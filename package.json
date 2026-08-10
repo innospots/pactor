@@ -1,0 +1,42 @@
+{
+  "name": "pactor",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Pactor — Dynamic Application Runtime: Server-Driven UI + AI-Native frontend runtime framework",
+  "keywords": [
+    "pactor",
+    "dsl",
+    "server-driven-ui",
+    "dynamic-ui",
+    "ai-native",
+    "runtime"
+  ],
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/426-330/pactor.git"
+  },
+  "homepage": "https://github.com/426-330/pactor",
+  "bugs": "https://github.com/426-330/pactor/issues",
+  "engines": {
+    "node": ">=18",
+    "pnpm": ">=9"
+  },
+  "scripts": {
+    "build": "pnpm -r --if-present build",
+    "test": "pnpm -r --if-present test && vitest run tests/",
+    "typecheck": "pnpm -r --if-present typecheck",
+    "docs:dev": "pnpm --filter pactor-docs dev",
+    "docs:build": "pnpm --filter pactor-docs build",
+    "docs:preview": "pnpm --filter pactor-docs preview",
+    "release": "pnpm build && pnpm test && pnpm -r publish"
+  },
+  "devDependencies": {
+    "pactor-core": "workspace:*",
+    "pactor-expression": "workspace:*",
+    "pactor-schema": "workspace:*",
+    "tsup": "^8.3.5",
+    "typescript": "^5.6.3",
+    "vitest": "^2.1.9"
+  }
+}
