@@ -164,4 +164,27 @@ describe('validatePageDsl', () => {
 
     expect(result.valid).toBe(false);
   });
+
+  it('accepts ActionConfig.id（命名动作结果，设计文档第 48 节）', () => {
+    const doc = clone(validPage) as Record<string, any>;
+    doc.body.children[0].children[0].events.onClick = [
+      { id: 'editResult', action: 'overlay.open' },
+      {
+        action: 'if',
+        params: { condition: '${actions.editResult.success}' },
+      },
+    ];
+    const result = validatePageDsl(doc);
+
+    expect(result.valid).toBe(true);
+    expect(result.errors).toEqual([]);
+  });
+
+  it('rejects empty-string ActionConfig.id', () => {
+    const doc = clone(validPage) as Record<string, any>;
+    doc.body.children[0].children[0].events.onClick = [{ id: '', action: 'reload' }];
+    const result = validatePageDsl(doc);
+
+    expect(result.valid).toBe(false);
+  });
 });

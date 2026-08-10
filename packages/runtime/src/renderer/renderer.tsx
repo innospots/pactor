@@ -42,6 +42,12 @@ export interface DslRendererProps {
   context: RuntimeContext;
   node?: DslNode;
   engine?: ActionEngine;
+  /**
+   * 附加子树（最小补充）：渲染在 RendererContextProvider 之内、
+   * DSL 根节点之后，供 OverlayHost 等宿主把扩展 UI 挂进
+   * Renderer 上下文（children 内可 `useRenderer()`）。
+   */
+  children?: ReactNode;
 }
 
 /**
@@ -54,7 +60,7 @@ export interface DslRendererProps {
  * 注入 readOnly）。V1 简化策略：根节点订阅整个 StateStore /
  * DataStore，任一变化重渲染整棵 DSL 树。
  */
-export function DslRenderer({ context, node, engine }: DslRendererProps) {
+export function DslRenderer({ context, node, engine, children }: DslRendererProps) {
   useSyncExternalStore(
     (onChange) => {
       const offState = context.state.subscribe(onChange);
@@ -86,6 +92,7 @@ export function DslRenderer({ context, node, engine }: DslRendererProps) {
   return (
     <RendererContextProvider value={value}>
       {node ? renderNode(node, value, node.id ?? 'root') : null}
+      {children}
     </RendererContextProvider>
   );
 }

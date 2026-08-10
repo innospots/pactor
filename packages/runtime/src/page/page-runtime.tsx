@@ -141,6 +141,10 @@ export function createPageRuntime(
       destroyed = true;
       await runLifecycle('onDestroy');
       lifecycleListeners.clear();
+      // 页面级命名动作结果随运行时销毁一并清理（设计文档第 48 节）
+      for (const key of Object.keys(context.actionResults)) {
+        delete context.actionResults[key];
+      }
     },
     onLifecycle(listener) {
       lifecycleListeners.add(listener);
@@ -151,7 +155,28 @@ export function createPageRuntime(
   };
 }
 
-/** React 组件形式的渲染入口 */
-export function PageRuntimeView({ runtime }: { runtime: PageRuntime }) {
-  return <>{runtime.render()}</>;
+/**
+ * React 组件形式的渲染入口。
+ *
+ * `children`（最小补充，供 OverlayHost 等宿主扩展使用）渲染在
+ * DslRenderer 的 React Context 之内——即页面 body 渲染完成后、
+ * 同一 Renderer 上下文下，因此 children 内的组件可使用
+ * `useRenderer()` 等 Renderer 能力。未传 children 时行为与此前一致。
+ */
+export function PageRuntimeView({
+  runtime,
+  children,
+}: {
+  runtime: PageRuntime;
+  children?: ReactNode;
+}) {
+  const body = runtime.pageDsl.body;
+  if (!body) {
+    return <>{children ?? null}</>;
+  }
+  return (
+    <DslRenderer context={runtime.context} node={body} engine={runtime.engine}>
+      {children}
+    </DslRenderer>
+  );
 }

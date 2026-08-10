@@ -42,12 +42,13 @@ const conditionSchema = {
   ],
 } as const;
 
-/** ActionConfig：动作名必填，params 任意键值 */
+/** ActionConfig：动作名必填，params 任意键值；id 为命名动作结果标识（设计文档第 48 节） */
 export const actionConfigSchema = {
   $id: ACTION_CONFIG_SCHEMA_ID,
   type: 'object',
   required: ['action'],
   properties: {
+    id: { type: 'string', minLength: 1 },
     action: { type: 'string', minLength: 1 },
     params: { type: 'object' },
     condition: conditionSchema,

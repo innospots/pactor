@@ -23,6 +23,13 @@ export type PermissionConfig =
 
 /** 动作配置（设计文档第 17 节） */
 export interface ActionConfig {
+  /**
+   * 命名动作 id（设计文档第 48 节）：声明后，动作执行结果写入
+   * 表达式作用域 `actions.<id>`（成功时为结果数据，失败时为
+   * `{ ok: false, error }`），供后续动作引用，如
+   * `${actions.editResult.success}`；缺省时行为不变
+   */
+  id?: string;
   /** 动作名，对应 Action Registry 中的注册名，如 "navigate"、"risk.calculate" */
   action: string;
   /** 动作参数，值可含表达式字符串 */

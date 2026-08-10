@@ -55,6 +55,15 @@ export interface RuntimeContext {
   services: ServiceRegistry;
   components: ComponentRegistry;
   actions: ActionRegistry;
+  /**
+   * 命名动作结果记录（设计文档第 48 节，决策 D2）：
+   * 带 `id` 的动作执行完成后写入——成功时为结果数据，失败时为
+   * `{ ok: false, error }`；经 `buildScope` 以 `actions` 键暴露给
+   * 表达式（`${actions.<id>.success}`）。页面级共享：同一
+   * RuntimeContext 的所有事件分发读写同一记录，PageRuntime
+   * destroy 时清理。
+   */
+  actionResults: Record<string, unknown>;
   permission: PermissionAdapter;
   capabilities: CapabilityRegistry;
   /** HTTP 出口适配器（DataSource / request 动作共用） */
@@ -128,6 +137,7 @@ export function createRuntimeContext(
     services,
     components,
     actions,
+    actionResults: {},
     permission,
     capabilities,
     http,

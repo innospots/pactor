@@ -41,6 +41,12 @@ export type ActionRegistry = Registry<ActionHandler>;
  * 执行管线：求值 `condition`（false 则跳过，返回 `{ ok: true, skipped: true }`）
  * → 检查 `permission`（拒绝返回 `{ ok: false }`）→ 查 ActionRegistry 执行。
  * 未注册动作返回受控失败；任何异常收敛为 `{ ok: false, error }`。
+ *
+ * 命名动作结果（设计文档第 48 节，决策 D2）：动作声明 `id` 时，
+ * 执行完成（含 skipped / 失败）后把结果写入 context 级 `actionResults`
+ * ——成功时为 `result.data`，失败时为 `{ ok: false, error }`；
+ * 经 buildScope 的 `actions` 键供后续动作引用（`${actions.<id>}`）。
+ * 未命名动作行为不变。
  */
 export class ActionEngine {
   constructor(private readonly context: RuntimeContext) {}
@@ -50,6 +56,7 @@ export class ActionEngine {
     localScope?: ExpressionScope,
   ): Promise<ActionResult> {
     const scope = buildScope(this.context, localScope);
+    let result: ActionResult;
     try {
       if (action.condition !== undefined) {
         const expression =
@@ -57,7 +64,9 @@ export class ActionEngine {
             ? action.condition
             : action.condition.expression;
         if (!resolveTemplate(expression, scope)) {
-          return { ok: true, skipped: true };
+          result = { ok: true, skipped: true };
+          this.recordNamedResult(action, result);
+          return result;
         }
       }
 
@@ -65,30 +74,38 @@ export class ActionEngine {
         action.permission !== undefined &&
         !this.context.permission.check(action.permission)
       ) {
-        return {
+        result = {
           ok: false,
           error: new Error(
             `[pactor-runtime] permission denied for action "${action.action}"`,
           ),
         };
+        this.recordNamedResult(action, result);
+        return result;
       }
 
       const handler = this.context.actions.get(action.action);
       if (!handler) {
-        return {
+        result = {
           ok: false,
           error: new Error(
             `[pactor-runtime] action not registered: "${action.action}"`,
           ),
         };
+        this.recordNamedResult(action, result);
+        return result;
       }
 
       const resolvedAction: ActionConfig = {
         ...action,
         // 内嵌的子动作配置（sequence/parallel/if 的 actions/then/else）
-        // 保持原样，由各自执行时按当时的 state 求值
+        // 与内嵌的 DslNode 子树（overlay.open 的 content 等，约定同
+        // Renderer 的 resolveProps）保持原样，由各自执行/渲染时
+        // 按当时的 state 与作用域求值
         params: resolveDeep(action.params ?? {}, scope, {
-          isOpaque: (value) => typeof value['action'] === 'string',
+          isOpaque: (value) =>
+            typeof value['action'] === 'string' ||
+            typeof value['type'] === 'string',
         }) as Record<string, unknown>,
       };
       const ctx: ActionContext = {
@@ -97,10 +114,22 @@ export class ActionEngine {
         // 子动作继承局部作用域（而非作用域快照），保证 state 始终取当前值
         execute: (child) => this.execute(child, localScope),
       };
-      return await handler(resolvedAction, ctx);
+      result = await handler(resolvedAction, ctx);
     } catch (cause) {
-      return { ok: false, error: toError(cause) };
+      result = { ok: false, error: toError(cause) };
     }
+    this.recordNamedResult(action, result);
+    return result;
+  }
+
+  /** 命名动作结果落盘：成功 → data；失败 → `{ ok: false, error }` */
+  private recordNamedResult(action: ActionConfig, result: ActionResult): void {
+    if (action.id === undefined) {
+      return;
+    }
+    this.context.actionResults[action.id] = result.ok
+      ? result.data
+      : { ok: false, error: result.error };
   }
 
   /** 事件动作数组按声明顺序串行执行 */
