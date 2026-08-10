@@ -4,6 +4,7 @@ import type {
   ActionConfig,
   DslNode,
   PageDsl,
+  PermissionConfig,
   RuntimeScope,
 } from './index.js';
 import { RUNTIME_SCOPES } from './index.js';
@@ -51,6 +52,44 @@ describe('DslNode', () => {
 
     expect(single.events?.onClick).toEqual({ action: 'reload' });
     expect(Array.isArray(multiple.events?.onClick)).toBe(true);
+  });
+});
+
+describe('PermissionConfig', () => {
+  it('accepts string, string array and object forms', () => {
+    const single: PermissionConfig = 'customer:edit';
+    const multiple: PermissionConfig = ['customer:edit', 'customer:view'];
+    const object: PermissionConfig = {
+      code: ['customer:edit'],
+      denied: 'disabled',
+    };
+    const objectWithoutDenied: PermissionConfig = { code: 'customer:edit' };
+
+    expect(objectWithoutDenied.denied).toBeUndefined();
+    expectTypeOf(single).toMatchTypeOf<PermissionConfig>();
+    expectTypeOf(multiple).toMatchTypeOf<PermissionConfig>();
+    expectTypeOf(object).toMatchTypeOf<PermissionConfig>();
+  });
+
+  it('rejects invalid denied strategies at compile time', () => {
+    // @ts-expect-error denied 仅允许 hidden / disabled / readonly
+    const invalid: PermissionConfig = { code: 'a', denied: 'toast' };
+
+    expect(invalid).toBeDefined();
+  });
+
+  it('DslNode 与 ActionConfig 均接受对象形式 permission', () => {
+    const node: DslNode = {
+      type: 'Button',
+      permission: { code: 'customer:edit', denied: 'readonly' },
+    };
+    const action: ActionConfig = {
+      action: 'submit',
+      permission: { code: ['customer:edit'] },
+    };
+
+    expect(node.permission).toEqual({ code: 'customer:edit', denied: 'readonly' });
+    expect(action.permission).toEqual({ code: ['customer:edit'] });
   });
 });
 

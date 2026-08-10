@@ -1,0 +1,61 @@
+{
+  "name": "pactor-permission",
+  "version": "0.1.0",
+  "description": "Pactor permission: permission code store, runtime permission adapter, menu/page guards and expression function",
+  "keywords": [
+    "pactor",
+    "dsl",
+    "server-driven-ui",
+    "permission",
+    "access-control"
+  ],
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/426-330/pactor.git",
+    "directory": "packages/permission"
+  },
+  "homepage": "https://github.com/426-330/pactor/tree/main/packages/permission",
+  "bugs": "https://github.com/426-330/pactor/issues",
+  "type": "module",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.js"
+      },
+      "require": {
+        "types": "./dist/index.d.cts",
+        "default": "./dist/index.cjs"
+      }
+    }
+  },
+  "sideEffects": false,
+  "engines": {
+    "node": ">=18"
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsup",
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit",
+    "prepublishOnly": "pnpm build"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "dependencies": {
+    "pactor-core": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/react": "^19.2.18",
+    "pactor-expression": "workspace:*",
+    "pactor-runtime": "workspace:*",
+    "react": "^19.2.8"
+  }
+}

@@ -8,8 +8,18 @@ export type ExpressionString = string;
 /** 条件配置：表达式字符串，或显式对象形式 */
 export type ConditionConfig = ExpressionString | { expression: ExpressionString };
 
-/** 权限配置：权限码或权限码数组（任一命中即可，由权限运行时解释） */
-export type PermissionConfig = string | string[];
+/** 无权限时的组件处理策略（设计文档第 41 节） */
+export type PermissionDeniedStrategy = 'hidden' | 'disabled' | 'readonly';
+
+/**
+ * 权限配置：权限码或权限码数组（任一命中即可，由权限运行时解释），
+ * 或对象形式（`code` 判定权限，`denied` 指定无权限时的组件处理策略，
+ * 缺省为 `'hidden'`）
+ */
+export type PermissionConfig =
+  | string
+  | string[]
+  | { code: string | string[]; denied?: PermissionDeniedStrategy };
 
 /** 动作配置（设计文档第 17 节） */
 export interface ActionConfig {

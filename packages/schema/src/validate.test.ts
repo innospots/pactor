@@ -137,4 +137,31 @@ describe('validatePageDsl', () => {
     expect(result.valid).toBe(false);
     expect(result.errors[0]?.keyword).toBe('enum');
   });
+
+  it('accepts object-form permission on page, node and action', () => {
+    const doc = clone(validPage) as Record<string, any>;
+    doc.page.permission = { code: ['customer:view'], denied: 'hidden' };
+    doc.body.children[0].children[0].permission = {
+      code: 'customer:edit',
+      denied: 'disabled',
+    };
+    doc.lifecycle.onLoad = [
+      { action: 'reload', permission: { code: 'customer:view' } },
+    ];
+    const result = validatePageDsl(doc);
+
+    expect(result.valid).toBe(true);
+    expect(result.errors).toEqual([]);
+  });
+
+  it('rejects object-form permission with invalid denied strategy', () => {
+    const doc = clone(validPage) as Record<string, any>;
+    doc.body.children[0].children[0].permission = {
+      code: 'customer:edit',
+      denied: 'toast',
+    };
+    const result = validatePageDsl(doc);
+
+    expect(result.valid).toBe(false);
+  });
 });

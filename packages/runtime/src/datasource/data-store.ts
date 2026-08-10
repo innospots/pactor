@@ -1,0 +1,180 @@
+import type { DataSourceConfig } from 'pactor-core';
+import type { ExpressionScope } from 'pactor-expression';
+
+import type {
+  HttpAdapter,
+  HttpRequestConfig,
+} from '../context/adapters.js';
+import type { ServiceRegistry } from '../context/context.js';
+import { resolveDeep, toError } from '../utils/resolve.js';
+
+/** 单个数据源的运行时状态 */
+export interface DataSourceStatus {
+  loading: boolean;
+  error?: Error;
+  data?: unknown;
+}
+
+export interface DataStoreDeps {
+  dataSources: Record<string, DataSourceConfig>;
+  services: ServiceRegistry;
+  http: HttpAdapter;
+  /** 加载前取当前表达式作用域（params / request 求值用） */
+  getScope: () => ExpressionScope;
+}
+
+/**
+ * DataStore：DataSource 运行时（设计文档第 19 节，决策 D3）。
+ *
+ * 按数据源名维护 `{ loading, error, data }`；按类型分派加载
+ * （static / service / http；computed / resource 留待后续迭代）。
+ * 错误一律写入 `error` 状态，绝不抛到渲染层。
+ */
+export class DataStore {
+  private readonly configs: Record<string, DataSourceConfig>;
+  private readonly services: ServiceRegistry;
+  private readonly http: HttpAdapter;
+  private readonly getScope: () => ExpressionScope;
+  private readonly statuses = new Map<string, DataSourceStatus>();
+  private readonly listeners = new Set<() => void>();
+  private version = 0;
+
+  constructor(deps: DataStoreDeps) {
+    this.configs = deps.dataSources;
+    this.services = deps.services;
+    this.http = deps.http;
+    this.getScope = deps.getScope;
+    for (const name of Object.keys(deps.dataSources)) {
+      this.statuses.set(name, { loading: false });
+    }
+  }
+
+  /** 状态快照（未知名返回空状态，不抛错） */
+  get(name: string): DataSourceStatus {
+    return this.statuses.get(name) ?? { loading: false };
+  }
+
+  /** 同 `get(name)`，语义化别名 */
+  getStatus(name: string): DataSourceStatus {
+    return this.get(name);
+  }
+
+  getData(name: string): unknown {
+    return this.get(name).data;
+  }
+
+  /** 各数据源当前数据，供表达式作用域的 `data` 键使用 */
+  getAllData(): Record<string, unknown> {
+    const out: Record<string, unknown> = {};
+    for (const [name, status] of this.statuses) {
+      out[name] = status.data;
+    }
+    return out;
+  }
+
+  subscribe(listener: () => void): () => void {
+    this.listeners.add(listener);
+    return () => {
+      this.listeners.delete(listener);
+    };
+  }
+
+  /** 版本号，供 `useSyncExternalStore` 的 getSnapshot 使用 */
+  getVersion(): number {
+    return this.version;
+  }
+
+  /** 触发所有 `autoLoad: true` 的数据源（PageRuntime 初始化阶段调用） */
+  init(): Promise<void[]> {
+    return Promise.all(this.autoLoadNames().map((name) => this.load(name)));
+  }
+
+  /**
+   * 加载指定数据源。状态流转：开始置 loading 并清空 error；
+   * 成功写入 data；失败写入 error（保留旧 data）。MUST NOT 抛出。
+   */
+  async load(name: string): Promise<void> {
+    const config = this.configs[name];
+    if (!config) {
+      throw new Error(`[pactor-runtime] unknown dataSource: "${name}"`);
+    }
+    const previous = this.get(name);
+    this.update(name, { loading: true, error: undefined, data: previous.data });
+    try {
+      const data = await this.loadByType(config);
+      this.update(name, { loading: false, data, error: undefined });
+    } catch (cause) {
+      this.update(name, {
+        loading: false,
+        error: toError(cause),
+        data: previous.data,
+      });
+    }
+  }
+
+  /** 重新加载指定数据源（语义同 `load`，供模板与 Action 调用） */
+  refresh(name: string): Promise<void> {
+    return this.load(name);
+  }
+
+  /**
+   * reload 语义：指定名称时刷新该数据源；
+   * 缺省时刷新全部 autoLoad 数据源（供 Action 引擎 `reload` 动作调用）。
+   */
+  reload(name?: string): Promise<void | void[]> {
+    if (name !== undefined) {
+      return this.load(name);
+    }
+    return Promise.all(this.autoLoadNames().map((n) => this.load(n)));
+  }
+
+  private autoLoadNames(): string[] {
+    return Object.entries(this.configs)
+      .filter(([, config]) => config.autoLoad === true)
+      .map(([name]) => name);
+  }
+
+  private async loadByType(config: DataSourceConfig): Promise<unknown> {
+    switch (config.type) {
+      case 'static':
+        return config.value;
+      case 'service': {
+        const serviceName = config.service ?? '';
+        const handler = this.services.get(serviceName);
+        if (!handler) {
+          throw new Error(
+            `[pactor-runtime] service not registered: "${serviceName}"`,
+          );
+        }
+        const params = resolveDeep(config.params ?? {}, this.getScope()) as Record<
+          string,
+          unknown
+        >;
+        return handler(params);
+      }
+      case 'http': {
+        if (!config.request) {
+          throw new Error('[pactor-runtime] http dataSource 缺少 request 配置');
+        }
+        const request = resolveDeep(
+          config.request,
+          this.getScope(),
+        ) as HttpRequestConfig;
+        return this.http.request(request);
+      }
+      default:
+        // computed / resource：留待 pactor-resource 或后续迭代
+        throw new Error(
+          `[pactor-runtime] unsupported dataSource type: "${config.type}"`,
+        );
+    }
+  }
+
+  private update(name: string, status: DataSourceStatus): void {
+    this.statuses.set(name, status);
+    this.version += 1;
+    for (const listener of [...this.listeners]) {
+      listener();
+    }
+  }
+}
