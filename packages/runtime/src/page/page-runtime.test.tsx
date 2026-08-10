@@ -9,6 +9,7 @@ import {
   PageRuntimeError,
   PageRuntimeView,
 } from './page-runtime.js';
+import { useRenderer } from '../renderer/renderer-context.js';
 
 afterEach(cleanup);
 
@@ -284,5 +285,71 @@ describe('端到端：设计文档第 10 节 Page DSL', () => {
     });
     expect(screen.getByText('搜索 张')).toBeTruthy();
     expect(screen.getByText('结果: list(张)')).toBeTruthy();
+  });
+});
+
+describe('命名动作结果（页面级 actionResults）', () => {
+  it('事件分发间共享同一记录，destroy 时清理', async () => {
+    const runtime = createPageRuntime(
+      minimalDsl({
+        body: {
+          type: 'Page',
+          children: [],
+        },
+      }),
+    );
+    await act(async () => {
+      await runtime.initialized;
+    });
+
+    runtime.context.actions.register('mark', (action) => ({
+      ok: true as const,
+      data: action.params?.['value'],
+    }));
+    // 两次独立分发（模拟两次事件）读写同一 actionResults
+    await runtime.engine.executeAll([
+      { id: 'a', action: 'mark', params: { value: 1 } },
+    ]);
+    await runtime.engine.executeAll([
+      { id: 'b', action: 'mark', params: { value: 2 } },
+    ]);
+    expect(runtime.context.actionResults).toEqual({ a: 1, b: 2 });
+
+    await runtime.destroy();
+    expect(runtime.context.actionResults).toEqual({});
+  });
+});
+
+describe('PageRuntimeView children（Renderer 上下文内的宿主扩展）', () => {
+  it('children 渲染在 DslRenderer 上下文之内，可 useRenderer', async () => {
+    const runtime = createPageRuntime(
+      minimalDsl({
+        body: { type: 'Page', children: [] },
+      }),
+    );
+    runtime.context.components.register(
+      'Page',
+      ({ children }: { children?: React.ReactNode }) => <div>{children}</div>,
+    );
+    await act(async () => {
+      await runtime.initialized;
+    });
+
+    const seen: string[] = [];
+    function HostExtension() {
+      const { context } = useRenderer();
+      seen.push(context.page.id ?? '');
+      return <span>扩展位</span>;
+    }
+
+    render(
+      <PageRuntimeView runtime={runtime}>
+        <HostExtension />
+      </PageRuntimeView>,
+    );
+
+    expect(screen.getByText('扩展位')).toBeTruthy();
+    expect(seen).toEqual(['p1']);
+    await runtime.destroy();
   });
 });

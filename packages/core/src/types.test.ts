@@ -55,6 +55,39 @@ describe('DslNode', () => {
   });
 });
 
+describe('ActionConfig.id（命名动作结果）', () => {
+  it('接受可选 id，缺省为 undefined', () => {
+    const named: ActionConfig = {
+      id: 'editResult',
+      action: 'overlay.open',
+      params: { overlay: { type: 'modal' } },
+    };
+    const anonymous: ActionConfig = { action: 'reload' };
+
+    expect(named.id).toBe('editResult');
+    expect(anonymous.id).toBeUndefined();
+    expectTypeOf(named.id).toEqualTypeOf<string | undefined>();
+  });
+
+  it('DslNode 事件的 ActionConfig 同样接受 id', () => {
+    const node: DslNode = {
+      type: 'Button',
+      events: {
+        onClick: [
+          { id: 'editResult', action: 'overlay.open' },
+          {
+            action: 'if',
+            params: { condition: '${actions.editResult.success}' },
+          },
+        ],
+      },
+    };
+
+    const [first] = node.events?.onClick as ActionConfig[];
+    expect(first.id).toBe('editResult');
+  });
+});
+
 describe('PermissionConfig', () => {
   it('accepts string, string array and object forms', () => {
     const single: PermissionConfig = 'customer:edit';

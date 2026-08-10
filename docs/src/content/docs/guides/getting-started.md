@@ -34,9 +34,12 @@ pnpm docs:dev
 | `pactor-expression` | `packages/expression` | 受控表达式引擎 | 无 |
 | `pactor-runtime` | `packages/runtime` | Runtime 引擎（上下文 / 状态 / 数据源 / 动作 / 渲染） | `react`（peer） |
 | `pactor-permission` | `packages/permission` | 权限（PermissionStore / 权限适配器 / Menu & Page 守卫 / 表达式函数） | 无 |
+| `pactor-resource` | `packages/resource` | DSL 资源加载（Envelope / HTTP & Static Loader / 缓存与 ETag） | 无 |
+| `pactor-router` | `packages/router` | 路由（MenuRegistry / PathMatcher / 导航桥接 / React Router 绑定） | `react`、`react-router-dom`（peer，仅 react 子入口） |
 | `pactor-components` | `packages/components` | 内置组件（12 个 V1 组件的 antd 适配层） | `react`、`antd`（peer） |
+| `pactor-interaction` | `packages/interaction` | 交互（OverlayManager / overlay.open 等交互动作 / OverlayHost / InteractionProvider） | `react`、`antd`（peer） |
 
-依赖方向严格单向：`pactor-core` ← `pactor-schema` ← `pactor-expression` ← `pactor-runtime` ← `pactor-components`；`pactor-permission` 仅依赖 `pactor-core`，结构化兼容 `pactor-runtime` 的适配接口（不产生运行时依赖）。
+依赖方向严格单向：`pactor-core` ← `pactor-schema` ← `pactor-expression` ← `pactor-runtime` ← `pactor-components` / `pactor-interaction`；`pactor-permission` 仅依赖 `pactor-core`，结构化兼容 `pactor-runtime` 的适配接口（不产生运行时依赖）；`pactor-resource` 仅依赖 `pactor-core`；`pactor-router` 依赖 `pactor-core` 与 `pactor-permission`，结构化兼容 `pactor-runtime` 的 RouterAdapter。
 
 ## 最小示例
 
@@ -81,4 +84,6 @@ console.log(keyword); // "张三"
 - [pactor-expression](/packages/expression/)：表达式语法与安全约束
 - [pactor-runtime](/packages/runtime/)：Runtime 引擎与 React Renderer
 - [pactor-permission](/packages/permission/)：权限存储、适配器与守卫
+- [pactor-resource](/packages/resource/)：DSL 资源加载、缓存与版本控制
+- [pactor-router](/packages/router/)：菜单注册、路径匹配、导航桥接与动态路由
 - [框架设计规范](/framework-design/)：完整架构设计

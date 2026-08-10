@@ -468,3 +468,128 @@ describe('permission 数组与对象形态语义', () => {
     expect(denied.ok).toBe(false);
   });
 });
+
+describe('命名动作结果（ActionConfig.id → actions 作用域）', () => {
+  it('成功时 actions.<id> 为结果数据，后续动作可经表达式引用', async () => {
+    const { engine, context } = setup();
+    context.actions.register('query', () => ({
+      ok: true as const,
+      data: { success: true, userId: 1001 },
+    }));
+
+    await engine.execute({ id: 'editResult', action: 'query' });
+    expect(context.actionResults['editResult']).toEqual({
+      success: true,
+      userId: 1001,
+    });
+
+    // 后续动作的 params / if 条件可引用 ${actions.editResult.x}
+    await engine.execute({
+      action: 'setState',
+      params: { copiedId: '${actions.editResult.userId}' },
+    });
+    expect(context.state.get('copiedId')).toBe(1001);
+
+    await engine.execute({
+      action: 'if',
+      params: {
+        condition: '${actions.editResult.success}',
+        then: { action: 'setState', params: { branch: 'then' } },
+        else: { action: 'setState', params: { branch: 'else' } },
+      },
+    });
+    expect(context.state.get('branch')).toBe('then');
+  });
+
+  it('失败时 actions.<id> 为 { ok: false, error }', async () => {
+    const { engine, context } = setup();
+    context.actions.register('fail', () => ({
+      ok: false as const,
+      error: new Error('boom'),
+    }));
+
+    await engine.execute({ id: 'op', action: 'fail' });
+
+    const record = context.actionResults['op'] as {
+      ok: boolean;
+      error: Error;
+    };
+    expect(record.ok).toBe(false);
+    expect(record.error.message).toBe('boom');
+  });
+
+  it('condition 跳过 / 未注册等受控结果也会记录', async () => {
+    const { engine, context } = setup();
+    context.actions.register('my.action', () => ({ ok: true as const }));
+
+    await engine.execute({
+      id: 'skipped',
+      action: 'my.action',
+      condition: '${state.missing}',
+    });
+    // skipped 视为成功路径：记录其 data（undefined）
+    expect('skipped' in context.actionResults).toBe(true);
+    expect(context.actionResults['skipped']).toBeUndefined();
+
+    await engine.execute({ id: 'ghost', action: 'ghost.action' });
+    expect(
+      (context.actionResults['ghost'] as { ok: boolean }).ok,
+    ).toBe(false);
+  });
+
+  it('未命名动作不写入 actionResults，行为不变', async () => {
+    const { engine, context } = setup();
+
+    const result = await engine.execute({
+      action: 'setState',
+      params: { a: 1 },
+    });
+
+    expect(result.ok).toBe(true);
+    expect(context.actionResults).toEqual({});
+  });
+
+  it('页面级共享：同一 context 的多次事件分发读写同一记录', async () => {
+    const { engine, context } = setup();
+    context.actions.register('step', (action) => ({
+      ok: true as const,
+      data: action.params?.['value'],
+    }));
+
+    await engine.executeAll([{ id: 'first', action: 'step', params: { value: 1 } }]);
+    await engine.executeAll([{ id: 'second', action: 'step', params: { value: 2 } }]);
+
+    expect(context.actionResults).toEqual({ first: 1, second: 2 });
+  });
+
+  it('params 中的内嵌 DslNode（含 type 字段）不随父动作提前求值', async () => {
+    const { engine, context } = setup({ state: { label: '外层' } });
+    const seen: unknown[] = [];
+    context.actions.register('capture', (action) => {
+      seen.push(action.params?.['overlay']);
+      return { ok: true as const };
+    });
+
+    await engine.execute({
+      action: 'capture',
+      params: {
+        overlay: {
+          type: 'modal',
+          title: '标题 ${state.label}',
+          content: {
+            type: 'Button',
+            props: { text: '${params.text}' },
+          },
+        },
+      },
+    });
+
+    // 含字符串 type 字段的对象整体视为内嵌 DSL 结构，原样保留——
+    // overlay.open 动作收到后自行求值 overlay 配置字段、保留 content 子树
+    expect(seen[0]).toEqual({
+      type: 'modal',
+      title: '标题 ${state.label}',
+      content: { type: 'Button', props: { text: '${params.text}' } },
+    });
+  });
+});
