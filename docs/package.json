@@ -1,0 +1,17 @@
+{
+  "name": "pactor-docs",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Pactor documentation site (Astro Starlight)",
+  "type": "module",
+  "scripts": {
+    "dev": "astro dev",
+    "start": "astro dev",
+    "build": "astro build",
+    "preview": "astro preview"
+  },
+  "dependencies": {
+    "@astrojs/starlight": "^0.41.7",
+    "astro": "^7.2.0"
+  }
+}

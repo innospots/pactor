@@ -1,0 +1,38 @@
+---
+title: Pactor
+description: 基于 YAML/JSON DSL 的企业级 Server-Driven UI 与 AI-Native 前端运行时框架
+template: splash
+hero:
+  tagline: 以 YAML/JSON DSL 描述应用、页面与交互，由浏览器中的公共 Runtime 动态渲染 —— 业务页面无需随前端代码一起打包。
+  actions:
+    - text: 快速开始
+      link: /guides/getting-started/
+      icon: right-arrow
+      variant: primary
+    - text: 框架设计规范
+      link: /framework-design/
+      variant: minimal
+---
+
+import { Card, CardGrid } from '@astrojs/starlight/components';
+
+## 核心模块
+
+<CardGrid stagger>
+  <Card title="pactor-core" icon="document">
+    DSL 核心协议类型与通用 Registry：DslNode、Page/Fragment/Application DSL、Action/Event/Condition/Permission 配置、Runtime Scope。零依赖，与 React 无关。
+  </Card>
+  <Card title="pactor-schema" icon="approve-check">
+    DSL 版本常量、Page DSL 与 DslNode 的 JSON Schema、基于 Ajv 的结构化校验器。
+  </Card>
+  <Card title="pactor-expression" icon="seti:code">
+    受控表达式引擎：`${...}` 模板、受控 AST 解析与求值、白名单函数。禁止 eval，禁止访问全局对象。
+  </Card>
+</CardGrid>
+
+## 设计原则
+
+- **DSL 是协议，不只是配置文件** —— 描述应用、页面、状态、数据源、事件、权限与交互。
+- **动态 DSL，静态能力** —— 服务端动态下发 DSL，可调用的能力由前端 Runtime 的 Registry 明确定义，禁止注入任意 JavaScript。
+- **Runtime 是框架核心** —— DSL → Parser/Validator → Runtime Context → Registry → Renderer。
+- **复杂业务允许逃逸到 React/TypeScript** —— DSL 不追求表达所有业务逻辑。
