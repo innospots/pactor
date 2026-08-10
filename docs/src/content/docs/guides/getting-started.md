@@ -32,8 +32,11 @@ pnpm docs:dev
 | `pactor-core` | `packages/core` | DSL 协议类型 + 通用 Registry | 无 |
 | `pactor-schema` | `packages/schema` | JSON Schema + Ajv 校验器 | `ajv` |
 | `pactor-expression` | `packages/expression` | 受控表达式引擎 | 无 |
+| `pactor-runtime` | `packages/runtime` | Runtime 引擎（上下文 / 状态 / 数据源 / 动作 / 渲染） | `react`（peer） |
+| `pactor-permission` | `packages/permission` | 权限（PermissionStore / 权限适配器 / Menu & Page 守卫 / 表达式函数） | 无 |
+| `pactor-components` | `packages/components` | 内置组件（12 个 V1 组件的 antd 适配层） | `react`、`antd`（peer） |
 
-依赖方向严格单向：`pactor-core` ← `pactor-schema` ← `pactor-expression`。
+依赖方向严格单向：`pactor-core` ← `pactor-schema` ← `pactor-expression` ← `pactor-runtime` ← `pactor-components`；`pactor-permission` 仅依赖 `pactor-core`，结构化兼容 `pactor-runtime` 的适配接口（不产生运行时依赖）。
 
 ## 最小示例
 
@@ -76,4 +79,6 @@ console.log(keyword); // "张三"
 - [pactor-core](/packages/core/)：DSL 协议类型与 Registry
 - [pactor-schema](/packages/schema/)：Schema 校验细节
 - [pactor-expression](/packages/expression/)：表达式语法与安全约束
+- [pactor-runtime](/packages/runtime/)：Runtime 引擎与 React Renderer
+- [pactor-permission](/packages/permission/)：权限存储、适配器与守卫
 - [框架设计规范](/framework-design/)：完整架构设计

@@ -10,6 +10,20 @@ const permissionSchema = {
   anyOf: [
     { type: 'string', minLength: 1 },
     { type: 'array', items: { type: 'string', minLength: 1 } },
+    {
+      type: 'object',
+      required: ['code'],
+      properties: {
+        code: {
+          anyOf: [
+            { type: 'string', minLength: 1 },
+            { type: 'array', items: { type: 'string', minLength: 1 } },
+          ],
+        },
+        denied: { enum: ['hidden', 'disabled', 'readonly'] },
+      },
+      additionalProperties: false,
+    },
   ],
 } as const;
 

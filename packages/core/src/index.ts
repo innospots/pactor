@@ -5,6 +5,7 @@ export type {
   EventMap,
   ExpressionString,
   PermissionConfig,
+  PermissionDeniedStrategy,
 } from './node.js';
 
 export type {

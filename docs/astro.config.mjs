@@ -24,6 +24,9 @@ export default defineConfig({
             { label: 'pactor-core', slug: 'packages/core' },
             { label: 'pactor-schema', slug: 'packages/schema' },
             { label: 'pactor-expression', slug: 'packages/expression' },
+            { label: 'pactor-runtime', slug: 'packages/runtime' },
+            { label: 'pactor-permission', slug: 'packages/permission' },
+            { label: 'pactor-components', slug: 'packages/components' },
           ],
         },
         {
