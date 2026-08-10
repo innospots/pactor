@@ -32,20 +32,21 @@ description: 基于 YAML/JSON DSL 的企业级 Server-Driven UI 与 AI-Native �
 
 # 2. 框架定位
 
+本框架定名为 **Pactor**。
+
 本框架不是简单的 YAML Renderer，也不是单纯的 React 组件库。
 
-推荐内部定位为：
+其定位为：
 
-> **Dynamic Application Runtime**
+> **Pactor — Dynamic Application Runtime**
 >
 > 一套面向企业应用的 Server-Driven UI + AI-Native 前端运行时框架。
 
-也可以使用以下名称：
+命名约定：
 
-- Server Driven Application Framework
-- Dynamic UI Runtime
-- DSL Application Runtime
-- AI-Native Dynamic Application Framework
+- 框架名：**pactor**
+- npm 包不使用 scope，各模块包名统一 `pactor-` 前缀，如 `pactor-core`、`pactor-schema`、`pactor-expression`、`pactor-app`
+- Monorepo 目录名保持简短（如 `packages/core`），与包名分离
 
 不建议将项目命名为：
 
@@ -160,7 +161,7 @@ React Renderer
 
 ```mermaid
 flowchart TB
-    A[Business Application] --> B[@company/dsl-app]
+    A[Business Application] --> B[pactor-app]
     B --> C[Application Shell]
     C --> D[Layout Runtime]
     C --> E[Navigation Runtime]
@@ -184,7 +185,7 @@ flowchart TB
 ```text
 ┌──────────────────────────────────────────────────────────────┐
 │                      Business Application                    │
-│                npm install @company/dsl-app                  │
+│                 npm install pactor-app                     │
 ├──────────────────────────────────────────────────────────────┤
 │                       Application Shell                      │
 │     Auth / Bootstrap / Theme / Error / Loading / Session     │
@@ -262,36 +263,36 @@ flowchart TB
 
 # 6. npm 包结构
 
-推荐采用 Monorepo，将能力拆为独立 npm package。
+采用 Monorepo，将能力拆为独立 npm package。包名不使用 scope，统一 `pactor-` 前缀（见第 2 节命名约定）。
 
 ```text
-@company/dsl-core
-@company/dsl-schema
-@company/dsl-expression
+pactor-core
+pactor-schema
+pactor-expression
 
-@company/dsl-runtime
-@company/dsl-resource
-@company/dsl-router
-@company/dsl-permission
+pactor-runtime
+pactor-resource
+pactor-router
+pactor-permission
 
-@company/dsl-layout
-@company/dsl-interaction
-@company/dsl-components
-@company/dsl-theme
+pactor-layout
+pactor-interaction
+pactor-components
+pactor-theme
 
-@company/dsl-markdown
-@company/dsl-chat
+pactor-markdown
+pactor-chat
 
-@company/dsl-devtools
-@company/vite-plugin-dsl
-@company/dsl-cli
+pactor-devtools
+pactor-vite-plugin
+pactor-cli
 
-@company/dsl-app
+pactor-app
 ```
 
 ## 6.1 包职责
 
-### `@company/dsl-core`
+### `pactor-core`
 
 负责与 React 无关的核心协议：
 
@@ -303,7 +304,7 @@ flowchart TB
 - Event 定义
 - Page / Fragment 基础类型
 
-### `@company/dsl-schema`
+### `pactor-schema`
 
 负责：
 
@@ -316,7 +317,7 @@ flowchart TB
 - Chat Message Schema
 - Validation Rules
 
-### `@company/dsl-expression`
+### `pactor-expression`
 
 负责受控表达式：
 
@@ -326,7 +327,7 @@ flowchart TB
 - Function Registry
 - Scope Resolve
 
-### `@company/dsl-runtime`
+### `pactor-runtime`
 
 负责：
 
@@ -339,7 +340,7 @@ flowchart TB
 - Action
 - Page Runtime
 
-### `@company/dsl-resource`
+### `pactor-resource`
 
 负责：
 
@@ -351,7 +352,7 @@ flowchart TB
 - ETag
 - Resource Metadata
 
-### `@company/dsl-router`
+### `pactor-router`
 
 负责：
 
@@ -362,7 +363,7 @@ flowchart TB
 - Menu Route Registry
 - Hidden Route
 
-### `@company/dsl-permission`
+### `pactor-permission`
 
 负责：
 
@@ -372,7 +373,7 @@ flowchart TB
 - Component Guard
 - Action Guard
 
-### `@company/dsl-layout`
+### `pactor-layout`
 
 负责：
 
@@ -385,7 +386,7 @@ flowchart TB
 - Workspace Layout
 - Blank / Embedded Layout
 
-### `@company/dsl-interaction`
+### `pactor-interaction`
 
 负责：
 
@@ -399,11 +400,11 @@ flowchart TB
 - Overlay Context
 - Overlay Promise
 
-### `@company/dsl-components`
+### `pactor-components`
 
 负责标准 UI DSL Components。
 
-### `@company/dsl-chat`
+### `pactor-chat`
 
 负责：
 
@@ -417,14 +418,14 @@ flowchart TB
 - Capability
 - AI Context Bridge
 
-### `@company/dsl-app`
+### `pactor-app`
 
 对业务工程提供一站式集成能力。
 
 业务项目优先：
 
 ```bash
-npm install @company/dsl-app
+npm install pactor-app
 ```
 
 ---
@@ -434,7 +435,7 @@ npm install @company/dsl-app
 推荐使用 pnpm workspace。
 
 ```text
-dsl-framework/
+pactor/
 ├── packages/
 │   ├── core/
 │   ├── schema/
@@ -3208,19 +3209,19 @@ DevTools 建议包含：
 安装：
 
 ```bash
-npm install -g @company/dsl-cli
+npm install -g pactor-cli
 ```
 
 建议命令：
 
 ```bash
-dsl create my-app
-dsl lint src/pages
-dsl validate page.yaml
-dsl inspect page.yaml
-dsl schema
-dsl build
-dsl preview
+pactor create my-app
+pactor lint src/pages
+pactor validate page.yaml
+pactor inspect page.yaml
+pactor schema
+pactor build
+pactor preview
 ```
 
 ---
@@ -3230,16 +3231,16 @@ dsl preview
 对于需要本地 DSL 的项目：
 
 ```bash
-npm install @company/vite-plugin-dsl
+npm install pactor-vite-plugin
 ```
 
 ```ts
-import dsl from '@company/vite-plugin-dsl';
+import pactor from 'pactor-vite-plugin';
 
 export default defineConfig({
   plugins: [
     react(),
-    dsl()
+    pactor()
   ]
 });
 ```
@@ -3273,13 +3274,13 @@ Optimized JSON / JS
 安装：
 
 ```bash
-npm install @company/dsl-app
+npm install pactor-app
 ```
 
 入口：
 
 ```tsx
-import { createDslApplication } from '@company/dsl-app';
+import { createDslApplication } from 'pactor-app';
 
 createDslApplication({
   appId: 'risk-admin',
@@ -4091,13 +4092,13 @@ flowchart TB
 业务工程：
 
 ```bash
-npm install @company/dsl-app
+npm install pactor-app
 ```
 
 入口：
 
 ```tsx
-import { createDslApplication } from '@company/dsl-app';
+import { createDslApplication } from 'pactor-app';
 
 createDslApplication({
   appId: 'risk-console',
@@ -4169,24 +4170,24 @@ Capability
 # 附录 A：推荐 npm 依赖关系
 
 ```text
-@company/dsl-core
+pactor-core
       ↑
-@company/dsl-schema
+pactor-schema
       ↑
-@company/dsl-expression
+pactor-expression
       ↑
-@company/dsl-runtime
+pactor-runtime
       ↑
-├── @company/dsl-resource
-├── @company/dsl-router
-├── @company/dsl-permission
-├── @company/dsl-layout
-├── @company/dsl-interaction
-├── @company/dsl-components
-├── @company/dsl-markdown
-└── @company/dsl-chat
+├── pactor-resource
+├── pactor-router
+├── pactor-permission
+├── pactor-layout
+├── pactor-interaction
+├── pactor-components
+├── pactor-markdown
+└── pactor-chat
       ↑
-@company/dsl-app
+pactor-app
 ```
 
 ---
