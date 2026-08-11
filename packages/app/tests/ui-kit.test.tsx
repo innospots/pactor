@@ -56,13 +56,13 @@ function createAppWithKit(
 }
 
 describe('ui-kit-selection：componentRegistry 选项', () => {
-  it('缺省仍为 antd：不传 componentRegistry 渲染 antd 实现', async () => {
+  it('缺省为 Radix：不传 componentRegistry 渲染 Radix 实现', async () => {
     app = createAppWithKit();
     const target = await mountApp(app);
 
-    await screen.findByRole('button', { name: /保\s*存/ });
-    expect(target.querySelector('.ant-btn-primary')).not.toBeNull();
-    expect(target.querySelector('.pcr-btn')).toBeNull();
+    await screen.findByRole('button', { name: '保存' });
+    expect(target.querySelector('.pcr-btn-primary')).not.toBeNull();
+    expect(target.querySelector('.ant-btn')).toBeNull();
   });
 
   it('切换 Radix：渲染结果为 Radix 实现（pcr 语义 class 存在）', async () => {

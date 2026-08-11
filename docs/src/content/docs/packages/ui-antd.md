@@ -24,6 +24,8 @@ pnpm add pactor-ui-antd antd react react-dom
 
 ## 用法（antdUiKit 预设）
 
+pactor-app 的**内置默认 UI kit 为 Radix**；使用 antd 实现需显式传入 `ui: antdUiKit`：
+
 ```tsx
 import { createPactorApplication } from 'pactor-app';
 import { antdUiKit } from 'pactor-ui-antd';
@@ -35,7 +37,7 @@ createPactorApplication({
 }).mount('#root');
 ```
 
-不传 `ui` 时 pactor-app 的内置默认即 antd 实现，两者行为一致。预设对象的价值在于**显式表达与局部覆盖**——每个槽位的取值优先级为：显式细粒度选项 > `ui` 预设 > 内置 antd 默认：
+预设对象也便于**局部覆盖**——每个槽位的取值优先级为：显式细粒度选项 > `ui` 预设 > 内置 Radix 默认：
 
 ```tsx
 import { antdUiKit } from 'pactor-ui-antd';

@@ -33,6 +33,8 @@ export default defineConfig({
             { label: 'pactor-markdown', slug: 'packages/markdown' },
             { label: 'pactor-chat', slug: 'packages/chat' },
             { label: 'pactor-app', slug: 'packages/app' },
+            { label: 'pactor-vite-plugin', slug: 'packages/vite-plugin' },
+            { label: 'pactor-cli', slug: 'packages/cli' },
           ],
         },
         {

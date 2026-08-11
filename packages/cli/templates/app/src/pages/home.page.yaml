@@ -1,0 +1,23 @@
+dsl: '1.0'
+page:
+  id: home
+  title: __APP_NAME__
+  type: custom
+state:
+  keyword: ''
+body:
+  type: Page
+  props:
+    title: __APP_NAME__
+  children:
+    - type: Alert
+      props:
+        type: info
+        message: 欢迎使用 Pactor！当前 keyword：${state.keyword}
+    - type: Card
+      props:
+        title: 示例卡片
+      children:
+        - type: Button
+          props:
+            text: 开始使用
