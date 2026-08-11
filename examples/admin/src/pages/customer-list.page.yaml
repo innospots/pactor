@@ -101,6 +101,8 @@ body:
                                 params:
                                   id: ${row.id}
                                   name: ${row.name}
+                                  phone: ${row.phone}
+                                  level: ${row.level}
                                 content:
                                   type: Form
                                   events:
@@ -136,7 +138,9 @@ body:
                                       props:
                                         name: name
                                         label: 客户名称
-                                        placeholder: 留空则保持不变
+                                        # 字段级初始值：回填当前行数据
+                                        value: ${params.name}
+                                        placeholder: 请输入客户名称
                                         rules:
                                           - required: true
                                             message: 请输入客户名称
@@ -144,11 +148,13 @@ body:
                                       props:
                                         name: phone
                                         label: 联系电话
-                                        placeholder: 留空则保持不变
+                                        value: ${params.phone}
+                                        placeholder: 请输入联系电话
                                     - type: Select
                                       props:
                                         name: level
                                         label: 等级
+                                        value: ${params.level}
                                         options:
                                           - label: A 级
                                             value: A

@@ -1,6 +1,6 @@
 import { Form as AntForm, Select as AntSelect } from 'antd';
 
-import { useFormContext } from '../Form/context.js';
+import { useFormContext, useFieldInitialValue } from '../Form/context.js';
 import type { FieldRule } from '../Input/index.js';
 
 /** Select 选项（支持表达式解析后的数组） */
@@ -18,7 +18,7 @@ export interface SelectProps {
   rules?: FieldRule[];
   /** 选项列表 */
   options?: SelectOption[];
-  /** 受控值（独立渲染时生效；Form 内由 Form.Item 托管） */
+  /** 受控值（独立渲染时生效）；Form 内作为字段初始值（优先于 Form initialValues） */
   value?: string | number | boolean;
   placeholder?: string;
   disabled?: boolean;
@@ -43,6 +43,7 @@ export function Select({
   onChange,
 }: SelectProps) {
   const formContext = useFormContext();
+  useFieldInitialValue(formContext, name, value);
 
   const select = (
     <AntSelect
@@ -56,7 +57,7 @@ export function Select({
 
   if (formContext?.inForm && name) {
     return (
-      <AntForm.Item name={name} label={label} rules={rules}>
+      <AntForm.Item name={name} label={label} rules={rules} initialValue={value}>
         {select}
       </AntForm.Item>
     );

@@ -1,6 +1,6 @@
 import { Form as AntForm, Input as AntInput } from 'antd';
 
-import { useFormContext } from '../Form/context.js';
+import { useFormContext, useFieldInitialValue } from '../Form/context.js';
 
 /** DSL 校验规则（框架级协议，当前支持 required + message） */
 export interface FieldRule {
@@ -15,7 +15,7 @@ export interface InputProps {
   label?: string;
   /** 校验规则 */
   rules?: FieldRule[];
-  /** 受控值（独立渲染时生效；Form 内由 Form.Item 托管） */
+  /** 受控值（独立渲染时生效）；Form 内作为字段初始值（优先于 Form initialValues） */
   value?: string;
   placeholder?: string;
   disabled?: boolean;
@@ -38,6 +38,7 @@ export function Input({
   onChange,
 }: InputProps) {
   const formContext = useFormContext();
+  useFieldInitialValue(formContext, name, value);
 
   const input = (
     <AntInput
@@ -49,7 +50,7 @@ export function Input({
 
   if (formContext?.inForm && name) {
     return (
-      <AntForm.Item name={name} label={label} rules={rules}>
+      <AntForm.Item name={name} label={label} rules={rules} initialValue={value}>
         {input}
       </AntForm.Item>
     );

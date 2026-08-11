@@ -16,8 +16,12 @@ export interface FormContextValue {
   errors: Record<string, string>;
   /** 更新字段值（受控写入并清除该字段错误） */
   setValue(name: string, value: unknown): void;
-  /** 注册字段校验规则（提交时统一校验） */
-  registerField(name: string, rules?: FieldRule[]): void;
+  /**
+   * 注册字段校验规则（提交时统一校验）；
+   * `initialValue` 为字段级初始值（value prop），仅在该字段首次注册时合并
+   * 进 values（字段级优先于 Form initialValues；已有合并结果不覆盖）
+   */
+  registerField(name: string, rules?: FieldRule[], initialValue?: unknown): void;
   /** 注销字段 */
   unregisterField(name: string): void;
 }
