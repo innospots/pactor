@@ -22,6 +22,8 @@ packages/
   ui-antd/     pactor-ui-antd     antd UI kit（components + interaction + layout + antdUiKit）
   ui-radix/    pactor-ui-radix    Radix UI kit（与 antd 版契约一致 + radixUiKit + 样式表）
   app/         pactor-app         一站式集成（createPactorApplication）
+examples/
+  admin/       example-admin      管理后台示例（private，StaticDslLoader + 内存 mock，端口 5199）
 docs/          pactor-docs        Astro Starlight 文档站
 ```
 

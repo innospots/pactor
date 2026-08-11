@@ -52,6 +52,8 @@ createPactorApplication({
 import 'pactor-ui-radix/styles.css';
 ```
 
+样式表内置 token 化主题体系：色板 / 语义 / 形状三层 CSS 变量、美观的默认亮色皮肤与内置暗色皮肤（`<html data-pactor-theme="dark">`）。换肤（覆盖变量 / 暗色切换 / class 覆盖）与完整 token 清单见主题指南 `docs/src/content/docs/guides/theming.md`。
+
 ## 聚合 re-export
 
 三层的公开 API 均可直接从本包导入：

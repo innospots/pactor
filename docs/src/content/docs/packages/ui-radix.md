@@ -110,11 +110,13 @@ createPactorApplication({
 
 ## 样式表
 
-三层样式（组件 / 布局 / 交互）合并为单文件样式表，全部为 `.pcr-*` 语义 class，只保证可用与可覆盖，不含主题体系：
+三层样式（组件 / 布局 / 交互）合并为单文件样式表，全部为 `.pcr-*` 语义 class，基于 token 化主题体系（色板 → 语义 → 形状三层 CSS 变量，组件规则只引用语义 token）：
 
 ```ts
 import 'pactor-ui-radix/styles.css';
 ```
+
+内置默认亮色皮肤与暗色皮肤（`<html data-pactor-theme="dark">`，可挂任意容器）。换肤三方式——覆盖 CSS 变量（只改主色亦可）、`data-pactor-theme='dark'`、直接覆盖 `.pcr-*` class——以及完整 token 清单和 Radix Colors 定制工具的配合，见[主题与换肤](/guides/theming/)。
 
 class 前缀：组件层 `.pcr-page` / `.pcr-grid` / `.pcr-btn` 等；布局层 `.pcr-admin-*` / `.pcr-menu-*` / `.pcr-breadcrumb-*` / `.pcr-tab*` / `.pcr-login-*` / `.pcr-landing-*` / `.pcr-blank-layout`；交互层 `.pcr-modal-*` / `.pcr-drawer-*` / `.pcr-confirm-*` / `.pcr-toast-*`。
 

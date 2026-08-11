@@ -1,0 +1,54 @@
+- generic [ref=e3]:
+  - banner [ref=e4]:
+    - generic [ref=e5]: Pactor Admin 示例
+  - generic [ref=e6]:
+    - complementary [ref=e7]:
+      - generic [ref=e8]:
+        - button "工作台" [ref=e9] [cursor=pointer]
+        - heading "客户管理" [level=3] [ref=e11]:
+          - button "客户管理" [ref=e12] [cursor=pointer]
+    - generic [ref=e13]:
+      - tablist [ref=e14]:
+        - tab "工作台" [selected] [ref=e15] [cursor=pointer]
+      - main [ref=e16]:
+        - navigation "面包屑" [ref=e17]:
+          - list [ref=e18]:
+            - listitem [ref=e19]:
+              - generic [ref=e20]: 工作台
+        - generic [ref=e21]:
+          - heading "工作台" [level=2] [ref=e22]
+          - generic [ref=e23]:
+            - alert [ref=e24]:
+              - generic [ref=e25]: 欢迎回来，演示管理员！
+              - generic [ref=e26]: 当前应用：Pactor Admin 示例（user / app 作用域表达式绑定）· 今日有 3 条待办工单
+            - generic [ref=e27]:
+              - generic [ref=e31]:
+                - generic [ref=e32]: 客户总数
+                - generic [ref=e33]: 8家
+              - generic [ref=e37]:
+                - generic [ref=e38]: 今日活跃
+                - generic [ref=e39]: 5家
+              - generic [ref=e43]:
+                - generic [ref=e44]: 待办工单
+                - generic [ref=e45]: 3条
+              - generic [ref=e49]:
+                - generic [ref=e50]: 转化率
+                - generic [ref=e51]: 62.5%
+            - generic [ref=e52]:
+              - generic [ref=e54]:
+                - heading "公告与待办" [level=3] [ref=e55]
+                - generic [ref=e57]:
+                  - tablist [ref=e58]:
+                    - tab "公告" [selected] [ref=e59] [cursor=pointer]
+                    - tab "待办" [ref=e60] [cursor=pointer]
+                  - tabpanel "公告" [ref=e61]:
+                    - alert [ref=e62]:
+                      - generic [ref=e63]: 本示例为纯前端演示：页面 DSL 本地导入，数据为内存 mock。
+              - generic [ref=e65]:
+                - heading "快捷操作" [level=3] [ref=e66]
+                - generic [ref=e68]:
+                  - alert [ref=e69]:
+                    - generic [ref=e70]: 常用入口一键直达（navigate 动作）。
+                  - generic [ref=e71]:
+                    - button "客户列表" [ref=e72] [cursor=pointer]
+                    - button "编辑客户" [ref=e73] [cursor=pointer]

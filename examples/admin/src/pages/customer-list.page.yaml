@@ -1,0 +1,184 @@
+dsl: '1.0'
+page:
+  id: customer-list
+  title: 客户列表
+  permission: customer:view
+
+state:
+  keyword: ''
+
+dataSources:
+  # service 数据源：customer.list（内存 mock，约 300ms 延迟），
+  # params 引用 state.keyword —— 查询表单提交后 setState + reload 即按新关键词重新加载
+  customers:
+    type: service
+    service: customer.list
+    autoLoad: true
+    params:
+      keyword: ${state.keyword}
+
+body:
+  type: Page
+  props:
+    title: 客户列表
+  children:
+    # 页面说明区
+    - type: Alert
+      props:
+        variant: info
+        message: 客户列表演示查询、抽屉编辑与权限禁用
+        description: 查询走 setState + reload 链路；行内"删除"因 permissions 不含 customer:delete 而禁用。
+    # 查询区
+    - type: Card
+      props:
+        title: 客户查询
+      children:
+        - type: Form
+          props:
+            layout: inline
+          events:
+            onSubmit:
+              - action: setState
+                params:
+                  keyword: ${event.keyword}
+              - action: reload
+                params:
+                  dataSource: customers
+          children:
+            - type: Input
+              props:
+                name: keyword
+                label: 关键词
+                placeholder: 客户名 / 负责人
+            - type: Button
+              props:
+                text: 查询
+                variant: primary
+                submit: true
+    # 数据区
+    - type: Card
+      props:
+        title: 客户数据（service 数据源）
+      children:
+        - type: Table
+          props:
+            dataSource: ${data.customers}
+            pagination:
+              pageSize: 5
+            columns:
+              - title: ID
+                dataIndex: id
+              - title: 客户名称
+                dataIndex: name
+              - title: 联系电话
+                dataIndex: phone
+              - title: 等级
+                dataIndex: level
+              - title: 负责人
+                dataIndex: owner
+              - title: 操作
+                # cell 行模板：row / rowIndex 子作用域
+                cell:
+                  type: Flex
+                  props:
+                    gap: 8
+                  children:
+                    - type: Button
+                      props:
+                        text: 编辑
+                        variant: primary
+                        size: small
+                      events:
+                        onClick:
+                          # 命名动作：overlay.open 的 close payload 即 actions.editResult
+                          - id: editResult
+                            action: overlay.open
+                            params:
+                              overlay:
+                                type: drawer
+                                title: 编辑客户
+                                width: 420
+                                params:
+                                  id: ${row.id}
+                                  name: ${row.name}
+                                content:
+                                  type: Form
+                                  events:
+                                    onSubmit:
+                                      - id: updateResult
+                                        action: service.call
+                                        params:
+                                          service: customer.update
+                                          params:
+                                            id: ${params.id}
+                                            name: ${event.name}
+                                            phone: ${event.phone}
+                                            level: ${event.level}
+                                      - action: if
+                                        params:
+                                          condition: ${actions.updateResult.id}
+                                          then:
+                                            - action: overlay.close
+                                              params:
+                                                payload:
+                                                  success: true
+                                          else:
+                                            - action: message
+                                              params:
+                                                type: error
+                                                text: 保存失败，请重试
+                                  children:
+                                    - type: Alert
+                                      props:
+                                        variant: info
+                                        message: 正在编辑：${params.name}（ID ${params.id}）
+                                    - type: Input
+                                      props:
+                                        name: name
+                                        label: 客户名称
+                                        placeholder: 留空则保持不变
+                                        rules:
+                                          - required: true
+                                            message: 请输入客户名称
+                                    - type: Input
+                                      props:
+                                        name: phone
+                                        label: 联系电话
+                                        placeholder: 留空则保持不变
+                                    - type: Select
+                                      props:
+                                        name: level
+                                        label: 等级
+                                        options:
+                                          - label: A 级
+                                            value: A
+                                          - label: B 级
+                                            value: B
+                                          - label: C 级
+                                            value: C
+                                    - type: Button
+                                      props:
+                                        text: 保存
+                                        variant: primary
+                                        submit: true
+                          # 抽屉以成功语义关闭后：reload 列表 + 成功 message
+                          - action: if
+                            params:
+                              condition: ${actions.editResult.success}
+                              then:
+                                - action: reload
+                                  params:
+                                    dataSource: customers
+                                - action: message
+                                  params:
+                                    type: success
+                                    text: 客户已更新
+                    # 权限演示：permissions 不含 customer:delete，按钮以禁用态呈现
+                    - type: Button
+                      props:
+                        text: 删除
+                        danger: true
+                        size: small
+                      permission:
+                        code: customer:delete
+                        denied: disabled
