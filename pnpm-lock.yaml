@@ -36,6 +36,67 @@ importers:
         specifier: ^7.2.0
         version: 7.2.0(@astrojs/markdown-remark@7.2.2)(@emnapi/core@1.11.1)(@emnapi/runtime@1.11.3)(@types/node@24.13.3)
 
+  packages/app:
+    dependencies:
+      pactor-components:
+        specifier: workspace:*
+        version: link:../components
+      pactor-core:
+        specifier: workspace:*
+        version: link:../core
+      pactor-expression:
+        specifier: workspace:*
+        version: link:../expression
+      pactor-interaction:
+        specifier: workspace:*
+        version: link:../interaction
+      pactor-layout:
+        specifier: workspace:*
+        version: link:../layout
+      pactor-permission:
+        specifier: workspace:*
+        version: link:../permission
+      pactor-resource:
+        specifier: workspace:*
+        version: link:../resource
+      pactor-router:
+        specifier: workspace:*
+        version: link:../router
+      pactor-runtime:
+        specifier: workspace:*
+        version: link:../runtime
+      pactor-schema:
+        specifier: workspace:*
+        version: link:../schema
+    devDependencies:
+      '@testing-library/dom':
+        specifier: ^10.4.1
+        version: 10.4.1
+      '@testing-library/react':
+        specifier: ^16.3.2
+        version: 16.3.2(@testing-library/dom@10.4.1)(@types/react-dom@19.2.4(@types/react@19.2.18))(@types/react@19.2.18)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
+      '@types/react':
+        specifier: ^19.2.18
+        version: 19.2.18
+      '@types/react-dom':
+        specifier: ^19.2.4
+        version: 19.2.4(@types/react@19.2.18)
+      antd:
+        specifier: ^6.6.0
+        version: 6.6.0(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
+      jsdom:
+        specifier: ^30.0.1
+        version: 30.0.1
+      react:
+        specifier: ^19.2.8
+        version: 19.2.8
+      react-dom:
+        specifier: ^19.2.8
+        version: 19.2.8(react@19.2.8)
+      react-router-dom:
+        specifier: ^7.18.2
+        version: 7.18.2(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
+
   packages/components:
     dependencies:
       pactor-core:
@@ -108,6 +169,43 @@ importers:
       pactor-components:
         specifier: workspace:*
         version: link:../components
+      react:
+        specifier: ^19.2.8
+        version: 19.2.8
+      react-dom:
+        specifier: ^19.2.8
+        version: 19.2.8(react@19.2.8)
+
+  packages/layout:
+    dependencies:
+      pactor-core:
+        specifier: workspace:*
+        version: link:../core
+      pactor-permission:
+        specifier: workspace:*
+        version: link:../permission
+      pactor-router:
+        specifier: workspace:*
+        version: link:../router
+    devDependencies:
+      '@testing-library/dom':
+        specifier: ^10.4.1
+        version: 10.4.1
+      '@testing-library/react':
+        specifier: ^16.3.2
+        version: 16.3.2(@testing-library/dom@10.4.1)(@types/react-dom@19.2.4(@types/react@19.2.18))(@types/react@19.2.18)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
+      '@types/react':
+        specifier: ^19.2.18
+        version: 19.2.18
+      '@types/react-dom':
+        specifier: ^19.2.4
+        version: 19.2.4(@types/react@19.2.18)
+      antd:
+        specifier: ^6.6.0
+        version: 6.6.0(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
+      jsdom:
+        specifier: ^30.0.1
+        version: 30.0.1
       react:
         specifier: ^19.2.8
         version: 19.2.8

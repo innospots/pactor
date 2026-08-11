@@ -67,9 +67,29 @@ describe('StaticDslLoader', () => {
     );
   });
 
-  it('loadBootstrap 抛 ResourceError（静态加载器不提供 bootstrap）', async () => {
+  it('loadBootstrap 抛 ResourceError（未提供 bootstrap 数据时）', async () => {
     const loader = new StaticDslLoader();
 
     await expect(loader.loadBootstrap()).rejects.toBeInstanceOf(ResourceError);
+  });
+
+  it('提供 bootstrap 数据时 loadBootstrap 宽容解析返回', async () => {
+    const loader = new StaticDslLoader({
+      bootstrap: {
+        app: { name: '运营平台' },
+        user: { name: '张三' },
+        permissions: ['customer:view'],
+        menus: [{ id: 'home', type: 'page', title: '首页', path: '/', pageId: 'demo' }],
+        pageVersions: { demo: 3 },
+      },
+    });
+
+    const bootstrap = await loader.loadBootstrap();
+
+    expect(bootstrap.resourceType).toBe('bootstrap');
+    expect(bootstrap.version).toBe(1);
+    expect(bootstrap.app).toEqual({ name: '运营平台' });
+    expect(bootstrap.permissions).toEqual(['customer:view']);
+    expect(bootstrap.pageVersions).toEqual({ demo: 3 });
   });
 });

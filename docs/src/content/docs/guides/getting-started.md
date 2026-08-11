@@ -3,7 +3,7 @@ title: 快速开始
 description: 环境要求、安装、构建与测试，以及一个端到端的最小示例
 ---
 
-Pactor 是一套基于 YAML/JSON DSL 的 Server-Driven UI 前端运行时框架。本页介绍如何在 Monorepo 中开发，以及三个基础模块的最小使用示例。
+Pactor 是一套基于 YAML/JSON DSL 的 Server-Driven UI 前端运行时框架。本页介绍如何在 Monorepo 中开发、pactor-app 一站式用法，以及基础模块的最小使用示例。
 
 ## 环境要求
 
@@ -38,8 +38,28 @@ pnpm docs:dev
 | `pactor-router` | `packages/router` | 路由（MenuRegistry / PathMatcher / 导航桥接 / React Router 绑定） | `react`、`react-router-dom`（peer，仅 react 子入口） |
 | `pactor-components` | `packages/components` | 内置组件（12 个 V1 组件的 antd 适配层） | `react`、`antd`（peer） |
 | `pactor-interaction` | `packages/interaction` | 交互（OverlayManager / overlay.open 等交互动作 / OverlayHost / InteractionProvider） | `react`、`antd`（peer） |
+| `pactor-layout` | `packages/layout` | 布局（AdminLayout / Blank / Login / Landing 外壳与 LayoutRegistry） | `react`、`antd`（peer） |
+| `pactor-app` | `packages/app` | 一站式组合层（createPactorApplication：启动编排 / 共享注册表 / 动态路由 / mount） | `react`、`react-dom`、`react-router-dom`、`antd`（peer） |
 
-依赖方向严格单向：`pactor-core` ← `pactor-schema` ← `pactor-expression` ← `pactor-runtime` ← `pactor-components` / `pactor-interaction`；`pactor-permission` 仅依赖 `pactor-core`，结构化兼容 `pactor-runtime` 的适配接口（不产生运行时依赖）；`pactor-resource` 仅依赖 `pactor-core`；`pactor-router` 依赖 `pactor-core` 与 `pactor-permission`，结构化兼容 `pactor-runtime` 的 RouterAdapter。
+依赖方向严格单向：`pactor-core` ← `pactor-schema` ← `pactor-expression` ← `pactor-runtime` ← `pactor-components` / `pactor-interaction`；`pactor-permission` 仅依赖 `pactor-core`，结构化兼容 `pactor-runtime` 的适配接口（不产生运行时依赖）；`pactor-resource` 仅依赖 `pactor-core`；`pactor-router` 依赖 `pactor-core` 与 `pactor-permission`，结构化兼容 `pactor-runtime` 的 RouterAdapter；`pactor-layout` 组合 router / permission；`pactor-app` 站在全部模块之上做一站式组装。
+
+## 一站式用法（pactor-app）
+
+业务工程优先使用 `pactor-app`：一个调用完成启动编排、动态路由、布局与页面运行时组装。
+
+```tsx
+import { createPactorApplication } from 'pactor-app';
+
+createPactorApplication({
+  appId: 'risk-admin',
+
+  api: {
+    baseURL: '/api/runtime',
+  },
+}).mount('#root');
+```
+
+服务端按 Envelope 协议提供 `{baseURL}/bootstrap`（app / user / permissions / menus / layout）与 `{baseURL}/pages/{id}`（Page DSL）端点即可；本地与测试环境可注入 `StaticDslLoader` 替代 `api`。详见 [pactor-app](/packages/app/)。
 
 ## 最小示例
 
@@ -86,4 +106,6 @@ console.log(keyword); // "张三"
 - [pactor-permission](/packages/permission/)：权限存储、适配器与守卫
 - [pactor-resource](/packages/resource/)：DSL 资源加载、缓存与版本控制
 - [pactor-router](/packages/router/)：菜单注册、路径匹配、导航桥接与动态路由
+- [pactor-layout](/packages/layout/)：应用外壳布局与 LayoutRegistry
+- [pactor-app](/packages/app/)：一站式组合层（createPactorApplication）
 - [框架设计规范](/framework-design/)：完整架构设计

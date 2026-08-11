@@ -1,0 +1,127 @@
+---
+title: pactor-app
+description: 一站式组合层——createPactorApplication 启动编排（loader/bootstrap/权限/菜单/布局）、共享 registries、react-router 动态路由、页面加载与错误兜底、mount/unmount 与扩展注册 API
+---
+
+`pactor-app` 是框架的一站式组合层（设计文档第 86–89 节）。业务工程不再需要逐包组装：一个 `createPactorApplication` 调用完成 DSL 资源加载、bootstrap 编排、共享 registries、动态路由、布局外壳、页面运行时、Overlay/Provider 集成与错误兜底。
+
+```bash
+pnpm add pactor-app react react-dom react-router-dom antd
+```
+
+`react >= 18`、`react-dom >= 18`、`react-router-dom >= 6`、`antd >= 5` 为 peer dependency（开发基准为 react-router-dom v7、antd v6）。
+
+## 一站式用法
+
+```tsx
+import { createPactorApplication } from 'pactor-app';
+
+createPactorApplication({
+  appId: 'risk-admin',
+  api: { baseURL: '/api/runtime' }, // 缺省即 '/api/runtime'
+}).mount('#root');
+```
+
+业务代码目录可以非常薄——页面完全动态化时甚至不需要 `pages/*.tsx`：
+
+```text
+src/
+├── services/
+├── extensions/
+├── components/
+└── main.tsx
+```
+
+服务端按 pactor-resource Envelope 协议提供 `{baseURL}/bootstrap` 与 `{baseURL}/pages/{id}` 端点。bootstrap 字段全部可选（缺省按空处理）：
+
+| 字段 | 说明 |
+| --- | --- |
+| `app.name` | 应用名，作为布局品牌区标题（回退 `appId`） |
+| `user` | 当前用户，注入页面表达式作用域 `${user.*}` |
+| `permissions` | 权限码数组（缺省 `[]`），写入 PermissionStore |
+| `menus` | 菜单树（缺省 `[]`），构建 MenuRegistry 驱动动态路由 |
+| `layout.type` / `layout.{header,sidebar,tabs,breadcrumb,footer}` | 布局类型与区域开关 |
+| `pageVersions` | 页面版本表，用于 loader 缓存版本控制 |
+
+## Options
+
+| 字段 | 说明 |
+| --- | --- |
+| `appId`（必填） | 应用 id：app 作用域缺省 `id`、brand 缺省标题回退 |
+| `api.baseURL` | DSL 资源 API 基础路径（缺省 `/api/runtime`）；未注入 loader 时创建 `HttpDslResourceLoader` |
+| `loader` | 自定义 `DslResourceLoader`（优先于 api；测试/本地用 `StaticDslLoader`） |
+| `layout` | 布局类型覆盖（优先级：`options.layout` > `bootstrap.layout.type` > `'admin'`） |
+| `brand` | `{ title, logo? }`，品牌区覆盖 |
+| `router` | `{ type?: 'browser' \| 'hash', basename?: string }`；V1 支持 browser + basename |
+| `components` | 业务组件（写入应用级共享 registry，可覆盖同名内置组件） |
+| `actions` | 业务动作（可覆盖同名内置/交互动作） |
+| `services` / `capabilities` | 业务服务与能力扩展 |
+| `authTokenProvider` | `() => string \| undefined \| Promise<string \| undefined>`；注入 DSL 资源请求与页面 HTTP 出口（`Authorization: Bearer`） |
+
+```tsx
+createPactorApplication({
+  appId: 'risk-admin',
+  loader: new StaticDslLoader({ bootstrap, pages }), // 本地/测试注入
+  layout: 'admin',
+  brand: { title: '风控平台' },
+  router: { basename: '/console' },
+  components: { RiskScore },
+  authTokenProvider: () => getToken(),
+});
+```
+
+## 启动编排
+
+mount 后依次：加载 bootstrap（全屏 loading）→ `PermissionStore` 写入 permissions → `MenuRegistry(menus)` → 解析布局 → 组装共享 registries 与 adapters。bootstrap 失败渲染含**重试**按钮的启动错误页，不白屏。
+
+应用级共享 registries 被所有页面 PageRuntime 共享：
+
+- **components**：pactor-components 全部内置组件 + `options.components` + 运行期注册；
+- **actions**：runtime 内置动作（setState / request / if 等，页面运行时创建时注册）+ 交互动作（`overlay.open` / `overlay.close` / `confirm` / `message`，应用级 OverlayManager / UiBridge 单例）+ `navigate` 动作（经 react-router 导航）+ `options.actions`；
+- **services / capabilities**：`options` 扩展 + 运行期注册。
+
+页面运行时创建时注入 permission / router / http adapters 与 route context（`${route.params.*}` / `${route.query.*}`）、`user`（bootstrap.user）、`app`（bootstrap.app）。同 `pageId` 导航往返或 `route.params` 变化时销毁重建（V1 无 keepAlive）。
+
+## React 组合结构
+
+```tsx
+<BrowserRouter basename={...}>
+  <RouterBridgeSync />                {/* react-router → NavigationBridge */}
+  <InteractionProvider bridge={uiBridge}>
+    <AdminLayout brand registry bridge route permissionChecker>
+      <Routes>
+        <Route path="*" element={
+          <DynamicDslRoute
+            render={({ pageId, route }) => <DslPageLoader ... />}
+            fallback={<NotFound />}     // 未命中 404
+            forbidden={<Forbidden />}   // 无权限 403
+            permissionChecker={store}
+          />
+        } />
+      </Routes>
+    </AdminLayout>
+  </InteractionProvider>
+</BrowserRouter>
+```
+
+`DslPageLoader`：pageId → loadPage → createPageRuntime → PageRuntimeView；加载中渲染 loading 态，失败渲染含重试的受控错误页，渲染期异常由 ErrorBoundary 捕获（外壳不崩溃）。OverlayHost 作为 PageRuntimeView 的 children（共享当前页面 Renderer 上下文）；page 类型 overlay 经 loader 加载页面 DSL，子运行时共享应用级 registries。
+
+## 扩展注册 API
+
+```ts
+const app = createPactorApplication({ appId: 'risk-admin', api: { baseURL: '/api/runtime' } });
+
+app.registerComponent('StrategyFlow', StrategyFlow);
+app.registerAction('strategy.export', exportStrategy);
+app.registerService('strategy', strategyService);
+app.registerCapability('strategy.backtest', backtestCapability);
+
+app.mount('#root');
+// app.unmount();  // 卸载根；重复 mount 会先卸载旧根
+```
+
+注册写入应用级共享 registry（同名覆盖）：新创建/重建的页面即可用，当前已创建页面下次重建后生效。
+
+:::note
+V1 边界（Non-Goals）：登录流程/auth.login 动作、Theme、i18n、telemetry/audit、灰度多租户、页面 keepAlive。布局类型未命中时回退 BlankLayout 并告警（pactor-layout 行为）。
+:::
