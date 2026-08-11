@@ -1,0 +1,57 @@
+/**
+ * example-admin 示例皮肤 —— pactor 换肤契约的可运行参考实现。
+ * 必须在 `pactor-ui-radix/styles.css` 之后导入（见 main.tsx）。
+ *
+ * 每段注释标注对应的换肤契约条款，完整说明见文档 guides/theming（《主题与换肤》）。
+ */
+
+/* ============================================================
+ * 1. token 覆盖（契约方式一：覆盖 CSS 变量）
+ *    只覆盖要改的语义 token，组件规则全部引用变量，自动跟随。
+ *    这里微调次背景（内容区底色 / 表头 / 条纹），light 与 dark 各给一值。
+ * ============================================================ */
+:root {
+  --pcr-bg-subtle: #f3f4f9;
+}
+
+/* 契约方式二：暗色皮肤下叠加同名变量的暗色值 */
+[data-pactor-theme='dark'] {
+  --pcr-bg-subtle: #1a1c22;
+}
+
+/* ============================================================
+ * 2. 欢迎横幅（契约方式三：class/结构覆盖）
+ *    DSL 不支持自定义 className，故用结构选择器定位：
+ *    内容区第一个、且后随 Grid（指标行）的 Alert 即 dashboard 欢迎横幅。
+ *    渐变色取自 accent 刻度 token，dark 下刻度自动切换，无需额外暗色规则。
+ * ============================================================ */
+.pcr-page-content > .pcr-alert:first-child:has(+ .pcr-grid) {
+  padding: 20px 24px;
+  border-color: transparent;
+  border-radius: var(--pcr-radius-lg);
+  background: linear-gradient(
+    135deg,
+    var(--pcr-accent-9),
+    var(--pcr-accent-7)
+  );
+  color: var(--pcr-accent-fg);
+}
+
+.pcr-page-content > .pcr-alert:first-child:has(+ .pcr-grid) .pcr-alert-message {
+  font-size: var(--pcr-font-size-lg);
+  font-weight: 600;
+}
+
+.pcr-page-content
+  > .pcr-alert:first-child:has(+ .pcr-grid)
+  .pcr-alert-description {
+  color: color-mix(in srgb, var(--pcr-accent-fg) 85%, transparent);
+}
+
+/* ============================================================
+ * 3. 指标卡 accent 强调条（契约方式三：结构性美化）
+ *    含 Statistic 的卡加左侧强调条；accent 为 token，dark 下自动适配。
+ * ============================================================ */
+.pcr-card:has(.pcr-statistic) {
+  border-left: 3px solid var(--pcr-accent);
+}

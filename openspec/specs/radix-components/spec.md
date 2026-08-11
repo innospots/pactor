@@ -65,7 +65,7 @@ Tabs SHALL 支持 `items`（key/label/children DslNode[]），pane 经 renderChi
 
 ### Requirement: 样式表
 
-包 SHALL 提供 `styles.css`（`.pcr-*` 语义 class 的极简可用样式）并通过 exports 暴露；组件 MUST 使用语义 class 而非内联大样式。
+包 SHALL 提供 `styles.css`（`.pcr-*` 语义 class，token 化主题体系——组件规则经 `--pcr-*` CSS 变量取值，含默认 light 皮肤与 `[data-pactor-theme='dark']` 暗色皮肤，详见 radix-theme spec）并通过 exports 暴露；组件 MUST 使用语义 class 而非内联大样式。
 
 #### Scenario: 样式入口可用
 

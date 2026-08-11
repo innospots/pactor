@@ -67,6 +67,17 @@ createPactorApplication({
 
 服务端按 Envelope 协议提供 `{baseURL}/bootstrap`（app / user / permissions / menus / layout）与 `{baseURL}/pages/{id}`（Page DSL）端点即可；本地与测试环境可注入 `StaticDslLoader` 替代 `api`。详见 [pactor-app](/packages/app/)。
 
+## 示例工程
+
+`examples/admin`（包名 `example-admin`，private）是框架首个完整演示：管理后台（admin 布局 + 页签 / 面包屑）、菜单权限过滤与隐藏详情页、表达式绑定、service 数据源、Form / Table、cell 行模板、overlay.open 抽屉编辑、navigate 与 route.params。纯前端可跑——页面 DSL 经 `pactor-vite-plugin` 本地导入，bootstrap 与数据为内存 mock：
+
+```bash
+pnpm --filter example-admin dev    # 端口 5199
+pnpm --filter example-admin build  # 构建期强校验全部页面 YAML
+```
+
+启动方式与演示点清单见 `examples/admin/README.md`。
+
 ## 最小示例
 
 校验一份 Page DSL，并求值其中的表达式：

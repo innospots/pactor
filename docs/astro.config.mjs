@@ -16,7 +16,10 @@ export default defineConfig({
       sidebar: [
         {
           label: '指南',
-          items: [{ label: '快速开始', slug: 'guides/getting-started' }],
+          items: [
+            { label: '快速开始', slug: 'guides/getting-started' },
+            { label: '主题与换肤', slug: 'guides/theming' },
+          ],
         },
         {
           label: '模块',
