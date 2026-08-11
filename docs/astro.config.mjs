@@ -31,6 +31,8 @@ export default defineConfig({
             { label: 'pactor-components', slug: 'packages/components' },
             { label: 'pactor-interaction', slug: 'packages/interaction' },
             { label: 'pactor-layout', slug: 'packages/layout' },
+            { label: 'pactor-markdown', slug: 'packages/markdown' },
+            { label: 'pactor-chat', slug: 'packages/chat' },
             { label: 'pactor-app', slug: 'packages/app' },
           ],
         },

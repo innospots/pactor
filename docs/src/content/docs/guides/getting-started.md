@@ -39,6 +39,8 @@ pnpm docs:dev
 | `pactor-components` | `packages/components` | 内置组件（12 个 V1 组件的 antd 适配层） | `react`、`antd`（peer） |
 | `pactor-interaction` | `packages/interaction` | 交互（OverlayManager / overlay.open 等交互动作 / OverlayHost / InteractionProvider） | `react`、`antd`（peer） |
 | `pactor-layout` | `packages/layout` | 布局（AdminLayout / Blank / Login / Landing 外壳与 LayoutRegistry） | `react`、`antd`（peer） |
+| `pactor-markdown` | `packages/markdown` | Markdown（安全渲染器 / 协议白名单 / DSL Markdown 组件） | `react-markdown`、`remark-gfm`、`react`（peer） |
+| `pactor-chat` | `packages/chat` | Chat（消息模型 / Streaming reducer / Safe Registry / capability 动作 / ChatView 与 chat 布局） | `react`、`antd`（peer） |
 | `pactor-app` | `packages/app` | 一站式组合层（createPactorApplication：启动编排 / 共享注册表 / 动态路由 / mount） | `react`、`react-dom`、`react-router-dom`、`antd`（peer） |
 
 依赖方向严格单向：`pactor-core` ← `pactor-schema` ← `pactor-expression` ← `pactor-runtime` ← `pactor-components` / `pactor-interaction`；`pactor-permission` 仅依赖 `pactor-core`，结构化兼容 `pactor-runtime` 的适配接口（不产生运行时依赖）；`pactor-resource` 仅依赖 `pactor-core`；`pactor-router` 依赖 `pactor-core` 与 `pactor-permission`，结构化兼容 `pactor-runtime` 的 RouterAdapter；`pactor-layout` 组合 router / permission；`pactor-app` 站在全部模块之上做一站式组装。
@@ -103,9 +105,13 @@ console.log(keyword); // "张三"
 - [pactor-schema](/packages/schema/)：Schema 校验细节
 - [pactor-expression](/packages/expression/)：表达式语法与安全约束
 - [pactor-runtime](/packages/runtime/)：Runtime 引擎与 React Renderer
+- [pactor-components](/packages/components/)：V1 基础组件（antd 适配层）
 - [pactor-permission](/packages/permission/)：权限存储、适配器与守卫
 - [pactor-resource](/packages/resource/)：DSL 资源加载、缓存与版本控制
 - [pactor-router](/packages/router/)：菜单注册、路径匹配、导航桥接与动态路由
+- [pactor-interaction](/packages/interaction/)：Overlay Runtime 与交互动作
 - [pactor-layout](/packages/layout/)：应用外壳布局与 LayoutRegistry
+- [pactor-markdown](/packages/markdown/)：安全 Markdown 渲染与 DSL Markdown 组件
+- [pactor-chat](/packages/chat/)：AI Message Rendering Protocol 与 Chat Runtime
 - [pactor-app](/packages/app/)：一站式组合层（createPactorApplication）
 - [框架设计规范](/framework-design/)：完整架构设计
