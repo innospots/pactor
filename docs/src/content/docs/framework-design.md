@@ -344,7 +344,7 @@ pactor-app
 
 负责：
 
-- HttpDslLoader
+- HttpDslResourceLoader
 - Page Loader
 - Fragment Loader
 - Cache
@@ -3280,9 +3280,9 @@ npm install pactor-app
 入口：
 
 ```tsx
-import { createDslApplication } from 'pactor-app';
+import { createPactorApplication } from 'pactor-app';
 
-createDslApplication({
+createPactorApplication({
   appId: 'risk-admin',
 
   api: {
@@ -3349,7 +3349,7 @@ runtime.registerCapability(
 
 ```mermaid
 flowchart TD
-    A[main.tsx] --> B[createDslApplication]
+    A[main.tsx] --> B[createPactorApplication]
     B --> C[Authentication]
     C --> D[GET /runtime/bootstrap]
     D --> E[Load App Config]
@@ -3363,7 +3363,7 @@ flowchart TD
     I --> M[Render App Shell]
     L --> N[Resolve Route]
     N --> O[Find pageId]
-    O --> P[HttpDslLoader]
+    O --> P[HttpDslResourceLoader]
     P --> Q[Cache / Version Check]
     Q --> R[GET /runtime/pages/{pageId}]
     R --> S[Validate DSL]
@@ -4098,9 +4098,9 @@ npm install pactor-app
 入口：
 
 ```tsx
-import { createDslApplication } from 'pactor-app';
+import { createPactorApplication } from 'pactor-app';
 
-createDslApplication({
+createPactorApplication({
   appId: 'risk-console',
 
   api: {
