@@ -1,0 +1,8 @@
+dsl: '1.0'
+page:
+  id: demo-page
+  title: 演示页面
+state:
+  keyword: ''
+body:
+  type: Page

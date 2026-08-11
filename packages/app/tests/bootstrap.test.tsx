@@ -51,10 +51,10 @@ describe('application-bootstrap：启动编排', () => {
     ).toBeTruthy();
     // 布局外壳：品牌区取 bootstrap.app.name
     expect(
-      target.querySelector('.pactor-admin-brand')?.textContent,
+      target.querySelector('.pcr-admin-brand')?.textContent,
     ).toBe('风控运营平台');
     // 菜单：sys:admin 无权限被过滤、隐藏页不可见 → 首页 / 客户管理两项
-    const menuItems = target.querySelectorAll('.ant-menu-item');
+    const menuItems = target.querySelectorAll('.pcr-menu-item');
     expect(menuItems).toHaveLength(2);
   });
 
@@ -94,9 +94,9 @@ describe('application-bootstrap：启动编排', () => {
     // 外壳正常（brand 取 bootstrap.app.name），路径未注册 → 404
     await screen.findByText('页面不存在或尚未注册');
     expect(
-      target.querySelector('.pactor-admin-brand')?.textContent,
+      target.querySelector('.pcr-admin-brand')?.textContent,
     ).toBe('空应用');
-    expect(target.querySelectorAll('.ant-menu-item')).toHaveLength(0);
+    expect(target.querySelectorAll('.pcr-menu-item')).toHaveLength(0);
   });
 });
 

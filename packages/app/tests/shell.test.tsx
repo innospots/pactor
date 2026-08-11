@@ -148,9 +148,9 @@ describe('application-shell：页面加载与错误处理', () => {
     await screen.findByText('页面渲染异常');
     // 外壳（品牌区 / 菜单）仍在
     expect(
-      target.querySelector('.pactor-admin-brand')?.textContent,
+      target.querySelector('.pcr-admin-brand')?.textContent,
     ).toBe('风控运营平台');
-    expect(target.querySelectorAll('.ant-menu-item')).toHaveLength(1);
+    expect(target.querySelectorAll('.pcr-menu-item')).toHaveLength(1);
   });
 });
 
@@ -162,14 +162,14 @@ describe('application-shell：布局包裹', () => {
 
     await screen.findByText('欢迎使用 Pactor');
     // 页签（bootstrap.layout.tabs: true）
-    const tabs = target.querySelector('.pactor-admin-tabs');
+    const tabs = target.querySelector('.pcr-admin-tabs');
     expect(tabs).not.toBeNull();
     expect(within(tabs as HTMLElement).getByText('首页')).toBeTruthy();
     // 页面内容在 AdminLayout 内容区
-    const content = target.querySelector('.pactor-admin-content');
+    const content = target.querySelector('.pcr-admin-content');
     expect(content?.textContent).toContain('欢迎使用 Pactor');
     // 菜单可见
-    expect(target.querySelectorAll('.ant-menu-item').length).toBeGreaterThan(0);
+    expect(target.querySelectorAll('.pcr-menu-item').length).toBeGreaterThan(0);
   });
 });
 
@@ -278,10 +278,10 @@ describe('application-shell：Overlay 与交互集成', () => {
     await screen.findByText('弹层页面内容 7');
   });
 
-  it('message 动作：antd message 出现对应提示', async () => {
+  it('message 动作：toast 出现对应提示', async () => {
     await mountInteractionApp();
 
-    fireEvent.click(screen.getByRole('button', { name: '提 示' }));
+    fireEvent.click(screen.getByRole('button', { name: '提示' }));
     await screen.findByText('操作成功');
   });
 });

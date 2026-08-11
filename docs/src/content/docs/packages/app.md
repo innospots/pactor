@@ -6,15 +6,24 @@ description: 一站式组合层——createPactorApplication 启动编排（load
 `pactor-app` 是框架的一站式组合层（设计文档第 86–89 节）。业务工程不再需要逐包组装：一个 `createPactorApplication` 调用完成 DSL 资源加载、bootstrap 编排、共享 registries、动态路由、布局外壳、页面运行时、Overlay/Provider 集成与错误兜底。
 
 ```bash
-pnpm add pactor-app react react-dom react-router-dom antd
+pnpm add pactor-app react react-dom react-router-dom
 ```
 
-`react >= 18`、`react-dom >= 18`、`react-router-dom >= 6`、`antd >= 5` 为 peer dependency（开发基准为 react-router-dom v7、antd v6）。
+`react >= 18`、`react-dom >= 18`、`react-router-dom >= 6` 为 peer dependency（开发基准为 react-router-dom v7）。
+
+**默认 UI kit 为 Radix**（pactor-ui-radix，随 pactor-app 传递依赖）。Radix 套件无内建样式，**必须导入样式表**：
+
+```ts
+import 'pactor-ui-radix/styles.css';
+```
+
+如需使用 antd 实现，显式传入 `ui: antdUiKit`（见 [pactor-ui-antd](/packages/ui-antd/)）。
 
 ## 一站式用法
 
 ```tsx
 import { createPactorApplication } from 'pactor-app';
+import 'pactor-ui-radix/styles.css'; // 默认 Radix UI kit 的样式（必需）
 
 createPactorApplication({
   appId: 'risk-admin',
@@ -76,7 +85,7 @@ mount 后依次：加载 bootstrap（全屏 loading）→ `PermissionStore` 写�
 
 应用级共享 registries 被所有页面 PageRuntime 共享：
 
-- **components**：pactor-ui-antd 全部内置组件 + `options.components` + 运行期注册；
+- **components**：所选 UI kit 的全部内置组件（缺省 pactor-ui-radix）+ `options.components` + 运行期注册；
 - **actions**：runtime 内置动作（setState / request / if 等，页面运行时创建时注册）+ 交互动作（`overlay.open` / `overlay.close` / `confirm` / `message`，应用级 OverlayManager / UiBridge 单例）+ `navigate` 动作（经 react-router 导航）+ `options.actions`；
 - **services / capabilities**：`options` 扩展 + 运行期注册。
 

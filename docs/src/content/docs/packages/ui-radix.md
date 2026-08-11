@@ -29,23 +29,31 @@ pnpm add pactor-ui-radix pactor-app react react-dom react-router-dom
 | `pactor-ui-radix/layout` | 布局层（`RadixAdminLayout` 等 / `createRadixLayoutRegistry`） |
 | `pactor-ui-radix/styles.css` | 三层合并样式表（单文件） |
 
-## 整站切换（推荐路径）
+## 默认 UI kit
 
-`createPactorApplication` 的 `ui` 选项接受 UI kit 预设对象。传入 `radixUiKit` 并导入合并样式表，即完成整站 antd-free 切换：
+**Radix 是 pactor-app 的内置默认**：不传任何 UI 选项时，组件、外壳布局、弹层与消息链路全部使用本包实现。
+
+:::caution[样式表必须导入]
+Radix 套件无内建样式（Primitives 无样式原语），无论是否显式传 `ui`，**都必须导入合并样式表**，否则界面无样式：
+
+```ts
+import 'pactor-ui-radix/styles.css';
+```
+:::
 
 ```ts
 import { createPactorApplication } from 'pactor-app';
-import { radixUiKit } from 'pactor-ui-radix';
 import 'pactor-ui-radix/styles.css';
 
 createPactorApplication({
   appId: 'risk-admin',
   api: { baseURL: '/api/runtime' },
-  ui: radixUiKit,
 }).mount('#root');
 ```
 
-`radixUiKit` 一次提供三个槽位：
+## 预设对象 radixUiKit
+
+`radixUiKit` 一次提供三个槽位（显式表达或局部覆盖场景使用）：
 
 | 槽位 | 值 | 来源层 |
 | --- | --- | --- |
@@ -53,13 +61,18 @@ createPactorApplication({
 | `layoutRegistry` | `createRadixLayoutRegistry` | layout |
 | `interactionKit` | `{ Provider: RadixInteractionProvider, OverlayHost: RadixOverlayHost }` | interaction |
 
-不传 `ui` 时行为与现状完全一致（内置 antd 实现）。
+```ts
+createPactorApplication({
+  appId: 'risk-admin',
+  ui: radixUiKit, // 与不传 ui 的默认行为一致
+});
+```
 
-antd 侧有对称的 [pactor-ui-antd](/packages/ui-antd/)（`antdUiKit` 预设）——不传 `ui` 与 `ui: antdUiKit` 行为一致，用于显式表达或局部覆盖场景。
+antd 侧有对称的 [pactor-ui-antd](/packages/ui-antd/)（`antdUiKit` 预设）——传入 `ui: antdUiKit` 即整站切换为 antd 实现。
 
 ## 进阶：细粒度选项覆盖预设
 
-每个槽位独立合并，优先级为：**显式细粒度选项 > `ui` 预设 > 内置 antd 默认**。例如在预设基础上只覆盖布局层：
+每个槽位独立合并，优先级为：**显式细粒度选项 > `ui` 预设 > 内置 Radix 默认**。例如在预设基础上只覆盖布局层：
 
 ```ts
 createPactorApplication({

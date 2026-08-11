@@ -93,22 +93,22 @@ const radixKit = {
   },
 };
 
-describe('shell-ui-kit-selection：缺省仍为 antd', () => {
-  it('不传 layoutRegistry / interactionKit：外壳为 antd AdminLayout，overlay.open 渲染 antd Modal', async () => {
+describe('shell-ui-kit-selection：缺省为 Radix', () => {
+  it('不传 layoutRegistry / interactionKit：外壳为 Radix AdminLayout，overlay.open 渲染 Radix Modal', async () => {
     app = createShellApp();
     const target = await mountApp(app);
 
     await screen.findByRole('button', { name: '打开弹层' });
-    // 外壳为 antd 布局
-    expect(target.querySelector('.ant-layout')).not.toBeNull();
-    expect(target.querySelector('.ant-menu')).not.toBeNull();
-    expect(target.querySelector('.pcr-admin-layout')).toBeNull();
+    // 外壳为 Radix 布局
+    expect(target.querySelector('.pcr-admin-layout')).not.toBeNull();
+    expect(target.querySelector('.pcr-menu')).not.toBeNull();
+    expect(target.querySelector('.ant-layout')).toBeNull();
 
-    // 交互层为 antd：overlay.open 渲染 antd Modal
+    // 交互层为 Radix：overlay.open 渲染 Radix Modal
     fireEvent.click(screen.getByRole('button', { name: '打开弹层' }));
     await screen.findByText('用户详情');
-    expect(document.querySelector('.ant-modal')).not.toBeNull();
-    expect(document.querySelector('.pcr-modal-content')).toBeNull();
+    expect(document.querySelector('.pcr-modal-content')).not.toBeNull();
+    expect(document.querySelector('.ant-modal')).toBeNull();
   });
 });
 

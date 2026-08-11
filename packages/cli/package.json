@@ -1,0 +1,48 @@
+{
+  "name": "pactor-cli",
+  "version": "0.1.0",
+  "description": "Pactor CLI: local DSL toolchain (validate / inspect / lint / schema / build / create)",
+  "keywords": [
+    "pactor",
+    "dsl",
+    "server-driven-ui",
+    "cli",
+    "toolchain"
+  ],
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/426-330/pactor.git",
+    "directory": "packages/cli"
+  },
+  "homepage": "https://github.com/426-330/pactor/tree/main/packages/cli",
+  "bugs": "https://github.com/426-330/pactor/issues",
+  "type": "module",
+  "bin": {
+    "pactor": "./dist/cli.js"
+  },
+  "main": "./dist/cli.js",
+  "sideEffects": false,
+  "engines": {
+    "node": ">=18"
+  },
+  "files": [
+    "dist",
+    "templates"
+  ],
+  "scripts": {
+    "build": "tsup",
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit",
+    "prepublishOnly": "pnpm build"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "dependencies": {
+    "pactor-core": "workspace:*",
+    "pactor-expression": "workspace:*",
+    "pactor-schema": "workspace:*",
+    "yaml": "^2.9.0"
+  }
+}

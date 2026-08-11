@@ -1,21 +1,20 @@
 import type { PageDsl } from 'pactor-core';
 import { Registry } from 'pactor-core';
-import { createBuiltinComponentRegistry } from 'pactor-ui-antd/components';
 import {
   createUiBridge,
-  InteractionProvider,
-  OverlayHost,
   OverlayManager,
   registerInteractionActions,
   type InteractionProviderProps,
   type OverlayHostProps,
   type UiBridge,
 } from 'pactor-ui-antd/interaction';
+import { type AdminLayoutConfig, type LayoutRegistry } from 'pactor-ui-antd/layout';
+import { createRadixComponentRegistry } from 'pactor-ui-radix/components';
 import {
-  createLayoutRegistry,
-  type AdminLayoutConfig,
-  type LayoutRegistry,
-} from 'pactor-ui-antd/layout';
+  RadixInteractionProvider,
+  RadixOverlayHost,
+} from 'pactor-ui-radix/interaction';
+import { createRadixLayoutRegistry } from 'pactor-ui-radix/layout';
 import { createPermissionAdapter, PermissionStore } from 'pactor-permission';
 import {
   createFetchAdapter,
@@ -81,25 +80,29 @@ export interface PactorApplicationOptions {
   components?: Record<string, unknown>;
   /**
    * UI 库切换（设计决策 D4，ui-kit-selection spec）：组件注册表工厂，
-   * 缺省 createBuiltinComponentRegistry（antd）；传入
-   * pactor-ui-radix 的 createRadixComponentRegistry 即全站切换为
-   * Radix 实现。options.components 与运行期 registerComponent 叠加在所选
-   * 注册表之上。
+   * 缺省 createRadixComponentRegistry（Radix，pactor-ui-radix）；
+   * 传入 pactor-ui-antd 的 createBuiltinComponentRegistry 或
+   * `ui: antdUiKit` 即切换为 antd 实现。options.components 与运行期
+   * registerComponent 叠加在所选注册表之上。
+   * 注意：Radix 套件无内建样式，默认路径需导入
+   * `pactor-ui-radix/styles.css`。
    */
   componentRegistry?: () => Registry<unknown>;
   /**
    * UI 库切换（shell-ui-kit-selection spec）：布局注册表工厂，
-   * 缺省 createLayoutRegistry（antd）；传入 pactor-ui-radix 的
-   * createRadixLayoutRegistry 即外壳布局切换为 Radix 实现。
+   * 缺省 createRadixLayoutRegistry（Radix，pactor-ui-radix）；
+   * 传入 pactor-ui-antd 的 createLayoutRegistry 或 `ui: antdUiKit`
+   * 即外壳布局切换为 antd 实现。
    * bootstrap 的 layout.type 解析逻辑不变。
    */
   layoutRegistry?: () => LayoutRegistry;
   /**
    * UI 库切换（shell-ui-kit-selection spec）：交互层组件对，
-   * 缺省 antd 版 InteractionProvider / OverlayHost；传入
-   * pactor-ui-radix 的 RadixInteractionProvider /
-   * RadixOverlayHost 即 overlay / message / confirm 链路切换为
-   * Radix 实现。props 类型复用 pactor-ui-antd interaction 层的导出。
+   * 缺省 Radix 版 RadixInteractionProvider / RadixOverlayHost
+   * （pactor-ui-radix）；传入 antd 版 InteractionProvider /
+   * OverlayHost 或 `ui: antdUiKit` 即 overlay / message / confirm
+   * 链路切换为 antd 实现。props 类型复用 pactor-ui-antd
+   * interaction 层的导出。
    */
   interactionKit?: {
     Provider: ComponentType<InteractionProviderProps>;
@@ -107,8 +110,9 @@ export interface PactorApplicationOptions {
   };
   /**
    * UI kit 预设（ui-kit-preset spec）：一次性提供三个 UI 库切换槽位
-   * （如 pactor-ui-radix 的 radixUiKit）。每个槽位独立合并，优先级：
-   * 显式细粒度选项 > ui 预设 > 内置 antd 默认。不传 ui 行为与现状一致。
+   * （如 pactor-ui-radix 的 radixUiKit、pactor-ui-antd 的 antdUiKit）。
+   * 每个槽位独立合并，优先级：显式细粒度选项 > ui 预设 > 内置
+   * Radix 默认。
    */
   ui?: UiKit;
   /** 业务动作扩展（可覆盖同名内置/交互动作） */
@@ -182,7 +186,7 @@ export interface PactorApplicationHandle {
   readonly uiBridge: UiBridge;
   readonly permissionStore: PermissionStore;
   readonly layoutRegistry: LayoutRegistry;
-  /** 交互层 UI kit（Provider / OverlayHost 组件对，缺省 antd 版） */
+  /** 交互层 UI kit（Provider / OverlayHost 组件对，缺省 Radix 版） */
   readonly interactionKit: {
     Provider: ComponentType<InteractionProviderProps>;
     OverlayHost: ComponentType<OverlayHostProps>;
@@ -386,14 +390,14 @@ export function createPactorApplication(
   const overlayManager = new OverlayManager();
   const uiBridge = createUiBridge();
   const permissionStore = new PermissionStore();
-  // 外壳层 UI kit：每槽位独立合并（显式选项 > ui 预设 > antd 默认）
+  // 外壳层 UI kit：每槽位独立合并（显式选项 > ui 预设 > Radix 默认）
   const layoutRegistry =
     (options.layoutRegistry ?? options.ui?.layoutRegistry)?.() ??
-    createLayoutRegistry();
+    createRadixLayoutRegistry();
   const interactionKit = options.interactionKit ??
     options.ui?.interactionKit ?? {
-      Provider: InteractionProvider,
-      OverlayHost,
+      Provider: RadixInteractionProvider,
+      OverlayHost: RadixOverlayHost,
     };
   const navigation = new ReactRouterBinding();
 
@@ -411,7 +415,7 @@ export function createPactorApplication(
   // ---- 共享 registries：所选 UI kit 注册表 + 交互 + 业务扩展 ----
   const components =
     (options.componentRegistry ?? options.ui?.componentRegistry)?.() ??
-    createBuiltinComponentRegistry();
+    createRadixComponentRegistry();
   upsertAll(components, options.components);
 
   const actions: ActionRegistry = new Registry('ActionRegistry');
