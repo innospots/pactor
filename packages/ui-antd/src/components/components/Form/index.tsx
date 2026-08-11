@@ -7,6 +7,8 @@ import { FormContextProvider } from './context.js';
 export interface FormProps {
   /** antd 表单布局，默认 vertical */
   layout?: 'horizontal' | 'vertical' | 'inline';
+  /** 表单初始值（创建时生效；字段级 value 优先于 initialValues[name]） */
+  initialValues?: Record<string, unknown>;
   children?: ReactNode;
   /** 提交事件（校验通过后触发），参数为表单 values */
   onSubmit?: (values: Record<string, unknown>) => void;
@@ -26,6 +28,7 @@ export interface FormProps {
  */
 export function Form({
   layout = 'vertical',
+  initialValues,
   children,
   onSubmit,
   onValuesChange,
@@ -43,6 +46,7 @@ export function Form({
       <AntForm
         form={form}
         layout={layout}
+        initialValues={initialValues}
         onFinish={handleFinish}
         onValuesChange={(changed, values) => onValuesChange?.(changed, values)}
       >

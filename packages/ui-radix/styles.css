@@ -11,6 +11,20 @@
  */
 
 /* ============================================================
+ * 0. 基础 reset（面向完整应用外壳的最小重置）
+ * ============================================================ */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+}
+
+/* ============================================================
  * 1. 色板 token（light）—— Radix Colors 12 级刻度语义：
  *    1=背景 2=次背景 3-5=UI 背景态 6-8=边框 9-10=实体色 11-12=文本
  *    accent 刻度由主色 #3C47DD 展开。
@@ -523,6 +537,17 @@
   display: flex;
   flex-wrap: wrap;
   gap: 12px;
+}
+
+/* inline 布局下 label 与控件同行，需要项内间距 */
+.pcr-form-layout-inline .pcr-form-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.pcr-form-layout-inline .pcr-form-label {
+  margin-bottom: 0;
 }
 
 .pcr-form-item {

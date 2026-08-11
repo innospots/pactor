@@ -130,6 +130,87 @@ describe('提交事件与 form 作用域', () => {
   });
 });
 
+describe('Form 初始值', () => {
+  it('字段级初始值：Form 内 Input 的 value 作为初始显示值', () => {
+    renderDsl({
+      type: 'Form',
+      children: [
+        {
+          type: 'Input',
+          props: { name: 'name', label: '客户名称', value: '云栖科技' },
+        },
+      ],
+    });
+
+    expect(screen.getByLabelText('客户名称')).toHaveProperty(
+      'value',
+      '云栖科技',
+    );
+  });
+
+  it('initialValues 回填：字段初始显示 initialValues[name]', () => {
+    renderDsl({
+      type: 'Form',
+      props: { initialValues: { phone: '13800000001' } },
+      children: [
+        { type: 'Input', props: { name: 'phone', label: '联系电话' } },
+      ],
+    });
+
+    expect(screen.getByLabelText('联系电话')).toHaveProperty(
+      'value',
+      '13800000001',
+    );
+  });
+
+  it('字段级优先：字段 value 覆盖 initialValues[name]', () => {
+    renderDsl({
+      type: 'Form',
+      props: { initialValues: { name: 'A' } },
+      children: [
+        {
+          type: 'Input',
+          props: { name: 'name', label: '客户名称', value: 'B' },
+        },
+      ],
+    });
+
+    expect(screen.getByLabelText('客户名称')).toHaveProperty('value', 'B');
+  });
+
+  it('初始值参与提交与 required 校验：未触碰字段以初始值提交', async () => {
+    const { context } = renderDsl({
+      type: 'Form',
+      props: { initialValues: { phone: '13800000001' } },
+      children: [
+        {
+          type: 'Input',
+          props: {
+            name: 'phone',
+            label: '联系电话',
+            rules: [{ required: true, message: '必填' }],
+          },
+        },
+        { type: 'Input', props: { name: 'name', label: '客户名称' } },
+        { type: 'Button', props: { text: '提交', submit: true } },
+      ],
+    });
+
+    // 只修改客户名称；phone 未触碰但带初始值，required 校验应通过
+    fireEvent.change(screen.getByLabelText('客户名称'), {
+      target: { value: '云栖科技' },
+    });
+    fireEvent.click(screen.getByRole('button', { name: /提\s*交/ }));
+
+    await vi.waitFor(() => {
+      expect(context.state.get('form')).toEqual({
+        phone: '13800000001',
+        name: '云栖科技',
+      });
+    });
+  });
+});
+
 describe('Select 选项', () => {
   it('渲染 options 并在选择后经 onChange 传出 value', async () => {
     const { context } = renderDsl({

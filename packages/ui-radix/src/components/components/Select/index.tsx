@@ -29,9 +29,10 @@ export function Select({
   const form = useFormContext();
   const inForm = form?.inForm === true && typeof name === 'string' && name !== '';
 
+  // 注册字段校验规则，同时把 value prop 作为字段级初始值交给 Form 上下文合并
   useEffect(() => {
     if (inForm && form && name) {
-      form.registerField(name, rules);
+      form.registerField(name, rules, value);
       return () => form.unregisterField(name);
     }
     return undefined;
@@ -44,6 +45,11 @@ export function Select({
       : encodeValue(current as SelectOption['value']);
 
   const handleChange = (key: string) => {
+    // Radix Select 在值从 uncontrolled 切换为 controlled 等场景会
+    // 以空串回调"纠正"值——忽略空 key，防止清空已有值（如初始值回填）
+    if (key === '') {
+      return;
+    }
     const next = options.find((option) => encodeValue(option.value) === key);
     const nextValue = next?.value;
     if (inForm && form && name) {
@@ -52,16 +58,26 @@ export function Select({
     onChange?.(nextValue);
   };
 
+  // Radix Select 的 Select.Value 仅在 item 渲染过时才能解析出选中项文本；
+  // 未打开过下拉时（如表单初始值回填）会显示占位符。
+  // 因此显式计算选中项 label 作为 Value 的 children。
+  const selectedOption =
+    currentKey === undefined
+      ? undefined
+      : options.find((option) => encodeValue(option.value) === currentKey);
+
   const select = (
     <span className="pcr-select">
       <RadixSelect.Root
-        value={currentKey}
+        value={currentKey ?? ''}
         onValueChange={handleChange}
         disabled={disabled}
         name={inForm ? name : undefined}
       >
         <RadixSelect.Trigger className="pcr-select-trigger">
-          <RadixSelect.Value placeholder={placeholder} />
+          <RadixSelect.Value placeholder={placeholder}>
+            {selectedOption?.label}
+          </RadixSelect.Value>
           <RadixSelect.Icon className="pcr-select-icon" aria-hidden>
             ▾
           </RadixSelect.Icon>

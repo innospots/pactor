@@ -12,21 +12,29 @@ function isEmpty(value: unknown): boolean {
 /**
  * Form 容器（Radix kit，语义对齐 antd 版）：
  * 维护受控 values 并经 React Context 下发，Form 内声明了 `name` 的
- * Input / Select 自动成为表单项。提交（`submit: true` 的 Button）时：
+ * Input / Select 自动成为表单项。创建时以 `initialValues` 初始化 values，
+ * 字段挂载注册时合并字段级 `value` 初始值（字段级优先，仅首次注册写入）。
+ * 提交（`submit: true` 的 Button）时：
  * 1. 统一校验已注册字段的 rules（required + message），失败则展示错误并阻止提交
  * 2. 校验通过把 values 写入 runtime state 的 `form` 路径（`${form.<field>}` 可用）
  * 3. 以 values 调用 onSubmit（Renderer 把它放入 `event` 作用域）
  */
 export function Form({
   layout = 'vertical',
+  initialValues,
   children,
   onSubmit,
   onValuesChange,
 }: FormProps) {
   const { context } = useRenderer();
-  const [values, setValues] = useState<Record<string, unknown>>({});
+  const [values, setValues] = useState<Record<string, unknown>>(() => ({
+    ...initialValues,
+  }));
   const [errors, setErrors] = useState<Record<string, string>>({});
   const fieldRulesRef = useRef(new Map<string, FieldRule[] | undefined>());
+  // 已合并字段级初始值的字段集合：useEffect 无依赖导致每次渲染重注册，
+  // 以 ref 记录保证初始值只写入一次（不清除，否则每次渲染都会重写覆盖用户输入）
+  const mergedInitialFieldsRef = useRef(new Set<string>());
 
   const formContext = useMemo<FormContextValue>(
     () => ({
@@ -46,8 +54,16 @@ export function Form({
         });
         onValuesChange?.({ [name]: value }, next);
       },
-      registerField(name, rules) {
+      registerField(name, rules, initialValue) {
         fieldRulesRef.current.set(name, rules);
+        // 字段级初始值：仅首次注册时写入（字段级优先于 initialValues）
+        if (
+          initialValue !== undefined &&
+          !mergedInitialFieldsRef.current.has(name)
+        ) {
+          mergedInitialFieldsRef.current.add(name);
+          setValues((prev) => ({ ...prev, [name]: initialValue }));
+        }
       },
       unregisterField(name) {
         fieldRulesRef.current.delete(name);

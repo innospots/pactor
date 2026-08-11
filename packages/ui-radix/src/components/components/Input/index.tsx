@@ -21,10 +21,11 @@ export function Input({
   const form = useFormContext();
   const inForm = form?.inForm === true && typeof name === 'string' && name !== '';
 
-  // 注册/注销字段校验规则（rules 每次渲染刷新，卸载时注销）
+  // 注册/注销字段校验规则（rules 每次渲染刷新，卸载时注销）；
+  // 同时把 value prop 作为字段级初始值交给 Form 上下文合并（仅首次注册生效）
   useEffect(() => {
     if (inForm && form && name) {
-      form.registerField(name, rules);
+      form.registerField(name, rules, value);
       return () => form.unregisterField(name);
     }
     return undefined;

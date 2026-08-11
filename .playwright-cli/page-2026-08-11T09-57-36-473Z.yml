@@ -1,0 +1,124 @@
+- generic [ref=e3]:
+  - banner [ref=e4]:
+    - generic [ref=e5]: Pactor Admin 示例
+  - generic [ref=e6]:
+    - complementary [ref=e7]:
+      - generic [ref=e8]:
+        - button "工作台" [ref=e9] [cursor=pointer]
+        - heading "客户管理" [level=3] [ref=e11]:
+          - button "客户管理" [ref=e12] [cursor=pointer]
+    - generic [ref=e13]:
+      - tablist [ref=e14]:
+        - tab "客户列表" [selected] [ref=e15] [cursor=pointer]
+      - main [ref=e16]:
+        - navigation "面包屑" [ref=e17]:
+          - list [ref=e18]:
+            - listitem [ref=e19]:
+              - generic [ref=e20]: 客户管理
+            - listitem [ref=e21]:
+              - generic [ref=e22]: /
+              - generic [ref=e23]: 客户列表
+        - generic [ref=e24]:
+          - heading "客户列表" [level=2] [ref=e25]
+          - generic [ref=e26]:
+            - alert [ref=e27]:
+              - generic [ref=e28]: 客户列表演示查询、抽屉编辑与权限禁用
+              - generic [ref=e29]: 查询走 setState + reload 链路；行内"删除"因 permissions 不含 customer:delete 而禁用。
+            - generic [ref=e30]:
+              - heading "客户查询" [level=3] [ref=e31]
+              - generic [ref=e33]:
+                - generic [ref=e34]:
+                  - generic [ref=e35]: 关键词
+                  - textbox "关键词" [ref=e36]:
+                    - /placeholder: 客户名 / 负责人
+                - button "查询" [ref=e37] [cursor=pointer]
+            - generic [ref=e38]:
+              - heading "客户数据（service 数据源）" [level=3] [ref=e39]
+              - generic [ref=e41]:
+                - table [ref=e42]:
+                  - rowgroup [ref=e43]:
+                    - row "ID 客户名称 联系电话 等级 负责人 操作" [ref=e44]:
+                      - columnheader "ID" [ref=e45]
+                      - columnheader "客户名称" [ref=e46]
+                      - columnheader "联系电话" [ref=e47]
+                      - columnheader "等级" [ref=e48]
+                      - columnheader "负责人" [ref=e49]
+                      - columnheader "操作" [ref=e50]
+                  - rowgroup [ref=e51]:
+                    - row "1 云栖科技 13800000001 A 张三 编辑 删除" [ref=e57]:
+                      - cell "1" [ref=e58]
+                      - cell "云栖科技" [ref=e59]
+                      - cell "13800000001" [ref=e60]
+                      - cell "A" [ref=e61]
+                      - cell "张三" [ref=e62]
+                      - cell "编辑 删除" [ref=e63]:
+                        - generic [ref=e64]:
+                          - button "编辑" [active] [ref=e65] [cursor=pointer]
+                          - button "删除" [disabled] [ref=e66]
+                    - row "2 临平贸易 13800000002 B 李四 编辑 删除" [ref=e67]:
+                      - cell "2" [ref=e68]
+                      - cell "临平贸易" [ref=e69]
+                      - cell "13800000002" [ref=e70]
+                      - cell "B" [ref=e71]
+                      - cell "李四" [ref=e72]
+                      - cell "编辑 删除" [ref=e73]:
+                        - generic [ref=e74]:
+                          - button "编辑" [ref=e75] [cursor=pointer]
+                          - button "删除" [disabled] [ref=e76]
+                    - row "3 西湖文创 13800000003 A 张三 编辑 删除" [ref=e77]:
+                      - cell "3" [ref=e78]
+                      - cell "西湖文创" [ref=e79]
+                      - cell "13800000003" [ref=e80]
+                      - cell "A" [ref=e81]
+                      - cell "张三" [ref=e82]
+                      - cell "编辑 删除" [ref=e83]:
+                        - generic [ref=e84]:
+                          - button "编辑" [ref=e85] [cursor=pointer]
+                          - button "删除" [disabled] [ref=e86]
+                    - row "4 滨江软件园 13800000004 C 王五 编辑 删除" [ref=e87]:
+                      - cell "4" [ref=e88]
+                      - cell "滨江软件园" [ref=e89]
+                      - cell "13800000004" [ref=e90]
+                      - cell "C" [ref=e91]
+                      - cell "王五" [ref=e92]
+                      - cell "编辑 删除" [ref=e93]:
+                        - generic [ref=e94]:
+                          - button "编辑" [ref=e95] [cursor=pointer]
+                          - button "删除" [disabled] [ref=e96]
+                    - row "5 未来科技城 13800000005 B 李四 编辑 删除" [ref=e97]:
+                      - cell "5" [ref=e98]
+                      - cell "未来科技城" [ref=e99]
+                      - cell "13800000005" [ref=e100]
+                      - cell "B" [ref=e101]
+                      - cell "李四" [ref=e102]
+                      - cell "编辑 删除" [ref=e103]:
+                        - generic [ref=e104]:
+                          - button "编辑" [ref=e105] [cursor=pointer]
+                          - button "删除" [disabled] [ref=e106]
+                - generic [ref=e55]:
+                  - button "1" [ref=e56] [cursor=pointer]
+                  - button "2" [ref=e107] [cursor=pointer]
+        - dialog "编辑客户" [ref=e110]:
+          - generic [ref=e111]:
+            - generic [ref=e112]: 编辑客户
+            - button "关闭" [ref=e113] [cursor=pointer]: ×
+          - generic [ref=e115]:
+            - alert [ref=e116]:
+              - generic [ref=e117]: 正在编辑：云栖科技（ID 1）
+            - generic [ref=e118]:
+              - generic [ref=e119]: 客户名称
+              - textbox "客户名称" [ref=e120]:
+                - /placeholder: 请输入客户名称
+                - text: 云栖科技
+            - generic [ref=e121]:
+              - generic [ref=e122]: 联系电话
+              - textbox "联系电话" [ref=e123]:
+                - /placeholder: 请输入联系电话
+                - text: "13800000001"
+            - generic [ref=e124]:
+              - generic [ref=e125]: 等级
+              - generic [ref=e126]:
+                - combobox [ref=e127] [cursor=pointer]:
+                  - generic [ref=e128]: ▾
+                - combobox [ref=e129]
+            - button "保存" [ref=e130] [cursor=pointer]
