@@ -1,17 +1,21 @@
 import type { PageDsl } from 'pactor-core';
 import { Registry } from 'pactor-core';
-import { createBuiltinComponentRegistry } from 'pactor-components';
+import { createBuiltinComponentRegistry } from 'pactor-ui-antd/components';
 import {
   createUiBridge,
+  InteractionProvider,
+  OverlayHost,
   OverlayManager,
   registerInteractionActions,
+  type InteractionProviderProps,
+  type OverlayHostProps,
   type UiBridge,
-} from 'pactor-interaction';
+} from 'pactor-ui-antd/interaction';
 import {
   createLayoutRegistry,
   type AdminLayoutConfig,
   type LayoutRegistry,
-} from 'pactor-layout';
+} from 'pactor-ui-antd/layout';
 import { createPermissionAdapter, PermissionStore } from 'pactor-permission';
 import {
   createFetchAdapter,
@@ -40,7 +44,7 @@ import {
   type ServiceHandler,
   type ServiceRegistry,
 } from 'pactor-runtime';
-import { createElement, type ReactNode } from 'react';
+import { createElement, type ComponentType, type ReactNode } from 'react';
 import { createRoot, type Root } from 'react-dom/client';
 
 import { Application } from './app-shell.js';
@@ -75,6 +79,38 @@ export interface PactorApplicationOptions {
   router?: PactorRouterOptions;
   /** 业务组件扩展（写入应用级共享 registry，可覆盖同名内置组件） */
   components?: Record<string, unknown>;
+  /**
+   * UI 库切换（设计决策 D4，ui-kit-selection spec）：组件注册表工厂，
+   * 缺省 createBuiltinComponentRegistry（antd）；传入
+   * pactor-ui-radix 的 createRadixComponentRegistry 即全站切换为
+   * Radix 实现。options.components 与运行期 registerComponent 叠加在所选
+   * 注册表之上。
+   */
+  componentRegistry?: () => Registry<unknown>;
+  /**
+   * UI 库切换（shell-ui-kit-selection spec）：布局注册表工厂，
+   * 缺省 createLayoutRegistry（antd）；传入 pactor-ui-radix 的
+   * createRadixLayoutRegistry 即外壳布局切换为 Radix 实现。
+   * bootstrap 的 layout.type 解析逻辑不变。
+   */
+  layoutRegistry?: () => LayoutRegistry;
+  /**
+   * UI 库切换（shell-ui-kit-selection spec）：交互层组件对，
+   * 缺省 antd 版 InteractionProvider / OverlayHost；传入
+   * pactor-ui-radix 的 RadixInteractionProvider /
+   * RadixOverlayHost 即 overlay / message / confirm 链路切换为
+   * Radix 实现。props 类型复用 pactor-ui-antd interaction 层的导出。
+   */
+  interactionKit?: {
+    Provider: ComponentType<InteractionProviderProps>;
+    OverlayHost: ComponentType<OverlayHostProps>;
+  };
+  /**
+   * UI kit 预设（ui-kit-preset spec）：一次性提供三个 UI 库切换槽位
+   * （如 pactor-ui-radix 的 radixUiKit）。每个槽位独立合并，优先级：
+   * 显式细粒度选项 > ui 预设 > 内置 antd 默认。不传 ui 行为与现状一致。
+   */
+  ui?: UiKit;
   /** 业务动作扩展（可覆盖同名内置/交互动作） */
   actions?: Record<string, ActionHandler>;
   /** 业务服务扩展 */
@@ -83,6 +119,19 @@ export interface PactorApplicationOptions {
   capabilities?: Record<string, unknown>;
   /** 认证令牌：注入 DSL 资源请求与页面 HTTP 出口（Authorization: Bearer） */
   authTokenProvider?: AuthTokenProvider;
+}
+
+/**
+ * UI kit 预设对象（ui-kit-preset spec）：三个槽位的字段类型直接复用
+ * PactorApplicationOptions 既有选项的类型（结构一致，天然向第三方 kit 开放）。
+ */
+export interface UiKit {
+  /** 组件注册表工厂（同 options.componentRegistry） */
+  componentRegistry?: PactorApplicationOptions['componentRegistry'];
+  /** 布局注册表工厂（同 options.layoutRegistry） */
+  layoutRegistry?: PactorApplicationOptions['layoutRegistry'];
+  /** 交互层组件对（同 options.interactionKit） */
+  interactionKit?: PactorApplicationOptions['interactionKit'];
 }
 
 /**
@@ -133,6 +182,11 @@ export interface PactorApplicationHandle {
   readonly uiBridge: UiBridge;
   readonly permissionStore: PermissionStore;
   readonly layoutRegistry: LayoutRegistry;
+  /** 交互层 UI kit（Provider / OverlayHost 组件对，缺省 antd 版） */
+  readonly interactionKit: {
+    Provider: ComponentType<InteractionProviderProps>;
+    OverlayHost: ComponentType<OverlayHostProps>;
+  };
   readonly routerOptions: PactorRouterOptions;
   /** react-router 桥接绑定（RouterBridgeSync 挂载后委托到真实路由） */
   readonly navigation: ReactRouterBinding;
@@ -332,7 +386,15 @@ export function createPactorApplication(
   const overlayManager = new OverlayManager();
   const uiBridge = createUiBridge();
   const permissionStore = new PermissionStore();
-  const layoutRegistry = createLayoutRegistry();
+  // 外壳层 UI kit：每槽位独立合并（显式选项 > ui 预设 > antd 默认）
+  const layoutRegistry =
+    (options.layoutRegistry ?? options.ui?.layoutRegistry)?.() ??
+    createLayoutRegistry();
+  const interactionKit = options.interactionKit ??
+    options.ui?.interactionKit ?? {
+      Provider: InteractionProvider,
+      OverlayHost,
+    };
   const navigation = new ReactRouterBinding();
 
   // ---- loader 与 adapters ----
@@ -346,8 +408,10 @@ export function createPactorApplication(
   const permissionAdapter = createPermissionAdapter(permissionStore);
   const routerAdapter = createRouterAdapter(navigation);
 
-  // ---- 共享 registries：内置 + 交互 + 业务扩展 ----
-  const components = createBuiltinComponentRegistry();
+  // ---- 共享 registries：所选 UI kit 注册表 + 交互 + 业务扩展 ----
+  const components =
+    (options.componentRegistry ?? options.ui?.componentRegistry)?.() ??
+    createBuiltinComponentRegistry();
   upsertAll(components, options.components);
 
   const actions: ActionRegistry = new Registry('ActionRegistry');
@@ -381,6 +445,7 @@ export function createPactorApplication(
     uiBridge,
     permissionStore,
     layoutRegistry,
+    interactionKit,
     routerOptions,
     navigation,
 

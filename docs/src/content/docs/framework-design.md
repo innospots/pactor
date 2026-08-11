@@ -275,9 +275,8 @@ pactor-resource
 pactor-router
 pactor-permission
 
-pactor-layout
-pactor-interaction
-pactor-components
+pactor-ui-antd
+pactor-ui-radix
 pactor-theme
 
 pactor-markdown
@@ -373,36 +372,17 @@ pactor-app
 - Component Guard
 - Action Guard
 
-### `pactor-layout`
+### `pactor-ui-antd`
 
-负责：
+antd 技术栈的 UI kit 单元，内含三层实现并导出 `antdUiKit` 预设：
 
-- Application Shell
-- Login Layout
-- Admin Layout
-- Landing Layout
-- Chat Layout
-- Dashboard Layout
-- Workspace Layout
-- Blank / Embedded Layout
+- components 层：标准 UI DSL Components（V1 基础组件的 antd 适配层）
+- interaction 层：Modal / Drawer / FormModal / FormDrawer / Popover / Confirm / ContextMenu / Overlay Context / Overlay Promise
+- layout 层：Application Shell / Login Layout / Admin Layout / Landing Layout / Chat Layout / Dashboard Layout / Workspace Layout / Blank / Embedded Layout
 
-### `pactor-interaction`
+### `pactor-ui-radix`
 
-负责：
-
-- Modal
-- Drawer
-- FormModal
-- FormDrawer
-- Popover
-- Confirm
-- ContextMenu
-- Overlay Context
-- Overlay Promise
-
-### `pactor-components`
-
-负责标准 UI DSL Components。
+Radix 技术栈的 UI kit 单元，与 `pactor-ui-antd` 契约一致的三层 Radix 实现（不依赖 antd），导出 `radixUiKit` 预设与合并样式表；契约类型与交互核心（OverlayManager / 交互动作 / UiBridge）复用 `pactor-ui-antd`。
 
 ### `pactor-chat`
 
@@ -444,9 +424,8 @@ pactor/
 │   ├── resource/
 │   ├── router/
 │   ├── permission/
-│   ├── layout/
-│   ├── interaction/
-│   ├── components/
+│   ├── ui-antd/
+│   ├── ui-radix/
 │   ├── markdown/
 │   ├── chat/
 │   ├── theme/
@@ -4181,9 +4160,8 @@ pactor-runtime
 ├── pactor-resource
 ├── pactor-router
 ├── pactor-permission
-├── pactor-layout
-├── pactor-interaction
-├── pactor-components
+├── pactor-ui-antd
+├── pactor-ui-radix
 ├── pactor-markdown
 └── pactor-chat
       ↑

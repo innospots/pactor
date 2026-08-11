@@ -1,6 +1,6 @@
 # Spec: form-container
 
-Form 容器协同：Form 内的字段自动成为表单项、提交事件、form 作用域（`pactor-components`）。
+Form 容器协同：Form 内的字段自动成为表单项、提交事件、form 作用域（`pactor-ui-antd` components 层）。
 
 ### Requirement: 字段自动包装
 

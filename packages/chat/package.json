@@ -70,8 +70,7 @@
     "@types/react-dom": "^19.2.4",
     "antd": "^6.6.0",
     "jsdom": "^30.0.1",
-    "pactor-components": "workspace:*",
-    "pactor-layout": "workspace:*",
+    "pactor-ui-antd": "workspace:*",
     "react": "^19.2.8",
     "react-dom": "^19.2.8"
   }

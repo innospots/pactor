@@ -1,5 +1,4 @@
 import { Button, Result, Spin } from 'antd';
-import { OverlayHost } from 'pactor-interaction';
 import type { RouteContext } from 'pactor-router';
 import { PageRuntimeView, type PageRuntime } from 'pactor-runtime';
 import { useEffect, useState } from 'react';
@@ -27,9 +26,10 @@ type PageState =
  *   key 变化即整体重建：旧运行时 destroy，新页面重新加载（V1 无 keepAlive）；
  * - 加载中渲染 loading 态；加载/校验失败渲染含重试的受控错误页；
  * - PageRuntimeView 经 PageErrorBoundary 包裹，渲染异常不白屏；
- * - OverlayHost 作为 PageRuntimeView children（共享当前页面 Renderer
- *   上下文；page overlay 经 resolvePage 接 loader，子运行时共享应用级
- *   registries——由 pactor-interaction host 内部实现）。
+ * - OverlayHost（app.interactionKit 所选实现，缺省 antd 版）作为
+ *   PageRuntimeView children（共享当前页面 Renderer 上下文；page overlay
+ *   经 resolvePage 接 loader，子运行时共享应用级 registries——由
+ *   interaction host 内部实现）。
  */
 export function DslPageLoader({ app, pageId, route }: DslPageLoaderProps) {
   const [state, setState] = useState<PageState>({ status: 'loading' });
@@ -99,10 +99,14 @@ export function DslPageLoader({ app, pageId, route }: DslPageLoaderProps) {
       />
     );
   }
+  const OverlayHostView = app.interactionKit.OverlayHost;
   return (
     <PageErrorBoundary>
       <PageRuntimeView runtime={state.runtime}>
-        <OverlayHost manager={app.overlayManager} resolvePage={app.resolvePage} />
+        <OverlayHostView
+          manager={app.overlayManager}
+          resolvePage={app.resolvePage}
+        />
       </PageRuntimeView>
     </PageErrorBoundary>
   );

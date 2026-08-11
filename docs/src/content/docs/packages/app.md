@@ -76,7 +76,7 @@ mount 后依次：加载 bootstrap（全屏 loading）→ `PermissionStore` 写�
 
 应用级共享 registries 被所有页面 PageRuntime 共享：
 
-- **components**：pactor-components 全部内置组件 + `options.components` + 运行期注册；
+- **components**：pactor-ui-antd 全部内置组件 + `options.components` + 运行期注册；
 - **actions**：runtime 内置动作（setState / request / if 等，页面运行时创建时注册）+ 交互动作（`overlay.open` / `overlay.close` / `confirm` / `message`，应用级 OverlayManager / UiBridge 单例）+ `navigate` 动作（经 react-router 导航）+ `options.actions`；
 - **services / capabilities**：`options` 扩展 + 运行期注册。
 
@@ -123,5 +123,5 @@ app.mount('#root');
 注册写入应用级共享 registry（同名覆盖）：新创建/重建的页面即可用，当前已创建页面下次重建后生效。
 
 :::note
-V1 边界（Non-Goals）：登录流程/auth.login 动作、Theme、i18n、telemetry/audit、灰度多租户、页面 keepAlive。布局类型未命中时回退 BlankLayout 并告警（pactor-layout 行为）。
+V1 边界（Non-Goals）：登录流程/auth.login 动作、Theme、i18n、telemetry/audit、灰度多租户、页面 keepAlive。布局类型未命中时回退 BlankLayout 并告警（pactor-ui-antd layout 层行为）。
 :::

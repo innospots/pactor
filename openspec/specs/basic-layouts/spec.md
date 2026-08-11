@@ -1,6 +1,6 @@
 # Spec: basic-layouts
 
-Blank / Login / Landing 布局与 LayoutRegistry（`pactor-layout`）。
+Blank / Login / Landing 布局与 LayoutRegistry（`pactor-ui-antd` layout 层）。
 
 ### Requirement: BlankLayout
 

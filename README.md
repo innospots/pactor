@@ -16,17 +16,16 @@ packages/
   schema/      pactor-schema      JSON Schema + Ajv 校验器
   expression/  pactor-expression  受控表达式引擎（无 eval）
   runtime/     pactor-runtime     Runtime 引擎 + React Renderer
-  components/  pactor-components  V1 基础组件（antd 适配层）
   permission/  pactor-permission  权限 Store + 四层守卫
   resource/    pactor-resource    DSL 资源加载 + 缓存 + 版本控制
   router/      pactor-router      菜单注册 + 动态路由 + 导航桥接
-  interaction/ pactor-interaction Overlay Runtime + 交互动作
-  layout/      pactor-layout      Application Shell 布局
+  ui-antd/     pactor-ui-antd     antd UI kit（components + interaction + layout + antdUiKit）
+  ui-radix/    pactor-ui-radix    Radix UI kit（与 antd 版契约一致 + radixUiKit + 样式表）
   app/         pactor-app         一站式集成（createPactorApplication）
 docs/          pactor-docs        Astro Starlight 文档站
 ```
 
-依赖方向严格单向：`core ← schema ← expression ← runtime ← {components, permission, resource, router, interaction, layout} ← app`。
+依赖方向严格单向：`core ← schema ← expression ← runtime ← {permission, resource, router, ui-antd} ← ui-radix ← app`。
 
 ## 常用命令
 
@@ -35,9 +34,13 @@ pnpm install        # 安装依赖
 pnpm build          # 构建全部包（ESM + CJS + d.ts）与文档站
 pnpm test           # 运行全部测试（含根级跨包冒烟测试）
 pnpm typecheck      # 全部包 TypeScript 检查
-pnpm docs:dev       # 启动文档站（Astro Starlight）
+pnpm docs:dev       # 启动文档站（Astro Starlight，端口 4334）
 pnpm docs:build     # 构建文档站
 ```
+
+> 注意：Astro 内容集合不会热收录**新增**的文档文件（修改已有文件会热更新）。
+> 新增 `docs/src/content/docs/**` 页面后需重启 `pnpm docs:dev`，
+> 否则侧边栏会报 `The slug "..." does not exist`。
 
 ## 环境要求
 

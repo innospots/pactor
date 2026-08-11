@@ -2,8 +2,8 @@
 import './setup.js';
 
 import { Registry } from 'pactor-core';
-import { createBuiltinComponentRegistry } from 'pactor-components';
-import { createLayoutRegistry, resolveLayout } from 'pactor-layout';
+import { createBuiltinComponentRegistry } from 'pactor-ui-antd/components';
+import { createLayoutRegistry, resolveLayout } from 'pactor-ui-antd/layout';
 import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 

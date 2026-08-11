@@ -1,6 +1,6 @@
 # Spec: admin-layout
 
-AdminLayout：标准管理后台外壳（`pactor-layout`，设计文档第 24 节）。
+AdminLayout：标准管理后台外壳（`pactor-ui-antd` layout 层，设计文档第 24 节）。
 
 ### Requirement: 布局结构与开关
 
