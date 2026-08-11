@@ -1,0 +1,83 @@
+{
+  "name": "pactor-app",
+  "version": "0.1.0",
+  "description": "Pactor application: one-stop composition layer (createPactorApplication) wiring loader, bootstrap, registries, router, layout, interaction and page runtimes",
+  "keywords": [
+    "pactor",
+    "dsl",
+    "server-driven-ui",
+    "application",
+    "bootstrap",
+    "react",
+    "antd"
+  ],
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/426-330/pactor.git",
+    "directory": "packages/app"
+  },
+  "homepage": "https://github.com/426-330/pactor/tree/main/packages/app",
+  "bugs": "https://github.com/426-330/pactor/issues",
+  "type": "module",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.js"
+      },
+      "require": {
+        "types": "./dist/index.d.cts",
+        "default": "./dist/index.cjs"
+      }
+    }
+  },
+  "sideEffects": false,
+  "engines": {
+    "node": ">=18"
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsup",
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit",
+    "prepublishOnly": "pnpm build"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "dependencies": {
+    "pactor-components": "workspace:*",
+    "pactor-core": "workspace:*",
+    "pactor-expression": "workspace:*",
+    "pactor-interaction": "workspace:*",
+    "pactor-layout": "workspace:*",
+    "pactor-permission": "workspace:*",
+    "pactor-resource": "workspace:*",
+    "pactor-router": "workspace:*",
+    "pactor-runtime": "workspace:*",
+    "pactor-schema": "workspace:*"
+  },
+  "peerDependencies": {
+    "antd": ">=5",
+    "react": ">=18",
+    "react-dom": ">=18",
+    "react-router-dom": ">=6"
+  },
+  "devDependencies": {
+    "@testing-library/dom": "^10.4.1",
+    "@testing-library/react": "^16.3.2",
+    "@types/react": "^19.2.18",
+    "@types/react-dom": "^19.2.4",
+    "antd": "^6.6.0",
+    "jsdom": "^30.0.1",
+    "react": "^19.2.8",
+    "react-dom": "^19.2.8",
+    "react-router-dom": "^7.18.2"
+  }
+}

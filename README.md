@@ -12,13 +12,21 @@ Dynamic Application Runtime — 基于 YAML/JSON DSL 的企业级 Server-Driven 
 
 ```text
 packages/
-  core/        pactor-core       DSL 核心协议类型 + 通用 Registry（零依赖）
-  schema/      pactor-schema     JSON Schema + Ajv 校验器
-  expression/  pactor-expression 受控表达式引擎（无 eval）
-docs/          pactor-docs       Astro Starlight 文档站
+  core/        pactor-core        DSL 核心协议类型 + 通用 Registry（零依赖）
+  schema/      pactor-schema      JSON Schema + Ajv 校验器
+  expression/  pactor-expression  受控表达式引擎（无 eval）
+  runtime/     pactor-runtime     Runtime 引擎 + React Renderer
+  components/  pactor-components  V1 基础组件（antd 适配层）
+  permission/  pactor-permission  权限 Store + 四层守卫
+  resource/    pactor-resource    DSL 资源加载 + 缓存 + 版本控制
+  router/      pactor-router      菜单注册 + 动态路由 + 导航桥接
+  interaction/ pactor-interaction Overlay Runtime + 交互动作
+  layout/      pactor-layout      Application Shell 布局
+  app/         pactor-app         一站式集成（createPactorApplication）
+docs/          pactor-docs        Astro Starlight 文档站
 ```
 
-依赖方向严格单向：`pactor-core` ← `pactor-schema` ← `pactor-expression`。
+依赖方向严格单向：`core ← schema ← expression ← runtime ← {components, permission, resource, router, interaction, layout} ← app`。
 
 ## 常用命令
 

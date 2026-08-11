@@ -1,0 +1,72 @@
+{
+  "name": "pactor-layout",
+  "version": "0.1.0",
+  "description": "Pactor layouts: application shells (Admin / Blank / Login / Landing) built on MenuRegistry + NavigationBridge, with LayoutRegistry",
+  "keywords": [
+    "pactor",
+    "dsl",
+    "server-driven-ui",
+    "layout",
+    "antd",
+    "react"
+  ],
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/426-330/pactor.git",
+    "directory": "packages/layout"
+  },
+  "homepage": "https://github.com/426-330/pactor/tree/main/packages/layout",
+  "bugs": "https://github.com/426-330/pactor/issues",
+  "type": "module",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.js"
+      },
+      "require": {
+        "types": "./dist/index.d.cts",
+        "default": "./dist/index.cjs"
+      }
+    }
+  },
+  "sideEffects": false,
+  "engines": {
+    "node": ">=18"
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsup",
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit",
+    "prepublishOnly": "pnpm build"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "dependencies": {
+    "pactor-core": "workspace:*",
+    "pactor-permission": "workspace:*",
+    "pactor-router": "workspace:*"
+  },
+  "peerDependencies": {
+    "antd": ">=5",
+    "react": ">=18"
+  },
+  "devDependencies": {
+    "@testing-library/dom": "^10.4.1",
+    "@testing-library/react": "^16.3.2",
+    "@types/react": "^19.2.18",
+    "@types/react-dom": "^19.2.4",
+    "antd": "^6.6.0",
+    "jsdom": "^30.0.1",
+    "react": "^19.2.8",
+    "react-dom": "^19.2.8"
+  }
+}

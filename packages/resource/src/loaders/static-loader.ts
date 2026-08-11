@@ -2,6 +2,7 @@ import type { FragmentDsl, PageDsl } from 'pactor-core';
 
 import { ResourceError } from '../errors.js';
 import {
+  parseBootstrapResource,
   parseEnvelope,
   type BootstrapResource,
   type DslResourceLoader,
@@ -13,6 +14,8 @@ import {
 export interface StaticDslLoaderData {
   pages?: Record<string, PageDsl | PageResource>;
   fragments?: Record<string, FragmentDsl | FragmentResource>;
+  /** bootstrap 资源（应用启动编排用；缺省时 loadBootstrap 拒绝） */
+  bootstrap?: BootstrapResource | Record<string, unknown>;
 }
 
 /**
@@ -22,10 +25,12 @@ export interface StaticDslLoaderData {
 export class StaticDslLoader implements DslResourceLoader {
   private readonly pages: Record<string, PageDsl | PageResource>;
   private readonly fragments: Record<string, FragmentDsl | FragmentResource>;
+  private readonly bootstrap?: BootstrapResource | Record<string, unknown>;
 
   constructor(data: StaticDslLoaderData = {}) {
     this.pages = data.pages ?? {};
     this.fragments = data.fragments ?? {};
+    this.bootstrap = data.bootstrap;
   }
 
   loadPage(pageId: string): Promise<PageResource> {
@@ -51,8 +56,11 @@ export class StaticDslLoader implements DslResourceLoader {
   }
 
   loadBootstrap(): Promise<BootstrapResource> {
-    return Promise.reject(
-      new ResourceError('StaticDslLoader 不提供 bootstrap 资源'),
-    );
+    if (this.bootstrap === undefined) {
+      return Promise.reject(
+        new ResourceError('StaticDslLoader 不提供 bootstrap 资源'),
+      );
+    }
+    return Promise.resolve(parseBootstrapResource(this.bootstrap));
   }
 }
