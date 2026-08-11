@@ -1,6 +1,6 @@
 # Spec: builtin-components
 
-V1 基础组件目录与 antd 适配约定（`pactor-components`）。DSL 只暴露框架级 props，不直接暴露 antd 原生 API。
+V1 基础组件目录与 antd 适配约定（`pactor-ui-antd` components 层）。DSL 只暴露框架级 props，不直接暴露 antd 原生 API。
 
 ### Requirement: 组件注册入口
 

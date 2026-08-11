@@ -1,6 +1,6 @@
 # Spec: table-component
 
-Table 组件：列定义、数据绑定、`cell` 行模板与 row/rowIndex 子作用域（`pactor-components`）。
+Table 组件：列定义、数据绑定、`cell` 行模板与 row/rowIndex 子作用域（`pactor-ui-antd` components 层）。
 
 ### Requirement: 列定义与数据绑定
 

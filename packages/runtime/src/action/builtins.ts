@@ -10,7 +10,7 @@ import type {
  * 内置 UI 无关标准动作（设计文档第 17 节，决策 D4）。
  *
  * `navigate` / `message` / `confirm` / `overlay.*` 依赖上层模块，
- * 不在此处实现，由 pactor-router / pactor-interaction 注册。
+ * 不在此处实现，由 pactor-router / pactor-ui-antd 的 interaction 层注册。
  * 已注册的同名动作不会被覆盖。
  */
 export function registerBuiltinActions(registry: ActionRegistry): void {

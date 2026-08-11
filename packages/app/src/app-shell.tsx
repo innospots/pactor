@@ -1,6 +1,5 @@
 import { Button, Result, Spin } from 'antd';
-import { InteractionProvider } from 'pactor-interaction';
-import { resolveLayout } from 'pactor-layout';
+import { resolveLayout } from 'pactor-ui-antd/layout';
 import { resolveRoute } from 'pactor-router';
 import { DynamicDslRoute, useReactRouterBridge } from 'pactor-router/react';
 import { useEffect, useState, type ReactNode } from 'react';
@@ -33,8 +32,9 @@ type BootstrapState =
  * Application（设计决策 D3）：bootstrap 状态机 + React 组合。
  *
  * mount 后依次：加载 bootstrap（loading 态）→ 失败渲染含重试的启动错误页 →
- * 成功渲染组合：Router → RouterBridgeSync → InteractionProvider →
- * 布局（resolveLayout）→ Routes path="*" → DynamicDslRoute（404/403）。
+ * 成功渲染组合：Router → RouterBridgeSync → interactionKit.Provider
+ * （缺省 antd InteractionProvider）→ 布局（resolveLayout）→
+ * Routes path="*" → DynamicDslRoute（404/403）。
  */
 export function Application({ app }: ApplicationProps) {
   const [state, setState] = useState<BootstrapState>({ status: 'loading' });
@@ -95,7 +95,7 @@ export function Application({ app }: ApplicationProps) {
   return <AppShell app={app} session={state.session} />;
 }
 
-/** bootstrap 就绪后的组合：Router → 桥接同步 → InteractionProvider → 布局 → 动态路由 */
+/** bootstrap 就绪后的组合：Router → 桥接同步 → interactionKit.Provider → 布局 → 动态路由 */
 function AppShell({
   app,
   session,
@@ -104,12 +104,13 @@ function AppShell({
   session: PactorAppSession;
 }) {
   const Router = app.routerOptions.type === 'hash' ? HashRouter : BrowserRouter;
+  const InteractionKit = app.interactionKit.Provider;
   return (
     <Router basename={app.routerOptions.basename}>
       <RouterBridgeSync binding={app.navigation} />
-      <InteractionProvider bridge={app.uiBridge}>
+      <InteractionKit bridge={app.uiBridge}>
         <ShellLayout app={app} session={session} />
-      </InteractionProvider>
+      </InteractionKit>
     </Router>
   );
 }

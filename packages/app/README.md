@@ -43,7 +43,7 @@ createPactorApplication({
 
 mount 后依次：加载 bootstrap（全屏 loading）→ `PermissionStore` 写入 `permissions`（缺省 `[]`）→ `MenuRegistry(menus)`（缺省 `[]`）→ 解析布局 → 组装共享 registries 与 adapters。bootstrap 失败渲染含**重试**按钮的启动错误页，不白屏。
 
-应用级共享 registries 被所有页面 PageRuntime 共享：内置组件（pactor-components）+ 交互动作（overlay.open / overlay.close / confirm / message，应用级 OverlayManager / UiBridge 单例）+ navigate 动作 + options 扩展。页面运行时创建时注入 permission / router / http adapters 与 route context（`route.params` / `route.query`）、`user`（bootstrap.user）、`app`（bootstrap.app）。
+应用级共享 registries 被所有页面 PageRuntime 共享：内置组件（pactor-ui-antd components 层）+ 交互动作（overlay.open / overlay.close / confirm / message，应用级 OverlayManager / UiBridge 单例）+ navigate 动作 + options 扩展。页面运行时创建时注入 permission / router / http adapters 与 route context（`route.params` / `route.query`）、`user`（bootstrap.user）、`app`（bootstrap.app）。
 
 ## 扩展注册 API
 

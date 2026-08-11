@@ -52,16 +52,14 @@
     "access": "public"
   },
   "dependencies": {
-    "pactor-components": "workspace:*",
     "pactor-core": "workspace:*",
     "pactor-expression": "workspace:*",
-    "pactor-interaction": "workspace:*",
-    "pactor-layout": "workspace:*",
     "pactor-permission": "workspace:*",
     "pactor-resource": "workspace:*",
     "pactor-router": "workspace:*",
     "pactor-runtime": "workspace:*",
-    "pactor-schema": "workspace:*"
+    "pactor-schema": "workspace:*",
+    "pactor-ui-antd": "workspace:*"
   },
   "peerDependencies": {
     "antd": ">=5",
@@ -76,6 +74,7 @@
     "@types/react-dom": "^19.2.4",
     "antd": "^6.6.0",
     "jsdom": "^30.0.1",
+    "pactor-ui-radix": "workspace:*",
     "react": "^19.2.8",
     "react-dom": "^19.2.8",
     "react-router-dom": "^7.18.2"

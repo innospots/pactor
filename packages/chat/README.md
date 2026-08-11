@@ -15,7 +15,7 @@ pnpm add pactor-chat pactor-runtime pactor-markdown antd react
 ## 示例
 
 ```tsx
-import { createBuiltinComponentRegistry } from 'pactor-components';
+import { createBuiltinComponentRegistry } from 'pactor-ui-antd/components';
 import {
   ChatView,
   ConversationStore,
