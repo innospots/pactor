@@ -7,6 +7,8 @@ import 'antd/dist/reset.css';
 import { readSession } from './auth';
 import { createBootstrap } from './bootstrap';
 import { demoServices } from './services';
+import { SkinProvider } from './SkinProvider';
+import { SkinSettings } from './SkinSettings';
 import customerEditPage from './pages/customer-edit.page.yaml';
 import customerListPage from './pages/customer-list.page.yaml';
 import dashboardPage from './pages/dashboard.page.yaml';
@@ -38,6 +40,11 @@ createPactorApplication({
   loader,
   ui: antdUiKit,
   services: demoServices,
+  // 皮肤设置：SkinProvider 将 antd ConfigProvider 注入应用树（Router 内、
+  // InteractionKit 外，message/modal/drawer 均消费主题）；SkinSettings
+  // 为 admin 头部右侧的皮肤入口
+  providers: SkinProvider,
+  headerExtra: <SkinSettings />,
   actions: {
     // 整页重载：登录/登出后需要重新加载 bootstrap（布局与菜单随会话变化），
     // react-router 的 navigate 不会触发 bootstrap 重取，故示例扩展此动作

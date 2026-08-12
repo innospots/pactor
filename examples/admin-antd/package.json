@@ -10,6 +10,7 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
+    "@ant-design/icons": "^6.3.2",
     "antd": "^6.6.0",
     "pactor-app": "workspace:*",
     "pactor-core": "workspace:*",

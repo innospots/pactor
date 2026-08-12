@@ -121,6 +121,14 @@ export interface PactorApplicationOptions {
   services?: Record<string, ServiceHandler>;
   /** 业务能力扩展 */
   capabilities?: Record<string, unknown>;
+  /**
+   * 应用级包装组件（Router 之内、InteractionKit 之外）：业务
+   * ConfigProvider / 全局 Context 由此进入应用树（message / modal /
+   * overlay 均消费其上下文）。皮肤主题等运行时切换场景经此注入。
+   */
+  providers?: ComponentType<{ children?: ReactNode }>;
+  /** admin 布局头部右侧插槽（透传 AdminLayout headerExtra） */
+  headerExtra?: ReactNode;
   /** 认证令牌：注入 DSL 资源请求与页面 HTTP 出口（Authorization: Bearer） */
   authTokenProvider?: AuthTokenProvider;
 }
@@ -192,6 +200,10 @@ export interface PactorApplicationHandle {
     OverlayHost: ComponentType<OverlayHostProps>;
   };
   readonly routerOptions: PactorRouterOptions;
+  /** 应用级包装组件（Router 之内、InteractionKit 之外；缺省不包装） */
+  readonly providers?: ComponentType<{ children?: ReactNode }>;
+  /** admin 布局头部右侧插槽（透传 AdminLayout headerExtra） */
+  readonly headerExtra?: ReactNode;
   /** react-router 桥接绑定（RouterBridgeSync 挂载后委托到真实路由） */
   readonly navigation: ReactRouterBinding;
   /** 启动编排：加载 bootstrap 并组装会话（失败 reject，由组合层渲染重试页） */
@@ -480,6 +492,8 @@ export function createPactorApplication(
     layoutRegistry,
     interactionKit,
     routerOptions,
+    providers: options.providers,
+    headerExtra: options.headerExtra,
     navigation,
 
     async loadSession(): Promise<PactorAppSession> {

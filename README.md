@@ -43,6 +43,18 @@ pnpm docs:dev       # 启动文档站（Astro Starlight，端口 4334）
 pnpm docs:build     # 构建文档站
 ```
 
+## 启动示例
+
+```bash
+pnpm --filter example-vite-starter dev   # 最小上手示例（vite-plugin 工作流），http://localhost:5499
+pnpm --filter example-admin dev          # 管理后台示例（Radix kit），http://localhost:5199
+pnpm --filter example-admin-antd dev     # 管理后台示例（antd kit，含皮肤设置），http://localhost:5299
+pnpm --filter example-chat dev           # pactor-chat 对话示例，http://localhost:5399
+```
+
+> 示例引用 workspace 包的 dist 产物：改包代码后需先 `pnpm build`，示例才能看到效果。
+> admin 示例演示账号：`admin` / `pactor123`。
+
 > 注意：Astro 内容集合不会热收录**新增**的文档文件（修改已有文件会热更新）。
 > 新增 `docs/src/content/docs/**` 页面后需重启 `pnpm docs:dev`，
 > 否则侧边栏会报 `The slug "..." does not exist`。

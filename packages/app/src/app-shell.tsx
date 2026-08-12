@@ -32,8 +32,8 @@ type BootstrapState =
  * Application（设计决策 D3）：bootstrap 状态机 + React 组合。
  *
  * mount 后依次：加载 bootstrap（loading 态）→ 失败渲染含重试的启动错误页 →
- * 成功渲染组合：Router → RouterBridgeSync → interactionKit.Provider
- * （缺省 antd InteractionProvider）→ 布局（resolveLayout）→
+ * 成功渲染组合：Router → RouterBridgeSync → providers（可选应用级包装）→
+ * interactionKit.Provider → 布局（resolveLayout）→
  * Routes path="*" → DynamicDslRoute（404/403）。
  */
 export function Application({ app }: ApplicationProps) {
@@ -95,7 +95,7 @@ export function Application({ app }: ApplicationProps) {
   return <AppShell app={app} session={state.session} />;
 }
 
-/** bootstrap 就绪后的组合：Router → 桥接同步 → interactionKit.Provider → 布局 → 动态路由 */
+/** bootstrap 就绪后的组合：Router → 桥接同步 → providers（可选）→ interactionKit.Provider → 布局 → 动态路由 */
 function AppShell({
   app,
   session,
@@ -105,12 +105,16 @@ function AppShell({
 }) {
   const Router = app.routerOptions.type === 'hash' ? HashRouter : BrowserRouter;
   const InteractionKit = app.interactionKit.Provider;
+  const Providers = app.providers;
+  const shell = (
+    <InteractionKit bridge={app.uiBridge}>
+      <ShellLayout app={app} session={session} />
+    </InteractionKit>
+  );
   return (
     <Router basename={app.routerOptions.basename}>
       <RouterBridgeSync binding={app.navigation} />
-      <InteractionKit bridge={app.uiBridge}>
-        <ShellLayout app={app} session={session} />
-      </InteractionKit>
+      {Providers !== undefined ? <Providers>{shell}</Providers> : shell}
     </Router>
   );
 }
@@ -188,6 +192,7 @@ function ShellLayout({
         bridge={app.navigation}
         route={route ?? undefined}
         permissionChecker={app.permissionStore}
+        headerExtra={app.headerExtra}
       >
         {outlet}
       </LayoutComponent>
