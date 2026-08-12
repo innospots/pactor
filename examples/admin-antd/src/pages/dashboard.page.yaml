@@ -1,0 +1,138 @@
+dsl: '1.0'
+page:
+  id: dashboard
+  title: 工作台
+
+dataSources:
+  stats:
+    type: static
+    autoLoad: true
+    value:
+      customerTotal: 8
+      activeToday: 5
+      pendingTickets: 3
+      conversionRate: 62.5
+
+body:
+  type: Page
+  props:
+    title: 工作台
+  children:
+    # 欢迎横幅：内容区第一个 Alert，由 src/theme.css 结构选择器样式化为品牌渐变
+    - type: Alert
+      props:
+        variant: info
+        message: 欢迎回来，${user.name}！
+        description: 当前应用：${app.name}（user / app 作用域表达式绑定）· 今日有 ${data.stats.pendingTickets} 条待办工单
+    # 指标行：4 张指标卡，src/theme.css 经 .pcr-card:has(.pcr-statistic) 加 accent 强调条
+    - type: Grid
+      props:
+        columns: 4
+        gap: 16
+      children:
+        - type: Card
+          children:
+            - type: Statistic
+              props:
+                title: 客户总数
+                value: ${data.stats.customerTotal}
+                suffix: 家
+        - type: Card
+          children:
+            - type: Statistic
+              props:
+                title: 今日活跃
+                value: ${data.stats.activeToday}
+                suffix: 家
+        - type: Card
+          children:
+            - type: Statistic
+              props:
+                title: 待办工单
+                value: ${data.stats.pendingTickets}
+                suffix: 条
+        - type: Card
+          children:
+            - type: Statistic
+              props:
+                title: 转化率
+                value: ${data.stats.conversionRate}
+                precision: 1
+                suffix: '%'
+    # 双栏内容区：公告/待办 Tabs + 快捷操作（navigate 动作演示）
+    - type: Grid
+      props:
+        columns: 2
+        gap: 16
+      children:
+        - type: Card
+          props:
+            title: 公告与待办
+          children:
+            - type: Tabs
+              props:
+                items:
+                  - key: notice
+                    label: 公告
+                    children:
+                      - type: Alert
+                        props:
+                          variant: info
+                          message: 本示例为纯前端演示：页面 DSL 本地导入，数据为内存 mock。
+                  - key: todo
+                    label: 待办
+                    children:
+                      - type: Alert
+                        props:
+                          variant: warning
+                          message: 你有 ${data.stats.pendingTickets} 条待办工单（数据源表达式）。
+        - type: Card
+          props:
+            title: 快捷操作
+          children:
+            - type: Flex
+              props:
+                direction: vertical
+                gap: 12
+              children:
+                - type: Alert
+                  props:
+                    variant: info
+                    message: 常用入口一键直达（navigate 动作）。
+                - type: Flex
+                  props:
+                    gap: 8
+                  children:
+                    - type: Button
+                      props:
+                        text: 客户列表
+                        variant: primary
+                      events:
+                        onClick:
+                          action: navigate
+                          params:
+                            to: /customers
+                    - type: Button
+                      props:
+                        text: 编辑客户
+                      events:
+                        onClick:
+                          action: navigate
+                          params:
+                            to: /customers/1/edit
+                - type: Alert
+                  props:
+                    variant: warning
+                    message: 退出登录演示：清除本地会话并整页重载回 /login。
+                - type: Button
+                  props:
+                    text: 退出登录
+                    danger: true
+                  events:
+                    onClick:
+                      - action: service.call
+                        params:
+                          service: auth.logout
+                      - action: app.reload
+                        params:
+                          to: /login

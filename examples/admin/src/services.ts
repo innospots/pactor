@@ -1,3 +1,5 @@
+import { DEMO_ACCOUNT, clearSession, writeSession } from './auth';
+
 /**
  * 与 pactor-runtime 的 ServiceHandler 结构一致
  *（示例不直接依赖 pactor-runtime，经 pactor-app options.services 注入）
@@ -76,8 +78,41 @@ const update: ServiceHandler = (params) => {
   return delay({ ...next });
 };
 
+/**
+ * 认证 mock：auth.login 校验演示账号（admin / pactor123），
+ * 成功写入 localStorage 会话并返回 { token, user }；
+ * auth.logout 清除会话。约 500ms 延迟模拟网络。
+ */
+const login: ServiceHandler = (params) => {
+  const username = typeof params['username'] === 'string' ? params['username'].trim() : '';
+  const password = typeof params['password'] === 'string' ? params['password'] : '';
+  if (username !== DEMO_ACCOUNT.username || password !== DEMO_ACCOUNT.password) {
+    return new Promise((_, reject) => {
+      setTimeout(
+        () => reject(new Error(`用户名或密码错误（演示账号 ${DEMO_ACCOUNT.username} / ${DEMO_ACCOUNT.password}）`)),
+        500,
+      );
+    });
+  }
+  const session = {
+    token: `demo-token-${Date.now()}`,
+    user: { id: 'u-1', name: '演示管理员', roles: ['operator'] },
+  };
+  writeSession(session);
+  return new Promise((resolve) => {
+    setTimeout(() => resolve(session), 500);
+  });
+};
+
+const logout: ServiceHandler = () => {
+  clearSession();
+  return delay({ success: true });
+};
+
 /** 示例服务的注册表（main.tsx 经 options.services 注入） */
 export const demoServices: Record<string, ServiceHandler> = {
+  'auth.login': login,
+  'auth.logout': logout,
   'customer.list': list,
   'customer.detail': detail,
   'customer.update': update,

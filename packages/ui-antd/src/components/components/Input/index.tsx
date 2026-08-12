@@ -17,6 +17,8 @@ export interface InputProps {
   rules?: FieldRule[];
   /** 受控值（独立渲染时生效）；Form 内作为字段初始值（优先于 Form initialValues） */
   value?: string;
+  /** 输入类型：password 时掩码输入（缺省 text） */
+  type?: 'text' | 'password';
   placeholder?: string;
   disabled?: boolean;
   /** 输入事件，传出 string 值（非原生 event，设计决策 D2） */
@@ -33,6 +35,7 @@ export function Input({
   label,
   rules,
   value,
+  type = 'text',
   placeholder,
   disabled,
   onChange,
@@ -40,8 +43,10 @@ export function Input({
   const formContext = useFormContext();
   useFieldInitialValue(formContext, name, value);
 
+  const InputComponent = type === 'password' ? AntInput.Password : AntInput;
+
   const input = (
-    <AntInput
+    <InputComponent
       placeholder={placeholder}
       disabled={disabled}
       onChange={(e) => onChange?.(e.target.value)}
@@ -57,7 +62,7 @@ export function Input({
   }
 
   return (
-    <AntInput
+    <InputComponent
       value={value}
       placeholder={placeholder}
       disabled={disabled}

@@ -120,3 +120,19 @@ body:
                           action: navigate
                           params:
                             to: /customers/1/edit
+                - type: Alert
+                  props:
+                    variant: warning
+                    message: 退出登录演示：清除本地会话并整页重载回 /login。
+                - type: Button
+                  props:
+                    text: 退出登录
+                    danger: true
+                  events:
+                    onClick:
+                      - action: service.call
+                        params:
+                          service: auth.logout
+                      - action: app.reload
+                        params:
+                          to: /login

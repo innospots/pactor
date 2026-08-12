@@ -14,6 +14,7 @@ export function Input({
   label,
   rules,
   value,
+  type = 'text',
   placeholder,
   disabled,
   onChange,
@@ -40,6 +41,7 @@ export function Input({
         <Control asChild>
           <input
             className="pcr-input"
+            type={type}
             value={typeof fieldValue === 'string' ? fieldValue : ''}
             placeholder={placeholder}
             disabled={disabled}
@@ -57,6 +59,7 @@ export function Input({
   return (
     <input
       className="pcr-input"
+      type={type}
       value={value ?? ''}
       placeholder={placeholder}
       disabled={disabled}

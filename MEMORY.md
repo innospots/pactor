@@ -8,7 +8,7 @@
 
 核心原则：DSL 是协议、Runtime 是核心、动态 DSL 静态能力（禁 eval/远程 JS）、Registry 管理一切可扩展点、前端权限只管 UI。
 
-## 包结构（packages/，14 个包 + examples/admin）
+## 包结构（packages/，14 个包 + examples/admin、examples/admin-antd）
 
 命名规则：无 npm scope，统一 `pactor-` 前缀，目录名简短。全部已按 npm 发布规范配置（license/repository/exports 双类型/prepublishOnly），包名在 npm 均可用，**但尚未发布、未 git 提交**。
 
@@ -38,6 +38,8 @@
 - **动作引擎**：condition 跳过 → permission 拦截 → registry 执行；命名动作（`id`）结果入 `actions.<id>` 作用域；编排动作（sequence 等）的子动作**执行时求值**而非快照；含 `action` 键或字符串 `type` 键的内嵌对象不求值（isOpaque 约定）。
 - **表达式**：标识符仅从注入 scope 解析（window/fetch 不可达），`__proto__/constructor` 隔离；整体单 `${...}` 保留原始类型，混合模板拼接字符串。
 - **Form 初始值**：`initialValues` + 字段级 `value`（字段级优先）；antd 靠挂载时 `setFieldValue` 实现字段级优先（antd 原生优先级相反）。
+- **Input type**：`InputProps.type: 'text' | 'password'`（缺省 text）；antd 映射 `Input.Password`，Radix 透传 `<input type>`（2026-08-12 add-input-type-prop，第 24 个归档变更）。
+- **示例登录模式**：会话存 localStorage（`src/auth.ts`），`createBootstrap()` 按会话返回 `login`/`admin` 布局形态（布局类型由 bootstrap 决定，全应用单布局）；登录/登出后须整页重载重取 bootstrap——示例用自定义 `app.reload` 动作（`window.location.assign`），路由守卫（未登录→/login）在 main.tsx DSL 之外。
 - **Radix Select 坑**：值从 uncontrolled→controlled 切换会以空串回调清值；`Select.Value` 未渲染过 item 时解析不到选中文案——已修复（`value={key ?? ''}` + 忽略空 key + 显式 label children）。
 - **主题换肤**：覆盖 `--pcr-*` CSS 变量 / `<html data-pactor-theme="dark">` / 覆盖 `.pcr-*` class；参考 `examples/admin/src/theme.css`；文档 `guides/theming`。
 - **Chat 安全**：LLM DSL 走 Safe Registry 白名单（`guardChatDsl` 替换为 ChatDenied 占位）；AI 动作走 capability 链（registry → permission → confirm → execute）。
@@ -45,14 +47,14 @@
 ## OpenSpec 工作流（本项目标准流程）
 
 - 每个变更：`openspec new change <name>` → proposal/design/specs/tasks 四件 → 实现（多由 coder 子代理完成）→ 主代理独立复跑验收 → tasks 勾选 → 归档时同步 delta specs 到 `openspec/specs/`（主 spec 无 ADDED/MODIFIED 头）→ `mv` 到 `changes/archive/YYYY-MM-DD-<name>`。
-- 已归档 23 个变更；主 specs 42 个能力（`openspec/specs/`）是现状基准。
+- 已归档 25 个变更；主 specs 43 个能力（`openspec/specs/`）是现状基准。
 - 规范细节：scenario 必须 4 个 `#`（####）；MODIFIED 需全量需求块；MODIFIED 合并时注意变更间依赖顺序。
 
 ## 环境与命令
 
 - Node >= 18 / pnpm >= 9（实际 node 22 + pnpm 10）。根命令：`pnpm build` / `pnpm test` / `pnpm typecheck` / `pnpm docs:dev`（端口 **4334**）/ `pnpm docs:build` / `pnpm release`。
 - 全量基线：**573 包内测试 + 289 根级测试**，typecheck 0 错误。
-- 示例：`pnpm --filter example-admin dev`（端口 **5199**）。
+- 示例：`pnpm --filter example-admin dev`（Radix，端口 **5199**）；`pnpm --filter example-admin-antd dev`（antd kit，端口 **5299**）。两个示例页面 DSL 逐字节一致，仅 main.tsx 的 `ui` 预设与样式导入不同（antd 版引 `antd/dist/reset.css`，不引 pcr 皮肤）。
 - **examples 引用 workspace 包的 dist 产物**——改包代码后必须重建该包，示例才能看到效果。
 - 视觉验证用 `playwright-cli`（截图 → ReadMediaFile 读图评审）。
 
