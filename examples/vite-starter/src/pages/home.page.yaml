@@ -1,0 +1,72 @@
+dsl: '1.0'
+page:
+  id: home
+  title: 待办清单
+
+state:
+  keyword: ''
+
+dataSources:
+  # service 数据源：todo.list（src/services.ts 的内存 mock，约 200ms 延迟）
+  # params 引用 state.keyword —— 查询表单提交后 setState + reload 即按新关键词重新加载
+  todos:
+    type: service
+    service: todo.list
+    autoLoad: true
+    params:
+      keyword: ${state.keyword}
+
+body:
+  type: Page
+  props:
+    title: 待办清单
+  children:
+    - type: Alert
+      props:
+        variant: info
+        message: 这个页面完全由 src/pages/home.page.yaml 描述
+        description: 试试修改这个 YAML 文件（比如改标题）—— vite-plugin 会在构建期校验并热更新。
+    - type: Card
+      props:
+        title: 查询
+      children:
+        - type: Form
+          props:
+            layout: inline
+          events:
+            onSubmit:
+              - action: setState
+                params:
+                  keyword: ${event.keyword}
+              - action: reload
+                params:
+                  dataSource: todos
+          children:
+            - type: Input
+              props:
+                name: keyword
+                label: 关键词
+                placeholder: 标题 / 负责人
+            - type: Button
+              props:
+                text: 查询
+                variant: primary
+                submit: true
+    - type: Card
+      props:
+        title: 待办列表（service 数据源）
+      children:
+        - type: Table
+          props:
+            dataSource: ${data.todos}
+            pagination:
+              pageSize: 10
+            columns:
+              - title: ID
+                dataIndex: id
+              - title: 标题
+                dataIndex: title
+              - title: 负责人
+                dataIndex: owner
+              - title: 状态
+                dataIndex: status

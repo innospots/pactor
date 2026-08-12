@@ -162,6 +162,43 @@ importers:
         specifier: ^8.2.1
         version: 8.2.1(@types/node@24.13.3)(esbuild@0.28.2)(yaml@2.9.0)
 
+  examples/vite-starter:
+    dependencies:
+      pactor-app:
+        specifier: workspace:*
+        version: link:../../packages/app
+      pactor-resource:
+        specifier: workspace:*
+        version: link:../../packages/resource
+      pactor-ui-radix:
+        specifier: workspace:*
+        version: link:../../packages/ui-radix
+      react:
+        specifier: ^19.2.8
+        version: 19.2.8
+      react-dom:
+        specifier: ^19.2.8
+        version: 19.2.8(react@19.2.8)
+    devDependencies:
+      '@types/react':
+        specifier: ^19.2.18
+        version: 19.2.18
+      '@types/react-dom':
+        specifier: ^19.2.4
+        version: 19.2.4(@types/react@19.2.18)
+      '@vitejs/plugin-react':
+        specifier: ^5.0.0
+        version: 5.2.0(vite@8.2.1(@types/node@24.13.3)(esbuild@0.28.2)(yaml@2.9.0))
+      pactor-vite-plugin:
+        specifier: workspace:*
+        version: link:../../packages/vite-plugin
+      typescript:
+        specifier: ^5.6.3
+        version: 5.9.3
+      vite:
+        specifier: ^8.2.1
+        version: 8.2.1(@types/node@24.13.3)(esbuild@0.28.2)(yaml@2.9.0)
+
   packages/app:
     dependencies:
       pactor-core:
