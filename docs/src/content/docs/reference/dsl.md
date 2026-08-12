@@ -196,7 +196,7 @@ overlay 内容的表达式以 overlay 作用域求值（`${params.x}` 取注入�
 
 ## 组件目录
 
-内置 12 个组件（antd / Radix 双实现，props 契约一致）。
+内置 12 个组件（antd / Radix 双实现，props 契约一致）+ pactor-markdown 注册的 Markdown。业务组件注册见[自定义组件](/guides/custom-components/)。
 
 ### Page
 
@@ -357,6 +357,20 @@ rules:
 ```
 
 校验失败阻止 Form 提交并在字段下方展示 `message`。
+
+### Markdown
+
+安全 Markdown 渲染（禁 raw HTML、链接协议白名单，含代码高亮与 KaTeX 数学），由 pactor-markdown 提供，需经 `registerMarkdownComponents(runtime.context.components)` 注册后可用（chat 场景经 Safe Registry 白名单放行）。
+
+| prop | 类型 | 说明 |
+| --- | --- | --- |
+| `content` | string | Markdown 源文本；`${data.xxx}` 等表达式由 Renderer 在下发前解析 |
+
+```yaml
+- type: Markdown
+  props:
+    content: '当前筛选：**${state.keyword}**'
+```
 
 ## 完整示例
 

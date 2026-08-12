@@ -18,7 +18,9 @@ export default defineConfig({
           label: '指南',
           items: [
             { label: '快速开始', slug: 'guides/getting-started' },
+            { label: '数据流', slug: 'guides/data-flow' },
             { label: '事件与表单联动', slug: 'guides/events' },
+            { label: '自定义组件', slug: 'guides/custom-components' },
             { label: '主题与换肤', slug: 'guides/theming' },
           ],
         },
