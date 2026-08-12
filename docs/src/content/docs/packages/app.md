@@ -69,6 +69,8 @@ src/
 | `components` | 业务组件（写入应用级共享 registry，可覆盖同名内置组件） |
 | `actions` | 业务动作（可覆盖同名内置/交互动作） |
 | `services` / `capabilities` | 业务服务与能力扩展 |
+| `providers` | 应用级包装组件（Router 之内、InteractionKit 之外）：业务 ConfigProvider / 全局 Context 由此进入应用树（message / modal / overlay 均消费其上下文），缺省不包装 |
+| `headerExtra` | admin 布局头部右侧插槽（透传 AdminLayout `headerExtra`） |
 | `authTokenProvider` | `() => string \| undefined \| Promise<string \| undefined>`；注入 DSL 资源请求与页面 HTTP 出口（`Authorization: Bearer`） |
 
 ```tsx
@@ -100,20 +102,22 @@ mount 后依次：加载 bootstrap（全屏 loading）→ `PermissionStore` 写�
 ```tsx
 <BrowserRouter basename={...}>
   <RouterBridgeSync />                {/* react-router → NavigationBridge */}
-  <InteractionProvider bridge={uiBridge}>
-    <AdminLayout brand registry bridge route permissionChecker>
-      <Routes>
-        <Route path="*" element={
-          <DynamicDslRoute
-            render={({ pageId, route }) => <DslPageLoader ... />}
-            fallback={<NotFound />}     // 未命中 404
-            forbidden={<Forbidden />}   // 无权限 403
-            permissionChecker={store}
-          />
-        } />
-      </Routes>
-    </AdminLayout>
-  </InteractionProvider>
+  <Providers>                         {/* options.providers，可选应用级包装 */}
+    <InteractionProvider bridge={uiBridge}>
+      <AdminLayout brand registry bridge route permissionChecker headerExtra={...}>
+        <Routes>
+          <Route path="*" element={
+            <DynamicDslRoute
+              render={({ pageId, route }) => <DslPageLoader ... />}
+              fallback={<NotFound />}     // 未命中 404
+              forbidden={<Forbidden />}   // 无权限 403
+              permissionChecker={store}
+            />
+          } />
+        </Routes>
+      </AdminLayout>
+    </InteractionProvider>
+  </Providers>
 </BrowserRouter>
 ```
 

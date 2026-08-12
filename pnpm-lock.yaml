@@ -85,6 +85,9 @@ importers:
 
   examples/admin-antd:
     dependencies:
+      '@ant-design/icons':
+        specifier: ^6.3.2
+        version: 6.3.2(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
       antd:
         specifier: ^6.6.0
         version: 6.6.0(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
