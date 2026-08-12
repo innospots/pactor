@@ -9,7 +9,7 @@ import {
   registerBuiltinActions,
   type RuntimeContext,
 } from 'pactor-runtime';
-import { cleanup, fireEvent, render, screen } from '@testing-library/react';
+import { cleanup, fireEvent, render, screen, act } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import { createUiBridge, registerInteractionActions } from '../../src/interaction/actions.js';
@@ -66,6 +66,26 @@ describe('Modal / Drawer 渲染', () => {
     await screen.findByText('编辑面板');
     expect(document.querySelector('.ant-drawer')).toBeTruthy();
     expect(document.querySelector('.ant-modal')).toBeFalsy();
+  });
+
+  it('overlay 内容绑定 state 的表达式随 state 变化重渲染（表单联动基础）', async () => {
+    const { context, manager } = setupHost();
+    context.components.register('Text', ({ value }: { value?: string }) => (
+      <span>{value}</span>
+    ));
+
+    context.state.set('label', '初始');
+    void manager.open({
+      type: 'modal',
+      title: '联动',
+      content: { type: 'Text', props: { value: '${state.label}' } },
+    });
+    await screen.findByText('初始');
+
+    act(() => {
+      context.state.set('label', '更新后');
+    });
+    await screen.findByText('更新后');
   });
 
   it('点击 Modal 关闭按钮触发取消语义：resolve { success: false }，弹层消失', async () => {

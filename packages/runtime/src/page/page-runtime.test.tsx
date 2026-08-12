@@ -89,6 +89,7 @@ describe('初始化链路', () => {
 
     expect(runtime.context.actions.list().sort()).toEqual([
       'delay',
+      'form.setValues',
       'if',
       'parallel',
       'reload',

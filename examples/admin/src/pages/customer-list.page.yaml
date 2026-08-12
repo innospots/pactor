@@ -6,6 +6,21 @@ page:
 
 state:
   keyword: ''
+  # 级联演示：省 → 市选项映射（编辑抽屉 region 字段 onChange 时查表写入 cityOptions）
+  cityMap:
+    浙江:
+      - { label: 杭州, value: 杭州 }
+      - { label: 宁波, value: 宁波 }
+      - { label: 温州, value: 温州 }
+    江苏:
+      - { label: 南京, value: 南京 }
+      - { label: 苏州, value: 苏州 }
+      - { label: 无锡, value: 无锡 }
+    广东:
+      - { label: 广州, value: 广州 }
+      - { label: 深圳, value: 深圳 }
+      - { label: 珠海, value: 珠海 }
+  cityOptions: []
 
 dataSources:
   # service 数据源：customer.list（内存 mock，约 300ms 延迟），
@@ -90,6 +105,10 @@ body:
                         size: small
                       events:
                         onClick:
+                          # 初始化级联选项：按当前行 region 查 cityMap（抽屉内 city 的 options 绑 state.cityOptions）
+                          - action: setState
+                            params:
+                              cityOptions: ${state.cityMap[row.region]}
                           # 命名动作：overlay.open 的 close payload 即 actions.editResult
                           - id: editResult
                             action: overlay.open
@@ -103,8 +122,13 @@ body:
                                   name: ${row.name}
                                   phone: ${row.phone}
                                   level: ${row.level}
+                                  region: ${row.region}
+                                  city: ${row.city}
                                 content:
                                   type: Form
+                                  props:
+                                    # 页面查询表单占用 default 名，抽屉表单显式命名避免重复注册
+                                    name: edit
                                   events:
                                     onSubmit:
                                       - id: updateResult
@@ -116,6 +140,8 @@ body:
                                             name: ${event.name}
                                             phone: ${event.phone}
                                             level: ${event.level}
+                                            region: ${event.region}
+                                            city: ${event.city}
                                       - action: if
                                         params:
                                           condition: ${actions.updateResult.id}
@@ -162,6 +188,32 @@ body:
                                             value: B
                                           - label: C 级
                                             value: C
+                                    # 级联演示：region 变化 → form.setValues 清空 city + setState 更新 city 选项
+                                    - type: Select
+                                      props:
+                                        name: region
+                                        label: 省份
+                                        value: ${params.region}
+                                        options:
+                                          - { label: 浙江, value: 浙江 }
+                                          - { label: 江苏, value: 江苏 }
+                                          - { label: 广东, value: 广东 }
+                                      events:
+                                        onChange:
+                                          - action: form.setValues
+                                            params:
+                                              form: edit
+                                              values:
+                                                city: ''
+                                          - action: setState
+                                            params:
+                                              cityOptions: ${state.cityMap[event]}
+                                    - type: Select
+                                      props:
+                                        name: city
+                                        label: 城市（随省份联动）
+                                        value: ${params.city}
+                                        options: ${state.cityOptions}
                                     - type: Button
                                       props:
                                         text: 保存

@@ -115,6 +115,32 @@ export function registerBuiltinActions(registry: ActionRegistry): void {
         setTimeout(() => resolve({ ok: true }), Number.isFinite(ms) ? ms : 0);
       }),
   );
+
+  // 表单联动：values（已求值）经 FormHandle 写入目标表单字段；
+  // 不触发校验与 onValuesChange（避免联动循环）；句柄未注册受控失败
+  register('form.setValues', (action, ctx) => {
+    const formName = action.params?.['form'];
+    const name =
+      typeof formName === 'string' && formName !== '' ? formName : 'default';
+    const handle = ctx.context.forms.get(name);
+    if (!handle) {
+      return {
+        ok: false,
+        error: new Error(
+          `[pactor-runtime] form.setValues 目标表单未注册: "${name}"`,
+        ),
+      };
+    }
+    const values = action.params?.['values'];
+    if (!isRecord(values)) {
+      return {
+        ok: false,
+        error: new Error('[pactor-runtime] form.setValues 缺少 params.values（object）'),
+      };
+    }
+    handle.setValues(values);
+    return { ok: true };
+  });
 }
 
 function asActions(value: unknown): ActionConfig[] {

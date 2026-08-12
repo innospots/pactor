@@ -44,6 +44,20 @@ export function OverlayHost({ manager, resolvePage }: OverlayHostProps) {
     (onChange) => manager.subscribe(onChange),
     () => manager.stack(),
   );
+  // 订阅 state / data 变化：overlay 内容里绑定 store 的表达式
+  //（如 options: ${state.xxx}）随之重渲染（表单联动等场景）
+  useSyncExternalStore(
+    (onChange) => {
+      const offState = renderer.context.state.subscribe(onChange);
+      const offData = renderer.context.data.subscribe(onChange);
+      return () => {
+        offState();
+        offData();
+      };
+    },
+    () =>
+      `${renderer.context.state.getVersion()}:${renderer.context.data.getVersion()}`,
+  );
 
   return (
     <>

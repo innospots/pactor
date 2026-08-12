@@ -1,10 +1,12 @@
 import { Form as AntForm } from 'antd';
 import { useRenderer } from 'pactor-runtime';
-import type { ReactNode } from 'react';
+import { useEffect, type ReactNode } from 'react';
 
 import { FormContextProvider } from './context.js';
 
 export interface FormProps {
+  /** 表单名（缺省 'default'）：`form.setValues` 联动动作按名寻址 */
+  name?: string;
   /** antd 表单布局，默认 vertical */
   layout?: 'horizontal' | 'vertical' | 'inline';
   /** 表单初始值（创建时生效；字段级 value 优先于 initialValues[name]） */
@@ -27,6 +29,7 @@ export interface FormProps {
  * 2. 以 values 调用 onSubmit（Renderer 把它放入 `event` 作用域）
  */
 export function Form({
+  name = 'default',
   layout = 'vertical',
   initialValues,
   children,
@@ -35,6 +38,16 @@ export function Form({
 }: FormProps) {
   const { context } = useRenderer();
   const [form] = AntForm.useForm();
+
+  // 表单联动桥：挂载注册句柄（setFieldsValue 不触发校验与 onValuesChange）、卸载注销
+  useEffect(() => {
+    context.forms.register(name, {
+      setValues: (values) => form.setFieldsValue(values),
+    });
+    return () => {
+      context.forms.unregister(name);
+    };
+  }, [context, name, form]);
 
   const handleFinish = (values: Record<string, unknown>) => {
     context.state.set('form', values);

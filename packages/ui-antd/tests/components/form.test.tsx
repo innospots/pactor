@@ -1,9 +1,68 @@
 // @vitest-environment jsdom
 import { fireEvent, render, screen } from '@testing-library/react';
+import { ActionEngine } from 'pactor-runtime';
 import { describe, expect, it, vi } from 'vitest';
 
 import { Input } from '../../src/components/index.js';
 import { renderDsl } from './helpers.js';
+
+describe('表单联动 form.setValues', () => {
+  it('按 name 寻址写入字段值，不触发 onValuesChange 与校验', async () => {
+    const { context } = renderDsl({
+      type: 'Form',
+      props: { name: 'edit' },
+      events: {
+        onValuesChange: { action: 'setState', params: { touched: true } },
+      },
+      children: [
+        {
+          type: 'Input',
+          props: {
+            name: 'city',
+            label: '城市',
+            value: '杭州',
+            rules: [{ required: true, message: '必填' }],
+          },
+        },
+      ],
+    });
+
+    expect(screen.getByLabelText('城市')).toHaveProperty('value', '杭州');
+
+    const engine = new ActionEngine(context);
+    const result = await engine.execute({
+      action: 'form.setValues',
+      params: { form: 'edit', values: { city: '' } },
+    });
+
+    expect(result.ok).toBe(true);
+    await vi.waitFor(() => {
+      expect(screen.getByLabelText('城市')).toHaveProperty('value', '');
+    });
+    // 不触发 onValuesChange（避免联动循环）
+    expect(context.state.get('touched')).toBeUndefined();
+    // 不触发校验错误展示
+    expect(screen.queryByText('必填')).toBeNull();
+  });
+
+  it('卸载后句柄注销，动作受控失败', async () => {
+    const { context, unmount } = renderDsl({
+      type: 'Form',
+      children: [{ type: 'Input', props: { name: 'city' } }],
+    });
+
+    expect(context.forms.has('default')).toBe(true);
+    unmount();
+    expect(context.forms.has('default')).toBe(false);
+
+    const engine = new ActionEngine(context);
+    const result = await engine.execute({
+      action: 'form.setValues',
+      params: { values: { city: 'x' } },
+    });
+    expect(result.ok).toBe(false);
+  });
+});
 
 describe('字段自动包装', () => {
   it('Form 内声明 name 的 Input 渲染为带标签的表单项', () => {
