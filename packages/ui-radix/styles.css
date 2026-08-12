@@ -1384,6 +1384,18 @@ body {
   animation: pcr-drawer-in 180ms ease-out;
 }
 
+/*
+ * 滚动锁定补偿：Radix Select/Dialog 展开时 react-remove-scroll 锁定 body
+ * （overflow: hidden + body margin 补偿），视口滚动条移除后 fixed 布局
+ * 视口变宽，右锚定的面板会随之外移产生跳动；body 内容已由库的 margin
+ * 补偿保持稳定，面板用库暴露的 --removed-body-scroll-bar-size 变量
+ * （body[data-scroll-locked] 上，随滚动锁定计数增减）保持原位。
+ * 无滚动条（overlay scrollbar / 短页面）时变量为 0，规则无效果。
+ */
+body[data-scroll-locked] .pcr-drawer-panel {
+  right: var(--removed-body-scroll-bar-size, 0px);
+}
+
 .pcr-drawer-header {
   display: flex;
   align-items: center;
