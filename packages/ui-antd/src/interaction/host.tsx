@@ -99,7 +99,8 @@ function OverlayEntryView({
       <Drawer
         open
         title={entry.title}
-        width={entry.width}
+        // antd v6 起 Drawer width 废弃，size 接受 number|string 语义等价
+        size={entry.width}
         onClose={handleCancel}
       >
         {body}

@@ -66,6 +66,19 @@ describe('Page / Card / Flex', () => {
     expect(screen.getByRole('button', { name: /新\s*建/ })).toBeTruthy();
   });
 
+  it('Page 内容区纵向间距 20px（与 Radix kit 一致）', () => {
+    const { container } = renderDsl({
+      type: 'Page',
+      children: [
+        { type: 'Card', props: { title: '一' } },
+        { type: 'Card', props: { title: '二' } },
+      ],
+    });
+
+    const content = container.querySelector('.pactor-page-content')!;
+    expect(getComputedStyle(content).gap).toBe('20px');
+  });
+
   it('Card 渲染标题与 children', () => {
     render(
       <Card title="概览">

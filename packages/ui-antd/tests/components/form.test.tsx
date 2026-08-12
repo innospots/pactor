@@ -51,6 +51,51 @@ describe('字段自动包装', () => {
   });
 });
 
+describe('输入类型 type', () => {
+  it('缺省渲染明文文本输入', () => {
+    const { container } = renderDsl({
+      type: 'Form',
+      children: [
+        { type: 'Input', props: { name: 'keyword', label: '关键词' } },
+      ],
+    });
+
+    const input = container.querySelector('input')!;
+    expect(input.type).toBe('text');
+  });
+
+  it('Form 内 type: password 渲染密码输入框', () => {
+    const { container } = renderDsl({
+      type: 'Form',
+      children: [
+        {
+          type: 'Input',
+          props: { name: 'password', label: '密码', type: 'password' },
+        },
+      ],
+    });
+
+    expect(container.querySelector('input[type="password"]')).not.toBeNull();
+  });
+
+  it('独立 type: password 掩码渲染且 onChange 传 string', async () => {
+    const { container, context } = renderDsl({
+      type: 'Input',
+      props: { type: 'password', placeholder: '请输入密码' },
+      events: {
+        onChange: { action: 'setState', params: { secret: '${event}' } },
+      },
+    });
+
+    const input = container.querySelector('input[type="password"]')!;
+    expect(input).not.toBeNull();
+    fireEvent.change(input, { target: { value: 's3cret' } });
+    await vi.waitFor(() => {
+      expect(context.state.get('secret')).toBe('s3cret');
+    });
+  });
+});
+
 describe('校验规则', () => {
   it('required 校验失败：显示错误且不触发 onSubmit', async () => {
     const { context } = renderDsl({

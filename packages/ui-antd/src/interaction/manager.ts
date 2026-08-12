@@ -11,7 +11,7 @@ export interface OverlayConfig {
   type: 'modal' | 'drawer';
   /** 标题（antd Modal title / Drawer title） */
   title?: string;
-  /** 宽度（antd Modal width / Drawer width） */
+  /** 宽度（antd Modal width / Drawer size，v6 起 Drawer width 废弃） */
   width?: number | string;
   /** 内联 DSL 内容，经 pactor-runtime Renderer 渲染 */
   content?: DslNode;
