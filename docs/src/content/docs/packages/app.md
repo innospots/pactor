@@ -50,6 +50,10 @@ src/
 | `permissions` | 权限码数组（缺省 `[]`），写入 PermissionStore |
 | `menus` | 菜单树（缺省 `[]`），构建 MenuRegistry 驱动动态路由 |
 | `layout.type` / `layout.{header,sidebar,tabs,breadcrumb,footer}` | 布局类型与区域开关 |
+| `layout.mode` | 结构模式：`top-side`（缺省，顶部-侧边）/ `top-bottom`（上-中-下，无侧边栏）/ `side-full`（侧边通栏全高，品牌区入侧边栏）/ `two-column`（侧边两列：一级菜单窄列 + 当前组子菜单列） |
+| `layout.fixedHeader` / `layout.fixedSider` | 固定顶部 / 固定侧边栏（内容区独立滚动），缺省 true，显式 false 关闭 |
+| `layout.collapsible` / `layout.collapsed` | 侧边栏收起 trigger / 初始收起（two-column 模式不叠加 trigger） |
+| `layout.breakpoint` | 响应式断点 `xs/sm/md/lg/xl/xxl`，视口小于断点时侧边栏自动收起 |
 | `pageVersions` | 页面版本表，用于 loader 缓存版本控制 |
 
 ## Options

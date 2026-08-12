@@ -34,6 +34,11 @@ function toAntdItems(menus: readonly MenuItem[]): AntdMenuItem[] {
   return items;
 }
 
+/** 任意菜单子树 → antd Menu items（two-column 模式的子菜单列复用） */
+export function buildAntdMenuItems(menus: readonly MenuItem[]): AntdMenuItem[] {
+  return toAntdItems(menus);
+}
+
 /**
  * 由 MenuRegistry 构建 antd Menu items：取可见树（hidden 已过滤），
  * 提供 permissionChecker 时先经 filterMenusByPermission 权限过滤。

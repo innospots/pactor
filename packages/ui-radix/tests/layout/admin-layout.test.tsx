@@ -270,3 +270,133 @@ describe('RadixAdminLayout Tabs', () => {
     expect(tabBar?.querySelectorAll('.pcr-tab')).toHaveLength(2);
   });
 });
+
+describe('RadixAdminLayout 结构模式（spec: radix-layout / 模式与收起）', () => {
+  it('top-bottom：无 Sidebar，footer 开关生效', () => {
+    const { container } = renderAdmin({
+      config: { mode: 'top-bottom', footer: true },
+    });
+    expect(
+      container.querySelector('.pcr-admin-layout')?.getAttribute('data-mode'),
+    ).toBe('top-bottom');
+    expect(container.querySelector('.pcr-admin-sidebar')).toBeNull();
+    expect(container.querySelector('.pcr-admin-footer')).toBeTruthy();
+  });
+
+  it('side-full：Sidebar 通栏含品牌区，Header 不重复品牌', () => {
+    const { container } = renderAdmin({ config: { mode: 'side-full' } });
+    expect(container.querySelector('.pcr-admin-side-full')).toBeTruthy();
+    expect(
+      container.querySelector('.pcr-admin-sidebar-brand')?.textContent,
+    ).toContain('运营平台');
+    expect(container.querySelector('.pcr-admin-header .pcr-admin-brand')).toBeNull();
+  });
+
+  it('two-column：一级菜单窄列 + 激活 group 的子菜单列', () => {
+    const route: RouteContext = {
+      path: '/customers',
+      params: {},
+      query: {},
+      menuId: 'customer-list',
+      activeMenu: 'customer-list',
+    };
+    const { container } = renderAdmin({ config: { mode: 'two-column' }, route });
+
+    const primary = container.querySelector('.pcr-admin-primary-col')!;
+    expect(primary.textContent).toContain('客');
+    expect(primary.textContent).toContain('工');
+    const secondary = container.querySelector('.pcr-admin-secondary-col')!;
+    expect(secondary.textContent).toContain('客户列表');
+    expect(within(secondary as HTMLElement).queryByText('工作台')).toBeNull();
+  });
+
+  it('collapsible：trigger 切换收起态；collapsed 初始收起', () => {
+    const { container } = renderAdmin({ config: { collapsible: true } });
+    const trigger = screen.getByRole('button', { name: '收起侧边栏' });
+    expect(container.querySelector('.pcr-admin-sidebar')?.getAttribute('data-collapsed')).toBeNull();
+
+    fireEvent.click(trigger);
+    expect(container.querySelector('.pcr-admin-sidebar')?.getAttribute('data-collapsed')).toBe('true');
+    // 收起态菜单仅显示首字符
+    expect(screen.getByRole('button', { name: '展开侧边栏' })).toBeTruthy();
+
+    cleanup();
+    const again = renderAdmin({ config: { collapsible: true, collapsed: true } });
+    expect(again.container.querySelector('.pcr-admin-sidebar')?.getAttribute('data-collapsed')).toBe('true');
+  });
+
+  it('收起态仅顶层首字符平铺；悬停 group 浮出子菜单，点其中 page 项导航并关闭浮层', async () => {
+    const bridge = new MemoryNavigation('/');
+    const push = vi.spyOn(bridge, 'push');
+    const { container } = renderAdmin({
+      config: { collapsible: true, collapsed: true },
+      bridge,
+    });
+    const sidebar = container.querySelector('.pcr-admin-sidebar')!;
+    // 顶层首字符：工（作台）、客（户管理）；子级"客户列表"不渲染
+    expect(within(sidebar as HTMLElement).getByText('工')).toBeTruthy();
+    expect(within(sidebar as HTMLElement).getByText('客')).toBeTruthy();
+    expect(screen.queryByText('客户列表')).toBeNull();
+    expect(sidebar.querySelector('.pcr-menu-group-trigger')).toBeNull();
+
+    // 悬停 group 图标 → 浮出子菜单（含组标题与子项）
+    fireEvent.mouseEnter(within(sidebar as HTMLElement).getByText('客'));
+    const flyout = await screen.findByText('客户列表');
+    expect(screen.getByText('客户管理')).toBeTruthy();
+
+    // 点击浮层中的 page 项 → 导航且浮层关闭，侧边栏保持收起
+    fireEvent.click(flyout);
+    expect(push).toHaveBeenCalledWith('/customers');
+    await vi.waitFor(() => {
+      expect(screen.queryByText('客户列表')).toBeNull();
+    });
+    expect(
+      container.querySelector('.pcr-admin-sidebar')?.getAttribute('data-collapsed'),
+    ).toBe('true');
+  });
+
+  it('fixedHeader / fixedSider 加修饰 class（spec: 固定区域）', () => {
+    const { container } = renderAdmin({
+      config: { fixedHeader: true, fixedSider: true },
+    });
+    const layout = container.querySelector('.pcr-admin-layout')!;
+    expect(layout.classList.contains('pcr-admin-layout--fixed-header')).toBe(true);
+    expect(layout.classList.contains('pcr-admin-layout--fixed-sider')).toBe(true);
+  });
+
+  it('缺省即固定；显式 false 关闭（spec: 缺省固定 / 显式关闭）', () => {
+    const { container } = renderAdmin();
+    const layout = container.querySelector('.pcr-admin-layout')!;
+    expect(layout.classList.contains('pcr-admin-layout--fixed-header')).toBe(true);
+    expect(layout.classList.contains('pcr-admin-layout--fixed-sider')).toBe(true);
+
+    cleanup();
+    const off = renderAdmin({ config: { fixedHeader: false, fixedSider: false } });
+    const layout2 = off.container.querySelector('.pcr-admin-layout')!;
+    expect(layout2.classList.contains('pcr-admin-layout--fixed-header')).toBe(false);
+    expect(layout2.classList.contains('pcr-admin-layout--fixed-sider')).toBe(false);
+  });
+
+  it('breakpoint：视口小于断点自动收起（spec: 响应式收起）', () => {
+    const original = window.matchMedia;
+    // 模拟视口命中 lg 断点（max-width: 991px 匹配）
+    window.matchMedia = ((query: string) => ({
+      matches: query.includes('max-width'),
+      media: query,
+      onchange: null,
+      addListener: () => {},
+      removeListener: () => {},
+      addEventListener: () => {},
+      removeEventListener: () => {},
+      dispatchEvent: () => false,
+    })) as typeof window.matchMedia;
+    try {
+      const { container } = renderAdmin({ config: { breakpoint: 'lg' } });
+      expect(
+        container.querySelector('.pcr-admin-sidebar')?.getAttribute('data-collapsed'),
+      ).toBe('true');
+    } finally {
+      window.matchMedia = original;
+    }
+  });
+});

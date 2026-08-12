@@ -287,7 +287,7 @@ const bridge = new MemoryNavigation('/');
 
 | prop | 说明 |
 | --- | --- |
-| `config` | 区域开关：`header` / `sidebar` / `tabs` / `breadcrumb` / `footer` |
+| `config` | 区域开关：`header` / `sidebar` / `tabs` / `breadcrumb` / `footer`；结构模式 `mode`（`top-side` 缺省 / `top-bottom` 上-中-下 / `side-full` 侧边通栏 / `two-column` 侧边两列）；`fixedHeader` / `fixedSider` 固定区域（缺省 true，显式 false 关闭）；`collapsible` / `collapsed` 收起侧边栏；`breakpoint` 响应式自动收起 |
 | `brand` | `{ title, logo? }`，Header 品牌区 |
 | `registry` | pactor-router `MenuRegistry` |
 | `bridge` | pactor-router `NavigationBridge`，布局内部订阅它解析当前路由 |

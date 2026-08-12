@@ -171,6 +171,46 @@ describe('application-shell：布局包裹', () => {
     // 菜单可见
     expect(target.querySelectorAll('.pcr-menu-item').length).toBeGreaterThan(0);
   });
+
+  it('bootstrap.layout 布局配置透传：mode top-bottom 无侧边栏，collapsible 出现收起 trigger', async () => {
+    setUrl('/');
+    app = createPactorApplication({
+      appId: 'risk-admin',
+      loader: new StaticDslLoader({
+        bootstrap: createBootstrap({
+          layout: { type: 'admin', mode: 'top-bottom', footer: true },
+        }),
+        pages: standardPages,
+      }),
+    });
+    const target = await mountApp(app);
+
+    await screen.findByText('欢迎使用 Pactor');
+    const layout = target.querySelector('.pcr-admin-layout');
+    expect(layout?.getAttribute('data-mode')).toBe('top-bottom');
+    expect(target.querySelector('.pcr-admin-sidebar')).toBeNull();
+    expect(target.querySelector('.pcr-admin-footer')).not.toBeNull();
+    await unmountApp(app);
+    app = null;
+    cleanup();
+    document.body.innerHTML = '';
+
+    setUrl('/');
+    app = createPactorApplication({
+      appId: 'risk-admin',
+      loader: new StaticDslLoader({
+        bootstrap: createBootstrap({
+          layout: { type: 'admin', collapsible: true },
+        }),
+        pages: standardPages,
+      }),
+    });
+    const target2 = await mountApp(app);
+    await screen.findByText('欢迎使用 Pactor');
+    expect(
+      target2.querySelector('.pcr-admin-collapse-trigger'),
+    ).not.toBeNull();
+  });
 });
 
 describe('application-shell：Overlay 与交互集成', () => {

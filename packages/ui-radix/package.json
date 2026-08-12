@@ -88,6 +88,7 @@
     "@radix-ui/react-accordion": "^1.2.0",
     "@radix-ui/react-dialog": "^1.1.0",
     "@radix-ui/react-form": "^0.1.0",
+    "@radix-ui/react-popover": "^1.1.23",
     "@radix-ui/react-select": "^2.1.0",
     "@radix-ui/react-tabs": "^1.1.0",
     "pactor-core": "workspace:*",

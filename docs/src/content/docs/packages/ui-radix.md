@@ -237,7 +237,7 @@ const Layout = resolveLayout(layoutRegistry, 'admin');
 | 维度 | 说明 |
 | --- | --- |
 | props 类型 | `AdminLayoutProps` / `BlankLayoutProps` / `LoginLayoutProps` / `LandingLayoutProps` 直接 `import type` 自 `pactor-ui-antd/layout` |
-| 布局开关 | `config.header / sidebar` 缺省开，`tabs / breadcrumb / footer` 缺省关 |
+| 布局开关 | `config.header / sidebar` 缺省开，`tabs / breadcrumb / footer` 缺省关；`mode`（top-side / top-bottom / side-full / two-column）、`fixedHeader` / `fixedSider`（缺省 true，显式 false 关闭）、`collapsible` / `collapsed`、`breakpoint` 与 antd 版契约一致（`data-mode` + `.pcr-admin-layout--*` 修饰 class） |
 | 菜单 | 可见树渲染（group 折叠 / page / link / disabled）；`permissionChecker` 过滤；`activeMenu` 高亮；page → `bridge.push`，link / external → `window.open` |
 | 选中态来源 | route props 优先，bridge 订阅兜底 |
 | Breadcrumb | 按 `findMenuChain` 菜单链渲染 |

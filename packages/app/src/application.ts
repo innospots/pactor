@@ -347,16 +347,45 @@ function sanitizeMenus(raw: unknown): MenuItem[] {
   return menus;
 }
 
-/** 提取 bootstrap.layout 的区域开关布尔字段（header/sidebar/tabs/breadcrumb/footer） */
+/**
+ * 提取 bootstrap.layout 的布局配置：区域开关布尔字段
+ * （header/sidebar/tabs/breadcrumb/footer）+ 结构模式与固定/收起/响应式
+ * （mode/fixedHeader/fixedSider/collapsible/collapsed/breakpoint）。
+ * 非法值（未知枚举）忽略，交给布局组件自身缺省。
+ */
+const LAYOUT_MODES = ['top-side', 'top-bottom', 'side-full', 'two-column'] as const;
+const LAYOUT_BREAKPOINTS = ['xs', 'sm', 'md', 'lg', 'xl', 'xxl'] as const;
+
 function pickLayoutConfig(
   layout: Record<string, unknown> | undefined,
 ): AdminLayoutConfig {
   const config: AdminLayoutConfig = {};
-  for (const key of ['header', 'sidebar', 'tabs', 'breadcrumb', 'footer'] as const) {
+  for (const key of [
+    'header',
+    'sidebar',
+    'tabs',
+    'breadcrumb',
+    'footer',
+    'fixedHeader',
+    'fixedSider',
+    'collapsible',
+    'collapsed',
+  ] as const) {
     const value = layout?.[key];
     if (typeof value === 'boolean') {
       config[key] = value;
     }
+  }
+  const mode = layout?.['mode'];
+  if (typeof mode === 'string' && (LAYOUT_MODES as readonly string[]).includes(mode)) {
+    config.mode = mode as AdminLayoutConfig['mode'];
+  }
+  const breakpoint = layout?.['breakpoint'];
+  if (
+    typeof breakpoint === 'string' &&
+    (LAYOUT_BREAKPOINTS as readonly string[]).includes(breakpoint)
+  ) {
+    config.breakpoint = breakpoint as AdminLayoutConfig['breakpoint'];
   }
   return config;
 }
