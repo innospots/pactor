@@ -1,6 +1,10 @@
 // @vitest-environment jsdom
 import './setup.js';
 
+import { readFileSync } from 'node:fs';
+import { dirname, join } from 'node:path';
+import { fileURLToPath } from 'node:url';
+
 import { cleanup, fireEvent, render, screen, act } from '@testing-library/react';
 import type { PageDsl } from 'pactor-core';
 import {
@@ -278,5 +282,20 @@ describe('page overlay 动态加载', () => {
     expect(alert.textContent).toContain('user-edit');
     // 受控：可正常关闭
     manager.close();
+  });
+});
+
+describe('滚动锁定补偿（经典滚动条下抽屉不跳动）', () => {
+  it('styles.css 含 body[data-scroll-locked] 下 drawer 面板的 right 补偿规则', () => {
+    // Radix Select/Dialog 展开时 react-remove-scroll 锁定 body 并移除视口
+    // 滚动条，右锚定的抽屉面板须用库暴露的补偿变量保持原位
+    const stylesPath = join(
+      dirname(fileURLToPath(import.meta.url)),
+      '../../styles.css',
+    );
+    const css = readFileSync(stylesPath, 'utf8');
+    expect(css).toMatch(
+      /body\[data-scroll-locked\]\s+\.pcr-drawer-panel\s*\{[^}]*right:\s*var\(--removed-body-scroll-bar-size,\s*0px\)/,
+    );
   });
 });
