@@ -23,7 +23,9 @@ packages/
   ui-radix/    pactor-ui-radix    Radix UI kit（与 antd 版契约一致 + radixUiKit + 样式表）
   app/         pactor-app         一站式集成（createPactorApplication）
 examples/
-  admin/       example-admin      管理后台示例（private，StaticDslLoader + 内存 mock，端口 5199）
+  admin/       example-admin      管理后台示例（Radix kit，StaticDslLoader + 内存 mock，端口 5199）
+  admin-antd/  example-admin-antd 管理后台示例（antd kit，DSL 与 example-admin 一致，端口 5299）
+  chat/        example-chat       pactor-chat 对话示例（mock AI 流式 transport，端口 5399）
 docs/          pactor-docs        Astro Starlight 文档站
 ```
 
