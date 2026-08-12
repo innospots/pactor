@@ -8,7 +8,7 @@
 
 核心原则：DSL 是协议、Runtime 是核心、动态 DSL 静态能力（禁 eval/远程 JS）、Registry 管理一切可扩展点、前端权限只管 UI。
 
-## 包结构（packages/，14 个包 + examples/admin、examples/admin-antd）
+## 包结构（packages/，14 个包 + examples/admin、examples/admin-antd、examples/chat）
 
 命名规则：无 npm scope，统一 `pactor-` 前缀，目录名简短。全部已按 npm 发布规范配置（license/repository/exports 双类型/prepublishOnly），包名在 npm 均可用，**但尚未发布、未 git 提交**。
 
@@ -48,7 +48,7 @@
 ## OpenSpec 工作流（本项目标准流程）
 
 - 每个变更：`openspec new change <name>` → proposal/design/specs/tasks 四件 → 实现（多由 coder 子代理完成）→ 主代理独立复跑验收 → tasks 勾选 → 归档时同步 delta specs 到 `openspec/specs/`（主 spec 无 ADDED/MODIFIED 头）→ `mv` 到 `changes/archive/YYYY-MM-DD-<name>`。
-- 已归档 26 个变更；主 specs 43 个能力（`openspec/specs/`）是现状基准。
+- 已归档 27 个变更；主 specs 44 个能力（`openspec/specs/`）是现状基准。
 - 规范细节：scenario 必须 4 个 `#`（####）；MODIFIED 需全量需求块；MODIFIED 合并时注意变更间依赖顺序。
 
 ## 环境与命令
@@ -56,7 +56,8 @@
 - Node >= 18 / pnpm >= 9（实际 node 22 + pnpm 10）。根命令：`pnpm build` / `pnpm test` / `pnpm typecheck` / `pnpm docs:dev`（端口 **4334**）/ `pnpm docs:build` / `pnpm release`。
 - 文档站结构：guides/（getting-started、**events 事件与表单联动**、theming） + **reference/dsl（DSL 完整参考：结构/作用域/数据源/动作/组件 props）** + packages/<包名> + framework-design；新增页面要同步 `docs/astro.config.mjs` sidebar 并重启 dev server。
 - 全量基线：**573 包内测试 + 289 根级测试**，typecheck 0 错误。
-- 示例：`pnpm --filter example-admin dev`（Radix，端口 **5199**）；`pnpm --filter example-admin-antd dev`（antd kit，端口 **5299**）。两个示例页面 DSL 逐字节一致，仅 main.tsx 的 `ui` 预设与样式导入不同（antd 版引 `antd/dist/reset.css`，不引 pcr 皮肤）。
+- 示例：`pnpm --filter example-admin dev`（Radix，端口 **5199**）；`pnpm --filter example-admin-antd dev`（antd kit，端口 **5299**）；`pnpm --filter example-chat dev`（pactor-chat 对话示例，端口 **5399**）。两个 admin 示例页面 DSL 逐字节一致，仅 main.tsx 的 `ui` 预设与样式导入不同（antd 版引 `antd/dist/reset.css`，不引 pcr 皮肤）。
+- **example-chat**（2026-08-12 add-example-chat）：不经 pactor-app，直接组合 `ConversationStore` + mock `ChatTransport`（async generator 分片延迟，`src/mock-ai.ts`）+ `ChatView`/`ChatLayout`；Safe Registry 白名单 Flex/Card/Statistic/Alert/Button（dsl 里塞一个 Table 演示 ChatDenied）；capability `weather.query`（低风险）/ `data.export`（high risk → `window.confirm` 确认链，执行后用 antd `message.success` 反馈）。演示口令：天气 / 报表 / 导出 / 任意提问。
 - **examples 引用 workspace 包的 dist 产物**——改包代码后必须重建该包，示例才能看到效果。
 - 视觉验证用 `playwright-cli`（截图 → ReadMediaFile 读图评审）。
 
