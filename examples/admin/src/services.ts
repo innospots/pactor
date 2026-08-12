@@ -18,19 +18,21 @@ interface Customer {
   name: string;
   phone: string;
   level: string;
+  region: string;
+  city: string;
   owner: string;
   createdAt: string;
 }
 
 const customers: Customer[] = [
-  { id: 1, name: '云栖科技', phone: '13800000001', level: 'A', owner: '张三', createdAt: '2025-01-12' },
-  { id: 2, name: '临平贸易', phone: '13800000002', level: 'B', owner: '李四', createdAt: '2025-02-03' },
-  { id: 3, name: '西湖文创', phone: '13800000003', level: 'A', owner: '张三', createdAt: '2025-03-18' },
-  { id: 4, name: '滨江软件园', phone: '13800000004', level: 'C', owner: '王五', createdAt: '2025-04-25' },
-  { id: 5, name: '未来科技城', phone: '13800000005', level: 'B', owner: '李四', createdAt: '2025-05-30' },
-  { id: 6, name: '钱塘物流', phone: '13800000006', level: 'C', owner: '赵六', createdAt: '2025-06-11' },
-  { id: 7, name: '之江实验室', phone: '13800000007', level: 'A', owner: '王五', createdAt: '2025-07-08' },
-  { id: 8, name: '富春智造', phone: '13800000008', level: 'B', owner: '赵六', createdAt: '2025-08-19' },
+  { id: 1, name: '云栖科技', phone: '13800000001', level: 'A', region: '浙江', city: '杭州', owner: '张三', createdAt: '2025-01-12' },
+  { id: 2, name: '临平贸易', phone: '13800000002', level: 'B', region: '浙江', city: '杭州', owner: '李四', createdAt: '2025-02-03' },
+  { id: 3, name: '西湖文创', phone: '13800000003', level: 'A', region: '浙江', city: '宁波', owner: '张三', createdAt: '2025-03-18' },
+  { id: 4, name: '滨江软件园', phone: '13800000004', level: 'C', region: '浙江', city: '杭州', owner: '王五', createdAt: '2025-04-25' },
+  { id: 5, name: '未来科技城', phone: '13800000005', level: 'B', region: '江苏', city: '南京', owner: '李四', createdAt: '2025-05-30' },
+  { id: 6, name: '钱塘物流', phone: '13800000006', level: 'C', region: '江苏', city: '苏州', owner: '赵六', createdAt: '2025-06-11' },
+  { id: 7, name: '之江实验室', phone: '13800000007', level: 'A', region: '广东', city: '深圳', owner: '王五', createdAt: '2025-07-08' },
+  { id: 8, name: '富春智造', phone: '13800000008', level: 'B', region: '广东', city: '广州', owner: '赵六', createdAt: '2025-08-19' },
 ];
 
 const DELAY_MS = 300;
@@ -73,6 +75,8 @@ const update: ServiceHandler = (params) => {
     name: typeof params['name'] === 'string' && params['name'] !== '' ? params['name'] : current.name,
     phone: typeof params['phone'] === 'string' && params['phone'] !== '' ? params['phone'] : current.phone,
     level: typeof params['level'] === 'string' && params['level'] !== '' ? params['level'] : current.level,
+    region: typeof params['region'] === 'string' && params['region'] !== '' ? params['region'] : current.region,
+    city: typeof params['city'] === 'string' && params['city'] !== '' ? params['city'] : current.city,
   };
   customers[index] = next;
   return delay({ ...next });

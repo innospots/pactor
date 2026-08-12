@@ -34,6 +34,18 @@ export type ComponentRegistry = Registry<unknown>;
 /** Capability Registry（设计文档第 37 节预留） */
 export type CapabilityRegistry = Registry<unknown>;
 
+/**
+ * Form 句柄（表单联动桥，决策同 UiBridge）：
+ * Form 组件挂载时注册、卸载注销；`form.setValues` 动作经它写入字段值。
+ * setValues 不触发校验与 onValuesChange（避免联动循环）。
+ */
+export interface FormHandle {
+  setValues(values: Record<string, unknown>): void;
+}
+
+/** Form Registry：表单名 → 句柄（缺省名 'default'） */
+export type FormRegistry = Registry<FormHandle>;
+
 /** 路由上下文：参数 + 导航能力（navigate 委托给 RouterAdapter） */
 export interface RouteContext {
   params: Record<string, unknown>;
@@ -55,6 +67,8 @@ export interface RuntimeContext {
   services: ServiceRegistry;
   components: ComponentRegistry;
   actions: ActionRegistry;
+  /** 表单句柄注册表：Form 组件挂载注册，`form.setValues` 动作寻址 */
+  forms: FormRegistry;
   /**
    * 命名动作结果记录（设计文档第 48 节，决策 D2）：
    * 带 `id` 的动作执行完成后写入——成功时为结果数据，失败时为
@@ -84,6 +98,7 @@ export interface CreateRuntimeContextOptions {
   services?: ServiceRegistry;
   components?: ComponentRegistry;
   actions?: ActionRegistry;
+  forms?: FormRegistry;
   permission?: PermissionAdapter;
   router?: RouterAdapter;
   http?: HttpAdapter;
@@ -106,6 +121,7 @@ export function createRuntimeContext(
   const components =
     options.components ?? new Registry<unknown>('ComponentRegistry');
   const actions = options.actions ?? new Registry('ActionRegistry');
+  const forms = options.forms ?? new Registry<FormHandle>('FormRegistry');
   const capabilities =
     options.capabilities ?? new Registry<unknown>('CapabilityRegistry');
   const permission = options.permission ?? createDefaultPermissionAdapter();
@@ -137,6 +153,7 @@ export function createRuntimeContext(
     services,
     components,
     actions,
+    forms,
     actionResults: {},
     permission,
     capabilities,

@@ -132,6 +132,59 @@ describe('内置动作 setState / resetState', () => {
   });
 });
 
+describe('内置动作 form.setValues', () => {
+  it('values 求值后写入已注册句柄（缺省 default）', async () => {
+    const { engine, context } = setup({ state: { next: '杭州' } });
+    const setValues = vi.fn();
+    context.forms.register('default', { setValues });
+
+    const result = await engine.execute({
+      action: 'form.setValues',
+      params: { values: { city: '${state.next}', district: '' } },
+    });
+
+    expect(result.ok).toBe(true);
+    expect(setValues).toHaveBeenCalledWith({ city: '杭州', district: '' });
+  });
+
+  it('按 form 名寻址', async () => {
+    const { engine, context } = setup();
+    const defaultSet = vi.fn();
+    const editSet = vi.fn();
+    context.forms.register('default', { setValues: defaultSet });
+    context.forms.register('edit', { setValues: editSet });
+
+    await engine.execute({
+      action: 'form.setValues',
+      params: { form: 'edit', values: { city: '' } },
+    });
+
+    expect(defaultSet).not.toHaveBeenCalled();
+    expect(editSet).toHaveBeenCalledWith({ city: '' });
+  });
+
+  it('句柄未注册时受控失败', async () => {
+    const { engine } = setup();
+
+    const result = await engine.execute({
+      action: 'form.setValues',
+      params: { values: { city: '' } },
+    });
+
+    expect(result.ok).toBe(false);
+    expect(result.error?.message).toContain('未注册');
+  });
+
+  it('缺少 values 时受控失败', async () => {
+    const { engine, context } = setup();
+    context.forms.register('default', { setValues: vi.fn() });
+
+    const result = await engine.execute({ action: 'form.setValues' });
+
+    expect(result.ok).toBe(false);
+  });
+});
+
 describe('内置动作 reload', () => {
   function withDataSources() {
     const loads: string[] = [];

@@ -15,6 +15,8 @@ export type {
   CapabilityRegistry,
   ComponentRegistry,
   CreateRuntimeContextOptions,
+  FormHandle,
+  FormRegistry,
   LocalScope,
   RouteContext,
   RuntimeContext,

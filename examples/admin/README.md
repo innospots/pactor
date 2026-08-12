@@ -33,6 +33,7 @@ pnpm --filter example-admin build  # 构建（插件构建期强校验全部页�
 - **service 数据源**：列表页 Table 经 `customer.list` mock 加载（`dataSource: ${data.customers}`）。
 - **Form 查询链路**：输入关键词提交 → `setState` + `reload` → 数据源以新 keyword 重新加载（感受 300ms 模拟延迟）。
 - **cell 行模板 + overlay.open**：行内"编辑"打开抽屉（drawer），内嵌表单；行数据经 `params` 注入抽屉作用域（`${params.name}`），字段级 `value` 回填现值。
+- **表单联动**：抽屉表单命名 `name: edit`（页面查询表单占用 default）；省份 Select 的 `onChange` → `form.setValues` 清空城市 + `setState` 查 `cityMap` 更新城市选项（`${state.cityMap[event]}` 计算成员访问）；打开抽屉前先按行数据初始化 cityOptions。
 - **命名动作结果链路**：抽屉表单提交 → `service.call`（`id: updateResult`）→ 成功 `overlay.close { success: true }` → `if ${actions.editResult.success}` → reload 列表 + 成功 message；直接关闭抽屉（X / 遮罩 / Escape）为取消语义，不 reload。
 - **navigate**：编辑页（`/customers/:id/edit`）提交成功后 `navigate` 回列表；"返回列表"按钮同。
 - **route.params 驱动**：编辑页 detail 数据源入参 `${route.params.id}`。

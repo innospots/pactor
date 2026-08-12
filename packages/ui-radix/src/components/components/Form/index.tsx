@@ -1,7 +1,7 @@
 import { Root as FormRoot } from '@radix-ui/react-form';
 import type { FieldRule, FormProps } from 'pactor-ui-antd/components';
 import { useRenderer } from 'pactor-runtime';
-import { useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import { FormContextProvider, type FormContextValue } from './context.js';
 
@@ -20,6 +20,7 @@ function isEmpty(value: unknown): boolean {
  * 3. 以 values 调用 onSubmit（Renderer 把它放入 `event` 作用域）
  */
 export function Form({
+  name = 'default',
   layout = 'vertical',
   initialValues,
   children,
@@ -35,6 +36,20 @@ export function Form({
   // 已合并字段级初始值的字段集合：useEffect 无依赖导致每次渲染重注册，
   // 以 ref 记录保证初始值只写入一次（不清除，否则每次渲染都会重写覆盖用户输入）
   const mergedInitialFieldsRef = useRef(new Set<string>());
+
+  // 批量写入（form.setValues 联动桥）：函数式 setState 保持稳定引用，
+  // 不触发 onValuesChange、不动 errors（语义对齐 antd setFieldsValue）
+  const setValuesBatch = useCallback((partial: Record<string, unknown>) => {
+    setValues((prev) => ({ ...prev, ...partial }));
+  }, []);
+
+  // 表单联动桥：挂载注册句柄、卸载注销
+  useEffect(() => {
+    context.forms.register(name, { setValues: setValuesBatch });
+    return () => {
+      context.forms.unregister(name);
+    };
+  }, [context, name, setValuesBatch]);
 
   const formContext = useMemo<FormContextValue>(
     () => ({
@@ -54,6 +69,7 @@ export function Form({
         });
         onValuesChange?.({ [name]: value }, next);
       },
+      setValues: setValuesBatch,
       registerField(name, rules, initialValue) {
         fieldRulesRef.current.set(name, rules);
         // 字段级初始值：仅首次注册时写入（字段级优先于 initialValues）
@@ -69,7 +85,7 @@ export function Form({
         fieldRulesRef.current.delete(name);
       },
     }),
-    [values, errors, onValuesChange],
+    [values, errors, onValuesChange, setValuesBatch],
   );
 
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {

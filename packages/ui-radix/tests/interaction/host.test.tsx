@@ -1,7 +1,7 @@
 // @vitest-environment jsdom
 import './setup.js';
 
-import { cleanup, fireEvent, render, screen } from '@testing-library/react';
+import { cleanup, fireEvent, render, screen, act } from '@testing-library/react';
 import type { PageDsl } from 'pactor-core';
 import {
   createUiBridge,
@@ -60,6 +60,26 @@ describe('Modal / Drawer 渲染（Radix 实现）', () => {
     expect(document.querySelector('.pcr-modal-content')).toBeTruthy();
     await screen.findByText('详情内容');
     expect(document.querySelector('.ant-modal')).toBeNull();
+  });
+
+  it('overlay 内容绑定 state 的表达式随 state 变化重渲染（表单联动基础）', async () => {
+    const { context, manager } = setupHost();
+    context.components.register('Text', ({ value }: { value?: string }) => (
+      <span>{value}</span>
+    ));
+
+    context.state.set('label', '初始');
+    void manager.open({
+      type: 'modal',
+      title: '联动',
+      content: { type: 'Text', props: { value: '${state.label}' } },
+    });
+    await screen.findByText('初始');
+
+    act(() => {
+      context.state.set('label', '更新后');
+    });
+    await screen.findByText('更新后');
   });
 
   it('type 为 drawer 时渲染自绘侧边面板（.pcr-drawer-*）并应用 title', async () => {

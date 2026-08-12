@@ -18,8 +18,13 @@ export default defineConfig({
           label: '指南',
           items: [
             { label: '快速开始', slug: 'guides/getting-started' },
+            { label: '事件与表单联动', slug: 'guides/events' },
             { label: '主题与换肤', slug: 'guides/theming' },
           ],
+        },
+        {
+          label: '参考',
+          items: [{ label: 'DSL 参考', slug: 'reference/dsl' }],
         },
         {
           label: '模块',

@@ -16,6 +16,8 @@ export interface FormContextValue {
   errors: Record<string, string>;
   /** 更新字段值（受控写入并清除该字段错误） */
   setValue(name: string, value: unknown): void;
+  /** 批量写入字段值（form.setValues 联动桥）：不触发 onValuesChange 与校验 */
+  setValues(values: Record<string, unknown>): void;
   /**
    * 注册字段校验规则（提交时统一校验）；
    * `initialValue` 为字段级初始值（value prop），仅在该字段首次注册时合并
