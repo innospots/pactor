@@ -49,6 +49,17 @@ export {
 // DSL 白名单守卫（零 React）
 export { CHAT_DENIED_TYPE, guardChatDsl } from './dsl-guard.js';
 
+// 流式交互 hooks（技术选型参考 DeepTutor web，独立实现）
+export {
+  useSmoothStreamText,
+  type UseSmoothStreamTextOptions,
+} from './hooks/use-smooth-stream-text.js';
+export {
+  useChatAutoScroll,
+  type UseChatAutoScrollOptions,
+  type UseChatAutoScrollResult,
+} from './hooks/use-chat-auto-scroll.js';
+
 // React 视图
 export { ChatView, type ChatViewProps } from './view/ChatView.js';
 export { MessageBubble, type MessageBubbleProps } from './view/MessageBubble.js';

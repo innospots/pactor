@@ -10,9 +10,9 @@ body {
   background: #f5f5f5;
 }
 
+/* 示例外壳：居中对话面板（皮肤本身由 pactor-chat/styles.css 提供） */
 .pactor-chat-layout {
   max-width: 860px;
   margin: 0 auto;
-  background: #fff;
   box-shadow: 0 0 8px rgb(0 0 0 / 6%);
 }

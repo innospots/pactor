@@ -74,6 +74,29 @@ describe('runChatTurn + createManualDriver（spec: chat-streaming / ChatTranspor
     const { assistantMessageId } = await turn;
     expect(store.getMessage(assistantMessageId)?.status).toBe('completed');
   });
+
+  it('abort 取消 turn：assistant 消息以 cancelled 收尾并正常返回（spec: abort 取消 turn）', async () => {
+    const store = new ConversationStore();
+    const driver = createManualDriver();
+    const controller = new AbortController();
+    const turn = runChatTurn(store, driver.transport, { text: 'hi' }, { signal: controller.signal });
+
+    driver.push({ type: 'text.delta', messageId: 'x', delta: '半截内容' });
+    await vi_waitMicrotask();
+    controller.abort();
+    // abort 后 driver 再推送的事件不应再落到 store；结束流让 for-await 退出
+    driver.push({ type: 'text.delta', messageId: 'x', delta: '不应出现' });
+    driver.complete();
+
+    const { assistantMessageId } = await turn;
+    const assistant = store.getMessage(assistantMessageId)!;
+    expect(assistant.status).toBe('cancelled');
+    const text = assistant.parts
+      .filter((p) => p.type === 'text')
+      .map((p) => (p as { content: string }).content)
+      .join('');
+    expect(text).toBe('半截内容');
+  });
 });
 
 async function vi_waitMicrotask(): Promise<void> {

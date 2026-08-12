@@ -1,21 +1,33 @@
-import { Alert, Collapse } from 'antd';
+import {
+  Brain,
+  CheckCircle2,
+  ChevronRight,
+  CircleAlert,
+  Clock,
+  Loader2,
+  XCircle,
+} from 'lucide-react';
 import { MarkdownRenderer } from 'pactor-markdown';
 import { DslRenderer, useRenderer } from 'pactor-runtime';
-import type { ReactNode } from 'react';
+import { useState, type ReactNode } from 'react';
 
 import { guardChatDsl } from '../dsl-guard.js';
+import { useSmoothStreamText } from '../hooks/use-smooth-stream-text.js';
 import type { ChatPart } from '../model.js';
 import { buildChatScope, type ChatRuntime, type ChatScope } from '../scope.js';
 
 /**
- * PartRenderer（设计决策 D6）：按 part 类型渲染。
+ * PartRenderer：按 part 类型渲染。
  *
  * - text → 文本段落；markdown → pactor-markdown 安全渲染器
+ *   （streaming 期间经 useSmoothStreamText 打字机揭示）
  * - dsl → runtime DslRenderer（Safe Registry + chat 作用域），
  *   白名单外节点经 guardChatDsl 替换为受控"不允许"占位
- * - tool-call / tool-result → antd Collapse 状态卡（设计文档第 71 节）
- * - thinking → 默认折叠（第 72 节，与正文分离）
- * - error → antd Alert；status → 弱提示文本
+ * - tool-call / tool-result / thinking → 自绘折叠卡（lucide 状态图标）
+ * - error → 自绘警示条；status → 弱提示文本
+ *
+ * 视图零 antd 依赖，颜色经 `pactor-chat/styles.css` 的
+ * `--pactor-chat-*` 变量表达。
  */
 export interface PartRendererProps {
   part: ChatPart;
@@ -23,29 +35,27 @@ export interface PartRendererProps {
   runtime?: ChatRuntime;
   /** dsl part 的 chat 作用域 */
   scope?: ChatScope;
+  /** 所属消息是否流式中（text/markdown 启用平滑揭示） */
+  streaming?: boolean;
 }
 
 /** 白名单外组件的受控占位（注册名 ChatDenied，见 dsl-guard） */
 export function ChatDenied({ deniedType }: { deniedType?: string }) {
   return (
-    <div
-      className="pactor-chat-denied"
-      data-pactor-chat-denied={deniedType}
-      style={{
-        border: '1px dashed #d9d9d9',
-        borderRadius: 4,
-        padding: 8,
-        color: '#8c8c8c',
-        fontSize: 12,
-      }}
-    >
+    <div className="pactor-chat-denied" data-pactor-chat-denied={deniedType}>
       该组件不允许在 Chat 中使用{deniedType ? `：${deniedType}` : ''}
     </div>
   );
 }
 
 /** 在 DslRenderer 上下文内注入 chat 局部作用域渲染 DSL 子树 */
-function ChatDslNode({ node, scope }: { node: NonNullable<ChatDslSchema>; scope?: ChatScope }) {
+function ChatDslNode({
+  node,
+  scope,
+}: {
+  node: NonNullable<ChatDslSchema>;
+  scope?: ChatScope;
+}) {
   const renderer = useRenderer();
   const extraScope = scope ? buildChatScope(scope) : undefined;
   return <>{renderer.renderChildren([node], extraScope)}</>;
@@ -60,42 +70,93 @@ const TOOL_STATUS_TEXT: Record<string, string> = {
   failed: '失败',
 };
 
-export function PartRenderer({ part, runtime, scope }: PartRendererProps) {
+/** 工具状态图标：running 旋转、success 对勾、failed 叉、waiting 时钟 */
+function ToolStatusIcon({ status }: { status: string }) {
+  if (status === 'running') {
+    return <Loader2 size={14} className="pactor-chat-spin" />;
+  }
+  if (status === 'success') {
+    return <CheckCircle2 size={14} />;
+  }
+  if (status === 'failed') {
+    return <XCircle size={14} />;
+  }
+  return <Clock size={14} />;
+}
+
+/** 自绘折叠卡（thinking / tool-call / tool-result 共用） */
+function CollapseCard({
+  icon,
+  title,
+  status,
+  defaultOpen = false,
+  children,
+}: {
+  icon: ReactNode;
+  title: ReactNode;
+  /** 状态修饰（running/success/failed），着色用 */
+  status?: string;
+  defaultOpen?: boolean;
+  children: ReactNode;
+}) {
+  const [open, setOpen] = useState(defaultOpen);
+  return (
+    <div className="pactor-chat-collapse" data-open={open}>
+      <button
+        type="button"
+        className="pactor-chat-collapse__header"
+        aria-expanded={open}
+        onClick={() => setOpen((value) => !value)}
+      >
+        <span className="pactor-chat-collapse__chevron">
+          <ChevronRight size={13} />
+        </span>
+        <span
+          className={
+            status ? `pactor-chat-collapse__status--${status}` : undefined
+          }
+        >
+          {icon}
+        </span>
+        <span>{title}</span>
+      </button>
+      {open && <div className="pactor-chat-collapse__body">{children}</div>}
+    </div>
+  );
+}
+
+/** streaming 期间的 text part：打字机揭示 */
+function SmoothText({ content, streaming }: { content: string; streaming: boolean }) {
+  const shown = useSmoothStreamText(content, streaming);
+  return <div className="pactor-chat-text">{shown}</div>;
+}
+
+/** streaming 期间的 markdown part：打字机揭示 */
+function SmoothMarkdown({ content, streaming }: { content: string; streaming: boolean }) {
+  const shown = useSmoothStreamText(content, streaming);
+  return <MarkdownRenderer content={shown} />;
+}
+
+export function PartRenderer({ part, runtime, scope, streaming = false }: PartRendererProps) {
   switch (part.type) {
     case 'text':
-      return (
-        <div className="pactor-chat-text" style={{ whiteSpace: 'pre-wrap' }}>
-          {part.content}
-        </div>
-      );
+      return <SmoothText content={part.content} streaming={streaming} />;
 
     case 'markdown':
-      return <MarkdownRenderer content={part.content} />;
+      return <SmoothMarkdown content={part.content} streaming={streaming} />;
 
     case 'thinking':
       return (
-        <Collapse
-          className="pactor-chat-thinking"
-          ghost
-          items={[
-            {
-              key: 'thinking',
-              label: '思考过程',
-              children: (
-                <div style={{ whiteSpace: 'pre-wrap', color: '#8c8c8c' }}>
-                  {part.content}
-                </div>
-              ),
-            },
-          ]}
-        />
+        <CollapseCard icon={<Brain size={14} />} title="思考过程">
+          {part.content}
+        </CollapseCard>
       );
 
     case 'dsl': {
       if (!part.schema || !runtime) {
         // dsl.start 占位阶段 / 未注入 Safe Registry 运行时
         return (
-          <div className="pactor-chat-dsl-pending" style={{ color: '#8c8c8c', fontSize: 12 }}>
+          <div className="pactor-chat-dsl-pending">
             {part.schema ? 'DSL 渲染不可用（未注入 Safe Registry）' : '内容生成中…'}
           </div>
         );
@@ -112,54 +173,40 @@ export function PartRenderer({ part, runtime, scope }: PartRendererProps) {
 
     case 'tool-call':
       return (
-        <Collapse
-          className="pactor-chat-tool"
-          ghost
-          items={[
-            {
-              key: 'tool',
-              label: `${part.title ?? part.name} · ${TOOL_STATUS_TEXT[part.status] ?? part.status}`,
-              children: (
-                <div style={{ fontSize: 12, color: '#8c8c8c' }}>
-                  工具：{part.name}
-                </div>
-              ),
-            },
-          ]}
-        />
+        <CollapseCard
+          icon={<ToolStatusIcon status={part.status} />}
+          title={`${part.title ?? part.name} · ${TOOL_STATUS_TEXT[part.status] ?? part.status}`}
+          status={part.status}
+        >
+          工具：{part.name}
+        </CollapseCard>
       );
 
     case 'tool-result':
       return (
-        <Collapse
-          className="pactor-chat-tool"
-          ghost
-          items={[
-            {
-              key: 'tool-result',
-              label: `${part.name} 结果 · ${TOOL_STATUS_TEXT[part.status] ?? part.status}`,
-              children: (
-                <pre style={{ margin: 0, fontSize: 12, whiteSpace: 'pre-wrap' }}>
-                  {part.status === 'failed'
-                    ? (part.error ?? '执行失败')
-                    : formatResult(part.result)}
-                </pre>
-              ),
-            },
-          ]}
-        />
+        <CollapseCard
+          icon={<ToolStatusIcon status={part.status} />}
+          title={`${part.name} 结果 · ${TOOL_STATUS_TEXT[part.status] ?? part.status}`}
+          status={part.status}
+        >
+          <pre>
+            {part.status === 'failed'
+              ? (part.error ?? '执行失败')
+              : formatResult(part.result)}
+          </pre>
+        </CollapseCard>
       );
 
     case 'error':
-      // DSL 语义为 message；antd v6 对应 prop 为 title（同 components Alert 适配约定）
-      return <Alert type="error" title={part.message} />;
-
-    case 'status':
       return (
-        <div className="pactor-chat-status" style={{ color: '#8c8c8c', fontSize: 12 }}>
-          {part.text}
+        <div className="pactor-chat-error" role="alert">
+          <CircleAlert size={14} />
+          <span>{part.message}</span>
         </div>
       );
+
+    case 'status':
+      return <div className="pactor-chat-status">{part.text}</div>;
 
     default:
       return null;

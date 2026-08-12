@@ -20,7 +20,7 @@ pnpm --filter example-chat dev   # http://localhost:5399
 
 ## 代码导览
 
-- `src/main.tsx` — 组合 `ChatLayout` + `ChatView`（store / transport / safeRegistry / capabilities / confirm）
+- `src/main.tsx` — 组合 `ChatLayout` + `ChatView`（store / transport / safeRegistry / capabilities / confirm）；引入 `pactor-chat/styles.css` 皮肤与 `katex/dist/katex.min.css`（公式渲染）
 - `src/mock-ai.ts` — mock `ChatTransport`：async generator 按意图分片产出 `ChatEvent`，模拟 SSE 节奏；真实接入时替换为对接服务端的实现
 - `src/safe-registry.ts` — Safe Registry 白名单（`createSafeRegistry` 包装 antd 内置组件表）
 - `src/capabilities.ts` — capability 白名单：`weather.query`（低风险直执行）、`data.export`（高风险，confirm 确认链）

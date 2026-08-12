@@ -160,7 +160,7 @@ describe('PartRenderer（spec: chat-view / PartRenderer）', () => {
     await screen.findByText(/该组件不允许在 Chat 中使用：Input/);
   });
 
-  it('tool 状态卡：tool-call running 渲染名称与状态，可折叠（spec: tool 状态卡）', async () => {
+  it('tool 状态卡：tool-call running 渲染名称与状态，点击头部展开/折叠（spec: tool 状态卡）', async () => {
     const store = createStore();
     store.appendMessage({
       id: 'a1',
@@ -173,7 +173,14 @@ describe('PartRenderer（spec: chat-view / PartRenderer）', () => {
 
     render(<ChatView store={store} />);
     await screen.findByText(/搜索数据 · 执行中/);
-    expect(document.querySelector('.pactor-chat-tool')).toBeTruthy();
+    const card = document.querySelector('.pactor-chat-collapse')!;
+    expect(card.getAttribute('data-open')).toBe('false');
+    // 默认折叠：工具详情不在文档中
+    expect(screen.queryByText('工具：search')).toBeNull();
+    // 点击头部展开
+    fireEvent.click(screen.getByText(/搜索数据 · 执行中/));
+    expect(card.getAttribute('data-open')).toBe('true');
+    expect(screen.getByText('工具：search')).toBeTruthy();
   });
 
   it('thinking 默认折叠，与正文分离（spec: thinking 折叠）', async () => {
@@ -243,6 +250,59 @@ describe('Composer（spec: chat-view / Composer）', () => {
     fireEvent.change(textarea, { target: { value: '   ' } });
     fireEvent.keyDown(textarea, { key: 'Enter' });
     expect(onSend).not.toHaveBeenCalled();
+  });
+
+  it('流式中显示停止按钮，点击触发 onStop（spec: 流式中停止）', () => {
+    const onStop = vi.fn();
+    render(<Composer streaming onStop={onStop} />);
+    expect(screen.queryByRole('button', { name: '发送' })).toBeNull();
+    fireEvent.click(screen.getByRole('button', { name: '停止生成' }));
+    expect(onStop).toHaveBeenCalled();
+  });
+});
+
+describe('ChatView 流式停止与操作条（spec: chat-view）', () => {
+  it('流式中点击停止按钮：turn 取消，assistant 消息以 cancelled 收尾（spec: 流式中停止）', async () => {
+    const store = createStore();
+    const driver = createManualDriver();
+    render(<ChatView store={store} transport={driver.transport} />);
+
+    fireEvent.change(document.querySelector('.pactor-chat-composer textarea')!, {
+      target: { value: '开始' },
+    });
+    fireEvent.keyDown(document.querySelector('.pactor-chat-composer textarea')!, {
+      key: 'Enter',
+    });
+    driver.push({ type: 'text.delta', messageId: 'x', delta: '半截' });
+    await screen.findByText('半截');
+
+    fireEvent.click(await screen.findByRole('button', { name: '停止生成' }));
+    driver.complete();
+
+    await vi.waitFor(() => {
+      const assistant = store.getMessages().find((m) => m.role === 'assistant')!;
+      expect(assistant.status).toBe('cancelled');
+    });
+  });
+
+  it('hover 操作条：复制 assistant 消息文本（spec: 复制消息）', async () => {
+    const writeText = vi.fn().mockResolvedValue(undefined);
+    Object.defineProperty(navigator, 'clipboard', {
+      value: { writeText },
+      configurable: true,
+    });
+    const store = createStore();
+    store.appendMessage({
+      id: 'a1',
+      role: 'assistant',
+      status: 'completed',
+      parts: [{ type: 'markdown', content: '**结论**：一切正常', status: 'ready' }],
+    });
+
+    render(<ChatView store={store} />);
+    fireEvent.click(screen.getByRole('button', { name: '复制' }));
+    expect(writeText).toHaveBeenCalledWith('**结论**：一切正常');
+    await screen.findByRole('button', { name: '已复制' });
   });
 });
 

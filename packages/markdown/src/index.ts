@@ -8,3 +8,7 @@ export type { MarkdownDslComponentProps } from './dsl-component.js';
 
 // 注册入口
 export { MARKDOWN_DSL_TYPE, registerMarkdownComponents } from './register.js';
+
+// 代码高亮（技术选型参考 DeepTutor web：react-syntax-highlighter Light 构建）
+export { CodeBlock, registerCodeLanguages } from './code-block.js';
+export type { CodeBlockProps } from './code-block.js';

@@ -70,3 +70,74 @@ describe('MarkdownRenderer 元素渲染', () => {
     expect(image.getAttribute('alt')).toBe('示意图');
   });
 });
+
+/** 代码语法高亮（spec: markdown-renderer / Requirement: 代码语法高亮） */
+describe('MarkdownRenderer 代码语法高亮', () => {
+  it('已知语言经高亮渲染：token 拆分为 span（Scenario: 已知语言高亮）', () => {
+    const { container } = render(
+      <MarkdownRenderer content={'```ts\nconst answer: number = 42;\n```'} />,
+    );
+    const code = container.querySelector('pre code')!;
+    expect(code.className).toContain('language-ts');
+    // 高亮 token 化后出现带 style 的 span
+    expect(code.querySelector('span[style]')).toBeTruthy();
+    expect(code.textContent).toContain('const answer: number = 42;');
+  });
+
+  it('未注册语言降级为普通 pre/code，无高亮 token', () => {
+    const { container } = render(
+      <MarkdownRenderer content={'```cobol\nDISPLAY "HI".\n```'} />,
+    );
+    const code = container.querySelector('pre code')!;
+    expect(code.className).toContain('language-cobol');
+    expect(code.querySelector('span[style]')).toBeNull();
+  });
+
+  it('codeHighlight=false 时已知语言也以普通 pre/code 渲染（Scenario: 关闭高亮）', () => {
+    const { container } = render(
+      <MarkdownRenderer
+        codeHighlight={false}
+        content={'```ts\nconst answer: number = 42;\n```'}
+      />,
+    );
+    const code = container.querySelector('pre code')!;
+    expect(code.className).toContain('language-ts');
+    expect(code.querySelector('span[style]')).toBeNull();
+  });
+});
+
+/** 数学公式渲染（spec: markdown-renderer / Requirement: 数学公式渲染） */
+describe('MarkdownRenderer 数学公式', () => {
+  it('块级与行内公式渲染为 KaTeX 结构（Scenario: 块级公式）', () => {
+    const { container } = render(
+      <MarkdownRenderer content={'行内 $E=mc^2$ 公式\n\n$$\\int_0^1 x\\,dx = \\frac{1}{2}$$'} />,
+    );
+    const katex = container.querySelectorAll('.katex');
+    expect(katex.length).toBeGreaterThanOrEqual(2);
+    // 块级公式的 TeX 源保留在 annotation 中
+    const annotations = [...container.querySelectorAll('annotation')].map((a) =>
+      a.textContent,
+    );
+    expect(annotations).toContain('E=mc^2');
+    expect(annotations).toContain('\\int_0^1 x\\,dx = \\frac{1}{2}');
+  });
+
+  it('math=false 时公式按原文渲染', () => {
+    const { container } = render(
+      <MarkdownRenderer math={false} content={'$$E=mc^2$$'} />,
+    );
+    expect(container.querySelector('.katex')).toBeNull();
+    expect(container.textContent).toContain('E=mc^2');
+  });
+
+  it('启用 math 后安全约束不变：script 与 javascript: 链接仍被拒绝（Scenario: 安全约束不变）', () => {
+    const { container } = render(
+      <MarkdownRenderer
+        content={'<script>alert(1)</script>\n\n[点我](javascript:alert(1))'}
+      />,
+    );
+    expect(container.querySelector('script')).toBeNull();
+    expect(container.querySelector('a')).toBeNull();
+    expect(container.textContent).toContain('点我');
+  });
+});

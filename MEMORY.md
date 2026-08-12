@@ -23,8 +23,8 @@
 | 能力 | `pactor-permission` | PermissionStore + 四层守卫（零 React，结构化兼容 runtime） |
 | | `pactor-resource` | DSL 资源加载（Http/Static Loader、`id@version` 缓存、ETag、inflight 去重） |
 | | `pactor-router` | MenuRegistry/PathMatcher/NavigationBridge + `pactor-router/react` 子入口（DynamicDslRoute） |
-| | `pactor-markdown` | react-markdown 安全渲染（禁 raw HTML、协议白名单）+ DSL Markdown 组件 |
-| | `pactor-chat` | Chat 消息模型/SSE reducer/Safe Registry/capability 动作/ChatView |
+| | `pactor-markdown` | react-markdown 安全渲染（禁 raw HTML、协议白名单）+ 代码高亮（react-syntax-highlighter Light）+ KaTeX 数学 + DSL Markdown 组件 |
+| | `pactor-chat` | Chat 消息模型/SSE reducer/Safe Registry/capability 动作/ChatView（视图零 antd：lucide 图标 + `styles.css` 皮肤 + smooth-stream/auto-scroll hooks） |
 | 集成 | `pactor-app` | `createPactorApplication({ appId, api|loader, ui?, componentRegistry?, layoutRegistry?, interactionKit?, ... }).mount()` |
 | 工具链 | `pactor-vite-plugin` | `import x from '*.page.yaml'`：YAML→校验→JS 模块 |
 | | `pactor-cli` | bin `pactor`：validate/inspect/lint/schema/build/create 六命令 |
@@ -43,19 +43,20 @@
 - **示例登录模式**：会话存 localStorage（`src/auth.ts`），`createBootstrap()` 按会话返回 `login`/`admin` 布局形态（布局类型由 bootstrap 决定，全应用单布局）；登录/登出后须整页重载重取 bootstrap——示例用自定义 `app.reload` 动作（`window.location.assign`），路由守卫（未登录→/login）在 main.tsx DSL 之外。
 - **Radix Select 坑**：值从 uncontrolled→controlled 切换会以空串回调清值；`Select.Value` 未渲染过 item 时解析不到选中文案——已修复（`value={key ?? ''}` + 忽略空 key + 显式 label children）。
 - **主题换肤**：覆盖 `--pcr-*` CSS 变量 / `<html data-pactor-theme="dark">` / 覆盖 `.pcr-*` class；参考 `examples/admin/src/theme.css`；文档 `guides/theming`。
+- **Chat 视图**（2026-08-12 polish-chat-view，参考 DeepTutor web 技术选型独立实现）：零 antd（lucide-react 图标 + `pactor-chat/styles.css` 皮肤 `--pactor-chat-*` 变量 + `data-pactor-theme="dark"` 暗色）；`useSmoothStreamText`（rAF 打字机）/ `useChatAutoScroll`（80px 释放、40px 回底、容器须 `overflow-anchor:none`）；`runChatTurn` 支持 `signal`（abort → cancelled 收尾不抛错）；MessageBubble user 右气泡 / assistant 通栏 + hover 复制条；Composer 自适应 textarea + 流式停止按钮。
 - **Chat 安全**：LLM DSL 走 Safe Registry 白名单（`guardChatDsl` 替换为 ChatDenied 占位）；AI 动作走 capability 链（registry → permission → confirm → execute）。
 
 ## OpenSpec 工作流（本项目标准流程）
 
 - 每个变更：`openspec new change <name>` → proposal/design/specs/tasks 四件 → 实现（多由 coder 子代理完成）→ 主代理独立复跑验收 → tasks 勾选 → 归档时同步 delta specs 到 `openspec/specs/`（主 spec 无 ADDED/MODIFIED 头）→ `mv` 到 `changes/archive/YYYY-MM-DD-<name>`。
-- 已归档 27 个变更；主 specs 44 个能力（`openspec/specs/`）是现状基准。
+- 已归档 28 个变更；主 specs 44 个能力（`openspec/specs/`）是现状基准。
 - 规范细节：scenario 必须 4 个 `#`（####）；MODIFIED 需全量需求块；MODIFIED 合并时注意变更间依赖顺序。
 
 ## 环境与命令
 
 - Node >= 18 / pnpm >= 9（实际 node 22 + pnpm 10）。根命令：`pnpm build` / `pnpm test` / `pnpm typecheck` / `pnpm docs:dev`（端口 **4334**）/ `pnpm docs:build` / `pnpm release`。
 - 文档站结构：guides/（getting-started、**events 事件与表单联动**、theming） + **reference/dsl（DSL 完整参考：结构/作用域/数据源/动作/组件 props）** + packages/<包名> + framework-design；新增页面要同步 `docs/astro.config.mjs` sidebar 并重启 dev server。
-- 全量基线：**573 包内测试 + 289 根级测试**，typecheck 0 错误。
+- 全量基线：**591 包内测试 + 329 根级测试**，typecheck 0 错误。
 - 示例：`pnpm --filter example-admin dev`（Radix，端口 **5199**）；`pnpm --filter example-admin-antd dev`（antd kit，端口 **5299**）；`pnpm --filter example-chat dev`（pactor-chat 对话示例，端口 **5399**）。两个 admin 示例页面 DSL 逐字节一致，仅 main.tsx 的 `ui` 预设与样式导入不同（antd 版引 `antd/dist/reset.css`，不引 pcr 皮肤）。
 - **example-chat**（2026-08-12 add-example-chat）：不经 pactor-app，直接组合 `ConversationStore` + mock `ChatTransport`（async generator 分片延迟，`src/mock-ai.ts`）+ `ChatView`/`ChatLayout`；Safe Registry 白名单 Flex/Card/Statistic/Alert/Button（dsl 里塞一个 Table 演示 ChatDenied）；capability `weather.query`（低风险）/ `data.export`（high risk → `window.confirm` 确认链，执行后用 antd `message.success` 反馈）。演示口令：天气 / 报表 / 导出 / 任意提问。
 - **examples 引用 workspace 包的 dist 产物**——改包代码后必须重建该包，示例才能看到效果。
@@ -74,7 +75,7 @@
 
 - **未 git 提交、未发布 npm**：全部工作敞口在工作区，优先级最高的待办。
 - 框架空白：无内置"调用 service"动作（示例用自定义 `service.call` 绕过）；Form initialValues 变化不重置表单（用 key 重建绕过）。
-- chat 视图仍用少量 antd（Collapse/Alert）——Radix 化未做；antd peer 在 ui-radix 依赖链上（peer 警告可忽略，彻底解耦需交互核心下沉 runtime）。
+- antd peer 在 ui-radix 依赖链上（peer 警告可忽略，彻底解耦需交互核心下沉 runtime）。
 - 未做：pactor-devtools、`pactor preview` 命令、真实 SSE Transport、AI Context Bridge、SSR/RSC 支持（Next.js 集成目前只能 client island + `ssr:false`，路由建议 hash 避让）。
 - V2 范围（设计文档第 99 节）：DSL Center、在线编辑、灰度多租户等均未启动。
 - `docs/.astro/data-store.json` 是构建缓存，改动无害。

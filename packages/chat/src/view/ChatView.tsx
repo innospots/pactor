@@ -1,9 +1,12 @@
+import { ArrowDown } from 'lucide-react';
 import { Registry } from 'pactor-core';
-import { useMemo, useSyncExternalStore } from 'react';
+import { useMemo, useRef, useSyncExternalStore } from 'react';
 
 import type { ChatConfirm, ChatPermissionChecker } from '../capability-action.js';
 import type { ChatCapabilityRegistry } from '../capability-action.js';
 import { CHAT_DENIED_TYPE } from '../dsl-guard.js';
+import { useChatAutoScroll } from '../hooks/use-chat-auto-scroll.js';
+import type { ChatMessage } from '../model.js';
 import {
   createChatRuntime,
   type ChatRuntime,
@@ -22,6 +25,12 @@ import { ChatDenied } from './PartRenderer.js';
  * 发送语义：`onSend` 回调先行（业务可完全自管）；注入 `transport`
  * 时同时经 `runChatTurn` 驱动一轮对话（user 消息 + assistant 占位 +
  * 流式 reduce）。通常二选一。
+ *
+ * 流式交互（技术选型参考 DeepTutor web）：
+ * - 流式中 Composer 发送按钮变为停止按钮，点击 abort 当前 turn
+ *   （assistant 消息以 cancelled 收尾）；
+ * - 消息区贴底自动跟随，用户上翻释放、回底恢复，释放期间显示
+ *   "回到底部"浮动按钮。
  */
 export interface ChatViewProps {
   store: ConversationStore;
@@ -42,6 +51,18 @@ export interface ChatViewProps {
   className?: string;
 }
 
+/** 末条消息的文本总长度（流式增长时驱动自动滚动） */
+function lastContentLength(messages: ChatMessage[]): number {
+  const last = messages[messages.length - 1];
+  if (!last) {
+    return 0;
+  }
+  return last.parts.reduce(
+    (total, part) => total + ('content' in part ? String(part.content).length : 0),
+    0,
+  );
+}
+
 export function ChatView({
   store,
   transport,
@@ -58,6 +79,10 @@ export function ChatView({
   const messages = useSyncExternalStore(
     (listener) => store.subscribe(listener),
     () => store.getMessages(),
+  );
+
+  const isStreaming = messages.some(
+    (message) => message.status === 'pending' || message.status === 'streaming',
   );
 
   // DSL part 渲染运行时：Safe Registry 快照 + ChatDenied 占位组件
@@ -85,28 +110,36 @@ export function ChatView({
     [conversationId, params],
   );
 
+  // 当前 turn 的取消控制器
+  const abortRef = useRef<AbortController | null>(null);
+
+  const { containerRef, isFollowing, scrollToBottom } = useChatAutoScroll({
+    messageCount: messages.length,
+    lastContentLength: lastContentLength(messages),
+    isStreaming,
+  });
+
   const handleSend = (text: string): void => {
     onSend?.(text);
     if (transport) {
-      void runChatTurn(store, transport, { text, conversationId });
+      const controller = new AbortController();
+      abortRef.current = controller;
+      void runChatTurn(store, transport, { text, conversationId }, {
+        signal: controller.signal,
+      });
     }
+  };
+
+  const handleStop = (): void => {
+    abortRef.current?.abort();
+    abortRef.current = null;
   };
 
   return (
     <div
       className={`pactor-chat-view${className ? ` ${className}` : ''}`}
-      style={{ display: 'flex', flexDirection: 'column', height: '100%', gap: 12 }}
     >
-      <div
-        className="pactor-chat-messages"
-        style={{
-          flex: 1,
-          overflowY: 'auto',
-          display: 'flex',
-          flexDirection: 'column',
-          gap: 8,
-        }}
-      >
+      <div className="pactor-chat-messages" ref={containerRef}>
         {messages.map((message) => (
           <MessageBubble
             key={message.id}
@@ -115,8 +148,22 @@ export function ChatView({
             scope={scope}
           />
         ))}
+        {!isFollowing && (
+          <button
+            type="button"
+            className="pactor-chat-scroll-bottom"
+            onClick={scrollToBottom}
+          >
+            <ArrowDown size={13} />
+            回到底部
+          </button>
+        )}
       </div>
-      <Composer onSend={handleSend} />
+      <Composer
+        onSend={handleSend}
+        streaming={isStreaming}
+        onStop={handleStop}
+      />
     </div>
   );
 }

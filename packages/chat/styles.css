@@ -1,0 +1,466 @@
+/**
+ * pactor-chat 皮肤样式表（单文件）。
+ *
+ * 技术选型参考 DeepTutor web：语义 CSS 变量 + 语义 class，无 antd。
+ *
+ * 换肤契约（与 pactor-ui-radix 一致）：
+ * 1. 覆盖 CSS 变量（在本样式表之后注入 `--pactor-chat-primary: …;` 等）；
+ * 2. 内置暗色：`<html data-pactor-theme="dark">`（或挂在任意祖先容器上）；
+ * 3. 直接覆盖 `.pactor-chat-*` class。
+ *
+ * 使用：import 'pactor-chat/styles.css';
+ */
+
+/* ============================================================
+ * 1. 皮肤 token（light）
+ * ============================================================ */
+
+.pactor-chat-view,
+.pactor-chat-layout {
+  --pactor-chat-bg: #ffffff;
+  --pactor-chat-fg: #1a1d26;
+  --pactor-chat-muted: #f4f4f6;
+  --pactor-chat-muted-fg: #6b7180;
+  --pactor-chat-card: #ffffff;
+  --pactor-chat-border: #e6e7eb;
+  --pactor-chat-primary: #3c47dd;
+  --pactor-chat-primary-fg: #ffffff;
+  --pactor-chat-danger: #d4380d;
+  --pactor-chat-danger-bg: #fff2f0;
+  --pactor-chat-success: #389e0d;
+  --pactor-chat-user-bubble-bg: #eef0fe;
+  --pactor-chat-user-bubble-border: rgb(60 71 221 / 35%);
+  --pactor-chat-code-bg: #f6f7f9;
+  --pactor-chat-radius: 12px;
+}
+
+.pactor-chat-view {
+
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  gap: 12px;
+  color: var(--pactor-chat-fg);
+  background: var(--pactor-chat-bg);
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+/* 暗色皮肤：data-pactor-theme="dark"（html 或任意祖先容器） */
+[data-pactor-theme='dark'] .pactor-chat-view,
+[data-pactor-theme='dark'] .pactor-chat-layout,
+.pactor-chat-view[data-pactor-theme='dark'],
+.pactor-chat-layout[data-pactor-theme='dark'] {
+  --pactor-chat-bg: #14161c;
+  --pactor-chat-fg: #e4e6ee;
+  --pactor-chat-muted: #1e2129;
+  --pactor-chat-muted-fg: #8b90a0;
+  --pactor-chat-card: #1a1d24;
+  --pactor-chat-border: #2c3038;
+  --pactor-chat-primary: #5b66f0;
+  --pactor-chat-primary-fg: #ffffff;
+  --pactor-chat-danger: #e8690c;
+  --pactor-chat-danger-bg: #2b1d16;
+  --pactor-chat-success: #49aa19;
+  --pactor-chat-user-bubble-bg: #262a45;
+  --pactor-chat-user-bubble-border: rgb(91 102 240 / 45%);
+  --pactor-chat-code-bg: #1e2129;
+}
+
+/* ============================================================
+ * 2. 布局（chat 布局 + 消息区）
+ * ============================================================ */
+
+.pactor-chat-layout {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  background: var(--pactor-chat-bg);
+  color: var(--pactor-chat-fg);
+}
+
+.pactor-chat-layout__header {
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--pactor-chat-border);
+  font-weight: 600;
+}
+
+.pactor-chat-layout__main {
+  flex: 1;
+  min-height: 0;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+}
+
+/* 消息滚动区：overflow-anchor none 配合 useChatAutoScroll（防浏览器
+   滚动锚定与贴底跟随互相拉扯） */
+.pactor-chat-messages {
+  position: relative;
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  overflow-anchor: none;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 4px 2px;
+}
+
+/* ============================================================
+ * 3. 消息气泡
+ * ============================================================ */
+
+.pactor-chat-message {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  max-width: 100%;
+}
+
+.pactor-chat-message__body {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 0;
+}
+
+/* user：右侧圆角气泡 */
+.pactor-chat-message--user {
+  align-items: flex-end;
+}
+
+.pactor-chat-message--user .pactor-chat-message__body {
+  max-width: 75%;
+  padding: 10px 14px;
+  border-radius: var(--pactor-chat-radius);
+  border: 1px solid var(--pactor-chat-user-bubble-border);
+  background: var(--pactor-chat-user-bubble-bg);
+  box-shadow: 0 1px 2px rgb(0 0 0 / 4%);
+}
+
+/* assistant：左侧通栏排版（无气泡底色） */
+.pactor-chat-message--assistant {
+  align-items: stretch;
+}
+
+/* system：居中弱提示 */
+.pactor-chat-message--system {
+  align-items: center;
+  color: var(--pactor-chat-muted-fg);
+  font-size: 12px;
+}
+
+/* 待响应占位 */
+.pactor-chat-message__pending {
+  color: var(--pactor-chat-muted-fg);
+}
+
+/* hover 操作条（assistant） */
+.pactor-chat-message__actions {
+  display: flex;
+  gap: 4px;
+  opacity: 0;
+  transition: opacity 0.15s ease;
+}
+
+.pactor-chat-message:hover .pactor-chat-message__actions,
+.pactor-chat-message__actions:focus-within {
+  opacity: 1;
+}
+
+/* ============================================================
+ * 4. 图标按钮 / 浮动按钮
+ * ============================================================ */
+
+.pactor-chat-icon-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4px;
+  border: none;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--pactor-chat-muted-fg);
+  cursor: pointer;
+  transition:
+    background 0.15s ease,
+    color 0.15s ease;
+}
+
+.pactor-chat-icon-button:hover {
+  background: var(--pactor-chat-muted);
+  color: var(--pactor-chat-fg);
+}
+
+/* "回到底部"浮动按钮 */
+.pactor-chat-scroll-bottom {
+  position: sticky;
+  bottom: 8px;
+  align-self: center;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border: 1px solid var(--pactor-chat-border);
+  border-radius: 999px;
+  background: var(--pactor-chat-card);
+  color: var(--pactor-chat-muted-fg);
+  font-size: 12px;
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgb(0 0 0 / 8%);
+}
+
+.pactor-chat-scroll-bottom:hover {
+  color: var(--pactor-chat-fg);
+}
+
+/* ============================================================
+ * 5. 折叠卡（thinking / tool-call / tool-result）
+ * ============================================================ */
+
+.pactor-chat-collapse {
+  border: 1px solid var(--pactor-chat-border);
+  border-radius: 8px;
+  background: var(--pactor-chat-card);
+  font-size: 12.5px;
+}
+
+.pactor-chat-collapse__header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 8px 12px;
+  border: none;
+  background: transparent;
+  color: var(--pactor-chat-muted-fg);
+  font-size: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+/* 头部内的图标/文字统一 flex 对齐（svg 默认按基线对齐会下沉） */
+.pactor-chat-collapse__header > span {
+  display: inline-flex;
+  align-items: center;
+  line-height: 1;
+}
+
+.pactor-chat-collapse__header:hover {
+  color: var(--pactor-chat-fg);
+}
+
+.pactor-chat-collapse__chevron {
+  display: inline-flex;
+  transition: transform 0.15s ease;
+}
+
+.pactor-chat-collapse[data-open='true'] .pactor-chat-collapse__chevron {
+  transform: rotate(90deg);
+}
+
+.pactor-chat-collapse__body {
+  padding: 0 12px 10px 32px;
+  color: var(--pactor-chat-muted-fg);
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.pactor-chat-collapse__body pre {
+  margin: 0;
+  font-size: 12px;
+  white-space: pre-wrap;
+}
+
+/* 状态色 */
+.pactor-chat-collapse__status--running {
+  color: var(--pactor-chat-primary);
+}
+
+.pactor-chat-collapse__status--success {
+  color: var(--pactor-chat-success);
+}
+
+.pactor-chat-collapse__status--failed {
+  color: var(--pactor-chat-danger);
+}
+
+/* running 旋转 */
+.pactor-chat-spin {
+  animation: pactor-chat-spin 1s linear infinite;
+}
+
+@keyframes pactor-chat-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* ============================================================
+ * 6. 其他 part
+ * ============================================================ */
+
+.pactor-chat-text {
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.pactor-chat-error {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 8px 12px;
+  border: 1px solid var(--pactor-chat-danger);
+  border-radius: 8px;
+  background: var(--pactor-chat-danger-bg);
+  color: var(--pactor-chat-danger);
+  font-size: 12.5px;
+}
+
+/* 图标与首行文字对齐（svg 默认按基线对齐会下沉） */
+.pactor-chat-error > svg {
+  flex-shrink: 0;
+  margin-top: 3px;
+  display: block;
+}
+
+.pactor-chat-status {
+  color: var(--pactor-chat-muted-fg);
+  font-size: 12px;
+}
+
+.pactor-chat-dsl-pending {
+  color: var(--pactor-chat-muted-fg);
+  font-size: 12px;
+}
+
+.pactor-chat-denied {
+  border: 1px dashed var(--pactor-chat-border);
+  border-radius: 4px;
+  padding: 8px;
+  color: var(--pactor-chat-muted-fg);
+  font-size: 12px;
+}
+
+/* ============================================================
+ * 7. Markdown 排版（chat 作为 pactor-markdown 的宿主主题）
+ * ============================================================ */
+
+.pactor-chat-view .pactor-markdown > :first-child {
+  margin-top: 0;
+}
+
+.pactor-chat-view .pactor-markdown > :last-child {
+  margin-bottom: 0;
+}
+
+.pactor-chat-view .pactor-markdown pre {
+  margin: 8px 0;
+  padding: 10px 12px;
+  border: 1px solid var(--pactor-chat-border);
+  border-radius: 8px;
+  background: var(--pactor-chat-code-bg);
+  overflow-x: auto;
+  font-size: 12.5px;
+}
+
+.pactor-chat-view .pactor-markdown :not(pre) > code {
+  padding: 2px 5px;
+  border-radius: 4px;
+  background: var(--pactor-chat-code-bg);
+  font-size: 0.9em;
+}
+
+.pactor-chat-view .pactor-markdown table {
+  border-collapse: collapse;
+  margin: 8px 0;
+}
+
+.pactor-chat-view .pactor-markdown th,
+.pactor-chat-view .pactor-markdown td {
+  padding: 6px 12px;
+  border: 1px solid var(--pactor-chat-border);
+}
+
+.pactor-chat-view .pactor-markdown th {
+  background: var(--pactor-chat-muted);
+}
+
+.pactor-chat-view .pactor-markdown a {
+  color: var(--pactor-chat-primary);
+}
+
+.pactor-chat-view .pactor-markdown blockquote {
+  margin: 8px 0;
+  padding: 2px 12px;
+  border-left: 3px solid var(--pactor-chat-border);
+  color: var(--pactor-chat-muted-fg);
+}
+
+.pactor-chat-view .pactor-markdown img {
+  max-width: 100%;
+}
+
+/* ============================================================
+ * 8. Composer
+ * ============================================================ */
+
+.pactor-chat-composer {
+  display: flex;
+  gap: 8px;
+  align-items: flex-end;
+  padding: 10px 12px;
+  border: 1px solid var(--pactor-chat-border);
+  border-radius: var(--pactor-chat-radius);
+  background: var(--pactor-chat-card);
+  transition: border-color 0.15s ease;
+}
+
+.pactor-chat-composer:focus-within {
+  border-color: var(--pactor-chat-primary);
+}
+
+.pactor-chat-composer__input {
+  flex: 1;
+  min-width: 0;
+  border: none;
+  outline: none;
+  resize: none;
+  background: transparent;
+  color: var(--pactor-chat-fg);
+  font: inherit;
+  line-height: 22px;
+  /* 单行时与 32px 发送按钮等高，文字（含 placeholder）垂直居中 */
+  min-height: 32px;
+  padding: 5px 0;
+  max-height: 200px;
+}
+
+.pactor-chat-composer__input::placeholder {
+  color: var(--pactor-chat-muted-fg);
+}
+
+.pactor-chat-composer__button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  flex-shrink: 0;
+  border: none;
+  border-radius: 8px;
+  background: var(--pactor-chat-primary);
+  color: var(--pactor-chat-primary-fg);
+  cursor: pointer;
+  transition: opacity 0.15s ease;
+}
+
+.pactor-chat-composer__button:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.pactor-chat-composer__button--stop {
+  background: var(--pactor-chat-danger);
+}

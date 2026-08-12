@@ -50,9 +50,13 @@
     "access": "public"
   },
   "dependencies": {
+    "katex": "^0.18.4",
     "pactor-core": "workspace:*",
     "react-markdown": "^10.1.0",
-    "remark-gfm": "^4.0.1"
+    "react-syntax-highlighter": "^16.1.1",
+    "rehype-katex": "^7.0.1",
+    "remark-gfm": "^4.0.1",
+    "remark-math": "^6.0.0"
   },
   "peerDependencies": {
     "react": ">=18"
@@ -62,6 +66,7 @@
     "@testing-library/react": "^16.3.2",
     "@types/react": "^19.2.18",
     "@types/react-dom": "^19.2.4",
+    "@types/react-syntax-highlighter": "^15.5.13",
     "jsdom": "^30.0.1",
     "pactor-runtime": "workspace:*",
     "react": "^19.2.8",
