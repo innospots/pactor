@@ -43,13 +43,14 @@
 - **示例登录模式**：会话存 localStorage（`src/auth.ts`），`createBootstrap()` 按会话返回 `login`/`admin` 布局形态（布局类型由 bootstrap 决定，全应用单布局）；登录/登出后须整页重载重取 bootstrap——示例用自定义 `app.reload` 动作（`window.location.assign`），路由守卫（未登录→/login）在 main.tsx DSL 之外。
 - **Radix Select 坑**：值从 uncontrolled→controlled 切换会以空串回调清值；`Select.Value` 未渲染过 item 时解析不到选中文案——已修复（`value={key ?? ''}` + 忽略空 key + 显式 label children）。
 - **主题换肤**：覆盖 `--pcr-*` CSS 变量 / `<html data-pactor-theme="dark">` / 覆盖 `.pcr-*` class；参考 `examples/admin/src/theme.css`；文档 `guides/theming`。
+- **Admin 布局模式**（2026-08-12 add-admin-layout-modes + change-layout-fixed-defaults）：bootstrap `layout` 支持 `mode`（top-side 缺省 / top-bottom / side-full / two-column）、`fixedHeader`/`fixedSider`（sticky，**缺省 true**，显式 false 关闭）、`collapsible`/`collapsed`、`breakpoint`（xs-xxl，antd 走 Sider breakpoint，Radix 走 useMediaQuery hook，断点 480/576/768/992/1200/1600）；app `pickLayoutConfig` 枚举校验透传，非法值忽略。two-column 选中项无子菜单时隐藏第二列收窄为 56px 窄列、不叠加收起 trigger；side-full 品牌区入侧边栏、header 不重复。双 kit 契约一致（antd 内联样式，Radix `data-mode` + styles.css）。
 - **Chat 视图**（2026-08-12 polish-chat-view，参考 DeepTutor web 技术选型独立实现）：零 antd（lucide-react 图标 + `pactor-chat/styles.css` 皮肤 `--pactor-chat-*` 变量 + `data-pactor-theme="dark"` 暗色）；`useSmoothStreamText`（rAF 打字机）/ `useChatAutoScroll`（80px 释放、40px 回底、容器须 `overflow-anchor:none`）；`runChatTurn` 支持 `signal`（abort → cancelled 收尾不抛错）；MessageBubble user 右气泡 / assistant 通栏 + hover 复制条；Composer 自适应 textarea + 流式停止按钮。
 - **Chat 安全**：LLM DSL 走 Safe Registry 白名单（`guardChatDsl` 替换为 ChatDenied 占位）；AI 动作走 capability 链（registry → permission → confirm → execute）。
 
 ## OpenSpec 工作流（本项目标准流程）
 
 - 每个变更：`openspec new change <name>` → proposal/design/specs/tasks 四件 → 实现（多由 coder 子代理完成）→ 主代理独立复跑验收 → tasks 勾选 → 归档时同步 delta specs 到 `openspec/specs/`（主 spec 无 ADDED/MODIFIED 头）→ `mv` 到 `changes/archive/YYYY-MM-DD-<name>`。
-- 已归档 30 个变更；主 specs 46 个能力（`openspec/specs/`）是现状基准。
+- 已归档 32 个变更；主 specs 46 个能力（`openspec/specs/`）是现状基准。
 - 规范细节：scenario 必须 4 个 `#`（####）；MODIFIED 需全量需求块；MODIFIED 合并时注意变更间依赖顺序。
 
 ## 环境与命令
@@ -57,7 +58,7 @@
 - Node >= 18 / pnpm >= 9（实际 node 22 + pnpm 10）。根命令：`pnpm build` / `pnpm test` / `pnpm typecheck` / `pnpm docs:dev`（端口 **4334**）/ `pnpm docs:build` / `pnpm release`。
 - **文档站已部署 Cloudflare**（Workers 静态资产，assets-only 无脚本）：`docs/wrangler.jsonc`（account `43cad862…727e`，即 Xp.java 账号），`pnpm --filter pactor-docs deploy`（build + wrangler deploy），线上 https://pactor-docs.xp-java.workers.dev 。
 - 文档站结构：guides/（getting-started、**data-flow 数据流**、events 事件与表单联动、**custom-components 自定义组件**、theming） + **reference/dsl（DSL 完整参考：结构/作用域/数据源/动作/组件 props，含 Markdown 组件）** + packages/<包名> + framework-design；新增页面要同步 `docs/astro.config.mjs` sidebar 并重启 dev server。
-- 全量基线：**591 包内测试 + 329 根级测试**，typecheck 0 错误。
+- 全量基线：**613 包内测试 + 346 根级测试**，typecheck 0 错误。
 - 示例：`pnpm --filter example-admin dev`（Radix，端口 **5199**）；`pnpm --filter example-admin-antd dev`（antd kit，端口 **5299**）；`pnpm --filter example-chat dev`（pactor-chat 对话示例，端口 **5399**）；`pnpm --filter example-vite-starter dev`（最小 vite-plugin 上手示例，端口 **5499**，blank 布局 + 单页 todo 清单）。两个 admin 示例页面 DSL 逐字节一致，仅 main.tsx 的 `ui` 预设与样式导入不同（antd 版引 `antd/dist/reset.css`，不引 pcr 皮肤）。
 - **example-chat**（2026-08-12 add-example-chat）：不经 pactor-app，直接组合 `ConversationStore` + mock `ChatTransport`（async generator 分片延迟，`src/mock-ai.ts`）+ `ChatView`/`ChatLayout`；Safe Registry 白名单 Flex/Card/Statistic/Alert/Button（dsl 里塞一个 Table 演示 ChatDenied）；capability `weather.query`（低风险）/ `data.export`（high risk → `window.confirm` 确认链，执行后用 antd `message.success` 反馈）。演示口令：天气 / 报表 / 导出 / 任意提问。
 - **examples 引用 workspace 包的 dist 产物**——改包代码后必须重建该包，示例才能看到效果。
@@ -72,6 +73,7 @@
 5. `grep -c` 无匹配时 exit 1——组合命令的 "Command failed" 可能只是 grep 无匹配。
 6. vitest `run tests/` 参数是路径过滤器，会连带匹配 `packages/*/tests/`（根级测试数因此偏大，无害）。
 7. DSL Schema 校验只管结构不管组件 props（props 开放，由组件自行解释）——演示 vite-plugin 构建期报错要用删 `page.id` 这类结构性错误，加非法 prop 不会报错。
+8. Radix admin 收起态：仅顶层首字符平铺（64px 窄列，不渲染子级与箭头）；group 悬停经 Radix Popover 浮出子菜单（hover 开、移入浮层保持、移出 200ms 延迟关、浮层内点 page 项导航后关闭，见 `CollapsedGroupFlyout`）。
 
 ## 已知边界 / 待办
 

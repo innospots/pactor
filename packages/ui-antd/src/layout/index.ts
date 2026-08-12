@@ -2,10 +2,16 @@
 export { AdminLayout } from './admin/AdminLayout.js';
 export type {
   AdminBrand,
+  AdminLayoutBreakpoint,
   AdminLayoutConfig,
+  AdminLayoutMode,
   AdminLayoutProps,
 } from './admin/AdminLayout.js';
-export { buildMenuItems, collectDefaultOpenKeys } from './admin/menu-items.js';
+export {
+  buildAntdMenuItems,
+  buildMenuItems,
+  collectDefaultOpenKeys,
+} from './admin/menu-items.js';
 export { findMenuChain } from './admin/menu-chain.js';
 
 // 基础布局

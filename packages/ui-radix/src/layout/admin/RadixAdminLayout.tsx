@@ -1,4 +1,5 @@
 import * as Accordion from '@radix-ui/react-accordion';
+import * as Popover from '@radix-ui/react-popover';
 import {
   collectDefaultOpenKeys,
   findMenuChain,
@@ -14,6 +15,8 @@ import {
   type RouteContext,
 } from 'pactor-router';
 import { useEffect, useMemo, useRef, useState } from 'react';
+
+import { useBreakpointBelow } from './use-media-query.js';
 
 /** 访问页签（与 antd 版 AdminLayout 同语义） */
 interface VisitedTab {
@@ -60,11 +63,90 @@ interface MenuTreeProps {
   bridge: NavigationBridge;
   activeMenuId?: string;
   defaultOpenKeys: string[];
+  /** 收起态：仅渲染顶层首字符（参考 antd Layout.Sider 收起形态） */
+  collapsed?: boolean;
+}
+
+/**
+ * 收起态 group 的悬停浮出子菜单（对齐 antd Sider 收起后的 flyout）：
+ * hover 触发首字符按钮短暂延迟后浮出，移入浮层保持，移出延迟关闭；
+ * 点击按钮切换浮层；浮层内 page 项导航后浮层关闭。
+ */
+function CollapsedGroupFlyout({
+  menu,
+  registry,
+  bridge,
+  activeMenuId,
+  defaultOpenKeys,
+}: {
+  menu: MenuItem;
+  registry: MenuRegistry;
+  bridge: NavigationBridge;
+  activeMenuId?: string;
+  defaultOpenKeys: string[];
+}) {
+  const [open, setOpen] = useState(false);
+  const closeTimer = useRef<number | undefined>(undefined);
+
+  const openNow = (): void => {
+    window.clearTimeout(closeTimer.current);
+    setOpen(true);
+  };
+  const closeLater = (): void => {
+    window.clearTimeout(closeTimer.current);
+    closeTimer.current = window.setTimeout(() => setOpen(false), 200);
+  };
+  useEffect(() => () => window.clearTimeout(closeTimer.current), []);
+
+  return (
+    <Popover.Root open={open} onOpenChange={setOpen}>
+      <Popover.Trigger asChild>
+        <button
+          type="button"
+          className="pcr-menu-item"
+          disabled={menu.disabled}
+          title={menu.title}
+          onMouseEnter={openNow}
+          onMouseLeave={closeLater}
+        >
+          {menu.title.slice(0, 1)}
+        </button>
+      </Popover.Trigger>
+      <Popover.Portal>
+        <Popover.Content
+          className="pcr-menu-flyout"
+          side="right"
+          align="start"
+          sideOffset={8}
+          onMouseEnter={openNow}
+          onMouseLeave={closeLater}
+          onOpenAutoFocus={(event) => event.preventDefault()}
+          onClick={(event) => {
+            // 浮层内点中 page 项（导航）后关闭浮层
+            if ((event.target as HTMLElement).closest('.pcr-menu-item')) {
+              setOpen(false);
+            }
+          }}
+        >
+          <div className="pcr-menu-flyout-title">{menu.title}</div>
+          <MenuTree
+            menus={menu.children ?? []}
+            registry={registry}
+            bridge={bridge}
+            activeMenuId={activeMenuId}
+            defaultOpenKeys={defaultOpenKeys}
+          />
+        </Popover.Content>
+      </Popover.Portal>
+    </Popover.Root>
+  );
 }
 
 /**
  * 菜单树：group → Radix Accordion 折叠项（defaultOpen 组默认展开），
  * page / link → 按钮项；activeMenu 项加高亮 class；disabled 原样传递。
+ * 收起态（collapsed）：仅顶层首字符平铺，不渲染箭头与子级；
+ * group 悬停浮出子菜单（见 CollapsedGroupFlyout）。
  */
 function MenuTree({
   menus,
@@ -72,7 +154,44 @@ function MenuTree({
   bridge,
   activeMenuId,
   defaultOpenKeys,
+  collapsed = false,
 }: MenuTreeProps) {
+  if (collapsed) {
+    return (
+      <div className="pcr-menu pcr-menu--collapsed">
+        {menus.map((menu) => {
+          if (menu.type === 'group') {
+            return (
+              <CollapsedGroupFlyout
+                key={menu.id}
+                menu={menu}
+                registry={registry}
+                bridge={bridge}
+                activeMenuId={activeMenuId}
+                defaultOpenKeys={defaultOpenKeys}
+              />
+            );
+          }
+          const classes = ['pcr-menu-item'];
+          if (menu.id === activeMenuId) {
+            classes.push('pcr-menu-item-active');
+          }
+          return (
+            <button
+              key={menu.id}
+              type="button"
+              className={classes.join(' ')}
+              disabled={menu.disabled}
+              title={menu.title}
+              onClick={() => navigateMenuItem(registry.findById(menu.id), bridge)}
+            >
+              {menu.title.slice(0, 1)}
+            </button>
+          );
+        })}
+      </div>
+    );
+  }
   return (
     <Accordion.Root
       type="multiple"
@@ -91,6 +210,7 @@ function MenuTree({
                 <Accordion.Trigger
                   className="pcr-menu-group-trigger"
                   disabled={menu.disabled}
+                  title={menu.title}
                 >
                   {menu.title}
                 </Accordion.Trigger>
@@ -117,6 +237,7 @@ function MenuTree({
             type="button"
             className={classes.join(' ')}
             disabled={menu.disabled}
+            title={menu.title}
             onClick={() => navigateMenuItem(registry.findById(menu.id), bridge)}
           >
             {menu.title}
@@ -131,6 +252,8 @@ function MenuTree({
  * RadixAdminLayout：与 pactor-layout 的 AdminLayout（antd 版）契约一致——
  * 复用 `AdminLayoutProps`；Header（brand + headerExtra）/ Sidebar / 内容出口；
  * config 开关（header/sidebar 缺省开，tabs/breadcrumb/footer 缺省关）一致；
+ * mode（top-side/top-bottom/side-full/two-column）、fixedHeader/fixedSider、
+ * collapsible/collapsed、breakpoint 响应式收起与 antd 版语义一致。
  * 菜单由 MenuRegistry 可见树渲染（group 折叠经 Radix Accordion），
  * permissionChecker 过滤、activeMenu 高亮、page → bridge.push、
  * link/external → window.open；Breadcrumb 按菜单链；Tabs 访问页签
@@ -147,11 +270,17 @@ export function RadixAdminLayout({
   headerExtra,
   children,
 }: AdminLayoutProps) {
+  const mode = config.mode ?? 'top-side';
   const showHeader = config.header ?? true;
-  const showSidebar = config.sidebar ?? true;
+  const showSidebar = (config.sidebar ?? true) && mode !== 'top-bottom';
   const showTabs = config.tabs ?? false;
   const showBreadcrumb = config.breadcrumb ?? false;
   const showFooter = config.footer ?? false;
+
+  // 侧边栏收起：collapsed 初始值 + breakpoint 命中时强制收起
+  const [collapsed, setCollapsed] = useState(config.collapsed ?? false);
+  const broken = useBreakpointBelow(config.breakpoint);
+  const effectiveCollapsed = collapsed || broken;
 
   // bridge 驱动的路由上下文（props.route 优先，订阅仅作生产兜底）
   const [bridgeRoute, setBridgeRoute] = useState<RouteContext | null>(() =>
@@ -199,6 +328,26 @@ export function RadixAdminLayout({
     [registry],
   );
 
+  // two-column：当前选中一级项（激活链首项优先）
+  const activeTopId = useMemo(() => {
+    if (activeMenuId !== undefined) {
+      const chain = findMenuChain(registry, activeMenuId);
+      if (chain.length > 0) {
+        return chain[0]!.id;
+      }
+    }
+    return undefined;
+  }, [registry, activeMenuId]);
+
+  const [selectedTopId, setSelectedTopId] = useState<string | undefined>();
+  const secondaryTopId =
+    selectedTopId ??
+    activeTopId ??
+    visibleMenus.find((m) => m.type === 'group')?.id ??
+    visibleMenus[0]?.id;
+  const secondaryTop = visibleMenus.find((m) => m.id === secondaryTopId);
+  const hasSecondary = (secondaryTop?.children?.length ?? 0) > 0;
+
   const breadcrumbItems = useMemo(() => {
     if (!showBreadcrumb || activeMenuId === undefined) {
       return [];
@@ -217,83 +366,193 @@ export function RadixAdminLayout({
     }
   };
 
-  return (
-    <div className="pcr-admin-layout">
-      {showHeader && (
-        <header className="pcr-admin-header">
+  const rootClasses = ['pcr-admin-layout'];
+  if (config.fixedHeader ?? true) rootClasses.push('pcr-admin-layout--fixed-header');
+  if (config.fixedSider ?? true) rootClasses.push('pcr-admin-layout--fixed-sider');
+  if (effectiveCollapsed) rootClasses.push('pcr-admin-layout--collapsed');
+
+  const header = showHeader ? (
+    <header className="pcr-admin-header">
+      {/* side-full 模式品牌区在通栏 sidebar 顶部，header 不再重复 */}
+      {mode !== 'side-full' && (
+        <>
           {brand.logo}
           <span className="pcr-admin-brand">{brand.title}</span>
-          <div className="pcr-admin-header-spacer" />
-          {headerExtra}
-        </header>
+        </>
       )}
-      <div className="pcr-admin-main">
-        {showSidebar && (
-          <aside className="pcr-admin-sidebar">
-            <MenuTree
-              menus={visibleMenus}
-              registry={registry}
-              bridge={bridge}
-              activeMenuId={activeMenuId}
-              defaultOpenKeys={defaultOpenKeys}
-            />
-          </aside>
-        )}
-        <div className="pcr-admin-body">
-          {showTabs && (
-            <div className="pcr-admin-tabs" role="tablist">
-              {tabs.map((tab, index) => {
-                const tabClasses = ['pcr-tab'];
-                if (tab.key === currentPath) {
-                  tabClasses.push('pcr-tab-active');
-                }
-                return (
-                  <div key={tab.key} className={tabClasses.join(' ')} role="presentation">
-                    <button
-                      type="button"
-                      role="tab"
-                      aria-selected={tab.key === currentPath}
-                      className="pcr-tab-label"
-                      onClick={() => bridge.push(tab.key)}
-                    >
-                      {tab.title}
-                    </button>
-                    {/* 首页（首个页签）不可关，与 antd 版一致 */}
-                    {index > 0 && (
-                      <button
-                        type="button"
-                        className="pcr-tab-close"
-                        aria-label={`关闭 ${tab.title}`}
-                        onClick={() => closeTab(tab.key)}
-                      >
-                        ×
-                      </button>
-                    )}
-                  </div>
-                );
-              })}
+      <div className="pcr-admin-header-spacer" />
+      {headerExtra}
+    </header>
+  ) : null;
+
+  /** two-column 第一列：一级菜单窄列（标题首字符作图标位） */
+  const primaryColumn = (
+    <div className="pcr-admin-primary-col">
+      {visibleMenus.map((menu) => {
+        const classes = ['pcr-admin-primary-item'];
+        if (menu.id === secondaryTopId || menu.id === activeTopId) {
+          classes.push('pcr-admin-primary-item-active');
+        }
+        return (
+          <button
+            key={menu.id}
+            type="button"
+            className={classes.join(' ')}
+            disabled={menu.disabled}
+            title={menu.title}
+            onClick={() => {
+              if (menu.type === 'group') {
+                setSelectedTopId(menu.id);
+              } else {
+                navigateMenuItem(menu, bridge);
+              }
+            }}
+          >
+            {menu.title.slice(0, 1)}
+          </button>
+        );
+      })}
+    </div>
+  );
+
+  // two-column 已有窄列形态，不再叠加收起 trigger
+  const showTrigger = config.collapsible && mode !== 'two-column';
+
+  const sidebar = showSidebar ? (
+    <aside
+      className="pcr-admin-sidebar"
+      data-collapsed={effectiveCollapsed || undefined}
+      style={
+        mode === 'two-column' && !hasSecondary ? { width: 56 } : undefined
+      }
+    >
+      {mode === 'side-full' && (
+        <div className="pcr-admin-sidebar-brand">
+          {brand.logo}
+          <span>{brand.title}</span>
+        </div>
+      )}
+      {mode === 'two-column' ? (
+        <div className="pcr-admin-two-col">
+          {primaryColumn}
+          {/* 选中项无子菜单时隐藏第二列（sidebar 收窄为窄列） */}
+          {hasSecondary && (
+            <div className="pcr-admin-secondary-col">
+              <MenuTree
+                menus={secondaryTop?.children ?? []}
+                registry={registry}
+                bridge={bridge}
+                activeMenuId={activeMenuId}
+                defaultOpenKeys={defaultOpenKeys}
+              />
             </div>
           )}
-          <main className="pcr-admin-content">
-            {showBreadcrumb && breadcrumbItems.length > 0 && (
-              <nav className="pcr-admin-breadcrumb" aria-label="面包屑">
-                <ol className="pcr-breadcrumb-list">
-                  {breadcrumbItems.map((title, index) => (
-                    <li key={index} className="pcr-breadcrumb-item">
-                      {index > 0 && (
-                        <span className="pcr-breadcrumb-separator">/</span>
-                      )}
-                      <span className="pcr-breadcrumb-link">{title}</span>
-                    </li>
-                  ))}
-                </ol>
-              </nav>
-            )}
-            {children}
-          </main>
         </div>
-      </div>
-      {showFooter && <footer className="pcr-admin-footer">{brand.title}</footer>}
+      ) : (
+        <MenuTree
+          menus={visibleMenus}
+          registry={registry}
+          bridge={bridge}
+          activeMenuId={activeMenuId}
+          defaultOpenKeys={defaultOpenKeys}
+          collapsed={effectiveCollapsed}
+        />
+      )}
+      {showTrigger && (
+        <button
+          type="button"
+          className="pcr-admin-collapse-trigger"
+          aria-label={effectiveCollapsed ? '展开侧边栏' : '收起侧边栏'}
+          aria-expanded={!effectiveCollapsed}
+          onClick={() => setCollapsed((value) => !value)}
+        >
+          {effectiveCollapsed ? '»' : '«'}
+        </button>
+      )}
+    </aside>
+  ) : null;
+
+  const body = (
+    <div className="pcr-admin-body">
+      {showTabs && (
+        <div className="pcr-admin-tabs" role="tablist">
+          {tabs.map((tab, index) => {
+            const tabClasses = ['pcr-tab'];
+            if (tab.key === currentPath) {
+              tabClasses.push('pcr-tab-active');
+            }
+            return (
+              <div key={tab.key} className={tabClasses.join(' ')} role="presentation">
+                <button
+                  type="button"
+                  role="tab"
+                  aria-selected={tab.key === currentPath}
+                  className="pcr-tab-label"
+                  onClick={() => bridge.push(tab.key)}
+                >
+                  {tab.title}
+                </button>
+                {/* 首页（首个页签）不可关，与 antd 版一致 */}
+                {index > 0 && (
+                  <button
+                    type="button"
+                    className="pcr-tab-close"
+                    aria-label={`关闭 ${tab.title}`}
+                    onClick={() => closeTab(tab.key)}
+                  >
+                    ×
+                  </button>
+                )}
+              </div>
+            );
+          })}
+        </div>
+      )}
+      <main className="pcr-admin-content">
+        {showBreadcrumb && breadcrumbItems.length > 0 && (
+          <nav className="pcr-admin-breadcrumb" aria-label="面包屑">
+            <ol className="pcr-breadcrumb-list">
+              {breadcrumbItems.map((title, index) => (
+                <li key={index} className="pcr-breadcrumb-item">
+                  {index > 0 && (
+                    <span className="pcr-breadcrumb-separator">/</span>
+                  )}
+                  <span className="pcr-breadcrumb-link">{title}</span>
+                </li>
+              ))}
+            </ol>
+          </nav>
+        )}
+        {children}
+      </main>
+    </div>
+  );
+
+  const footer = showFooter ? (
+    <footer className="pcr-admin-footer">{brand.title}</footer>
+  ) : null;
+
+  return (
+    <div className={rootClasses.join(' ')} data-mode={mode}>
+      {mode === 'side-full' ? (
+        <div className="pcr-admin-side-full">
+          {sidebar}
+          <div className="pcr-admin-side-full-main">
+            {header}
+            {body}
+            {footer}
+          </div>
+        </div>
+      ) : (
+        <>
+          {header}
+          <div className="pcr-admin-main">
+            {sidebar}
+            {body}
+          </div>
+          {footer}
+        </>
+      )}
     </div>
   );
 }

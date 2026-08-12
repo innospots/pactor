@@ -246,3 +246,104 @@ describe('AdminLayout Tabs', () => {
     expect(tabBar?.querySelectorAll('.ant-tabs-tab')).toHaveLength(2);
   });
 });
+
+describe('AdminLayout 结构模式（spec: admin-layout / 布局结构与开关）', () => {
+  it('top-bottom（上-中-下）：无 Sidebar，footer 开关生效（spec: 上-中-下模式）', () => {
+    const { container } = renderAdmin({
+      config: { mode: 'top-bottom', footer: true },
+    });
+
+    const layout = container.querySelector('.pactor-admin-layout')!;
+    expect(layout.getAttribute('data-mode')).toBe('top-bottom');
+    expect(container.querySelector('.pactor-admin-sidebar')).toBeNull();
+    expect(container.querySelector('.pactor-admin-header')).toBeTruthy();
+    expect(container.querySelector('.pactor-admin-footer')).toBeTruthy();
+  });
+
+  it('side-full（通栏侧边）：Sidebar 全高居左含品牌区，Header 不重复品牌（spec: 通栏侧边模式）', () => {
+    const { container } = renderAdmin({ config: { mode: 'side-full' } });
+
+    expect(
+      container.querySelector('.pactor-admin-layout')?.getAttribute('data-mode'),
+    ).toBe('side-full');
+    expect(container.querySelector('.pactor-admin-sidebar-brand')?.textContent).toContain(
+      '运营平台',
+    );
+    expect(container.querySelector('.pactor-admin-header .pactor-admin-brand')).toBeNull();
+  });
+
+  it('two-column（侧边两列）：一级菜单窄列 + 选中 group 的子菜单列（spec: 两列侧边模式）', () => {
+    const route: RouteContext = {
+      path: '/customers',
+      params: {},
+      query: {},
+      menuId: 'customer-list',
+      activeMenu: 'customer-list',
+    };
+    const { container } = renderAdmin({ config: { mode: 'two-column' }, route });
+
+    const primary = container.querySelector('.pactor-admin-primary-col')!;
+    // 一级菜单：客户管理（group）/ 工作台 / 文档，窄列渲染首字符
+    expect(primary.textContent).toContain('客');
+    expect(primary.textContent).toContain('工');
+    // 激活链首项为 customer group，第二列渲染其子菜单
+    const secondary = container.querySelector('.pactor-admin-secondary-col')!;
+    expect(secondary.textContent).toContain('客户列表');
+    expect(within(secondary as HTMLElement).queryByText('工作台')).toBeNull();
+    // 一级列激活态
+    expect(
+      primary.querySelector('.pactor-admin-primary-item-active')?.textContent,
+    ).toBe('客');
+  });
+});
+
+describe('AdminLayout 固定区域（spec: admin-layout / 固定区域）', () => {
+  it('fixedHeader：Header sticky 固定（spec: 固定顶部）', () => {
+    const { container } = renderAdmin({ config: { fixedHeader: true } });
+    const header = container.querySelector('.pactor-admin-header') as HTMLElement;
+    expect(header.style.position).toBe('sticky');
+    expect(header.style.top).toBe('0px');
+  });
+
+  it('缺省即固定（spec: 缺省固定）；显式 false 关闭（spec: 显式关闭）', () => {
+    const { container } = renderAdmin();
+    const header = container.querySelector('.pactor-admin-header') as HTMLElement;
+    const sider = container.querySelector('.pactor-admin-sidebar') as HTMLElement;
+    expect(header.style.position).toBe('sticky');
+    expect(sider.style.position).toBe('sticky');
+
+    cleanup();
+    const off = renderAdmin({ config: { fixedHeader: false, fixedSider: false } });
+    const header2 = off.container.querySelector('.pactor-admin-header') as HTMLElement;
+    const sider2 = off.container.querySelector('.pactor-admin-sidebar') as HTMLElement;
+    expect(header2.style.position).not.toBe('sticky');
+    expect(sider2.style.position).not.toBe('sticky');
+  });
+
+  it('fixedSider：Sidebar sticky 固定且自身滚动', () => {
+    const { container } = renderAdmin({ config: { fixedSider: true } });
+    const sider = container.querySelector('.pactor-admin-sidebar') as HTMLElement;
+    expect(sider.style.position).toBe('sticky');
+    expect(sider.style.overflow).toBe('auto');
+  });
+});
+
+describe('AdminLayout 收起侧边栏（spec: admin-layout / 收起侧边栏）', () => {
+  it('collapsible：trigger 点击切换收起态（spec: 收起与展开）', () => {
+    const { container } = renderAdmin({ config: { collapsible: true } });
+
+    const trigger = container.querySelector('.ant-layout-sider-trigger')!;
+    expect(trigger).toBeTruthy();
+    expect(container.querySelector('.ant-layout-sider-collapsed')).toBeNull();
+
+    fireEvent.click(trigger);
+    expect(container.querySelector('.ant-layout-sider-collapsed')).toBeTruthy();
+  });
+
+  it('collapsed 初始收起（spec: 初始收起）', () => {
+    const { container } = renderAdmin({
+      config: { collapsible: true, collapsed: true },
+    });
+    expect(container.querySelector('.ant-layout-sider-collapsed')).toBeTruthy();
+  });
+});

@@ -83,7 +83,7 @@ export function createBootstrap(): Partial<BootstrapResource> &
         permission: 'system:admin',
       },
     ],
-    layout: { type: 'admin', tabs: true, breadcrumb: true },
+    layout: { type: 'admin', tabs: true, fixedHeader: true, fixedSider: true, breadcrumb: true, collapsible: true, breakpoint: 'lg' },
     pageVersions: { dashboard: 1, 'customer-list': 1, 'customer-edit': 1 },
   };
 }

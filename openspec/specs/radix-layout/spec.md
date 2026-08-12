@@ -4,7 +4,7 @@ Admin / Blank / Login / Landing 布局的 Radix 实现（`pactor-ui-radix` layou
 
 ### Requirement: RadixAdminLayout
 
-SHALL 提供 `RadixAdminLayout`，props 契约复用 pactor-ui-antd（layout 层）的 `AdminLayoutProps`：Header（brand + headerExtra）/ Sidebar / 内容出口；config 开关（header/sidebar/tabs/breadcrumb/footer，缺省 header/sidebar 开）一致；菜单由 MenuRegistry 可见树渲染（group 可折叠、page/link 项、disabled），permissionChecker 时先过滤；选中态取 activeMenu；点击 page 经 bridge.push 导航，link/external 新窗口；Breadcrumb 按菜单链；Tabs 访问页签（去重、点击导航、关闭当前回退最后一个）。
+SHALL 提供 `RadixAdminLayout`，props 契约复用 pactor-ui-antd（layout 层）的 `AdminLayoutProps`：Header（brand + headerExtra）/ Sidebar / 内容出口；config 开关（header/sidebar/tabs/breadcrumb/footer，缺省 header/sidebar 开）一致；菜单由 MenuRegistry 可见树渲染（group 可折叠、page/link 项、disabled），permissionChecker 时先过滤；选中态取 activeMenu；点击 page 经 bridge.push 导航，link/external 新窗口；Breadcrumb 按菜单链；Tabs 访问页签（去重、点击导航、关闭当前回退最后一个）。config `mode`（top-side/top-bottom/side-full/two-column）、`fixedHeader`/`fixedSider`（缺省 true，显式 false 关闭）、`collapsible`/`collapsed`、`breakpoint` 的结构与行为 SHALL 与 antd 版契约一致（样式经 styles.css `.pcr-*` class 与 `data-mode` 属性表达）。
 
 #### Scenario: 菜单渲染与权限过滤
 
@@ -26,6 +26,15 @@ SHALL 提供 `RadixAdminLayout`，props 契约复用 pactor-ui-antd（layout 层
 - **WHEN** config.sidebar 为 false
 - **THEN** 不渲染 Sidebar
 
+#### Scenario: 模式与收起
+
+- **WHEN** config.mode 为 'two-column' 且 collapsible 为 true
+- **THEN** 渲染两列侧边结构，trigger 点击切换收起态（与 antd 版语义一致）
+
+#### Scenario: 响应式收起
+
+- **WHEN** config.breakpoint 为 'lg' 且视口小于 992px
+- **THEN** Sidebar 自动呈收起态
 ### Requirement: Radix 基础布局
 
 RadixBlankLayout（纯出口）、RadixLoginLayout（variant center/split + brand）、RadixLandingLayout（navbar/footer 插槽）SHALL 复用 pactor-ui-antd（layout 层）对应 props 类型，行为与 antd 版一致。
