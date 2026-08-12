@@ -6,10 +6,10 @@ description: Chat——AI Message Rendering Protocol（消息模型 / Streaming 
 `pactor-chat` 是 V1 最后一个模块，核心是"协议 + Runtime"而非单个组件：消息模型与 `ConversationStore`、Streaming 事件与纯 reducer、LLM DSL 的 Safe Registry 白名单、Capability → Permission → Confirmation → Execute 的 AI Action 链，以及独立的 React 视图族。model / store / events / reducer / safe-registry / capability 零 React，可纯 Node 测试。
 
 ```bash
-pnpm add pactor-chat pactor-runtime pactor-markdown antd react
+pnpm add pactor-chat pactor-runtime pactor-markdown react
 ```
 
-`react >= 18`、`antd >= 5` 为 peer dependency（开发基准为 antd v6）。
+`react >= 18` 为 peer dependency。视图层零 antd 依赖（2026-08-12 polish-chat-view 起）：图标用 lucide-react，皮肤经 `pactor-chat/styles.css` 提供（技术选型参考 [DeepTutor web](https://github.com/HKUDS/DeepTutor/tree/main/web)）。
 
 ## 组合结构
 
@@ -71,7 +71,7 @@ interface ChatTransport {
 }
 ```
 
-`runChatTurn(store, transport, input)` 先 append user 消息（completed）与 assistant 占位（pending），再 for-await 逐事件 reduce；transport 抛错收敛为 `message.error`，流正常结束但未收到 `message.end` 时兜底 completed。真实 SSE / WebSocket 客户端由业务实现；`createManualDriver()`（`push` / `complete` / `fail`）供测试与手动驱动。
+`runChatTurn(store, transport, input, options?)` 先 append user 消息（completed）与 assistant 占位（pending），再 for-await 逐事件 reduce；transport 抛错收敛为 `message.error`，流正常结束但未收到 `message.end` 时兜底 completed。`options.signal`（AbortSignal）abort 时停止消费事件流，assistant 消息以 `cancelled` 收尾并正常返回（不抛错）。真实 SSE / WebSocket 客户端由业务实现；`createManualDriver()`（`push` / `complete` / `fail`）供测试与手动驱动。
 
 ## Safe Registry 与 capability 动作
 
@@ -105,12 +105,25 @@ DSL part 经 runtime Renderer 渲染：ComponentRegistry 为 Safe Registry；作
 
 ## React 视图
 
-- **`<ChatView store transport? onSend? safeRegistry? capabilities? permission? confirm? conversationId? user? params?>`**：`useSyncExternalStore` 订阅消息列表 + Composer。发送时 `onSend` 回调先行，注入 `transport` 时同时驱动一轮 turn（通常二选一）。
-- **`<MessageBubble>`**：user 靠右、assistant 靠左、system 居中，parts 按序逐个渲染。
-- **`<PartRenderer>`**：text → 文本段落；markdown → pactor-markdown 安全渲染器；dsl → runtime 渲染（Safe Registry + chat 作用域）；tool-call / tool-result → antd Collapse 状态卡；thinking → 默认折叠（与正文分离）；error → antd Alert；status → 弱提示。
-- **`<Composer>`**：Enter 发送、Shift+Enter 换行；空文本不发送。
+- **`<ChatView store transport? onSend? safeRegistry? capabilities? permission? confirm? conversationId? user? params?>`**：`useSyncExternalStore` 订阅消息列表 + Composer。发送时 `onSend` 回调先行，注入 `transport` 时同时驱动一轮 turn（通常二选一）。流式中 Composer 按钮变为停止按钮（点击 abort 当前 turn）；消息区贴底自动跟随，上翻释放、回底恢复，释放期间显示"回到底部"浮动按钮。
+- **`<MessageBubble>`**：user 右侧圆角气泡、assistant 左侧通栏排版（hover 显示复制操作条）、system 居中弱提示，parts 按序逐个渲染。
+- **`<PartRenderer>`**：text → 文本段落；markdown → pactor-markdown 安全渲染器（streaming 期间经 `useSmoothStreamText` 打字机揭示）；dsl → runtime 渲染（Safe Registry + chat 作用域）；tool-call / tool-result / thinking → 自绘折叠卡（lucide 状态图标，thinking 默认折叠）；error → 自绘警示条；status → 弱提示。
+- **`<Composer>`**：自适应高度 textarea（上限 200px）；Enter 发送、Shift+Enter 换行；空文本不发送。
 
-样式为语义 class（`pactor-chat-*`）+ 极简内联布局，主题留给 pactor-theme。
+### 流式交互 hooks
+
+- **`useSmoothStreamText(content, isStreaming, options?)`**：rAF 打字机平滑——streaming 期间按 backlog 自适应速率逐帧揭示文本（每帧 `max(2, backlog/5)`，封顶 120 字符），流停止立即对齐全文，内容回缩立即回退，`enabled: false` 直通。
+- **`useChatAutoScroll({ messageCount, lastContentLength, isStreaming })`**：返回 `{ containerRef, isFollowing, scrollToBottom }`；跟随期间钉底，上翻超 80px 释放、回底 40px 内恢复。滚动容器需 `overflow-anchor: none`（styles.css 已内置）。
+
+## 皮肤
+
+视图颜色全部经 `--pactor-chat-*` CSS 变量表达，样式表 `pactor-chat/styles.css`（使用前必须引入）：
+
+```ts
+import 'pactor-chat/styles.css';
+```
+
+换肤契约与 pactor-ui-radix 一致：覆盖 CSS 变量 / `<html data-pactor-theme="dark">` 启用内置暗色 / 直接覆盖 `.pactor-chat-*` class。主要变量：`--pactor-chat-bg/fg/muted/muted-fg/card/border/primary/primary-fg/danger/success`、`--pactor-chat-user-bubble-bg/border`、`--pactor-chat-code-bg`、`--pactor-chat-radius`。
 
 ## chat 布局注册
 

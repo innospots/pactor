@@ -1,6 +1,15 @@
 import type { Components } from 'react-markdown';
 import Markdown from 'react-markdown';
+import rehypeKatex from 'rehype-katex';
 import remarkGfm from 'remark-gfm';
+import remarkMath from 'remark-math';
+
+import {
+  CodeBlock,
+  extractFencedCode,
+  isCodeLanguageRegistered,
+  registerCodeLanguages,
+} from './code-block.js';
 
 /**
  * MarkdownRenderer（设计决策 D1/D2）。
@@ -68,10 +77,25 @@ const SafeImage: NonNullable<Components['img']> = ({ src, alt }) => {
   return <img src={src} alt={alt ?? ''} />;
 };
 
-/** react-markdown 组件覆盖表：仅替换 a / img，其余沿用默认 AST 渲染 */
-const markdownComponents: Components = {
+/** react-markdown 组件覆盖表：仅替换 a / img / pre，其余沿用默认 AST 渲染 */
+const baseComponents: Components = {
   a: SafeLink,
   img: SafeImage,
+};
+
+/**
+ * 带代码高亮的覆盖表：fenced 代码块（pre > code.language-xxx）走高亮，
+ * 未注册语言与非标准结构降级为默认 pre 渲染；行内 code 不受影响。
+ */
+const highlightingComponents: Components = {
+  ...baseComponents,
+  pre: ({ children }) => {
+    const fenced = extractFencedCode(children);
+    if (fenced && isCodeLanguageRegistered(fenced.language)) {
+      return <CodeBlock language={fenced.language}>{fenced.code}</CodeBlock>;
+    }
+    return <pre>{children}</pre>;
+  },
 };
 
 export interface MarkdownRendererProps {
@@ -79,19 +103,37 @@ export interface MarkdownRendererProps {
   content?: string;
   /** 附加 className，与基础 class `pactor-markdown` 并存 */
   className?: string;
+  /** 数学公式（remark-math + rehype-katex），默认 true；需自行引入 katex css */
+  math?: boolean;
+  /** fenced 代码块语法高亮，默认 true */
+  codeHighlight?: boolean;
 }
 
 /**
- * Markdown 渲染器：标题 / 列表 / 表格（GFM）/ 代码块 / 引用 / 链接 / 图片。
- * 容器带基础 class `pactor-markdown`，样式由宿主主题决定（设计决策 D2）。
- * remark-gfm 提供表格 / 删除线 / 任务列表；代码块渲染为
- * `<pre><code class="language-xxx">`，供后续语法高亮扩展。
+ * Markdown 渲染器：标题 / 列表 / 表格（GFM）/ 代码块 / 引用 / 链接 / 图片 /
+ * 数学公式（KaTeX）。容器带基础 class `pactor-markdown`，样式由宿主主题决定。
+ * 技术选型参考 DeepTutor web：react-markdown + remark-gfm + remark-math +
+ * rehype-katex + react-syntax-highlighter（Light 构建）。
+ *
+ * 注意：启用 math 时需在使用方引入 `katex/dist/katex.min.css`。
  */
-export function MarkdownRenderer({ content = '', className }: MarkdownRendererProps) {
+export function MarkdownRenderer({
+  content = '',
+  className,
+  math = true,
+  codeHighlight = true,
+}: MarkdownRendererProps) {
+  if (codeHighlight) {
+    registerCodeLanguages();
+  }
   const containerClass = className ? `pactor-markdown ${className}` : 'pactor-markdown';
   return (
     <div className={containerClass}>
-      <Markdown remarkPlugins={[remarkGfm]} components={markdownComponents}>
+      <Markdown
+        remarkPlugins={math ? [remarkGfm, remarkMath] : [remarkGfm]}
+        rehypePlugins={math ? [rehypeKatex] : []}
+        components={codeHighlight ? highlightingComponents : baseComponents}
+      >
         {content}
       </Markdown>
     </div>

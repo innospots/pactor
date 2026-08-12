@@ -25,6 +25,8 @@ export interface ChatTransport {
 export interface RunChatTurnOptions {
   userMessageId?: string;
   assistantMessageId?: string;
+  /** 取消信号：abort 时停止消费事件流，assistant 消息以 cancelled 收尾 */
+  signal?: AbortSignal;
 }
 
 /** runChatTurn 结果：本 turn 建立的两条消息 id */
@@ -69,7 +71,16 @@ export async function runChatTurn(
 
   try {
     for await (const event of transport.send(input)) {
+      if (options.signal?.aborted) {
+        store.updateMessage(assistantMessageId, { status: 'cancelled' });
+        return { userMessageId, assistantMessageId };
+      }
       applyChatEvent(store, { ...event, messageId: assistantMessageId });
+    }
+    // abort 与流自然结束同时发生：cancelled 优先，不再补 message.end
+    if (options.signal?.aborted) {
+      store.updateMessage(assistantMessageId, { status: 'cancelled' });
+      return { userMessageId, assistantMessageId };
     }
     // 流正常结束但未收到 message.end / message.error：兜底收尾
     const message = store.getMessage(assistantMessageId);

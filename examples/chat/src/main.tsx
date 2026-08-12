@@ -1,4 +1,6 @@
 import 'antd/dist/reset.css';
+import 'katex/dist/katex.min.css';
+import 'pactor-chat/styles.css';
 import './app.css';
 
 import { ChatLayout, ChatView, ConversationStore } from 'pactor-chat';

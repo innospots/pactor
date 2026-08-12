@@ -11,6 +11,7 @@
   },
   "dependencies": {
     "antd": "^6.6.0",
+    "katex": "^0.18.4",
     "pactor-chat": "workspace:*",
     "pactor-ui-antd": "workspace:*",
     "react": "^19.2.8",
