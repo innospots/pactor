@@ -55,6 +55,7 @@
 ## 环境与命令
 
 - Node >= 18 / pnpm >= 9（实际 node 22 + pnpm 10）。根命令：`pnpm build` / `pnpm test` / `pnpm typecheck` / `pnpm docs:dev`（端口 **4334**）/ `pnpm docs:build` / `pnpm release`。
+- **文档站已部署 Cloudflare**（Workers 静态资产，assets-only 无脚本）：`docs/wrangler.jsonc`（account `43cad862…727e`，即 Xp.java 账号），`pnpm --filter pactor-docs deploy`（build + wrangler deploy），线上 https://pactor-docs.xp-java.workers.dev 。
 - 文档站结构：guides/（getting-started、**data-flow 数据流**、events 事件与表单联动、**custom-components 自定义组件**、theming） + **reference/dsl（DSL 完整参考：结构/作用域/数据源/动作/组件 props，含 Markdown 组件）** + packages/<包名> + framework-design；新增页面要同步 `docs/astro.config.mjs` sidebar 并重启 dev server。
 - 全量基线：**591 包内测试 + 329 根级测试**，typecheck 0 错误。
 - 示例：`pnpm --filter example-admin dev`（Radix，端口 **5199**）；`pnpm --filter example-admin-antd dev`（antd kit，端口 **5299**）；`pnpm --filter example-chat dev`（pactor-chat 对话示例，端口 **5399**）；`pnpm --filter example-vite-starter dev`（最小 vite-plugin 上手示例，端口 **5499**，blank 布局 + 单页 todo 清单）。两个 admin 示例页面 DSL 逐字节一致，仅 main.tsx 的 `ui` 预设与样式导入不同（antd 版引 `antd/dist/reset.css`，不引 pcr 皮肤）。
