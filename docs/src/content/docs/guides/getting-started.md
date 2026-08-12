@@ -1,131 +1,188 @@
 ---
 title: 快速开始
-description: 环境要求、安装、构建与测试，以及一个端到端的最小示例
+description: 面向框架使用者——安装、最小接入、createPactorApplication 参数与 UI kit 切换
 ---
 
-Pactor 是一套基于 YAML/JSON DSL 的 Server-Driven UI 前端运行时框架。本页介绍如何在 Monorepo 中开发、pactor-app 一站式用法，以及基础模块的最小使用示例。
+Pactor 是一套基于 YAML/JSON DSL 的 Server-Driven UI 前端运行时框架：页面用 YAML 描述，浏览器里的公共 Runtime 负责渲染，业务页面无需随前端代码一起打包。本页带你 5 分钟跑起一个应用。
 
 ## 环境要求
 
 - Node.js >= 18
-- pnpm >= 9
+- pnpm >= 9（npm / yarn 亦可）
+- React >= 18 的 Vite 工程（React 19 为开发基准）
 
-## 安装与常用命令
+## 安装
 
-```bash
-pnpm install        # 安装依赖
-pnpm build          # 构建全部包（ESM + CJS + d.ts）
-pnpm test           # 运行全部测试（含跨包冒烟测试）
-pnpm typecheck      # 全部包 TypeScript 检查
+按使用场景选择包组合（包名无 scope，统一 `pactor-` 前缀）：
+
+| 场景 | 安装 |
+| --- | --- |
+| 完整应用（推荐） | `pnpm add pactor-app pactor-ui-radix`（Radix kit，默认）或 `pnpm add pactor-app pactor-ui-antd antd`（antd kit） |
+| 只要 DSL 渲染器（自己组合） | `pnpm add pactor-runtime` |
+| AI 对话视图 | `pnpm add pactor-chat pactor-markdown` |
+| YAML 即模块（构建期校验 + HMR） | `pnpm add -D pactor-vite-plugin` |
+| 命令行校验 / 脚手架 | `pnpm add -D pactor-cli` |
+
+## 最小接入（四步）
+
+与 `examples/vite-starter` 等效的最小工程：
+
+**1. vite.config.ts 挂插件**
+
+```ts
+import react from '@vitejs/plugin-react';
+import { defineConfig } from 'vite';
+import pactor from 'pactor-vite-plugin';
+
+export default defineConfig({
+  plugins: [react(), pactor()],
+});
 ```
 
-启动本文档站：
+**2. 添加 `src/dsl-modules.d.ts`**（让 TS 识别 YAML 模块）
 
-```bash
-pnpm docs:dev
+```ts
+declare module '*.page.yaml' {
+  import type { PageDsl } from 'pactor-core';
+  const page: PageDsl;
+  export const dslVersion: string;
+  export default page;
+}
 ```
 
-## 模块概览
+**3. 写页面 `src/pages/home.page.yaml`**
 
-| 包 | 目录 | 职责 | 运行时依赖 |
-| --- | --- | --- | --- |
-| `pactor-core` | `packages/core` | DSL 协议类型 + 通用 Registry | 无 |
-| `pactor-schema` | `packages/schema` | JSON Schema + Ajv 校验器 | `ajv` |
-| `pactor-expression` | `packages/expression` | 受控表达式引擎 | 无 |
-| `pactor-runtime` | `packages/runtime` | Runtime 引擎（上下文 / 状态 / 数据源 / 动作 / 渲染） | `react`（peer） |
-| `pactor-permission` | `packages/permission` | 权限（PermissionStore / 权限适配器 / Menu & Page 守卫 / 表达式函数） | 无 |
-| `pactor-resource` | `packages/resource` | DSL 资源加载（Envelope / HTTP & Static Loader / 缓存与 ETag） | 无 |
-| `pactor-router` | `packages/router` | 路由（MenuRegistry / PathMatcher / 导航桥接 / React Router 绑定） | `react`、`react-router-dom`（peer，仅 react 子入口） |
-| `pactor-ui-antd` | `packages/ui-antd` | antd UI kit（components + interaction + layout 三层 + `antdUiKit` 预设） | `react`、`react-dom`、`antd`（peer） |
-| `pactor-ui-radix` | `packages/ui-radix` | Radix UI kit（三层 Radix 实现 + `radixUiKit` 预设 + 合并样式表，与 antd 版契约一致） | `@radix-ui/react-*`、`pactor-ui-antd`、`react`（peer） |
-| `pactor-markdown` | `packages/markdown` | Markdown（安全渲染器 / 协议白名单 / DSL Markdown 组件） | `react-markdown`、`remark-gfm`、`react`（peer） |
-| `pactor-chat` | `packages/chat` | Chat（消息模型 / Streaming reducer / Safe Registry / capability 动作 / ChatView 与 chat 布局） | `react`、`antd`（peer） |
-| `pactor-app` | `packages/app` | 一站式组合层（createPactorApplication：启动编排 / 共享注册表 / 动态路由 / mount） | `react`、`react-dom`、`react-router-dom`、`antd`（peer） |
-| `pactor-vite-plugin` | `packages/vite-plugin` | Vite 插件（`.page.yaml` / `.fragment.yaml` 构建期转换 / Schema 校验 / HMR） | `yaml`，`vite`（peer） |
-| `pactor-cli` | `packages/cli` | 命令行工具（validate / inspect / lint / schema / build / create） | `yaml` |
+```yaml
+dsl: '1.0'
+page:
+  id: home
+  title: 待办清单
 
-依赖方向严格单向：`pactor-core` ← `pactor-schema` ← `pactor-expression` ← `pactor-runtime` ← `pactor-ui-antd`；`pactor-permission` 仅依赖 `pactor-core`，结构化兼容 `pactor-runtime` 的适配接口（不产生运行时依赖）；`pactor-resource` 仅依赖 `pactor-core`；`pactor-router` 依赖 `pactor-core` 与 `pactor-permission`，结构化兼容 `pactor-runtime` 的 RouterAdapter；`pactor-ui-antd` 组合 runtime / router / permission；`pactor-ui-radix` 复用 `pactor-ui-antd` 的契约类型与交互核心（type-only + interaction 层运行时复用）；`pactor-app` 站在全部模块之上做一站式组装。
+dataSources:
+  todos:
+    type: service
+    service: todo.list
+    autoLoad: true
+    params:
+      keyword: ${state.keyword}
 
-## 一站式用法（pactor-app）
+body:
+  type: Page
+  props: { title: 待办清单 }
+  children:
+    - type: Form
+      props: { layout: inline }
+      events:
+        onSubmit:
+          - action: setState
+            params: { keyword: ${event.keyword} }
+          - action: reload
+            params: { dataSource: todos }
+      children:
+        - type: Input
+          props: { name: keyword, label: 关键词 }
+        - type: Button
+          props: { text: 查询, variant: primary, submit: true }
+    - type: Table
+      props:
+        dataSource: ${data.todos}
+        columns:
+          - { title: 标题, dataIndex: title }
+          - { title: 负责人, dataIndex: owner }
+```
 
-业务工程优先使用 `pactor-app`：一个调用完成启动编排、动态路由、布局与页面运行时组装。**默认 UI kit 为 Radix**（pactor-ui-radix），其无内建样式，样式表导入为必需步骤：
+**4. `src/main.tsx` 挂载**
 
 ```tsx
 import { createPactorApplication } from 'pactor-app';
-import 'pactor-ui-radix/styles.css'; // 默认 Radix UI kit 的样式（必需）
+import { StaticDslLoader } from 'pactor-resource';
+import 'pactor-ui-radix/styles.css'; // Radix kit 样式（必需）
+
+import homePage from './pages/home.page.yaml';
+
+const loader = new StaticDslLoader({
+  bootstrap: {
+    app: { name: '我的应用' },
+    menus: [{ id: 'home', type: 'page', title: '待办清单', path: '/', pageId: 'home' }],
+    layout: { type: 'blank' },
+  },
+  pages: { home: homePage },
+});
 
 createPactorApplication({
-  appId: 'risk-admin',
-
-  api: {
-    baseURL: '/api/runtime',
+  appId: 'my-app',
+  loader,
+  services: {
+    'todo.list': async (params) =>
+      fetch(`/api/todos?keyword=${params.keyword ?? ''}`).then((r) => r.json()),
   },
 }).mount('#root');
 ```
 
-如需 antd 实现，显式传入 `ui: antdUiKit`（见 [pactor-ui-antd](/packages/ui-antd/)）。
+真实项目中 bootstrap 与页面 DSL 由服务端下发：把 `loader` 换成 `api: { baseURL: 'https://your-dsl-center' }`（HttpDslResourceLoader）即可，本地 import 的 yaml 只是静态开发形态。
 
-服务端按 Envelope 协议提供 `{baseURL}/bootstrap`（app / user / permissions / menus / layout）与 `{baseURL}/pages/{id}`（Page DSL）端点即可；本地与测试环境可注入 `StaticDslLoader` 替代 `api`。详见 [pactor-app](/packages/app/)。
+## createPactorApplication 参数
 
-## 示例工程
+| 参数 | 类型 | 说明 |
+| --- | --- | --- |
+| `appId` | string（必填） | 应用 id；brand 缺省标题回退 |
+| `api` | `{ baseURL? }` | DSL 资源 API（未注入 loader 时创建 HttpDslResourceLoader） |
+| `loader` | DslResourceLoader | 资源加载器，优先于 `api`（本地/测试用 StaticDslLoader） |
+| `ui` | UiKit | UI kit 预设（`radixUiKit` / `antdUiKit`），一次提供三个槽位 |
+| `componentRegistry` | `() => Registry` | 组件注册表工厂（槽位之一，优先级高于 `ui` 预设） |
+| `layoutRegistry` | `() => LayoutRegistry` | 布局注册表工厂（槽位之一） |
+| `interactionKit` | `{ Provider, OverlayHost }` | 交互层组件对（overlay / message / confirm，槽位之一） |
+| `components` | `Record<string, unknown>` | 业务组件扩展，叠加在所选注册表之上，可覆盖同名内置组件 |
+| `actions` | `Record<string, ActionHandler>` | 业务动作扩展（如 `service.call`） |
+| `services` | `Record<string, ServiceHandler>` | 业务服务（`type: service` 数据源按名引用） |
+| `capabilities` | `Record<string, unknown>` | 业务能力扩展 |
+| `layout` | string | 布局类型覆盖（> bootstrap.layout.type > 'admin'） |
+| `brand` | `{ title, logo? }` | 品牌区覆盖（缺省取 bootstrap.app.name） |
+| `router` | `{ type?: 'browser'\|'hash', basename? }` | 路由配置 |
+| `authTokenProvider` | AuthTokenProvider | 认证令牌，注入 DSL 资源请求与页面 HTTP 出口 |
 
-`examples/admin`（包名 `example-admin`，private）是框架首个完整演示：管理后台（admin 布局 + 页签 / 面包屑）、菜单权限过滤与隐藏详情页、表达式绑定、service 数据源、Form / Table、cell 行模板、overlay.open 抽屉编辑、navigate 与 route.params。纯前端可跑——页面 DSL 经 `pactor-vite-plugin` 本地导入，bootstrap 与数据为内存 mock：
+槽位合并优先级：**显式细粒度选项（componentRegistry 等）> `ui` 预设 > 内置 Radix 默认**。
 
-```bash
-pnpm --filter example-admin dev    # 端口 5199
-pnpm --filter example-admin build  # 构建期强校验全部页面 YAML
+## 切换 antd UI kit
+
+同一份 DSL 不换内容即可换实现：
+
+```tsx
+import { antdUiKit } from 'pactor-ui-antd';
+import 'antd/dist/reset.css'; // 替代 pactor-ui-radix/styles.css
+
+createPactorApplication({
+  appId: 'my-app',
+  loader,
+  ui: antdUiKit,
+  // ...
+});
 ```
 
-启动方式与演示点清单见 `examples/admin/README.md`。
+## 命令行（pactor-cli）
 
-## 最小示例
-
-校验一份 Page DSL，并求值其中的表达式：
-
-```ts
-import { validatePageDsl, DSL_VERSION } from 'pactor-schema';
-import { resolveTemplate } from 'pactor-expression';
-
-const pageDsl = {
-  dsl: '1.0',
-  page: { id: 'customer-list', title: '客户管理', type: 'list' },
-  state: { keyword: '' },
-  dataSources: {
-    customers: {
-      type: 'service',
-      service: 'customer.list',
-      autoLoad: true,
-      params: { keyword: '${state.keyword}' },
-    },
-  },
-  body: { type: 'Page', children: [] },
-};
-
-// 1. Schema 校验
-const result = validatePageDsl(pageDsl);
-console.assert(result.valid, result.errors);
-
-// 2. 表达式求值（组装作用域后解析 dataSource 参数）
-const scope = { state: { keyword: '张三' } };
-const keyword = resolveTemplate(
-  pageDsl.dataSources.customers.params.keyword,
-  scope,
-);
-console.log(keyword); // "张三"
+```bash
+pnpm pactor validate src/pages/**/*.page.yaml   # 校验 DSL
+pnpm pactor inspect src/pages/home.page.yaml    # 查看结构摘要
+pnpm pactor create my-app                        # 脚手架
 ```
 
 ## 下一步
 
-- [pactor-core](/packages/core/)：DSL 协议类型与 Registry
-- [pactor-schema](/packages/schema/)：Schema 校验细节
-- [pactor-expression](/packages/expression/)：表达式语法与安全约束
-- [pactor-runtime](/packages/runtime/)：Runtime 引擎与 React Renderer
-- [pactor-ui-antd](/packages/ui-antd/)：antd UI kit（内置组件 / 交互 / 布局三层 + `antdUiKit` 预设）
-- [pactor-ui-radix](/packages/ui-radix/)：Radix UI kit（与 antd 版契约一致，含整站切换 recipe）
-- [pactor-permission](/packages/permission/)：权限存储、适配器与守卫
-- [pactor-resource](/packages/resource/)：DSL 资源加载、缓存与版本控制
-- [pactor-router](/packages/router/)：菜单注册、路径匹配、导航桥接与动态路由
-- [pactor-markdown](/packages/markdown/)：安全 Markdown 渲染与 DSL Markdown 组件
-- [pactor-chat](/packages/chat/)：AI Message Rendering Protocol 与 Chat Runtime
-- [pactor-app](/packages/app/)：一站式组合层（createPactorApplication）
-- [框架设计规范](/framework-design/)：完整架构设计
+- [数据流](/guides/data-flow/)：`${data.x}` 从哪来、何时更新、谁重渲染
+- [事件与表单联动](/guides/events/)：动作编排、表单三级联动
+- [自定义组件](/guides/custom-components/)：注册你的业务组件
+- [DSL 参考](/reference/dsl/)：全部字段与组件 props 手册
+
+## 参与框架开发（monorepo）
+
+```bash
+git clone https://github.com/426-330/pactor.git && cd pactor
+pnpm install
+pnpm build        # 构建全部包（ESM + CJS + d.ts）
+pnpm test         # 全部测试
+pnpm typecheck    # 全部包 TS 检查
+pnpm docs:dev     # 本文档站（端口 4334）
+```
+
+示例工程：`examples/vite-starter`（最小上手）、`examples/admin`（Radix 管理后台）、`examples/admin-antd`（antd 后台）、`examples/chat`（AI 对话）。
