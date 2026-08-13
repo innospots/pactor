@@ -1,7 +1,9 @@
 import { Button, Result, Spin } from 'antd';
+import { createI18nContext } from 'pactor-core';
 import { resolveLayout } from 'pactor-ui-antd/layout';
 import { resolveRoute } from 'pactor-router';
 import { DynamicDslRoute, useReactRouterBridge } from 'pactor-router/react';
+import { I18nContextProvider } from 'pactor-runtime';
 import { useEffect, useState, type ReactNode } from 'react';
 import {
   BrowserRouter,
@@ -106,10 +108,17 @@ function AppShell({
   const Router = app.routerOptions.type === 'hash' ? HashRouter : BrowserRouter;
   const InteractionKit = app.interactionKit.Provider;
   const Providers = app.providers;
+  const i18n = createI18nContext({
+    locale: session.locale,
+    defaultLocale: session.defaultLocale,
+    messages: session.messages,
+  });
   const shell = (
-    <InteractionKit bridge={app.uiBridge}>
-      <ShellLayout app={app} session={session} />
-    </InteractionKit>
+    <I18nContextProvider value={i18n}>
+      <InteractionKit bridge={app.uiBridge}>
+        <ShellLayout app={app} session={session} />
+      </InteractionKit>
+    </I18nContextProvider>
   );
   return (
     <Router basename={app.routerOptions.basename}>

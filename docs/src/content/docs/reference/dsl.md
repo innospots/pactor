@@ -96,7 +96,7 @@ permission: { code: customer:delete, denied: disabled }  # 对象形式
 
 - 字符串整体恰好是一个 `${...}`：**保留原始类型**（`${state.count}` → number）
 - 与其他文本混合：拼接为字符串（`共 ${state.count} 条`）；`null` / `undefined` 渲染为空串
-- 支持成员访问、字面量、常见二元/逻辑/一元运算符与白名单函数调用（成员方法调用被拒绝）；详见 [pactor-expression](/packages/expression/)
+- 支持成员访问、字面量（含对象字面量 `{ name: user.name }`，常用作 `t()` 插值参数）、常见二元/逻辑/一元运算符与白名单函数调用（成员方法调用被拒绝）；详见 [pactor-expression](/packages/expression/)
 
 ### 全局作用域键
 
@@ -111,6 +111,8 @@ permission: { code: customer:delete, denied: disabled }  # 对象形式
 | `route` | 路由上下文（`${route.params.id}`、`${route.query.x}`） |
 | `params` | `route.params` 别名；overlay 内为 overlay 注入的 params |
 | `actions` | 命名动作结果（`${actions.editResult.success}`） |
+| `locale` | 当前语言代码（如 `'zh-CN'`） |
+| `t` | 翻译函数（`${t('menu.home')}`、`${t('welcome', { name: 'Alice' })}`） |
 
 ### 局部作用域键（覆盖同名全局键）
 

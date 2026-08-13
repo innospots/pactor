@@ -40,34 +40,34 @@ body:
             - action: message
               params:
                 type: error
-                text: 登录失败：用户名或密码错误
+                text: ${t('login.error')}
   children:
     - type: Alert
       props:
         variant: info
-        message: 演示账号 admin / pactor123
-        description: 登录成功后写入本地会话并整页重载，bootstrap 按会话返回 admin 布局。
+        message: ${t('login.hint.message')}
+        description: ${t('login.hint.description')}
     - type: Input
       props:
         name: username
-        label: 用户名
-        placeholder: 请输入用户名
+        label: ${t('login.username.label')}
+        placeholder: ${t('login.username.placeholder')}
         rules:
           - required: true
-            message: 请输入用户名
+            message: ${t('login.username.required')}
     - type: Input
       props:
         name: password
-        label: 密码
+        label: ${t('login.password.label')}
         # add-input-type-prop：password 掩码输入
         type: password
-        placeholder: 请输入密码
+        placeholder: ${t('login.password.placeholder')}
         rules:
           - required: true
-            message: 请输入密码
+            message: ${t('login.password.required')}
     - type: Button
       props:
-        text: 登 录
+        text: ${t('login.submit')}
         variant: primary
         submit: true
         loading: ${state.submitting}

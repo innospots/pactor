@@ -255,6 +255,29 @@ class Parser {
       this.expectPunctuator(')');
       return node;
     }
+    if (token.type === 'punctuator' && token.value === '{') {
+      // 对象字面量：键为标识符或字符串，值为任意表达式（如 t() 的插值参数表）
+      const properties: Array<{ key: string; value: ExpressionNode }> = [];
+      if (!this.isPunctuator('}')) {
+        for (;;) {
+          const keyToken = this.next();
+          if (keyToken.type !== 'identifier' && keyToken.type !== 'string') {
+            throw new ExpressionError(
+              `expected object key but got "${keyToken.value}"`,
+              keyToken.pos,
+            );
+          }
+          this.expectPunctuator(':');
+          properties.push({
+            key: keyToken.value,
+            value: this.parseConditional(),
+          });
+          if (!this.eatPunctuator(',')) break;
+        }
+      }
+      this.expectPunctuator('}');
+      return { type: 'ObjectExpression', properties };
+    }
 
     throw new ExpressionError(`unexpected token "${token.value}"`, token.pos);
   }

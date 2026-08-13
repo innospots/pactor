@@ -94,7 +94,8 @@ export function Form({
     for (const [name, rules] of fieldRulesRef.current) {
       for (const rule of rules ?? []) {
         if (rule.required && isEmpty(values[name])) {
-          nextErrors[name] = rule.message ?? '必填';
+          nextErrors[name] =
+            rule.message ?? context.i18n.t('pactor.form.required');
           break;
         }
       }

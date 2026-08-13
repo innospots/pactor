@@ -1,6 +1,7 @@
 import { Field, Label } from '@radix-ui/react-form';
 import * as RadixSelect from '@radix-ui/react-select';
 import type { SelectOption, SelectProps } from 'pactor-ui-antd/components';
+import { useI18n } from 'pactor-runtime';
 import { useEffect } from 'react';
 
 import { useFormContext } from '../Form/context.js';
@@ -27,6 +28,7 @@ export function Select({
   onChange,
 }: SelectProps) {
   const form = useFormContext();
+  const { t } = useI18n();
   const inForm = form?.inForm === true && typeof name === 'string' && name !== '';
 
   // 注册字段校验规则，同时把 value prop 作为字段级初始值交给 Form 上下文合并
@@ -102,7 +104,7 @@ export function Select({
         <button
           type="button"
           className="pcr-select-clear"
-          aria-label="清除"
+          aria-label={t('pactor.select.clear')}
           onClick={() => {
             if (inForm && form && name) {
               form.setValue(name, undefined);

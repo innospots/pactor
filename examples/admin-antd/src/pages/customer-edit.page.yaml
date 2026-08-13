@@ -16,12 +16,12 @@ dataSources:
 body:
   type: Page
   props:
-    title: 编辑客户
+    title: ${t('customerEdit.title')}
   children:
     # 返回操作（navigate 动作）
     - type: Button
       props:
-        text: ← 返回列表
+        text: ${t('customerEdit.back')}
       events:
         onClick:
           action: navigate
@@ -29,12 +29,12 @@ body:
             to: /customers
     - type: Card
       props:
-        title: 客户信息
+        title: ${t('customerEdit.card.title')}
       children:
         - type: Alert
           props:
             variant: info
-            message: 正在编辑：${data.detail.name}（路由参数 id = ${route.params.id}）
+            message: "${t('customerEdit.editing', { name: data.detail.name, id: route.params.id })}"
         - type: Form
           events:
             onSubmit:
@@ -54,7 +54,7 @@ body:
                     - action: message
                       params:
                         type: success
-                        text: 保存成功
+                        text: ${t('customerEdit.saved')}
                     - action: navigate
                       params:
                         to: /customers
@@ -62,34 +62,34 @@ body:
                     - action: message
                       params:
                         type: error
-                        text: 保存失败，请重试
+                        text: ${t('customers.form.saveError')}
           children:
             - type: Input
               props:
                 name: name
-                label: 客户名称
-                placeholder: 留空则保持不变
+                label: ${t('customers.form.name.label')}
+                placeholder: ${t('customerEdit.keepPlaceholder')}
                 rules:
                   - required: true
-                    message: 请输入客户名称
+                    message: ${t('customers.form.name.required')}
             - type: Input
               props:
                 name: phone
-                label: 联系电话
-                placeholder: 留空则保持不变
+                label: ${t('customers.form.phone.label')}
+                placeholder: ${t('customerEdit.keepPlaceholder')}
             - type: Select
               props:
                 name: level
-                label: 等级
+                label: ${t('customers.form.level.label')}
                 options:
-                  - label: A 级
+                  - label: ${t('customers.form.level.a')}
                     value: A
-                  - label: B 级
+                  - label: ${t('customers.form.level.b')}
                     value: B
-                  - label: C 级
+                  - label: ${t('customers.form.level.c')}
                     value: C
             - type: Button
               props:
-                text: 保存
+                text: ${t('customers.form.save')}
                 variant: primary
                 submit: true

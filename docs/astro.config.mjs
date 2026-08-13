@@ -22,6 +22,7 @@ export default defineConfig({
             { label: '事件与表单联动', slug: 'guides/events' },
             { label: '自定义组件', slug: 'guides/custom-components' },
             { label: '主题与换肤', slug: 'guides/theming' },
+            { label: '国际化', slug: 'guides/i18n' },
           ],
         },
         {

@@ -137,4 +137,17 @@ describe('buildScope', () => {
     expect(scope['params']).toEqual({ id: '42' });
     expect(scope['route']).toBe(context.route);
   });
+
+  it('包含 locale 与 t 翻译函数', () => {
+    const context = createRuntimeContext({
+      locale: 'en-US',
+      messages: { 'menu.home': 'Home' },
+    });
+
+    const scope = buildScope(context);
+
+    expect(scope['locale']).toBe('en-US');
+    expect(scope['t']).toBe(context.i18n.t);
+    expect((scope['t'] as (key: string) => string)('menu.home')).toBe('Home');
+  });
 });

@@ -6,6 +6,8 @@ import 'antd/dist/reset.css';
 
 import { readSession } from './auth';
 import { createBootstrap } from './bootstrap';
+import { getLocale, messages } from './i18n';
+import { LanguageSwitcher } from './LanguageSwitcher';
 import { demoServices } from './services';
 import { SkinProvider } from './SkinProvider';
 import { SkinSettings } from './SkinSettings';
@@ -23,8 +25,9 @@ if (!session && window.location.pathname !== '/login') {
   window.location.replace('/');
 }
 
-// 与 example-admin（Radix kit）完全相同的页面 DSL 与 bootstrap，
+// 与 example-admin（Radix kit）相同的页面结构与 bootstrap 形态，
 // 仅 ui 预设切换为 antdUiKit —— 演示"同一 DSL 双 UI kit 运行"
+// （本示例额外接入了 i18n：页面文案走 ${t()} 表达式，见 src/i18n.ts）
 const loader = new StaticDslLoader({
   bootstrap: createBootstrap(),
   pages: {
@@ -40,11 +43,23 @@ createPactorApplication({
   loader,
   ui: antdUiKit,
   services: demoServices,
+  // 国际化：locale 取自 localStorage 语言偏好（见 src/i18n.ts），
+  // 页面 DSL 的 ${t('key')} 表达式按 messages 求值；内置组件文案
+  // 未覆盖时回退框架默认（zh-CN）。antd 组件自身文案由
+  // SkinProvider 的 ConfigProvider locale 接管
+  locale: getLocale(),
+  defaultLocale: 'zh-CN',
+  messages,
   // 皮肤设置：SkinProvider 将 antd ConfigProvider 注入应用树（Router 内、
   // InteractionKit 外，message/modal/drawer 均消费主题）；SkinSettings
   // 为 admin 头部右侧的皮肤入口
   providers: SkinProvider,
-  headerExtra: <SkinSettings />,
+  headerExtra: (
+    <>
+      <LanguageSwitcher />
+      <SkinSettings />
+    </>
+  ),
   actions: {
     // 整页重载：登录/登出后需要重新加载 bootstrap（布局与菜单随会话变化），
     // react-router 的 navigate 不会触发 bootstrap 重取，故示例扩展此动作

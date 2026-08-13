@@ -298,4 +298,19 @@ describe('滚动锁定补偿（经典滚动条下抽屉不跳动）', () => {
       /body\[data-scroll-locked\]\s+\.pcr-drawer-panel\s*\{[^}]*right:\s*var\(--removed-body-scroll-bar-size,\s*0px\)/,
     );
   });
+
+  it('styles.css 含 scrollbar-gutter 与 margin 归零规则防止滚动条闪烁', () => {
+    // html scrollbar-gutter: stable 预留滚动条空间，避免 Select/Dialog 展开
+    // 时滚动条出现/消失导致的内容位移；同时将 react-remove-scroll 的
+    // margin 补偿归零，防止与 scrollbar-gutter 重复补偿。
+    const stylesPath = join(
+      dirname(fileURLToPath(import.meta.url)),
+      '../../styles.css',
+    );
+    const css = readFileSync(stylesPath, 'utf8');
+    expect(css).toMatch(/html\s*\{[^}]*scrollbar-gutter:\s*stable/);
+    expect(css).toMatch(
+      /body\[data-scroll-locked\]\s*\{[^}]*margin-right:\s*0\s*!important/,
+    );
+  });
 });

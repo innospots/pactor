@@ -1,5 +1,5 @@
 import type { TableProps } from 'pactor-ui-antd/components';
-import { useRenderer } from 'pactor-runtime';
+import { useI18n, useRenderer } from 'pactor-runtime';
 import { useState } from 'react';
 
 function renderCellValue(value: unknown): string {
@@ -26,6 +26,7 @@ export function Table({
   onChange,
 }: TableProps) {
   const { renderChildren } = useRenderer();
+  const { t } = useI18n();
   const [current, setCurrent] = useState(1);
 
   const pageSize = pagination === false ? undefined : pagination?.pageSize;
@@ -46,7 +47,9 @@ export function Table({
 
   return (
     <div className="pcr-table">
-      {loading ? <div className="pcr-table-loading">加载中…</div> : null}
+      {loading ? (
+        <div className="pcr-table-loading">{t('pactor.table.loading')}</div>
+      ) : null}
       <table className="pcr-table-table">
         <thead>
           <tr className="pcr-table-head-row">
@@ -65,7 +68,7 @@ export function Table({
           {pageRows.length === 0 ? (
             <tr className="pcr-table-empty-row">
               <td colSpan={Math.max(1, columns.length)}>
-                <div className="pcr-table-empty">暂无数据</div>
+                <div className="pcr-table-empty">{t('pactor.table.empty')}</div>
               </td>
             </tr>
           ) : (

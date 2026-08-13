@@ -163,6 +163,18 @@ function evaluateNode(
       const args = node.arguments.map((arg) => evaluateNode(arg, scope, options));
       return fn(...args);
     }
+
+    case 'ObjectExpression': {
+      const out: Record<string, unknown> = {};
+      for (const { key, value } of node.properties) {
+        // 拒绝原型链相关键，避免 out['__proto__'] 赋值污染原型
+        if (FORBIDDEN_KEYS.has(key)) {
+          throw new ExpressionError(`object literal key "${key}" is not allowed`);
+        }
+        out[key] = evaluateNode(value, scope, options);
+      }
+      return out;
+    }
   }
 }
 

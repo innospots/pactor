@@ -38,6 +38,17 @@ createPactorApplication({
   appId: 'example-admin',
   loader,
   services: demoServices,
+  locale: 'zh-CN',
+  messages: {
+    'zh-CN': {
+      'menu.dashboard': '工作台',
+      'menu.customers': '客户管理',
+    },
+    'en-US': {
+      'menu.dashboard': 'Dashboard',
+      'menu.customers': 'Customers',
+    },
+  },
   actions: {
     // 整页重载：登录/登出后需要重新加载 bootstrap（布局与菜单随会话变化），
     // react-router 的 navigate 不会触发 bootstrap 重取，故示例扩展此动作

@@ -176,8 +176,8 @@ export function AdminLayout({
     [registry, permissionChecker],
   );
   const defaultOpenKeys = useMemo(
-    () => collectDefaultOpenKeys(registry),
-    [registry],
+    () => collectDefaultOpenKeys(registry, activeMenuId),
+    [registry, activeMenuId],
   );
 
   // two-column：可见一级菜单 + 当前选中一级项（激活链首项优先）

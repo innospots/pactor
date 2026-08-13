@@ -1,4 +1,4 @@
-import { Registry, type DataSourceConfig, type PageMeta } from 'pactor-core';
+import { Registry, createI18nContext, type DataSourceConfig, type I18nContext, type PageMeta } from 'pactor-core';
 import type { ExpressionScope } from 'pactor-expression';
 
 import type { ActionRegistry } from '../action/engine.js';
@@ -82,6 +82,10 @@ export interface RuntimeContext {
   capabilities: CapabilityRegistry;
   /** HTTP 出口适配器（DataSource / request 动作共用） */
   http: HttpAdapter;
+  /** 当前语言代码（如 'zh-CN'） */
+  locale: string;
+  /** i18n 上下文：提供 `t(key, params?)` 翻译函数 */
+  i18n: I18nContext;
 }
 
 export interface CreateRuntimeContextOptions {
@@ -103,6 +107,12 @@ export interface CreateRuntimeContextOptions {
   router?: RouterAdapter;
   http?: HttpAdapter;
   capabilities?: CapabilityRegistry;
+  /** 当前语言代码（缺省 'zh-CN'） */
+  locale?: string;
+  /** 回退语言代码（缺省 'zh-CN'） */
+  defaultLocale?: string;
+  /** 翻译消息表 */
+  messages?: Record<string, string | Record<string, string>>;
 }
 
 /**
@@ -158,6 +168,12 @@ export function createRuntimeContext(
     permission,
     capabilities,
     http,
+    locale: options.locale ?? 'zh-CN',
+    i18n: createI18nContext({
+      locale: options.locale,
+      defaultLocale: options.defaultLocale,
+      messages: options.messages,
+    }),
   };
   return context;
 }

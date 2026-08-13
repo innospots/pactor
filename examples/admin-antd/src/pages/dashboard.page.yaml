@@ -16,14 +16,14 @@ dataSources:
 body:
   type: Page
   props:
-    title: 工作台
+    title: ${t('menu.dashboard')}
   children:
     # 欢迎横幅：内容区第一个 Alert，由 src/theme.css 结构选择器样式化为品牌渐变
     - type: Alert
       props:
         variant: info
-        message: 欢迎回来，${user.name}！
-        description: 当前应用：${app.name}（user / app 作用域表达式绑定）· 今日有 ${data.stats.pendingTickets} 条待办工单
+        message: "${t('dashboard.welcome.message', { name: user.name })}"
+        description: "${t('dashboard.welcome.description', { app: app.name, count: data.stats.pendingTickets })}"
     # 指标行：4 张指标卡，src/theme.css 经 .pcr-card:has(.pcr-statistic) 加 accent 强调条
     - type: Grid
       props:
@@ -34,28 +34,28 @@ body:
           children:
             - type: Statistic
               props:
-                title: 客户总数
+                title: ${t('dashboard.stats.customerTotal')}
                 value: ${data.stats.customerTotal}
-                suffix: 家
+                suffix: ${t('dashboard.stats.unit.customer')}
         - type: Card
           children:
             - type: Statistic
               props:
-                title: 今日活跃
+                title: ${t('dashboard.stats.activeToday')}
                 value: ${data.stats.activeToday}
-                suffix: 家
+                suffix: ${t('dashboard.stats.unit.customer')}
         - type: Card
           children:
             - type: Statistic
               props:
-                title: 待办工单
+                title: ${t('dashboard.stats.pendingTickets')}
                 value: ${data.stats.pendingTickets}
-                suffix: 条
+                suffix: ${t('dashboard.stats.unit.ticket')}
         - type: Card
           children:
             - type: Statistic
               props:
-                title: 转化率
+                title: ${t('dashboard.stats.conversionRate')}
                 value: ${data.stats.conversionRate}
                 precision: 1
                 suffix: '%'
@@ -67,28 +67,28 @@ body:
       children:
         - type: Card
           props:
-            title: 公告与待办
+            title: ${t('dashboard.notice.title')}
           children:
             - type: Tabs
               props:
                 items:
                   - key: notice
-                    label: 公告
+                    label: ${t('dashboard.notice.tab')}
                     children:
                       - type: Alert
                         props:
                           variant: info
-                          message: 本示例为纯前端演示：页面 DSL 本地导入，数据为内存 mock。
+                          message: ${t('dashboard.notice.message')}
                   - key: todo
-                    label: 待办
+                    label: ${t('dashboard.todo.tab')}
                     children:
                       - type: Alert
                         props:
                           variant: warning
-                          message: 你有 ${data.stats.pendingTickets} 条待办工单（数据源表达式）。
+                          message: "${t('dashboard.todo.message', { count: data.stats.pendingTickets })}"
         - type: Card
           props:
-            title: 快捷操作
+            title: ${t('dashboard.quickActions.title')}
           children:
             - type: Flex
               props:
@@ -98,14 +98,14 @@ body:
                 - type: Alert
                   props:
                     variant: info
-                    message: 常用入口一键直达（navigate 动作）。
+                    message: ${t('dashboard.quickActions.message')}
                 - type: Flex
                   props:
                     gap: 8
                   children:
                     - type: Button
                       props:
-                        text: 客户列表
+                        text: ${t('dashboard.quickActions.customers')}
                         variant: primary
                       events:
                         onClick:
@@ -114,7 +114,7 @@ body:
                             to: /customers
                     - type: Button
                       props:
-                        text: 编辑客户
+                        text: ${t('dashboard.quickActions.customerEdit')}
                       events:
                         onClick:
                           action: navigate
@@ -123,10 +123,10 @@ body:
                 - type: Alert
                   props:
                     variant: warning
-                    message: 退出登录演示：清除本地会话并整页重载回 /login。
+                    message: ${t('dashboard.logout.message')}
                 - type: Button
                   props:
-                    text: 退出登录
+                    text: ${t('dashboard.logout')}
                     danger: true
                   events:
                     onClick:
