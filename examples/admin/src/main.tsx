@@ -4,10 +4,14 @@ import { StaticDslLoader } from 'pactor-resource';
 import 'pactor-ui-radix/styles.css';
 // 示例皮肤：换肤契约参考实现（须在 pactor-ui-radix/styles.css 之后导入）
 import './theme.css';
+// 皮肤 store：模块加载即把持久化的皮肤应用到 DOM（data-pactor-theme 等），
+// 须在首屏渲染前执行
+import './skin';
 
 import { readSession } from './auth';
 import { createBootstrap } from './bootstrap';
 import { demoServices } from './services';
+import { SkinSettings } from './SkinSettings';
 import customerEditPage from './pages/customer-edit.page.yaml';
 import customerListPage from './pages/customer-list.page.yaml';
 import dashboardPage from './pages/dashboard.page.yaml';
@@ -49,6 +53,9 @@ createPactorApplication({
       'menu.customers': 'Customers',
     },
   },
+  // 皮肤设置：头部右侧入口（主色预设 / 暗黑 / 圆角），
+  // 皮肤应用走 DOM 属性与 CSS 变量（见 skin.ts），即时生效无需刷新
+  headerExtra: <SkinSettings />,
   actions: {
     // 整页重载：登录/登出后需要重新加载 bootstrap（布局与菜单随会话变化），
     // react-router 的 navigate 不会触发 bootstrap 重取，故示例扩展此动作

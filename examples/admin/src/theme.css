@@ -29,10 +29,11 @@
   padding: 20px 24px;
   border-color: transparent;
   border-radius: var(--pcr-radius-lg);
+  /* 渐变取语义 token（而非 accent 刻度），皮肤设置面板切换主色时跟随 */
   background: linear-gradient(
     135deg,
-    var(--pcr-accent-9),
-    var(--pcr-accent-7)
+    var(--pcr-accent),
+    var(--pcr-accent-active)
   );
   color: var(--pcr-accent-fg);
 }
@@ -54,4 +55,40 @@
  * ============================================================ */
 .pcr-card:has(.pcr-statistic) {
   border-left: 3px solid var(--pcr-accent);
+}
+
+/* ============================================================
+ * 4. 主色预设（皮肤设置面板：skin.ts 在 <html> 上切换
+ *    data-pactor-accent 属性；'default' 不设属性，用样式表内置刻度）
+ *    预设只声明实体主色 --pcr-accent，其余语义态用 color-mix 派生：
+ *    hover/active/text 向 --pcr-fg 靠拢（亮色主题变深、暗色主题变浅），
+ *    subtle/border 向 --pcr-bg 靠拢（随明暗主题自适应底色的浅底/边框）。
+ * ============================================================ */
+[data-pactor-accent] {
+  --pcr-accent-hover: color-mix(in srgb, var(--pcr-accent) 88%, var(--pcr-fg));
+  --pcr-accent-active: color-mix(in srgb, var(--pcr-accent) 78%, var(--pcr-fg));
+  --pcr-accent-text: color-mix(in srgb, var(--pcr-accent) 82%, var(--pcr-fg));
+  --pcr-accent-subtle: color-mix(in srgb, var(--pcr-accent) 12%, var(--pcr-bg));
+  --pcr-accent-border: color-mix(in srgb, var(--pcr-accent) 45%, var(--pcr-bg));
+  --pcr-focus-ring: color-mix(in srgb, var(--pcr-accent) 35%, transparent);
+}
+
+[data-pactor-accent='blue'] {
+  --pcr-accent: #1677ff;
+}
+
+[data-pactor-accent='green'] {
+  --pcr-accent: #0e7a3d;
+}
+
+[data-pactor-accent='purple'] {
+  --pcr-accent: #722ed1;
+}
+
+[data-pactor-accent='magenta'] {
+  --pcr-accent: #eb2f96;
+}
+
+[data-pactor-accent='orange'] {
+  --pcr-accent: #d4380d;
 }
