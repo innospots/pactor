@@ -27,5 +27,16 @@ const defaultI18n = createI18nContext({
 /** 在 React 组件内获取 i18n 上下文；未包裹 I18nContextProvider 时返回缺省上下文 */
 export function useI18n(): I18nContext {
   const value = useContext(I18nReactContext);
-  return value ?? defaultI18n;
+  if (value === null) {
+    return defaultI18n;
+  }
+  // Provider 的 messages（options / bootstrap 下发）通常不含内置 pactor.* 文案：
+  // key 未命中（t 原样返回 key）时先回退内置默认文案，再回退 key 本身
+  return {
+    ...value,
+    t: (key, params) => {
+      const translated = value.t(key, params);
+      return translated === key ? defaultI18n.t(key, params) : translated;
+    },
+  };
 }
