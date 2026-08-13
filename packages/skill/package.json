@@ -1,0 +1,29 @@
+{
+  "name": "pactor-skill",
+  "version": "1.0.0",
+  "description": "Agent skill for rapidly building pactor Server-Driven UI applications",
+  "keywords": [
+    "pactor",
+    "dsl",
+    "server-driven-ui",
+    "skill",
+    "agent"
+  ],
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/426-330/pactor.git",
+    "directory": "packages/skill"
+  },
+  "homepage": "https://github.com/426-330/pactor/tree/main/packages/skill",
+  "bugs": "https://github.com/426-330/pactor/issues",
+  "type": "module",
+  "files": [
+    "SKILL.md",
+    "README.md"
+  ],
+  "scripts": {},
+  "publishConfig": {
+    "access": "public"
+  }
+}
