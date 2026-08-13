@@ -19,6 +19,13 @@
   box-sizing: border-box;
 }
 
+html {
+  /* 预留滚动条空间，防止 Select/Dialog 展开时 react-remove-scroll 移除
+   * 滚动条导致的内容位移与滚动条闪烁。与库的 margin 补偿互斥，需配合
+   * 下方 body[data-scroll-locked] 的 margin-right 归零使用。 */
+  scrollbar-gutter: stable;
+}
+
 body {
   margin: 0;
   padding: 0;
@@ -1386,12 +1393,16 @@ body {
 
 /*
  * 滚动锁定补偿：Radix Select/Dialog 展开时 react-remove-scroll 锁定 body
- * （overflow: hidden + body margin 补偿），视口滚动条移除后 fixed 布局
- * 视口变宽，右锚定的面板会随之外移产生跳动；body 内容已由库的 margin
- * 补偿保持稳定，面板用库暴露的 --removed-body-scroll-bar-size 变量
- * （body[data-scroll-locked] 上，随滚动锁定计数增减）保持原位。
+ * （overflow: hidden + body margin 补偿）。html 已用 scrollbar-gutter: stable
+ * 预留滚动条空间，因此需将库的 margin 补偿归零，避免与 scrollbar-gutter
+ * 重复补偿导致内容偏移。右锚定的 Drawer 面板继续用库暴露的
+ * --removed-body-scroll-bar-size 变量保持原位。
  * 无滚动条（overlay scrollbar / 短页面）时变量为 0，规则无效果。
  */
+body[data-scroll-locked] {
+  margin-right: 0 !important;
+}
+
 body[data-scroll-locked] .pcr-drawer-panel {
   right: var(--removed-body-scroll-bar-size, 0px);
 }

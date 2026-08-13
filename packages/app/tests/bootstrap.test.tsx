@@ -98,6 +98,38 @@ describe('application-bootstrap：启动编排', () => {
     ).toBe('空应用');
     expect(target.querySelectorAll('.pcr-menu-item')).toHaveLength(0);
   });
+
+  it('i18n 配置：options.locale/messages 注入页面表达式作用域', async () => {
+    const i18nPage: PageDsl = {
+      dsl: '1.0',
+      page: { id: 'home', title: '首页' },
+      body: {
+        type: 'Page',
+        children: [
+          {
+            type: 'Text',
+            props: { value: "${t('welcome')}" },
+          },
+        ],
+      },
+    };
+    setUrl('/');
+    app = createPactorApplication({
+      appId: 'risk-admin',
+      loader: new StaticDslLoader({
+        bootstrap: createBootstrap({ menus: [standardMenus[0]] }),
+        pages: { home: i18nPage },
+      }),
+      components: {
+        Text: ({ value }: { value?: string }) => <span>{value}</span>,
+      },
+      locale: 'en-US',
+      messages: { welcome: 'Hello, Pactor!' },
+    });
+    await mountApp(app);
+
+    await screen.findByText('Hello, Pactor!');
+  });
 });
 
 describe('application-bootstrap：共享注册表与页面运行时工厂', () => {

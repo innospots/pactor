@@ -59,6 +59,14 @@ pnpm --filter example-chat dev           # pactor-chat 对话示例，http://loc
 > 新增 `docs/src/content/docs/**` 页面后需重启 `pnpm docs:dev`，
 > 否则侧边栏会报 `The slug "..." does not exist`。
 
+## 特性
+
+- **Server-Driven UI**：页面用 YAML/JSON DSL 描述，由浏览器 Runtime 动态渲染
+- **AI-Native**：支持 Markdown + DSL 的 AI Chat 交互
+- **国际化**：内置轻量 i18n 支持，DSL 可使用 `${t('key')}` 表达式
+- **权限控制**：页面/菜单/组件/动作四层守卫
+- **主题换肤**：CSS 变量 + UI kit 切换（Radix / antd）
+
 ## 环境要求
 
 - Node.js >= 18

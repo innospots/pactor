@@ -23,7 +23,7 @@
 
 ### Requirement: 受控 AST 解析
 
-解析器 SHALL 仅支持以下 AST 节点：Literal、Identifier、MemberExpression、BinaryExpression、LogicalExpression、UnaryExpression、ConditionalExpression、CallExpression（白名单函数）。对不支持的语法（赋值、`new`、箭头函数、序列表达式等）MUST 在 parse 阶段抛出结构化语法错误，MUST NOT 使用 `eval` 或 `new Function`。
+解析器 SHALL 仅支持以下 AST 节点：Literal、Identifier、MemberExpression、BinaryExpression、LogicalExpression、UnaryExpression、ConditionalExpression、CallExpression（白名单函数）、ObjectExpression（对象字面量，键限标识符/字符串，主要作为 `t()` 等白名单函数的参数表）。对不支持的语法（赋值、`new`、箭头函数、数组字面量、序列表达式等）MUST 在 parse 阶段抛出结构化语法错误，MUST NOT 使用 `eval` 或 `new Function`。对象字面量的键为 `__proto__` / `prototype` / `constructor` 时 MUST 在求值阶段抛出受控错误，禁止原型污染。
 
 #### Scenario: 解析二元与逻辑表达式
 
@@ -34,6 +34,16 @@
 
 - **WHEN** 解析并求值 `state.loading ? '加载中' : '完成'`
 - **THEN** 根据 `state.loading` 真假返回对应分支
+
+#### Scenario: 对象字面量作为函数参数
+
+- **WHEN** 求值 `t('welcome', { name: user.name })` 且 `user.name` 为 `'Alice'`
+- **THEN** 第二个参数求值为普通对象 `{ name: 'Alice' }`
+
+#### Scenario: 对象字面量原型污染键被拒绝
+
+- **WHEN** 求值 `{ __proto__: { x: 1 } }` 或 `{ constructor: 1 }`
+- **THEN** 抛出受控错误，不污染任何对象原型
 
 #### Scenario: 非法语法被拒绝
 
@@ -95,3 +105,22 @@ LogicalExpression MUST 短路求值：`&&` 左侧为假时不得求值右侧，`
 
 - **WHEN** 求值 `state.missing && state.missing.deep` 且 `state.missing` 为 `undefined`
 - **THEN** 返回 falsy 值且不因访问 `undefined.deep` 抛错
+
+### Requirement: i18n 翻译函数
+
+表达式引擎 SHALL 在 Function Registry 中提供 `t(key)` 与 `t(key, params)` 白名单函数，用于根据当前 locale 翻译文案。`t()` MUST 支持参数插值（`{{name}}`）与回退（当前 locale → defaultLocale → key 本身）。
+
+#### Scenario: 基础翻译
+
+- **WHEN** 作用域提供 `t` 函数，messages 含 `menu.home`，求值 `t('menu.home')`
+- **THEN** 返回当前 locale 下 `menu.home` 的翻译值
+
+#### Scenario: 参数插值
+
+- **WHEN** messages 为 `{ 'welcome': 'Hello, {{name}}!' }`，求值 `t('welcome', { name: 'Alice' })`
+- **THEN** 返回 `'Hello, Alice!'`
+
+#### Scenario: 缺失 key 回退
+
+- **WHEN** 求值 `t('missing.key')` 且 messages 中不存在该 key
+- **THEN** 返回字符串 `'missing.key'`

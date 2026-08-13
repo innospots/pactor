@@ -27,6 +27,8 @@ export function buildScope(
     user: context.user,
     params: context.route.params,
     actions: context.actionResults,
+    locale: context.locale,
+    t: context.i18n.t,
     ...local,
   };
 }

@@ -25,6 +25,7 @@ export type {
 } from './context/context.js';
 export { buildScope } from './context/scope.js';
 export { StateStore } from './context/state-store.js';
+export { I18nContextProvider, useI18n } from './context/i18n-context.js';
 
 // datasource：DataSource 运行时（非 React）
 export { DataStore } from './datasource/data-store.js';

@@ -33,6 +33,8 @@ const PUNCTUATORS = [
   '!',
   '[',
   ']',
+  '{',
+  '}',
 ] as const;
 
 const IDENTIFIER_START = /[A-Za-z_$]/;

@@ -75,7 +75,7 @@
 6. vitest `run tests/` 参数是路径过滤器，会连带匹配 `packages/*/tests/`（根级测试数因此偏大，无害）。
 7. DSL Schema 校验只管结构不管组件 props（props 开放，由组件自行解释）——演示 vite-plugin 构建期报错要用删 `page.id` 这类结构性错误，加非法 prop 不会报错。
 8. Radix admin 收起态：仅顶层首字符平铺（64px 窄列，不渲染子级与箭头）；group 悬停经 Radix Popover 浮出子菜单（hover 开、移入浮层保持、移出 200ms 延迟关、浮层内点 page 项导航后关闭，见 `CollapsedGroupFlyout`）。
-9. **Radix Select/Dialog 展开会锁 body 滚动**（react-remove-scroll：body `data-scroll-locked` + overflow hidden + margin 补偿）——经典滚动条系统下视口变宽，右锚定的自绘 Drawer 面板会右移跳动；已用库暴露的 `--removed-body-scroll-bar-size` 变量补偿（`body[data-scroll-locked] .pcr-drawer-panel { right: var(...) }`）。注意 `scrollbar-gutter: stable` 与该库的 margin 补偿会**重复补偿**，勿组合使用。
+9. **Radix Select/Dialog 展开会锁 body 滚动**（react-remove-scroll：body `data-scroll-locked` + overflow hidden + margin 补偿）——经典滚动条系统下视口变宽，右锚定的自绘 Drawer 面板会右移跳动；已用库暴露的 `--removed-body-scroll-bar-size` 变量补偿（`body[data-scroll-locked] .pcr-drawer-panel { right: var(...) }`）。为消除滚动条闪烁，已加 `html { scrollbar-gutter: stable }` 预留滚动条空间，并将 `body[data-scroll-locked] { margin-right: 0 !important }` 归零库的 margin 补偿，避免重复补偿。
 
 ## 已知边界 / 待办
 

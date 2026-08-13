@@ -87,6 +87,34 @@ describe('collectDefaultOpenKeys', () => {
   it('收集 defaultOpen 的 group id', () => {
     expect(collectDefaultOpenKeys(new MenuRegistry(menus))).toEqual(['customer']);
   });
+
+  it('并入激活菜单父链上的 group（刷新子页面时选中项所在分组保持展开）', () => {
+    const closed: MenuItem[] = [
+      {
+        id: 'customer',
+        type: 'group',
+        title: '客户管理',
+        children: [
+          {
+            id: 'customer-list',
+            type: 'page',
+            title: '客户列表',
+            path: '/customers',
+          },
+        ],
+      },
+    ];
+    const registry = new MenuRegistry(closed);
+
+    // 未传 activeMenuId：分组不展开
+    expect(collectDefaultOpenKeys(registry)).toEqual([]);
+    // 激活项在分组内：分组并入默认展开集
+    expect(collectDefaultOpenKeys(registry, 'customer-list')).toEqual(['customer']);
+    // 激活项不在任何分组内：不额外展开
+    expect(collectDefaultOpenKeys(new MenuRegistry(menus), 'dashboard')).toEqual([
+      'customer',
+    ]);
+  });
 });
 
 describe('findMenuChain', () => {

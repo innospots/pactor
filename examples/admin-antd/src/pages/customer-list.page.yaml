@@ -7,6 +7,7 @@ page:
 state:
   keyword: ''
   # 级联演示：省 → 市选项映射（编辑抽屉 region 字段 onChange 时查表写入 cityOptions）
+  # 省市名为业务数据（与 mock service 的 region/city 取值一致），不参与 i18n
   cityMap:
     浙江:
       - { label: 杭州, value: 杭州 }
@@ -35,18 +36,18 @@ dataSources:
 body:
   type: Page
   props:
-    title: 客户列表
+    title: ${t('customers.title')}
   children:
     # 页面说明区
     - type: Alert
       props:
         variant: info
-        message: 客户列表演示查询、抽屉编辑与权限禁用
-        description: 查询走 setState + reload 链路；行内"删除"因 permissions 不含 customer:delete 而禁用。
+        message: ${t('customers.intro.message')}
+        description: ${t('customers.intro.description')}
     # 查询区
     - type: Card
       props:
-        title: 客户查询
+        title: ${t('customers.search.title')}
       children:
         - type: Form
           props:
@@ -63,17 +64,17 @@ body:
             - type: Input
               props:
                 name: keyword
-                label: 关键词
-                placeholder: 客户名 / 负责人
+                label: ${t('customers.search.keyword.label')}
+                placeholder: ${t('customers.search.keyword.placeholder')}
             - type: Button
               props:
-                text: 查询
+                text: ${t('customers.search.submit')}
                 variant: primary
                 submit: true
     # 数据区
     - type: Card
       props:
-        title: 客户数据（service 数据源）
+        title: ${t('customers.table.title')}
       children:
         - type: Table
           props:
@@ -83,15 +84,15 @@ body:
             columns:
               - title: ID
                 dataIndex: id
-              - title: 客户名称
+              - title: ${t('customers.column.name')}
                 dataIndex: name
-              - title: 联系电话
+              - title: ${t('customers.column.phone')}
                 dataIndex: phone
-              - title: 等级
+              - title: ${t('customers.column.level')}
                 dataIndex: level
-              - title: 负责人
+              - title: ${t('customers.column.owner')}
                 dataIndex: owner
-              - title: 操作
+              - title: ${t('customers.column.actions')}
                 # cell 行模板：row / rowIndex 子作用域
                 cell:
                   type: Flex
@@ -100,7 +101,7 @@ body:
                   children:
                     - type: Button
                       props:
-                        text: 编辑
+                        text: ${t('customers.action.edit')}
                         variant: primary
                         size: small
                       events:
@@ -115,7 +116,7 @@ body:
                             params:
                               overlay:
                                 type: drawer
-                                title: 编辑客户
+                                title: ${t('customers.drawer.title')}
                                 width: 420
                                 params:
                                   id: ${row.id}
@@ -154,45 +155,45 @@ body:
                                             - action: message
                                               params:
                                                 type: error
-                                                text: 保存失败，请重试
+                                                text: ${t('customers.form.saveError')}
                                   children:
                                     - type: Alert
                                       props:
                                         variant: info
-                                        message: 正在编辑：${params.name}（ID ${params.id}）
+                                        message: "${t('customers.drawer.editing', { name: params.name, id: params.id })}"
                                     - type: Input
                                       props:
                                         name: name
-                                        label: 客户名称
+                                        label: ${t('customers.form.name.label')}
                                         # 字段级初始值：回填当前行数据
                                         value: ${params.name}
-                                        placeholder: 请输入客户名称
+                                        placeholder: ${t('customers.form.name.placeholder')}
                                         rules:
                                           - required: true
-                                            message: 请输入客户名称
+                                            message: ${t('customers.form.name.required')}
                                     - type: Input
                                       props:
                                         name: phone
-                                        label: 联系电话
+                                        label: ${t('customers.form.phone.label')}
                                         value: ${params.phone}
-                                        placeholder: 请输入联系电话
+                                        placeholder: ${t('customers.form.phone.placeholder')}
                                     - type: Select
                                       props:
                                         name: level
-                                        label: 等级
+                                        label: ${t('customers.form.level.label')}
                                         value: ${params.level}
                                         options:
-                                          - label: A 级
+                                          - label: ${t('customers.form.level.a')}
                                             value: A
-                                          - label: B 级
+                                          - label: ${t('customers.form.level.b')}
                                             value: B
-                                          - label: C 级
+                                          - label: ${t('customers.form.level.c')}
                                             value: C
                                     # 级联演示：region 变化 → form.setValues 清空 city + setState 更新 city 选项
                                     - type: Select
                                       props:
                                         name: region
-                                        label: 省份
+                                        label: ${t('customers.form.region.label')}
                                         value: ${params.region}
                                         options:
                                           - { label: 浙江, value: 浙江 }
@@ -211,12 +212,12 @@ body:
                                     - type: Select
                                       props:
                                         name: city
-                                        label: 城市（随省份联动）
+                                        label: ${t('customers.form.city.label')}
                                         value: ${params.city}
                                         options: ${state.cityOptions}
                                     - type: Button
                                       props:
-                                        text: 保存
+                                        text: ${t('customers.form.save')}
                                         variant: primary
                                         submit: true
                           # 抽屉以成功语义关闭后：reload 列表 + 成功 message
@@ -230,11 +231,11 @@ body:
                                 - action: message
                                   params:
                                     type: success
-                                    text: 客户已更新
+                                    text: ${t('customers.updated')}
                     # 权限演示：permissions 不含 customer:delete，按钮以禁用态呈现
                     - type: Button
                       props:
-                        text: 删除
+                        text: ${t('customers.action.delete')}
                         danger: true
                         size: small
                       permission:

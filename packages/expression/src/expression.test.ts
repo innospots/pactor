@@ -137,6 +137,40 @@ describe('whitelisted function calls', () => {
   });
 });
 
+describe('object literals', () => {
+  it('evaluates object literals with expression values', () => {
+    const scope = { user: { name: 'Alice' }, count: 3 };
+    expect(evaluateExpression("{ name: user.name, n: count + 1, ok: true }", scope)).toEqual({
+      name: 'Alice',
+      n: 4,
+      ok: true,
+    });
+  });
+
+  it('supports string keys and empty objects', () => {
+    expect(evaluateExpression('{}')).toEqual({});
+    expect(evaluateExpression("{ 'a-b': 1 }")).toEqual({ 'a-b': 1 });
+  });
+
+  it('passes object literals as whitelisted function args (t() 插值参数)', () => {
+    const t = (key: unknown, params?: Record<string, unknown>) =>
+      `${String(key)}:${String(params?.['name'])}`;
+    expect(
+      evaluateExpression("t('welcome', { name: user.name })", {
+        user: { name: 'Alice' },
+        t,
+      }),
+    ).toBe('welcome:Alice');
+  });
+
+  it('rejects prototype-polluting keys', () => {
+    expect(() => evaluateExpression("{ __proto__: { x: 1 } }")).toThrow(
+      /not allowed/,
+    );
+    expect(() => evaluateExpression("{ constructor: 1 }")).toThrow(/not allowed/);
+  });
+});
+
 describe('global object isolation', () => {
   it('cannot reach globals via identifiers', () => {
     expect(evaluateExpression('window.location')).toBeUndefined();

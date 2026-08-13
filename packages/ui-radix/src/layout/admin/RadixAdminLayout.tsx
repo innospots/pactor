@@ -14,6 +14,7 @@ import {
   type NavigationBridge,
   type RouteContext,
 } from 'pactor-router';
+import { useI18n } from 'pactor-runtime';
 import { useEffect, useMemo, useRef, useState } from 'react';
 
 import { useBreakpointBelow } from './use-media-query.js';
@@ -270,6 +271,7 @@ export function RadixAdminLayout({
   headerExtra,
   children,
 }: AdminLayoutProps) {
+  const { t } = useI18n();
   const mode = config.mode ?? 'top-side';
   const showHeader = config.header ?? true;
   const showSidebar = (config.sidebar ?? true) && mode !== 'top-bottom';
@@ -324,8 +326,8 @@ export function RadixAdminLayout({
     [registry, permissionChecker],
   );
   const defaultOpenKeys = useMemo(
-    () => collectDefaultOpenKeys(registry),
-    [registry],
+    () => collectDefaultOpenKeys(registry, activeMenuId),
+    [registry, activeMenuId],
   );
 
   // two-column：当前选中一级项（激活链首项优先）
@@ -462,7 +464,11 @@ export function RadixAdminLayout({
         <button
           type="button"
           className="pcr-admin-collapse-trigger"
-          aria-label={effectiveCollapsed ? '展开侧边栏' : '收起侧边栏'}
+          aria-label={
+            effectiveCollapsed
+              ? t('pactor.layout.expandSidebar')
+              : t('pactor.layout.collapseSidebar')
+          }
           aria-expanded={!effectiveCollapsed}
           onClick={() => setCollapsed((value) => !value)}
         >
@@ -497,7 +503,7 @@ export function RadixAdminLayout({
                   <button
                     type="button"
                     className="pcr-tab-close"
-                    aria-label={`关闭 ${tab.title}`}
+                    aria-label={t('pactor.layout.closeTab', { title: tab.title })}
                     onClick={() => closeTab(tab.key)}
                   >
                     ×
@@ -510,7 +516,10 @@ export function RadixAdminLayout({
       )}
       <main className="pcr-admin-content">
         {showBreadcrumb && breadcrumbItems.length > 0 && (
-          <nav className="pcr-admin-breadcrumb" aria-label="面包屑">
+          <nav
+            className="pcr-admin-breadcrumb"
+            aria-label={t('pactor.layout.breadcrumb')}
+          >
             <ol className="pcr-breadcrumb-list">
               {breadcrumbItems.map((title, index) => (
                 <li key={index} className="pcr-breadcrumb-item">

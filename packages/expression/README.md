@@ -32,8 +32,8 @@ evaluateExpression("!permission('customer:edit')", scope, {
 
 安全约束：
 
-- 仅支持白名单 AST 节点（字面量 / 标识符 / 成员访问 / 二元 / 逻辑 / 一元 / 三元 / 白名单函数调用）
-- 赋值、`new`、箭头函数、`obj.method()` 等在 parse 阶段直接抛错
+- 仅支持白名单 AST 节点（字面量 / 标识符 / 成员访问 / 二元 / 逻辑 / 一元 / 三元 / 白名单函数调用 / 对象字面量）
+- 赋值、`new`、箭头函数、数组字面量、`obj.method()` 等在 parse 阶段直接抛错
 - 标识符仅从调用方传入的作用域解析，`window` / `fetch` 等全局对象不可达
 - `__proto__` / `prototype` / `constructor` 键被隔离
 

@@ -1,7 +1,9 @@
 /**
  * 受控表达式 AST（设计文档第 16.1 节白名单节点）。
  *
- * 语法子集刻意保持最小：无赋值、无 new、无箭头函数、无对象/数组字面量。
+ * 语法子集刻意保持最小：无赋值、无 new、无箭头函数、无数组字面量。
+ * 对象字面量（`{ name: state.x }`）仅作为白名单函数的参数载体开放
+ * （如 `t('key', { name: user.name })`），键仅允许标识符/字符串。
  * 不支持的语法在 parse 阶段直接抛错，而不是解析后再黑名单过滤。
  */
 
@@ -81,6 +83,15 @@ export interface CallExpression {
   arguments: ExpressionNode[];
 }
 
+/**
+ * 对象字面量（`{ key: value, ... }`）：键为标识符或字符串，
+ * 值为任意表达式。主要作为白名单函数的参数表（如 t() 的插值参数）。
+ */
+export interface ObjectExpression {
+  type: 'ObjectExpression';
+  properties: Array<{ key: string; value: ExpressionNode }>;
+}
+
 export type ExpressionNode =
   | Literal
   | Identifier
@@ -89,4 +100,5 @@ export type ExpressionNode =
   | LogicalExpression
   | UnaryExpression
   | ConditionalExpression
-  | CallExpression;
+  | CallExpression
+  | ObjectExpression;

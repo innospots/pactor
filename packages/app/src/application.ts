@@ -1,4 +1,4 @@
-import type { PageDsl } from 'pactor-core';
+import type { I18nMessages, PageDsl } from 'pactor-core';
 import { Registry } from 'pactor-core';
 import {
   createUiBridge,
@@ -131,6 +131,12 @@ export interface PactorApplicationOptions {
   headerExtra?: ReactNode;
   /** 认证令牌：注入 DSL 资源请求与页面 HTTP 出口（Authorization: Bearer） */
   authTokenProvider?: AuthTokenProvider;
+  /** 当前语言代码（优先级高于 bootstrap.locale 与浏览器语言） */
+  locale?: string;
+  /** 回退语言代码（缺省 'zh-CN'） */
+  defaultLocale?: string;
+  /** 翻译消息表（优先级高于 bootstrap.messages） */
+  messages?: I18nMessages;
 }
 
 /**
@@ -165,6 +171,12 @@ export interface PactorAppSession {
   user: Record<string, unknown>;
   /** 应用信息（{ id: appId, ...bootstrap.app }，注入 app 作用域） */
   app: Record<string, unknown>;
+  /** 当前语言代码 */
+  locale: string;
+  /** 回退语言代码 */
+  defaultLocale: string;
+  /** 翻译消息表 */
+  messages: I18nMessages;
 }
 
 /** 应用实例（设计决策 D4）：mount/unmount 与扩展注册 API */
@@ -182,6 +194,8 @@ export interface PactorApplication {
   registerService(name: string, handler: ServiceHandler): void;
   /** 注册业务能力（同名覆盖） */
   registerCapability(name: string, capability: unknown): void;
+  /** 运行时切换语言：更新应用级 i18n 配置并触发页面重建 */
+  setLocale(locale: string, messages?: I18nMessages): void;
 }
 
 /**
@@ -521,6 +535,26 @@ export function createPactorApplication(
         title: typeof appRecord['name'] === 'string' ? (appRecord['name'] as string) : appId,
         logo: undefined,
       };
+      const browserLocale =
+        typeof navigator !== 'undefined' && typeof navigator.language === 'string'
+          ? navigator.language
+          : 'zh-CN';
+      const locale =
+        options.locale ??
+        (typeof bootstrap.locale === 'string' ? bootstrap.locale : undefined) ??
+        browserLocale;
+      const defaultLocale =
+        options.defaultLocale ??
+        (typeof bootstrap.defaultLocale === 'string'
+          ? bootstrap.defaultLocale
+          : undefined) ??
+        'zh-CN';
+      const messages =
+        options.messages ??
+        (isRecord(bootstrap.messages)
+          ? (bootstrap.messages as I18nMessages)
+          : undefined) ??
+        {};
       const next: PactorAppSession = {
         bootstrap,
         menuRegistry,
@@ -529,6 +563,9 @@ export function createPactorApplication(
         brand,
         user: isRecord(bootstrap.user) ? bootstrap.user : {},
         app: appRecord,
+        locale,
+        defaultLocale,
+        messages,
       };
       session = next;
       return next;
@@ -546,6 +583,9 @@ export function createPactorApplication(
         route: { params: route.params, query: route.query },
         user: session?.user ?? {},
         app: session?.app ?? { id: appId },
+        locale: session?.locale ?? 'zh-CN',
+        defaultLocale: session?.defaultLocale ?? 'zh-CN',
+        messages: session?.messages ?? {},
       });
     },
 
@@ -593,6 +633,16 @@ export function createPactorApplication(
     },
     registerCapability(name: string, capability: unknown): void {
       upsert(capabilities, name, capability);
+    },
+
+    setLocale(locale: string, messages?: I18nMessages): void {
+      if (session === null) {
+        console.warn('[pactor-app] setLocale 在 bootstrap 完成前调用已忽略');
+        return;
+      }
+      session = { ...session, locale, messages: messages ?? session.messages };
+      // V1 策略：整页刷新以重建所有页面运行时
+      window.location.reload();
     },
   };
 }

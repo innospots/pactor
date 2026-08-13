@@ -1,6 +1,7 @@
 import type { BootstrapResource } from 'pactor-resource';
 
 import { readSession } from './auth';
+import { translate } from './i18n';
 
 /**
  * 模拟服务端 bootstrap 资源（无后端演示），按本地会话分两种形态：
@@ -10,6 +11,10 @@ import { readSession } from './auth';
  *   customer:edit，故意不含 customer:delete（列表删除按钮演示 denied: disabled）
  *   与 system:admin（"系统设置"菜单被过滤，直接访问 /settings 得到 403）；
  *   menus 含 group 分组、hidden 详情页（activeMenu 指向列表页高亮）、未授权项。
+ *
+ * 菜单标题 / 应用名不做表达式求值（框架按字符串直渲染），
+ * 因此按当前语言偏好经 translate() 查表生成；切换语言整页刷新后
+ * bootstrap 重新执行，即得到新语言的菜单。
  */
 export function createBootstrap(): Partial<BootstrapResource> &
   Record<string, unknown> {
@@ -17,13 +22,13 @@ export function createBootstrap(): Partial<BootstrapResource> &
 
   if (!session) {
     return {
-      app: { name: 'Pactor Admin 示例' },
+      app: { name: translate('app.name') },
       permissions: [],
       menus: [
         {
           id: 'login',
           type: 'page',
-          title: '登录',
+          title: translate('menu.login'),
           path: '/login',
           pageId: 'login',
           hidden: true,
@@ -35,26 +40,26 @@ export function createBootstrap(): Partial<BootstrapResource> &
   }
 
   return {
-    app: { name: 'Pactor Admin 示例' },
+    app: { name: translate('app.name') },
     user: session.user,
     permissions: ['customer:view', 'customer:edit'],
     menus: [
       {
         id: 'dashboard',
         type: 'page',
-        title: '工作台',
+        title: translate('menu.dashboard'),
         path: '/',
         pageId: 'dashboard',
       },
       {
         id: 'customer',
         type: 'group',
-        title: '客户管理',
+        title: translate('menu.customers'),
         children: [
           {
             id: 'customer-list',
             type: 'page',
-            title: '客户列表',
+            title: translate('menu.customerList'),
             path: '/customers',
             pageId: 'customer-list',
             permission: 'customer:view',
@@ -65,7 +70,7 @@ export function createBootstrap(): Partial<BootstrapResource> &
         // 隐藏详情页：不出现在菜单树，但参与路径匹配；命中时高亮列表页
         id: 'customer-edit',
         type: 'page',
-        title: '编辑客户',
+        title: translate('menu.customerEdit'),
         path: '/customers/:id/edit',
         pageId: 'customer-edit',
         hidden: true,
@@ -77,7 +82,7 @@ export function createBootstrap(): Partial<BootstrapResource> &
         // 直接访问 /settings 由 DynamicDslRoute 渲染 403
         id: 'settings',
         type: 'page',
-        title: '系统设置',
+        title: translate('menu.settings'),
         path: '/settings',
         pageId: 'settings',
         permission: 'system:admin',
