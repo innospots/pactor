@@ -11,7 +11,8 @@ import { getLocale, switchLocale } from './i18n';
 export function LanguageSwitcher() {
   return (
     <Space size={4}>
-      <GlobalOutlined aria-label="language" />
+      {/* admin header 为深色底，图标显式浅色 */}
+      <GlobalOutlined aria-label="language" style={{ color: 'rgba(255, 255, 255, 0.88)' }} />
       <Select
         size="small"
         value={getLocale()}

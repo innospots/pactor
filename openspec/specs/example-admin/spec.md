@@ -72,6 +72,20 @@
 - **WHEN** 打开列表页
 - **THEN** 表格展示 mock 数据
 
+### Requirement: 皮肤切换
+
+示例 SHALL 在 admin 头部提供皮肤设置入口（`headerExtra`，按钮 → 下拉面板）：主色预设（`data-pactor-accent`）、暗黑开关（`data-pactor-theme`）、圆角调节（`--pcr-radius-*` 内联变量）。皮肤 SHALL 即时生效（无需刷新）并经 localStorage 持久化；预设只声明实体主色，其余语义态由 theme.css 的 color-mix 规则派生（明暗主题自适应）。
+
+#### Scenario: 切换主色与暗黑
+
+- **WHEN** 在皮肤面板选择主色预设并打开暗黑开关
+- **THEN** `<html>` 出现 `data-pactor-accent` / `data-pactor-theme="dark"`，按钮、菜单激活底、横幅渐变即时跟随
+
+#### Scenario: 皮肤持久化
+
+- **WHEN** 修改皮肤后刷新页面
+- **THEN** 皮肤保持为修改后的值（模块加载即在首屏前应用）
+
 ### Requirement: 文档与说明
 
 示例 SHALL 含 README（启动方式、演示点清单）；getting-started 增加示例工程小节；根 README 工程结构补 examples。
