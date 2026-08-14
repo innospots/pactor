@@ -29,6 +29,8 @@ export function SkinSettings() {
         type="text"
         aria-label="皮肤设置"
         icon={<BgColorsOutlined />}
+        // admin header 为深色底，text 按钮需显式浅色，否则与背景融为一体
+        style={{ color: 'rgba(255, 255, 255, 0.88)' }}
         onClick={() => setOpen(true)}
       />
       <Drawer
