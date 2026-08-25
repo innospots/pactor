@@ -123,6 +123,49 @@ describe('applyChatEvent（spec: chat-streaming）', () => {
     });
   });
 
+  it('tool.start 携带 args：新建 part 时存入 tool-call（spec: tool.start 携带调用参数）', () => {
+    const store = new ConversationStore();
+    applyChatEvent(store, {
+      type: 'tool.start',
+      messageId: 'm1',
+      name: 'search',
+      title: '搜索',
+      args: { query: 'pactor', limit: 5 },
+    });
+    expect(store.getMessage('m1')?.parts[0]).toMatchObject({
+      type: 'tool-call',
+      name: 'search',
+      status: 'running',
+      args: { query: 'pactor', limit: 5 },
+    });
+  });
+
+  it('tool.start 携带 args：part 已存在时同样写入 args', () => {
+    const store = new ConversationStore();
+    applyChatEvent(store, { type: 'tool.start', messageId: 'm1', name: 'search' });
+    expect(
+      (store.getMessage('m1')?.parts[0] as { args?: unknown }).args,
+    ).toBeUndefined();
+
+    applyChatEvent(store, {
+      type: 'tool.start',
+      messageId: 'm1',
+      name: 'search',
+      args: { query: 'pactor' },
+    });
+    const parts = store.getMessage('m1')!.parts;
+    expect(parts).toHaveLength(1);
+    expect(parts[0]).toMatchObject({ args: { query: 'pactor' } });
+  });
+
+  it('tool.start 未携带 args：行为不变，args 缺省', () => {
+    const store = new ConversationStore();
+    applyChatEvent(store, { type: 'tool.start', messageId: 'm1', name: 'search' });
+    const part = store.getMessage('m1')!.parts[0]!;
+    expect(part).toMatchObject({ type: 'tool-call', name: 'search', status: 'running' });
+    expect((part as { args?: unknown }).args).toBeUndefined();
+  });
+
   it('markdown delta：format=markdown 时建立 markdown part', () => {
     const store = new ConversationStore();
     applyChatEvent(store, {

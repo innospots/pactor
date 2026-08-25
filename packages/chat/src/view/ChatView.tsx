@@ -13,8 +13,13 @@ import {
   type ChatScope,
 } from '../scope.js';
 import type { ConversationStore } from '../store.js';
-import { runChatTurn, type ChatTransport } from '../transport.js';
-import { Composer } from './Composer.js';
+import {
+  runChatTurn,
+  runRegenerateTurn,
+  type ChatTransport,
+} from '../transport.js';
+import { Composer, type ComposerProps } from './Composer.js';
+import { EmptyState, type ChatSuggestion } from './EmptyState.js';
 import { MessageBubble } from './MessageBubble.js';
 import { ChatDenied } from './PartRenderer.js';
 
@@ -31,8 +36,22 @@ import { ChatDenied } from './PartRenderer.js';
  *   （assistant 消息以 cancelled 收尾）；
  * - 消息区贴底自动跟随，用户上翻释放、回底恢复，释放期间显示
  *   "回到底部"浮动按钮。
+ *
+ * Composer 扩展 props（attachments / onAttachFiles / toolbar 槽 /
+ * 提及与 "+" 触发等，见 ComposerProps）原样透传给内建 Composer。
  */
-export interface ChatViewProps {
+export interface ChatViewProps
+  extends Pick<
+    ComposerProps,
+    | 'attachments'
+    | 'onAttachmentsChange'
+    | 'onAttachFiles'
+    | 'onAttachmentClick'
+    | 'toolbarStart'
+    | 'toolbarEnd'
+    | 'onMentionTrigger'
+    | 'onPlusMenu'
+  > {
   store: ConversationStore;
   /** 注入后发送即驱动 turn；缺省时仅触发 onSend */
   transport?: ChatTransport;
@@ -48,6 +67,12 @@ export interface ChatViewProps {
   /** 注入 dsl part 作用域 user / params */
   user?: Record<string, unknown>;
   params?: Record<string, unknown>;
+  /** 空会话问候语（缺省用内置默认文案） */
+  greeting?: string;
+  /** 空会话副标题 */
+  subtitle?: string;
+  /** 空会话起始建议；空数组 / 未传时不渲染建议区 */
+  suggestions?: ChatSuggestion[];
   className?: string;
 }
 
@@ -74,7 +99,18 @@ export function ChatView({
   conversationId,
   user,
   params,
+  greeting,
+  subtitle,
+  suggestions,
   className,
+  attachments,
+  onAttachmentsChange,
+  onAttachFiles,
+  onAttachmentClick,
+  toolbarStart,
+  toolbarEnd,
+  onMentionTrigger,
+  onPlusMenu,
 }: ChatViewProps) {
   const messages = useSyncExternalStore(
     (listener) => store.subscribe(listener),
@@ -135,19 +171,61 @@ export function ChatView({
     abortRef.current = null;
   };
 
+  // 重新生成 / 错误重试（spec: chat-message-actions）：与发送共用
+  // abortRef 生命周期——先取消当前 turn，再挂新控制器跑 regenerate。
+  // 仅 transport 模式可用：onSend-only 模式下调用方完全自管 store，
+  // 包内无法保证"截断 + 重跑"语义，故不出示入口。
+  const handleRegenerate = (): void => {
+    if (!transport) {
+      return;
+    }
+    handleStop();
+    const controller = new AbortController();
+    abortRef.current = controller;
+    void runRegenerateTurn(store, transport, { signal: controller.signal });
+  };
+
+  // 编辑重发（spec: chat-message-actions）：确认后截断该 user 消息及
+  // 之后全部消息，再以新文本走与 Composer 相同的发送路径
+  const handleEditResend = (messageId: string, text: string): void => {
+    handleStop();
+    store.removeMessagesFrom(messageId);
+    handleSend(text);
+  };
+
+  // 重新生成入口只出现在"末条消息且为 completed assistant"的场景
+  const lastMessage = messages[messages.length - 1];
+  const regenerableMessageId =
+    lastMessage?.role === 'assistant' && lastMessage.status === 'completed'
+      ? lastMessage.id
+      : undefined;
+
   return (
     <div
       className={`pactor-chat-view${className ? ` ${className}` : ''}`}
     >
       <div className="pactor-chat-messages" ref={containerRef}>
-        {messages.map((message) => (
-          <MessageBubble
-            key={message.id}
-            message={message}
-            runtime={runtime}
-            scope={scope}
+        {messages.length === 0 ? (
+          <EmptyState
+            greeting={greeting}
+            subtitle={subtitle}
+            suggestions={suggestions}
+            onSuggestionClick={handleSend}
           />
-        ))}
+        ) : (
+          messages.map((message) => (
+            <MessageBubble
+              key={message.id}
+              message={message}
+              runtime={runtime}
+              scope={scope}
+              showRegenerate={message.id === regenerableMessageId}
+              onRegenerate={transport ? handleRegenerate : undefined}
+              onRetry={transport ? handleRegenerate : undefined}
+              onEditResend={(text) => handleEditResend(message.id, text)}
+            />
+          ))
+        )}
         {!isFollowing && (
           <button
             type="button"
@@ -163,6 +241,14 @@ export function ChatView({
         onSend={handleSend}
         streaming={isStreaming}
         onStop={handleStop}
+        attachments={attachments}
+        onAttachmentsChange={onAttachmentsChange}
+        onAttachFiles={onAttachFiles}
+        onAttachmentClick={onAttachmentClick}
+        toolbarStart={toolbarStart}
+        toolbarEnd={toolbarEnd}
+        onMentionTrigger={onMentionTrigger}
+        onPlusMenu={onPlusMenu}
       />
     </div>
   );

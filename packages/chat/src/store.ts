@@ -87,6 +87,19 @@ export class ConversationStore {
     this.updateMessage(id, { status });
   }
 
+  /**
+   * 不可变地移除目标消息及其后全部消息（编辑重发 / 重新生成的截断基础）。
+   * 未知 id 时告警并忽略。
+   */
+  removeMessagesFrom(messageId: string): void {
+    const index = this.messages.findIndex((message) => message.id === messageId);
+    if (index < 0) {
+      console.warn(`[pactor-chat] message not found: "${messageId}"`);
+      return;
+    }
+    this.commit(this.messages.slice(0, index));
+  }
+
   /** 清空会话 */
   clear(): void {
     if (this.messages.length === 0) {

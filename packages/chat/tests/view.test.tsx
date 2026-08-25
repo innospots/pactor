@@ -160,7 +160,7 @@ describe('PartRenderer（spec: chat-view / PartRenderer）', () => {
     await screen.findByText(/该组件不允许在 Chat 中使用：Input/);
   });
 
-  it('tool 状态卡：tool-call running 渲染名称与状态，点击头部展开/折叠（spec: tool 状态卡）', async () => {
+  it('tool 轨迹条目：tool-call running 渲染为活动轨迹单行条目，点击可展开（spec: tool 轨迹条目）', async () => {
     const store = createStore();
     store.appendMessage({
       id: 'a1',
@@ -172,15 +172,17 @@ describe('PartRenderer（spec: chat-view / PartRenderer）', () => {
     });
 
     render(<ChatView store={store} />);
-    await screen.findByText(/搜索数据 · 执行中/);
-    const card = document.querySelector('.pactor-chat-collapse')!;
-    expect(card.getAttribute('data-open')).toBe('false');
-    // 默认折叠：工具详情不在文档中
-    expect(screen.queryByText('工具：search')).toBeNull();
-    // 点击头部展开
-    fireEvent.click(screen.getByText(/搜索数据 · 执行中/));
-    expect(card.getAttribute('data-open')).toBe('true');
-    expect(screen.getByText('工具：search')).toBeTruthy();
+    // 活动轨迹中的单行条目（流式期间默认展开）：名称 + running 状态
+    const entry = document.querySelector('.pactor-chat-trace__entry')!;
+    expect(entry).toBeTruthy();
+    expect(entry.getAttribute('data-status')).toBe('running');
+    expect(screen.getByText('搜索数据')).toBeTruthy();
+    // MUST NOT 再渲染为独立状态卡
+    expect(document.querySelector('.pactor-chat-collapse')).toBeNull();
+    // 点击条目展开详情
+    fireEvent.click(screen.getByText('搜索数据'));
+    expect(entry.getAttribute('data-open')).toBe('true');
+    expect(document.querySelector('.pactor-chat-trace__entry-body')).toBeTruthy();
   });
 
   it('thinking 默认折叠，与正文分离（spec: thinking 折叠）', async () => {
@@ -303,6 +305,51 @@ describe('ChatView 流式停止与操作条（spec: chat-view）', () => {
     fireEvent.click(screen.getByRole('button', { name: '复制' }));
     expect(writeText).toHaveBeenCalledWith('**结论**：一切正常');
     await screen.findByRole('button', { name: '已复制' });
+  });
+});
+
+describe('ChatView 透传 Composer 扩展 props（spec: chat-composer-extensions）', () => {
+  it('attachments + onAttachmentsChange 透传到内建 Composer：渲染附件卡片', () => {
+    const store = createStore();
+    render(
+      <ChatView
+        store={store}
+        attachments={[
+          {
+            id: 'att-1',
+            name: 'report.pdf',
+            mimeType: 'application/pdf',
+            size: 1536,
+          },
+        ]}
+        onAttachmentsChange={() => {}}
+      />,
+    );
+    expect(screen.getByText('report.pdf')).toBeTruthy();
+    expect(screen.getByText('1.5 KB')).toBeTruthy();
+    expect(document.querySelector('[data-attachment-id="att-1"]')).toBeTruthy();
+  });
+
+  it('toolbarEnd 内容渲染在内建 Composer 工具栏区', () => {
+    const store = createStore();
+    render(
+      <ChatView
+        store={store}
+        toolbarEnd={<span data-testid="chat-view-chip">模型 chip</span>}
+      />,
+    );
+    const toolbar = document.querySelector('.pactor-chat-composer__toolbar')!;
+    expect(toolbar).toBeTruthy();
+    expect(screen.getByTestId('chat-view-chip')).toBeTruthy();
+  });
+
+  it('未传 onPlusMenu：内建 Composer 不渲染 "+" 按钮；传入后渲染', () => {
+    const store = createStore();
+    const { rerender } = render(<ChatView store={store} />);
+    expect(screen.queryByRole('button', { name: '更多功能' })).toBeNull();
+
+    rerender(<ChatView store={store} onPlusMenu={() => {}} />);
+    expect(screen.getByRole('button', { name: '更多功能' })).toBeTruthy();
   });
 });
 

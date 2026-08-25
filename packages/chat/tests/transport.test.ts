@@ -1,9 +1,10 @@
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 
 import {
   ConversationStore,
   createManualDriver,
   runChatTurn,
+  runRegenerateTurn,
 } from '../src/index.js';
 
 describe('runChatTurn + createManualDriver（spec: chat-streaming / ChatTransport）', () => {
@@ -96,6 +97,116 @@ describe('runChatTurn + createManualDriver（spec: chat-streaming / ChatTranspor
       .map((p) => (p as { content: string }).content)
       .join('');
     expect(text).toBe('半截内容');
+  });
+
+  it('skipUserMessage：不追加 user 消息，仍追加 assistant 占位并 reduce 事件', async () => {
+    const store = new ConversationStore();
+    const driver = createManualDriver();
+
+    const turn = runChatTurn(store, driver.transport, { text: 'hi' }, { skipUserMessage: true });
+    expect(store.getMessages().filter((m) => m.role === 'user')).toHaveLength(0);
+
+    driver.push({ type: 'text.delta', messageId: 'x', delta: '你好' });
+    driver.push({ type: 'message.end', messageId: 'x' });
+    driver.complete();
+
+    const { assistantMessageId } = await turn;
+    expect(store.getMessage(assistantMessageId)?.status).toBe('completed');
+    expect(store.getMessages()).toHaveLength(1);
+  });
+});
+
+describe('runRegenerateTurn（spec: chat-streaming / 重新生成轮次）', () => {
+  it('重新生成：移除原 assistant 回复，以末条 user 文本重跑 turn，user 消息数不变（spec: 重新生成）', async () => {
+    const store = new ConversationStore();
+    const first = createManualDriver();
+    const firstTurn = runChatTurn(store, first.transport, { text: '帮我看下数据' });
+    first.push({ type: 'text.delta', messageId: 'x', delta: '旧回复' });
+    first.push({ type: 'message.end', messageId: 'x' });
+    first.complete();
+    const { userMessageId, assistantMessageId } = await firstTurn;
+    expect(store.getMessages()).toHaveLength(2);
+
+    const second = createManualDriver();
+    const regen = runRegenerateTurn(store, second.transport);
+    // 原 assistant 回复被移除，新 assistant 占位追加，user 消息不变
+    expect(store.getMessage(assistantMessageId)).toBeUndefined();
+    expect(store.getMessages().filter((m) => m.role === 'user')).toHaveLength(1);
+    expect(store.getMessages()[0]?.id).toBe(userMessageId);
+
+    second.push({ type: 'message.start', messageId: 'x' });
+    second.push({ type: 'text.delta', messageId: 'x', delta: '新回复' });
+    second.push({ type: 'message.end', messageId: 'x' });
+    second.complete();
+
+    const result = await regen;
+    expect(result?.userMessageId).toBe(userMessageId);
+    const assistant = store.getMessage(result!.assistantMessageId)!;
+    expect(assistant.status).toBe('completed');
+    expect(assistant.parts[0]).toMatchObject({ type: 'text', content: '新回复' });
+    expect(store.getMessages().filter((m) => m.role === 'user')).toHaveLength(1);
+  });
+
+  it('transport 收到的输入文本为末条 user 消息的文本', async () => {
+    const store = new ConversationStore();
+    store.appendMessage({
+      id: 'u1',
+      role: 'user',
+      status: 'completed',
+      parts: [
+        { type: 'text', content: '第一段', status: 'ready' },
+        { type: 'markdown', content: '**第二段**', status: 'ready' },
+      ],
+    });
+    store.appendMessage({ id: 'a1', role: 'assistant', status: 'completed', parts: [] });
+
+    let sentText: string | undefined;
+    const transport = {
+      async *send(input: { text: string }) {
+        sentText = input.text;
+        yield { type: 'message.end', messageId: 'x' } as const;
+      },
+    };
+    await runRegenerateTurn(store, transport);
+    expect(sentText).toBe('第一段**第二段**');
+    expect(store.getMessage('a1')).toBeUndefined();
+    expect(store.getMessage('u1')).toBeDefined();
+  });
+
+  it('无 user 消息：告警并正常返回，store 不变（spec: 无 user 消息）', async () => {
+    const store = new ConversationStore();
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
+    const driver = createManualDriver();
+
+    const result = await runRegenerateTurn(store, driver.transport);
+    expect(result).toBeUndefined();
+    expect(warn).toHaveBeenCalled();
+    expect(store.getMessages()).toHaveLength(0);
+    warn.mockRestore();
+  });
+
+  it('abort 取消：新 assistant 消息以 cancelled 收尾并正常返回（spec: abort 取消）', async () => {
+    const store = new ConversationStore();
+    store.appendMessage({
+      id: 'u1',
+      role: 'user',
+      status: 'completed',
+      parts: [{ type: 'text', content: 'hi', status: 'ready' }],
+    });
+
+    const driver = createManualDriver();
+    const controller = new AbortController();
+    const regen = runRegenerateTurn(store, driver.transport, { signal: controller.signal });
+
+    driver.push({ type: 'text.delta', messageId: 'x', delta: '半截' });
+    await vi_waitMicrotask();
+    controller.abort();
+    driver.complete();
+
+    const result = await regen;
+    const assistant = store.getMessage(result!.assistantMessageId)!;
+    expect(assistant.status).toBe('cancelled');
+    expect(store.getMessage('u1')).toBeDefined();
   });
 });
 

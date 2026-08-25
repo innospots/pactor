@@ -31,7 +31,21 @@
   --pactor-chat-user-bubble-bg: #eef0fe;
   --pactor-chat-user-bubble-border: rgb(60 71 221 / 35%);
   --pactor-chat-code-bg: #f6f7f9;
+  /* 旧通用圆角令牌（保留兼容）；新组件改用下方圆角阶梯 */
   --pactor-chat-radius: 12px;
+  /* 圆角阶梯：sm 控件 / md 卡片 / lg 气泡 / xl composer */
+  --pactor-chat-radius-sm: 6px;
+  --pactor-chat-radius-md: 8px;
+  --pactor-chat-radius-lg: 16px;
+  --pactor-chat-radius-xl: 26px;
+  /* 投影：sm 气泡/卡片轻投影；composer 柔和分层投影 */
+  --pactor-chat-shadow-sm: 0 1px 2px rgb(0 0 0 / 4%);
+  --pactor-chat-shadow-composer:
+    0 1px 2px rgb(0 0 0 / 3%),
+    0 10px 28px -10px rgb(0 0 0 / 8%);
+  /* 衬线展示字体栈：空状态问候 / chat 布局标题 */
+  --pactor-chat-font-display: 'Songti SC', 'Noto Serif SC', Georgia,
+    'Times New Roman', serif;
 }
 
 .pactor-chat-view {
@@ -46,7 +60,8 @@
   line-height: 1.6;
 }
 
-/* 暗色皮肤：data-pactor-theme="dark"（html 或任意祖先容器） */
+/* 暗色皮肤：data-pactor-theme="dark"（html 或任意祖先容器）。
+   只覆盖令牌（颜色/投影），组件规则不区分主题。 */
 [data-pactor-theme='dark'] .pactor-chat-view,
 [data-pactor-theme='dark'] .pactor-chat-layout,
 .pactor-chat-view[data-pactor-theme='dark'],
@@ -65,6 +80,12 @@
   --pactor-chat-user-bubble-bg: #262a45;
   --pactor-chat-user-bubble-border: rgb(91 102 240 / 45%);
   --pactor-chat-code-bg: #1e2129;
+  --pactor-chat-shadow-sm: 0 1px 2px rgb(0 0 0 / 35%);
+  --pactor-chat-shadow-composer:
+    0 1px 2px rgb(0 0 0 / 4%),
+    0 12px 32px -10px rgb(0 0 0 / 55%);
+  --pactor-chat-font-display: 'Songti SC', 'Noto Serif SC', Georgia,
+    'Times New Roman', serif;
 }
 
 /* ============================================================
@@ -82,6 +103,8 @@
 .pactor-chat-layout__header {
   padding: 12px 16px;
   border-bottom: 1px solid var(--pactor-chat-border);
+  font-family: var(--pactor-chat-font-display);
+  font-size: 15px;
   font-weight: 600;
 }
 
@@ -94,7 +117,7 @@
 }
 
 /* 消息滚动区：overflow-anchor none 配合 useChatAutoScroll（防浏览器
-   滚动锚定与贴底跟随互相拉扯） */
+   滚动锚定与贴底跟随互相拉扯）；上下 mask 渐隐 + 6px 细滚动条 */
 .pactor-chat-messages {
   position: relative;
   flex: 1;
@@ -105,10 +128,97 @@
   flex-direction: column;
   gap: 16px;
   padding: 4px 2px;
+  scrollbar-width: thin;
+  scrollbar-color: var(--pactor-chat-border) transparent;
+  -webkit-mask-image: linear-gradient(
+    to bottom,
+    transparent,
+    #000 24px,
+    #000 calc(100% - 24px),
+    transparent
+  );
+  mask-image: linear-gradient(
+    to bottom,
+    transparent,
+    #000 24px,
+    #000 calc(100% - 24px),
+    transparent
+  );
+}
+
+.pactor-chat-messages::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+.pactor-chat-messages::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.pactor-chat-messages::-webkit-scrollbar-thumb {
+  background: var(--pactor-chat-border);
+  border-radius: 3px;
+}
+
+.pactor-chat-messages::-webkit-scrollbar-thumb:hover {
+  background: var(--pactor-chat-muted-fg);
 }
 
 /* ============================================================
- * 3. 消息气泡
+ * 3. 空状态（spec: chat-empty-state）
+ * ============================================================ */
+
+.pactor-chat-empty {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 32px 16px;
+  text-align: center;
+}
+
+.pactor-chat-empty__greeting {
+  font-family: var(--pactor-chat-font-display);
+  font-size: 26px;
+  font-weight: 500;
+  line-height: 1.4;
+}
+
+.pactor-chat-empty__subtitle {
+  color: var(--pactor-chat-muted-fg);
+  font-size: 13px;
+}
+
+.pactor-chat-empty__suggestions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.pactor-chat-empty__suggestion {
+  padding: 6px 14px;
+  border: 1px solid var(--pactor-chat-border);
+  border-radius: 999px;
+  background: var(--pactor-chat-card);
+  color: var(--pactor-chat-fg);
+  font-size: 13px;
+  cursor: pointer;
+  transition:
+    border-color 0.15s ease,
+    background 0.15s ease;
+}
+
+.pactor-chat-empty__suggestion:hover {
+  border-color: var(--pactor-chat-primary);
+  background: var(--pactor-chat-muted);
+}
+
+/* ============================================================
+ * 4. 消息气泡
  * ============================================================ */
 
 .pactor-chat-message {
@@ -125,18 +235,18 @@
   min-width: 0;
 }
 
-/* user：右侧圆角气泡 */
+/* user：右侧圆角气泡（16px 圆角 + 轻投影） */
 .pactor-chat-message--user {
   align-items: flex-end;
 }
 
 .pactor-chat-message--user .pactor-chat-message__body {
   max-width: 75%;
-  padding: 10px 14px;
-  border-radius: var(--pactor-chat-radius);
+  padding: 10px 16px;
+  border-radius: var(--pactor-chat-radius-lg);
   border: 1px solid var(--pactor-chat-user-bubble-border);
   background: var(--pactor-chat-user-bubble-bg);
-  box-shadow: 0 1px 2px rgb(0 0 0 / 4%);
+  box-shadow: var(--pactor-chat-shadow-sm);
 }
 
 /* assistant：左侧通栏排版（无气泡底色） */
@@ -169,23 +279,80 @@
   opacity: 1;
 }
 
+/* error 消息的重试入口常显（不依赖 hover） */
+.pactor-chat-message__actions--visible {
+  opacity: 1;
+}
+
+/* user 消息内联编辑框（编辑重发） */
+.pactor-chat-message__edit {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  max-width: 75%;
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid var(--pactor-chat-user-bubble-border);
+  border-radius: var(--pactor-chat-radius-lg);
+  background: var(--pactor-chat-user-bubble-bg);
+}
+
+.pactor-chat-message__edit-input {
+  border: none;
+  outline: none;
+  resize: vertical;
+  background: transparent;
+  color: var(--pactor-chat-fg);
+  font: inherit;
+  line-height: 1.6;
+}
+
+.pactor-chat-message__edit-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.pactor-chat-message__edit-button {
+  padding: 4px 12px;
+  border: 1px solid var(--pactor-chat-border);
+  border-radius: var(--pactor-chat-radius-sm);
+  background: var(--pactor-chat-card);
+  color: var(--pactor-chat-fg);
+  font-size: 12.5px;
+  cursor: pointer;
+}
+
+.pactor-chat-message__edit-button--confirm {
+  border-color: var(--pactor-chat-primary);
+  background: var(--pactor-chat-primary);
+  color: var(--pactor-chat-primary-fg);
+}
+
 /* ============================================================
- * 4. 图标按钮 / 浮动按钮
+ * 5. 图标按钮 / 浮动按钮
  * ============================================================ */
 
+/* quiet 图标按钮：透明底，hover 增亮；图标统一 15px */
 .pactor-chat-icon-button {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   padding: 4px;
   border: none;
-  border-radius: 6px;
+  border-radius: var(--pactor-chat-radius-md);
   background: transparent;
   color: var(--pactor-chat-muted-fg);
   cursor: pointer;
   transition:
     background 0.15s ease,
-    color 0.15s ease;
+    color 0.15s ease,
+    transform 0.1s ease;
+}
+
+.pactor-chat-icon-button svg {
+  width: 15px;
+  height: 15px;
 }
 
 .pactor-chat-icon-button:hover {
@@ -193,10 +360,14 @@
   color: var(--pactor-chat-fg);
 }
 
-/* "回到底部"浮动按钮 */
+.pactor-chat-icon-button:active {
+  transform: scale(0.92);
+}
+
+/* "回到底部"浮动按钮（bottom 避开滚动区底部 mask 渐隐带） */
 .pactor-chat-scroll-bottom {
   position: sticky;
-  bottom: 8px;
+  bottom: 28px;
   align-self: center;
   display: inline-flex;
   align-items: center;
@@ -208,7 +379,7 @@
   color: var(--pactor-chat-muted-fg);
   font-size: 12px;
   cursor: pointer;
-  box-shadow: 0 2px 8px rgb(0 0 0 / 8%);
+  box-shadow: var(--pactor-chat-shadow-composer);
 }
 
 .pactor-chat-scroll-bottom:hover {
@@ -216,74 +387,174 @@
 }
 
 /* ============================================================
- * 5. 折叠卡（thinking / tool-call / tool-result）
+ * 6. 活动轨迹（spec: chat-activity-trace）：状态头 + 轨迹条目 + thinking
  * ============================================================ */
 
-.pactor-chat-collapse {
-  border: 1px solid var(--pactor-chat-border);
-  border-radius: 8px;
-  background: var(--pactor-chat-card);
+.pactor-chat-trace {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
   font-size: 12.5px;
 }
 
-.pactor-chat-collapse__header {
+/* 状态头 / 条目头 / thinking 头共用的单行按钮形态 */
+.pactor-chat-trace__header,
+.pactor-chat-trace__entry-header,
+.pactor-chat-thinking__header {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 6px;
   width: 100%;
-  padding: 8px 12px;
+  padding: 3px 0;
   border: none;
   background: transparent;
   color: var(--pactor-chat-muted-fg);
   font-size: inherit;
   text-align: left;
+}
+
+button.pactor-chat-trace__header,
+.pactor-chat-trace__entry-header,
+.pactor-chat-thinking__header {
   cursor: pointer;
 }
 
-/* 头部内的图标/文字统一 flex 对齐（svg 默认按基线对齐会下沉） */
-.pactor-chat-collapse__header > span {
-  display: inline-flex;
-  align-items: center;
-  line-height: 1;
-}
-
-.pactor-chat-collapse__header:hover {
+button.pactor-chat-trace__header:hover,
+.pactor-chat-trace__entry-header:hover,
+.pactor-chat-thinking__header:hover {
   color: var(--pactor-chat-fg);
 }
 
-.pactor-chat-collapse__chevron {
+/* 头部内图标/文字统一 flex 对齐（svg 默认按基线对齐会下沉） */
+.pactor-chat-trace__header > span,
+.pactor-chat-trace__entry-header > span,
+.pactor-chat-thinking__header > span {
   display: inline-flex;
+  align-items: center;
+  line-height: 1;
+  min-width: 0;
+}
+
+/* 状态文案：流式期间呼吸动画（纯 CSS） */
+.pactor-chat-trace__status-text--breathing {
+  animation: pactor-chat-breathing 1.8s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+@keyframes pactor-chat-breathing {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.45;
+  }
+}
+
+/* 状态图标脉冲：流式期间（图标为 spinner 时）轻微缩放逐帧"呼吸"，
+   与文案呼吸不同周期，避免机械同步感 */
+.pactor-chat-trace__status-icon:has(.pactor-chat-spin),
+.pactor-chat-thinking[data-streaming='true'] .pactor-chat-thinking__icon {
+  animation: pactor-chat-mark-pulse 2.4s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  transform-origin: center;
+}
+
+@keyframes pactor-chat-mark-pulse {
+  0%,
+  100% {
+    transform: scale(0.9);
+  }
+  50% {
+    transform: scale(1.08);
+  }
+}
+
+.pactor-chat-trace__elapsed {
+  color: var(--pactor-chat-muted-fg);
+  font-variant-numeric: tabular-nums;
+}
+
+/* chevron 展开旋转（状态头 / 条目 / thinking 共用） */
+.pactor-chat-trace__chevron {
+  display: inline-flex;
+  flex-shrink: 0;
   transition: transform 0.15s ease;
 }
 
-.pactor-chat-collapse[data-open='true'] .pactor-chat-collapse__chevron {
+.pactor-chat-trace[data-open='true'] > .pactor-chat-trace__header
+  .pactor-chat-trace__chevron,
+.pactor-chat-trace__entry[data-open='true'] .pactor-chat-trace__chevron,
+.pactor-chat-thinking[data-open='true'] .pactor-chat-trace__chevron {
   transform: rotate(90deg);
 }
 
-.pactor-chat-collapse__body {
-  padding: 0 12px 10px 32px;
+/* 轨迹条目列表：缩进对齐状态头文本 */
+.pactor-chat-trace__entries {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin-left: 4px;
+}
+
+.pactor-chat-trace__entry-title {
+  flex-shrink: 0;
+}
+
+/* 参数摘要：单行省略 */
+.pactor-chat-trace__entry-args {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
   color: var(--pactor-chat-muted-fg);
+  opacity: 0.8;
+}
+
+/* 条目状态色 */
+.pactor-chat-trace__entry[data-status='running'] .pactor-chat-trace__entry-icon {
+  color: var(--pactor-chat-primary);
+}
+
+.pactor-chat-trace__entry[data-status='success'] .pactor-chat-trace__entry-icon {
+  color: var(--pactor-chat-success);
+}
+
+.pactor-chat-trace__entry[data-status='failed'] .pactor-chat-trace__entry-icon {
+  color: var(--pactor-chat-danger);
+}
+
+/* 展开详情：参数与结果/错误 */
+.pactor-chat-trace__entry-body {
+  padding: 2px 0 6px 24px;
+  color: var(--pactor-chat-muted-fg);
+}
+
+.pactor-chat-trace__entry-detail {
+  margin: 0;
+  font-size: 12px;
   white-space: pre-wrap;
   word-break: break-word;
 }
 
-.pactor-chat-collapse__body pre {
-  margin: 0;
-  font-size: 12px;
-  white-space: pre-wrap;
+/* thinking 折叠卡：进行中指示（图标旋转沿用 .pactor-chat-spin） */
+.pactor-chat-thinking__icon {
+  color: var(--pactor-chat-muted-fg);
 }
 
-/* 状态色 */
-.pactor-chat-collapse__status--running {
+.pactor-chat-thinking[data-streaming='true'] .pactor-chat-thinking__icon {
   color: var(--pactor-chat-primary);
 }
 
-.pactor-chat-collapse__status--success {
-  color: var(--pactor-chat-success);
+.pactor-chat-thinking__body {
+  padding: 2px 0 6px 24px;
+  color: var(--pactor-chat-muted-fg);
 }
 
-.pactor-chat-collapse__status--failed {
-  color: var(--pactor-chat-danger);
+.pactor-chat-thinking__body .pactor-markdown > :first-child {
+  margin-top: 0;
+}
+
+.pactor-chat-thinking__body .pactor-markdown > :last-child {
+  margin-bottom: 0;
 }
 
 /* running 旋转 */
@@ -298,7 +569,7 @@
 }
 
 /* ============================================================
- * 6. 其他 part
+ * 7. 其他 part
  * ============================================================ */
 
 .pactor-chat-text {
@@ -312,7 +583,7 @@
   gap: 8px;
   padding: 8px 12px;
   border: 1px solid var(--pactor-chat-danger);
-  border-radius: 8px;
+  border-radius: var(--pactor-chat-radius-md);
   background: var(--pactor-chat-danger-bg);
   color: var(--pactor-chat-danger);
   font-size: 12.5px;
@@ -337,14 +608,14 @@
 
 .pactor-chat-denied {
   border: 1px dashed var(--pactor-chat-border);
-  border-radius: 4px;
+  border-radius: var(--pactor-chat-radius-sm);
   padding: 8px;
   color: var(--pactor-chat-muted-fg);
   font-size: 12px;
 }
 
 /* ============================================================
- * 7. Markdown 排版（chat 作为 pactor-markdown 的宿主主题）
+ * 8. Markdown 排版（chat 作为 pactor-markdown 的宿主主题）
  * ============================================================ */
 
 .pactor-chat-view .pactor-markdown > :first-child {
@@ -359,7 +630,7 @@
   margin: 8px 0;
   padding: 10px 12px;
   border: 1px solid var(--pactor-chat-border);
-  border-radius: 8px;
+  border-radius: var(--pactor-chat-radius-md);
   background: var(--pactor-chat-code-bg);
   overflow-x: auto;
   font-size: 12.5px;
@@ -403,22 +674,36 @@
 }
 
 /* ============================================================
- * 8. Composer
+ * 9. Composer
  * ============================================================ */
 
 .pactor-chat-composer {
   display: flex;
+  flex-direction: column;
   gap: 8px;
-  align-items: flex-end;
-  padding: 10px 12px;
+  padding: 12px 14px;
   border: 1px solid var(--pactor-chat-border);
-  border-radius: var(--pactor-chat-radius);
+  border-radius: var(--pactor-chat-radius-xl);
   background: var(--pactor-chat-card);
+  box-shadow: var(--pactor-chat-shadow-composer);
   transition: border-color 0.15s ease;
 }
 
 .pactor-chat-composer:focus-within {
   border-color: var(--pactor-chat-primary);
+}
+
+/* 拖拽悬停视觉态（附件拖入时） */
+.pactor-chat-composer--dragover {
+  border-color: var(--pactor-chat-primary);
+  background: var(--pactor-chat-muted);
+}
+
+/* 输入行：textarea + 发送/停止按钮 */
+.pactor-chat-composer__row {
+  display: flex;
+  gap: 8px;
+  align-items: flex-end;
 }
 
 .pactor-chat-composer__input {
@@ -441,7 +726,9 @@
   color: var(--pactor-chat-muted-fg);
 }
 
+/* 发送 / 停止按钮：圆形主按钮 */
 .pactor-chat-composer__button {
+  position: relative;
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -449,7 +736,7 @@
   height: 32px;
   flex-shrink: 0;
   border: none;
-  border-radius: 8px;
+  border-radius: 999px;
   background: var(--pactor-chat-primary);
   color: var(--pactor-chat-primary-fg);
   cursor: pointer;
@@ -463,4 +750,126 @@
 
 .pactor-chat-composer__button--stop {
   background: var(--pactor-chat-danger);
+}
+
+/* 停止态进行中光环（纯 CSS keyframes，随按钮圆形） */
+.pactor-chat-composer__button--stop::after {
+  content: '';
+  position: absolute;
+  inset: -3px;
+  border: 2px solid var(--pactor-chat-danger);
+  border-radius: 999px;
+  pointer-events: none;
+  animation: pactor-chat-ring 1.4s ease-out infinite;
+}
+
+@keyframes pactor-chat-ring {
+  0% {
+    transform: scale(0.92);
+    opacity: 0.6;
+  }
+  100% {
+    transform: scale(1.3);
+    opacity: 0;
+  }
+}
+
+/* 附件卡片区 */
+.pactor-chat-composer__attachments {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.pactor-chat-composer__attachment {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  border: 1px solid var(--pactor-chat-border);
+  border-radius: var(--pactor-chat-radius-md);
+  background: var(--pactor-chat-muted);
+  cursor: pointer;
+}
+
+.pactor-chat-composer__attachment-thumb img {
+  display: block;
+  width: 40px;
+  height: 40px;
+  object-fit: cover;
+  border-radius: 7px;
+}
+
+.pactor-chat-composer__attachment-info {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 10px;
+  font-size: 12.5px;
+  color: var(--pactor-chat-fg);
+}
+
+.pactor-chat-composer__attachment-name {
+  max-width: 160px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.pactor-chat-composer__attachment-size {
+  color: var(--pactor-chat-muted-fg);
+}
+
+.pactor-chat-composer__attachment-remove {
+  position: absolute;
+  top: -6px;
+  right: -6px;
+  padding: 2px;
+  border: 1px solid var(--pactor-chat-border);
+  border-radius: 50%;
+  background: var(--pactor-chat-card);
+}
+
+/* 移除按钮是微型圆形按钮，保持 12px 小图标 */
+.pactor-chat-composer__attachment-remove svg {
+  width: 12px;
+  height: 12px;
+}
+
+/* 工具栏：渲染槽 + "+" / 附件入口 */
+.pactor-chat-composer__toolbar {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.pactor-chat-composer__toolbar-spacer {
+  flex: 1;
+}
+
+/* ============================================================
+ * 10. 动效降级（prefers-reduced-motion）
+ * ============================================================ */
+
+/* 遵循系统级减弱动效设置：过渡缩短到近乎即时；循环动画（呼吸文案、
+   停止光环、状态图标脉冲、spinner 旋转）整体移除，保留静态色态指示 */
+@media (prefers-reduced-motion: reduce) {
+  .pactor-chat-view *,
+  .pactor-chat-view *::before,
+  .pactor-chat-view *::after,
+  .pactor-chat-layout *,
+  .pactor-chat-layout *::before,
+  .pactor-chat-layout *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+
+  .pactor-chat-trace__status-text--breathing,
+  .pactor-chat-trace__status-icon:has(.pactor-chat-spin),
+  .pactor-chat-thinking[data-streaming='true'] .pactor-chat-thinking__icon,
+  .pactor-chat-spin,
+  .pactor-chat-composer__button--stop::after {
+    animation: none !important;
+  }
 }

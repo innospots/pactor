@@ -33,6 +33,8 @@ export type ChatEvent =
       messageId: string;
       name: string;
       title?: string;
+      /** 调用参数（可选；reducer 存入 tool-call part 的 args） */
+      args?: unknown;
       partId?: string;
     }
   | {
@@ -141,6 +143,7 @@ export function applyChatEvent(store: ConversationStore, event: ChatEvent): void
         store.updatePart(event.messageId, part.index, {
           status: 'running',
           title: event.title,
+          args: event.args,
         });
       } else {
         store.appendPart(event.messageId, {
@@ -148,6 +151,7 @@ export function applyChatEvent(store: ConversationStore, event: ChatEvent): void
           type: 'tool-call',
           name: event.name,
           title: event.title,
+          args: event.args,
           status: 'running',
         });
       }

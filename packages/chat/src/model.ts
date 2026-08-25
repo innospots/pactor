@@ -46,6 +46,8 @@ export type ChatPart =
       type: 'tool-call';
       name: string;
       title?: string;
+      /** 调用参数（tool.start 事件携带；供活动轨迹参数摘要 / 详情渲染） */
+      args?: unknown;
       status: ToolCallStatus;
     }
   | {
@@ -59,6 +61,15 @@ export type ChatPart =
   | { id?: string; type: 'error'; message: string }
   | { id?: string; type: 'status'; text: string };
 
+/** 消息附件引用（上传与存储由调用方负责，包内只持有引用） */
+export interface ChatAttachment {
+  id: string;
+  name: string;
+  mimeType: string;
+  size?: number;
+  url?: string;
+}
+
 /** Chat 消息 */
 export interface ChatMessage {
   id: string;
@@ -66,6 +77,7 @@ export interface ChatMessage {
   status: MessageStatus;
   parts: ChatPart[];
   createdAt?: number;
+  attachments?: ChatAttachment[];
 }
 
 /** updatePart 的定位参数：数组下标或 part id */
@@ -81,6 +93,7 @@ export type PartPatch = Partial<{
   status: string;
   name: string;
   title: string;
+  args: unknown;
   result: unknown;
   error: string;
   message: string;
