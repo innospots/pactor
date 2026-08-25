@@ -70,7 +70,19 @@ export {
   type UseChatAutoScrollResult,
 } from './hooks/use-chat-auto-scroll.js';
 
+// DSL 页面工作区工厂（spec: chat-dsl-page）
+export {
+  createChatWorkspace,
+  type ChatWorkspaceProps,
+  type ChatWorkspaceServices,
+} from './chat-workspace.js';
+
 // React 视图
+export {
+  AppShell,
+  useSidebarDrawer,
+  type AppShellProps,
+} from './view/AppShell.js';
 export { ChatView, type ChatViewProps } from './view/ChatView.js';
 export {
   DEFAULT_CHAT_GREETING,

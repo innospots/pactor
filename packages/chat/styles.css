@@ -16,7 +16,9 @@
  * ============================================================ */
 
 .pactor-chat-view,
-.pactor-chat-layout {
+.pactor-chat-layout,
+.pactor-chat-shell,
+.pactor-chat-workspace {
   --pactor-chat-bg: #ffffff;
   --pactor-chat-fg: #1a1d26;
   --pactor-chat-muted: #f4f4f6;
@@ -46,6 +48,10 @@
   /* 衬线展示字体栈：空状态问候 / chat 布局标题 */
   --pactor-chat-font-display: 'Songti SC', 'Noto Serif SC', Georgia,
     'Times New Roman', serif;
+  /* AppShell：侧栏宽度 / 移动端顶栏高度 / 抽屉遮罩色 */
+  --pactor-chat-sidebar-width: 240px;
+  --pactor-chat-shell-topbar-height: 44px;
+  --pactor-chat-shell-scrim: rgb(0 0 0 / 40%);
 }
 
 .pactor-chat-view {
@@ -64,8 +70,12 @@
    只覆盖令牌（颜色/投影），组件规则不区分主题。 */
 [data-pactor-theme='dark'] .pactor-chat-view,
 [data-pactor-theme='dark'] .pactor-chat-layout,
+[data-pactor-theme='dark'] .pactor-chat-shell,
+[data-pactor-theme='dark'] .pactor-chat-workspace,
 .pactor-chat-view[data-pactor-theme='dark'],
-.pactor-chat-layout[data-pactor-theme='dark'] {
+.pactor-chat-layout[data-pactor-theme='dark'],
+.pactor-chat-shell[data-pactor-theme='dark'],
+.pactor-chat-workspace[data-pactor-theme='dark'] {
   --pactor-chat-bg: #14161c;
   --pactor-chat-fg: #e4e6ee;
   --pactor-chat-muted: #1e2129;
@@ -84,6 +94,7 @@
   --pactor-chat-shadow-composer:
     0 1px 2px rgb(0 0 0 / 4%),
     0 12px 32px -10px rgb(0 0 0 / 55%);
+  --pactor-chat-shell-scrim: rgb(0 0 0 / 55%);
   --pactor-chat-font-display: 'Songti SC', 'Noto Serif SC', Georgia,
     'Times New Roman', serif;
 }
@@ -114,6 +125,139 @@
   padding: 16px;
   display: flex;
   flex-direction: column;
+}
+
+/* ------------------------------------------------------------
+ * ChatWorkspace（spec: chat-dsl-page）：createChatWorkspace 工厂
+ * 返回组件的外层容器 = 可选头部（title + headerExtra）+ ChatView。
+ * ------------------------------------------------------------ */
+
+.pactor-chat-workspace {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 0;
+  background: var(--pactor-chat-bg);
+  color: var(--pactor-chat-fg);
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+.pactor-chat-workspace__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 16px;
+  border-bottom: 1px solid var(--pactor-chat-border);
+  flex-shrink: 0;
+}
+
+.pactor-chat-workspace__title {
+  font-family: var(--pactor-chat-font-display);
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.pactor-chat-workspace__header-extra {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.pactor-chat-workspace > .pactor-chat-view {
+  flex: 1;
+  min-height: 0;
+}
+
+/* ------------------------------------------------------------
+ * AppShell（spec: chat-app-shell）：侧栏 + 主区外壳。
+ * 桌面（≥768px）flex 同行；移动端（<768px）侧栏退出文档流
+ * 变为覆盖抽屉，布局切换全部由媒体查询表达，JS 只管开合。
+ * ------------------------------------------------------------ */
+
+.pactor-chat-shell {
+  display: flex;
+  height: 100dvh;
+  overflow: hidden;
+  background: var(--pactor-chat-bg);
+  color: var(--pactor-chat-fg);
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+/* 桌面：侧栏为固定宽度 flex 列 */
+.pactor-chat-shell__sidebar {
+  width: var(--pactor-chat-sidebar-width);
+  flex-shrink: 0;
+  border-right: 1px solid var(--pactor-chat-border);
+  background: var(--pactor-chat-bg);
+}
+
+.pactor-chat-shell__main {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+/* 移动端顶栏：菜单按钮 + brand 插槽；桌面隐藏 */
+.pactor-chat-shell__topbar {
+  display: none;
+  align-items: center;
+  gap: 4px;
+  height: var(--pactor-chat-shell-topbar-height);
+  flex-shrink: 0;
+  padding: 0 8px;
+  border-bottom: 1px solid var(--pactor-chat-border);
+}
+
+.pactor-chat-shell__menu svg {
+  width: 18px;
+  height: 18px;
+}
+
+.pactor-chat-shell__content {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+/* 抽屉遮罩：仅打开时渲染；桌面隐藏 */
+.pactor-chat-shell__scrim {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+  background: var(--pactor-chat-shell-scrim);
+}
+
+@media (max-width: 767px) {
+  .pactor-chat-shell__sidebar {
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    z-index: 50;
+    box-shadow: var(--pactor-chat-shadow-composer);
+    transform: translateX(-100%);
+    transition: transform 0.2s ease-out;
+  }
+
+  .pactor-chat-shell__sidebar[data-open='true'] {
+    transform: translateX(0);
+  }
+
+  .pactor-chat-shell__scrim {
+    display: block;
+  }
+
+  .pactor-chat-shell__topbar {
+    display: flex;
+  }
 }
 
 /* 消息滚动区：overflow-anchor none 配合 useChatAutoScroll（防浏览器
@@ -859,7 +1003,10 @@ button.pactor-chat-trace__header:hover,
   .pactor-chat-view *::after,
   .pactor-chat-layout *,
   .pactor-chat-layout *::before,
-  .pactor-chat-layout *::after {
+  .pactor-chat-layout *::after,
+  .pactor-chat-shell *,
+  .pactor-chat-shell *::before,
+  .pactor-chat-shell *::after {
     animation-duration: 0.001ms !important;
     animation-iteration-count: 1 !important;
     transition-duration: 0.001ms !important;
