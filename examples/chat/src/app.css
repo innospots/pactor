@@ -6,25 +6,371 @@ body,
   padding: 0;
 }
 
-body {
-  background: #f5f5f5;
+/* 示例外壳的视觉令牌（皮肤本身由 pactor-chat/styles.css 提供） */
+.demo-app {
+  --demo-bg: #f7f7f8;
+  --demo-header-bg: rgb(255 255 255 / 75%);
+  --demo-border: #e8e8eb;
+  --demo-fg: #1a1d26;
+  --demo-muted-fg: #6b7180;
+  --demo-chip-bg: #f4f4f6;
+  --demo-popup-bg: #ffffff;
+  --demo-popup-shadow:
+    0 4px 16px rgb(0 0 0 / 8%),
+    0 12px 40px -12px rgb(0 0 0 / 16%);
 }
 
-/* 示例外壳：居中对话面板（皮肤本身由 pactor-chat/styles.css 提供） */
-.pactor-chat-layout {
-  max-width: 860px;
-  margin: 0 auto;
-  box-shadow: 0 0 8px rgb(0 0 0 / 6%);
+.demo-app[data-pactor-theme='dark'] {
+  --demo-bg: #101216;
+  --demo-header-bg: rgb(16 18 22 / 70%);
+  --demo-border: #2c3038;
+  --demo-fg: #e4e6ee;
+  --demo-muted-fg: #8b90a0;
+  --demo-chip-bg: #1e2129;
+  --demo-popup-bg: #1a1d24;
+  --demo-popup-shadow:
+    0 4px 16px rgb(0 0 0 / 45%),
+    0 12px 40px -12px rgb(0 0 0 / 65%);
 }
 
-/* 工具栏槽 chip（toolbarEnd 注入） */
-.demo-composer__chip {
+/* ============================================================
+ * 页壳：全高列布局（吸顶 header + 居中消息列）
+ * ============================================================ */
+
+.demo-app {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  background: var(--demo-bg);
+  color: var(--demo-fg);
+  font-family:
+    -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC',
+    'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+}
+
+/* 吸顶顶栏：底部分隔线 + 毛玻璃 */
+.demo-header {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 16px;
+  border-bottom: 1px solid var(--demo-border);
+  background: var(--demo-header-bg);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
+.demo-header__title {
+  min-width: 0;
+}
+
+.demo-header__title-text {
+  max-width: 40vw;
+  padding: 4px 8px;
+  border: none;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--demo-fg);
+  font-size: 14px;
+  font-weight: 600;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  cursor: text;
+}
+
+.demo-header__title-text:hover {
+  background: var(--demo-chip-bg);
+}
+
+.demo-header__title-input {
+  padding: 4px 8px;
+  border: 1px solid var(--demo-border);
+  border-radius: 8px;
+  background: var(--demo-popup-bg);
+  color: var(--demo-fg);
+  font-size: 14px;
+  font-weight: 600;
+  outline: none;
+}
+
+.demo-header__actions {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+/* 安静的图标按钮：无底色，hover 浮出 */
+.demo-icon-button {
   display: inline-flex;
   align-items: center;
-  padding: 2px 10px;
-  border: 1px solid #e5e5e5;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  padding: 0;
+  border: none;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--demo-muted-fg);
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.demo-icon-button:hover {
+  background: var(--demo-chip-bg);
+  color: var(--demo-fg);
+}
+
+/* 消息列：居中、最大宽度 768px */
+.demo-main {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 12px 16px 16px;
+}
+
+/* ChatWorkspace（DSL 页面渲染的聊天工作区）填满剩余高度，
+   内部 ChatView 透明继承 */
+.demo-main .pactor-chat-workspace {
+  flex: 1;
+  min-height: 0;
+  width: 100%;
+  max-width: 768px;
+  background: transparent;
+}
+
+.demo-main .pactor-chat-view {
+  background: transparent;
+}
+
+/* ============================================================
+ * 演示侧栏（AppShell sidebar 插槽）：新建对话 + mock 会话列表
+ * ============================================================ */
+
+.demo-brand {
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.demo-sidebar {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  height: 100%;
+  padding: 12px 10px;
+  background: var(--demo-bg);
+  box-sizing: border-box;
+}
+
+.demo-sidebar__new {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 8px 12px;
+  border: 1px solid var(--demo-border);
+  border-radius: 10px;
+  background: var(--demo-popup-bg);
+  color: var(--demo-fg);
+  font-size: 13px;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.demo-sidebar__new:hover {
+  background: var(--demo-chip-bg);
+}
+
+.demo-sidebar__section {
+  padding: 12px 8px 4px;
+  font-size: 12px;
+  color: var(--demo-muted-fg);
+}
+
+.demo-sidebar__list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.demo-sidebar__item {
+  width: 100%;
+  padding: 7px 8px;
+  border: none;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--demo-fg);
+  font-size: 13px;
+  text-align: left;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.demo-sidebar__item:hover {
+  background: var(--demo-chip-bg);
+}
+
+.demo-sidebar__item--active,
+.demo-sidebar__item--active:hover {
+  background: var(--demo-chip-bg);
+  font-weight: 600;
+}
+
+/* ============================================================
+ * Composer 工具栏 chip（能力 / 上下文 / 模型，经 toolbar 槽注入）
+ * ============================================================ */
+
+.demo-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 10px;
+  border: 1px solid var(--demo-border);
   border-radius: 999px;
   font-size: 12px;
-  color: #666;
-  background: #fafafa;
+  color: var(--demo-muted-fg);
+  background: var(--demo-chip-bg);
+  white-space: nowrap;
+}
+
+.demo-chip--interactive {
+  cursor: pointer;
+  transition: color 0.15s ease, border-color 0.15s ease;
+}
+
+.demo-chip--interactive:hover {
+  color: var(--demo-fg);
+  border-color: var(--demo-muted-fg);
+}
+
+.demo-chip__chevron--open {
+  transform: rotate(180deg);
+}
+
+.demo-chip--context {
+  color: var(--demo-fg);
+}
+
+.demo-chip__remove {
+  display: inline-flex;
+  align-items: center;
+  padding: 1px;
+  border: none;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--demo-muted-fg);
+  cursor: pointer;
+}
+
+.demo-chip__remove:hover {
+  color: var(--demo-fg);
+}
+
+/* ============================================================
+ * 锚定弹层（能力 / "+" / 模型 / 提及共用）
+ * ============================================================ */
+
+.demo-popup {
+  position: fixed;
+  z-index: 100;
+  min-width: 200px;
+  padding: 4px;
+  border: 1px solid var(--demo-border);
+  border-radius: 12px;
+  background: var(--demo-popup-bg);
+  box-shadow: var(--demo-popup-shadow);
+}
+
+.demo-popup--mention {
+  min-width: 220px;
+}
+
+.demo-popup__item {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+  width: 100%;
+  padding: 8px 10px;
+  border: none;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--demo-fg);
+  font-size: 13px;
+  text-align: left;
+  cursor: pointer;
+}
+
+.demo-popup__item--row {
+  flex-direction: row;
+  align-items: center;
+  gap: 8px;
+}
+
+.demo-popup__item:hover {
+  background: var(--demo-chip-bg);
+}
+
+.demo-popup__item--active .demo-popup__item-label {
+  font-weight: 600;
+}
+
+.demo-popup__item-label {
+  font-size: 13px;
+}
+
+.demo-popup__item-desc {
+  font-size: 12px;
+  color: var(--demo-muted-fg);
+}
+
+.demo-popup__empty {
+  padding: 10px 12px;
+  font-size: 12px;
+  color: var(--demo-muted-fg);
+}
+
+/* ============================================================
+ * 上下文选择器 Modal（antd Modal 内的复选列表）
+ * ============================================================ */
+
+.demo-picker__list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.demo-picker__item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 6px;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.demo-picker__item:hover {
+  background: rgb(0 0 0 / 4%);
+}
+
+.demo-picker__name {
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.demo-picker__desc {
+  font-size: 12px;
+  color: var(--demo-muted-fg);
 }

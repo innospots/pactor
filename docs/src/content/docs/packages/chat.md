@@ -139,3 +139,15 @@ import 'pactor-chat/styles.css';
 ## chat 布局注册
 
 `registerChatLayout(layoutRegistry)` 注册 `chat` 布局（header 标题区 + ChatView 区，V1 无会话历史侧栏）；注册后 `resolveLayout(registry, 'chat')` 命中，可与其他布局一样经 DSL `layout` 字段使用。
+
+## AppShell 应用外壳
+
+`<AppShell sidebar brand? locationKey? className?>` 是更外层的应用外壳（与 ChatLayout 组合而非替代）：侧栏插槽 + 主区。桌面（≥768px）侧栏与主区 flex 同行；移动端（<768px）侧栏变为覆盖抽屉（遮罩 + 顶栏菜单按钮 + `brand` 品牌区），断点由 CSS 媒体查询表达（`--pactor-chat-sidebar-width` 等令牌可覆盖），JS 只管开合。关闭语义：Escape / 遮罩点击 / `locationKey` 变化（路由或会话切换时传入变化的 key，渲染期比较关闭）；移动端关闭时侧栏容器 `inert`。侧栏内容（如会话列表）在导航后调用 `useSidebarDrawer()?.close()` 关抽屉（壳外返回 null）。示例见 `examples/chat`。
+
+## DSL 页面：createChatWorkspace
+
+聊天页可以与其他 pactor 页面一样以 `*.page.yaml` 声明、经 `createPageRuntime` 渲染。函数 / 实例无法从 DSL 产生，故运行时服务（`transport` 必填；`store` / `storeFactory`、`safeRegistry`、`capabilities`、`permission`、`confirm`、`user`、附件回调、`onMentionTrigger` / `onPlusMenu`、`toolbarStart` / `toolbarEnd` ReactNode 槽、`headerExtra` 可选）一律由宿主经 `createChatWorkspace(services)` 工厂闭包注入，返回的 `ChatWorkspace` 组件注册进页面运行时组件注册表（`options.components`）。
+
+组件 props 全部为 DSL 可表达的标量 / 数组：`title?`（工作区头部标题，与 `headerExtra` 任一存在即渲染头部）/ `greeting?` / `subtitle?` / `suggestions?` / `conversationId?` / `params?`；另支持两个 DslNode 槽——`sidebar?`（提供时以 AppShell 包裹工作区）与 `toolbarEnd?`——renderer 对内嵌 DslNode prop 跳过提前求值，组件内经 `useRenderer().renderChildren` 渲染（Table `columns[].cell` 同款机制），仅页面运行时上下文内有效。
+
+组件自持 `ConversationStore`（外部 `store` > `storeFactory` > 默认构造，ref 保持——重渲染不重建）与附件受控状态（`onAttachFiles` 回传的附件追加、发送后清空）。完整装配参考 `examples/chat`（`chat.page.yaml` + `App.tsx` 宿主装配）。

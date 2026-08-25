@@ -12,7 +12,10 @@
   "dependencies": {
     "antd": "^6.6.0",
     "katex": "^0.18.4",
+    "lucide-react": "^1.31.0",
     "pactor-chat": "workspace:*",
+    "pactor-core": "workspace:*",
+    "pactor-runtime": "workspace:*",
     "pactor-ui-antd": "workspace:*",
     "react": "^19.2.8",
     "react-dom": "^19.2.8"
@@ -21,6 +24,7 @@
     "@types/react": "^19.2.18",
     "@types/react-dom": "^19.2.4",
     "@vitejs/plugin-react": "^5.0.0",
+    "pactor-vite-plugin": "workspace:*",
     "typescript": "^5.6.3",
     "vite": "^8.2.1"
   }

@@ -1,0 +1,21 @@
+dsl: '1.0'
+page:
+  id: chat
+  title: Pactor Chat 示例
+
+# 聊天工作区页：body 为 ChatWorkspace 节点（宿主在 bootstrap 中经
+# createChatWorkspace 闭包注入 transport / store / safeRegistry /
+# capabilities / 附件与弹层回调后注册进组件注册表）。
+# DSL 只携带标量配置：title / greeting / subtitle / suggestions /
+# conversationId——函数与实例一律不出现（spec: chat-dsl-page）。
+body:
+  type: ChatWorkspace
+  props:
+    title: Pactor Chat 工作区
+    greeting: 你好，我是 Pactor Chat 示例
+    subtitle: 数据全部由调用方经接口注入；点击下方建议立即开始
+    conversationId: conv-demo
+    suggestions:
+      - { label: 今天天气怎么样, prompt: 今天天气怎么样 }
+      - { label: 看一下本月报表, prompt: 看一下本月报表 }
+      - { label: 导出客户数据, prompt: 导出客户数据 }

@@ -69,7 +69,54 @@ driver.complete();
 - **`<ActivityTrace>`**：流式状态头（动画图标 + 呼吸文案 + 秒级计时，结束定格）+ 配对工具轨迹条目（单行：名称 + 参数摘要 + 状态图标，展开显示参数与结果/错误）；流式展开 → 答案阶段自动折叠 → 用户 pin 后不再自动变更（按消息记忆）。
 - **`<MessageActions>`**：消息操作条（hover 显现）——复制（`collectMessageText` 汇总文本写入剪贴板）、末条 completed assistant 重新生成、user 消息气泡内联编辑重发（确认 → 截断 + 重跑，取消不改 store）、error 消息重试。
 - **`<Composer>`**：自适应高度 textarea；IME 合成守卫（合成中 Enter 不发送）；发送按钮状态机（disabled / ready / streaming 停止，同元素切换 + 纯 CSS 光环）；受控附件 `attachments` + `onAttachmentsChange`（图片缩略图/文档卡片 + 移除），拖拽悬停态、粘贴与文件选择产出 `File[]` 经 `onAttachFiles` 交给调用方（包内不上传），点击卡片经 `onAttachmentClick` 通知；`toolbarStart` / `toolbarEnd` 渲染槽；词边界 `@` 触发 `onMentionTrigger(query, anchorRect)`，"+" 按钮触发 `onPlusMenu(anchorRect)`（未传回调不渲染入口，弹层由调用方实现）。
+- **`<AppShell sidebar brand? locationKey? className?>`**：应用外壳——侧栏插槽 + 主区。桌面（≥768px）侧栏与主区 flex 同行；移动端（<768px）侧栏退出文档流变为覆盖抽屉（遮罩 + 顶栏菜单按钮 + `brand` 品牌区），断点由 CSS 媒体查询表达，JS 只管开合。抽屉打开时 Escape / 遮罩点击关闭；`locationKey` 变化（路由 / 会话切换）渲染期自动关闭；移动端关闭时侧栏容器 `inert`。侧栏内容经 `useSidebarDrawer()` 取 `{ close }`（壳外返回 null），导航后可关闭抽屉。
 - **`registerChatLayout(layoutRegistry)`**：注册 `chat` 布局（header 标题区 + ChatView 区，V1 无会话历史侧栏），`resolveLayout(registry, 'chat')` 命中。
+- **`createChatWorkspace(services)`**：DSL 页面工作区工厂，见下节。
+
+## DSL 页面：createChatWorkspace
+
+聊天页可以像其他 pactor 页面一样以 `*.page.yaml` 声明、经 `createPageRuntime` 渲染。表达式作用域只承载可序列化数据，函数 / 实例无法从 DSL 产生——因此运行时服务一律由宿主经工厂闭包注入，DSL 只携带标量配置：
+
+```tsx
+import { Registry } from 'pactor-core';
+import { createPageRuntime } from 'pactor-runtime';
+import { createChatWorkspace } from 'pactor-chat';
+import chatPageDsl from './chat.page.yaml'; // 经 pactor-vite-plugin 编译
+
+// 宿主装配：全部运行时服务与交互回调经闭包注入（只创建一次，
+// 组件身份稳定，内部 store 才不会重建）
+const ChatWorkspace = createChatWorkspace({
+  transport,                 // 必填：ChatTransport
+  store,                     // 可选：外部自持 store（另有 storeFactory）
+  safeRegistry, capabilities, confirm,
+  onAttachFiles: (files) => upload(files), // 回传 ChatAttachment[]，发送后自动清空
+  onMentionTrigger, onPlusMenu,
+  toolbarStart: <ToolbarStart />,          // ReactNode 闭包槽
+});
+
+const components = new Registry<unknown>('ComponentRegistry');
+components.register('ChatWorkspace', ChatWorkspace);
+const runtime = createPageRuntime(chatPageDsl, { components });
+runtime.render(); // 或 <PageRuntimeView runtime={runtime} />
+```
+
+```yaml
+# chat.page.yaml：DSL 只声明页面与标量配置
+dsl: '1.0'
+page: { id: chat, title: 聊天页 }
+body:
+  type: ChatWorkspace
+  props:
+    title: 助手工作区        # 工作区头部标题（title 或 headerExtra 存在时渲染头部）
+    greeting: 你好
+    suggestions:
+      - { label: 今天天气怎么样, prompt: 今天天气怎么样 }
+```
+
+- **DSL 安全 props**：`title?` / `greeting?` / `subtitle?` / `suggestions?` / `conversationId?` / `params?`——全部为标量 / 数组 / 普通对象；函数与实例一律不出现。
+- **DslNode 槽**：`sidebar?: DslNode`（提供时以 AppShell 包裹）、`toolbarEnd?: DslNode`——renderer 对内嵌 DslNode prop 跳过提前求值，组件内经 `useRenderer().renderChildren` 渲染（Table `columns[].cell` 同款机制），仅页面运行时上下文内有效；纯 React 直连场景用服务的 `toolbarEnd` ReactNode 槽。
+- **状态自持**：组件内部创建并持有 `ConversationStore`（外部 `store` > `storeFactory` > 默认构造，ref 保持——重渲染 / props 变化不重建）与附件受控状态（`onAttachFiles` 回传追加、发送后清空）。
+- **React 直连 vs DSL 页面**：细粒度组装继续用 `<ChatView>`；整页 DSL 化用 `createChatWorkspace` + 页面运行时。完整参考见 `examples/chat`。
 
 > **数据由调用方经接口注入**：包内不发起网络请求、不读取外部数据源。greeting / suggestions / attachments 等均为受控 props；文件上传、提及列表、预览等由调用方实现后经回调回写。`examples/chat` 提供内存级参考实现（data URL 伪上传、工具栏 chip、mention/+ 触发）。
 
