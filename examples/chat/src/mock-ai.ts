@@ -111,10 +111,16 @@ const EXPORT_DSL: DslNode = {
   ],
 };
 
-/** 天气意图：thinking → 工具调用 → markdown 结论 */
+/** 天气意图：thinking → 工具调用（携带 args，活动轨迹显示参数摘要）→ markdown 结论 */
 async function* weatherTurn(messageId: string): AsyncGenerator<ChatEvent> {
   yield* streamThinking(messageId, '用户询问天气，需要调用 weather.query 工具获取实时数据……');
-  yield { type: 'tool.start', messageId, name: 'weather.query', title: '查询天气' };
+  yield {
+    type: 'tool.start',
+    messageId,
+    name: 'weather.query',
+    title: '查询天气',
+    args: { city: '杭州', days: 1 },
+  };
   await sleep(600);
   yield {
     type: 'tool.result',

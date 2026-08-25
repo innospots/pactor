@@ -1,5 +1,5 @@
 import { applyChatEvent, type ChatEvent } from './events.js';
-import { createChatId } from './model.js';
+import { createChatId, type ChatPart } from './model.js';
 import type { ConversationStore } from './store.js';
 
 /**
@@ -27,6 +27,11 @@ export interface RunChatTurnOptions {
   assistantMessageId?: string;
   /** 取消信号：abort 时停止消费事件流，assistant 消息以 cancelled 收尾 */
   signal?: AbortSignal;
+  /**
+   * 跳过 user 消息追加（重新生成复用已有 user 消息时使用）：
+   * 仍追加 assistant 占位并 reduce 事件流。
+   */
+  skipUserMessage?: boolean;
 }
 
 /** runChatTurn 结果：本 turn 建立的两条消息 id */
@@ -52,15 +57,17 @@ export async function runChatTurn(
   const userMessageId = options.userMessageId ?? createChatId('msg');
   const assistantMessageId = options.assistantMessageId ?? createChatId('msg');
 
-  store.appendMessage({
-    id: userMessageId,
-    role: 'user',
-    status: 'completed',
-    parts: [
-      { id: createChatId('part'), type: 'text', content: input.text, status: 'ready' },
-    ],
-    createdAt: Date.now(),
-  });
+  if (!options.skipUserMessage) {
+    store.appendMessage({
+      id: userMessageId,
+      role: 'user',
+      status: 'completed',
+      parts: [
+        { id: createChatId('part'), type: 'text', content: input.text, status: 'ready' },
+      ],
+      createdAt: Date.now(),
+    });
+  }
   store.appendMessage({
     id: assistantMessageId,
     role: 'assistant',
@@ -96,6 +103,55 @@ export async function runChatTurn(
   }
 
   return { userMessageId, assistantMessageId };
+}
+
+/**
+ * 重新生成末轮（设计决策 D2，spec: chat-streaming / 重新生成轮次）：
+ * 定位 store 中最后一条 user 消息，移除其后全部消息（保留该 user
+ * 消息本身），再以其文本驱动一轮新 turn（skipUserMessage，不产生
+ * 新的 user 消息）。
+ *
+ * store 中无 user 消息时告警并正常返回（不抛错、不改 store）。
+ * `options.signal` 语义同 runChatTurn：abort 时新 assistant 消息以
+ * cancelled 收尾并正常返回。
+ */
+export async function runRegenerateTurn(
+  store: ConversationStore,
+  transport: ChatTransport,
+  options: RunChatTurnOptions = {},
+): Promise<ChatTurnResult | undefined> {
+  const messages = store.getMessages();
+  let lastUserIndex = -1;
+  for (let index = messages.length - 1; index >= 0; index -= 1) {
+    if (messages[index]!.role === 'user') {
+      lastUserIndex = index;
+      break;
+    }
+  }
+  if (lastUserIndex < 0) {
+    console.warn('[pactor-chat] runRegenerateTurn: no user message, ignored');
+    return undefined;
+  }
+
+  const lastUser = messages[lastUserIndex]!;
+  const next = messages[lastUserIndex + 1];
+  if (next) {
+    store.removeMessagesFrom(next.id);
+  }
+
+  const text = lastUser.parts
+    .filter(
+      (part): part is Extract<ChatPart, { type: 'text' | 'markdown' }> =>
+        part.type === 'text' || part.type === 'markdown',
+    )
+    .map((part) => part.content)
+    .join('');
+
+  return runChatTurn(store, transport, { text }, {
+    ...options,
+    userMessageId: lastUser.id,
+    skipUserMessage: true,
+  });
 }
 
 /** 手动 driver：代码控制推送事件的 ChatTransport 实现 */

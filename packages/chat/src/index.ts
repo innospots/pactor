@@ -1,6 +1,7 @@
 // 消息模型与 Store（零 React）
 export {
   createChatId,
+  type ChatAttachment,
   type ChatMessage,
   type ChatPart,
   type ChatRole,
@@ -15,9 +16,18 @@ export { ConversationStore } from './store.js';
 
 // Streaming 事件模型与 reducer（零 React）
 export { applyChatEvent, type ChatEvent } from './events.js';
+
+// 活动轨迹纯函数（零 React）
+export {
+  detectStreamingMode,
+  pairToolTraces,
+  type StreamingMode,
+  type ToolTraceEntry,
+} from './activity.js';
 export {
   createManualDriver,
   runChatTurn,
+  runRegenerateTurn,
   type ChatInput,
   type ChatTransport,
   type ChatTurnResult,
@@ -62,7 +72,22 @@ export {
 
 // React 视图
 export { ChatView, type ChatViewProps } from './view/ChatView.js';
+export {
+  DEFAULT_CHAT_GREETING,
+  EmptyState,
+  type ChatSuggestion,
+  type EmptyStateProps,
+} from './view/EmptyState.js';
+export {
+  ActivityTrace,
+  type ActivityTraceProps,
+} from './view/ActivityTrace.js';
 export { MessageBubble, type MessageBubbleProps } from './view/MessageBubble.js';
+export {
+  collectMessageText,
+  MessageActions,
+  type MessageActionsProps,
+} from './view/MessageActions.js';
 export {
   ChatDenied,
   PartRenderer,

@@ -97,4 +97,68 @@ describe('ConversationStore', () => {
     store.clear();
     expect(store.getMessages()).toHaveLength(0);
   });
+
+  it('附件引用：含 attachments 的 user 消息可构造（spec: 附件引用）', () => {
+    const message: ChatMessage = {
+      id: 'm1',
+      role: 'user',
+      status: 'completed',
+      parts: [{ type: 'text', content: '看下这个文件' }],
+      attachments: [
+        { id: 'a1', name: '报表.pdf', mimeType: 'application/pdf', size: 1024 },
+        { id: 'a2', name: '截图.png', mimeType: 'image/png', url: 'https://example.com/x.png' },
+      ],
+    };
+    expect(message.attachments).toHaveLength(2);
+    expect(message.attachments?.[0]).toMatchObject({ name: '报表.pdf', mimeType: 'application/pdf' });
+  });
+
+  it('removeMessagesFrom：移除该消息及其后全部消息，之前的消息不变（spec: 截断消息）', () => {
+    const store = new ConversationStore();
+    for (const id of ['m1', 'm2', 'm3', 'm4']) {
+      store.appendMessage({ id, role: 'user', status: 'completed', parts: [] });
+    }
+    const before = store.getMessages();
+
+    store.removeMessagesFrom('m2');
+    const after = store.getMessages();
+    expect(after).not.toBe(before);
+    expect(after.map((m) => m.id)).toEqual(['m1']);
+    // 未被移除的消息对象保持引用稳定
+    expect(after[0]).toBe(before[0]);
+  });
+
+  it('removeMessagesFrom：不可变——旧数组引用内容不变', () => {
+    const store = new ConversationStore();
+    for (const id of ['m1', 'm2']) {
+      store.appendMessage({ id, role: 'user', status: 'completed', parts: [] });
+    }
+    const before = store.getMessages();
+    store.removeMessagesFrom('m1');
+    expect(before.map((m) => m.id)).toEqual(['m1', 'm2']);
+    expect(store.getMessages()).toHaveLength(0);
+  });
+
+  it('removeMessagesFrom：未知 id 告警并忽略，数组引用不变', () => {
+    const store = new ConversationStore();
+    store.appendMessage({ id: 'm1', role: 'user', status: 'completed', parts: [] });
+    const before = store.getMessages();
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
+
+    store.removeMessagesFrom('missing');
+    expect(warn).toHaveBeenCalled();
+    expect(store.getMessages()).toBe(before);
+    warn.mockRestore();
+  });
+
+  it('removeMessagesFrom：通知订阅者', () => {
+    const store = new ConversationStore();
+    store.appendMessage({ id: 'm1', role: 'user', status: 'completed', parts: [] });
+    store.appendMessage({ id: 'm2', role: 'assistant', status: 'completed', parts: [] });
+    const listener = vi.fn();
+    store.subscribe(listener);
+
+    store.removeMessagesFrom('m2');
+    expect(listener).toHaveBeenCalledTimes(1);
+  });
 });
