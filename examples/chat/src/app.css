@@ -125,18 +125,29 @@ body,
   color: var(--demo-fg);
 }
 
-/* 消息列：居中、最大宽度 768px */
+/* 主区：承载 DSL 页面渲染的 Chat 组件（内建 AppShell 侧栏 + 工作区）。
+   Chat 的 AppShell 默认 100dvh 定高，嵌在顶栏之下时改为撑满剩余高度 */
 .demo-main {
   flex: 1;
   min-height: 0;
   display: flex;
   flex-direction: column;
+}
+
+.demo-main .pactor-chat-shell {
+  flex: 1;
+  min-height: 0;
+  height: auto;
+  width: 100%;
+}
+
+/* 消息列：居中、最大宽度 768px */
+.demo-main .pactor-chat-shell__content {
   align-items: center;
   padding: 12px 16px 16px;
 }
 
-/* ChatWorkspace（DSL 页面渲染的聊天工作区）填满剩余高度，
-   内部 ChatView 透明继承 */
+/* Chat 工作区填满剩余高度，内部 ChatView 透明继承 */
 .demo-main .pactor-chat-workspace {
   flex: 1;
   min-height: 0;
@@ -147,85 +158,6 @@ body,
 
 .demo-main .pactor-chat-view {
   background: transparent;
-}
-
-/* ============================================================
- * 演示侧栏（AppShell sidebar 插槽）：新建对话 + mock 会话列表
- * ============================================================ */
-
-.demo-brand {
-  font-size: 13px;
-  font-weight: 600;
-}
-
-.demo-sidebar {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-  height: 100%;
-  padding: 12px 10px;
-  background: var(--demo-bg);
-  box-sizing: border-box;
-}
-
-.demo-sidebar__new {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 6px;
-  padding: 8px 12px;
-  border: 1px solid var(--demo-border);
-  border-radius: 10px;
-  background: var(--demo-popup-bg);
-  color: var(--demo-fg);
-  font-size: 13px;
-  cursor: pointer;
-  transition: background 0.15s ease;
-}
-
-.demo-sidebar__new:hover {
-  background: var(--demo-chip-bg);
-}
-
-.demo-sidebar__section {
-  padding: 12px 8px 4px;
-  font-size: 12px;
-  color: var(--demo-muted-fg);
-}
-
-.demo-sidebar__list {
-  margin: 0;
-  padding: 0;
-  list-style: none;
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-}
-
-.demo-sidebar__item {
-  width: 100%;
-  padding: 7px 8px;
-  border: none;
-  border-radius: 8px;
-  background: transparent;
-  color: var(--demo-fg);
-  font-size: 13px;
-  text-align: left;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  cursor: pointer;
-  transition: background 0.15s ease;
-}
-
-.demo-sidebar__item:hover {
-  background: var(--demo-chip-bg);
-}
-
-.demo-sidebar__item--active,
-.demo-sidebar__item--active:hover {
-  background: var(--demo-chip-bg);
-  font-weight: 600;
 }
 
 /* ============================================================

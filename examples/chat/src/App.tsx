@@ -1,11 +1,12 @@
 import { message } from 'antd';
 import {
-  AppShell,
+  ChatServicesProvider,
   ConversationStore,
-  createChatWorkspace,
+  registerChatComponent,
+  type ChatServices,
 } from 'pactor-chat';
 import { Registry } from 'pactor-core';
-import { createPageRuntime } from 'pactor-runtime';
+import { createPageRuntime, type ActionHandler } from 'pactor-runtime';
 import {
   createContext,
   useContext,
@@ -20,7 +21,6 @@ import chatPageDsl from './chat.page.yaml';
 import { CapabilityChip } from './components/CapabilityChip';
 import { ContextChips, type ContextChipData } from './components/ContextChips';
 import { ContextPickerModal } from './components/ContextPickerModal';
-import { DemoSidebar } from './components/DemoSidebar';
 import { Header } from './components/Header';
 import { MentionListbox } from './components/MentionListbox';
 import { ModelSelector } from './components/ModelSelector';
@@ -31,22 +31,22 @@ import { PICKER_CHIP_PREFIX, type PickerKind } from './mock-data';
 import { createChatSafeRegistry } from './safe-registry';
 
 /**
- * examples/chat 是"DSL 页面 + 宿主装配"的参考实现（spec: chat-dsl-page /
- * example-chat）：
+ * examples/chat 是"DSL 页面 + 宿主装配"的参考实现（spec:
+ * chat-dsl-component / example-chat）：
  *
  * - 聊天页面由 `chat.page.yaml` 声明（vite-plugin-dsl 编译为 PageDsl），
- *   body 是 ChatWorkspace 节点，greeting / suggestions / title 等标量
- *   配置全部在 YAML；
+ *   body 是一等组件 `Chat` 节点——左侧菜单、greeting / suggestions 等
+ *   标量配置全部在 YAML，菜单交互经 `events.onMenuSelect` + 页面 state
+ *   （setState）表达；
  * - 运行时服务（transport / store / safeRegistry / capabilities /
- *   confirm / 附件伪上传 / 提及与 "+" 弹层 / 工具栏槽）由本文件经
- *   `createChatWorkspace(services)` 闭包注入，组件注册进页面运行时的
- *   组件注册表后以 `createPageRuntime` 渲染；
- * - AppShell + DemoSidebar + Header 仍是 DSL 页面之外的宿主外壳。
+ *   confirm / 附件伪上传 / 提及与 "+" 弹层 / 工具栏槽）经
+ *   `ChatServicesProvider` 在根部注入一次，`Chat` 组件从 context 读取；
+ * - 宿主只剩应用壳：顶栏 Header（可编辑标题 / 导出 / 明暗切换 / 清空）
+ *   与全部弹层仍是 DSL 页面之外的宿主 UI。
  */
 
 /**
- * 宿主槽位 context：createChatWorkspace 只调用一次（组件身份稳定，store
- * 才不会重建），工具栏槽内的动态内容（上下文 chips）经 context 读取
+ * 宿主槽位 context：工具栏槽内的动态内容（上下文 chips）经 context 读取
  * 最新宿主状态，而不是把易变的 ReactNode 固化进服务闭包。
  */
 interface DemoHost {
@@ -84,7 +84,8 @@ interface MentionState {
 
 function App() {
   // store / transport / 白名单在会话内保持稳定，只创建一次。
-  // store 为外部自持（顶栏导出 / 清空需要访问），经服务闭包传给工作区
+  // store 为外部自持（顶栏导出 / 清空与「新建对话」动作需要访问），
+  // 经 ChatServicesProvider 注入工作区
   const store = useMemo(() => new ConversationStore(), []);
   const transport = useMemo(() => createMockAiTransport(), []);
   const safeRegistry = useMemo(() => createChatSafeRegistry(), []);
@@ -93,12 +94,6 @@ function App() {
   // 页壳状态：主题（写到 app 根的 data-pactor-theme）与会话标题
   const [theme, setTheme] = useState<'light' | 'dark'>('light');
   const [title, setTitle] = useState('新的对话');
-
-  // 侧栏会话状态（纯演示）：active 会话 id 同时作为 AppShell 的
-  // locationKey——切换会话即关移动端抽屉。消息在单一内存 store 中，
-  // 「新建对话」清空 store；切换历史会话只改高亮，不加载历史消息
-  const [activeSessionId, setActiveSessionId] = useState('new-0');
-  const sessionSeq = useMemo(() => ({ value: 0 }), []);
 
   // 已选上下文 chips（"+" 菜单选择器 / `@` 提及选中产生，可移除）
   const [contextChips, setContextChips] = useState<ContextChipData[]>([]);
@@ -128,43 +123,52 @@ function App() {
     return () => document.removeEventListener('input', handleInput, true);
   }, [mention]);
 
-  // 聊天工作区组件：全部运行时服务经工厂闭包注入（只创建一次——组件
-  // 身份变化会导致子树重挂载、store 丢失）。附件受控状态由工作区自持：
-  // onAttachFiles 回传（data URL 伪上传）即追加，发送后自动清空
-  const ChatWorkspace = useMemo(
-    () =>
-      createChatWorkspace({
-        transport,
-        store,
-        safeRegistry,
-        capabilities,
-        confirm: ({ name }) =>
-          Promise.resolve(window.confirm(`高风险操作「${name}」，确认执行？`)),
-        onAttachFiles: (files) => Promise.all(files.map(readAsAttachment)),
-        onAttachmentClick: (attachment) => {
-          if (attachment.url) {
-            window.open(attachment.url, '_blank');
-          } else {
-            void message.info(`附件「${attachment.name}」无 url（伪上传未产出 data URL）`);
-          }
-        },
-        toolbarStart: <ToolbarStartSlot />,
-        toolbarEnd: <ModelSelector />,
-        onMentionTrigger: (query, anchorRect) =>
-          setMention({ query, rect: anchorRect }),
-        onPlusMenu: (anchorRect) =>
-          setPlusRect((prev) => (prev ? null : anchorRect)),
-      }),
+  // 聊天服务：全部运行时依赖与交互回调经 provider 注入一次（useMemo
+  // 保持稳定引用）。附件受控状态由 Chat 组件自持：onAttachFiles 回传
+  // （data URL 伪上传）即追加，发送后自动清空
+  const chatServices = useMemo<ChatServices>(
+    () => ({
+      transport,
+      store,
+      safeRegistry,
+      capabilities,
+      confirm: ({ name }) =>
+        Promise.resolve(window.confirm(`高风险操作「${name}」，确认执行？`)),
+      onAttachFiles: (files) => Promise.all(files.map(readAsAttachment)),
+      onAttachmentClick: (attachment) => {
+        if (attachment.url) {
+          window.open(attachment.url, '_blank');
+        } else {
+          void message.info(`附件「${attachment.name}」无 url（伪上传未产出 data URL）`);
+        }
+      },
+      toolbarStart: <ToolbarStartSlot />,
+      toolbarEnd: <ModelSelector />,
+      onMentionTrigger: (query, anchorRect) =>
+        setMention({ query, rect: anchorRect }),
+      onPlusMenu: (anchorRect) =>
+        setPlusRect((prev) => (prev ? null : anchorRect)),
+    }),
     [store, transport, safeRegistry, capabilities],
   );
 
-  // 页面运行时：ChatWorkspace 注册进组件注册表，chat.page.yaml 经
-  // createPageRuntime 校验并渲染
+  // 页面运行时：registerChatComponent 注册 Chat 类型（不覆盖已有注册），
+  // chat.page.yaml 经 createPageRuntime 校验并渲染；demo.newSession 是
+  // 示例扩展动作（DSL 无法触达宿主 store），由菜单「新建对话」触发
   const runtime = useMemo(() => {
     const components = new Registry<unknown>('ComponentRegistry');
-    components.register('ChatWorkspace', ChatWorkspace);
-    return createPageRuntime(chatPageDsl, { components });
-  }, [ChatWorkspace]);
+    registerChatComponent(components);
+    // demo.newSession 是示例扩展动作（DSL 无法触达宿主 store），
+    // 由菜单「新建对话」经 events.onMenuSelect 触发
+    const actions = new Registry<ActionHandler>('ActionRegistry');
+    actions.register('demo.newSession', () => {
+      store.clear();
+      setContextChips([]);
+      setTitle('新的对话');
+      return { ok: true };
+    });
+    return createPageRuntime(chatPageDsl, { components, actions });
+  }, [store]);
 
   const addChip = (label: string): void => {
     setContextChips((prev) => {
@@ -191,14 +195,6 @@ function App() {
     void message.success('会话已清空');
   };
 
-  const handleNewSession = (): void => {
-    store.clear();
-    setContextChips([]);
-    sessionSeq.value += 1;
-    setActiveSessionId(`new-${sessionSeq.value}`);
-    setTitle('新的对话');
-  };
-
   return (
     <DemoHostContext.Provider
       value={{
@@ -207,18 +203,9 @@ function App() {
           setContextChips((prev) => prev.filter((chip) => chip.id !== id)),
       }}
     >
-      <div className="demo-app" data-pactor-theme={theme === 'dark' ? 'dark' : undefined}>
-        <AppShell
-          sidebar={
-            <DemoSidebar
-              activeSessionId={activeSessionId}
-              onSelectSession={setActiveSessionId}
-              onNewSession={handleNewSession}
-            />
-          }
-          brand={<span className="demo-brand">Pactor Chat</span>}
-          locationKey={activeSessionId}
-        >
+      <ChatServicesProvider value={chatServices}>
+        <div className="demo-app" data-pactor-theme={theme === 'dark' ? 'dark' : undefined}>
+          {/* 宿主应用壳：顶栏（可编辑标题 / 导出 / 明暗 / 清空）在 DSL 页面之上 */}
           <Header
             title={title}
             onTitleChange={setTitle}
@@ -227,37 +214,38 @@ function App() {
             onExport={handleExport}
             onClear={handleClear}
           />
+          {/* DSL 页面：Chat 组件自持 AppShell 侧栏（menu 数据驱动）+ 工作区 */}
           <main className="demo-main">{runtime.render()}</main>
-        </AppShell>
 
-        {plusRect && (
-          <PlusMenu
-            rect={plusRect}
-            onClose={() => setPlusRect(null)}
-            onOpenPicker={(kind) => setPickerKind(kind)}
-          />
-        )}
-        {pickerKind && (
-          <ContextPickerModal
-            kind={pickerKind}
-            onCancel={() => setPickerKind(null)}
-            onConfirm={(entries) => {
-              for (const entry of entries) {
-                addChip(`${PICKER_CHIP_PREFIX[pickerKind]}：${entry.name}`);
-              }
-              setPickerKind(null);
-            }}
-          />
-        )}
-        {mention && (
-          <MentionListbox
-            query={mention.query}
-            rect={mention.rect}
-            onClose={() => setMention(null)}
-            onSelect={(name) => addChip(`@${name}`)}
-          />
-        )}
-      </div>
+          {plusRect && (
+            <PlusMenu
+              rect={plusRect}
+              onClose={() => setPlusRect(null)}
+              onOpenPicker={(kind) => setPickerKind(kind)}
+            />
+          )}
+          {pickerKind && (
+            <ContextPickerModal
+              kind={pickerKind}
+              onCancel={() => setPickerKind(null)}
+              onConfirm={(entries) => {
+                for (const entry of entries) {
+                  addChip(`${PICKER_CHIP_PREFIX[pickerKind]}：${entry.name}`);
+                }
+                setPickerKind(null);
+              }}
+            />
+          )}
+          {mention && (
+            <MentionListbox
+              query={mention.query}
+              rect={mention.rect}
+              onClose={() => setMention(null)}
+              onSelect={(name) => addChip(`@${name}`)}
+            />
+          )}
+        </div>
+      </ChatServicesProvider>
     </DemoHostContext.Provider>
   );
 }

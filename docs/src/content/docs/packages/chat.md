@@ -140,6 +140,55 @@ import 'pactor-chat/styles.css';
 
 `registerChatLayout(layoutRegistry)` 注册 `chat` 布局（header 标题区 + ChatView 区，V1 无会话历史侧栏）；注册后 `resolveLayout(registry, 'chat')` 命中，可与其他布局一样经 DSL `layout` 字段使用。
 
+## Chat：一等 DSL 组件
+
+`Chat` 是与 Button / Input 同级的 DSL 组件（spec: chat-dsl-component）：`registerChatComponent(registry)` 注册一次（已存在同名类型时不覆盖），页面 DSL 以 `{ type: 'Chat', props, events }` 声明完整聊天工作区（AppShell 侧栏 + header + ChatView）。服务注入与组件声明解耦：宿主在根部用 `ChatServicesProvider` 注入一次 `ChatServices`（与 `ChatWorkspaceServices` 同型，`transport` 必填），`Chat` 就近从 context 读取；未注入时渲染受控「未配置聊天服务」提示并 `console.warn`，不抛错。
+
+```tsx
+import { Registry } from 'pactor-core';
+import { createPageRuntime } from 'pactor-runtime';
+import { ChatServicesProvider, registerChatComponent } from 'pactor-chat';
+import chatPageDsl from './chat.page.yaml';
+
+const components = new Registry<unknown>('ComponentRegistry');
+registerChatComponent(components);
+const runtime = createPageRuntime(chatPageDsl, { components });
+
+<ChatServicesProvider value={{ transport, safeRegistry, ... }}>
+  {runtime.render()}
+</ChatServicesProvider>;
+```
+
+```yaml
+dsl: '1.0'
+page: { id: chat, title: 聊天页 }
+state: { activeMenu: new }
+body:
+  type: Chat
+  props:
+    title: 助手工作区          # showHeader: false 可关闭 header
+    greeting: 你好
+    activeMenuKey: ${state.activeMenu}
+    menu:
+      - { key: new, label: 新建对话, icon: plus }
+      - { key: s1, label: 本月报表分析, icon: history, group: 历史会话 }
+  events:
+    onMenuSelect:              # event 作用域：event.key / event.item
+      - action: setState
+        params: { activeMenu: ${event.key} }
+    onSend:                    # event 作用域：event.text（与 transport turn 并行）
+      - action: setState
+        params: { lastSent: ${event.text} }
+```
+
+- **菜单**：`menu: ChatMenuItem[]`（`key / label / icon? / badge? / disabled? / group?`）驱动内建侧栏（AppShell 承载，移动端为抽屉）；`icon` 字符串名映射内置 lucide 子集（plus / chat / history / settings / star / search / user / folder），未知名渲染占位圆点；`group` 渲染分组标题行；`activeMenuKey` 为受控 prop，典型闭环是 `${state.x}` 绑定 + `onMenuSelect` 调 `setState`；disabled 项不触发 `onMenuSelect`。
+- **Header 三层**：`title` 标量 → `headerExtra?: DslNode | ReactNode`（标题右侧槽）→ `header?: DslNode | ReactNode`（整体替换）；`showHeader: false` 关闭。DslNode 槽仅页面运行时可渲染；纯 React 场景传 ReactNode，误传 DslNode 时告警并跳过。
+- **侧栏槽**：`sidebar?: DslNode | ReactNode` 提供时整体替代内建菜单侧栏。
+- **React 直连**：`<ChatServicesProvider>` + `<Chat>` 可直接作为 React 组件使用（`onSend?(text)` / `onMenuSelect?(key, item)` 为普通函数 props）。`createChatWorkspace` 保留为兼容路径，内部与 `Chat` 共用同一组合（`ChatComposition`），行为不变。
+
+完整装配参考 `examples/chat`。
+
+
 ## AppShell 应用外壳
 
 `<AppShell sidebar brand? locationKey? className?>` 是更外层的应用外壳（与 ChatLayout 组合而非替代）：侧栏插槽 + 主区。桌面（≥768px）侧栏与主区 flex 同行；移动端（<768px）侧栏变为覆盖抽屉（遮罩 + 顶栏菜单按钮 + `brand` 品牌区），断点由 CSS 媒体查询表达（`--pactor-chat-sidebar-width` 等令牌可覆盖），JS 只管开合。关闭语义：Escape / 遮罩点击 / `locationKey` 变化（路由或会话切换时传入变化的 key，渲染期比较关闭）；移动端关闭时侧栏容器 `inert`。侧栏内容（如会话列表）在导航后调用 `useSidebarDrawer()?.close()` 关抽屉（壳外返回 null）。示例见 `examples/chat`。
