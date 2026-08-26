@@ -2,8 +2,9 @@
  * SkinSettings（pactor-app headerExtra 槽位）：头部「皮肤」按钮 → 下拉面板
  * （主色预设 / 暗黑开关 / 圆角滑杆 / 恢复默认）。
  *
- * Radix kit 没有设置面板类组件，面板用原生控件 + `.pcr-*` token 内联样式
- * 拼装；皮肤应用走 DOM 属性/CSS 变量（见 skin.ts），无需刷新即时生效。
+ * shadcn kit 没有设置面板类组件，面板用原生控件 + 语义 token
+ * （--radius / --border / --popover / --foreground …）内联样式拼装；
+ * 皮肤应用走 DOM 属性/CSS 变量（见 skin.ts），无需刷新即时生效。
  */
 import { useEffect, useRef, useState, useSyncExternalStore } from 'react';
 
@@ -37,12 +38,12 @@ export function SkinSettings() {
         onClick={() => setOpen((value) => !value)}
         style={{
           border: 'none',
-          borderRadius: 'var(--pcr-radius-sm)',
-          background: open ? 'rgb(255 255 255 / 0.18)' : 'transparent',
+          borderRadius: 'var(--radius)',
+          background: open ? 'var(--accent)' : 'transparent',
           color: 'inherit',
           padding: '4px 10px',
           cursor: 'pointer',
-          fontSize: 'var(--pcr-font-size-sm)',
+          fontSize: 13,
         }}
       >
         皮肤
@@ -58,12 +59,13 @@ export function SkinSettings() {
             zIndex: 1000,
             width: 260,
             padding: 16,
-            borderRadius: 'var(--pcr-radius-md)',
-            border: '1px solid var(--pcr-border-subtle)',
-            background: 'var(--pcr-bg-elevated)',
-            boxShadow: 'var(--pcr-shadow-lg)',
-            color: 'var(--pcr-fg)',
-            fontSize: 'var(--pcr-font-size-sm)',
+            borderRadius: 'calc(var(--radius) + 2px)',
+            border: '1px solid var(--border)',
+            background: 'var(--popover)',
+            boxShadow:
+              '0 12px 24px -4px rgb(0 0 0 / 0.12), 0 4px 8px -4px rgb(0 0 0 / 0.08)',
+            color: 'var(--popover-foreground)',
+            fontSize: 13,
           }}
         >
           <div style={{ fontWeight: 600, marginBottom: 8 }}>主色</div>
@@ -78,12 +80,12 @@ export function SkinSettings() {
                 style={{
                   width: 28,
                   height: 28,
-                  borderRadius: 'var(--pcr-radius-sm)',
+                  borderRadius: 'var(--radius)',
                   backgroundColor: preset.color,
                   cursor: 'pointer',
                   border:
                     skin.accent === preset.key
-                      ? '2px solid var(--pcr-fg)'
+                      ? '2px solid var(--foreground)'
                       : '2px solid transparent',
                 }}
               />
@@ -119,8 +121,8 @@ export function SkinSettings() {
               marginTop: 16,
               width: '100%',
               padding: '6px 0',
-              borderRadius: 'var(--pcr-radius-sm)',
-              border: '1px solid var(--pcr-border)',
+              borderRadius: 'var(--radius)',
+              border: '1px solid var(--border)',
               background: 'transparent',
               color: 'inherit',
               cursor: 'pointer',

@@ -1,5 +1,6 @@
 import { Component, type ErrorInfo, type ReactNode } from 'react';
-import { Button, Result } from 'antd';
+
+import { PrimaryButton, ResultView } from './feedback.js';
 
 interface PageErrorBoundaryProps {
   children?: ReactNode;
@@ -31,18 +32,14 @@ export class PageErrorBoundary extends Component<
     const { error } = this.state;
     if (error !== null) {
       return (
-        <Result
+        <ResultView
           className="pactor-app-page-render-error"
-          status="error"
           title="页面渲染异常"
           subTitle={error.message}
           extra={
-            <Button
-              type="primary"
-              onClick={() => this.setState({ error: null })}
-            >
+            <PrimaryButton onClick={() => this.setState({ error: null })}>
               重试
-            </Button>
+            </PrimaryButton>
           }
         />
       );

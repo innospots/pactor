@@ -1,4 +1,3 @@
-import { message } from 'antd';
 import {
   ChatServicesProvider,
   ConversationStore,
@@ -7,6 +6,7 @@ import {
 } from 'pactor-chat';
 import { Registry } from 'pactor-core';
 import { createPageRuntime, type ActionHandler } from 'pactor-runtime';
+import { ShadcnInteractionProvider } from 'pactor-ui/interaction';
 import {
   createContext,
   useContext,
@@ -29,6 +29,7 @@ import { downloadMessagesAsMarkdown } from './export-markdown';
 import { createMockAiTransport } from './mock-ai';
 import { PICKER_CHIP_PREFIX, type PickerKind } from './mock-data';
 import { createChatSafeRegistry } from './safe-registry';
+import { showConfirm, showMessage, uiBridge } from './ui-bridge';
 
 /**
  * examples/chat 是"DSL 页面 + 宿主装配"的参考实现（spec:
@@ -133,13 +134,13 @@ function App() {
       safeRegistry,
       capabilities,
       confirm: ({ name }) =>
-        Promise.resolve(window.confirm(`高风险操作「${name}」，确认执行？`)),
+        showConfirm(`高风险操作「${name}」，确认执行？`),
       onAttachFiles: (files) => Promise.all(files.map(readAsAttachment)),
       onAttachmentClick: (attachment) => {
         if (attachment.url) {
           window.open(attachment.url, '_blank');
         } else {
-          void message.info(`附件「${attachment.name}」无 url（伪上传未产出 data URL）`);
+          showMessage('info', `附件「${attachment.name}」无 url（伪上传未产出 data URL）`);
         }
       },
       toolbarStart: <ToolbarStartSlot />,
@@ -182,17 +183,17 @@ function App() {
   const handleExport = (): void => {
     const messages = store.getMessages();
     if (messages.length === 0) {
-      void message.info('当前会话还没有消息');
+      showMessage('info', '当前会话还没有消息');
       return;
     }
     downloadMessagesAsMarkdown(title, messages);
-    void message.success('已导出 Markdown');
+    showMessage('success', '已导出 Markdown');
   };
 
   const handleClear = (): void => {
     store.clear();
     setContextChips([]);
-    void message.success('会话已清空');
+    showMessage('success', '会话已清空');
   };
 
   return (
@@ -204,6 +205,8 @@ function App() {
       }}
     >
       <ChatServicesProvider value={chatServices}>
+        {/* pactor-ui 交互层：toast / confirm 经 UiBridge 注入（宿主根部挂载） */}
+        <ShadcnInteractionProvider bridge={uiBridge}>
         <div className="demo-app" data-pactor-theme={theme === 'dark' ? 'dark' : undefined}>
           {/* 宿主应用壳：顶栏（可编辑标题 / 导出 / 明暗 / 清空）在 DSL 页面之上 */}
           <Header
@@ -245,6 +248,7 @@ function App() {
             />
           )}
         </div>
+        </ShadcnInteractionProvider>
       </ChatServicesProvider>
     </DemoHostContext.Provider>
   );

@@ -5,12 +5,12 @@
 ## 安装
 
 ```bash
-npm install pactor-app react react-dom react-router-dom antd
+npm install pactor-app pactor-ui react react-dom react-router-dom
 # 或
-pnpm add pactor-app react react-dom react-router-dom antd
+pnpm add pactor-app pactor-ui react react-dom react-router-dom
 ```
 
-`react >= 18`、`react-dom >= 18`、`react-router-dom >= 6`、`antd >= 5` 为 peer dependency（开发基准为 react-router-dom v7、antd v6）。
+`react >= 18`、`react-dom >= 18`、`react-router-dom >= 6` 为 peer dependency（开发基准为 react-router-dom v7）。内置 UI kit 为 `pactor-ui`（shadcn，传递依赖），需导入其预建样式表 `import 'pactor-ui/styles.css'`。
 
 ## 一站式用法
 
@@ -43,7 +43,7 @@ createPactorApplication({
 
 mount 后依次：加载 bootstrap（全屏 loading）→ `PermissionStore` 写入 `permissions`（缺省 `[]`）→ `MenuRegistry(menus)`（缺省 `[]`）→ 解析布局 → 组装共享 registries 与 adapters。bootstrap 失败渲染含**重试**按钮的启动错误页，不白屏。
 
-应用级共享 registries 被所有页面 PageRuntime 共享：内置组件（pactor-ui-antd components 层）+ 交互动作（overlay.open / overlay.close / confirm / message，应用级 OverlayManager / UiBridge 单例）+ navigate 动作 + options 扩展。页面运行时创建时注入 permission / router / http adapters 与 route context（`route.params` / `route.query`）、`user`（bootstrap.user）、`app`（bootstrap.app）。
+应用级共享 registries 被所有页面 PageRuntime 共享：内置组件（pactor-ui components 层）+ 交互动作（overlay.open / overlay.close / confirm / message，应用级 OverlayManager / UiBridge 单例）+ navigate 动作 + options 扩展。页面运行时创建时注入 permission / router / http adapters 与 route context（`route.params` / `route.query`）、`user`（bootstrap.user）、`app`（bootstrap.app）。
 
 ## 扩展注册 API
 

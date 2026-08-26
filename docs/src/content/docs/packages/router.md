@@ -108,5 +108,5 @@ import { Route, Routes } from 'react-router-dom';
 `<DynamicDslRoute>` 经 `useLocation` 驱动：useLocation 变化时重新解析——未命中（或命中项无 `pageId`）渲染 `fallback`（404）；配置了 `permissionChecker` 且页面无权限（pactor-permission `checkPagePermission` 守卫）渲染 `forbidden`（403），不调用 `render`；否则 `render({ pageId, route })`。`useReactRouterBridge()` 把 `useNavigate` / `useLocation` 包装为 `NavigationBridge`（React Router 自身驱动重渲染，`subscribe` 为 no-op）。
 
 :::note
-页面资源加载（`pageId` → `loadPage`，pactor-resource）不在本包，由应用组合层在 `render` 中串联。HashRouter / BrowserRouter 的选择由宿主决定；KeepAlive / Tabs / Breadcrumb 的 UI 语义由 pactor-ui-antd 的 layout 层消费 MenuItem 字段实现。
+页面资源加载（`pageId` → `loadPage`，pactor-resource）不在本包，由应用组合层在 `render` 中串联。HashRouter / BrowserRouter 的选择由宿主决定；KeepAlive / Tabs / Breadcrumb 的 UI 语义由 pactor-ui 的 layout 层消费 MenuItem 字段实现。
 :::

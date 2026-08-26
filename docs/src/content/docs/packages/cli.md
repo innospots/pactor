@@ -93,10 +93,10 @@ pactor create my-app        # 模板参数 -t app（当前唯一模板，可省�
 
 生成的工程包含：
 
-- `package.json`（vite / react / pactor-app / pactor-ui-radix / pactor-vite-plugin 依赖；版本为 `^0.1.0` 等语义化占位，发布后按实际版本对齐）
+- `package.json`（vite / react / pactor-app / pactor-ui / pactor-vite-plugin 依赖；版本为 `^0.1.0` 等语义化占位，发布后按实际版本对齐）
 - `vite.config.ts`（react + `pactor()` 插件）
 - `index.html`、`tsconfig.json`、`README.md`
-- `src/main.tsx`（`createPactorApplication` + `StaticDslLoader` + `import 'pactor-ui-radix/styles.css'`，默认 UI kit 为 Radix）
+- `src/main.tsx`（`createPactorApplication` + `StaticDslLoader` + `import 'pactor-ui/styles.css'`，默认 UI kit 为 shadcn）
 - `src/pages/home.page.yaml`（示例 Page DSL）
 
 模板中的 `__APP_NAME__` 占位替换为目标目录名。目标目录已存在且非空时报错（退出码 2），不覆盖任何内容；已存在的空目录允许生成。

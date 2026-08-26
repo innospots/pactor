@@ -1,6 +1,6 @@
 # __APP_NAME__
 
-由 `pactor create` 生成的 Pactor 业务工程：vite + react + pactor-app + pactor-ui-radix + pactor-vite-plugin。
+由 `pactor create` 生成的 Pactor 业务工程：vite + react + pactor-app + pactor-ui + pactor-vite-plugin。
 
 ```bash
 pnpm install
@@ -9,7 +9,7 @@ pnpm dev
 
 - `src/pages/home.page.yaml`：示例 Page DSL，经 pactor-vite-plugin 在构建期转换为 JS 模块
 - `src/main.tsx`：`createPactorApplication` + `StaticDslLoader`（本地 DSL 开发）；接入服务端后改用 `api: { baseURL: '/api/runtime' }`
-- 默认 UI kit 为 Radix，`pactor-ui-radix/styles.css` 样式导入为必需步骤
+- 默认 UI kit 为 shadcn，`pactor-ui/styles.css` 样式导入为必需步骤
 
 ## 说明
 

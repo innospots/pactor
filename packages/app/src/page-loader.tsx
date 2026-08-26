@@ -1,10 +1,10 @@
-import { Button, Result, Spin } from 'antd';
 import type { RouteContext } from 'pactor-router';
 import { PageRuntimeView, type PageRuntime } from 'pactor-runtime';
 import { useEffect, useState } from 'react';
 
 import type { PactorApplicationHandle } from './application.js';
 import { PageErrorBoundary } from './error-boundary.js';
+import { BootstrapSpinner, PrimaryButton, ResultView } from './feedback.js';
 
 /** DslPageLoader props */
 export interface DslPageLoaderProps {
@@ -26,7 +26,7 @@ type PageState =
  *   key 变化即整体重建：旧运行时 destroy，新页面重新加载（V1 无 keepAlive）；
  * - 加载中渲染 loading 态；加载/校验失败渲染含重试的受控错误页；
  * - PageRuntimeView 经 PageErrorBoundary 包裹，渲染异常不白屏；
- * - OverlayHost（app.interactionKit 所选实现，缺省 antd 版）作为
+ * - OverlayHost（app.interactionKit 所选实现，缺省 shadcn 版）作为
  *   PageRuntimeView children（共享当前页面 Renderer 上下文；page overlay
  *   经 resolvePage 接 loader，子运行时共享应用级 registries——由
  *   interaction host 内部实现）。
@@ -71,30 +71,21 @@ export function DslPageLoader({ app, pageId, route }: DslPageLoaderProps) {
 
   if (state.status === 'loading') {
     return (
-      <div
-        className="pactor-app-page-loading"
-        style={{
-          padding: 48,
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-        }}
-      >
-        <Spin size="large" />
+      <div className="pactor-app-page-loading">
+        <BootstrapSpinner style={{ minHeight: 0, padding: 48 }} />
       </div>
     );
   }
   if (state.status === 'error') {
     return (
-      <Result
+      <ResultView
         className="pactor-app-page-load-error"
-        status="error"
         title="页面加载失败"
         subTitle={state.error.message}
         extra={
-          <Button type="primary" onClick={() => setRetryTick((n) => n + 1)}>
+          <PrimaryButton onClick={() => setRetryTick((n) => n + 1)}>
             重试
-          </Button>
+          </PrimaryButton>
         }
       />
     );

@@ -1,29 +1,29 @@
-import { createPactorApplication } from 'pactor-app';
-import { StaticDslLoader } from 'pactor-resource';
-// 默认 UI kit 为 Radix（pactor-ui-radix），样式表导入为必需步骤
-import 'pactor-ui-radix/styles.css';
-// 示例皮肤：换肤契约参考实现（须在 pactor-ui-radix/styles.css 之后导入）
-import './theme.css';
+import { createPactorApplication } from "pactor-app";
+import { StaticDslLoader } from "pactor-resource";
+// 默认 UI kit 为 shadcn（pactor-ui），样式表导入为必需步骤
+import "pactor-ui/styles.css";
+// 示例皮肤：换肤契约参考实现（须在 pactor-ui/styles.css 之后导入）
+import "./theme.css";
 // 皮肤 store：模块加载即把持久化的皮肤应用到 DOM（data-pactor-theme 等），
 // 须在首屏渲染前执行
-import './skin';
+import "./skin";
 
-import { readSession } from './auth';
-import { createBootstrap } from './bootstrap';
-import { demoServices } from './services';
-import { SkinSettings } from './SkinSettings';
-import customerEditPage from './pages/customer-edit.page.yaml';
-import customerListPage from './pages/customer-list.page.yaml';
-import dashboardPage from './pages/dashboard.page.yaml';
-import loginPage from './pages/login.page.yaml';
+import { readSession } from "./auth";
+import { createBootstrap } from "./bootstrap";
+import { demoServices } from "./services";
+import { SkinSettings } from "./SkinSettings";
+import customerEditPage from "./pages/customer-edit.page.yaml";
+import customerListPage from "./pages/customer-list.page.yaml";
+import dashboardPage from "./pages/dashboard.page.yaml";
+import loginPage from "./pages/login.page.yaml";
 
 // 路由守卫（应用外壳职责，在 DSL 之外）：未登录访问业务页 → /login；
 // 已登录访问 /login → /。整页跳转，bootstrap 随之按会话重新生成
 const session = readSession();
-if (!session && window.location.pathname !== '/login') {
-  window.location.replace('/login');
-} else if (session && window.location.pathname === '/login') {
-  window.location.replace('/');
+if (!session && window.location.pathname !== "/login") {
+  window.location.replace("/login");
+} else if (session && window.location.pathname === "/login") {
+  window.location.replace("/");
 }
 
 // 本地 DSL 开发：静态加载器直接喂入构建期 import 的页面与模拟 bootstrap
@@ -33,24 +33,24 @@ const loader = new StaticDslLoader({
   pages: {
     login: loginPage,
     dashboard: dashboardPage,
-    'customer-list': customerListPage,
-    'customer-edit': customerEditPage,
+    "customer-list": customerListPage,
+    "customer-edit": customerEditPage,
   },
 });
 
 createPactorApplication({
-  appId: 'example-admin',
+  appId: "example-admin",
   loader,
   services: demoServices,
-  locale: 'zh-CN',
+  locale: "zh-CN",
   messages: {
-    'zh-CN': {
-      'menu.dashboard': '工作台',
-      'menu.customers': '客户管理',
+    "zh-CN": {
+      "menu.dashboard": "工作台",
+      "menu.customers": "客户管理",
     },
-    'en-US': {
-      'menu.dashboard': 'Dashboard',
-      'menu.customers': 'Customers',
+    "en-US": {
+      "menu.dashboard": "Dashboard",
+      "menu.customers": "Customers",
     },
   },
   // 皮肤设置：头部右侧入口（主色预设 / 暗黑 / 圆角），
@@ -59,20 +59,20 @@ createPactorApplication({
   actions: {
     // 整页重载：登录/登出后需要重新加载 bootstrap（布局与菜单随会话变化），
     // react-router 的 navigate 不会触发 bootstrap 重取，故示例扩展此动作
-    'app.reload': (action) => {
-      const to = action.params?.['to'];
-      window.location.assign(typeof to === 'string' && to !== '' ? to : '/');
+    "app.reload": (action) => {
+      const to = action.params?.["to"];
+      window.location.assign(typeof to === "string" && to !== "" ? to : "/");
       return { ok: true };
     },
     // 框架暂无内置"调用服务"动作（request 仅走 HTTP 出口），
     // 示例经 options.actions 扩展 service.call：写操作经 ServiceRegistry 调用，
     // params.params 由动作引擎完成表达式求值后传入
-    'service.call': async (action, ctx) => {
-      const name = action.params?.['service'];
-      if (typeof name !== 'string' || name === '') {
+    "service.call": async (action, ctx) => {
+      const name = action.params?.["service"];
+      if (typeof name !== "string" || name === "") {
         return {
           ok: false,
-          error: new Error('[example-admin] service.call 缺少 params.service'),
+          error: new Error("[example-admin] service.call 缺少 params.service"),
         };
       }
       const handler = ctx.context.services.get(name);
@@ -83,9 +83,9 @@ createPactorApplication({
         };
       }
       try {
-        const callParams = action.params?.['params'];
+        const callParams = action.params?.["params"];
         const data = await handler(
-          typeof callParams === 'object' && callParams !== null
+          typeof callParams === "object" && callParams !== null
             ? (callParams as Record<string, unknown>)
             : {},
         );
@@ -98,4 +98,4 @@ createPactorApplication({
       }
     },
   },
-}).mount('#root');
+}).mount("#root");

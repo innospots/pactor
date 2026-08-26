@@ -1,6 +1,5 @@
-import { Button, Result, Spin } from 'antd';
 import { createI18nContext } from 'pactor-core';
-import { resolveLayout } from 'pactor-ui-antd/layout';
+import { resolveLayout } from 'pactor-ui/layout';
 import { resolveRoute } from 'pactor-router';
 import { DynamicDslRoute, useReactRouterBridge } from 'pactor-router/react';
 import { I18nContextProvider } from 'pactor-runtime';
@@ -18,6 +17,7 @@ import type {
   PactorApplicationHandle,
   ReactRouterBinding,
 } from './application.js';
+import { BootstrapSpinner, PrimaryButton, ResultView } from './feedback.js';
 import { DslPageLoader } from './page-loader.js';
 
 /** Application props：app 为 createPactorApplication 的内部句柄 */
@@ -66,30 +66,21 @@ export function Application({ app }: ApplicationProps) {
 
   if (state.status === 'loading') {
     return (
-      <div
-        className="pactor-app-bootstrap-loading"
-        style={{
-          minHeight: '100vh',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-        }}
-      >
-        <Spin size="large" />
+      <div className="pactor-app-bootstrap-loading">
+        <BootstrapSpinner />
       </div>
     );
   }
   if (state.status === 'error') {
     return (
-      <Result
+      <ResultView
         className="pactor-app-bootstrap-error"
-        status="error"
         title="应用启动失败"
         subTitle={state.error.message}
         extra={
-          <Button type="primary" onClick={() => setRetryTick((n) => n + 1)}>
+          <PrimaryButton onClick={() => setRetryTick((n) => n + 1)}>
             重试
-          </Button>
+          </PrimaryButton>
         }
       />
     );
@@ -225,9 +216,8 @@ function pageLoaderKey(
 /** 404：路径未命中任何菜单页 */
 function NotFoundPage(): ReactNode {
   return (
-    <Result
+    <ResultView
       className="pactor-app-not-found"
-      status="404"
       title="404"
       subTitle="页面不存在或尚未注册"
     />
@@ -237,9 +227,8 @@ function NotFoundPage(): ReactNode {
 /** 403：命中页面但无访问权限 */
 function ForbiddenPage(): ReactNode {
   return (
-    <Result
+    <ResultView
       className="pactor-app-forbidden"
-      status="403"
       title="403"
       subTitle="没有访问该页面的权限"
     />

@@ -5,7 +5,7 @@ description: 页面 DSL 的完整结构、表达式作用域、数据源、动�
 
 Pactor 页面以 YAML / JSON DSL 描述（`.page.yaml`，经 `pactor-vite-plugin` 构建期校验）。本页是 DSL 的完整参考：顶层结构、表达式作用域、数据源、动作目录与内置组件属性。
 
-DSL 的类型定义以 `pactor-core` 为准（`PageDsl` / `DslNode` / `ActionConfig`）；组件 props 契约以 `pactor-ui-antd` components 层为准（Radix kit 复用同一契约）。
+DSL 的类型定义以 `pactor-core` 为准（`PageDsl` / `DslNode` / `ActionConfig`）；组件 props 契约以 `pactor-ui` components 层为准。
 
 ## 顶层结构（PageDsl）
 
@@ -198,7 +198,7 @@ overlay 内容的表达式以 overlay 作用域求值（`${params.x}` 取注入�
 
 ## 组件目录
 
-内置 12 个组件（antd / Radix 双实现，props 契约一致）+ pactor-markdown 注册的 Markdown。业务组件注册见[自定义组件](/guides/custom-components/)。
+内置 12 个组件（shadcn 实现，pactor-ui）+ pactor-markdown 注册的 Markdown。业务组件注册见[自定义组件](/guides/custom-components/)。
 
 ### Page
 

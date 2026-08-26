@@ -275,8 +275,7 @@ pactor-resource
 pactor-router
 pactor-permission
 
-pactor-ui-antd
-pactor-ui-radix
+pactor-ui
 pactor-theme
 
 pactor-markdown
@@ -372,17 +371,9 @@ pactor-app
 - Component Guard
 - Action Guard
 
-### `pactor-ui-antd`
+### `pactor-ui`（shadcn）
 
-antd 技术栈的 UI kit 单元，内含三层实现并导出 `antdUiKit` 预设：
-
-- components 层：标准 UI DSL Components（V1 基础组件的 antd 适配层）
-- interaction 层：Modal / Drawer / FormModal / FormDrawer / Popover / Confirm / ContextMenu / Overlay Context / Overlay Promise
-- layout 层：Application Shell / Login Layout / Admin Layout / Landing Layout / Chat Layout / Dashboard Layout / Workspace Layout / Blank / Embedded Layout
-
-### `pactor-ui-radix`
-
-Radix 技术栈的 UI kit 单元，与 `pactor-ui-antd` 契约一致的三层 Radix 实现（不依赖 antd），导出 `radixUiKit` 预设与合并样式表；契约类型与交互核心（OverlayManager / 交互动作 / UiBridge）复用 `pactor-ui-antd`。
+唯一内置 UI kit 单元（shadcn 风格）：vendored shadcn/ui 组件源码（Radix Primitives + cva + tailwind-merge + lucide-react），自持 components / interaction / layout 三层（12 组件 props 契约类型、交互核心 OverlayManager / createUiBridge / registerInteractionActions / UiBridge、布局类型与 resolveLayout 均为本包自有），导出 `shadcnUiKit` 预设与预建样式表（Tailwind v4 构建期编译，消费方零 Tailwind 配置；preflight 关闭，令牌挂 `:root` / `[data-pactor-theme='dark']`）。**pactor-app 的内置默认 UI kit（唯一内置实现）**；自定义组件 / 布局 / 交互层经 componentRegistry / layoutRegistry / interactionKit / ui 覆盖点接入。
 
 ### `pactor-chat`
 
@@ -424,8 +415,7 @@ pactor/
 │   ├── resource/
 │   ├── router/
 │   ├── permission/
-│   ├── ui-antd/
-│   ├── ui-radix/
+│   ├── ui/
 │   ├── markdown/
 │   ├── chat/
 │   ├── theme/
@@ -4160,8 +4150,7 @@ pactor-runtime
 ├── pactor-resource
 ├── pactor-router
 ├── pactor-permission
-├── pactor-ui-antd
-├── pactor-ui-radix
+├── pactor-ui
 ├── pactor-markdown
 └── pactor-chat
       ↑

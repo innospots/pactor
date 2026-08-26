@@ -9,7 +9,7 @@
     "application",
     "bootstrap",
     "react",
-    "antd"
+    "shadcn-ui"
   ],
   "license": "MIT",
   "repository": {
@@ -59,11 +59,9 @@
     "pactor-router": "workspace:*",
     "pactor-runtime": "workspace:*",
     "pactor-schema": "workspace:*",
-    "pactor-ui-antd": "workspace:*",
-    "pactor-ui-radix": "workspace:*"
+    "pactor-ui": "workspace:*"
   },
   "peerDependencies": {
-    "antd": ">=5",
     "react": ">=18",
     "react-dom": ">=18",
     "react-router-dom": ">=6"
@@ -73,7 +71,6 @@
     "@testing-library/react": "^16.3.2",
     "@types/react": "^19.2.18",
     "@types/react-dom": "^19.2.4",
-    "antd": "^6.6.0",
     "jsdom": "^30.0.1",
     "react": "^19.2.8",
     "react-dom": "^19.2.8",

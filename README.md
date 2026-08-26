@@ -19,18 +19,16 @@ packages/
   permission/  pactor-permission  权限 Store + 四层守卫
   resource/    pactor-resource    DSL 资源加载 + 缓存 + 版本控制
   router/      pactor-router      菜单注册 + 动态路由 + 导航桥接
-  ui-antd/     pactor-ui-antd     antd UI kit（components + interaction + layout + antdUiKit）
-  ui-radix/    pactor-ui-radix    Radix UI kit（与 antd 版契约一致 + radixUiKit + 样式表）
+  ui/          pactor-ui          唯一内置 UI kit（shadcn：vendored shadcn/ui + 契约/交互核心/布局三层 + shadcnUiKit + 预建样式表）
   app/         pactor-app         一站式集成（createPactorApplication）
 examples/
   vite-starter/ example-vite-starter 最小上手示例（vite-plugin 工作流，端口 5499）
-  admin/       example-admin      管理后台示例（Radix kit，StaticDslLoader + 内存 mock，端口 5199）
-  admin-antd/  example-admin-antd 管理后台示例（antd kit，DSL 与 example-admin 一致，端口 5299）
+  admin/       example-admin      管理后台示例（shadcn kit，StaticDslLoader + 内存 mock，端口 5199）
   chat/        example-chat       pactor-chat 对话示例（mock AI 流式 transport，端口 5399）
 docs/          pactor-docs        Astro Starlight 文档站
 ```
 
-依赖方向严格单向：`core ← schema ← expression ← runtime ← {permission, resource, router, ui-antd} ← ui-radix ← app`。
+依赖方向严格单向：`core ← schema ← expression ← runtime ← {permission, resource, router, ui} ← app`。
 
 ## 常用命令
 
@@ -47,8 +45,7 @@ pnpm docs:build     # 构建文档站
 
 ```bash
 pnpm --filter example-vite-starter dev   # 最小上手示例（vite-plugin 工作流），http://localhost:5499
-pnpm --filter example-admin dev          # 管理后台示例（Radix kit），http://localhost:5199
-pnpm --filter example-admin-antd dev     # 管理后台示例（antd kit，含皮肤设置），http://localhost:5299
+pnpm --filter example-admin dev          # 管理后台示例（shadcn kit，含皮肤设置），http://localhost:5199
 pnpm --filter example-chat dev           # pactor-chat 对话示例，http://localhost:5399
 ```
 
@@ -65,7 +62,7 @@ pnpm --filter example-chat dev           # pactor-chat 对话示例，http://loc
 - **AI-Native**：支持 Markdown + DSL 的 AI Chat 交互
 - **国际化**：内置轻量 i18n 支持，DSL 可使用 `${t('key')}` 表达式
 - **权限控制**：页面/菜单/组件/动作四层守卫
-- **主题换肤**：CSS 变量 + UI kit 切换（Radix / antd）
+- **主题换肤**：CSS 变量令牌覆盖 + 内置暗色皮肤（shadcn kit，`data-pactor-theme`）
 
 ## 环境要求
 

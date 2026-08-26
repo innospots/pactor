@@ -23,9 +23,9 @@ export function ChatLayout({ title, children }: ChatLayoutProps) {
 export const CHAT_LAYOUT_TYPE = 'chat';
 
 /**
- * 结构化 LayoutRegistry（兼容 pactor-ui-antd layout 层的 LayoutRegistry =
+ * 结构化 LayoutRegistry（兼容 pactor-ui layout 层的 LayoutRegistry =
  * Registry<LayoutComponent>）：以结构化类型声明，避免对
- * pactor-ui-antd 产生运行时依赖。
+ * pactor-ui 产生运行时依赖。
  */
 export interface ChatLayoutRegistry {
   has(name: string): boolean;

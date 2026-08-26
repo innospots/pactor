@@ -3,7 +3,7 @@ title: 事件与表单联动
 description: 在 YAML 中配置组件事件（events / ActionConfig / event 载荷），以及表单字段级联、选项联动、多表单寻址的完整写法
 ---
 
-本页详细说明两件事：DSL 中**事件如何配置**（`events` 映射、动作参数、事件载荷），以及**表单联动**（选项联动、字段值联动、多表单寻址）。所有示例均可在 `examples/admin`（Radix）与 `examples/admin-antd`（antd）中直接运行——同一份 DSL，双 UI kit 行为一致。
+本页详细说明两件事：DSL 中**事件如何配置**（`events` 映射、动作参数、事件载荷），以及**表单联动**（选项联动、字段值联动、多表单寻址）。所有示例均可在 `examples/admin`（shadcn kit）中直接运行。
 
 ## 事件配置（events）
 

@@ -51,10 +51,10 @@ describe('application-bootstrap：启动编排', () => {
     ).toBeTruthy();
     // 布局外壳：品牌区取 bootstrap.app.name
     expect(
-      target.querySelector('.pcr-admin-brand')?.textContent,
+      target.querySelector('[data-slot=admin-brand]')?.textContent,
     ).toBe('风控运营平台');
     // 菜单：sys:admin 无权限被过滤、隐藏页不可见 → 首页 / 客户管理两项
-    const menuItems = target.querySelectorAll('.pcr-menu-item');
+    const menuItems = target.querySelectorAll('[data-slot=menu-item]');
     expect(menuItems).toHaveLength(2);
   });
 
@@ -76,7 +76,7 @@ describe('application-bootstrap：启动编排', () => {
     expect(screen.getByText('网络异常：bootstrap 加载失败')).toBeTruthy();
 
     // 重试后正常启动
-    fireEvent.click(screen.getByRole('button', { name: '重 试' }));
+    fireEvent.click(screen.getByRole('button', { name: '重试' }));
     await screen.findByText('欢迎使用 Pactor');
   });
 
@@ -94,9 +94,9 @@ describe('application-bootstrap：启动编排', () => {
     // 外壳正常（brand 取 bootstrap.app.name），路径未注册 → 404
     await screen.findByText('页面不存在或尚未注册');
     expect(
-      target.querySelector('.pcr-admin-brand')?.textContent,
+      target.querySelector('[data-slot=admin-brand]')?.textContent,
     ).toBe('空应用');
-    expect(target.querySelectorAll('.pcr-menu-item')).toHaveLength(0);
+    expect(target.querySelectorAll('[data-slot=menu-item]')).toHaveLength(0);
   });
 
   it('i18n 配置：options.locale/messages 注入页面表达式作用域', async () => {

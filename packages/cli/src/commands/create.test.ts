@@ -41,7 +41,7 @@ describe('pactor create', () => {
 
     const mainTsx = readFileSync(join(target, 'src/main.tsx'), 'utf8');
     expect(mainTsx).toContain("appId: 'my-app'");
-    expect(mainTsx).toContain("import 'pactor-ui-radix/styles.css'");
+    expect(mainTsx).toContain("import 'pactor-ui/styles.css'");
     expect(mainTsx).toContain('StaticDslLoader');
     expect(mainTsx).toContain('createPactorApplication');
     expect(mainTsx).not.toContain('__APP_NAME__');

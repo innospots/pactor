@@ -3,8 +3,9 @@ import './setup.js';
 
 import { cleanup, screen } from '@testing-library/react';
 import type { PageDsl } from 'pactor-core';
-import { createRadixComponentRegistry } from 'pactor-ui-radix/components';
+import { Registry } from 'pactor-core';
 import { StaticDslLoader } from 'pactor-resource';
+import type { ReactNode } from 'react';
 import { afterEach, describe, expect, it } from 'vitest';
 
 import {
@@ -25,7 +26,7 @@ afterEach(async () => {
   window.history.replaceState({}, '', '/');
 });
 
-/** 含 Button / Statistic 的首页（两套 UI kit 契约一致，DSL 零修改） */
+/** 含 Button / Statistic 的首页 */
 const kitPage: PageDsl = {
   dsl: '1.0',
   page: { id: 'home', title: '首页' },
@@ -55,27 +56,51 @@ function createAppWithKit(
   });
 }
 
+/** 全自定义组件注册表（验证 componentRegistry 覆盖点可整体替换内置实现） */
+function createCustomComponentRegistry(): Registry<unknown> {
+  const registry = new Registry<unknown>('ComponentRegistry');
+  registry.register('Page', ({ children }: { children?: ReactNode }) => (
+    <div className="custom-page">{children}</div>
+  ));
+  registry.register('Button', ({ text }: { text?: string }) => (
+    <button type="button" className="custom-btn">
+      {text}
+    </button>
+  ));
+  registry.register(
+    'Statistic',
+    ({ title, value }: { title?: string; value?: number | string }) => (
+      <div className="custom-statistic">
+        {title}:{value}
+      </div>
+    ),
+  );
+  return registry;
+}
+
 describe('ui-kit-selection：componentRegistry 选项', () => {
-  it('缺省为 Radix：不传 componentRegistry 渲染 Radix 实现', async () => {
+  it('缺省为 shadcn：不传 componentRegistry 渲染 shadcn 实现（pactor-ui，唯一内置实现）', async () => {
     app = createAppWithKit();
     const target = await mountApp(app);
 
-    await screen.findByRole('button', { name: '保存' });
-    expect(target.querySelector('.pcr-btn-primary')).not.toBeNull();
-    expect(target.querySelector('.ant-btn')).toBeNull();
+    const button = await screen.findByRole('button', { name: '保存' });
+    // variant: primary → shadcn default 变体（bg-primary 工具类）
+    expect(button.className).toContain('bg-primary');
+    expect(target.querySelector('[data-slot=statistic]')).not.toBeNull();
   });
 
-  it('切换 Radix：渲染结果为 Radix 实现（pcr 语义 class 存在）', async () => {
-    app = createAppWithKit({ componentRegistry: createRadixComponentRegistry });
+  it('传入自定义注册表：整体替换内置 shadcn 实现', async () => {
+    app = createAppWithKit({ componentRegistry: createCustomComponentRegistry });
     const target = await mountApp(app);
 
     await screen.findByRole('button', { name: '保存' });
-    expect(target.querySelector('.pcr-btn-primary')).not.toBeNull();
-    expect(target.querySelector('.pcr-statistic')).not.toBeNull();
-    expect(target.querySelector('.ant-btn')).toBeNull();
+    expect(target.querySelector('.custom-btn')).not.toBeNull();
+    expect(target.querySelector('.custom-statistic')).not.toBeNull();
+    // 内置 shadcn 实现未渲染
+    expect(target.querySelector('[data-slot=statistic]')).toBeNull();
   });
 
-  it('业务组件叠加：切换 Radix 后 options.components 自定义组件与内置组件同页可用', async () => {
+  it('业务组件叠加：options.components 自定义组件与内置 shadcn 组件同页可用', async () => {
     function RiskScore(props: { score?: number }) {
       return <span data-testid="risk-score">风险分:{props.score}</span>;
     }
@@ -101,12 +126,14 @@ describe('ui-kit-selection：componentRegistry 选项', () => {
         }),
         pages: { home: page },
       }),
-      componentRegistry: createRadixComponentRegistry,
       components: { RiskScore },
     });
     const target = await mountApp(app);
 
     await screen.findByText('风险分:86');
-    expect(target.querySelector('.pcr-btn-primary')).not.toBeNull();
+    // 内置组件仍为 shadcn 实现
+    const button = screen.getByRole('button', { name: '保存' });
+    expect(button.className).toContain('bg-primary');
+    expect(target.querySelector('[data-testid=risk-score]')).not.toBeNull();
   });
 });
