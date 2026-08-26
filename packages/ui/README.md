@@ -1,6 +1,6 @@
 # pactor-ui
 
-[Pactor](https://github.com/426-330/pactor) 的**唯一内置 UI kit**（shadcn 风格）：内含 components / interaction / layout 三层（vendored shadcn/ui 组件源码——Radix Primitives + cva + tailwind-merge + lucide-react；12 组件 props 契约类型、交互核心 `OverlayManager` / `createUiBridge` / `registerInteractionActions` / `UiBridge`、布局类型与 `resolveLayout` 均为本包自有），并提供 `shadcnUiKit` 预设对象与预建样式表。**这是 pactor-app 的内置默认（也是唯一内置）UI kit**。主入口导出三层全部公开 API 与预设，另提供 `pactor-ui/components` / `/interaction` / `/layout` 子路径入口。
+[Pactor](https://github.com/426-330/pactor) 的**唯一内置 UI kit**（shadcn 风格）：内含 components / interaction / layout 三层（vendored shadcn/ui 组件源码——Base UI 原语（`@base-ui/react`，shadcn 官方默认原语层）+ cva + tailwind-merge + lucide-react；12 组件 props 契约类型、交互核心 `OverlayManager` / `createUiBridge` / `registerInteractionActions` / `UiBridge`、布局类型与 `resolveLayout` 均为本包自有），并提供 `shadcnUiKit` 预设对象与预建样式表。**这是 pactor-app 的内置默认（也是唯一内置）UI kit**。主入口导出三层全部公开 API 与预设，另提供子路径入口：`pactor-ui/components`（DSL 组件适配层）/ `/interaction` / `/layout` / `/ui`（vendored shadcn 原语组件——宿主自写 React UI 用，如槽位内容与自定义组件）。
 
 ## 安装
 

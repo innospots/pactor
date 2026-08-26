@@ -18,7 +18,7 @@
 | | `pactor-schema` | JSON Schema + Ajv 校验（`validatePageDsl` 结构化错误） |
 | | `pactor-expression` | 受控表达式引擎（自研 AST parser，禁 eval，`${...}` 模板） |
 | 运行时 | `pactor-runtime` | RuntimeContext/StateStore/DataStore/ActionEngine（8 内置动作）/React Renderer/PageRuntime；react>=18 peer |
-| UI kit | `pactor-ui` | **唯一内置 UI kit**（shadcn，pactor-app 默认）：vendored shadcn/ui（Radix Primitives + cva + tailwind-merge + lucide-react）；components/interaction/layout 三层自持（12 组件 props 契约、`OverlayManager`/`createUiBridge`/`registerInteractionActions` 交互核心、布局类型与 `resolveLayout` 均在本包）+ `shadcnUiKit` 预设 + 预建 `styles.css`（shadcn 语义令牌，light/dark） |
+| UI kit | `pactor-ui` | **唯一内置 UI kit**（shadcn，pactor-app 默认）：vendored shadcn/ui（Base UI 原语 + cva + tailwind-merge + lucide-react；2026-08-26 migrate-ui-base-ui 起 radix 全移除）；components/interaction/layout 三层自持（12 组件 props 契约、`OverlayManager`/`createUiBridge`/`registerInteractionActions` 交互核心、布局类型与 `resolveLayout` 均在本包）+ `shadcnUiKit` 预设 + 预建 `styles.css`（shadcn 语义令牌，light/dark） |
 | 能力 | `pactor-permission` | PermissionStore + 四层守卫（零 React，结构化兼容 runtime） |
 | | `pactor-resource` | DSL 资源加载（Http/Static Loader、`id@version` 缓存、ETag、inflight 去重） |
 | | `pactor-router` | MenuRegistry/PathMatcher/NavigationBridge + `pactor-router/react` 子入口（DynamicDslRoute） |
@@ -40,10 +40,12 @@
 - **表单联动**：`form.setValues` 内置动作（params.form 缺省 default + values），Form 经 `context.forms` 桥注册（Form `name` prop 缺省 default，同页多表单须显式命名否则重复注册抛错）；setValues 不触发校验/onValuesChange。`onValuesChange` 的 event 仅首参 `{ <field>: <newValue> }`。**OverlayHost 已订阅 state/data**——overlay 内容绑 store 的表达式随变化重渲染（曾是级联选项不更新的坑）。
 - **Input type**：`InputProps.type: 'text' | 'password'`（缺省 text）；shadcn kit 透传 `<input type>`（2026-08-12 add-input-type-prop，第 24 个归档变更）。
 - **示例登录模式**：会话存 localStorage（`src/auth.ts`），`createBootstrap()` 按会话返回 `login`/`admin` 布局形态（布局类型由 bootstrap 决定，全应用单布局）；登录/登出后须整页重载重取 bootstrap——示例用自定义 `app.reload` 动作（`window.location.assign`），路由守卫（未登录→/login）在 main.tsx DSL 之外。
-- **Radix Select 坑**：值从 uncontrolled→controlled 切换会以空串回调清值；`Select.Value` 未渲染过 item 时解析不到选中文案——已修复（`value={key ?? ''}` + 忽略空 key + 显式 label children）。
+- **Select（Base UI）**：DSL `options` 直接作 Root `items`（value→label 映射），value 原生支持 string/number/boolean，空值映射 `null` 显示 placeholder；`alignItemWithTrigger` 缺省 false。原 Radix Select 两个坑（空串回调清值 / 未渲染 item 解析不到 label）随原语消失，已有对应回归测试。
 - **主题换肤**：覆盖 shadcn 语义令牌（`--primary` / `--muted` 等 CSS 变量）/ `<html data-pactor-theme="dark">` / `data-slot` 结构覆盖；参考 `examples/admin/src/theme.css`；文档 `guides/theming`。**preflight 已开启**（2026-08-26 align-ui-shadcn-theme，第 37 个归档变更）：styles.css = 完整 tailwindcss + tw-animate-css + 官方 base layer，对齐 shadcn 官方主题脚手架（radius 乘法派生、chart/sidebar 令牌、accordion keyframes）；导入即接受基线全局样式，宿主皮肤 CSS 须在其后导入。
 - **Admin 布局模式**（2026-08-12 add-admin-layout-modes + change-layout-fixed-defaults）：bootstrap `layout` 支持 `mode`（top-side 缺省 / top-bottom / side-full / two-column）、`fixedHeader`/`fixedSider`（sticky，**缺省 true**，显式 false 关闭）、`collapsible`/`collapsed`、`breakpoint`（xs-xxl，shadcn 走 useMediaQuery hook，断点 480/576/768/992/1200/1600）；app `pickLayoutConfig` 枚举校验透传，非法值忽略。two-column 选中项无子菜单时隐藏第二列收窄为 56px 窄列、不叠加收起 trigger；side-full 品牌区入侧边栏、header 不重复。
 - **Chat 视图**（2026-08-12 polish-chat-view，参考 DeepTutor web 技术选型独立实现）：零 antd（lucide-react 图标 + `pactor-chat/styles.css` 皮肤 `--pactor-chat-*` 变量 + `data-pactor-theme="dark"` 暗色）；`useSmoothStreamText`（rAF 打字机）/ `useChatAutoScroll`（80px 释放、40px 回底、容器须 `overflow-anchor:none`）；`runChatTurn` 支持 `signal`（abort → cancelled 收尾不抛错）；MessageBubble user 右气泡 / assistant 通栏 + hover 复制条；Composer 自适应 textarea + 流式停止按钮。
+- **pactor-ui `/ui` 原语子路径**（2026-08-26 export-ui-primitives）：vendored shadcn 原语公开导出，宿主自定义 UI（槽位/业务组件）用 `/ui`，DSL 编排用 `/components`。**坑：预建 styles.css 只含包内源码实际用到的 Tailwind 工具类**（Tailwind v4 扫描产物），宿主自定义 UI 不要依赖包内未用过的零散工具类（如 rounded-full/rotate-180/backdrop-blur），排版优先走原语组件结构。examples/chat 的 8 个槽位组件已全部改用 `/ui` 原语，AnchoredPopup 删除（Popover Positioner anchor 虚拟元素语义覆盖）。
+- **Chat 组件样式自持**（2026-08-26 chat-self-contained-styles）：组件结构布局（高度/对话列居中/面板贴右）全在 `pactor-chat/styles.css`，调用端零覆盖；高度语义 = 填满父容器（`height: 100%`，**宿主须给容器显式定高**，父级无定高退化为内容高度，不再硬编码 100dvh）；可调令牌 `--pactor-chat-content-width`（对话列 768px）/ `--pactor-chat-inspector-width` / `--pactor-chat-sidebar-width`。示例 app.css 只管 demo 自有 UI（顶栏/chip/弹层）。
 - **Chat 产出物面板与 ChatShell**（2026-08-26 add-chat-artifact-panel）：`ChatArtifact`（markdown/code/text/dsl 四 kind，dsl 经 Safe Registry 守卫活预览）+ `ArtifactStore`；`Chat` 受控 props `artifact`/`panelOpen`/`onPanelClose` + `inspector` 槽 + `events.onArtifact`（artifact part 就绪触发，框架不擅自开面板）；`ChatShell` = AppShell + 菜单侧栏 + `content` 槽（无聊天/路由逻辑），随 `registerChatComponent` 一并注册。**坑：面板开合不得改变子树深度**——面板功能使用时恒渲染 host 包裹层，否则 ChatView 重挂载导致 onArtifact 重放（有回归测试）。**examples/chat 已路由化**：HashRouter + pactor-router（MenuRegistry/DynamicDslRoute/createRouterAdapter），三页 YAML（chat/agents/settings），刷新按 URL 还原；ConversationStore 按会话 id 缓存于宿主 Map 跨页存活。
 - **Chat 安全**：LLM DSL 走 Safe Registry 白名单（`guardChatDsl` 替换为 ChatDenied 占位）；AI 动作走 capability 链（registry → permission → confirm → execute）。
 - **应用级槽位**（2026-08-12 add-antd-skin-settings）：`providers`（Router 内、InteractionKit 外，业务 ConfigProvider/全局 Context 入口，皮肤主题等运行时切换经此注入）+ `headerExtra`（admin 头部右侧插槽）。example-admin 皮肤设置：`skin.ts` store（localStorage + 订阅）→ 写 DOM 属性（`data-pactor-theme` / `data-pactor-accent` / `--radius` 内联变量）→ `SkinSettings`（头部按钮 → 面板：预设色板/取色/暗黑/圆角/恢复默认）。
@@ -51,7 +53,7 @@
 ## OpenSpec 工作流（本项目标准流程）
 
 - 每个变更：`openspec new change <name>` → proposal/design/specs/tasks 四件 → 实现（多由 coder 子代理完成）→ 主代理独立复跑验收 → tasks 勾选 → 归档时同步 delta specs 到 `openspec/specs/`（主 spec 无 ADDED/MODIFIED 头）→ `mv` 到 `changes/archive/YYYY-MM-DD-<name>`。
-- 已归档 43 个变更；主 specs 50 个能力（`openspec/specs/`）是现状基准。
+- 已归档 48 个变更；主 specs 50 个能力（`openspec/specs/`）是现状基准。
 - 规范细节：scenario 必须 4 个 `#`（####）；MODIFIED 需全量需求块；MODIFIED 合并时注意变更间依赖顺序。
 
 ## 环境与命令
@@ -73,7 +75,7 @@
 4. `grep -c` 无匹配时 exit 1——组合命令的 "Command failed" 可能只是 grep 无匹配。
 5. vitest `run tests/` 参数是路径过滤器，会连带匹配 `packages/*/tests/`（根级测试数因此偏大，无害）。
 6. DSL Schema 校验只管结构不管组件 props（props 开放，由组件自行解释）——演示 vite-plugin 构建期报错要用删 `page.id` 这类结构性错误，加非法 prop 不会报错。
-7. **@radix-ui/react-dialog（shadcn Dialog）展开会锁 body 滚动**（react-remove-scroll：body `data-scroll-locked` + overflow hidden + margin 补偿）——经典滚动条系统下视口变宽，右锚定的自绘面板会右移跳动；注意滚动补偿冲突。
+7. **Base UI Dialog 默认不锁 body 滚动**（原 radix react-remove-scroll 的 `data-scroll-locked` + margin 补偿机制随迁移消失）——经典滚动条系统下右锚定面板右移跳动问题不再存在；accordion 动画变量为 `--accordion-panel-height`（经 `--animate-accordion-down/up` 令牌），uncontrolled Accordion 的 defaultValue 必须首渲染冻结（Base UI 对变更 console.error 告警）。
 
 ## 已知边界 / 待办
 

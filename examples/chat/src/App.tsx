@@ -375,7 +375,7 @@ function Shell() {
             <ChatShell
               menu={toChatMenu(menuRegistry.tree())}
               activeMenuKey={route?.activeMenu}
-              brand={<span className="demo-brand">Pactor Chat</span>}
+              brand={<span className="text-sm font-semibold">Pactor Chat</span>}
               onMenuSelect={(key) => {
                 const menu = menuRegistry.findById(key);
                 if (menu?.path) {

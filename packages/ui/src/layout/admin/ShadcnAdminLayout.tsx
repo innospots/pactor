@@ -109,31 +109,34 @@ function CollapsedGroupFlyout({
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
-      <PopoverTrigger asChild>
-        <button
-          type="button"
-          data-slot="menu-item"
-          className={cn(
-            menuItemClass,
-            'mx-auto size-10 justify-center px-0 font-semibold',
-          )}
-          disabled={menu.disabled}
-          title={menu.title}
-          onMouseEnter={openNow}
-          onMouseLeave={closeLater}
-        >
-          {menu.title.slice(0, 1)}
-        </button>
-      </PopoverTrigger>
+      <PopoverTrigger
+        render={
+          <button
+            type="button"
+            data-slot="menu-item"
+            className={cn(
+              menuItemClass,
+              'mx-auto size-10 justify-center px-0 font-semibold',
+            )}
+            disabled={menu.disabled}
+            title={menu.title}
+            onMouseEnter={openNow}
+            onMouseLeave={closeLater}
+          >
+            {menu.title.slice(0, 1)}
+          </button>
+        }
+      />
       <PopoverContent
         data-slot="menu-flyout"
         side="right"
         align="start"
         sideOffset={8}
         className="max-h-[70vh] w-40 overflow-auto p-1"
+        // hover 浮层：不抢占焦点（原 Radix onOpenAutoFocus preventDefault 的对应语义）
+        initialFocus={false}
         onMouseEnter={openNow}
         onMouseLeave={closeLater}
-        onOpenAutoFocus={(event) => event.preventDefault()}
         onClick={(event) => {
           // 浮层内点中 page 项（导航）后关闭浮层
           if ((event.target as HTMLElement).closest('[data-slot=menu-item]')) {
@@ -349,10 +352,14 @@ export function ShadcnAdminLayout({
     () => buildVisibleMenuTree(registry, permissionChecker),
     [registry, permissionChecker],
   );
-  const defaultOpenKeys = useMemo(
-    () => collectDefaultOpenKeys(registry, activeMenuId),
-    [registry, activeMenuId],
-  );
+  // defaultOpenKeys 首渲染冻结：Base UI Accordion 对 uncontrolled defaultValue
+  // 的后续变更会 console.error 告警（Radix 原为静默忽略）——冻结与 Radix 时代
+  // 的实际行为一致（展开态由用户交互持有，路由切换不改写）
+  const defaultOpenKeysRef = useRef<string[] | null>(null);
+  if (defaultOpenKeysRef.current === null) {
+    defaultOpenKeysRef.current = collectDefaultOpenKeys(registry, activeMenuId);
+  }
+  const defaultOpenKeys = defaultOpenKeysRef.current;
 
   // two-column：当前选中一级项（激活链首项优先）
   const activeTopId = useMemo(() => {

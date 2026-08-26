@@ -373,7 +373,7 @@ pactor-app
 
 ### `pactor-ui`（shadcn）
 
-唯一内置 UI kit 单元（shadcn 风格）：vendored shadcn/ui 组件源码（Radix Primitives + cva + tailwind-merge + lucide-react），自持 components / interaction / layout 三层（12 组件 props 契约类型、交互核心 OverlayManager / createUiBridge / registerInteractionActions / UiBridge、布局类型与 resolveLayout 均为本包自有），导出 `shadcnUiKit` 预设与预建样式表（Tailwind v4 构建期编译，消费方零 Tailwind 配置；preflight 开启 + tw-animate-css 动画层，对齐 shadcn 官方主题脚手架，令牌挂 `:root` / `[data-pactor-theme='dark']`）。**pactor-app 的内置默认 UI kit（唯一内置实现）**；自定义组件 / 布局 / 交互层经 componentRegistry / layoutRegistry / interactionKit / ui 覆盖点接入。
+唯一内置 UI kit 单元（shadcn 风格）：vendored shadcn/ui 组件源码（Base UI 原语 + cva + tailwind-merge + lucide-react），自持 components / interaction / layout 三层（12 组件 props 契约类型、交互核心 OverlayManager / createUiBridge / registerInteractionActions / UiBridge、布局类型与 resolveLayout 均为本包自有），导出 `shadcnUiKit` 预设与预建样式表（Tailwind v4 构建期编译，消费方零 Tailwind 配置；preflight 开启 + tw-animate-css 动画层，对齐 shadcn 官方主题脚手架，令牌挂 `:root` / `[data-pactor-theme='dark']`）。**pactor-app 的内置默认 UI kit（唯一内置实现）**；自定义组件 / 布局 / 交互层经 componentRegistry / layoutRegistry / interactionKit / ui 覆盖点接入。
 
 ### `pactor-chat`
 

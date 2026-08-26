@@ -56,6 +56,8 @@
   --pactor-chat-shell-scrim: rgb(0 0 0 / 40%);
   /* 产出物面板（spec: chat-artifact-panel）：桌面固定宽右栏 */
   --pactor-chat-inspector-width: 320px;
+  /* 对话列限宽居中（spec: chat-app-shell 嵌入契约）：置 none 关闭限宽 */
+  --pactor-chat-content-width: 768px;
 }
 
 .pactor-chat-view {
@@ -112,7 +114,7 @@
 .pactor-chat-layout {
   display: flex;
   flex-direction: column;
-  height: 100vh;
+  height: 100%;
   background: var(--pactor-chat-bg);
   color: var(--pactor-chat-fg);
 }
@@ -143,6 +145,11 @@
   flex-direction: column;
   height: 100%;
   min-height: 0;
+  /* 对话列缺省限宽居中（spec: chat-app-shell 嵌入契约）：
+   * shell content / 面板 host / 独立块级容器三场景统一生效 */
+  width: 100%;
+  max-width: var(--pactor-chat-content-width);
+  margin-inline: auto;
   background: var(--pactor-chat-bg);
   color: var(--pactor-chat-fg);
   font-size: 14px;
@@ -180,11 +187,17 @@
  * AppShell（spec: chat-app-shell）：侧栏 + 主区外壳。
  * 桌面（≥768px）flex 同行；移动端（<768px）侧栏退出文档流
  * 变为覆盖抽屉，布局切换全部由媒体查询表达，JS 只管开合。
+/* AppShell（spec: chat-app-shell）：侧栏 + 主区外壳。
+ * 桌面（≥768px）flex 同行；移动端（<768px）侧栏退出文档流
+ * 变为覆盖抽屉，布局切换全部由媒体查询表达，JS 只管开合。
+ * 高度填满父容器（height: 100%）：嵌入任意定高容器即正确；
+ * 父级无定高时退化为内容高度。standalone 顶层挂载时宿主
+ * 容器定高（如 100dvh）属宿主职责（嵌入契约）。
  * ------------------------------------------------------------ */
 
 .pactor-chat-shell {
   display: flex;
-  height: 100dvh;
+  height: 100%;
   overflow: hidden;
   background: var(--pactor-chat-bg);
   color: var(--pactor-chat-fg);
@@ -230,6 +243,18 @@
   display: flex;
   flex-direction: column;
   overflow: hidden;
+  padding: 12px 16px 16px;
+}
+
+/* 对话列在 shell content 内的间距（content 区 padding 承担）与
+ * 面板打开时的贴右处理见下方 :has 规则 */
+
+/* 产出物面板打开（spec: chat-artifact-panel）：面板贴容器右缘——
+ * 内容区右/上/下 padding 归零，面板 border-left 作分隔线 */
+.pactor-chat-shell__content:has(> .pactor-chat-inspector-host) {
+  padding-top: 0;
+  padding-right: 0;
+  padding-bottom: 0;
 }
 
 /* 抽屉遮罩：仅打开时渲染；桌面隐藏 */
@@ -274,21 +299,30 @@
  * 面板关闭 / 未配置时不渲染 DOM（组合层保证）。
  * ------------------------------------------------------------ */
 
-/* 面板打开时的同行容器：workspace（或 AppShell）与面板 flex 并排 */
+/* 面板打开时的同行容器：workspace（或 AppShell）与面板 flex 并排，
+ * host 在 shell content 内撑满剩余高度与宽度 */
 .pactor-chat-inspector-host {
   display: flex;
-  height: 100%;
+  flex: 1;
+  width: 100%;
   min-height: 0;
   overflow: hidden;
 }
 
-.pactor-chat-inspector-host > .pactor-chat-workspace,
+/* 面板打开时 host 内的直子：AppShell 填满剩余空间；workspace 只缩不伸，
+ * 宽度受 --pactor-chat-content-width 限宽，margin auto 在剩余空间内居中 */
 .pactor-chat-inspector-host > .pactor-chat-shell {
   flex: 1;
   min-width: 0;
 }
 
+.pactor-chat-inspector-host > .pactor-chat-workspace {
+  flex: 0 1 auto;
+  min-width: 0;
+}
+
 .pactor-chat-inspector {
+  position: relative;
   display: flex;
   flex-direction: column;
   width: var(--pactor-chat-inspector-width);
@@ -299,6 +333,28 @@
   font-size: 14px;
   line-height: 1.6;
   overflow: hidden;
+}
+
+/* 拖拽调宽手柄（spec: chat-artifact-panel / 拖拽调宽）：
+ * 面板左缘内覆 8px 热区（overflow:hidden 会裁掉负偏移，故内覆而非外探） */
+.pactor-chat-inspector__resize {
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 8px;
+  cursor: col-resize;
+  z-index: 1;
+  touch-action: none;
+}
+
+.pactor-chat-inspector__resize:hover,
+.pactor-chat-inspector__resize:active {
+  background: color-mix(
+    in oklab,
+    var(--pactor-chat-primary) 35%,
+    transparent
+  );
 }
 
 .pactor-chat-inspector__header {
@@ -396,6 +452,11 @@
     right: 0;
     z-index: 50;
     box-shadow: var(--pactor-chat-shadow-composer);
+  }
+
+  /* 窄屏覆盖抽屉形态：不显示拖拽手柄（spec scenario: 窄屏无拖拽手柄） */
+  .pactor-chat-inspector__resize {
+    display: none;
   }
 
   .pactor-chat-inspector__scrim {

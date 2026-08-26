@@ -133,9 +133,9 @@ export function ShadcnInteractionProvider({
                     {(confirmState?.title as ReactNode) ?? ''}
                   </DialogTitle>
                   {confirmState?.content !== undefined && (
-                    <DialogDescription asChild>
-                      <div>{confirmState.content as ReactNode}</div>
-                    </DialogDescription>
+                    <DialogDescription
+                      render={<div>{confirmState.content as ReactNode}</div>}
+                    />
                   )}
                 </DialogHeader>
                 <DialogFooter>

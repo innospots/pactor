@@ -1,4 +1,3 @@
-import { Root as FormRoot } from '@radix-ui/react-form';
 import { useRenderer } from 'pactor-runtime';
 import {
   useCallback,
@@ -136,13 +135,13 @@ export function Form({
 
   return (
     <FormContextProvider value={formContext}>
-      <FormRoot
+      <form
         data-slot="form"
         className={cn(layout === 'inline' && 'flex flex-wrap items-center gap-3')}
         onSubmit={handleSubmit}
       >
         {children}
-      </FormRoot>
+      </form>
     </FormContextProvider>
   );
 }

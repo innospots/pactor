@@ -30,7 +30,7 @@ if (typeof window !== 'undefined') {
     window.scrollTo = () => {};
   }
 
-  // Radix Select 依赖 Pointer Capture / scrollIntoView，jsdom 未实现
+  // Base UI 弹层（Select/Popover 等）依赖 Pointer Capture / scrollIntoView，jsdom 未实现
   if (!HTMLElement.prototype.hasPointerCapture) {
     HTMLElement.prototype.hasPointerCapture = () => false;
     HTMLElement.prototype.setPointerCapture = () => {};

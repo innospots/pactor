@@ -89,6 +89,74 @@ describe('ArtifactPanel（spec: chat-artifact-panel / ArtifactPanel 视图与内
     expect(pre.textContent).toBe('第一行\n第二行');
   });
 
+  it('拖拽调宽：手柄左拖变宽（spec scenario: 拖拽调宽）', () => {
+    // jsdom 无布局：面板 320、宿主容器 1000（mock getBoundingClientRect）
+    const rectSpy = vi
+      .spyOn(HTMLElement.prototype, 'getBoundingClientRect')
+      .mockImplementation(function (this: HTMLElement) {
+        const width = this.classList?.contains('pactor-chat-inspector')
+          ? 320
+          : 1000;
+        return {
+          width,
+          height: 600,
+          top: 0,
+          left: 0,
+          right: width,
+          bottom: 600,
+          x: 0,
+          y: 0,
+          toJSON: () => ({}),
+        } as DOMRect;
+      });
+
+    render(<ArtifactPanel artifact={MARKDOWN_ARTIFACT} />);
+    const panel = document.querySelector('.pactor-chat-inspector')!;
+    const handle = screen.getByRole('separator', { name: '拖动调整面板宽度' });
+
+    fireEvent.pointerDown(handle, { clientX: 500 });
+    fireEvent.pointerMove(document, { clientX: 400 });
+    // 320 + (500-400) = 420（容器 1000 的 70% = 700，未触顶）
+    expect((panel as HTMLElement).style.width).toBe('420px');
+    // 拖拽期间禁文本选择
+    expect(document.body.style.userSelect).toBe('none');
+
+    fireEvent.pointerUp(document);
+    expect(document.body.style.userSelect).toBe('');
+    rectSpy.mockRestore();
+  });
+
+  it('拖拽夹取下限：右拖超过 240px 后保持 240px（spec scenario: 拖拽夹取下限）', () => {
+    const rectSpy = vi
+      .spyOn(HTMLElement.prototype, 'getBoundingClientRect')
+      .mockImplementation(function (this: HTMLElement) {
+        const width = this.classList?.contains('pactor-chat-inspector')
+          ? 320
+          : 1000;
+        return {
+          width,
+          height: 600,
+          top: 0,
+          left: 0,
+          right: width,
+          bottom: 600,
+          x: 0,
+          y: 0,
+          toJSON: () => ({}),
+        } as DOMRect;
+      });
+
+    render(<ArtifactPanel artifact={MARKDOWN_ARTIFACT} />);
+    const panel = document.querySelector('.pactor-chat-inspector')!;
+    const handle = screen.getByRole('separator', { name: '拖动调整面板宽度' });
+
+    fireEvent.pointerDown(handle, { clientX: 500 });
+    fireEvent.pointerMove(document, { clientX: 900 });
+    expect((panel as HTMLElement).style.width).toBe('240px');
+    fireEvent.pointerUp(document);
+    rectSpy.mockRestore();
+  });
+
   it('dsl 产出物活预览：白名单组件经 renderChildren 渲染（spec scenario）', async () => {
     render(
       <ArtifactPanel
@@ -354,6 +422,42 @@ describe('Chat 面板集成（spec: chat-artifact-panel / 面板布局与响应�
     expect(document.querySelector('.pactor-chat-inspector')).toBeNull();
   });
 
+  it('受控：卡片打开按钮无条件触发 onOpenArtifact 回调（spec scenario: 卡片触发宿主回调）', async () => {
+    const driver = createManualDriver();
+    const onOpenArtifact = vi.fn();
+    render(
+      <ChatServicesProvider value={{ transport: driver.transport }}>
+        <Chat
+          artifact={MARKDOWN_ARTIFACT}
+          panelOpen={false}
+          onOpenArtifact={onOpenArtifact}
+        />
+      </ChatServicesProvider>,
+    );
+
+    fireEvent.change(document.querySelector('.pactor-chat-composer textarea')!, {
+      target: { value: '给我报告' },
+    });
+    fireEvent.keyDown(document.querySelector('.pactor-chat-composer textarea')!, {
+      key: 'Enter',
+    });
+    driver.push({
+      type: 'artifact',
+      messageId: 'x',
+      artifact: MARKDOWN_ARTIFACT,
+    });
+    driver.push({ type: 'message.end', messageId: 'x' });
+    driver.complete();
+
+    // 受控：点击卡片按钮触发回调（面板开关由宿主决定，本身保持关闭）
+    fireEvent.click(
+      await screen.findByRole('button', { name: '在面板中打开' }),
+    );
+    expect(onOpenArtifact).toHaveBeenCalledTimes(1);
+    expect(onOpenArtifact).toHaveBeenCalledWith(MARKDOWN_ARTIFACT);
+    expect(document.querySelector('.pactor-chat-inspector')).toBeNull();
+  });
+
   it('非受控：services.artifactStore 注入即生效（store.open → 面板打开）', async () => {
     const artifactStore = new ArtifactStore();
     renderChat(<Chat />, {
@@ -530,6 +634,68 @@ describe('Chat 面板 DSL 集成（spec: chat-dsl-component / 产出物面板配
     await screen.findByText('回显：分析报告');
     // 框架未擅自开面板
     expect(document.querySelector('.pactor-chat-inspector')).toBeNull();
+    driver.push({ type: 'message.end', messageId: 'x' });
+    driver.complete();
+    await runtime.destroy();
+  });
+
+  it('onOpenArtifact 事件：受控 DSL 场景点击卡片打开按钮 → setState 重开面板（spec scenario: 卡片点击触发动作）', async () => {
+    const driver = createManualDriver();
+    // 典型接法：onArtifact 首次自动开、onPanelClose 关闭、
+    // onOpenArtifact 卡片重开（fix-artifact-card-open）
+    const runtime = createRuntime(
+      {
+        type: 'Chat',
+        props: {
+          artifact: '${state.artifact}',
+          panelOpen: '${state.panelOpen}',
+        },
+        events: {
+          onArtifact: [
+            { action: 'setState', params: { panelOpen: true } },
+          ],
+          onPanelClose: [
+            { action: 'setState', params: { panelOpen: false } },
+          ],
+          onOpenArtifact: [
+            { action: 'setState', params: { panelOpen: true } },
+          ],
+        },
+      },
+      { panelOpen: false },
+    );
+
+    render(
+      <ChatServicesProvider value={{ transport: driver.transport }}>
+        {runtime.render()}
+      </ChatServicesProvider>,
+    );
+
+    fireEvent.change(document.querySelector('.pactor-chat-composer textarea')!, {
+      target: { value: 'hi' },
+    });
+    fireEvent.keyDown(document.querySelector('.pactor-chat-composer textarea')!, {
+      key: 'Enter',
+    });
+    driver.push({
+      type: 'artifact',
+      messageId: 'x',
+      artifact: MARKDOWN_ARTIFACT,
+    });
+    await vi.waitFor(() => {
+      expect(document.querySelector('.pactor-chat-inspector')).toBeTruthy();
+    });
+
+    // 关面板 → 点击卡片"在面板中打开" → onOpenArtifact → setState 重开
+    fireEvent.click(screen.getByRole('button', { name: '关闭面板' }));
+    await vi.waitFor(() => {
+      expect(document.querySelector('.pactor-chat-inspector')).toBeNull();
+    });
+    fireEvent.click(screen.getByRole('button', { name: '在面板中打开' }));
+    await vi.waitFor(() => {
+      expect(document.querySelector('.pactor-chat-inspector')).toBeTruthy();
+    });
+
     driver.push({ type: 'message.end', messageId: 'x' });
     driver.complete();
     await runtime.destroy();

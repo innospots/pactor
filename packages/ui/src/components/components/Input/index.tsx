@@ -1,5 +1,4 @@
-import { Control, Field, Label } from '@radix-ui/react-form';
-import { useEffect } from 'react';
+import { useEffect, useId } from 'react';
 
 import { Input as ShadcnInput } from '../../../ui/input.js';
 import { formItemClass, useFormContext } from '../Form/context.js';
@@ -31,6 +30,8 @@ export interface InputProps {
  * Input 适配器（shadcn kit，语义对齐 antd 版）：
  * 在 Form 内且声明 `name` 时自动成为表单项（label / rules 生效，
  * 值由 Form 上下文托管）；否则渲染独立受控控件，onChange 传出 string。
+ * 表单项为去原语化结构（design D3）：`<div data-slot="form-item">` +
+ * `<label htmlFor>` 与控件 `useId` 关联。
  */
 export function Input({
   name,
@@ -43,6 +44,7 @@ export function Input({
   onChange,
 }: InputProps) {
   const form = useFormContext();
+  const controlId = useId();
   const inForm = form?.inForm === true && typeof name === 'string' && name !== '';
 
   // 注册/注销字段校验规则（rules 每次渲染刷新，卸载时注销）；
@@ -59,28 +61,32 @@ export function Input({
     const fieldValue = form.values[name];
     const error = form.errors[name];
     return (
-      <Field name={name} data-slot="form-item" className={formItemClass(form.layout)}>
+      <div data-slot="form-item" className={formItemClass(form.layout)}>
         {label ? (
-          <Label className="shrink-0 text-sm leading-none font-medium whitespace-nowrap">{label}</Label>
+          <label
+            htmlFor={controlId}
+            className="shrink-0 text-sm leading-none font-medium whitespace-nowrap"
+          >
+            {label}
+          </label>
         ) : null}
-        <Control asChild>
-          <ShadcnInput
-            type={type}
-            value={typeof fieldValue === 'string' ? fieldValue : ''}
-            placeholder={placeholder}
-            disabled={disabled}
-            onChange={(event) => {
-              form.setValue(name, event.target.value);
-              onChange?.(event.target.value);
-            }}
-          />
-        </Control>
+        <ShadcnInput
+          id={controlId}
+          type={type}
+          value={typeof fieldValue === 'string' ? fieldValue : ''}
+          placeholder={placeholder}
+          disabled={disabled}
+          onChange={(event) => {
+            form.setValue(name, event.target.value);
+            onChange?.(event.target.value);
+          }}
+        />
         {error ? (
           <div data-slot="form-error" className="text-sm text-destructive">
             {error}
           </div>
         ) : null}
-      </Field>
+      </div>
     );
   }
 

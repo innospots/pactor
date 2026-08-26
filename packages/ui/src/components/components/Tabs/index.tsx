@@ -25,7 +25,7 @@ export interface TabsProps {
 
 /**
  * Tabs 容器（shadcn kit，语义对齐 antd 版）：
- * 基于 vendored shadcn Tabs（@radix-ui/react-tabs），每个 pane 的内容经
+ * 基于 vendored shadcn Tabs（@base-ui/react），每个 pane 的内容经
  * renderChildren 渲染；未传 activeKey 时缺省激活第一个页签。
  */
 export function Tabs({ items = [], activeKey, onChange }: TabsProps) {

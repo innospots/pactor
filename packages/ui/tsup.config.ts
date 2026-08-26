@@ -6,6 +6,7 @@ export default defineConfig({
     'src/components/index.ts',
     'src/interaction/index.ts',
     'src/layout/index.ts',
+    'src/ui/index.ts',
   ],
   format: ['esm', 'cjs'],
   dts: true,

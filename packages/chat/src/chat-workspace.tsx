@@ -97,6 +97,8 @@ export interface ChatWorkspaceProps {
   inspector?: DslNode;
   /** artifact part 就绪回调（runtime 绑定 events.onArtifact 时传入） */
   onArtifact?: (artifact: ChatArtifact) => void;
+  /** 产出物卡片"在面板中打开"回调（runtime 绑定 events.onOpenArtifact 时传入） */
+  onOpenArtifact?: (artifact: ChatArtifact) => void;
   className?: string;
 }
 
@@ -125,6 +127,7 @@ export function createChatWorkspace(
     onPanelClose,
     inspector,
     onArtifact,
+    onOpenArtifact,
     className,
   }: ChatWorkspaceProps): ReactNode {
     return (
@@ -149,6 +152,7 @@ export function createChatWorkspace(
           onPanelClose={onPanelClose}
           inspector={inspector ? <DslNodeSlot node={inspector} /> : undefined}
           onArtifact={onArtifact}
+          onOpenArtifact={onOpenArtifact}
         />
       </ChatServicesProvider>
     );

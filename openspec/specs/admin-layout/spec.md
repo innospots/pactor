@@ -4,7 +4,7 @@ AdminLayout：标准管理后台外壳（`pactor-ui-antd` layout 层，设计文
 
 ### Requirement: 布局结构与开关
 
-AdminLayout SHALL 渲染 Header / Sidebar / 内容区，并按 config 开关 `header` / `sidebar` / `tabs` / `breadcrumb` / `footer` 控制各区域显隐（默认 header/sidebar 开，tabs/breadcrumb/footer 关）。内容区渲染 children。config `mode` SHALL 支持结构模式：`'top-side'`（缺省，顶部 header + 下方 sidebar/content）/ `'top-bottom'`（上-中-下，无 sidebar）/ `'side-full'`（sidebar 通栏全高居左，header+content 居右）/ `'two-column'`（侧边两列：一级菜单窄列 + 当前一级菜单的子菜单列）。antd 与 Radix 双实现的结构与行为契约 SHALL 一致。
+AdminLayout SHALL 渲染 Header / Sidebar / 内容区，并按 config 开关 `header` / `sidebar` / `tabs` / `breadcrumb` / `footer` 控制各区域显隐（默认 header/sidebar 开，tabs/breadcrumb/footer 关）。内容区渲染 children。config `mode` SHALL 支持结构模式：`'top-side'`（缺省，顶部 header + 下方 sidebar/content）/ `'top-bottom'`（上-中-下，无 sidebar）/ `'side-full'`（sidebar 通栏全高居左，header+content 居右）/ `'two-column'`（侧边两列：一级菜单窄列 + 当前一级菜单的子菜单列）。
 
 #### Scenario: 默认渲染
 

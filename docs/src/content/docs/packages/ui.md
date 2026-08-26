@@ -1,11 +1,11 @@
 ---
 title: pactor-ui
-description: 唯一内置 UI kit（shadcn）——vendored shadcn/ui 组件源码（Radix Primitives + cva + tailwind-merge + lucide-react），自持 components / interaction / layout 三层（props 契约类型、OverlayManager / createUiBridge 交互核心、布局类型与 resolveLayout 均在本包），shadcnUiKit 预设 + 构建期 Tailwind 预编译样式表；pactor-app 的内置默认
+description: 唯一内置 UI kit（shadcn）——vendored shadcn/ui 组件源码（Base UI 原语 + cva + tailwind-merge + lucide-react），自持 components / interaction / layout 三层（props 契约类型、OverlayManager / createUiBridge 交互核心、布局类型与 resolveLayout 均在本包），shadcnUiKit 预设 + 构建期 Tailwind 预编译样式表；pactor-app 的内置默认
 ---
 
-`pactor-ui` 是 Pactor 的**唯一内置 UI kit**（shadcn 风格）：组件源码 vendor 进包内（`src/ui/`，标准 shadcn 形态——Radix Primitives + cva 变体 + `cn()`），其上是 components / interaction / layout 三层实现。12 个组件 props 契约类型、交互核心（`OverlayManager` / `createUiBridge` / `registerInteractionActions` / `UiBridge`）与布局类型、`resolveLayout` 均为本包自有定义并导出。
+`pactor-ui` 是 Pactor 的**唯一内置 UI kit**（shadcn 风格）：组件源码 vendor 进包内（`src/ui/`，标准 shadcn 形态——Base UI 原语（`@base-ui/react`，shadcn 2026-07 起的官方默认原语层）+ cva 变体 + `cn()`），其上是 components / interaction / layout 三层实现。12 个组件 props 契约类型、交互核心（`OverlayManager` / `createUiBridge` / `registerInteractionActions` / `UiBridge`）与布局类型、`resolveLayout` 均为本包自有定义并导出。
 
-- 三层实现基于 vendored shadcn 组件：`Select` / `Tabs` / `Form` / modal 基于 `@radix-ui/react-select` / `react-tabs` / `react-form` / `react-dialog`，菜单组折叠基于 `@radix-ui/react-accordion`（shadcn 的固有构成）；
+- 三层实现基于 vendored shadcn 组件（Base UI 版）：`Select` / `Tabs` / modal / 菜单组折叠基于 `@base-ui/react` 的 Select / Tabs / Dialog / Accordion 原语；Form 为去原语化实现（原生 form/label + useId 关联，校验与受控状态自管）；
 - **不依赖 antd**（源码与构建产物均无 `from 'antd'` 引用）；
 - **消费方无需 Tailwind**：Tailwind v4 仅在包构建期运行，产出预建 `styles.css`。
 
@@ -23,7 +23,10 @@ pnpm add pactor-ui pactor-app react react-dom react-router-dom
 | `pactor-ui/components` | 组件层：12 组件与 props 契约类型 + `createShadcnComponentRegistry` 等 |
 | `pactor-ui/interaction` | 交互层：`OverlayManager` / `createUiBridge` / `registerInteractionActions` / `UiBridge` + `ShadcnInteractionProvider` / `ShadcnOverlayHost` |
 | `pactor-ui/layout` | 布局层：布局 props 类型 + `resolveLayout` + `ShadcnAdminLayout` 等 / `createShadcnLayoutRegistry` |
+| `pactor-ui/ui` | vendored shadcn 原语组件（Button / Input / Card / Dialog / Popover / Select 等），供宿主构建自定义槽位 UI 与业务组件，视觉随语义令牌皮肤 |
 | `pactor-ui/styles.css` | 预建样式表（Tailwind v4 构建期编译产物，单文件） |
+
+**`/ui` 与 `/components` 的分工**：DSL 编排用 `/components` 的 12 组件适配器（DSL 契约）；宿主自写 React UI（槽位内容、自定义组件）用 `/ui` 原语。注意预建样式表只包含包内源码实际用到的 Tailwind 工具类——自定义 UI 排版优先用原语组件的结构（Card/Flex 布局容器等）与语义令牌，避免依赖未被包内使用过的零散工具类。
 
 ## 默认 UI kit
 
@@ -92,7 +95,7 @@ import 'pactor-ui/styles.css';
 
 交互核心为零 React 的 `OverlayManager`（overlay 堆栈与 Promise 模型）+ `createUiBridge` / `registerInteractionActions`（`overlay.open` / `overlay.close` / `confirm` / `message` 动作注册）。
 
-React 渲染层为 `ShadcnOverlayHost` 与 `ShadcnInteractionProvider`：modal / confirm 基于 vendored shadcn Dialog（`@radix-ui/react-dialog`）；drawer 为自绘固定右侧面板；toast 为 shadcn 风格消息栈（固定右上角，类型色条读语义令牌，约 3s 自动消失）。取消语义（X / 遮罩 / Escape → resolve `{ success: false }`）、content 作用域（`{ params, parent }`）、page overlay（`resolvePage` + 子 PageRuntime）。
+React 渲染层为 `ShadcnOverlayHost` 与 `ShadcnInteractionProvider`：modal / confirm 基于 vendored shadcn Dialog（`@base-ui/react` Dialog）；drawer 为自绘固定右侧面板；toast 为 shadcn 风格消息栈（固定右上角，类型色条读语义令牌，约 3s 自动消失）。取消语义（X / 遮罩 / Escape → resolve `{ success: false }`）、content 作用域（`{ params, parent }`）、page overlay（`resolvePage` + 子 PageRuntime）。
 
 ## layout 层
 

@@ -3,7 +3,13 @@ import { Registry } from 'pactor-core';
 import type { DslNode } from 'pactor-core';
 import { MarkdownRenderer } from 'pactor-markdown';
 import { DslRenderer, useRenderer } from 'pactor-runtime';
-import { Component, useMemo, type ReactNode } from 'react';
+import {
+  Component,
+  useMemo,
+  useRef,
+  useState,
+  type ReactNode,
+} from 'react';
 
 import type { ChatArtifact } from '../artifact.js';
 import { CHAT_DENIED_TYPE, guardChatDsl } from '../dsl-guard.js';
@@ -172,11 +178,60 @@ export function ArtifactPanel({
   className,
 }: ArtifactPanelProps): ReactNode {
   const runtime = useArtifactRuntime(safeRegistry, user);
+
+  // 拖拽调宽（spec: chat-artifact-panel / 面板布局与响应式）：
+  // 面板左缘手柄 pointer 拖拽实时改宽，结果存内部 state（inline width
+  // 覆盖 --pactor-chat-inspector-width 缺省），不向外部受控；窄屏抽屉
+  // 形态手柄由 CSS 隐藏
+  const panelRef = useRef<HTMLElement | null>(null);
+  const [width, setWidth] = useState<number | null>(null);
+
+  const handleResizeStart = (event: React.PointerEvent): void => {
+    event.preventDefault();
+    const panel = panelRef.current;
+    if (!panel) {
+      return;
+    }
+    const hostRect = panel.parentElement?.getBoundingClientRect();
+    // jsdom 等无布局环境 host 宽为 0 → 回退视口宽
+    const hostWidth =
+      hostRect !== undefined && hostRect.width > 0
+        ? hostRect.width
+        : window.innerWidth;
+    const maxWidth = hostWidth * 0.7;
+    const startWidth = panel.getBoundingClientRect().width;
+    const startX = event.clientX;
+    const prevUserSelect = document.body.style.userSelect;
+    document.body.style.userSelect = 'none';
+
+    const onMove = (moveEvent: PointerEvent): void => {
+      // 向左拖（clientX 减小）→ 变宽
+      const next = startWidth + (startX - moveEvent.clientX);
+      setWidth(Math.round(Math.min(Math.max(next, 240), maxWidth)));
+    };
+    const onUp = (): void => {
+      document.body.style.userSelect = prevUserSelect;
+      document.removeEventListener('pointermove', onMove);
+      document.removeEventListener('pointerup', onUp);
+    };
+    document.addEventListener('pointermove', onMove);
+    document.addEventListener('pointerup', onUp);
+  };
+
   return (
     <aside
+      ref={panelRef}
       className={`pactor-chat-inspector${className ? ` ${className}` : ''}`}
       data-kind={artifact?.kind}
+      style={width !== null ? { width: `${width}px` } : undefined}
     >
+      <div
+        className="pactor-chat-inspector__resize"
+        role="separator"
+        aria-orientation="vertical"
+        aria-label="拖动调整面板宽度"
+        onPointerDown={handleResizeStart}
+      />
       <div className="pactor-chat-inspector__header">
         <span className="pactor-chat-inspector__title">
           {artifact?.title ?? '产出物'}

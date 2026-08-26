@@ -130,6 +130,13 @@ export interface ChatCompositionProps {
   inspector?: ReactNode;
   /** artifact part 就绪（status ready）时触发（透传 ChatView） */
   onArtifact?: (artifact: ChatArtifact) => void;
+  /**
+   * 产出物卡片"在面板中打开"按钮点击回调（spec: chat-artifact-panel）：
+   * 无条件触发——受控场景的面板打开入口（DSL 侧典型接法：
+   * setState artifact=${event.artifact}, panelOpen=true）；非受控场景
+   * 并行 store.open（纯 React 零接线可用）。
+   */
+  onOpenArtifact?: (artifact: ChatArtifact) => void;
 }
 
 /**
@@ -158,6 +165,7 @@ export function ChatComposition({
   onPanelClose,
   inspector,
   onArtifact,
+  onOpenArtifact,
 }: ChatCompositionProps): ReactNode {
   // store 首渲染确定、ref 保持：重渲染 / props 变化不重建（决策 D2）
   const storeRef = useRef<ConversationStore | null>(null);
@@ -196,9 +204,10 @@ export function ChatComposition({
     }
   };
 
-  // 卡片"在面板中打开"：纯 React / 非受控场景的开面板入口（决策 D4）；
-  // 受控场景由 DSL onArtifact 事件 + setState 闭环开面板
+  // 卡片"在面板中打开"：无条件触发宿主回调（受控场景的开面板入口）；
+  // 非受控时并行落 store（纯 React 零接线可用）
   const handleOpenArtifact = (next: ChatArtifact): void => {
+    onOpenArtifact?.(next);
     if (!panelControlled) {
       artifactStore.open(next);
     }
@@ -297,6 +306,7 @@ export function ChatComposition({
     inspector !== undefined ||
     onPanelClose !== undefined ||
     onArtifact !== undefined ||
+    onOpenArtifact !== undefined ||
     services.artifactStore !== undefined;
   if (!panelFeatureUsed && !effectivePanelOpen) {
     return main;

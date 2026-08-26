@@ -23,7 +23,7 @@ Form 容器协同：Form 内的字段自动成为表单项、提交事件、form
 
 ### Requirement: Form 初始值
 
-Form SHALL 支持 `initialValues?: Record<string, unknown>` prop（可含表达式，如 `${params}`）：创建表单时作为字段初始值；字段级 `value` 与 `initialValues[name]` 同时存在时 MUST 以字段级为准。初始值 MUST 参与提交（未修改字段以初始值提交）与校验（required 以合并后的值判定）。双 kit（antd / Radix）行为 MUST 一致。
+Form SHALL 支持 `initialValues?: Record<string, unknown>` prop（可含表达式，如 `${params}`）：创建表单时作为字段初始值；字段级 `value` 与 `initialValues[name]` 同时存在时 MUST 以字段级为准。初始值 MUST 参与提交（未修改字段以初始值提交）与校验（required 以合并后的值判定）。
 
 #### Scenario: initialValues 回填
 
@@ -40,10 +40,10 @@ Form SHALL 支持 `initialValues?: Record<string, unknown>` prop（可含表达�
 - **WHEN** initialValues.name 为 'A' 且字段 value 为 'B'
 - **THEN** 字段初始显示 'B'
 
-#### Scenario: 双 kit 一致
+#### Scenario: 初始值回填
 
-- **WHEN** 同一份含 initialValues 的 Form DSL 分别以 antd 与 Radix kit 渲染
-- **THEN** 两者均回填相同初始值
+- **WHEN** 渲染含 initialValues 的 Form DSL
+- **THEN** 字段回填相同初始值
 
 ### Requirement: 校验规则
 
@@ -79,7 +79,7 @@ Select SHALL 接受 `options` prop（`Array<{ label, value }>`，支持表达式
 
 ### Requirement: 字段值联动（form.setValues）
 
-Form SHALL 支持可选 `name` prop（缺省 `default`），挂载时向 RuntimeContext 的 `forms` 注册表注册句柄、卸载注销。运行时 SHALL 提供内置动作 `form.setValues`：params `form`（缺省 `default`）指定目标表单、`values`（表达式求值后）合并写入表单字段值；目标句柄未注册时 MUST 返回 `{ ok: false, error }` 受控失败。setValues MUST NOT 触发校验与 `onValuesChange`（避免联动循环）。双 kit 行为 MUST 一致。`onValuesChange` 事件的 `event` 载荷为变化字段单键对象 `{ <field>: <newValue> }`。
+Form SHALL 支持可选 `name` prop（缺省 `default`），挂载时向 RuntimeContext 的 `forms` 注册表注册句柄、卸载注销。运行时 SHALL 提供内置动作 `form.setValues`：params `form`（缺省 `default`）指定目标表单、`values`（表达式求值后）合并写入表单字段值；目标句柄未注册时 MUST 返回 `{ ok: false, error }` 受控失败。setValues MUST NOT 触发校验与 `onValuesChange`（避免联动循环）。`onValuesChange` 事件的 `event` 载荷为变化字段单键对象 `{ <field>: <newValue> }`。
 
 #### Scenario: 级联清空
 
@@ -96,7 +96,7 @@ Form SHALL 支持可选 `name` prop（缺省 `default`），挂载时向 Runtime
 - **WHEN** `form.setValues` 指定的 form 名未注册
 - **THEN** 动作返回 `{ ok: false, error }`，页面不崩溃
 
-#### Scenario: 双 kit 一致
+#### Scenario: 级联联动
 
-- **WHEN** 同一份级联 DSL 分别以 antd 与 Radix kit 渲染并触发联动
-- **THEN** 两者目标字段值变化一致
+- **WHEN** 渲染级联 DSL 并触发联动
+- **THEN** 目标字段值按联动规则变化

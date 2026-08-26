@@ -13,8 +13,12 @@
  *   属性覆盖（全仓既有约定，不用官方 .dark class）；radius 派生为乘法比例
  *   （sm 0.6 / md 0.8 / lg 基准 / xl 1.4 / 2xl 1.8 / 3xl 2.2 / 4xl 2.6）；
  *   成功/警告/信息色补充 --success/--warning/--info 供 Alert 四态使用。
- * - **动画层**：`tw-animate-css`（官方推荐）提供 animate-in/out、fade/zoom/slide
- *   工具类；accordion-down/up 关键帧本地定义（官方原在 tailwind config 中定义）。
+ * - **动画层**：`tw-animate-css` 提供 animate-in/out、fade/zoom 工具类
+ *   （2026-08 migrate-ui-base-ui 评估结论：官方 Base UI 版组件源码仍使用这些
+ *   类——见 base-nova 版 dialog/popover/select 与 registry style `index.json`
+ *   的 css 依赖，故保留该依赖）；accordion 关键帧改用 Base UI 面板机制
+ *   （`--accordion-panel-height`，对齐官方 shadcn/tailwind.css），并补充官方
+ *   同款 `data-open`/`data-closed`/`data-active`/`data-disabled` 自定义变体。
  * - `@theme inline` 把语义变量桥接为 Tailwind 颜色工具类
  *   （bg-background / text-foreground / border-border / ring-ring …），
  *   工具类运行时读 var()，主题切换无需重新构建。
@@ -150,22 +154,55 @@
   --sidebar-ring: oklch(0.556 0 0);
 }
 
-/* Accordion 展开/收起关键帧（官方原在 tailwind config 中定义） */
-@keyframes accordion-down {
-  from {
-    height: 0;
+/* Accordion 展开/收起：Base UI 面板机制（Panel 组件在面板元素上设置
+ * --accordion-panel-height；关键帧定义对齐官方 shadcn/tailwind.css，
+ * 经 @theme 声明 --animate-accordion-* 供 data-open/data-closed 变体引用） */
+@theme inline {
+  --animate-accordion-down: accordion-down 200ms ease-out;
+  --animate-accordion-up: accordion-up 200ms ease-out;
+
+  @keyframes accordion-down {
+    from {
+      height: 0;
+    }
+    to {
+      height: var(--accordion-panel-height);
+    }
   }
-  to {
-    height: var(--radix-accordion-content-height);
+
+  @keyframes accordion-up {
+    from {
+      height: var(--accordion-panel-height);
+    }
+    to {
+      height: 0;
+    }
   }
 }
 
-@keyframes accordion-up {
-  from {
-    height: var(--radix-accordion-content-height);
+/* 官方同款自定义变体（shadcn/tailwind.css）：Base UI 组件以 data-open /
+ * data-closed / data-active / data-disabled 属性表达状态 */
+@custom-variant data-open {
+  &:where([data-open]:not([data-open='false'])) {
+    @slot;
   }
-  to {
-    height: 0;
+}
+
+@custom-variant data-closed {
+  &:where([data-closed]:not([data-closed='false'])) {
+    @slot;
+  }
+}
+
+@custom-variant data-active {
+  &:where([data-active]:not([data-active='false'])) {
+    @slot;
+  }
+}
+
+@custom-variant data-disabled {
+  &:where([data-disabled]:not([data-disabled='false'])) {
+    @slot;
   }
 }
 

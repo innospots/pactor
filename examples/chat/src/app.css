@@ -1,3 +1,13 @@
+/**
+ * examples/chat 私有样式（瘦身版，spec: export-ui-primitives/D3）：
+ * 槽位自定义 UI（顶栏/chip/弹层/modal）已全部改经 `pactor-ui/ui`
+ * 原语与语义令牌表达，视觉不再依赖本样式表；这里只保留：
+ * - 页面壳高度链（html/body/#root、.demo-app、.demo-main）与外壳皮肤
+ *   令牌（--demo-bg/--demo-fg，含暗色覆盖）；
+ * - 宿主 DSL 页面（agents/settings 等非对话页）的限宽居中规则。
+ * 本文件须在 pactor-ui / pactor-chat 样式之后导入（皮肤覆盖顺序约定）。
+ */
+
 html,
 body,
 #root {
@@ -9,34 +19,15 @@ body,
 /* 示例外壳的视觉令牌（皮肤本身由 pactor-chat/styles.css 提供） */
 .demo-app {
   --demo-bg: #f7f7f8;
-  --demo-header-bg: rgb(255 255 255 / 75%);
-  --demo-border: #e8e8eb;
   --demo-fg: #1a1d26;
-  --demo-muted-fg: #6b7180;
-  --demo-chip-bg: #f4f4f6;
-  --demo-popup-bg: #ffffff;
-  --demo-popup-shadow:
-    0 4px 16px rgb(0 0 0 / 8%),
-    0 12px 40px -12px rgb(0 0 0 / 16%);
 }
 
 .demo-app[data-pactor-theme='dark'] {
   --demo-bg: #101216;
-  --demo-header-bg: rgb(16 18 22 / 70%);
-  --demo-border: #2c3038;
   --demo-fg: #e4e6ee;
-  --demo-muted-fg: #8b90a0;
-  --demo-chip-bg: #1e2129;
-  --demo-popup-bg: #1a1d24;
-  --demo-popup-shadow:
-    0 4px 16px rgb(0 0 0 / 45%),
-    0 12px 40px -12px rgb(0 0 0 / 65%);
 }
 
-/* ============================================================
- * 页壳：全高列布局（吸顶 header + 居中消息列）
- * ============================================================ */
-
+/* 页壳：全高列布局（顶栏 + 主区） */
 .demo-app {
   display: flex;
   flex-direction: column;
@@ -48,85 +39,9 @@ body,
     'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
 }
 
-/* 吸顶顶栏：底部分隔线 + 毛玻璃 */
-.demo-header {
-  position: sticky;
-  top: 0;
-  z-index: 10;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  padding: 10px 16px;
-  border-bottom: 1px solid var(--demo-border);
-  background: var(--demo-header-bg);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-}
-
-.demo-header__title {
-  min-width: 0;
-}
-
-.demo-header__title-text {
-  max-width: 40vw;
-  padding: 4px 8px;
-  border: none;
-  border-radius: 8px;
-  background: transparent;
-  color: var(--demo-fg);
-  font-size: 14px;
-  font-weight: 600;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  cursor: text;
-}
-
-.demo-header__title-text:hover {
-  background: var(--demo-chip-bg);
-}
-
-.demo-header__title-input {
-  padding: 4px 8px;
-  border: 1px solid var(--demo-border);
-  border-radius: 8px;
-  background: var(--demo-popup-bg);
-  color: var(--demo-fg);
-  font-size: 14px;
-  font-weight: 600;
-  outline: none;
-}
-
-.demo-header__actions {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-}
-
-/* 安静的图标按钮：无底色，hover 浮出 */
-.demo-icon-button {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 30px;
-  height: 30px;
-  padding: 0;
-  border: none;
-  border-radius: 8px;
-  background: transparent;
-  color: var(--demo-muted-fg);
-  cursor: pointer;
-  transition: background 0.15s ease;
-}
-
-.demo-icon-button:hover {
-  background: var(--demo-chip-bg);
-  color: var(--demo-fg);
-}
-
 /* 主区：承载 ChatShell（菜单外壳 = AppShell 侧栏 + 内容槽路由出口）。
-   AppShell 默认 100dvh 定高，嵌在顶栏之下时改为撑满剩余高度 */
+   组件结构样式（高度/对话列居中/面板贴右）由 pactor-chat/styles.css 自持，
+   这里只给宿主容器定高（嵌入契约：组件填满父容器） */
 .demo-main {
   flex: 1;
   min-height: 0;
@@ -134,258 +49,15 @@ body,
   flex-direction: column;
 }
 
-.demo-main .pactor-chat-shell {
-  flex: 1;
-  min-height: 0;
-  height: auto;
-  width: 100%;
-}
-
-/* 内容区：居中、页面左右留白 */
-.demo-main .pactor-chat-shell__content {
-  align-items: center;
-  padding: 12px 16px 16px;
-}
-
-/* Chat 工作区填满剩余高度，内部 ChatView 透明继承 */
-.demo-main .pactor-chat-workspace {
-  flex: 1;
-  min-height: 0;
-  width: 100%;
-  max-width: 768px;
-  background: transparent;
-}
-
-/* 产出物面板打开时：workspace 与面板同行为一组，整体限宽居中 */
-.demo-main .pactor-chat-inspector-host {
-  flex: 1;
-  min-height: 0;
-  width: 100%;
-  max-width: 1120px;
-}
-
-.demo-main .pactor-chat-inspector-host > .pactor-chat-workspace {
-  max-width: none;
-}
-
-/* agents / settings 等非对话页：Page 容器限宽居中，内容超出自滚动 */
+/* agents / settings 等非对话页（宿主 DSL 页面布局属宿主职责）：
+   Page 容器限宽居中，内容超出自滚动 */
 .demo-main .pactor-chat-shell__content > [data-slot='page'] {
   width: 100%;
   max-width: 960px;
+  margin-inline: auto;
   overflow-y: auto;
-}
-
-/* 移动端顶栏品牌区（ChatShell brand 槽） */
-.demo-brand {
-  font-size: 14px;
-  font-weight: 600;
 }
 
 .demo-main .pactor-chat-view {
   background: transparent;
-}
-
-/* ============================================================
- * Composer 工具栏 chip（能力 / 上下文 / 模型，经 toolbar 槽注入）
- * ============================================================ */
-
-.demo-chip {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  padding: 3px 10px;
-  border: 1px solid var(--demo-border);
-  border-radius: 999px;
-  font-size: 12px;
-  color: var(--demo-muted-fg);
-  background: var(--demo-chip-bg);
-  white-space: nowrap;
-}
-
-.demo-chip--interactive {
-  cursor: pointer;
-  transition: color 0.15s ease, border-color 0.15s ease;
-}
-
-.demo-chip--interactive:hover {
-  color: var(--demo-fg);
-  border-color: var(--demo-muted-fg);
-}
-
-.demo-chip__chevron--open {
-  transform: rotate(180deg);
-}
-
-.demo-chip--context {
-  color: var(--demo-fg);
-}
-
-.demo-chip__remove {
-  display: inline-flex;
-  align-items: center;
-  padding: 1px;
-  border: none;
-  border-radius: 999px;
-  background: transparent;
-  color: var(--demo-muted-fg);
-  cursor: pointer;
-}
-
-.demo-chip__remove:hover {
-  color: var(--demo-fg);
-}
-
-/* ============================================================
- * 锚定弹层（能力 / "+" / 模型 / 提及共用）
- * ============================================================ */
-
-.demo-popup {
-  position: fixed;
-  z-index: 100;
-  min-width: 200px;
-  padding: 4px;
-  border: 1px solid var(--demo-border);
-  border-radius: 12px;
-  background: var(--demo-popup-bg);
-  box-shadow: var(--demo-popup-shadow);
-}
-
-.demo-popup--mention {
-  min-width: 220px;
-}
-
-.demo-popup__item {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: 2px;
-  width: 100%;
-  padding: 8px 10px;
-  border: none;
-  border-radius: 8px;
-  background: transparent;
-  color: var(--demo-fg);
-  font-size: 13px;
-  text-align: left;
-  cursor: pointer;
-}
-
-.demo-popup__item--row {
-  flex-direction: row;
-  align-items: center;
-  gap: 8px;
-}
-
-.demo-popup__item:hover {
-  background: var(--demo-chip-bg);
-}
-
-.demo-popup__item--active .demo-popup__item-label {
-  font-weight: 600;
-}
-
-.demo-popup__item-label {
-  font-size: 13px;
-}
-
-.demo-popup__item-desc {
-  font-size: 12px;
-  color: var(--demo-muted-fg);
-}
-
-.demo-popup__empty {
-  padding: 10px 12px;
-  font-size: 12px;
-  color: var(--demo-muted-fg);
-}
-
-/* ============================================================
- * 上下文选择器 Modal（antd Modal 内的复选列表）
- * ============================================================ */
-
-.demo-picker__list {
-  margin: 0;
-  padding: 0;
-  list-style: none;
-}
-
-.demo-picker__item {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 8px 6px;
-  border-radius: 8px;
-  cursor: pointer;
-}
-
-.demo-picker__item:hover {
-  background: rgb(0 0 0 / 4%);
-}
-
-.demo-picker__name {
-  font-size: 13px;
-  font-weight: 500;
-}
-
-.demo-picker__desc {
-  font-size: 12px;
-  color: var(--demo-muted-fg);
-}
-
-/* ============================================================
- * 本地 Modal（上下文选择器外壳；列表样式见上方 demo-picker__*）
- * ============================================================ */
-
-.demo-modal__mask {
-  position: fixed;
-  inset: 0;
-  z-index: 100;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: rgb(0 0 0 / 45%);
-}
-
-.demo-modal {
-  width: 420px;
-  max-width: calc(100vw - 48px);
-  padding: 16px 20px;
-  border-radius: 12px;
-  background: var(--demo-bg, #fff);
-  color: var(--demo-fg, #1f2329);
-  box-shadow: 0 8px 32px rgb(0 0 0 / 18%);
-}
-
-.demo-modal__title {
-  margin-bottom: 12px;
-  font-size: 15px;
-  font-weight: 600;
-}
-
-.demo-modal__footer {
-  display: flex;
-  justify-content: flex-end;
-  gap: 8px;
-  margin-top: 16px;
-}
-
-.demo-modal__btn {
-  padding: 6px 16px;
-  border: 1px solid var(--demo-border, #d9d9d9);
-  border-radius: 8px;
-  background: transparent;
-  color: inherit;
-  font-size: 13px;
-  cursor: pointer;
-}
-
-.demo-modal__btn--primary {
-  border-color: var(--demo-primary, #1677ff);
-  background: var(--demo-primary, #1677ff);
-  color: #fff;
-}
-
-.demo-modal__btn:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
 }

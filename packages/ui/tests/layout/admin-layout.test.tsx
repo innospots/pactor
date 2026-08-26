@@ -363,6 +363,27 @@ describe('ShadcnAdminLayout 结构模式（spec: 模式与收起）', () => {
     ).toBe('true');
   });
 
+  it('flyout hover 行为：移出触发按钮后延迟关闭浮层', async () => {
+    const { container } = renderAdmin({
+      config: { collapsible: true, collapsed: true },
+    });
+    const sidebar = container.querySelector('[data-slot=admin-sidebar]')!;
+    const groupButton = within(sidebar as HTMLElement).getByText('客');
+
+    // 悬停打开
+    fireEvent.mouseEnter(groupButton);
+    await screen.findByText('客户列表');
+
+    // 移出（未移入浮层）→ 200ms 延迟后关闭
+    fireEvent.mouseLeave(groupButton);
+    await vi.waitFor(
+      () => {
+        expect(screen.queryByText('客户列表')).toBeNull();
+      },
+      { timeout: 1000 },
+    );
+  });
+
   it('fixedHeader / fixedSider 缺省即固定；显式 false 关闭', () => {
     const { container } = renderAdmin();
     const layout = container.querySelector('[data-slot=admin-layout]')!;

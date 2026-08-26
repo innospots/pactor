@@ -1,6 +1,5 @@
-import { Field, Label } from '@radix-ui/react-form';
 import { useI18n } from 'pactor-runtime';
-import { useEffect } from 'react';
+import { useEffect, useId } from 'react';
 
 import {
   Select as ShadcnSelect,
@@ -36,16 +35,15 @@ export interface SelectProps {
   onChange?: (value: unknown) => void;
 }
 
-/** Radix Select 的 item value 仅支持 string：JSON 编码保留原始值类型（string/number/boolean） */
-function encodeValue(value: SelectOption['value']): string {
-  return JSON.stringify(value);
-}
-
 /**
  * Select 适配器（shadcn kit，语义对齐 antd 版）：
- * 基于 vendored shadcn Select（@radix-ui/react-select）；Form 内声明 `name`
- * 自动成为表单项；onChange 传出选中的原始 value（经 JSON 编码还原，
- * 保留 number/boolean 类型）。
+ * 基于 vendored shadcn Select（@base-ui/react）；Form 内声明 `name`
+ * 自动成为表单项；onChange 传出选中的原始 value（Base UI Select 的
+ * value 原生支持 string/number/boolean，无需序列化）。
+ *
+ * value→label 映射经 Root 的 `items` 提供：选中值对应的 item 尚未渲染过
+ * popup 时（如表单初始值回填），Trigger 同样显示 label（对齐原 Radix 坑
+ * 的对应场景，见 design D2/风险表）。
  */
 export function Select({
   name,
@@ -60,6 +58,7 @@ export function Select({
 }: SelectProps) {
   const form = useFormContext();
   const { t } = useI18n();
+  const controlId = useId();
   const inForm = form?.inForm === true && typeof name === 'string' && name !== '';
 
   // 注册字段校验规则，同时把 value prop 作为字段级初始值交给 Form 上下文合并
@@ -72,58 +71,39 @@ export function Select({
   });
 
   const current = inForm && form && name ? form.values[name] : value;
-  const currentKey =
+  const selectedValue =
     current === undefined || current === null || current === ''
-      ? undefined
-      : encodeValue(current as SelectOption['value']);
+      ? null
+      : (current as SelectOption['value']);
 
-  const handleChange = (key: string) => {
-    // Radix Select 在值从 uncontrolled 切换为 controlled 等场景会
-    // 以空串回调"纠正"值——忽略空 key，防止清空已有值（如初始值回填）
-    if (key === '') {
-      return;
-    }
-    const next = options.find((option) => encodeValue(option.value) === key);
-    const nextValue = next?.value;
+  const handleChange = (next: SelectOption['value'] | null) => {
     if (inForm && form && name) {
-      form.setValue(name, nextValue);
+      form.setValue(name, next ?? undefined);
     }
-    onChange?.(nextValue);
+    onChange?.(next ?? undefined);
   };
-
-  // Radix Select 的 Select.Value 仅在 item 渲染过时才能解析出选中项文本；
-  // 未打开过下拉时（如表单初始值回填）会显示占位符。
-  // 因此显式计算选中项 label 作为 Value 的 children。
-  const selectedOption =
-    currentKey === undefined
-      ? undefined
-      : options.find((option) => encodeValue(option.value) === currentKey);
 
   const select = (
     <span className="inline-flex items-center gap-1">
-      <ShadcnSelect
-        value={currentKey ?? ''}
+      <ShadcnSelect<SelectOption['value']>
+        items={options}
+        value={selectedValue}
         onValueChange={handleChange}
         disabled={disabled}
         name={inForm ? name : undefined}
       >
-        <SelectTrigger>
-          <SelectValue placeholder={placeholder}>
-            {selectedOption?.label}
-          </SelectValue>
+        <SelectTrigger id={controlId}>
+          <SelectValue placeholder={placeholder} />
         </SelectTrigger>
         <SelectContent>
           {options.map((option) => (
-            <SelectItem
-              key={encodeValue(option.value)}
-              value={encodeValue(option.value)}
-            >
+            <SelectItem key={String(option.value)} value={option.value}>
               {option.label}
             </SelectItem>
           ))}
         </SelectContent>
       </ShadcnSelect>
-      {allowClear && currentKey !== undefined && !disabled ? (
+      {allowClear && selectedValue !== null && !disabled ? (
         <button
           type="button"
           aria-label={t('pactor.select.clear')}
@@ -144,9 +124,14 @@ export function Select({
   if (inForm && form && name) {
     const error = form.errors[name];
     return (
-      <Field name={name} data-slot="form-item" className={formItemClass(form.layout)}>
+      <div data-slot="form-item" className={formItemClass(form.layout)}>
         {label ? (
-          <Label className="shrink-0 text-sm leading-none font-medium whitespace-nowrap">{label}</Label>
+          <label
+            htmlFor={controlId}
+            className="shrink-0 text-sm leading-none font-medium whitespace-nowrap"
+          >
+            {label}
+          </label>
         ) : null}
         {select}
         {error ? (
@@ -154,7 +139,7 @@ export function Select({
             {error}
           </div>
         ) : null}
-      </Field>
+      </div>
     );
   }
 
