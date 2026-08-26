@@ -1,19 +1,21 @@
 dsl: '1.0'
 page:
   id: chat
-  title: Pactor Chat 示例
+  title: 对话
 
-# 页面级 state：侧栏菜单高亮项。点击菜单 → events.onMenuSelect →
-# setState 更新 activeMenu → activeMenuKey 绑定刷新高亮（spec:
-# chat-dsl-component / 选择更新状态）。菜单仅演示高亮切换——真实路由
-# 与会话持久化不在本示例范围（设计决策 D2 / Non-Goals）。
+# 页面级 state：产出物面板闭环（spec: chat-artifact-panel）——
+# artifact part 就绪 → events.onArtifact → setState 写入 artifact 并打开面板；
+# 面板关闭按钮 / 窄屏遮罩 → events.onPanelClose → setState 关闭。
+# artifact / panelOpen 为受控 props（任一提供即全受控）。
 state:
-  activeMenu: new
+  panelOpen: false
+  artifact: null
 
-# 聊天页 body 为一等组件 Chat（spec: chat-dsl-component）：左侧菜单、
-# 问候与建议、会话参数均由 YAML 配置；transport / safeRegistry /
-# capabilities / 附件与弹层回调等运行时服务由宿主经 ChatServicesProvider
-# 一次注入（见 App.tsx），DSL 只携带可序列化数据。
+# 聊天页 body 为一等组件 Chat（spec: chat-dsl-component）：无侧栏形态
+# （菜单外壳由宿主 App.tsx 的 ChatShell + MenuRegistry 承担，菜单切换 =
+# URL 变化）；会话 id 取路由 query（智能体列表 navigate /chat?id=xxx
+# 进入独立会话），缺省 conv-demo。transport / safeRegistry / capabilities /
+# 附件与弹层回调等运行时服务由宿主经 ChatServicesProvider 注入（见 App.tsx）。
 body:
   type: Chat
   props:
@@ -22,27 +24,27 @@ body:
     showHeader: false
     greeting: 你好，我是 Pactor Chat 示例
     subtitle: 数据全部由调用方经接口注入；点击下方建议立即开始
-    conversationId: conv-demo
-    activeMenuKey: ${state.activeMenu}
-    menu:
-      - { key: new, label: 新建对话, icon: plus }
-      - { key: s1, label: 本月报表分析, icon: history, group: 历史会话 }
-      - { key: s2, label: 周报整理, icon: history }
-      - { key: s3, label: 新功能评审记录, icon: history }
+    conversationId: ${route.query.id || 'conv-demo'}
+    params:
+      agentId: ${route.query.id || ''}
+    artifact: ${state.artifact}
+    panelOpen: ${state.panelOpen}
     suggestions:
       - { label: 今天天气怎么样, prompt: 今天天气怎么样 }
       - { label: 看一下本月报表, prompt: 看一下本月报表 }
+      - { label: 生成一份月报, prompt: 帮我生成一份月报 }
+      - { label: 写一段代码, prompt: 帮我写一段代码 }
+      - { label: 生成统计页面, prompt: 帮我生成一个统计页面 }
       - { label: 导出客户数据, prompt: 导出客户数据 }
   events:
-    onMenuSelect:
-      # 高亮切换：event.key 为选中项 key（event.item 为整项数据）
+    # artifact part 就绪：event.artifact 为产出物对象，setState 开面板
+    onArtifact:
       - action: setState
         params:
-          activeMenu: ${event.key}
-      # 「新建对话」额外清空会话与上下文 chips（示例扩展动作，见 App.tsx）；
-      # 切换历史会话只改高亮，不加载历史消息（纯演示）
-      - action: if
+          artifact: ${event.artifact}
+          panelOpen: true
+    # 面板关闭按钮 / 窄屏遮罩点击
+    onPanelClose:
+      - action: setState
         params:
-          condition: ${event.key == 'new'}
-          then:
-            - action: demo.newSession
+          panelOpen: false

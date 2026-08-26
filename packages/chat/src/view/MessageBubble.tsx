@@ -1,5 +1,6 @@
 import { useRef, useState } from 'react';
 
+import type { ChatArtifact } from '../artifact.js';
 import type { ChatMessage } from '../model.js';
 import type { ChatRuntime, ChatScope } from '../scope.js';
 import { ActivityTrace } from './ActivityTrace.js';
@@ -32,6 +33,8 @@ export interface MessageBubbleProps {
    * turn）；取消编辑不触任何回调。
    */
   onEditResend?: (text: string) => void;
+  /** artifact 卡片"在面板中打开"回调（透传 PartRenderer） */
+  onOpenArtifact?: (artifact: ChatArtifact) => void;
 }
 
 /** user 消息的内联编辑框：预填原文本，确认回调新文本，取消静默关闭 */
@@ -101,6 +104,7 @@ export function MessageBubble({
   onRegenerate,
   onRetry,
   onEditResend,
+  onOpenArtifact,
 }: MessageBubbleProps) {
   const [editing, setEditing] = useState(false);
   const bubbleScope: ChatScope = {
@@ -157,6 +161,7 @@ export function MessageBubble({
                 runtime={runtime}
                 scope={bubbleScope}
                 streaming={streaming}
+                onOpenArtifact={onOpenArtifact}
               />
             ))
           )}

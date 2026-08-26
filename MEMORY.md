@@ -44,13 +44,14 @@
 - **主题换肤**：覆盖 shadcn 语义令牌（`--primary` / `--muted` 等 CSS 变量）/ `<html data-pactor-theme="dark">` / `data-slot` 结构覆盖；参考 `examples/admin/src/theme.css`；文档 `guides/theming`。**preflight 已开启**（2026-08-26 align-ui-shadcn-theme，第 37 个归档变更）：styles.css = 完整 tailwindcss + tw-animate-css + 官方 base layer，对齐 shadcn 官方主题脚手架（radius 乘法派生、chart/sidebar 令牌、accordion keyframes）；导入即接受基线全局样式，宿主皮肤 CSS 须在其后导入。
 - **Admin 布局模式**（2026-08-12 add-admin-layout-modes + change-layout-fixed-defaults）：bootstrap `layout` 支持 `mode`（top-side 缺省 / top-bottom / side-full / two-column）、`fixedHeader`/`fixedSider`（sticky，**缺省 true**，显式 false 关闭）、`collapsible`/`collapsed`、`breakpoint`（xs-xxl，shadcn 走 useMediaQuery hook，断点 480/576/768/992/1200/1600）；app `pickLayoutConfig` 枚举校验透传，非法值忽略。two-column 选中项无子菜单时隐藏第二列收窄为 56px 窄列、不叠加收起 trigger；side-full 品牌区入侧边栏、header 不重复。
 - **Chat 视图**（2026-08-12 polish-chat-view，参考 DeepTutor web 技术选型独立实现）：零 antd（lucide-react 图标 + `pactor-chat/styles.css` 皮肤 `--pactor-chat-*` 变量 + `data-pactor-theme="dark"` 暗色）；`useSmoothStreamText`（rAF 打字机）/ `useChatAutoScroll`（80px 释放、40px 回底、容器须 `overflow-anchor:none`）；`runChatTurn` 支持 `signal`（abort → cancelled 收尾不抛错）；MessageBubble user 右气泡 / assistant 通栏 + hover 复制条；Composer 自适应 textarea + 流式停止按钮。
+- **Chat 产出物面板与 ChatShell**（2026-08-26 add-chat-artifact-panel）：`ChatArtifact`（markdown/code/text/dsl 四 kind，dsl 经 Safe Registry 守卫活预览）+ `ArtifactStore`；`Chat` 受控 props `artifact`/`panelOpen`/`onPanelClose` + `inspector` 槽 + `events.onArtifact`（artifact part 就绪触发，框架不擅自开面板）；`ChatShell` = AppShell + 菜单侧栏 + `content` 槽（无聊天/路由逻辑），随 `registerChatComponent` 一并注册。**坑：面板开合不得改变子树深度**——面板功能使用时恒渲染 host 包裹层，否则 ChatView 重挂载导致 onArtifact 重放（有回归测试）。**examples/chat 已路由化**：HashRouter + pactor-router（MenuRegistry/DynamicDslRoute/createRouterAdapter），三页 YAML（chat/agents/settings），刷新按 URL 还原；ConversationStore 按会话 id 缓存于宿主 Map 跨页存活。
 - **Chat 安全**：LLM DSL 走 Safe Registry 白名单（`guardChatDsl` 替换为 ChatDenied 占位）；AI 动作走 capability 链（registry → permission → confirm → execute）。
 - **应用级槽位**（2026-08-12 add-antd-skin-settings）：`providers`（Router 内、InteractionKit 外，业务 ConfigProvider/全局 Context 入口，皮肤主题等运行时切换经此注入）+ `headerExtra`（admin 头部右侧插槽）。example-admin 皮肤设置：`skin.ts` store（localStorage + 订阅）→ 写 DOM 属性（`data-pactor-theme` / `data-pactor-accent` / `--radius` 内联变量）→ `SkinSettings`（头部按钮 → 面板：预设色板/取色/暗黑/圆角/恢复默认）。
 
 ## OpenSpec 工作流（本项目标准流程）
 
 - 每个变更：`openspec new change <name>` → proposal/design/specs/tasks 四件 → 实现（多由 coder 子代理完成）→ 主代理独立复跑验收 → tasks 勾选 → 归档时同步 delta specs 到 `openspec/specs/`（主 spec 无 ADDED/MODIFIED 头）→ `mv` 到 `changes/archive/YYYY-MM-DD-<name>`。
-- 已归档 32 个变更；主 specs 46 个能力（`openspec/specs/`）是现状基准。
+- 已归档 43 个变更；主 specs 50 个能力（`openspec/specs/`）是现状基准。
 - 规范细节：scenario 必须 4 个 `#`（####）；MODIFIED 需全量需求块；MODIFIED 合并时注意变更间依赖顺序。
 
 ## 环境与命令

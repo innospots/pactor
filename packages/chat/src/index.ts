@@ -14,6 +14,13 @@ export {
 } from './model.js';
 export { ConversationStore } from './store.js';
 
+// 产出物模型与 Store（spec: chat-artifact-panel，零 React）
+export {
+  ArtifactStore,
+  type ArtifactPatch,
+  type ChatArtifact,
+} from './artifact.js';
+
 // Streaming 事件模型与 reducer（零 React）
 export { applyChatEvent, type ChatEvent } from './events.js';
 
@@ -86,10 +93,22 @@ export {
 export {
   CHAT_COMPONENT_TYPE,
   Chat,
+  ChatSidebarMenu,
+  MENU_ICONS,
   registerChatComponent,
   type ChatMenuItem,
   type ChatProps,
 } from './view/Chat.js';
+export {
+  CHAT_SHELL_COMPONENT_TYPE,
+  ChatShell,
+  registerChatShellComponent,
+  type ChatShellProps,
+} from './view/ChatShell.js';
+export {
+  ArtifactPanel,
+  type ArtifactPanelProps,
+} from './view/ArtifactPanel.js';
 
 // React 视图
 export {

@@ -45,6 +45,9 @@ importers:
       pactor-app:
         specifier: workspace:*
         version: link:../../packages/app
+      pactor-chat:
+        specifier: workspace:*
+        version: link:../../packages/chat
       pactor-core:
         specifier: workspace:*
         version: link:../../packages/core
@@ -97,6 +100,9 @@ importers:
       pactor-core:
         specifier: workspace:*
         version: link:../../packages/core
+      pactor-router:
+        specifier: workspace:*
+        version: link:../../packages/router
       pactor-runtime:
         specifier: workspace:*
         version: link:../../packages/runtime
@@ -109,6 +115,9 @@ importers:
       react-dom:
         specifier: ^19.2.8
         version: 19.2.8(react@19.2.8)
+      react-router-dom:
+        specifier: ^7.18.2
+        version: 7.18.2(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
     devDependencies:
       '@types/react':
         specifier: ^19.2.18

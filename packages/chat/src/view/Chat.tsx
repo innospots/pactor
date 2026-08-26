@@ -18,7 +18,9 @@ import {
 
 import { ChatComposition, resolveSlot } from '../chat-composition.js';
 import { useChatServices } from '../chat-services.js';
+import type { ChatArtifact } from '../artifact.js';
 import { useSidebarDrawer } from './AppShell.js';
+import { registerChatShellComponent } from './ChatShell.js';
 import type { ChatSuggestion } from './EmptyState.js';
 
 /**
@@ -68,6 +70,19 @@ export interface ChatProps {
   headerExtra?: DslNode | ReactNode;
   /** header 槽：整体替换内建 header */
   header?: DslNode | ReactNode;
+  /**
+   * 产出物面板（spec: chat-artifact-panel / chat-dsl-component，决策 D2）：
+   * `artifact` / `panelOpen` 可绑 DSL state；任一提供即全受控，
+   * 都未提供时由内部 / 注入的 ArtifactStore 驱动
+   */
+  artifact?: ChatArtifact | null;
+  panelOpen?: boolean;
+  /** 面板关闭按钮 / 窄屏遮罩点击回调（典型接法：setState panelOpen=false） */
+  onPanelClose?: () => void;
+  /** 面板内容槽：提供时整体替代面板内建渲染器 */
+  inspector?: DslNode | ReactNode;
+  /** artifact part 就绪时触发（event 作用域含 artifact；框架不擅自开面板） */
+  onArtifact?: (artifact: ChatArtifact) => void;
   className?: string;
   /** 发送回调：与 transport 驱动 turn 并行（同 ChatView onSend 语义） */
   onSend?: (text: string) => void;
@@ -76,7 +91,7 @@ export interface ChatProps {
 }
 
 /** 菜单图标名 → lucide 子集（白名单式，未知名渲染占位圆点，不抛错） */
-const MENU_ICONS: Record<
+export const MENU_ICONS: Record<
   string,
   ComponentType<{ size?: number; strokeWidth?: number }>
 > = {
@@ -90,8 +105,8 @@ const MENU_ICONS: Record<
   folder: Folder,
 };
 
-/** 内建侧栏：menu 数据驱动的菜单（分组标题 + 图标 + badge + disabled） */
-function ChatSidebarMenu({
+/** 内建侧栏：menu 数据驱动的菜单（分组标题 + 图标 + badge + disabled）；ChatShell 同款复用 */
+export function ChatSidebarMenu({
   menu,
   activeMenuKey,
   onMenuSelect,
@@ -175,6 +190,11 @@ export function Chat({
   sidebar,
   headerExtra,
   header,
+  artifact,
+  panelOpen,
+  onPanelClose,
+  inspector,
+  onArtifact,
   className,
   onSend,
   onMenuSelect,
@@ -226,6 +246,11 @@ export function Chat({
       headerExtra={resolveSlot(headerExtra) ?? services.headerExtra}
       sidebar={sidebarContent}
       onSend={onSend}
+      artifact={artifact}
+      panelOpen={panelOpen}
+      onPanelClose={onPanelClose}
+      inspector={resolveSlot(inspector)}
+      onArtifact={onArtifact}
     />
   );
 }
@@ -239,15 +264,19 @@ type DslEventHandler = (event: unknown) => void;
  * DSL 适配层（决策 D4）：renderer 把 events.onX 绑成单参函数（入参进
  * event 作用域），而 Chat 的 React 签名是 onSend(text) /
  * onMenuSelect(key, item)——适配器把调用折算为事件对象，
- * DSL 侧即 event.text / event.key / event.item。
+ * DSL 侧即 event.text / event.key / event.item / event.artifact。
  */
 function ChatDslAdapter({
   onSend,
   onMenuSelect,
+  onPanelClose,
+  onArtifact,
   ...rest
-}: Omit<ChatProps, 'onSend' | 'onMenuSelect'> & {
+}: Omit<ChatProps, 'onSend' | 'onMenuSelect' | 'onPanelClose' | 'onArtifact'> & {
   onSend?: DslEventHandler;
   onMenuSelect?: DslEventHandler;
+  onPanelClose?: DslEventHandler;
+  onArtifact?: DslEventHandler;
 }): ReactNode {
   return (
     <Chat
@@ -260,6 +289,12 @@ function ChatDslAdapter({
           ? (key: string, item: ChatMenuItem) => onMenuSelect({ key, item })
           : undefined
       }
+      onPanelClose={onPanelClose ? () => onPanelClose({}) : undefined}
+      onArtifact={
+        onArtifact
+          ? (artifact: ChatArtifact) => onArtifact({ artifact })
+          : undefined
+      }
     />
   );
 }
@@ -267,9 +302,12 @@ function ChatDslAdapter({
 /**
  * 注册 Chat DSL 组件（spec: chat-dsl-component / Chat 组件注册）：
  * 已存在同名类型时不覆盖（沿用 registerChatLayout 的语义）。
+ * ChatShell（spec: chat-dsl-component / ChatShell 外壳组件，决策 D6）
+ * 一并注册，同样不覆盖已有同名类型。
  */
 export function registerChatComponent(registry: Registry<unknown>): void {
   if (!registry.has(CHAT_COMPONENT_TYPE)) {
     registry.register(CHAT_COMPONENT_TYPE, ChatDslAdapter);
   }
+  registerChatShellComponent(registry);
 }

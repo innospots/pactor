@@ -188,6 +188,35 @@ body:
 
 完整装配参考 `examples/chat`。
 
+### 产出物面板（Inspector）
+
+`Chat` 支持右侧产出物预览面板（spec: chat-artifact-panel），承载 LLM/Agent 的结果物（报告、代码、页面片段），可关闭/隐藏：
+
+- **模型**：`ChatArtifact { id, kind: 'markdown' | 'code' | 'text' | 'dsl', title, content, language?, meta? }`；`ArtifactStore`（`get/subscribe/open/update/close`，ConversationStore 同模式，可经 services `artifactStore` 注入）。
+- **受控配置**：`artifact` / `panelOpen` 可绑 `${state.x}`；`events.onPanelClose` 在关闭按钮/遮罩点击时触发（典型接法 setState panelOpen=false）；`inspector?: DslNode | ReactNode` 槽整体替代面板内建渲染。
+- **内建渲染器**按 kind 分发：`markdown` 走 pactor-markdown 安全渲染、`code` 只读代码块（language 角标）、`text` 预格式文本、`dsl` 经 Safe Registry 守卫 + renderChildren 活预览（拦截/失败降级不抛错）。
+- **LLM → 面板联动**：`ChatPart` 新增 `artifact` part，消息流内联渲染"产出物卡片"（含"在面板中打开"按钮）；part 就绪时触发 `events.onArtifact`（event 作用域含 `artifact`），DSL 侧典型接法 `setState artifact=${event.artifact}, panelOpen=true`——框架不擅自开面板。
+- **布局**：桌面固定宽右栏（`--pactor-chat-inspector-width`，缺省 320px）；窄屏（<768px）退化为右侧覆盖抽屉（遮罩点击关闭）。未配置面板时零渲染。
+
+```yaml
+state: { panelOpen: false }
+body:
+  type: Chat
+  props:
+    artifact: ${state.artifact}
+    panelOpen: ${state.panelOpen}
+  events:
+    onArtifact:    # artifact part 就绪 → 开面板
+      - action: setState
+        params: { artifact: ${event.artifact}, panelOpen: true }
+    onPanelClose:
+      - action: setState
+        params: { panelOpen: false }
+```
+
+### ChatShell：菜单外壳
+
+`ChatShell`（随 `registerChatComponent` 一并注册，React 同名组件亦可直接用）是**不含聊天与路由逻辑**的外壳：AppShell + 内建菜单侧栏（与 `Chat` 同款 `menu` / `activeMenuKey` / `onMenuSelect`，图标白名单一致）+ `content: DslNode | ReactNode` 主区槽 + `sidebar` 替代槽。用于"菜单切换到非对话页"的工作区应用：DSL 场景 content 槽内放 `when` 条件子树（onMenuSelect → setState 闭环）；路由场景 content 传路由出口（onMenuSelect → 导航）。嵌入的 `Chat` 不传 `menu` 即为无侧栏形态；会话状态经共享 `services.store` 跨页面切换存活。路由化多页装配参考 `examples/chat`（HashRouter + MenuRegistry + DynamicDslRoute，刷新按 URL 还原页面）。
 
 ## AppShell 应用外壳
 

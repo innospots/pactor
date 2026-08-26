@@ -1,6 +1,7 @@
 import type { DslNode, Registry } from 'pactor-core';
 import type { ReactNode } from 'react';
 
+import type { ArtifactStore, ChatArtifact } from './artifact.js';
 import type {
   ChatCapabilityRegistry,
   ChatConfirm,
@@ -27,6 +28,8 @@ export interface ChatWorkspaceServices {
   store?: ConversationStore;
   /** 缺省 store 的创建工厂（仅首渲染调用一次） */
   storeFactory?: () => ConversationStore;
+  /** 产出物面板 store（spec: chat-artifact-panel）；缺省包内默认构造 */
+  artifactStore?: ArtifactStore;
   /** Safe Registry（createSafeRegistry 包装后的白名单注册表） */
   safeRegistry?: Registry<unknown>;
   /** capability 白名单与确认链 */
@@ -82,6 +85,18 @@ export interface ChatWorkspaceProps {
   sidebar?: DslNode;
   /** Composer 工具栏右端 DslNode 槽（与服务注入的 toolbarEnd 先后渲染） */
   toolbarEnd?: DslNode;
+  /**
+   * 产出物面板受控 props（spec: chat-artifact-panel，决策 D2）：
+   * 任一提供即全受控；都未提供时由内部 / 注入的 ArtifactStore 驱动
+   */
+  artifact?: ChatArtifact | null;
+  panelOpen?: boolean;
+  /** 面板关闭回调（runtime 绑定 events.onPanelClose 时以函数形态传入） */
+  onPanelClose?: () => void;
+  /** 面板内容 DslNode 槽：提供时整体替代内建渲染器 */
+  inspector?: DslNode;
+  /** artifact part 就绪回调（runtime 绑定 events.onArtifact 时传入） */
+  onArtifact?: (artifact: ChatArtifact) => void;
   className?: string;
 }
 
@@ -105,6 +120,11 @@ export function createChatWorkspace(
     params,
     sidebar,
     toolbarEnd,
+    artifact,
+    panelOpen,
+    onPanelClose,
+    inspector,
+    onArtifact,
     className,
   }: ChatWorkspaceProps): ReactNode {
     return (
@@ -124,6 +144,11 @@ export function createChatWorkspace(
           headerExtra={services.headerExtra}
           sidebar={sidebar ? <DslNodeSlot node={sidebar} /> : undefined}
           toolbarEnd={toolbarEnd ? <DslNodeSlot node={toolbarEnd} /> : undefined}
+          artifact={artifact}
+          panelOpen={panelOpen}
+          onPanelClose={onPanelClose}
+          inspector={inspector ? <DslNodeSlot node={inspector} /> : undefined}
+          onArtifact={onArtifact}
         />
       </ChatServicesProvider>
     );

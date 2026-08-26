@@ -1,7 +1,17 @@
 import { createPactorApplication } from "pactor-app";
+import {
+  ChatServicesProvider,
+  createSafeRegistry,
+  registerChatComponent,
+  type ChatServices,
+} from "pactor-chat";
+// Chat 一等组件（AI 工作区页）的皮肤样式表
+import "pactor-chat/styles.css";
 import { StaticDslLoader } from "pactor-resource";
 // 默认 UI kit 为 shadcn（pactor-ui），样式表导入为必需步骤
 import "pactor-ui/styles.css";
+import { createShadcnComponentRegistry } from "pactor-ui/components";
+import type { ReactNode } from "react";
 // 示例皮肤：换肤契约参考实现（须在 pactor-ui/styles.css 之后导入）
 import "./theme.css";
 // 皮肤 store：模块加载即把持久化的皮肤应用到 DOM（data-pactor-theme 等），
@@ -10,8 +20,10 @@ import "./skin";
 
 import { readSession } from "./auth";
 import { createBootstrap } from "./bootstrap";
+import { createMockAiTransport } from "./mock-ai";
 import { demoServices } from "./services";
 import { SkinSettings } from "./SkinSettings";
+import aiWorkspacePage from "./pages/ai-workspace.page.yaml";
 import customerEditPage from "./pages/customer-edit.page.yaml";
 import customerListPage from "./pages/customer-list.page.yaml";
 import dashboardPage from "./pages/dashboard.page.yaml";
@@ -35,8 +47,30 @@ const loader = new StaticDslLoader({
     dashboard: dashboardPage,
     "customer-list": customerListPage,
     "customer-edit": customerEditPage,
+    "ai-workspace": aiWorkspacePage,
   },
 });
+
+// AI 工作区页的聊天服务（spec: chat-artifact-panel，设计决策 D5）：
+// transport 为本地 mock（见 mock-ai.ts）；safeRegistry 限定 dsl 产出物
+// 活预览的白名单组件
+const chatServices: ChatServices = {
+  transport: createMockAiTransport(),
+  safeRegistry: createSafeRegistry(createShadcnComponentRegistry(), [
+    "Flex",
+    "Card",
+    "Statistic",
+    "Alert",
+    "Button",
+  ]),
+};
+
+/** providers 槽（Router 之内、InteractionKit 之外）：向 DSL 页内 Chat 注入聊天服务 */
+function ChatProvider({ children }: { children?: ReactNode }) {
+  return (
+    <ChatServicesProvider value={chatServices}>{children}</ChatServicesProvider>
+  );
+}
 
 createPactorApplication({
   appId: "example-admin",
@@ -56,6 +90,15 @@ createPactorApplication({
   // 皮肤设置：头部右侧入口（主色预设 / 暗黑 / 圆角），
   // 皮肤应用走 DOM 属性与 CSS 变量（见 skin.ts），即时生效无需刷新
   headerExtra: <SkinSettings />,
+  // Chat 一等组件注册（AI 工作区页）：shadcn 注册表之上叠加 Chat / ChatShell
+  // （registerChatComponent 不覆盖已有同名类型）
+  componentRegistry: () => {
+    const registry = createShadcnComponentRegistry();
+    registerChatComponent(registry);
+    return registry;
+  },
+  // 聊天服务注入：DSL 页内 Chat 经 ChatServicesProvider 就近读取
+  providers: ChatProvider,
   actions: {
     // 整页重载：登录/登出后需要重新加载 bootstrap（布局与菜单随会话变化），
     // react-router 的 navigate 不会触发 bootstrap 重取，故示例扩展此动作

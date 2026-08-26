@@ -1,5 +1,7 @@
 import type { DslNode } from 'pactor-core';
 
+import type { ChatArtifact } from './artifact.js';
+
 /**
  * 消息模型（设计决策 D1，设计文档第 58/59/70 节）：
  * AI Message Rendering Protocol 的数据层——消息 + Part 联合类型 +
@@ -59,7 +61,14 @@ export type ChatPart =
       error?: string;
     }
   | { id?: string; type: 'error'; message: string }
-  | { id?: string; type: 'status'; text: string };
+  | { id?: string; type: 'status'; text: string }
+  | {
+      id?: string;
+      /** 产出物 part（spec: chat-artifact-panel，设计决策 D4）：内联渲染为产出物卡片 */
+      type: 'artifact';
+      artifact: ChatArtifact;
+      status?: PartStatus;
+    };
 
 /** 消息附件引用（上传与存储由调用方负责，包内只持有引用） */
 export interface ChatAttachment {
@@ -98,6 +107,7 @@ export type PartPatch = Partial<{
   error: string;
   message: string;
   text: string;
+  artifact: ChatArtifact;
 }>;
 
 let idCounter = 0;
