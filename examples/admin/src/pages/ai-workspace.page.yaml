@@ -1,0 +1,37 @@
+dsl: '1.0'
+page:
+  id: ai-workspace
+  title: AI 工作区
+
+# AI 工作区页（spec: chat-artifact-panel，设计决策 D5——createPactorApplication
+# 集成路径验证）：body 即一等组件 Chat，运行时服务（transport / safeRegistry）
+# 由 main.tsx 经 options.providers 的 ChatServicesProvider 注入；admin 布局
+# 已有头部，故 showHeader: false 避免双 header。产出物面板闭环同 chat 示例：
+# onArtifact → setState 开面板，onPanelClose → setState 关闭。
+state:
+  panelOpen: false
+  artifact: null
+
+body:
+  type: Chat
+  props:
+    className: ai-workspace-chat
+    showHeader: false
+    greeting: 你好，我是 AI 工作区助手
+    subtitle: 试试「月报」或「页面」口令，产出物将在右侧面板打开
+    conversationId: ai-workspace
+    artifact: ${state.artifact}
+    panelOpen: ${state.panelOpen}
+    suggestions:
+      - { label: 生成一份月报, prompt: 帮我生成一份月报 }
+      - { label: 生成统计页面, prompt: 帮我生成一个统计页面 }
+  events:
+    onArtifact:
+      - action: setState
+        params:
+          artifact: ${event.artifact}
+          panelOpen: true
+    onPanelClose:
+      - action: setState
+        params:
+          panelOpen: false

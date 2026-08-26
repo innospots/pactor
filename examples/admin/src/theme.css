@@ -92,3 +92,17 @@
 [data-pactor-accent='orange'] {
   --primary: oklch(0.553 0.195 42.0);
 }
+
+/* ============================================================
+ * AI 工作区页（pages/ai-workspace.page.yaml 的 Chat）：
+ * admin 内容区随窗口滚动、无固有高度，Chat 工作区（height: 100%）
+ * 需显式定高以启用消息区内部滚动；高度 = 视口 - 头部 - 内容留白
+ * 与面包屑，皮肤 token 取 shadcn 语义变量，随明暗主题自适应。
+ * ============================================================ */
+.ai-workspace-chat {
+  height: calc(100vh - 3.5rem - 9rem);
+  min-height: 420px;
+  border: 1px solid var(--border);
+  border-radius: calc(var(--radius) + 4px);
+  background: var(--background);
+}

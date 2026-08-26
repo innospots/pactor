@@ -1,7 +1,7 @@
 import type { DslNode } from 'pactor-core';
 import { describe, expect, it, vi } from 'vitest';
 
-import type { ChatEvent } from '../src/index.js';
+import type { ChatArtifact, ChatEvent } from '../src/index.js';
 import { applyChatEvent, ConversationStore } from '../src/index.js';
 
 const DSL_SCHEMA: DslNode = {
@@ -187,5 +187,50 @@ describe('applyChatEvent（spec: chat-streaming）', () => {
     const message = store.getMessage('m1')!;
     expect(message.status).toBe('error');
     expect(message.parts[message.parts.length - 1]).toMatchObject({ type: 'error', message: '上游超时' });
+  });
+
+  it('artifact 事件：追加 ready 的 artifact part（spec: chat-artifact-panel / artifact 消息 part）', () => {
+    const store = new ConversationStore();
+    const artifact: ChatArtifact = {
+      id: 'a1',
+      kind: 'code',
+      title: '查询脚本',
+      content: 'SELECT 1',
+      language: 'sql',
+    };
+    applyChatEvent(store, { type: 'message.start', messageId: 'm1' });
+    applyChatEvent(store, { type: 'artifact', messageId: 'm1', artifact });
+
+    const part = store.getMessage('m1')!.parts[0]!;
+    expect(part).toMatchObject({ type: 'artifact', status: 'ready', artifact });
+  });
+
+  it('artifact 事件：partId 命中既有 part 时原地更新（不重复追加）', () => {
+    const store = new ConversationStore();
+    const artifact: ChatArtifact = {
+      id: 'a1',
+      kind: 'text',
+      title: '纪要',
+      content: 'v1',
+    };
+    applyChatEvent(store, {
+      type: 'artifact',
+      messageId: 'm1',
+      partId: 'p1',
+      artifact,
+    });
+    applyChatEvent(store, {
+      type: 'artifact',
+      messageId: 'm1',
+      partId: 'p1',
+      artifact: { ...artifact, content: 'v2' },
+    });
+
+    const parts = store.getMessage('m1')!.parts;
+    expect(parts).toHaveLength(1);
+    expect(parts[0]).toMatchObject({
+      type: 'artifact',
+      artifact: { content: 'v2' },
+    });
   });
 });

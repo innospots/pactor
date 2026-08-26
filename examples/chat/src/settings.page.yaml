@@ -1,0 +1,71 @@
+dsl: '1.0'
+page:
+  id: settings
+  title: 系统设置
+
+# 设置表单页：Form/Input/Select DSL，onSubmit → setState 保存 +
+# message 成功提示；下方卡片绑定 state.saved 回显（提交后出现）。
+state:
+  saved: null
+
+body:
+  type: Page
+  props:
+    title: 系统设置
+  children:
+    - type: Card
+      props:
+        title: 偏好设置
+      children:
+        - type: Form
+          events:
+            onSubmit:
+              # event 为表单值；保存到 state.saved 供下方回显
+              - action: setState
+                params:
+                  saved: ${event}
+              - action: message
+                params:
+                  type: success
+                  text: 设置已保存
+          children:
+            - type: Input
+              props:
+                name: nickname
+                label: 昵称
+                placeholder: 请输入昵称
+                rules:
+                  - required: true
+                    message: 请输入昵称
+            - type: Select
+              props:
+                name: language
+                label: 语言
+                value: zh-CN
+                options:
+                  - { label: 简体中文, value: zh-CN }
+                  - { label: English, value: en-US }
+            - type: Select
+              props:
+                name: theme
+                label: 主题
+                value: system
+                options:
+                  - { label: 跟随系统, value: system }
+                  - { label: 浅色, value: light }
+                  - { label: 深色, value: dark }
+            - type: Button
+              props:
+                text: 保存设置
+                variant: primary
+                submit: true
+    # 提交后回显：when 条件子树（state.saved 为空时不渲染）
+    - type: Card
+      props:
+        title: 当前保存的设置
+      when: ${state.saved}
+      children:
+        - type: Alert
+          props:
+            variant: success
+            message: 昵称 ${state.saved.nickname} · 语言 ${state.saved.language} · 主题 ${state.saved.theme}

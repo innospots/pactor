@@ -1,0 +1,92 @@
+dsl: '1.0'
+page:
+  id: agents
+  title: 我的智能体
+
+# 智能体列表页（spec: chat-dsl-component / examples-chat 路由化）：
+# 白名单组件（Page/Grid/Card/Alert/Button）静态声明 mock 列表；
+# 点击「开始对话」经 DSL navigate 动作跳 /chat?id=xxx —— 页内 runtime
+# 注入了 router adapter（见 App.tsx），chat 页以该 query 作 conversationId，
+# 每个智能体一个独立会话。
+body:
+  type: Page
+  props:
+    title: 我的智能体
+  children:
+    - type: Alert
+      props:
+        variant: info
+        message: 点击智能体进入独立会话：DSL navigate 动作跳转 /chat?id=xxx，会话消息跨页面切换保留。
+    - type: Grid
+      props:
+        columns: 3
+        gap: 16
+      children:
+        - type: Card
+          props:
+            title: 小助手
+          children:
+            - type: Alert
+              props:
+                variant: info
+                message: 通用问答与总结
+            - type: Button
+              props:
+                text: 开始对话
+                variant: primary
+              events:
+                onClick:
+                  action: navigate
+                  params:
+                    to: /chat?id=agent-helper
+        - type: Card
+          props:
+            title: 代码专家
+          children:
+            - type: Alert
+              props:
+                variant: info
+                message: 代码生成与审查
+            - type: Button
+              props:
+                text: 开始对话
+                variant: primary
+              events:
+                onClick:
+                  action: navigate
+                  params:
+                    to: /chat?id=agent-coder
+        - type: Card
+          props:
+            title: 翻译官
+          children:
+            - type: Alert
+              props:
+                variant: info
+                message: 中英互译与润色
+            - type: Button
+              props:
+                text: 开始对话
+                variant: primary
+              events:
+                onClick:
+                  action: navigate
+                  params:
+                    to: /chat?id=agent-translator
+        - type: Card
+          props:
+            title: 数据分析师
+          children:
+            - type: Alert
+              props:
+                variant: info
+                message: 报表解读与月报产出物
+            - type: Button
+              props:
+                text: 开始对话
+                variant: primary
+              events:
+                onClick:
+                  action: navigate
+                  params:
+                    to: /chat?id=agent-analyst

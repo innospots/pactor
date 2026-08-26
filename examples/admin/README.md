@@ -38,6 +38,7 @@ pnpm --filter example-admin build  # 构建（插件构建期强校验全部页�
 - **navigate**：编辑页（`/customers/:id/edit`）提交成功后 `navigate` 回列表；"返回列表"按钮同。
 - **route.params 驱动**：编辑页 detail 数据源入参 `${route.params.id}`。
 - **组件权限 denied**：行内"删除"按钮配置 `permission: { code: 'customer:delete', denied: 'disabled' }`，因未授权以禁用态呈现。
+- **AI 工作区（Chat 一等组件 / 产出物面板）**：菜单"AI 工作区"（`/ai`）页面 body 即 `Chat` DSL 组件——`componentRegistry` 工厂在 shadcn 注册表上叠加 `registerChatComponent`，`options.providers` 包 `ChatServicesProvider` 注入 mock transport（`src/mock-ai.ts`）与 dsl 产出物白名单；「月报」/「页面」口令产出 artifact part → `events.onArtifact` → `setState` 打开右侧产出物面板（含 dsl kind 白名单活预览），`onPanelClose` 关闭。
 - **自定义动作扩展**：`service.call`（写操作调 ServiceRegistry）与 `app.reload`（整页重载，供登录/登出后重取 bootstrap）均经 `options.actions` 注册——框架暂无内置"调用服务"动作（`request` 仅走 HTTP 出口），这是示例侧的扩展点用法。
 
 ## 已知限制

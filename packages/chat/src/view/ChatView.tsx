@@ -1,7 +1,8 @@
 import { ArrowDown } from 'lucide-react';
 import { Registry } from 'pactor-core';
-import { useMemo, useRef, useSyncExternalStore } from 'react';
+import { useEffect, useMemo, useRef, useSyncExternalStore } from 'react';
 
+import type { ChatArtifact } from '../artifact.js';
 import type { ChatConfirm, ChatPermissionChecker } from '../capability-action.js';
 import type { ChatCapabilityRegistry } from '../capability-action.js';
 import { CHAT_DENIED_TYPE } from '../dsl-guard.js';
@@ -73,6 +74,13 @@ export interface ChatViewProps
   subtitle?: string;
   /** 空会话起始建议；空数组 / 未传时不渲染建议区 */
   suggestions?: ChatSuggestion[];
+  /**
+   * artifact part 就绪（status ready）时触发（spec: chat-dsl-component /
+   * 产出物事件）；同一 part 只触发一次，框架不擅自打开面板
+   */
+  onArtifact?: (artifact: ChatArtifact) => void;
+  /** artifact 卡片"在面板中打开"回调（透传 PartRenderer） */
+  onOpenArtifact?: (artifact: ChatArtifact) => void;
   className?: string;
 }
 
@@ -103,6 +111,8 @@ export function ChatView({
   subtitle,
   suggestions,
   className,
+  onArtifact,
+  onOpenArtifact,
   attachments,
   onAttachmentsChange,
   onAttachFiles,
@@ -145,6 +155,33 @@ export function ChatView({
     () => ({ conversation: { id: conversationId }, params }),
     [conversationId, params],
   );
+
+  // 产出物事件（spec: chat-dsl-component / 产出物事件）：assistant 消息中
+  // artifact part 就绪（status ready，缺省视为 ready）时触发一次；
+  // 是否开面板由宿主 / DSL 决定，框架不擅自抢焦点
+  const notifiedArtifactsRef = useRef<Set<string>>(new Set());
+  useEffect(() => {
+    if (!onArtifact) {
+      return;
+    }
+    for (const message of messages) {
+      if (message.role !== 'assistant') {
+        continue;
+      }
+      message.parts.forEach((part, index) => {
+        if (
+          part.type === 'artifact' &&
+          (part.status ?? 'ready') === 'ready'
+        ) {
+          const key = `${message.id}:${part.id ?? index}`;
+          if (!notifiedArtifactsRef.current.has(key)) {
+            notifiedArtifactsRef.current.add(key);
+            onArtifact(part.artifact);
+          }
+        }
+      });
+    }
+  }, [messages, onArtifact]);
 
   // 当前 turn 的取消控制器
   const abortRef = useRef<AbortController | null>(null);
@@ -223,6 +260,7 @@ export function ChatView({
               onRegenerate={transport ? handleRegenerate : undefined}
               onRetry={transport ? handleRegenerate : undefined}
               onEditResend={(text) => handleEditResend(message.id, text)}
+              onOpenArtifact={onOpenArtifact}
             />
           ))
         )}

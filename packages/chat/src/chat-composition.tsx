@@ -5,13 +5,16 @@ import {
   isValidElement,
   useRef,
   useState,
+  useSyncExternalStore,
   type ReactNode,
 } from 'react';
 
+import { ArtifactStore, type ChatArtifact } from './artifact.js';
 import type { ChatWorkspaceServices } from './chat-workspace.js';
 import type { ChatAttachment } from './model.js';
 import { ConversationStore } from './store.js';
 import { AppShell } from './view/AppShell.js';
+import { ArtifactPanel } from './view/ArtifactPanel.js';
 import { ChatView } from './view/ChatView.js';
 import type { ChatSuggestion } from './view/EmptyState.js';
 
@@ -113,6 +116,20 @@ export interface ChatCompositionProps {
   className?: string;
   /** 发送回调：在 services.onSend 之后触发，均在 transport turn 之前 */
   onSend?: (text: string) => void;
+  /**
+   * 产出物面板（spec: chat-artifact-panel，设计决策 D2）——受控优先：
+   * `panelOpen` 或 `artifact` 任一提供即全受控（以 props 为准，panelOpen
+   * 缺省随 artifact 是否存在推导）；都未提供时由内部 / 注入的
+   * ArtifactStore 状态驱动。都未配置且面板未打开时不渲染面板 DOM。
+   */
+  artifact?: ChatArtifact | null;
+  panelOpen?: boolean;
+  /** 面板关闭按钮 / 窄屏遮罩点击回调（DSL 侧典型接法：setState panelOpen=false） */
+  onPanelClose?: () => void;
+  /** 面板内容槽：提供时整体替代内建渲染器（标题栏保留） */
+  inspector?: ReactNode;
+  /** artifact part 就绪（status ready）时触发（透传 ChatView） */
+  onArtifact?: (artifact: ChatArtifact) => void;
 }
 
 /**
@@ -136,6 +153,11 @@ export function ChatComposition({
   toolbarEnd,
   className,
   onSend,
+  artifact,
+  panelOpen,
+  onPanelClose,
+  inspector,
+  onArtifact,
 }: ChatCompositionProps): ReactNode {
   // store 首渲染确定、ref 保持：重渲染 / props 变化不重建（决策 D2）
   const storeRef = useRef<ConversationStore | null>(null);
@@ -144,6 +166,43 @@ export function ChatComposition({
       services.store ?? services.storeFactory?.() ?? new ConversationStore();
   }
   const store = storeRef.current;
+
+  // ArtifactStore（决策 D1）：与 ConversationStore 同款 ref 自持 +
+  // services.artifactStore 注入；受控模式下仍可被卡片按钮安全调用
+  const artifactStoreRef = useRef<ArtifactStore | null>(null);
+  if (artifactStoreRef.current === null) {
+    artifactStoreRef.current = services.artifactStore ?? new ArtifactStore();
+  }
+  const artifactStore = artifactStoreRef.current;
+
+  // 受控规则（决策 D2）：panelOpen 或 artifact 任一提供即全受控
+  const panelControlled = panelOpen !== undefined || artifact !== undefined;
+  const storeArtifact = useSyncExternalStore(
+    (listener) => artifactStore.subscribe(listener),
+    () => artifactStore.get(),
+  );
+  const effectiveArtifact = panelControlled
+    ? (artifact ?? null)
+    : storeArtifact;
+  const effectivePanelOpen = panelControlled
+    ? (panelOpen ?? artifact != null)
+    : storeArtifact !== null;
+
+  // 关闭：受控只回调（面板不单方面改外部状态）；非受控同时落 store
+  const handlePanelClose = (): void => {
+    onPanelClose?.();
+    if (!panelControlled) {
+      artifactStore.close();
+    }
+  };
+
+  // 卡片"在面板中打开"：纯 React / 非受控场景的开面板入口（决策 D4）；
+  // 受控场景由 DSL onArtifact 事件 + setState 闭环开面板
+  const handleOpenArtifact = (next: ChatArtifact): void => {
+    if (!panelControlled) {
+      artifactStore.open(next);
+    }
+  };
 
   // 附件受控状态：宿主 onAttachFiles 回传的附件追加；发送后清空
   const [attachments, setAttachments] = useState<ChatAttachment[]>([]);
@@ -213,13 +272,54 @@ export function ChatComposition({
         toolbarEnd={mergedToolbarEnd}
         onMentionTrigger={services.onMentionTrigger}
         onPlusMenu={services.onPlusMenu}
+        onArtifact={onArtifact}
+        onOpenArtifact={handleOpenArtifact}
       />
     </div>
   );
 
   // 侧栏：提供时以 AppShell 包裹（侧栏 + 移动端抽屉）
-  if (sidebar) {
-    return <AppShell sidebar={sidebar}>{workspace}</AppShell>;
+  const main = sidebar ? <AppShell sidebar={sidebar}>{workspace}</AppShell> : workspace;
+
+  // 产出物面板（决策 D2）：打开时 workspace 与面板 flex 同行；
+  // 窄屏由 CSS 媒体查询退化为右侧覆盖抽屉（遮罩点击关闭）；
+  // 关闭 / 未配置时不渲染面板 DOM。
+  //
+  // 结构稳定性：面板功能被使用（受控 props / 事件回调 / inspector /
+  // 注入 artifactStore 任一提供）时恒渲染 host 包裹层，面板开关只改
+  // host 内面板子树的显隐——否则 main 在树中的深度随开关变化，整个
+  // ChatView 子树重挂载（composer 草稿丢失、onArtifact 去重 ref 重置
+  // 导致历史 ready part 重放）。功能完全未使用且面板未打开时保持
+  // 直返 main（零渲染承诺不破）。
+  const panelFeatureUsed =
+    artifact !== undefined ||
+    panelOpen !== undefined ||
+    inspector !== undefined ||
+    onPanelClose !== undefined ||
+    onArtifact !== undefined ||
+    services.artifactStore !== undefined;
+  if (!panelFeatureUsed && !effectivePanelOpen) {
+    return main;
   }
-  return workspace;
+  return (
+    <div className="pactor-chat-inspector-host">
+      {main}
+      {effectivePanelOpen ? (
+        <>
+          <div
+            className="pactor-chat-inspector__scrim"
+            aria-hidden
+            onClick={handlePanelClose}
+          />
+          <ArtifactPanel
+            artifact={effectiveArtifact}
+            inspector={inspector}
+            onClose={handlePanelClose}
+            safeRegistry={services.safeRegistry}
+            user={services.user}
+          />
+        </>
+      ) : null}
+    </div>
+  );
 }

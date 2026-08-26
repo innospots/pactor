@@ -73,4 +73,5 @@ export const MOCK_PICKER_ENTRIES: Record<PickerKind, MockPickerEntry[]> = {
   ],
 };
 
-/** 侧栏历史会话已迁移为 chat.page.yaml 的 Chat menu 配置（spec: chat-dsl-component） */
+/** 侧栏历史会话已随路由化重构移除：菜单为页面导航（见 App.tsx DEMO_MENUS），
+ * 智能体列表见 src/agents.page.yaml（mock 条目即上方 MOCK_AGENTS 的静态展开） */

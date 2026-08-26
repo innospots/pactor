@@ -1,5 +1,6 @@
 import type { DslNode } from 'pactor-core';
 
+import type { ChatArtifact } from './artifact.js';
 import type { ChatMessage, ChatPart } from './model.js';
 import { createChatId } from './model.js';
 import type { ConversationStore } from './store.js';
@@ -9,7 +10,8 @@ import type { ConversationStore } from './store.js';
  *
  * 事件对齐 SSE 协议：`message.start` / `text.delta` / `thinking.delta`
  * / `tool.start` / `tool.result` / `dsl.start` / `dsl.complete`
- * / `message.end` / `message.error`（`dsl.patch` V1 不实现）。
+ * / `artifact`（产出物，spec: chat-artifact-panel）/ `message.end`
+ * / `message.error`（`dsl.patch` V1 不实现）。
  */
 
 export type ChatEvent =
@@ -51,6 +53,13 @@ export type ChatEvent =
       type: 'dsl.complete';
       messageId: string;
       schema: DslNode;
+      partId?: string;
+    }
+  | {
+      /** 产出物到达（spec: chat-artifact-panel）：一次性写入 ready 的 artifact part */
+      type: 'artifact';
+      messageId: string;
+      artifact: ChatArtifact;
       partId?: string;
     }
   | { type: 'message.end'; messageId: string }
@@ -208,6 +217,27 @@ export function applyChatEvent(store: ConversationStore, event: ChatEvent): void
           id: event.partId ?? createChatId('part'),
           type: 'dsl',
           schema: event.schema,
+          status: 'ready',
+        });
+      }
+      return;
+    }
+
+    case 'artifact': {
+      ensureMessage(store, event.messageId);
+      const message = store.getMessage(event.messageId)!;
+      // partId 命中既有 artifact part 时原地更新；否则追加 ready part
+      const part = locatePart(message, event.partId, (p) => p.type === 'artifact');
+      if (part) {
+        store.updatePart(event.messageId, part.index, {
+          artifact: event.artifact,
+          status: 'ready',
+        });
+      } else {
+        store.appendPart(event.messageId, {
+          id: event.partId ?? createChatId('part'),
+          type: 'artifact',
+          artifact: event.artifact,
           status: 'ready',
         });
       }

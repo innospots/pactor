@@ -19,6 +19,7 @@
 .pactor-chat-layout,
 .pactor-chat-shell,
 .pactor-chat-workspace,
+.pactor-chat-inspector,
 .pactor-chat-notice {
   --pactor-chat-bg: #ffffff;
   --pactor-chat-fg: #1a1d26;
@@ -53,6 +54,8 @@
   --pactor-chat-sidebar-width: 240px;
   --pactor-chat-shell-topbar-height: 44px;
   --pactor-chat-shell-scrim: rgb(0 0 0 / 40%);
+  /* 产出物面板（spec: chat-artifact-panel）：桌面固定宽右栏 */
+  --pactor-chat-inspector-width: 320px;
 }
 
 .pactor-chat-view {
@@ -261,6 +264,186 @@
   .pactor-chat-shell__topbar {
     display: flex;
   }
+}
+
+/* ------------------------------------------------------------
+ * ArtifactPanel（spec: chat-artifact-panel，设计决策 D2）：
+ * 产出物预览面板。桌面（≥768px）为工作区右侧固定宽栏（flex 同行，
+ * 宽度经 --pactor-chat-inspector-width 可调）；移动端（<768px）
+ * 退化为右侧覆盖抽屉（遮罩点击关闭），与 AppShell 同一断点。
+ * 面板关闭 / 未配置时不渲染 DOM（组合层保证）。
+ * ------------------------------------------------------------ */
+
+/* 面板打开时的同行容器：workspace（或 AppShell）与面板 flex 并排 */
+.pactor-chat-inspector-host {
+  display: flex;
+  height: 100%;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.pactor-chat-inspector-host > .pactor-chat-workspace,
+.pactor-chat-inspector-host > .pactor-chat-shell {
+  flex: 1;
+  min-width: 0;
+}
+
+.pactor-chat-inspector {
+  display: flex;
+  flex-direction: column;
+  width: var(--pactor-chat-inspector-width);
+  flex-shrink: 0;
+  border-left: 1px solid var(--pactor-chat-border);
+  background: var(--pactor-chat-bg);
+  color: var(--pactor-chat-fg);
+  font-size: 14px;
+  line-height: 1.6;
+  overflow: hidden;
+}
+
+.pactor-chat-inspector__header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--pactor-chat-border);
+  flex-shrink: 0;
+}
+
+.pactor-chat-inspector__title {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-family: var(--pactor-chat-font-display);
+  font-size: 14px;
+  font-weight: 600;
+}
+
+/* kind 角标（与产出物卡片角标同款） */
+.pactor-chat-inspector__kind,
+.pactor-chat-artifact-card__kind {
+  flex-shrink: 0;
+  padding: 0 6px;
+  border-radius: 999px;
+  background: var(--pactor-chat-muted);
+  color: var(--pactor-chat-muted-fg);
+  font-size: 11px;
+  line-height: 18px;
+}
+
+.pactor-chat-inspector__close {
+  flex-shrink: 0;
+}
+
+.pactor-chat-inspector__body {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  padding: 12px;
+}
+
+/* code 产出物：只读代码块（language 右上角标，不引高亮依赖） */
+.pactor-chat-inspector__code {
+  position: relative;
+}
+
+.pactor-chat-inspector__code pre {
+  margin: 0;
+  padding: 10px 12px;
+  border: 1px solid var(--pactor-chat-border);
+  border-radius: var(--pactor-chat-radius-md);
+  background: var(--pactor-chat-code-bg);
+  overflow-x: auto;
+  font-size: 12.5px;
+}
+
+.pactor-chat-inspector__code-lang {
+  position: absolute;
+  top: 6px;
+  right: 8px;
+  padding: 0 6px;
+  border-radius: 999px;
+  background: var(--pactor-chat-muted);
+  color: var(--pactor-chat-muted-fg);
+  font-size: 11px;
+  line-height: 18px;
+}
+
+/* text 产出物：预格式文本 */
+.pactor-chat-inspector__text {
+  margin: 0;
+  white-space: pre-wrap;
+  word-break: break-word;
+  font-size: 13px;
+}
+
+/* 窄屏覆盖抽屉遮罩：仅面板打开时渲染；桌面隐藏（同 AppShell scrim 模式） */
+.pactor-chat-inspector__scrim {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+  background: var(--pactor-chat-shell-scrim);
+}
+
+@media (max-width: 767px) {
+  .pactor-chat-inspector {
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    right: 0;
+    z-index: 50;
+    box-shadow: var(--pactor-chat-shadow-composer);
+  }
+
+  .pactor-chat-inspector__scrim {
+    display: block;
+  }
+}
+
+/* ------------------------------------------------------------
+ * 产出物卡片（spec: chat-artifact-panel / artifact 消息 part）：
+ * 消息流内 artifact part 的内联呈现——标题 + kind 角标 + 打开按钮。
+ * ------------------------------------------------------------ */
+
+.pactor-chat-artifact-card {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 8px 0;
+  padding: 10px 12px;
+  border: 1px solid var(--pactor-chat-border);
+  border-radius: var(--pactor-chat-radius-md);
+  background: var(--pactor-chat-card);
+  box-shadow: var(--pactor-chat-shadow-sm);
+}
+
+.pactor-chat-artifact-card__title {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-weight: 600;
+  font-size: 13px;
+}
+
+.pactor-chat-artifact-card__open {
+  flex-shrink: 0;
+  padding: 4px 10px;
+  border: 1px solid var(--pactor-chat-border);
+  border-radius: var(--pactor-chat-radius-sm);
+  background: transparent;
+  color: var(--pactor-chat-primary);
+  font-size: 12px;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.pactor-chat-artifact-card__open:hover {
+  background: var(--pactor-chat-muted);
 }
 
 /* ------------------------------------------------------------

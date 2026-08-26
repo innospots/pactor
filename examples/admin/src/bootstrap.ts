@@ -73,6 +73,15 @@ export function createBootstrap(): Partial<BootstrapResource> &
         permission: 'customer:edit',
       },
       {
+        // AI 工作区：Chat 一等组件页（产出物面板演示），无权限门控
+        id: 'ai-workspace',
+        type: 'page',
+        title: 'AI 工作区',
+        icon: 'chat',
+        path: '/ai',
+        pageId: 'ai-workspace',
+      },
+      {
         // 未授权项：permissions 不含 system:admin，菜单中被过滤；
         // 直接访问 /settings 由 DynamicDslRoute 渲染 403
         id: 'settings',
@@ -84,6 +93,6 @@ export function createBootstrap(): Partial<BootstrapResource> &
       },
     ],
     layout: { type: 'admin', tabs: true, fixedHeader: true, fixedSider: true, breadcrumb: true, collapsible: true, breakpoint: 'lg' },
-    pageVersions: { dashboard: 1, 'customer-list': 1, 'customer-edit': 1 },
+    pageVersions: { dashboard: 1, 'customer-list': 1, 'customer-edit': 1, 'ai-workspace': 1 },
   };
 }
