@@ -38,7 +38,8 @@ describe('Tabs 容器', () => {
       },
     });
 
-    fireEvent.mouseDown(screen.getByText('页签B'));
+    // Base UI Tabs.Tab 在 click 时激活（原 Radix 在 mousedown 时激活）
+    fireEvent.click(screen.getByText('页签B'));
     await vi.waitFor(() => {
       expect(context.state.get('tab')).toBe('b');
     });

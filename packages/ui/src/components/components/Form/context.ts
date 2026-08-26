@@ -4,7 +4,7 @@ import { createContext, useContext } from 'react';
 /**
  * Form 容器上下文（shadcn kit）：Form 组件维护受控 values / 校验错误
  * 并经 React Context 下发；Input / Select 据此判断自身是否在表单内。
- * 不持有 UI 库表单实例，values 由框架侧受控管理（与 Radix kit 同模型）。
+ * 不持有 UI 库表单实例，values 由框架侧受控管理（去原语化，见 design D3）。
  */
 export interface FormContextValue {
   /** 标记后代字段处于 Form 容器内 */

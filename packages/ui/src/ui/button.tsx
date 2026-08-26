@@ -1,11 +1,13 @@
-import { Slot } from '@radix-ui/react-slot';
+import { Button as ButtonPrimitive } from '@base-ui/react/button';
 import { cva, type VariantProps } from 'class-variance-authority';
 import * as React from 'react';
 
 import { cn } from '../lib/utils.js';
 
 /**
- * shadcn/ui Button（vendored 源码，Tailwind v4 版）。
+ * shadcn/ui Button（vendored 源码，Tailwind v4 版，Base UI 原语）。
+ * 官方源码：https://ui.shadcn.com/r/styles/base-nova/button.json
+ * `asChild` 语义经 Base UI 的 `render` 模式消化（合并 props 到唯一子元素）。
  */
 const buttonVariants = cva(
   "inline-flex shrink-0 cursor-pointer items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium outline-none transition-colors focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
@@ -41,19 +43,32 @@ function Button({
   variant,
   size,
   asChild = false,
+  children,
   ...props
 }: React.ComponentProps<'button'> &
   VariantProps<typeof buttonVariants> & {
     asChild?: boolean;
   }) {
-  const Comp = asChild ? Slot : 'button';
+  if (asChild && React.isValidElement(children)) {
+    // asChild（原 Radix Slot）→ Base UI render：行为/props 合并到子元素
+    return (
+      <ButtonPrimitive
+        data-slot="button"
+        className={cn(buttonVariants({ variant, size, className }))}
+        render={children}
+        {...props}
+      />
+    );
+  }
 
   return (
-    <Comp
+    <ButtonPrimitive
       data-slot="button"
       className={cn(buttonVariants({ variant, size, className }))}
       {...props}
-    />
+    >
+      {children}
+    </ButtonPrimitive>
   );
 }
 

@@ -12,6 +12,12 @@ pnpm add pactor-chat pactor-runtime pactor-markdown react
 
 `react >= 18` 为 peer dependency。
 
+视图组件（ChatView / Chat / ChatShell 等）样式自持，使用前引入样式表并给宿主容器显式定高（组件填满父容器，`height: 100%`）：
+
+```ts
+import 'pactor-chat/styles.css';
+```
+
 ## 示例
 
 ```tsx

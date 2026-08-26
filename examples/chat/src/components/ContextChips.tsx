@@ -1,4 +1,5 @@
 import { X } from 'lucide-react';
+import { Badge } from 'pactor-ui/ui';
 
 /**
  * 已选上下文 chip（toolbarStart 区）：由 "+" 菜单选择器确认或
@@ -22,18 +23,18 @@ export function ContextChips({
   return (
     <>
       {chips.map((chip) => (
-        <span key={chip.id} className="demo-chip demo-chip--context">
+        <Badge key={chip.id} variant="secondary" className="gap-1 py-1">
           {chip.label}
           <button
             type="button"
-            className="demo-chip__remove"
+            className="inline-flex cursor-pointer items-center rounded-xs opacity-70 transition-opacity hover:opacity-100"
             title="移除"
             aria-label={`移除${chip.label}`}
             onClick={() => onRemove(chip.id)}
           >
             <X size={11} />
           </button>
-        </span>
+        </Badge>
       ))}
     </>
   );

@@ -151,16 +151,18 @@ function OverlayEntryView({
       >
         <DialogHeader>
           <DialogTitle>{entry.title ?? ''}</DialogTitle>
-          <DialogClose asChild>
-            <button
-              type="button"
-              data-slot="overlay-modal-close"
-              aria-label="关闭"
-              className="absolute top-4 right-4 cursor-pointer rounded-xs opacity-70 transition-opacity hover:opacity-100 focus-visible:ring-[3px] focus-visible:ring-ring/50 focus-visible:outline-none"
-            >
-              <XIcon className="size-4" />
-            </button>
-          </DialogClose>
+          <DialogClose
+            render={
+              <button
+                type="button"
+                data-slot="overlay-modal-close"
+                aria-label="关闭"
+                className="absolute top-4 right-4 cursor-pointer rounded-xs opacity-70 transition-opacity hover:opacity-100 focus-visible:ring-[3px] focus-visible:ring-ring/50 focus-visible:outline-none"
+              >
+                <XIcon className="size-4" />
+              </button>
+            }
+          />
         </DialogHeader>
         <div data-slot="overlay-modal-body">{body}</div>
       </DialogContent>

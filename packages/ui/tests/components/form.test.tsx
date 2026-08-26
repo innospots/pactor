@@ -76,7 +76,7 @@ describe('字段自动包装', () => {
 
     expect(screen.getByText('关键词')).toBeTruthy();
     expect(container.querySelector('[data-slot=form-item]')).not.toBeNull();
-    // label 与控件关联（Radix Form Field 下发 id）
+    // label 与控件关联（label htmlFor ↔ input id，useId 生成）
     expect(screen.getByLabelText('关键词')).toBeTruthy();
   });
 
@@ -290,7 +290,8 @@ describe('Form 初始值', () => {
       ],
     });
 
-    // Radix Select 的 Value 需显式提供选中项文本，否则未打开下拉时显示占位符
+    // Base UI Select 经 Root items 做 value→label 映射：未渲染过 popup 的
+    // 选中项也能在触发器显示 label（原 Radix Select.Value 坑的对应场景）
     expect(screen.getByRole('combobox').textContent).toContain('A 级');
   });
 
@@ -407,5 +408,61 @@ describe('Select 选项', () => {
 
     expect(screen.getByText('城市')).toBeTruthy();
     expect(container.querySelector('[data-slot=form-item]')).not.toBeNull();
+  });
+
+  it('items 映射：选中值对应 item 未渲染过 popup 时触发器显示 label（独立受控值）', () => {
+    // 独立于 Form 的受控值场景：number 值经 items 映射出 label，
+    // 全程未打开下拉（popup 从未渲染）
+    renderDsl({
+      type: 'Select',
+      props: {
+        value: 2,
+        options: [
+          { label: '一档', value: 1 },
+          { label: '二档', value: 2 },
+        ],
+      },
+    });
+
+    const trigger = screen.getByRole('combobox');
+    expect(trigger.textContent).toContain('二档');
+    expect(document.querySelector('[data-slot=select-content]')).toBeNull();
+  });
+
+  it('表单项 label 经 htmlFor 与触发器 id 关联', () => {
+    const { container } = renderDsl({
+      type: 'Form',
+      children: [
+        {
+          type: 'Select',
+          props: {
+            name: 'city',
+            label: '城市',
+            options: [{ label: '杭州', value: 'hz' }],
+          },
+        },
+      ],
+    });
+
+    const formItem = container.querySelector('[data-slot=form-item]')!;
+    const formLabel = formItem.querySelector('label')!;
+    const trigger = formItem.querySelector('[data-slot=select-trigger]')!;
+    expect(formLabel.getAttribute('for')).toBeTruthy();
+    expect(formLabel.getAttribute('for')).toBe(trigger.id);
+  });
+
+  it('表单项 label 经 htmlFor 与 input id 关联', () => {
+    const { container } = renderDsl({
+      type: 'Form',
+      children: [
+        { type: 'Input', props: { name: 'keyword', label: '关键词' } },
+      ],
+    });
+
+    const formItem = container.querySelector('[data-slot=form-item]')!;
+    const formLabel = formItem.querySelector('label')!;
+    const input = formItem.querySelector('input')!;
+    expect(formLabel.getAttribute('for')).toBeTruthy();
+    expect(formLabel.getAttribute('for')).toBe(input.id);
   });
 });

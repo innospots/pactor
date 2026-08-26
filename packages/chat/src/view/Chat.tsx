@@ -83,6 +83,8 @@ export interface ChatProps {
   inspector?: DslNode | ReactNode;
   /** artifact part 就绪时触发（event 作用域含 artifact；框架不擅自开面板） */
   onArtifact?: (artifact: ChatArtifact) => void;
+  /** 产出物卡片"在面板中打开"按钮点击回调（event 作用域含 artifact；受控场景的开面板入口） */
+  onOpenArtifact?: (artifact: ChatArtifact) => void;
   className?: string;
   /** 发送回调：与 transport 驱动 turn 并行（同 ChatView onSend 语义） */
   onSend?: (text: string) => void;
@@ -195,6 +197,7 @@ export function Chat({
   onPanelClose,
   inspector,
   onArtifact,
+  onOpenArtifact,
   className,
   onSend,
   onMenuSelect,
@@ -251,6 +254,7 @@ export function Chat({
       onPanelClose={onPanelClose}
       inspector={resolveSlot(inspector)}
       onArtifact={onArtifact}
+      onOpenArtifact={onOpenArtifact}
     />
   );
 }
@@ -271,12 +275,17 @@ function ChatDslAdapter({
   onMenuSelect,
   onPanelClose,
   onArtifact,
+  onOpenArtifact,
   ...rest
-}: Omit<ChatProps, 'onSend' | 'onMenuSelect' | 'onPanelClose' | 'onArtifact'> & {
+}: Omit<
+  ChatProps,
+  'onSend' | 'onMenuSelect' | 'onPanelClose' | 'onArtifact' | 'onOpenArtifact'
+> & {
   onSend?: DslEventHandler;
   onMenuSelect?: DslEventHandler;
   onPanelClose?: DslEventHandler;
   onArtifact?: DslEventHandler;
+  onOpenArtifact?: DslEventHandler;
 }): ReactNode {
   return (
     <Chat
@@ -293,6 +302,11 @@ function ChatDslAdapter({
       onArtifact={
         onArtifact
           ? (artifact: ChatArtifact) => onArtifact({ artifact })
+          : undefined
+      }
+      onOpenArtifact={
+        onOpenArtifact
+          ? (artifact: ChatArtifact) => onOpenArtifact({ artifact })
           : undefined
       }
     />

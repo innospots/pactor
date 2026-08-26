@@ -108,6 +108,8 @@ components: {
 
 ## 注意事项
 
+自定义组件与槽位内容需要 UI 元素时，推荐用 `pactor-ui/ui` 子路径导出的原语组件（Button / Input / Popover / Dialog 等）——视觉自动跟随语义令牌皮肤，无需自写样式。
+
 - **props 命名避开 `on*`**：props 里 key 以 `on` 开头且值为字符串时渲染器原样保留不求值（事件统一走 `events` 字段）。
 - **组件要"受控友好"**：state/data 变化会触发整棵子树重渲染，组件应纯由 props 驱动，避免内部状态与 DSL 状态双写。
 - **权限注入优先**：denied 策略注入的 `disabled` / `readOnly` 会覆盖 DSL 同名字段，组件应尊重这两个 prop。

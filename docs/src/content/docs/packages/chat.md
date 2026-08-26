@@ -134,6 +134,8 @@ DSL part 经 runtime Renderer 渲染：ComponentRegistry 为 Safe Registry；作
 import 'pactor-chat/styles.css';
 ```
 
+**嵌入契约（spec: chat-app-shell）**：组件样式自持——结构布局（高度、对话列居中、面板贴右）全部由包内样式承担，调用端无需任何覆盖。高度语义为"填满父容器"（`height: 100%`）：嵌入时宿主须给容器显式定高（flex 链或固定高度），standalone 顶层挂载同理（如容器 `height: 100vh`）；父级无定高时退化为内容高度。可调令牌：`--pactor-chat-content-width`（对话列限宽，缺省 768px，置 `none` 关闭）、`--pactor-chat-inspector-width`（产出物面板宽，缺省 320px）、`--pactor-chat-sidebar-width`（侧栏宽）。
+
 换肤契约与 pactor-ui 一致：覆盖 CSS 变量 / `<html data-pactor-theme="dark">` 启用内置暗色 / 直接覆盖 `.pactor-chat-*` class。主要变量：`--pactor-chat-bg/fg/muted/muted-fg/card/border/primary/primary-fg/danger/success`、`--pactor-chat-user-bubble-bg/border`、`--pactor-chat-code-bg`、`--pactor-chat-radius`、`--pactor-chat-font-display`（衬线展示字体栈，用于空状态问候与布局标题）。动画（呼吸文案、发送按钮 streaming 光环、状态图标脉冲）为纯 CSS keyframes。
 
 ## chat 布局注册
@@ -195,8 +197,9 @@ body:
 - **模型**：`ChatArtifact { id, kind: 'markdown' | 'code' | 'text' | 'dsl', title, content, language?, meta? }`；`ArtifactStore`（`get/subscribe/open/update/close`，ConversationStore 同模式，可经 services `artifactStore` 注入）。
 - **受控配置**：`artifact` / `panelOpen` 可绑 `${state.x}`；`events.onPanelClose` 在关闭按钮/遮罩点击时触发（典型接法 setState panelOpen=false）；`inspector?: DslNode | ReactNode` 槽整体替代面板内建渲染。
 - **内建渲染器**按 kind 分发：`markdown` 走 pactor-markdown 安全渲染、`code` 只读代码块（language 角标）、`text` 预格式文本、`dsl` 经 Safe Registry 守卫 + renderChildren 活预览（拦截/失败降级不抛错）。
+- **卡片重开**：消息流内产出物卡片的"在面板中打开"按钮无条件触发 `events.onOpenArtifact`（event 含 artifact），受控 DSL 场景借此重开面板；非受控场景直接 store.open。
 - **LLM → 面板联动**：`ChatPart` 新增 `artifact` part，消息流内联渲染"产出物卡片"（含"在面板中打开"按钮）；part 就绪时触发 `events.onArtifact`（event 作用域含 `artifact`），DSL 侧典型接法 `setState artifact=${event.artifact}, panelOpen=true`——框架不擅自开面板。
-- **布局**：桌面固定宽右栏（`--pactor-chat-inspector-width`，缺省 320px）；窄屏（<768px）退化为右侧覆盖抽屉（遮罩点击关闭）。未配置面板时零渲染。
+- **布局**：桌面固定宽右栏（`--pactor-chat-inspector-width`，缺省 320px），左缘可拖拽实时调宽（夹取 240px ~ 容器宽 70%，内部状态无需受控接线）；窄屏（<768px）退化为右侧覆盖抽屉（遮罩点击关闭）。未配置面板时零渲染。
 
 ```yaml
 state: { panelOpen: false }

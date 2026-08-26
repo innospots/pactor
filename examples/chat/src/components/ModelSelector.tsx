@@ -1,57 +1,56 @@
-import { Check, ChevronDown } from 'lucide-react';
-import { useRef, useState } from 'react';
+import { Check, ChevronDown, ChevronUp } from 'lucide-react';
+import { Button, Popover, PopoverContent, PopoverTrigger } from 'pactor-ui/ui';
+import { useState } from 'react';
 
 import { MOCK_MODELS } from '../mock-data';
-import { AnchoredPopup } from './AnchoredPopup';
 
 /**
  * 模型选择 chip（对应参考页 composer 右侧模型选择器）：
  * 当前模型 + 下拉弹层，选择结果仅是演示 UI 状态。
+ * 弹层经 Popover（触发器即 chip 按钮，向上锚定），Escape / 外部点击关闭。
  */
 export function ModelSelector() {
   const [current, setCurrent] = useState(MOCK_MODELS[0]!);
-  const [anchorRect, setAnchorRect] = useState<DOMRect | null>(null);
-  const buttonRef = useRef<HTMLButtonElement>(null);
-
-  const toggle = (): void => {
-    setAnchorRect((prev) =>
-      prev ? null : buttonRef.current!.getBoundingClientRect(),
-    );
-  };
+  const [open, setOpen] = useState(false);
 
   return (
-    <>
-      <button
-        ref={buttonRef}
-        type="button"
-        className="demo-chip demo-chip--interactive"
-        title="选择模型"
-        onClick={toggle}
-      >
-        模型: {current.label}
-        <ChevronDown size={12} className={anchorRect ? 'demo-chip__chevron--open' : undefined} />
-      </button>
-      {anchorRect && (
-        <AnchoredPopup rect={anchorRect} onClose={() => setAnchorRect(null)}>
-          {MOCK_MODELS.map((model) => (
-            <button
-              key={model.value}
-              type="button"
-              role="menuitem"
-              className={`demo-popup__item demo-popup__item--row${
-                model.value === current.value ? ' demo-popup__item--active' : ''
-              }`}
-              onClick={() => {
-                setCurrent(model);
-                setAnchorRect(null);
-              }}
+    <Popover open={open} onOpenChange={setOpen}>
+      <PopoverTrigger
+        render={
+          <Button
+            variant="outline"
+            size="sm"
+            className="rounded-xl"
+            title="选择模型"
+          >
+            模型: {current.label}
+            {open ? <ChevronUp size={12} /> : <ChevronDown size={12} />}
+          </Button>
+        }
+      />
+      <PopoverContent side="top" align="start" sideOffset={8} className="w-52 p-1">
+        {MOCK_MODELS.map((model) => (
+          <button
+            key={model.value}
+            type="button"
+            role="menuitem"
+            className="flex w-full cursor-pointer items-center gap-2 rounded-md px-3 py-2 text-left text-sm hover:bg-accent"
+            onClick={() => {
+              setCurrent(model);
+              setOpen(false);
+            }}
+          >
+            <span
+              className={
+                model.value === current.value ? 'font-semibold' : undefined
+              }
             >
-              <span className="demo-popup__item-label">{model.label}</span>
-              {model.value === current.value && <Check size={13} />}
-            </button>
-          ))}
-        </AnchoredPopup>
-      )}
-    </>
+              {model.label}
+            </span>
+            {model.value === current.value && <Check size={13} />}
+          </button>
+        ))}
+      </PopoverContent>
+    </Popover>
   );
 }

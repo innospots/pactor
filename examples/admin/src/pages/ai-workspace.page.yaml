@@ -35,3 +35,9 @@ body:
       - action: setState
         params:
           panelOpen: false
+    # 产出物卡片"在面板中打开"：受控场景的重开面板入口
+    onOpenArtifact:
+      - action: setState
+        params:
+          artifact: ${event.artifact}
+          panelOpen: true
