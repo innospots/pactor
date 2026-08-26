@@ -87,12 +87,12 @@ document.documentElement.removeAttribute('data-pactor-theme');
 
 | token | 默认值 | 说明 |
 | --- | --- | --- |
-| `--radius` | `0.625rem` | 圆角基准；`rounded-sm/md/lg/xl` 由其加减派生 |
+| `--radius` | `0.625rem` | 圆角基准；`rounded-sm/md/lg/xl/2xl/3xl/4xl` 由其乘法派生（0.6/0.8/1/1.4/1.8/2.2/2.6） |
 
 ## 工具类桥接（`@theme inline`）
 
 语义令牌经 `@theme inline` 映射为 Tailwind 颜色工具类（`bg-background` / `text-foreground` / `bg-card` / `bg-popover` / `bg-primary` / `text-primary-foreground` / `bg-secondary` / `bg-muted` / `text-muted-foreground` / `bg-accent` / `bg-destructive` / `border-border` / `border-input` / `ring-ring` 等）与圆角阶梯（`rounded-sm` … `rounded-xl`）。业务自写的扩展组件也可以直接使用这些工具类，自动跟随皮肤。
 
-:::note[preflight 关闭]
-预建样式表只含 theme + utilities 两层与令牌定义，**不注入全局 reset**——宿主页面的全局样式零影响。代价是组件内的边框类都显式带颜色（`border-border` / `border-input`），自定义扩展时请同样显式指定边框色。
+:::note[preflight 开启（shadcn 官方基线）]
+预建样式表与 [shadcn 官方主题脚手架](https://ui.shadcn.com/docs/theming)一致：完整 `tailwindcss`（含 preflight）+ `tw-animate-css` 动画层 + 官方 base layer（`* { border-border outline-ring/50 }`、`body { bg-background text-foreground }`）。导入 `pactor-ui/styles.css` 即接受该基线全局样式；宿主自定义皮肤 CSS 须在其后导入。
 :::

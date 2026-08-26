@@ -146,7 +146,7 @@ export function Select({
     return (
       <Field name={name} data-slot="form-item" className={formItemClass(form.layout)}>
         {label ? (
-          <Label className="text-sm leading-none font-medium">{label}</Label>
+          <Label className="shrink-0 text-sm leading-none font-medium whitespace-nowrap">{label}</Label>
         ) : null}
         {select}
         {error ? (
