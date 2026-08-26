@@ -53,7 +53,7 @@ describe('样式表', () => {
     expect(pkg.sideEffects).toContain('./styles.css');
   });
 
-  it('样式源文件定义 shadcn 语义令牌与 [data-pactor-theme=dark] 暗色覆盖，且不含 preflight', () => {
+  it('样式源文件定义 shadcn 语义令牌与 [data-pactor-theme=dark] 暗色覆盖，含 preflight 与动画层', () => {
     const css = readFileSync(
       new URL('../../src/styles.css', import.meta.url),
       'utf8',
@@ -72,13 +72,19 @@ describe('样式表', () => {
       '--input',
       '--ring',
       '--radius',
+      '--chart-1',
+      '--chart-5',
+      '--sidebar',
+      '--sidebar-ring',
     ]) {
       expect(css, token).toContain(token);
     }
     expect(css).toContain("[data-pactor-theme='dark']");
-    // preflight 关闭：只引入 theme + utilities 两层
-    expect(css).not.toContain('tailwindcss/preflight');
-    expect(css).toContain("tailwindcss/theme.css");
-    expect(css).toContain("tailwindcss/utilities.css");
+    // preflight 开启（官方基线）：完整 tailwindcss 导入 + tw-animate-css 动画层
+    expect(css).toContain("@import 'tailwindcss'");
+    expect(css).toContain("tw-animate-css");
+    // accordion 关键帧（vendored Accordion 的 animate-[accordion-*] 任意值类依赖）
+    expect(css).toContain('@keyframes accordion-down');
+    expect(css).toContain('@keyframes accordion-up');
   });
 });

@@ -62,7 +62,7 @@ export function ShadcnLoginLayout({
           <CardTitle className="sr-only">{brand.title}</CardTitle>
           {brandBlock}
         </CardHeader>
-        <CardContent className="px-6">{children}</CardContent>
+        <CardContent className="flex flex-col gap-4 px-6">{children}</CardContent>
       </Card>
     </div>
   );

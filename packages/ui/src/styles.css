@@ -3,22 +3,25 @@
  * → 构建期经 Tailwind v4 CLI 编译为包根预建 `styles.css`（pnpm build:styles），
  *   消费方仅 `import 'pactor-ui/styles.css'`，无需自身 Tailwind 配置。
  *
- * 设计决策（见 openspec/changes/add-ui-shadcn-kit/design.md D1/D4）：
- * - **preflight 关闭**：只引入 theme + utilities 两层（不含 Tailwind preflight），
- *   不注入全局 reset / 元素选择器，宿主页面全局样式零影响（admin 示例无视觉回归）。
- *   代价：vendored 组件内所有 border 类均显式带颜色（border-border / border-input
- *   等），不依赖 preflight 的默认边框色。
- * - **主题令牌**：shadcn 语义变量（--background/--foreground/--primary/…）定义在
- *   `:root`，暗色经 `[data-pactor-theme='dark']` 属性覆盖（全仓既有约定，
- *   不用 shadcn 默认的 .dark class）；成功/警告/信息色补充 --success/--warning/--info
- *   供 Alert 四态使用。
+ * 设计决策（见 openspec/changes/align-ui-shadcn-theme/design.md）：
+ * - **preflight 开启**：完整 `@import 'tailwindcss'`，与 shadcn 官方主题脚手架一致
+ *   （https://ui.shadcn.com/docs/theming）。导入本样式表即接受 shadcn 基线全局样式
+ *   （box-sizing/边距归零/元素字体继承等）；pactor-ui 作为应用的 UI 基线，与任何
+ *   shadcn 应用的前提相同。示例自有皮肤（theme.css/app.css）须在本样式表之后导入。
+ * - **主题令牌**：shadcn 语义变量（--background/--foreground/--primary/…，含
+ *   chart-1..5 与 sidebar 系列）定义在 `:root`，暗色经 `[data-pactor-theme='dark']`
+ *   属性覆盖（全仓既有约定，不用官方 .dark class）；radius 派生为乘法比例
+ *   （sm 0.6 / md 0.8 / lg 基准 / xl 1.4 / 2xl 1.8 / 3xl 2.2 / 4xl 2.6）；
+ *   成功/警告/信息色补充 --success/--warning/--info 供 Alert 四态使用。
+ * - **动画层**：`tw-animate-css`（官方推荐）提供 animate-in/out、fade/zoom/slide
+ *   工具类；accordion-down/up 关键帧本地定义（官方原在 tailwind config 中定义）。
  * - `@theme inline` 把语义变量桥接为 Tailwind 颜色工具类
  *   （bg-background / text-foreground / border-border / ring-ring …），
  *   工具类运行时读 var()，主题切换无需重新构建。
  */
 
-@import 'tailwindcss/theme.css' layer(theme);
-@import 'tailwindcss/utilities.css' layer(utilities);
+@import 'tailwindcss';
+@import 'tw-animate-css';
 
 /* 语义令牌 → 工具类桥接（运行时解析 var()，支持暗色覆盖与宿主换肤） */
 @theme inline {
@@ -44,65 +47,135 @@
   --color-border: var(--border);
   --color-input: var(--input);
   --color-ring: var(--ring);
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
 
-  --radius-sm: calc(var(--radius) - 4px);
-  --radius-md: calc(var(--radius) - 2px);
+  --radius-sm: calc(var(--radius) * 0.6);
+  --radius-md: calc(var(--radius) * 0.8);
   --radius-lg: var(--radius);
-  --radius-xl: calc(var(--radius) + 4px);
+  --radius-xl: calc(var(--radius) * 1.4);
+  --radius-2xl: calc(var(--radius) * 1.8);
+  --radius-3xl: calc(var(--radius) * 2.2);
+  --radius-4xl: calc(var(--radius) * 2.6);
 }
 
+/* shadcn 默认 neutral 主题（light） */
+:root {
+  --radius: 0.625rem;
+  --background: oklch(1 0 0);
+  --foreground: oklch(0.145 0 0);
+  --card: oklch(1 0 0);
+  --card-foreground: oklch(0.145 0 0);
+  --popover: oklch(1 0 0);
+  --popover-foreground: oklch(0.145 0 0);
+  --primary: oklch(0.205 0 0);
+  --primary-foreground: oklch(0.985 0 0);
+  --secondary: oklch(0.97 0 0);
+  --secondary-foreground: oklch(0.205 0 0);
+  --muted: oklch(0.97 0 0);
+  --muted-foreground: oklch(0.556 0 0);
+  --accent: oklch(0.97 0 0);
+  --accent-foreground: oklch(0.205 0 0);
+  --destructive: oklch(0.577 0.245 27.325);
+  --destructive-foreground: oklch(0.985 0 0);
+  /* Alert 四态补充色（契约语义色，非 shadcn 默认令牌） */
+  --success: oklch(0.696 0.17 162.48);
+  --warning: oklch(0.769 0.188 70.08);
+  --info: oklch(0.623 0.214 259.815);
+  --border: oklch(0.922 0 0);
+  --input: oklch(0.922 0 0);
+  --ring: oklch(0.708 0 0);
+  --chart-1: oklch(0.646 0.222 41.116);
+  --chart-2: oklch(0.6 0.118 184.704);
+  --chart-3: oklch(0.398 0.07 227.392);
+  --chart-4: oklch(0.828 0.189 84.429);
+  --chart-5: oklch(0.769 0.188 70.08);
+  --sidebar: oklch(0.985 0 0);
+  --sidebar-foreground: oklch(0.145 0 0);
+  --sidebar-primary: oklch(0.205 0 0);
+  --sidebar-primary-foreground: oklch(0.985 0 0);
+  --sidebar-accent: oklch(0.97 0 0);
+  --sidebar-accent-foreground: oklch(0.205 0 0);
+  --sidebar-border: oklch(0.922 0 0);
+  --sidebar-ring: oklch(0.708 0 0);
+}
+
+/* 暗色皮肤：全仓约定的属性开关（挂在根或任意容器上） */
+[data-pactor-theme='dark'] {
+  --background: oklch(0.145 0 0);
+  --foreground: oklch(0.985 0 0);
+  --card: oklch(0.205 0 0);
+  --card-foreground: oklch(0.985 0 0);
+  --popover: oklch(0.205 0 0);
+  --popover-foreground: oklch(0.985 0 0);
+  --primary: oklch(0.922 0 0);
+  --primary-foreground: oklch(0.205 0 0);
+  --secondary: oklch(0.269 0 0);
+  --secondary-foreground: oklch(0.985 0 0);
+  --muted: oklch(0.269 0 0);
+  --muted-foreground: oklch(0.708 0 0);
+  --accent: oklch(0.269 0 0);
+  --accent-foreground: oklch(0.985 0 0);
+  --destructive: oklch(0.704 0.191 22.216);
+  --destructive-foreground: oklch(0.985 0 0);
+  --success: oklch(0.696 0.17 162.48);
+  --warning: oklch(0.769 0.188 70.08);
+  --info: oklch(0.623 0.214 259.815);
+  --border: oklch(1 0 0 / 10%);
+  --input: oklch(1 0 0 / 15%);
+  --ring: oklch(0.556 0 0);
+  --chart-1: oklch(0.488 0.243 264.376);
+  --chart-2: oklch(0.696 0.17 162.48);
+  --chart-3: oklch(0.769 0.188 70.08);
+  --chart-4: oklch(0.627 0.265 303.9);
+  --chart-5: oklch(0.645 0.246 16.439);
+  --sidebar: oklch(0.205 0 0);
+  --sidebar-foreground: oklch(0.985 0 0);
+  --sidebar-primary: oklch(0.488 0.243 264.376);
+  --sidebar-primary-foreground: oklch(0.985 0 0);
+  --sidebar-accent: oklch(0.269 0 0);
+  --sidebar-accent-foreground: oklch(0.985 0 0);
+  --sidebar-border: oklch(1 0 0 / 10%);
+  --sidebar-ring: oklch(0.556 0 0);
+}
+
+/* Accordion 展开/收起关键帧（官方原在 tailwind config 中定义） */
+@keyframes accordion-down {
+  from {
+    height: 0;
+  }
+  to {
+    height: var(--radix-accordion-content-height);
+  }
+}
+
+@keyframes accordion-up {
+  from {
+    height: var(--radix-accordion-content-height);
+  }
+  to {
+    height: 0;
+  }
+}
+
+/* 官方 base layer：默认边框色/焦点环色 + 页面底色与文字色 */
 @layer base {
-  :root {
-    /* shadcn 默认 neutral 主题（light） */
-    --background: oklch(1 0 0);
-    --foreground: oklch(0.145 0 0);
-    --card: oklch(1 0 0);
-    --card-foreground: oklch(0.145 0 0);
-    --popover: oklch(1 0 0);
-    --popover-foreground: oklch(0.145 0 0);
-    --primary: oklch(0.205 0 0);
-    --primary-foreground: oklch(0.985 0 0);
-    --secondary: oklch(0.97 0 0);
-    --secondary-foreground: oklch(0.205 0 0);
-    --muted: oklch(0.97 0 0);
-    --muted-foreground: oklch(0.556 0 0);
-    --accent: oklch(0.97 0 0);
-    --accent-foreground: oklch(0.205 0 0);
-    --destructive: oklch(0.577 0.245 27.325);
-    --destructive-foreground: oklch(0.985 0 0);
-    /* Alert 四态补充色（契约语义色，非 shadcn 默认令牌） */
-    --success: oklch(0.696 0.17 162.48);
-    --warning: oklch(0.769 0.188 70.08);
-    --info: oklch(0.623 0.214 259.815);
-    --border: oklch(0.922 0 0);
-    --input: oklch(0.922 0 0);
-    --ring: oklch(0.708 0 0);
-    --radius: 0.625rem;
+  * {
+    @apply border-border outline-ring/50;
   }
 
-  /* 暗色皮肤：全仓约定的属性开关（挂在根或任意容器上） */
-  [data-pactor-theme='dark'] {
-    --background: oklch(0.145 0 0);
-    --foreground: oklch(0.985 0 0);
-    --card: oklch(0.205 0 0);
-    --card-foreground: oklch(0.985 0 0);
-    --popover: oklch(0.205 0 0);
-    --popover-foreground: oklch(0.985 0 0);
-    --primary: oklch(0.922 0 0);
-    --primary-foreground: oklch(0.205 0 0);
-    --secondary: oklch(0.269 0 0);
-    --secondary-foreground: oklch(0.985 0 0);
-    --muted: oklch(0.269 0 0);
-    --muted-foreground: oklch(0.708 0 0);
-    --accent: oklch(0.269 0 0);
-    --accent-foreground: oklch(0.985 0 0);
-    --destructive: oklch(0.704 0.191 22.216);
-    --destructive-foreground: oklch(0.985 0 0);
-    --success: oklch(0.696 0.17 162.48);
-    --warning: oklch(0.769 0.188 70.08);
-    --info: oklch(0.623 0.214 259.815);
-    --border: oklch(1 0 0 / 10%);
-    --input: oklch(1 0 0 / 15%);
-    --ring: oklch(0.556 0 0);
+  body {
+    @apply bg-background text-foreground;
   }
 }

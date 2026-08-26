@@ -71,7 +71,7 @@ import 'pactor-ui/styles.css';
 
 - **主题令牌**：shadcn 语义变量（`--background` / `--foreground` / `--card` / `--popover` / `--primary` / `--secondary` / `--muted` / `--accent` / `--destructive` / `--border` / `--input` / `--ring` / `--radius`，另补充 `--success` / `--warning` / `--info` 供 Alert 四态）定义在 `:root`，经 `@theme inline` 桥接为 `bg-primary` / `text-muted-foreground` 等工具类——工具类运行时读 `var()`，**覆盖变量即换肤，无需重新构建**；
 - **暗色皮肤**：`<html data-pactor-theme="dark">`（可挂任意容器），与全仓约定一致；
-- **preflight 关闭**：样式表只含 theme + utilities 两层与令牌定义，不注入全局 reset，宿主页面全局样式零影响；
+- **preflight 开启（shadcn 官方基线）**：完整 `tailwindcss`（含 preflight）+ `tw-animate-css` 动画层 + 官方 base layer，与 [shadcn 官方主题脚手架](https://ui.shadcn.com/docs/theming)一致；导入 `styles.css` 即接受基线全局样式，宿主皮肤 CSS 须在其后导入；
 - 结构钩子为 `data-slot` 属性（如 `[data-slot=admin-layout]` / `[data-slot=button]` / `[data-slot=toast]`），供结构性覆盖与测试定位。
 
 换肤参考实现见 `examples/admin/src/theme.css`（token 覆盖 / data-slot 结构覆盖 / 主色预设）。

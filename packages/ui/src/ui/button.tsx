@@ -6,7 +6,6 @@ import { cn } from '../lib/utils.js';
 
 /**
  * shadcn/ui Button（vendored 源码，Tailwind v4 版）。
- * 说明：本包不启用 preflight，outline 变体显式带 border-border。
  */
 const buttonVariants = cva(
   "inline-flex shrink-0 cursor-pointer items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium outline-none transition-colors focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
