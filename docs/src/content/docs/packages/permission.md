@@ -66,7 +66,7 @@ const runtime = createPageRuntime(pageDsl, {
 - **Action 层**：动作配置无权限的 permission 时被 Action 引擎拦截，返回 `{ ok: false }`（denied 策略对动作无意义，对象形式只判定 `code`）。
 
 :::note
-`disabled` / `readOnly` prop 并非所有组件都支持，组件适配层自行映射（如 antd Input 的 `readOnly`）。不接入 pactor-permission 时（默认适配器放行）行为完全不变。
+`disabled` / `readOnly` prop 并非所有组件都支持，组件适配层自行映射。不接入 pactor-permission 时（默认适配器放行）行为完全不变。
 :::
 
 ## Menu / Page 守卫（纯函数）

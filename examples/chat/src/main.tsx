@@ -1,5 +1,5 @@
-import 'antd/dist/reset.css';
 import 'katex/dist/katex.min.css';
+import 'pactor-ui/styles.css';
 import 'pactor-chat/styles.css';
 import './app.css';
 

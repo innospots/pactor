@@ -10,7 +10,6 @@
     "ai",
     "llm",
     "streaming",
-    "antd",
     "react"
   ],
   "license": "MIT",
@@ -70,9 +69,8 @@
     "@testing-library/react": "^16.3.2",
     "@types/react": "^19.2.18",
     "@types/react-dom": "^19.2.4",
-    "antd": "^6.6.0",
     "jsdom": "^30.0.1",
-    "pactor-ui-antd": "workspace:*",
+    "pactor-ui": "workspace:*",
     "react": "^19.2.8",
     "react-dom": "^19.2.8"
   }

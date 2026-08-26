@@ -114,7 +114,7 @@ describe('application-shell：页面加载与错误处理', () => {
     expect(screen.getByText('网络异常：页面加载失败')).toBeTruthy();
 
     available = true;
-    fireEvent.click(screen.getByRole('button', { name: '重 试' }));
+    fireEvent.click(screen.getByRole('button', { name: '重试' }));
     await screen.findByText('修复后的页面');
   });
 
@@ -148,9 +148,9 @@ describe('application-shell：页面加载与错误处理', () => {
     await screen.findByText('页面渲染异常');
     // 外壳（品牌区 / 菜单）仍在
     expect(
-      target.querySelector('.pcr-admin-brand')?.textContent,
+      target.querySelector('[data-slot=admin-brand]')?.textContent,
     ).toBe('风控运营平台');
-    expect(target.querySelectorAll('.pcr-menu-item')).toHaveLength(1);
+    expect(target.querySelectorAll('[data-slot=menu-item]')).toHaveLength(1);
   });
 });
 
@@ -162,14 +162,14 @@ describe('application-shell：布局包裹', () => {
 
     await screen.findByText('欢迎使用 Pactor');
     // 页签（bootstrap.layout.tabs: true）
-    const tabs = target.querySelector('.pcr-admin-tabs');
+    const tabs = target.querySelector('[data-slot=admin-tabs]');
     expect(tabs).not.toBeNull();
     expect(within(tabs as HTMLElement).getByText('首页')).toBeTruthy();
     // 页面内容在 AdminLayout 内容区
-    const content = target.querySelector('.pcr-admin-content');
+    const content = target.querySelector('[data-slot=admin-content]');
     expect(content?.textContent).toContain('欢迎使用 Pactor');
     // 菜单可见
-    expect(target.querySelectorAll('.pcr-menu-item').length).toBeGreaterThan(0);
+    expect(target.querySelectorAll('[data-slot=menu-item]').length).toBeGreaterThan(0);
   });
 
   it('bootstrap.layout 布局配置透传：mode top-bottom 无侧边栏，collapsible 出现收起 trigger', async () => {
@@ -186,10 +186,10 @@ describe('application-shell：布局包裹', () => {
     const target = await mountApp(app);
 
     await screen.findByText('欢迎使用 Pactor');
-    const layout = target.querySelector('.pcr-admin-layout');
+    const layout = target.querySelector('[data-slot=admin-layout]');
     expect(layout?.getAttribute('data-mode')).toBe('top-bottom');
-    expect(target.querySelector('.pcr-admin-sidebar')).toBeNull();
-    expect(target.querySelector('.pcr-admin-footer')).not.toBeNull();
+    expect(target.querySelector('[data-slot=admin-sidebar]')).toBeNull();
+    expect(target.querySelector('[data-slot=admin-footer]')).not.toBeNull();
     await unmountApp(app);
     app = null;
     cleanup();
@@ -208,7 +208,7 @@ describe('application-shell：布局包裹', () => {
     const target2 = await mountApp(app);
     await screen.findByText('欢迎使用 Pactor');
     expect(
-      target2.querySelector('.pcr-admin-collapse-trigger'),
+      target2.querySelector('[data-slot=admin-collapse-trigger]'),
     ).not.toBeNull();
   });
 });

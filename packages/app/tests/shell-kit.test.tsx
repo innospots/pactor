@@ -3,13 +3,13 @@ import './setup.js';
 
 import { cleanup, fireEvent, screen } from '@testing-library/react';
 import type { PageDsl } from 'pactor-core';
-import { createRadixComponentRegistry } from 'pactor-ui-radix/components';
-import {
-  RadixInteractionProvider,
-  RadixOverlayHost,
-} from 'pactor-ui-radix/interaction';
-import { createRadixLayoutRegistry } from 'pactor-ui-radix/layout';
 import { StaticDslLoader } from 'pactor-resource';
+import { createShadcnLayoutRegistry } from 'pactor-ui/layout';
+import type {
+  InteractionProviderProps,
+  OverlayHostProps,
+} from 'pactor-ui/interaction';
+import { useEffect, useSyncExternalStore, type ReactNode } from 'react';
 import { afterEach, describe, expect, it } from 'vitest';
 
 import {
@@ -30,7 +30,7 @@ afterEach(async () => {
   window.history.replaceState({}, '', '/');
 });
 
-/** 含 message 与 overlay.open 动作的首页（两套 UI kit 契约一致，DSL 零修改） */
+/** 含 message 与 overlay.open 动作的首页 */
 const shellPage: PageDsl = {
   dsl: '1.0',
   page: { id: 'home', title: '首页' },
@@ -84,71 +84,111 @@ function createShellApp(
   });
 }
 
-const radixKit = {
-  componentRegistry: createRadixComponentRegistry,
-  layoutRegistry: createRadixLayoutRegistry,
-  interactionKit: {
-    Provider: RadixInteractionProvider,
-    OverlayHost: RadixOverlayHost,
-  },
+/** 自定义交互层 Provider：注入极简 message 实现（DOM 标记），验证 interactionKit 覆盖点 */
+function CustomInteractionProvider({
+  bridge,
+  children,
+}: InteractionProviderProps) {
+  useEffect(() => {
+    const push = (content: unknown) => {
+      const el = document.createElement('div');
+      el.className = 'custom-toast';
+      el.textContent = String(content);
+      document.body.appendChild(el);
+    };
+    bridge.message = {
+      success: push,
+      error: push,
+      info: push,
+      warning: push,
+    };
+    return () => {
+      bridge.message = undefined;
+      bridge.modal = undefined;
+    };
+  }, [bridge]);
+  return <>{children}</>;
+}
+
+/** 自定义 OverlayHost：极简渲染堆栈条目（仅标题），验证 interactionKit 覆盖点 */
+function CustomOverlayHost({ manager }: OverlayHostProps) {
+  const stack = useSyncExternalStore(
+    (onChange) => manager.subscribe(onChange),
+    () => manager.stack(),
+  );
+  return (
+    <>
+      {stack.map((entry) => (
+        <div key={entry.id} className="custom-modal">
+          {entry.title}
+        </div>
+      ))}
+    </>
+  );
+}
+
+const customInteractionKit = {
+  Provider: CustomInteractionProvider,
+  OverlayHost: CustomOverlayHost,
 };
 
-describe('shell-ui-kit-selection：缺省为 Radix', () => {
-  it('不传 layoutRegistry / interactionKit：外壳为 Radix AdminLayout，overlay.open 渲染 Radix Modal', async () => {
+/** 自定义布局注册表：admin 替换为极简实现 */
+function CustomAdminLayout({ children }: { children?: ReactNode }) {
+  return <div className="custom-admin-layout">{children}</div>;
+}
+
+const customLayoutRegistry = () => {
+  const registry = createShadcnLayoutRegistry();
+  registry.unregister('admin');
+  registry.register('admin', CustomAdminLayout);
+  return registry;
+};
+
+describe('shell-ui-kit-selection：缺省为 shadcn（唯一内置实现）', () => {
+  it('不传 layoutRegistry / interactionKit：外壳为 shadcn AdminLayout，overlay.open 渲染 shadcn Modal', async () => {
     app = createShellApp();
     const target = await mountApp(app);
 
     await screen.findByRole('button', { name: '打开弹层' });
-    // 外壳为 Radix 布局
-    expect(target.querySelector('.pcr-admin-layout')).not.toBeNull();
-    expect(target.querySelector('.pcr-menu')).not.toBeNull();
-    expect(target.querySelector('.ant-layout')).toBeNull();
+    // 外壳为 shadcn 布局（data-slot 钩子）
+    expect(target.querySelector('[data-slot=admin-layout]')).not.toBeNull();
+    expect(target.querySelector('[data-slot=menu]')).not.toBeNull();
 
-    // 交互层为 Radix：overlay.open 渲染 Radix Modal
+    // 交互层为 shadcn：overlay.open 渲染 shadcn Modal
     fireEvent.click(screen.getByRole('button', { name: '打开弹层' }));
     await screen.findByText('用户详情');
-    expect(document.querySelector('.pcr-modal-content')).not.toBeNull();
-    expect(document.querySelector('.ant-modal')).toBeNull();
+    expect(document.querySelector('[data-slot=overlay-modal]')).not.toBeNull();
   });
 });
 
-describe('shell-ui-kit-selection：切换 Radix 外壳', () => {
-  it('layoutRegistry 切换：外壳渲染 Radix 布局（.pcr-admin-* 存在，无 .ant-layout）', async () => {
-    app = createShellApp({ layoutRegistry: createRadixLayoutRegistry });
+describe('shell-ui-kit-selection：自定义 kit 覆盖点保留', () => {
+  it('layoutRegistry 切换：外壳渲染自定义布局', async () => {
+    app = createShellApp({ layoutRegistry: customLayoutRegistry });
     const target = await mountApp(app);
 
-    await screen.findByRole('button', { name: /提\s*示/ });
-    expect(target.querySelector('.pcr-admin-layout')).not.toBeNull();
-    expect(target.querySelector('.pcr-admin-header')).not.toBeNull();
-    expect(target.querySelector('.pcr-admin-sidebar')).not.toBeNull();
-    expect(target.querySelector('.ant-layout')).toBeNull();
+    await screen.findByRole('button', { name: '提示' });
+    expect(target.querySelector('.custom-admin-layout')).not.toBeNull();
+    expect(target.querySelector('[data-slot=admin-layout]')).toBeNull();
   });
 
-  it('整站 Radix 切换：overlay.open 与 message 链路可用且均为 Radix 渲染，无 .ant-* 元素', async () => {
-    app = createShellApp(radixKit);
+  it('interactionKit 切换：message / overlay.open 链路走自定义实现', async () => {
+    app = createShellApp({ interactionKit: customInteractionKit });
     const target = await mountApp(app);
 
-    // 页面（Radix 组件）就绪
     await screen.findByRole('button', { name: '打开弹层' });
-    expect(target.querySelector('.pcr-admin-layout')).not.toBeNull();
-    expect(target.querySelector('.pcr-btn-primary')).not.toBeNull();
+    // 外壳仍为 shadcn 默认布局
+    expect(target.querySelector('[data-slot=admin-layout]')).not.toBeNull();
 
-    // message → Radix toast（先触发，避免 Dialog 打开后外部内容 aria-hidden）
+    // message → 自定义 toast
     fireEvent.click(screen.getByRole('button', { name: '提示' }));
     await screen.findByText('保存成功');
-    expect(document.querySelector('.pcr-toast-success')).not.toBeNull();
+    expect(document.querySelector('.custom-toast')).not.toBeNull();
+    expect(document.querySelector('[data-slot=toast]')).toBeNull();
 
-    // overlay.open → Radix Modal
+    // overlay.open → 自定义 modal
     fireEvent.click(screen.getByRole('button', { name: '打开弹层' }));
     await screen.findByText('用户详情');
-    expect(document.querySelector('.pcr-modal-content')).not.toBeNull();
-    await screen.findByRole('button', { name: '弹层按钮' });
-
-    // 全站无 antd 渲染产物
-    expect(document.querySelector('.ant-layout')).toBeNull();
-    expect(document.querySelector('.ant-menu')).toBeNull();
-    expect(document.querySelector('.ant-modal')).toBeNull();
-    expect(document.querySelector('.ant-message')).toBeNull();
-    expect(document.querySelector('.ant-btn')).toBeNull();
+    expect(document.querySelector('.custom-modal')).not.toBeNull();
+    expect(document.querySelector('[data-slot=overlay-modal]')).toBeNull();
   });
 });

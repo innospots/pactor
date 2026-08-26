@@ -7,7 +7,7 @@ import { match } from './path-matcher.js';
  *
  * 菜单声明 `path` + `pageId`，不绑定 React 组件；Dynamic Router 把
  * URL 解析为 pageId 与路由上下文。`keepAlive` / `tab` / `breadcrumb`
- * 等 UI 语义字段由 pactor-ui-antd 的 layout 层消费，本包只保留字段与 activeMenu 解析。
+ * 等 UI 语义字段由 pactor-ui 的 layout 层消费，本包只保留字段与 activeMenu 解析。
  */
 export interface MenuItem {
   id: string;

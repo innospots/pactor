@@ -20,7 +20,7 @@ pactor inspect <file>           输出 DSL 结构摘要（状态 / 数据源 / �
 pactor lint <paths...>          校验 + 静态检查规则（目录递归 .page/.fragment.yaml/.yml）
 pactor schema [-o <file>]       输出 Page DSL JSON Schema（含 node / action 关联 Schema）
 pactor build <src> -o <dir>     递归编译 DSL 为 Runtime Envelope JSON（<out>/<id>.json）
-pactor create <name> [-t app]   从模板生成业务工程（vite + react + pactor-app + pactor-ui-radix）
+pactor create <name> [-t app]   从模板生成业务工程（vite + react + pactor-app + pactor-ui）
 pactor --help                   命令清单
 ```
 

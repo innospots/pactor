@@ -1,31 +1,31 @@
 /**
  * 皮肤 store：主色预设 / 暗黑 / 圆角，localStorage 持久化 + 订阅通知。
  *
- * 与 antd 示例的差异：Radix kit 的主题是 CSS 变量契约（见 guides/theming），
+ * shadcn kit 的主题是 CSS 变量契约（见 guides/theming），
  * 应用皮肤 = 写 DOM（`data-pactor-theme` / `data-pactor-accent` 属性 +
- * `--pcr-radius-*` 内联变量），无需 React Provider 注入组件树。
+ * `--radius` 内联变量），无需 React Provider 注入组件树。
  * store 模块加载时立即应用一次（main.tsx 顶部 import 副作用），
  * SkinSettings 面板经 useSyncExternalStore 读取当前值、setSkin 写入。
  */
 
 export interface Skin {
-  /** 主色预设 key（'default' = 样式表内置刻度，不设属性） */
+  /** 主色预设 key（'default' = 样式表内置令牌，不设属性） */
   accent: string;
   /** 暗黑模式（<html data-pactor-theme="dark">） */
   dark: boolean;
-  /** 控件圆角基准（--pcr-radius-sm，px；md/lg 由此派生） */
+  /** 控件圆角基准（--radius，px；组件 sm/md/lg 圆角由此派生） */
   radius: number;
 }
 
 export const DEFAULT_SKIN: Skin = {
   accent: 'default',
   dark: false,
-  radius: 6,
+  radius: 10,
 };
 
 /** 主色预设色板：key 对应 <html data-pactor-accent="...">，派生规则见 theme.css */
 export const ACCENT_PRESETS = [
-  { key: 'default', color: '#3C47DD', label: '默认靛蓝' },
+  { key: 'default', color: '#171717', label: '默认石墨' },
   { key: 'blue', color: '#1677ff', label: '亮蓝' },
   { key: 'green', color: '#0e7a3d', label: '墨绿' },
   { key: 'purple', color: '#722ed1', label: '紫罗兰' },
@@ -74,13 +74,9 @@ function applySkin(next: Skin): void {
     root.setAttribute('data-pactor-accent', next.accent);
   }
   if (next.radius === DEFAULT_SKIN.radius) {
-    root.style.removeProperty('--pcr-radius-sm');
-    root.style.removeProperty('--pcr-radius-md');
-    root.style.removeProperty('--pcr-radius-lg');
+    root.style.removeProperty('--radius');
   } else {
-    root.style.setProperty('--pcr-radius-sm', `${next.radius}px`);
-    root.style.setProperty('--pcr-radius-md', `${next.radius + 2}px`);
-    root.style.setProperty('--pcr-radius-lg', `${next.radius + 6}px`);
+    root.style.setProperty('--radius', `${next.radius}px`);
   }
 }
 

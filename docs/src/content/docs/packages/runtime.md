@@ -93,7 +93,7 @@ await data.reload();          // 缺省刷新全部 autoLoad 源
 | `if` | 按 `params.condition` 执行 `then` / `else` |
 | `delay` | 等待 `params.ms` 毫秒 |
 
-`navigate` / `message` / `confirm` / `overlay.*` 依赖上层模块，由 pactor-router / pactor-ui-antd 的 interaction 层注册。
+`navigate` / `message` / `confirm` / `overlay.*` 依赖上层模块，由 pactor-router / pactor-ui 的 interaction 层注册。
 
 ## React Renderer
 
@@ -123,5 +123,5 @@ context.components.register('Table', { component: Table, withScope: true });
 另提供 `useRuntimeState(path?)` / `useDataSource(name)` hooks（基于 `useSyncExternalStore`）供组件直接订阅状态。
 
 :::note
-本包不内置任何具体组件。Level 1+ 组件由 pactor-ui-antd 的 components 层提供，经 ComponentRegistry 注册即可被 Renderer 渲染。
+本包不内置任何具体组件。Level 1+ 组件由 pactor-ui 的 components 层提供，经 ComponentRegistry 注册即可被 Renderer 渲染。
 :::

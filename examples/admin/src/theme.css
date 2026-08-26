@@ -1,94 +1,94 @@
 /**
- * example-admin 示例皮肤 —— pactor 换肤契约的可运行参考实现。
- * 必须在 `pactor-ui-radix/styles.css` 之后导入（见 main.tsx）。
+ * example-admin 示例皮肤 —— pactor 换肤契约的可运行参考实现（shadcn kit 版）。
+ * 必须在 `pactor-ui/styles.css` 之后导入（见 main.tsx）。
  *
+ * shadcn kit 的主题契约：语义令牌（--primary / --muted / --border …）挂在
+ * `:root`，暗色覆盖挂 `[data-pactor-theme='dark']`；组件经 Tailwind 工具类
+ * 读取 var()，覆盖变量即全局换肤。结构钩子为 data-slot 属性。
  * 每段注释标注对应的换肤契约条款，完整说明见文档 guides/theming（《主题与换肤》）。
  */
 
 /* ============================================================
  * 1. token 覆盖（契约方式一：覆盖 CSS 变量）
- *    只覆盖要改的语义 token，组件规则全部引用变量，自动跟随。
- *    这里微调次背景（内容区底色 / 表头 / 条纹），light 与 dark 各给一值。
+ *    只覆盖要改的语义 token，组件工具类全部经 var() 引用变量，自动跟随。
+ *    这里微调 muted（内容区底色 / 表头 / 悬浮态），light 与 dark 各给一值。
  * ============================================================ */
 :root {
-  --pcr-bg-subtle: #f3f4f9;
+  --muted: oklch(0.962 0.008 264);
 }
 
 /* 契约方式二：暗色皮肤下叠加同名变量的暗色值 */
 [data-pactor-theme='dark'] {
-  --pcr-bg-subtle: #1a1c22;
+  --muted: oklch(0.25 0.01 264);
 }
 
 /* ============================================================
- * 2. 欢迎横幅（契约方式三：class/结构覆盖）
+ * 2. 欢迎横幅（契约方式三：data-slot 结构覆盖）
  *    DSL 不支持自定义 className，故用结构选择器定位：
  *    内容区第一个、且后随 Grid（指标行）的 Alert 即 dashboard 欢迎横幅。
- *    渐变色取自 accent 刻度 token，dark 下刻度自动切换，无需额外暗色规则。
+ *    渐变取 --primary 语义 token，皮肤设置面板切换主色时跟随。
  * ============================================================ */
-.pcr-page-content > .pcr-alert:first-child:has(+ .pcr-grid) {
+[data-slot='page-content'] > [data-slot='alert']:first-child:has(+ [data-slot='grid']) {
   padding: 20px 24px;
   border-color: transparent;
-  border-radius: var(--pcr-radius-lg);
-  /* 渐变取语义 token（而非 accent 刻度），皮肤设置面板切换主色时跟随 */
+  border-radius: calc(var(--radius) + 4px);
   background: linear-gradient(
     135deg,
-    var(--pcr-accent),
-    var(--pcr-accent-active)
+    var(--primary),
+    color-mix(in oklab, var(--primary) 75%, var(--foreground))
   );
-  color: var(--pcr-accent-fg);
+  color: var(--primary-foreground);
 }
 
-.pcr-page-content > .pcr-alert:first-child:has(+ .pcr-grid) .pcr-alert-message {
-  font-size: var(--pcr-font-size-lg);
+[data-slot='page-content']
+  > [data-slot='alert']:first-child:has(+ [data-slot='grid'])
+  [data-slot='alert-title'] {
+  font-size: 1rem;
   font-weight: 600;
 }
 
-.pcr-page-content
-  > .pcr-alert:first-child:has(+ .pcr-grid)
-  .pcr-alert-description {
-  color: color-mix(in srgb, var(--pcr-accent-fg) 85%, transparent);
+[data-slot='page-content']
+  > [data-slot='alert']:first-child:has(+ [data-slot='grid'])
+  [data-slot='alert-description'] {
+  color: color-mix(in oklab, var(--primary-foreground) 85%, transparent);
 }
 
 /* ============================================================
- * 3. 指标卡 accent 强调条（契约方式三：结构性美化）
- *    含 Statistic 的卡加左侧强调条；accent 为 token，dark 下自动适配。
+ * 3. 指标卡主色强调条（契约方式三：结构性美化）
+ *    含 Statistic 的卡加左侧强调条；--primary 为 token，dark 下自动适配。
  * ============================================================ */
-.pcr-card:has(.pcr-statistic) {
-  border-left: 3px solid var(--pcr-accent);
+[data-slot='card']:has([data-slot='statistic']) {
+  border-left: 3px solid var(--primary);
 }
 
 /* ============================================================
  * 4. 主色预设（皮肤设置面板：skin.ts 在 <html> 上切换
- *    data-pactor-accent 属性；'default' 不设属性，用样式表内置刻度）
- *    预设只声明实体主色 --pcr-accent，其余语义态用 color-mix 派生：
- *    hover/active/text 向 --pcr-fg 靠拢（亮色主题变深、暗色主题变浅），
- *    subtle/border 向 --pcr-bg 靠拢（随明暗主题自适应底色的浅底/边框）。
+ *    data-pactor-accent 属性；'default' 不设属性，用样式表内置令牌）
+ *    预设只声明实体主色 --primary 与其前景 / 焦点环，其余语义态
+ *    （hover / subtle 底）由组件工具类经透明度派生（bg-primary/90 等），
+ *    随明暗主题自适应。
  * ============================================================ */
 [data-pactor-accent] {
-  --pcr-accent-hover: color-mix(in srgb, var(--pcr-accent) 88%, var(--pcr-fg));
-  --pcr-accent-active: color-mix(in srgb, var(--pcr-accent) 78%, var(--pcr-fg));
-  --pcr-accent-text: color-mix(in srgb, var(--pcr-accent) 82%, var(--pcr-fg));
-  --pcr-accent-subtle: color-mix(in srgb, var(--pcr-accent) 12%, var(--pcr-bg));
-  --pcr-accent-border: color-mix(in srgb, var(--pcr-accent) 45%, var(--pcr-bg));
-  --pcr-focus-ring: color-mix(in srgb, var(--pcr-accent) 35%, transparent);
+  --primary-foreground: oklch(0.985 0 0);
+  --ring: var(--primary);
 }
 
 [data-pactor-accent='blue'] {
-  --pcr-accent: #1677ff;
+  --primary: oklch(0.546 0.245 262.881);
 }
 
 [data-pactor-accent='green'] {
-  --pcr-accent: #0e7a3d;
+  --primary: oklch(0.523 0.133 155.0);
 }
 
 [data-pactor-accent='purple'] {
-  --pcr-accent: #722ed1;
+  --primary: oklch(0.512 0.24 300.0);
 }
 
 [data-pactor-accent='magenta'] {
-  --pcr-accent: #eb2f96;
+  --primary: oklch(0.591 0.24 350.0);
 }
 
 [data-pactor-accent='orange'] {
-  --pcr-accent: #d4380d;
+  --primary: oklch(0.553 0.195 42.0);
 }

@@ -15,12 +15,12 @@ Activate this skill when the user works with **Pactor** or any `pactor-*` packag
 - Using `createPactorApplication`, `pactor-app`, or `StaticDslLoader`
 - Writing YAML/JSON DSL pages, components, events, or actions
 - Creating or registering custom components / actions / services
-- Switching or customizing UI kits (Radix / antd)
+- Switching or customizing UI kits (shadcn / custom registries)
 - Configuring themes, skins, layouts, or menus
 - Integrating data sources, routers, resources, or permissions
 - Handling form linkage, event linkage, or action orchestration
 - Using `pactor-vite-plugin` or `pactor-cli`
-- Mentioning packages: `pactor-core`, `pactor-runtime`, `pactor-app`, `pactor-ui-radix`, `pactor-ui-antd`, `pactor-router`, `pactor-resource`, `pactor-permission`, `pactor-expression`, `pactor-schema`, `pactor-chat`, `pactor-markdown`
+- Mentioning packages: `pactor-core`, `pactor-runtime`, `pactor-app`, `pactor-ui`, `pactor-router`, `pactor-resource`, `pactor-permission`, `pactor-expression`, `pactor-schema`, `pactor-chat`, `pactor-markdown`
 
 ## What you can do with this skill
 
@@ -46,8 +46,7 @@ Activate this skill when the user works with **Pactor** or any `pactor-*` packag
 | `packages/resource` | `pactor-resource` | DSL loaders (HTTP / static), cache, versioning |
 | `packages/router` | `pactor-router` | Dynamic routing, Path Matcher, menu registry |
 | `packages/permission` | `pactor-permission` | Page/menu/component/action guards |
-| `packages/ui-antd` | `pactor-ui-antd` | antd UI kit (`antdUiKit`) |
-| `packages/ui-radix` | `pactor-ui-radix` | Radix UI kit (`radixUiKit` + stylesheet) |
+| `packages/ui` | `pactor-ui` | shadcn UI kit — the single built-in kit (`shadcnUiKit` + prebuilt stylesheet + contracts/interaction core) |
 | `packages/markdown` | `pactor-markdown` | Markdown + DSL Part rendering |
 | `packages/chat` | `pactor-chat` | AI conversation, streaming, capabilities |
 | `packages/vite-plugin` | `pactor-vite-plugin` | Vite YAML modules, build-time validation, HMR |
@@ -61,10 +60,10 @@ Dependencies are strictly one-way:
 ```text
 core ← schema ← expression ← runtime
                               ↓
-        {permission, resource, router, ui-antd} ← ui-radix ← app
+        {permission, resource, router, ui} ← app
 ```
 
-- Business apps depend only on `pactor-app` + the chosen UI kit.
+- Business apps depend only on `pactor-app` + `pactor-ui` (the single built-in shadcn UI kit).
 - Never import implementation details from sibling packages.
 - Renderer logic must resolve components via Registry, not `if (type === 'X')` branches.
 
@@ -73,18 +72,15 @@ core ← schema ← expression ← runtime
 ### Install
 
 ```bash
-# Radix UI kit (default)
-pnpm add pactor-app pactor-ui-radix
-
-# antd UI kit
-pnpm add pactor-app pactor-ui-antd antd
+# shadcn UI kit (the single built-in kit)
+pnpm add pactor-app pactor-ui
 ```
 
 ### Bootstrap with API loader
 
 ```tsx
 import { createPactorApplication } from 'pactor-app';
-import 'pactor-ui-radix/styles.css'; // required for Radix
+import 'pactor-ui/styles.css'; // required
 
 createPactorApplication({
   appId: 'my-app',
@@ -102,7 +98,7 @@ Server must provide the Envelope endpoints:
 ```tsx
 import { createPactorApplication } from 'pactor-app';
 import { StaticDslLoader } from 'pactor-resource';
-import 'pactor-ui-radix/styles.css';
+import 'pactor-ui/styles.css';
 import homePage from './pages/home.page.yaml';
 
 const loader = new StaticDslLoader({
@@ -147,10 +143,10 @@ Custom components receive RuntimeContext (state, data, permissions, routing, ser
 
 ## Workflow: theming and skins
 
-- UI kit determines visuals: Radix by default, antd via `ui: antdUiKit`
+- The built-in UI kit is shadcn (`pactor-ui`); theming = overriding its CSS variable tokens (`--primary` / `--muted` / ...), dark via `data-pactor-theme="dark"`
 - Layout and theme config usually come from bootstrap
-- For business skin settings, see `examples/admin-antd` (`SkinProvider` / `SkinSettings`)
-- Use `providers` and `headerExtra` slots in `pactor-app` to inject global ConfigProvider and settings entry
+- For business skin settings, see `examples/admin` (`skin.ts` / `SkinSettings`)
+- Use `providers` and `headerExtra` slots in `pactor-app` to inject global providers and settings entry
 
 ## Workflow: events and data flow
 
@@ -213,8 +209,7 @@ pnpm docs:dev
 
 # examples
 pnpm --filter example-vite-starter dev   # minimal starter
-pnpm --filter example-admin dev          # Radix admin dashboard
-pnpm --filter example-admin-antd dev     # antd admin dashboard (skin settings)
+pnpm --filter example-admin dev          # shadcn admin dashboard (skin settings)
 pnpm --filter example-chat dev           # AI chat example
 
 # pactor-cli
@@ -240,7 +235,7 @@ pnpm pactor create my-app
 - **Do not** write `if (type === 'Button')` branches in a Renderer; use `ComponentRegistry`.
 - **Do not** inject JavaScript from the server into DSL; register actions/services/capabilities in the frontend.
 - **Do not** rely on frontend permission checks for security; enforce authorization on backend APIs.
-- **Do not** forget to import `pactor-ui-radix/styles.css` when using the default Radix kit.
+- **Do not** forget to import `pactor-ui/styles.css` when using the default shadcn kit.
 
 ## References
 
@@ -249,8 +244,7 @@ pnpm pactor create my-app
 - pactor-app docs: `docs/src/content/docs/packages/app.md`
 - Example projects:
   - `examples/vite-starter` — minimal starter
-  - `examples/admin` — Radix admin dashboard
-  - `examples/admin-antd` — antd admin dashboard with skin settings
+  - `examples/admin` — shadcn admin dashboard with skin settings
   - `examples/chat` — AI chat
 
 ## How to use this skill

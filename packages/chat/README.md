@@ -5,17 +5,17 @@
 ## 安装
 
 ```bash
-npm install pactor-chat pactor-runtime pactor-markdown antd react
+npm install pactor-chat pactor-runtime pactor-markdown react
 # 或
-pnpm add pactor-chat pactor-runtime pactor-markdown antd react
+pnpm add pactor-chat pactor-runtime pactor-markdown react
 ```
 
-`react >= 18`、`antd >= 5` 为 peer dependency（开发基准为 antd v6）。
+`react >= 18` 为 peer dependency。
 
 ## 示例
 
 ```tsx
-import { createBuiltinComponentRegistry } from 'pactor-ui-antd/components';
+import { createShadcnComponentRegistry } from 'pactor-ui/components';
 import {
   ChatView,
   ConversationStore,
@@ -25,7 +25,7 @@ import {
 
 const store = new ConversationStore();
 // Safe Registry：LLM 生成的 DSL 只渲染白名单内的组件
-const safeRegistry = createSafeRegistry(createBuiltinComponentRegistry(), [
+const safeRegistry = createSafeRegistry(createShadcnComponentRegistry(), [
   'Statistic',
   'Card',
 ]);

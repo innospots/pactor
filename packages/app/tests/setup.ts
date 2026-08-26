@@ -1,5 +1,5 @@
 /**
- * jsdom 测试环境 polyfill：antd（rc-*）依赖 matchMedia / ResizeObserver
+ * jsdom 测试环境 polyfill：matchMedia / ResizeObserver
  * 等浏览器 API，jsdom 未实现，这里统一补齐。
  * 在需要的测试文件顶部 `import './setup.js';`（或对应相对路径）引入。
  */

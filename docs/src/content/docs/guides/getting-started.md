@@ -1,6 +1,6 @@
 ---
 title: 快速开始
-description: 面向框架使用者——安装、最小接入、createPactorApplication 参数与 UI kit 切换
+description: 面向框架使用者——安装、最小接入、createPactorApplication 参数与 UI kit 自定义
 ---
 
 Pactor 是一套基于 YAML/JSON DSL 的 Server-Driven UI 前端运行时框架：页面用 YAML 描述，浏览器里的公共 Runtime 负责渲染，业务页面无需随前端代码一起打包。本页带你 5 分钟跑起一个应用。
@@ -17,7 +17,7 @@ Pactor 是一套基于 YAML/JSON DSL 的 Server-Driven UI 前端运行时框架�
 
 | 场景 | 安装 |
 | --- | --- |
-| 完整应用（推荐） | `pnpm add pactor-app pactor-ui-radix`（Radix kit，默认）或 `pnpm add pactor-app pactor-ui-antd antd`（antd kit） |
+| 完整应用（推荐） | `pnpm add pactor-app pactor-ui`（shadcn kit，唯一内置实现） |
 | 只要 DSL 渲染器（自己组合） | `pnpm add pactor-runtime` |
 | AI 对话视图 | `pnpm add pactor-chat pactor-markdown` |
 | YAML 即模块（构建期校验 + HMR） | `pnpm add -D pactor-vite-plugin` |
@@ -96,7 +96,7 @@ body:
 ```tsx
 import { createPactorApplication } from 'pactor-app';
 import { StaticDslLoader } from 'pactor-resource';
-import 'pactor-ui-radix/styles.css'; // Radix kit 样式（必需）
+import 'pactor-ui/styles.css'; // shadcn kit 预建样式（必需）
 
 import homePage from './pages/home.page.yaml';
 
@@ -128,7 +128,7 @@ createPactorApplication({
 | `appId` | string（必填） | 应用 id；brand 缺省标题回退 |
 | `api` | `{ baseURL? }` | DSL 资源 API（未注入 loader 时创建 HttpDslResourceLoader） |
 | `loader` | DslResourceLoader | 资源加载器，优先于 `api`（本地/测试用 StaticDslLoader） |
-| `ui` | UiKit | UI kit 预设（`radixUiKit` / `antdUiKit`），一次提供三个槽位 |
+| `ui` | UiKit | UI kit 预设（内置为 `shadcnUiKit`），一次提供三个槽位 |
 | `componentRegistry` | `() => Registry` | 组件注册表工厂（槽位之一，优先级高于 `ui` 预设） |
 | `layoutRegistry` | `() => LayoutRegistry` | 布局注册表工厂（槽位之一） |
 | `interactionKit` | `{ Provider, OverlayHost }` | 交互层组件对（overlay / message / confirm，槽位之一） |
@@ -141,23 +141,24 @@ createPactorApplication({
 | `router` | `{ type?: 'browser'\|'hash', basename? }` | 路由配置 |
 | `authTokenProvider` | AuthTokenProvider | 认证令牌，注入 DSL 资源请求与页面 HTTP 出口 |
 
-槽位合并优先级：**显式细粒度选项（componentRegistry 等）> `ui` 预设 > 内置 Radix 默认**。
+槽位合并优先级：**显式细粒度选项（componentRegistry 等）> `ui` 预设 > 内置 shadcn 默认**。
 
-## 切换 antd UI kit
+## 自定义 UI kit
 
-同一份 DSL 不换内容即可换实现：
+内置 UI 实现只有 shadcn 一套（`pactor-ui`）。业务需要自定义组件 / 布局 / 交互层时，通过保留的覆盖点逐槽位替换（详见 [pactor-ui](/packages/ui/) 的「自定义 UI kit」与迁移对照表）：
 
 ```tsx
-import { antdUiKit } from 'pactor-ui-antd';
-import 'antd/dist/reset.css'; // 替代 pactor-ui-radix/styles.css
+import { shadcnUiKit } from 'pactor-ui';
 
 createPactorApplication({
   appId: 'my-app',
   loader,
-  ui: antdUiKit,
+  ui: shadcnUiKit, // 显式预设（与缺省一致）；配合 componentRegistry 等细粒度选项逐槽位覆盖
   // ...
 });
 ```
+
+从旧 `pactor-ui-antd` / `pactor-ui-radix` 包迁移的符号对照见 [pactor-ui 迁移说明](/packages/ui/#从-pactor-ui-antd--pactor-ui-radix-迁移)。
 
 ## 命令行（pactor-cli）
 
@@ -185,4 +186,4 @@ pnpm typecheck    # 全部包 TS 检查
 pnpm docs:dev     # 本文档站（端口 4334）
 ```
 
-示例工程：`examples/vite-starter`（最小上手）、`examples/admin`（Radix 管理后台）、`examples/admin-antd`（antd 后台）、`examples/chat`（AI 对话）。
+示例工程：`examples/vite-starter`（最小上手）、`examples/admin`（shadcn 管理后台，含换肤）、`examples/chat`（AI 对话）。

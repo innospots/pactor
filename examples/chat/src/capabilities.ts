@@ -1,6 +1,7 @@
-import { message } from 'antd';
 import { Registry } from 'pactor-core';
 import type { CapabilityHandler, ChatCapabilityRegistry } from 'pactor-chat';
+
+import { showMessage } from './ui-bridge';
 
 /**
  * capability 白名单（examples/chat）：AI DSL 触发业务能力的唯一通道。
@@ -27,7 +28,7 @@ export function createChatCapabilities(): ChatCapabilityRegistry {
         rows: 342,
       };
       // 执行结果反馈（capability 返回值作为动作 data，界面反馈由业务自行处理）
-      void message.success(`已导出 ${result.rows} 行：${result.file}`);
+      showMessage('success', `已导出 ${result.rows} 行：${result.file}`);
       return result;
     },
   });

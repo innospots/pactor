@@ -3,9 +3,9 @@ import './setup.js';
 
 import { cleanup, fireEvent, screen } from '@testing-library/react';
 import type { PageDsl } from 'pactor-core';
-import { createLayoutRegistry } from 'pactor-ui-antd/layout';
 import { StaticDslLoader } from 'pactor-resource';
-import { radixUiKit } from 'pactor-ui-radix';
+import { shadcnUiKit } from 'pactor-ui';
+import { createShadcnLayoutRegistry } from 'pactor-ui/layout';
 import type { ReactNode } from 'react';
 import { afterEach, describe, expect, it } from 'vitest';
 
@@ -87,62 +87,70 @@ function CustomAdminLayout({ children }: { children?: ReactNode }) {
 }
 
 const customLayoutRegistry = () => {
-  const registry = createLayoutRegistry();
+  const registry = createShadcnLayoutRegistry();
   registry.unregister('admin');
   registry.register('admin', CustomAdminLayout);
   return registry;
 };
 
 describe('ui-kit-preset：ui 预设整站生效', () => {
-  it('ui: radixUiKit 后页面组件 / 布局 / overlay.open / message 均为 Radix（.pcr-* 存在，无 .ant-*）', async () => {
-    app = createShellApp({ ui: radixUiKit });
+  it('ui: shadcnUiKit 后页面组件 / 布局 / overlay.open / message 均为 shadcn（与缺省默认一致）', async () => {
+    app = createShellApp({ ui: shadcnUiKit });
     const target = await mountApp(app);
 
-    // 页面（Radix 组件）就绪，外壳为 Radix 布局
+    // 页面（shadcn 组件）就绪，外壳为 shadcn 布局
     await screen.findByRole('button', { name: '打开弹层' });
-    expect(target.querySelector('.pcr-admin-layout')).not.toBeNull();
-    expect(target.querySelector('.pcr-btn-primary')).not.toBeNull();
+    expect(target.querySelector('[data-slot=admin-layout]')).not.toBeNull();
+    const primaryButton = screen.getByRole('button', { name: '提示' });
+    expect(primaryButton.className).toContain('bg-primary');
 
-    // message → Radix toast（先触发，避免 Dialog 打开后外部内容 aria-hidden）
+    // message → shadcn toast（先触发，避免 Dialog 打开后外部内容 aria-hidden）
     fireEvent.click(screen.getByRole('button', { name: '提示' }));
     await screen.findByText('保存成功');
-    expect(document.querySelector('.pcr-toast-success')).not.toBeNull();
+    expect(
+      document.querySelector('[data-slot=toast][data-type=success]'),
+    ).not.toBeNull();
 
-    // overlay.open → Radix Modal
+    // overlay.open → shadcn Modal
     fireEvent.click(screen.getByRole('button', { name: '打开弹层' }));
     await screen.findByText('用户详情');
-    expect(document.querySelector('.pcr-modal-content')).not.toBeNull();
+    expect(document.querySelector('[data-slot=overlay-modal]')).not.toBeNull();
     await screen.findByRole('button', { name: '弹层按钮' });
+  });
 
-    // 全站无 antd 渲染产物
-    expect(document.querySelector('.ant-layout')).toBeNull();
-    expect(document.querySelector('.ant-menu')).toBeNull();
-    expect(document.querySelector('.ant-modal')).toBeNull();
-    expect(document.querySelector('.ant-message')).toBeNull();
-    expect(document.querySelector('.ant-btn')).toBeNull();
+  it('不传 ui（仅 api/loader）：行为与 shadcnUiKit 一致（缺省即唯一内置实现）', async () => {
+    app = createShellApp();
+    const target = await mountApp(app);
+
+    await screen.findByRole('button', { name: '打开弹层' });
+    expect(target.querySelector('[data-slot=admin-layout]')).not.toBeNull();
+
+    fireEvent.click(screen.getByRole('button', { name: '打开弹层' }));
+    await screen.findByText('用户详情');
+    expect(document.querySelector('[data-slot=overlay-modal]')).not.toBeNull();
   });
 });
 
 describe('ui-kit-preset：显式选项覆盖预设', () => {
-  it('ui: radixUiKit + 显式 layoutRegistry：布局用显式值，组件与交互层仍为 Radix 预设', async () => {
+  it('ui: shadcnUiKit + 显式 layoutRegistry：布局用显式值，组件与交互层仍为预设', async () => {
     app = createShellApp({
-      ui: radixUiKit,
+      ui: shadcnUiKit,
       layoutRegistry: customLayoutRegistry,
     });
     const target = await mountApp(app);
 
-    // 布局槽位被显式值覆盖：自定义布局生效，Radix 外壳未渲染
+    // 布局槽位被显式值覆盖：自定义布局生效，shadcn 外壳未渲染
     await screen.findByRole('button', { name: '打开弹层' });
     expect(target.querySelector('.custom-admin-layout')).not.toBeNull();
-    expect(target.querySelector('.pcr-admin-layout')).toBeNull();
+    expect(target.querySelector('[data-slot=admin-layout]')).toBeNull();
 
-    // 组件槽位仍为 Radix 预设
-    expect(target.querySelector('.pcr-btn-primary')).not.toBeNull();
+    // 组件槽位仍为 shadcn 预设
+    const primaryButton = screen.getByRole('button', { name: '提示' });
+    expect(primaryButton.className).toContain('bg-primary');
 
-    // 交互层槽位仍为 Radix 预设：overlay.open 渲染 Radix Modal
+    // 交互层槽位仍为 shadcn 预设：overlay.open 渲染 shadcn Modal
     fireEvent.click(screen.getByRole('button', { name: '打开弹层' }));
     await screen.findByText('用户详情');
-    expect(document.querySelector('.pcr-modal-content')).not.toBeNull();
-    expect(document.querySelector('.ant-modal')).toBeNull();
+    expect(document.querySelector('[data-slot=overlay-modal]')).not.toBeNull();
   });
 });

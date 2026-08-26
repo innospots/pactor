@@ -1,12 +1,12 @@
 ---
 title: 主题与换肤
-description: pactor-ui-radix 的 token 化主题体系——覆盖 CSS 变量换肤、内置暗色皮肤、class 覆盖兼容，以及与 Radix Colors 定制工具的配合
+description: pactor-ui（shadcn kit）的 token 化主题体系——覆盖 CSS 变量换肤、内置暗色皮肤、data-slot 结构覆盖
 ---
 
-`pactor-ui-radix/styles.css` 采用 token 三层结构：**色板 token**（Radix Colors 12 级刻度，accent 由品牌主色 `#3C47DD` 展开）→ **语义 token**（背景 / 前景 / 边框 / accent 各态 / 四语义色 / 焦点环）→ **形状 token**（圆角 / 阴影 / 字体）。所有组件规则只引用语义 token，因此换肤不需要改任何组件样式——覆盖变量即可。
+`pactor-ui/styles.css`（shadcn kit 预建样式表）采用 **shadcn 语义令牌 + Tailwind 工具类**结构：语义变量（`--background` / `--foreground` / `--primary` / `--muted` / `--border` / `--ring` / `--radius` 等）定义在 `:root`，经 `@theme inline` 桥接为 `bg-primary` / `text-muted-foreground` 等工具类——**工具类运行时读 `var()`，覆盖变量即换肤，无需重新构建**。
 
 ```ts
-import 'pactor-ui-radix/styles.css';
+import 'pactor-ui/styles.css';
 ```
 
 ## 方式一：覆盖 CSS 变量（推荐）
@@ -16,24 +16,21 @@ import 'pactor-ui-radix/styles.css';
 只改主色的最小示例：
 
 ```css
-/* your-theme.css —— 在 pactor-ui-radix/styles.css 之后导入 */
+/* your-theme.css —— 在 pactor-ui/styles.css 之后导入 */
 :root {
-  --pcr-accent: #0e7a3d;        /* 实体色：主按钮背景、激活指示 */
-  --pcr-accent-hover: #0c6b36;  /* hover 态 */
-  --pcr-accent-active: #0a5c2f; /* 按下态 */
-  --pcr-accent-text: #0d7a40;   /* 链接 / 激活文字 */
-  --pcr-accent-subtle: #dcf2e4; /* 菜单激活底、选中高亮底 */
-  --pcr-accent-border: #6fbf92; /* hover 边框 */
-  --pcr-focus-ring: rgb(14 122 61 / 0.35);
+  --primary: oklch(0.55 0.2 260);          /* 主按钮、激活态 */
+  --primary-foreground: oklch(0.985 0 0);  /* 主色上的文字 */
+  --ring: oklch(0.55 0.2 260);             /* 焦点环 */
+  --radius: 0.75rem;                       /* 全站圆角基准 */
 }
 ```
 
 ```ts
-import 'pactor-ui-radix/styles.css';
+import 'pactor-ui/styles.css';
 import './your-theme.css';
 ```
 
-也可以只覆盖形状 token（如全站圆角、阴影）或语义色，粒度任选。
+也可以只覆盖形状 token（`--radius`）或语义色（`--success` / `--warning` / `--info` / `--destructive`），粒度任选。
 
 ## 方式二：内置暗色皮肤
 
@@ -53,86 +50,49 @@ document.documentElement.removeAttribute('data-pactor-theme');
 
 注意属性名是 `data-pactor-theme`（不是 `data-theme`），避免与宿主自己的主题属性冲突。暗色皮肤可以与方式一叠加：在 `[data-pactor-theme='dark']` 选择器下覆盖同名变量即可定制暗色值。
 
-## 方式三：覆盖 `.pcr-*` class（兼容旧方式）
+## 方式三：data-slot 结构覆盖
 
-所有组件规则都是 `.pcr-*` 语义 class 且优先级普通，直接写 class 覆盖仍然有效：
+组件根/部位带有稳定的 `data-slot` 钩子（如 `[data-slot=admin-layout]` / `[data-slot=button]` / `[data-slot=card]` / `[data-slot=toast]`）。DSL 不支持自定义 className，结构性美化用这些钩子定位：
 
 ```css
-.pcr-card {
-  border-radius: 16px;
+/* 指标卡左侧加主色强调条 */
+[data-slot='card']:has([data-slot='statistic']) {
+  border-left: 3px solid var(--primary);
 }
 ```
 
-这与旧版硬编码样式表的覆盖方式完全兼容。推荐优先用方式一（变量覆盖），class 覆盖留给变量表达不了的结构性调整。
+推荐优先用方式一（变量覆盖），结构覆盖留给变量表达不了的调整。
 
-`examples/admin/src/theme.css` 是以上三种方式的可运行参考实现：token 覆盖（light + dark）、结构性美化（欢迎横幅渐变、指标卡 accent 强调条），可直接对照源码阅读。
+`examples/admin/src/theme.css` 是以上三种方式的可运行参考实现：token 覆盖（light + dark）、结构性美化（欢迎横幅渐变、指标卡 accent 强调条）、主色预设切换，可直接对照源码阅读。
 
 ## 完整 token 清单
 
-### 色板 token
+### 语义 token（`:root`，暗色同名覆盖）
 
 | token | 说明 |
 | --- | --- |
-| `--pcr-accent-1` … `--pcr-accent-12` | accent 12 级刻度（9=实体主色 `#3C47DD`，10=hover 实体，11=文本，12=高对比文本） |
-| `--pcr-slate-1` … `--pcr-slate-12` | 中性刻度（对齐 Radix Colors slate） |
-| `--pcr-green-3` / `--pcr-green-9` / `--pcr-green-11` | success 三级（subtle 底 / 实体 / 文本） |
-| `--pcr-amber-3` / `--pcr-amber-9` / `--pcr-amber-11` | warning 三级 |
-| `--pcr-red-3` / `--pcr-red-9` / `--pcr-red-11` | error 三级 |
-| `--pcr-blue-3` / `--pcr-blue-9` / `--pcr-blue-11` | info 三级 |
-
-### 语义 token
-
-| token | 说明 |
-| --- | --- |
-| `--pcr-bg` / `--pcr-bg-subtle` / `--pcr-bg-muted` | 页面背景 / 次背景（表头、条纹）/ 弱背景（禁用态、页签条） |
-| `--pcr-bg-elevated` | 浮起表面（卡片、弹层、下拉） |
-| `--pcr-fg` / `--pcr-fg-muted` / `--pcr-fg-subtle` | 主文字 / 次级文字 / 占位与禁用文字 |
-| `--pcr-border-subtle` / `--pcr-border` / `--pcr-border-strong` | 分隔线 / 常规边框 / 强边框 |
-| `--pcr-accent` / `--pcr-accent-hover` / `--pcr-accent-active` | 主色实体三态 |
-| `--pcr-accent-fg` | 主色实体上的文字色（默认白） |
-| `--pcr-accent-subtle` / `--pcr-accent-text` / `--pcr-accent-border` | 主色浅底 / 主色文字 / 主色边框 |
-| `--pcr-success` / `--pcr-success-subtle` / `--pcr-success-text` | success 语义三件套 |
-| `--pcr-warning` / `--pcr-warning-subtle` / `--pcr-warning-text` | warning 语义三件套 |
-| `--pcr-error` / `--pcr-error-subtle` / `--pcr-error-text` | error 语义三件套 |
-| `--pcr-info` / `--pcr-info-subtle` / `--pcr-info-text` | info 语义三件套 |
-| `--pcr-focus-ring` | 焦点环颜色（focus-visible 盒阴影用） |
-| `--pcr-mask` | 弹层遮罩色 |
-| `--pcr-header-bg` / `--pcr-header-fg` | AdminLayout 头部背景 / 文字 |
+| `--background` / `--foreground` | 页面背景 / 主文字 |
+| `--card` / `--card-foreground` | 卡片表面 / 卡片文字 |
+| `--popover` / `--popover-foreground` | 浮起表面（弹层、下拉、Toast）/ 其上文字 |
+| `--primary` / `--primary-foreground` | 主色实体 / 主色上的文字 |
+| `--secondary` / `--secondary-foreground` | 次级表面 / 其上文字 |
+| `--muted` / `--muted-foreground` | 弱背景（表头、悬浮态）/ 次级文字 |
+| `--accent` / `--accent-foreground` | 强调底（选中、悬浮）/ 其上文字 |
+| `--destructive` / `--destructive-foreground` | 危险语义（error / danger）/ 其上文字 |
+| `--success` / `--warning` / `--info` | Alert 四态补充语义色（非 shadcn 默认令牌） |
+| `--border` / `--input` | 常规边框 / 输入控件边框 |
+| `--ring` | 焦点环颜色 |
 
 ### 形状 token
 
 | token | 默认值 | 说明 |
 | --- | --- | --- |
-| `--pcr-radius-sm` | `6px` | 控件圆角（按钮、输入框） |
-| `--pcr-radius-md` | `8px` | 面板圆角（卡片、Alert、Toast） |
-| `--pcr-radius-lg` | `12px` | 弹层圆角（Modal、Drawer、Confirm） |
-| `--pcr-shadow-sm` / `--pcr-shadow-md` / `--pcr-shadow-lg` | 柔和三档 | 卡片 / 下拉与 Toast / 弹层 |
-| `--pcr-font-family` | 系统字体栈 | 全站字体 |
-| `--pcr-font-size-xs` … `--pcr-font-size-2xl` | `12px` … `24px` | 字号阶梯 |
-| `--pcr-line-height` | `1.5715` | 基础行高 |
+| `--radius` | `0.625rem` | 圆角基准；`rounded-sm/md/lg/xl` 由其加减派生 |
 
-以上全部 token 在 `[data-pactor-theme='dark']` 块中均有同名暗色值。
+## 工具类桥接（`@theme inline`）
 
-## 与 Radix Colors 定制工具配合
+语义令牌经 `@theme inline` 映射为 Tailwind 颜色工具类（`bg-background` / `text-foreground` / `bg-card` / `bg-popover` / `bg-primary` / `text-primary-foreground` / `bg-secondary` / `bg-muted` / `text-muted-foreground` / `bg-accent` / `bg-destructive` / `border-border` / `border-input` / `ring-ring` 等）与圆角阶梯（`rounded-sm` … `rounded-xl`）。业务自写的扩展组件也可以直接使用这些工具类，自动跟随皮肤。
 
-[radix-ui.com/colors/custom](https://radix-ui.com/colors/custom) 可以基于任意主色生成符合 Radix 12 级刻度语义的 light/dark 色板。配合步骤：
-
-1. 在工具中输入你的品牌主色，生成 light 与 dark 两组 12 级刻度；
-2. 把生成的刻度逐条映射到 `--pcr-accent-1` … `--pcr-accent-12`（light 写到 `:root`，dark 写到 `[data-pactor-theme='dark']`）；
-3. 语义 token 默认已从刻度取值（`--pcr-accent` 用第 9 级、`-hover` 第 10 级、`-text` 第 11 级、`-subtle` 第 3 级、`-border` 第 7 级），通常无需再改；如生成的刻度语义不同，再单独覆盖这几个语义 token 即可。
-
-```css
-:root {
-  --pcr-accent-1: …;  /* 工具生成的 light 刻度第 1 级 */
-  /* … */
-  --pcr-accent-12: …;
-}
-
-[data-pactor-theme='dark'] {
-  --pcr-accent-1: …;  /* 工具生成的 dark 刻度第 1 级 */
-  /* … */
-  --pcr-accent-12: …;
-}
-```
-
-中性色与语义色同理：换 slate 刻度改 `--pcr-slate-*`，换语义色改 `--pcr-green-*` / `--pcr-amber-*` / `--pcr-red-*` / `--pcr-blue-*`。
+:::note[preflight 关闭]
+预建样式表只含 theme + utilities 两层与令牌定义，**不注入全局 reset**——宿主页面的全局样式零影响。代价是组件内的边框类都显式带颜色（`border-border` / `border-input`），自定义扩展时请同样显式指定边框色。
+:::

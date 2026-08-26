@@ -1,0 +1,108 @@
+/**
+ * pactor-ui（shadcn kit）样式入口源文件
+ * → 构建期经 Tailwind v4 CLI 编译为包根预建 `styles.css`（pnpm build:styles），
+ *   消费方仅 `import 'pactor-ui/styles.css'`，无需自身 Tailwind 配置。
+ *
+ * 设计决策（见 openspec/changes/add-ui-shadcn-kit/design.md D1/D4）：
+ * - **preflight 关闭**：只引入 theme + utilities 两层（不含 Tailwind preflight），
+ *   不注入全局 reset / 元素选择器，宿主页面全局样式零影响（admin 示例无视觉回归）。
+ *   代价：vendored 组件内所有 border 类均显式带颜色（border-border / border-input
+ *   等），不依赖 preflight 的默认边框色。
+ * - **主题令牌**：shadcn 语义变量（--background/--foreground/--primary/…）定义在
+ *   `:root`，暗色经 `[data-pactor-theme='dark']` 属性覆盖（全仓既有约定，
+ *   不用 shadcn 默认的 .dark class）；成功/警告/信息色补充 --success/--warning/--info
+ *   供 Alert 四态使用。
+ * - `@theme inline` 把语义变量桥接为 Tailwind 颜色工具类
+ *   （bg-background / text-foreground / border-border / ring-ring …），
+ *   工具类运行时读 var()，主题切换无需重新构建。
+ */
+
+@import 'tailwindcss/theme.css' layer(theme);
+@import 'tailwindcss/utilities.css' layer(utilities);
+
+/* 语义令牌 → 工具类桥接（运行时解析 var()，支持暗色覆盖与宿主换肤） */
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-success: var(--success);
+  --color-warning: var(--warning);
+  --color-info: var(--info);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+}
+
+@layer base {
+  :root {
+    /* shadcn 默认 neutral 主题（light） */
+    --background: oklch(1 0 0);
+    --foreground: oklch(0.145 0 0);
+    --card: oklch(1 0 0);
+    --card-foreground: oklch(0.145 0 0);
+    --popover: oklch(1 0 0);
+    --popover-foreground: oklch(0.145 0 0);
+    --primary: oklch(0.205 0 0);
+    --primary-foreground: oklch(0.985 0 0);
+    --secondary: oklch(0.97 0 0);
+    --secondary-foreground: oklch(0.205 0 0);
+    --muted: oklch(0.97 0 0);
+    --muted-foreground: oklch(0.556 0 0);
+    --accent: oklch(0.97 0 0);
+    --accent-foreground: oklch(0.205 0 0);
+    --destructive: oklch(0.577 0.245 27.325);
+    --destructive-foreground: oklch(0.985 0 0);
+    /* Alert 四态补充色（契约语义色，非 shadcn 默认令牌） */
+    --success: oklch(0.696 0.17 162.48);
+    --warning: oklch(0.769 0.188 70.08);
+    --info: oklch(0.623 0.214 259.815);
+    --border: oklch(0.922 0 0);
+    --input: oklch(0.922 0 0);
+    --ring: oklch(0.708 0 0);
+    --radius: 0.625rem;
+  }
+
+  /* 暗色皮肤：全仓约定的属性开关（挂在根或任意容器上） */
+  [data-pactor-theme='dark'] {
+    --background: oklch(0.145 0 0);
+    --foreground: oklch(0.985 0 0);
+    --card: oklch(0.205 0 0);
+    --card-foreground: oklch(0.985 0 0);
+    --popover: oklch(0.205 0 0);
+    --popover-foreground: oklch(0.985 0 0);
+    --primary: oklch(0.922 0 0);
+    --primary-foreground: oklch(0.205 0 0);
+    --secondary: oklch(0.269 0 0);
+    --secondary-foreground: oklch(0.985 0 0);
+    --muted: oklch(0.269 0 0);
+    --muted-foreground: oklch(0.708 0 0);
+    --accent: oklch(0.269 0 0);
+    --accent-foreground: oklch(0.985 0 0);
+    --destructive: oklch(0.704 0.191 22.216);
+    --destructive-foreground: oklch(0.985 0 0);
+    --success: oklch(0.696 0.17 162.48);
+    --warning: oklch(0.769 0.188 70.08);
+    --info: oklch(0.623 0.214 259.815);
+    --border: oklch(1 0 0 / 10%);
+    --input: oklch(1 0 0 / 15%);
+    --ring: oklch(0.556 0 0);
+  }
+}

@@ -14,7 +14,7 @@ pnpm add pactor-chat pactor-runtime pactor-markdown react
 ## 组合结构
 
 ```tsx
-import { createBuiltinComponentRegistry } from 'pactor-ui-antd/components';
+import { createShadcnComponentRegistry } from 'pactor-ui/components';
 import {
   ChatView,
   ConversationStore,
@@ -24,7 +24,7 @@ import {
 
 const store = new ConversationStore();
 // Safe Registry：LLM 生成的 DSL 只渲染白名单内的组件
-const safeRegistry = createSafeRegistry(createBuiltinComponentRegistry(), [
+const safeRegistry = createSafeRegistry(createShadcnComponentRegistry(), [
   'Statistic',
   'Card',
 ]);
@@ -134,7 +134,7 @@ DSL part 经 runtime Renderer 渲染：ComponentRegistry 为 Safe Registry；作
 import 'pactor-chat/styles.css';
 ```
 
-换肤契约与 pactor-ui-radix 一致：覆盖 CSS 变量 / `<html data-pactor-theme="dark">` 启用内置暗色 / 直接覆盖 `.pactor-chat-*` class。主要变量：`--pactor-chat-bg/fg/muted/muted-fg/card/border/primary/primary-fg/danger/success`、`--pactor-chat-user-bubble-bg/border`、`--pactor-chat-code-bg`、`--pactor-chat-radius`、`--pactor-chat-font-display`（衬线展示字体栈，用于空状态问候与布局标题）。动画（呼吸文案、发送按钮 streaming 光环、状态图标脉冲）为纯 CSS keyframes。
+换肤契约与 pactor-ui 一致：覆盖 CSS 变量 / `<html data-pactor-theme="dark">` 启用内置暗色 / 直接覆盖 `.pactor-chat-*` class。主要变量：`--pactor-chat-bg/fg/muted/muted-fg/card/border/primary/primary-fg/danger/success`、`--pactor-chat-user-bubble-bg/border`、`--pactor-chat-code-bg`、`--pactor-chat-radius`、`--pactor-chat-font-display`（衬线展示字体栈，用于空状态问候与布局标题）。动画（呼吸文案、发送按钮 streaming 光环、状态图标脉冲）为纯 CSS keyframes。
 
 ## chat 布局注册
 
