@@ -3,19 +3,46 @@ page:
   id: chat
   title: Pactor Chat 示例
 
-# 聊天工作区页：body 为 ChatWorkspace 节点（宿主在 bootstrap 中经
-# createChatWorkspace 闭包注入 transport / store / safeRegistry /
-# capabilities / 附件与弹层回调后注册进组件注册表）。
-# DSL 只携带标量配置：title / greeting / subtitle / suggestions /
-# conversationId——函数与实例一律不出现（spec: chat-dsl-page）。
+# 页面级 state：侧栏菜单高亮项。点击菜单 → events.onMenuSelect →
+# setState 更新 activeMenu → activeMenuKey 绑定刷新高亮（spec:
+# chat-dsl-component / 选择更新状态）。菜单仅演示高亮切换——真实路由
+# 与会话持久化不在本示例范围（设计决策 D2 / Non-Goals）。
+state:
+  activeMenu: new
+
+# 聊天页 body 为一等组件 Chat（spec: chat-dsl-component）：左侧菜单、
+# 问候与建议、会话参数均由 YAML 配置；transport / safeRegistry /
+# capabilities / 附件与弹层回调等运行时服务由宿主经 ChatServicesProvider
+# 一次注入（见 App.tsx），DSL 只携带可序列化数据。
 body:
-  type: ChatWorkspace
+  type: Chat
   props:
-    title: Pactor Chat 工作区
+    # 宿主顶栏（可编辑标题 / 导出 / 明暗切换 / 清空）仍是 DSL 页面之外的
+    # 应用壳，故关闭 Chat 内建 header
+    showHeader: false
     greeting: 你好，我是 Pactor Chat 示例
     subtitle: 数据全部由调用方经接口注入；点击下方建议立即开始
     conversationId: conv-demo
+    activeMenuKey: ${state.activeMenu}
+    menu:
+      - { key: new, label: 新建对话, icon: plus }
+      - { key: s1, label: 本月报表分析, icon: history, group: 历史会话 }
+      - { key: s2, label: 周报整理, icon: history }
+      - { key: s3, label: 新功能评审记录, icon: history }
     suggestions:
       - { label: 今天天气怎么样, prompt: 今天天气怎么样 }
       - { label: 看一下本月报表, prompt: 看一下本月报表 }
       - { label: 导出客户数据, prompt: 导出客户数据 }
+  events:
+    onMenuSelect:
+      # 高亮切换：event.key 为选中项 key（event.item 为整项数据）
+      - action: setState
+        params:
+          activeMenu: ${event.key}
+      # 「新建对话」额外清空会话与上下文 chips（示例扩展动作，见 App.tsx）；
+      # 切换历史会话只改高亮，不加载历史消息（纯演示）
+      - action: if
+        params:
+          condition: ${event.key == 'new'}
+          then:
+            - action: demo.newSession

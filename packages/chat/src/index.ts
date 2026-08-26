@@ -77,6 +77,20 @@ export {
   type ChatWorkspaceServices,
 } from './chat-workspace.js';
 
+// Chat 服务注入与一等 DSL 组件（spec: chat-dsl-component）
+export {
+  ChatServicesProvider,
+  useChatServices,
+  type ChatServices,
+} from './chat-services.js';
+export {
+  CHAT_COMPONENT_TYPE,
+  Chat,
+  registerChatComponent,
+  type ChatMenuItem,
+  type ChatProps,
+} from './view/Chat.js';
+
 // React 视图
 export {
   AppShell,

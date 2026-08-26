@@ -71,7 +71,67 @@ driver.complete();
 - **`<Composer>`**：自适应高度 textarea；IME 合成守卫（合成中 Enter 不发送）；发送按钮状态机（disabled / ready / streaming 停止，同元素切换 + 纯 CSS 光环）；受控附件 `attachments` + `onAttachmentsChange`（图片缩略图/文档卡片 + 移除），拖拽悬停态、粘贴与文件选择产出 `File[]` 经 `onAttachFiles` 交给调用方（包内不上传），点击卡片经 `onAttachmentClick` 通知；`toolbarStart` / `toolbarEnd` 渲染槽；词边界 `@` 触发 `onMentionTrigger(query, anchorRect)`，"+" 按钮触发 `onPlusMenu(anchorRect)`（未传回调不渲染入口，弹层由调用方实现）。
 - **`<AppShell sidebar brand? locationKey? className?>`**：应用外壳——侧栏插槽 + 主区。桌面（≥768px）侧栏与主区 flex 同行；移动端（<768px）侧栏退出文档流变为覆盖抽屉（遮罩 + 顶栏菜单按钮 + `brand` 品牌区），断点由 CSS 媒体查询表达，JS 只管开合。抽屉打开时 Escape / 遮罩点击关闭；`locationKey` 变化（路由 / 会话切换）渲染期自动关闭；移动端关闭时侧栏容器 `inert`。侧栏内容经 `useSidebarDrawer()` 取 `{ close }`（壳外返回 null），导航后可关闭抽屉。
 - **`registerChatLayout(layoutRegistry)`**：注册 `chat` 布局（header 标题区 + ChatView 区，V1 无会话历史侧栏），`resolveLayout(registry, 'chat')` 命中。
-- **`createChatWorkspace(services)`**：DSL 页面工作区工厂，见下节。
+- **`Chat` / `registerChatComponent(registry)`**：一等 DSL 聊天工作区组件，见下节。
+- **`createChatWorkspace(services)`**：React 直连路径的工作区工厂（内部与 Chat 共用同一组合），见下文「DSL 页面：createChatWorkspace」。
+
+## Chat：一等 DSL 组件
+
+`Chat` 是与 Button / Input 同级的 DSL 组件：注册一次后，任意页面 DSL 里 `{ type: 'Chat', props, events }` 即可声明完整聊天工作区（AppShell 侧栏 + header + ChatView）。与 `createChatWorkspace` 的区别是**服务注入与组件声明解耦**——宿主在应用根部用 `ChatServicesProvider` 注入一次服务，`Chat` 组件就近从 context 读取；未注入时渲染受控「未配置聊天服务」提示并 `console.warn`，不抛错。
+
+```tsx
+import { Registry } from 'pactor-core';
+import { createPageRuntime } from 'pactor-runtime';
+import {
+  ChatServicesProvider,
+  registerChatComponent,
+} from 'pactor-chat';
+import chatPageDsl from './chat.page.yaml';
+
+const components = new Registry<unknown>('ComponentRegistry');
+registerChatComponent(components); // 已存在 Chat 类型时不覆盖
+const runtime = createPageRuntime(chatPageDsl, { components });
+
+// 服务（ChatServices，与 ChatWorkspaceServices 同型：transport 必填，
+// store / safeRegistry / capabilities / confirm / 附件与弹层回调等可选）
+// 在根部注入一次
+<ChatServicesProvider value={{ transport, safeRegistry, ... }}>
+  {runtime.render()}
+</ChatServicesProvider>;
+```
+
+```yaml
+# chat.page.yaml：菜单 / header / 问候建议均为 DSL 配置
+dsl: '1.0'
+page: { id: chat, title: 聊天页 }
+state:
+  activeMenu: new
+body:
+  type: Chat
+  props:
+    title: 助手工作区            # 内建 header 标题；showHeader: false 可关闭 header
+    greeting: 你好
+    suggestions:
+      - { label: 今天天气怎么样, prompt: 今天天气怎么样 }
+    activeMenuKey: ${state.activeMenu}   # 受控高亮，可绑 DSL state
+    menu:                        # 内建侧栏（AppShell 承载，移动端为抽屉）
+      - { key: new, label: 新建对话, icon: plus }
+      - { key: s1, label: 本月报表分析, icon: history, group: 历史会话 }
+  events:
+    onMenuSelect:                # event 作用域：event.key / event.item
+      - action: setState
+        params: { activeMenu: ${event.key} }
+    onSend:                      # event 作用域：event.text（与 transport turn 并行）
+      - action: setState
+        params: { lastSent: ${event.text} }
+```
+
+- **菜单**：`menu: ChatMenuItem[]`（`key / label / icon? / badge? / disabled? / group?`）驱动内建侧栏；`icon` 为字符串名，映射内置 lucide 子集（plus / chat / history / settings / star / search / user / folder），未知名渲染占位圆点不抛错；`group` 渲染分组标题行；`activeMenuKey` 为受控 prop，典型用法是 `${state.x}` 绑定 + `events.onMenuSelect` 调 `setState` 闭环；disabled 项不触发 `onMenuSelect`。
+- **Header 三层**：`title` 标量 → `headerExtra?: DslNode | ReactNode`（标题右侧槽）→ `header?: DslNode | ReactNode`（整体替换内建 header）；`showHeader: false` 关闭。DslNode 槽仅在页面运行时（DslRenderer）上下文内经 `useRenderer().renderChildren` 渲染；纯 React 场景传 ReactNode，误传 DslNode 时告警并跳过（不抛错）。
+- **侧栏槽**：`sidebar?: DslNode | ReactNode` 提供时整体替代内建菜单侧栏（仍以 AppShell 承载）。
+- **React 直连**：`<ChatServicesProvider>` + `<Chat>` 同样可直接作为 React 组件使用（events 即普通函数 props：`onSend?(text)` / `onMenuSelect?(key, item)`）。`createChatWorkspace` 工厂保留为兼容路径，内部已改为 provider + 同一组合逻辑（`ChatComposition`），行为不变。
+
+完整参考见 `examples/chat`（`chat.page.yaml` 菜单 / state / events + `App.tsx` 宿主装配）。
+
 
 ## DSL 页面：createChatWorkspace
 

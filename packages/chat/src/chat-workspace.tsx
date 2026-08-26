@@ -1,23 +1,24 @@
 import type { DslNode, Registry } from 'pactor-core';
-import { useRenderer } from 'pactor-runtime';
-import { useRef, useState, type ReactNode } from 'react';
+import type { ReactNode } from 'react';
 
 import type {
   ChatCapabilityRegistry,
   ChatConfirm,
   ChatPermissionChecker,
 } from './capability-action.js';
+import { ChatComposition, DslNodeSlot } from './chat-composition.js';
+import { ChatServicesProvider } from './chat-services.js';
 import type { ChatAttachment } from './model.js';
-import { ConversationStore } from './store.js';
+import type { ConversationStore } from './store.js';
 import type { ChatTransport } from './transport.js';
-import { AppShell } from './view/AppShell.js';
-import { ChatView } from './view/ChatView.js';
 import type { ChatSuggestion } from './view/EmptyState.js';
 
 /**
  * ChatWorkspace 宿主服务（spec: chat-dsl-page，设计决策 D1）：
- * 全部运行时依赖与交互回调由宿主以工厂闭包注入——表达式作用域只承载
+ * 全部运行时依赖与交互回调由宿主注入——表达式作用域只承载
  * 可序列化数据，函数 / 实例不进 DSL props。
+ * （chat-dsl-component 起同型复用为 ChatServices，经 ChatServicesProvider
+ * 注入；本工厂保留为 React 直连路径。）
  */
 export interface ChatWorkspaceServices {
   /** 传输层（必填）：发送即经 runChatTurn 驱动一轮对话 */
@@ -85,22 +86,12 @@ export interface ChatWorkspaceProps {
 }
 
 /**
- * 渲染内嵌 DslNode 槽：经 useRenderer().renderChildren 以当前作用域渲染
- * （Table columns[].cell 同款机制）。仅在页面运行时（DslRenderer）上下文
- * 内挂载——纯 React 直连场景请用服务的 ReactNode 槽。
- */
-function DslNodeSlot({ node }: { node: DslNode }): ReactNode {
-  const { renderChildren } = useRenderer();
-  return renderChildren([node]);
-}
-
-/**
- * createChatWorkspace（spec: chat-dsl-page）：宿主闭包注入全部运行时服务，
- * 返回可注册进 DSL 组件注册表（options.components）的 ChatWorkspace 组件。
+ * createChatWorkspace（spec: chat-dsl-page / chat-dsl-component，决策 D5）：
+ * 宿主闭包注入全部运行时服务，返回可注册进 DSL 组件注册表
+ * （options.components）的 ChatWorkspace 组件。
  *
- * 组件自持 ConversationStore（外部 store > storeFactory > 默认构造，ref
- * 保持——props 变化的重渲染不重建，spec: 重渲染不丢会话）与附件受控状态
- * （onAttachFiles 回传追加、发送后清空）。
+ * 实现为 ChatServicesProvider + ChatComposition 的薄封装（与 Chat 组件
+ * 共用同一组合，逻辑单一来源）；行为与 DSL props 契约保持不变。
  */
 export function createChatWorkspace(
   services: ChatWorkspaceServices,
@@ -116,95 +107,26 @@ export function createChatWorkspace(
     toolbarEnd,
     className,
   }: ChatWorkspaceProps): ReactNode {
-    // store 首渲染确定、ref 保持：重渲染 / props 变化不重建（决策 D2）
-    const storeRef = useRef<ConversationStore | null>(null);
-    if (storeRef.current === null) {
-      storeRef.current =
-        services.store ?? services.storeFactory?.() ?? new ConversationStore();
-    }
-    const store = storeRef.current;
-
-    // 附件受控状态：宿主 onAttachFiles 回传的附件追加；发送后清空
-    const [attachments, setAttachments] = useState<ChatAttachment[]>([]);
-
-    const handleAttachFiles = services.onAttachFiles
-      ? (files: File[]): void => {
-          void Promise.resolve(services.onAttachFiles!(files)).then(
-            (created) => {
-              if (created && created.length > 0) {
-                setAttachments((prev) => [...prev, ...created]);
-              }
-            },
-          );
-        }
-      : undefined;
-
-    const handleSend = (text: string): void => {
-      services.onSend?.(text);
-      setAttachments([]);
-    };
-
-    // 工具栏右端：宿主闭包 ReactNode 槽 + DSL DslNode 槽先后渲染
-    const mergedToolbarEnd =
-      services.toolbarEnd !== undefined || toolbarEnd !== undefined ? (
-        <>
-          {services.toolbarEnd}
-          {toolbarEnd ? <DslNodeSlot node={toolbarEnd} /> : null}
-        </>
-      ) : undefined;
-
-    const showHeader =
-      title !== undefined || services.headerExtra !== undefined;
-
-    const workspace = (
-      <div
-        className={`pactor-chat-workspace${className ? ` ${className}` : ''}`}
-      >
-        {showHeader ? (
-          <header className="pactor-chat-workspace__header">
-            <div className="pactor-chat-workspace__title">{title}</div>
-            {services.headerExtra !== undefined ? (
-              <div className="pactor-chat-workspace__header-extra">
-                {services.headerExtra}
-              </div>
-            ) : null}
-          </header>
-        ) : null}
-        <ChatView
-          store={store}
-          transport={services.transport}
-          onSend={handleSend}
-          safeRegistry={services.safeRegistry}
-          capabilities={services.capabilities}
-          permission={services.permission}
-          confirm={services.confirm}
-          conversationId={conversationId}
-          user={services.user}
-          params={params}
+    return (
+      <ChatServicesProvider value={services}>
+        <ChatComposition
+          services={services}
+          title={title}
           greeting={greeting}
           subtitle={subtitle}
           suggestions={suggestions}
-          attachments={attachments}
-          onAttachmentsChange={setAttachments}
-          onAttachFiles={handleAttachFiles}
-          onAttachmentClick={services.onAttachmentClick}
-          toolbarStart={services.toolbarStart}
-          toolbarEnd={mergedToolbarEnd}
-          onMentionTrigger={services.onMentionTrigger}
-          onPlusMenu={services.onPlusMenu}
+          conversationId={conversationId}
+          params={params}
+          className={className}
+          showHeader={
+            title !== undefined || services.headerExtra !== undefined
+          }
+          headerExtra={services.headerExtra}
+          sidebar={sidebar ? <DslNodeSlot node={sidebar} /> : undefined}
+          toolbarEnd={toolbarEnd ? <DslNodeSlot node={toolbarEnd} /> : undefined}
         />
-      </div>
+      </ChatServicesProvider>
     );
-
-    // 侧栏 DslNode 槽：提供时以 AppShell 包裹（侧栏 + 移动端抽屉）
-    if (sidebar) {
-      return (
-        <AppShell sidebar={<DslNodeSlot node={sidebar} />}>
-          {workspace}
-        </AppShell>
-      );
-    }
-    return workspace;
   }
 
   return ChatWorkspace;

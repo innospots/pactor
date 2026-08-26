@@ -73,14 +73,4 @@ export const MOCK_PICKER_ENTRIES: Record<PickerKind, MockPickerEntry[]> = {
   ],
 };
 
-/** 侧栏 mock 历史会话（仅演示 active 高亮与切换，消息不随会话保存） */
-export interface MockSession {
-  id: string;
-  title: string;
-}
-
-export const MOCK_SESSIONS: MockSession[] = [
-  { id: 's1', title: '本月报表分析' },
-  { id: 's2', title: '周报整理' },
-  { id: 's3', title: '新功能评审记录' },
-];
+/** 侧栏历史会话已迁移为 chat.page.yaml 的 Chat menu 配置（spec: chat-dsl-component） */
