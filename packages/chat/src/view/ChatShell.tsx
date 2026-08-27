@@ -20,10 +20,14 @@ export interface ChatShellProps {
   menu?: ChatMenuItem[];
   /** 受控高亮项 key（DSL 侧可绑 ${state.x}，经 onMenuSelect + setState 闭环） */
   activeMenuKey?: string;
-  /** 移动端顶栏品牌区（透传 AppShell） */
+  /** 品牌区（透传 AppShell）：移动端顶栏 + 桌面侧栏顶部品牌行（决策 D3） */
   brand?: ReactNode;
+  /** 桌面端可折叠为 icon rail（透传 AppShell；DSL 可序列化布尔，缺省 false） */
+  collapsible?: boolean;
   /** 侧栏槽：提供时替代内建菜单侧栏 */
   sidebar?: DslNode | ReactNode;
+  /** 侧栏底部固定槽（spec: chat-app-shell / 侧栏底部槽）：DslNode 经 renderChildren 渲染，ReactNode 原样渲染 */
+  sidebarFooter?: DslNode | ReactNode;
   /** 主区内容槽：DslNode 经 renderChildren 渲染；ReactNode 原样渲染（路由出口等） */
   content?: DslNode | ReactNode;
   className?: string;
@@ -35,7 +39,9 @@ export function ChatShell({
   menu,
   activeMenuKey,
   brand,
+  collapsible,
   sidebar,
+  sidebarFooter,
   content,
   className,
   onMenuSelect,
@@ -52,7 +58,13 @@ export function ChatShell({
     ) : null);
 
   return (
-    <AppShell sidebar={sidebarContent} brand={brand} className={className}>
+    <AppShell
+      sidebar={sidebarContent}
+      brand={brand}
+      collapsible={collapsible}
+      sidebarFooter={resolveSlot(sidebarFooter)}
+      className={className}
+    >
       {resolveSlot(content)}
     </AppShell>
   );

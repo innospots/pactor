@@ -5,8 +5,11 @@ import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import {
+  Chat,
+  ChatServicesProvider,
   ChatView,
   ConversationStore,
+  createChatWorkspace,
   type ChatInput,
   type ChatTransport,
 } from '../src/index.js';
@@ -167,5 +170,116 @@ describe('选中模型进入 transport 输入（spec: chat-model-selector / 选�
     sendText('无模型');
     await vi.waitFor(() => expect(send).toHaveBeenCalledTimes(1));
     expect((send.mock.calls[0]![0] as ChatInput).model).toBeUndefined();
+  });
+});
+
+describe('模型选择位置配置 modelPlacement（spec: chat-model-selector / 模型选择位置配置，决策 D2）', () => {
+  it('header 位：chip 渲染在工作区头部左端（title 之前），Composer 无 chip', () => {
+    const { transport } = createSpyTransport();
+    render(
+      <ChatServicesProvider value={{ transport }}>
+        <Chat title="分析台" models={MODELS} modelPlacement="header" />
+      </ChatServicesProvider>,
+    );
+    const header = document.querySelector('.pactor-chat-workspace__header')!;
+    expect(header).toBeTruthy();
+    const chip = header.querySelector('.pactor-chat-model-chip')!;
+    expect(chip).toBeTruthy();
+    // chip 在 title 之前（左端组首子节点）
+    const leftGroup = header.querySelector(
+      '.pactor-chat-workspace__header-left',
+    )!;
+    expect(leftGroup.firstElementChild).toBe(chip);
+    const title = header.querySelector('.pactor-chat-workspace__title')!;
+    expect(
+      chip.compareDocumentPosition(title) & Node.DOCUMENT_POSITION_FOLLOWING,
+    ).toBeTruthy();
+    // Composer 工具栏不再渲染模型 chip（不重复）
+    expect(
+      document.querySelector('.pactor-chat-composer .pactor-chat-model-chip'),
+    ).toBeNull();
+  });
+
+  it('仅 models + header 位也渲染极简头部（spec: header 极简形态）', () => {
+    const { transport } = createSpyTransport();
+    const ChatWorkspace = createChatWorkspace({ transport });
+    render(<ChatWorkspace models={MODELS} modelPlacement="header" />);
+    const header = document.querySelector('.pactor-chat-workspace__header')!;
+    // 未配置 title/headerExtra/headerActions，头部仍渲染且仅有模型 chip
+    expect(header).toBeTruthy();
+    expect(header.querySelector('.pactor-chat-model-chip')).toBeTruthy();
+    expect(header.querySelector('.pactor-chat-workspace__header-actions')).toBeNull();
+    expect(
+      document.querySelector('.pactor-chat-composer .pactor-chat-model-chip'),
+    ).toBeNull();
+  });
+
+  it('缺省 composer 位不变：chip 仍渲染在 Composer 工具栏（spec: 缺省位置不变）', () => {
+    const { transport } = createSpyTransport();
+    render(
+      <ChatServicesProvider value={{ transport }}>
+        <Chat title="分析台" models={MODELS} />
+      </ChatServicesProvider>,
+    );
+    expect(
+      document.querySelector('.pactor-chat-composer .pactor-chat-model-chip'),
+    ).toBeTruthy();
+    expect(
+      document.querySelector('.pactor-chat-workspace__header .pactor-chat-model-chip'),
+    ).toBeNull();
+    expect(
+      document.querySelector('.pactor-chat-workspace__header-left'),
+    ).toBeNull();
+  });
+
+  it('非受控：header 位切换模型后 chip 自持更新（组合层状态两位置共享）', () => {
+    const { transport } = createSpyTransport();
+    render(
+      <ChatServicesProvider value={{ transport }}>
+        <Chat models={MODELS} modelPlacement="header" />
+      </ChatServicesProvider>,
+    );
+    const chip = screen.getByRole('button', { name: '选择模型' });
+    expect(chip.textContent).toContain('demo-mock');
+
+    fireEvent.click(chip);
+    fireEvent.click(screen.getByText('pro-max'));
+    expect(
+      screen.getByRole('button', { name: '选择模型' }).textContent,
+    ).toContain('pro-max');
+  });
+
+  it('受控：header 位切换触发 onModelChange，后续发送携带新 model（spec: 位置不影响选中语义）', async () => {
+    const { transport, send } = createSpyTransport();
+    const onModelChange = vi.fn();
+    const { rerender } = render(
+      <ChatServicesProvider value={{ transport }}>
+        <Chat
+          models={MODELS}
+          model="demo"
+          onModelChange={onModelChange}
+          modelPlacement="header"
+        />
+      </ChatServicesProvider>,
+    );
+    fireEvent.click(screen.getByRole('button', { name: '选择模型' }));
+    fireEvent.click(screen.getByText('pro-max'));
+    expect(onModelChange).toHaveBeenCalledWith('pro');
+
+    // 宿主闭环更新 props 后发送，transport 输入携带新 model
+    rerender(
+      <ChatServicesProvider value={{ transport }}>
+        <Chat
+          models={MODELS}
+          model="pro"
+          onModelChange={onModelChange}
+          modelPlacement="header"
+        />
+      </ChatServicesProvider>,
+    );
+    sendText('分析一下');
+    await vi.waitFor(() => expect(send).toHaveBeenCalledTimes(1));
+    const input = send.mock.calls[0]![0] as ChatInput;
+    expect(input.model).toBe('pro');
   });
 });

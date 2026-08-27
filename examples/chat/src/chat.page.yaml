@@ -15,21 +15,20 @@ state:
 
 # 聊天页 body 为一等组件 Chat（spec: chat-dsl-component / example-chat）：
 # 无侧栏形态（菜单外壳由宿主 App.tsx 的 ChatShell + MenuRegistry 承担，
-# 菜单切换 = URL 变化）；会话 id 取路由 query（智能体列表 navigate
-# /chat?id=xxx 进入独立会话），缺省 conv-demo。
-# header（可编辑标题 + 导出/明暗/清空操作组）、模型选择、@/+ 上下文弹层
-# 均为包内建特性，由下方 props 声明开启；transport / safeRegistry /
-# capabilities / 附件伪上传 / callService 服务桥由宿主经
-# ChatServicesProvider 注入（见 App.tsx）。
+# 菜单切换 = URL 变化）；会话 id 取路由 query（智能体列表与侧栏「最近」
+# 分组 navigate /chat?id=xxx 进入独立会话），缺省 conv-demo。
+# 对齐参考默认形态（spec: chat-default-skin / example-chat）：极简头部
+# 仅模型选择（modelPlacement: header，无 title / headerActions /
+# editableTitle）；空态问候组与 Composer 垂直居中成组为包内默认行为。
+# 模型选择、@/+ 上下文弹层均为包内建特性，由下方 props 声明开启；
+# transport / safeRegistry / capabilities / 附件伪上传 / callService
+# 服务桥由宿主经 ChatServicesProvider 注入（见 App.tsx）。
 body:
   type: Chat
   props:
-    # 内建 header：可编辑标题 + 操作组（默认行为在包内执行：导出
-    # Markdown 下载 / 明暗切换写 documentElement 的 data-pactor-theme /
-    # 清空 store；事件经下方 events 接 toast 提示）
-    title: 新的对话
-    editableTitle: true
-    headerActions: [export, theme, clear]
+    # 模型 chip 渲染在工作区头部左端（spec: chat-model-selector，
+    # 决策 D2）：仅配置 models 也渲染极简头部
+    modelPlacement: header
     greeting: 你好，我是 Pactor Chat 示例
     subtitle: 数据全部由调用方经接口注入；点击下方建议立即开始
     conversationId: ${route.query.id || 'conv-demo'}
@@ -79,20 +78,3 @@ body:
       - action: setState
         params:
           model: ${event.model}
-    # 内建 header 操作的并行事件（默认行为已在包内执行）：toast 提示。
-    # onContextsChange 不接（chips 由包内自持，发送后自动清空）
-    onExport:
-      - action: message
-        params:
-          type: success
-          text: 已导出 Markdown
-    onClear:
-      - action: message
-        params:
-          type: success
-          text: 会话已清空
-    onTitleChange:
-      - action: message
-        params:
-          type: success
-          text: 标题已更新为「${event.title}」

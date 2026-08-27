@@ -130,6 +130,12 @@ export interface ChatWorkspaceProps {
   models?: ChatModelOption[];
   model?: string;
   onModelChange?: (value: string) => void;
+  /**
+   * 模型 chip 渲染位置（spec: chat-model-selector / 模型选择位置配置，
+   * 决策 D2；DSL 可序列化标量，缺省 'composer'）。'header' 时头部渲染
+   * 条件扩展：仅配置 models（无 title / headerExtra）也渲染极简头部
+   */
+  modelPlacement?: 'composer' | 'header';
   /** 内建上下文数据源（spec: chat-context-sources） */
   contexts?: ChatContextSource[];
   onContextsChange?: (chips: ChatContextItem[]) => void;
@@ -171,6 +177,7 @@ export function createChatWorkspace(
     models,
     model,
     onModelChange,
+    modelPlacement,
     contexts,
     onContextsChange,
     className,
@@ -187,7 +194,12 @@ export function createChatWorkspace(
           params={params}
           className={className}
           showHeader={
-            title !== undefined || services.headerExtra !== undefined
+            title !== undefined ||
+            services.headerExtra !== undefined ||
+            // header 位模型 chip（决策 D2）：仅配置 models 也渲染极简头部
+            (modelPlacement === 'header' &&
+              models !== undefined &&
+              models.length > 0)
           }
           headerExtra={services.headerExtra}
           sidebar={sidebar ? <DslNodeSlot node={sidebar} /> : undefined}
@@ -207,6 +219,7 @@ export function createChatWorkspace(
           models={models}
           model={model}
           onModelChange={onModelChange}
+          modelPlacement={modelPlacement}
           contexts={contexts}
           onContextsChange={onContextsChange}
         />

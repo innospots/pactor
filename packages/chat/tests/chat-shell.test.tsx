@@ -69,7 +69,8 @@ describe('ChatShell（spec: chat-dsl-component / ChatShell 外壳组件）', () 
     );
     expect(screen.getByText('自定义侧栏')).toBeTruthy();
     expect(document.querySelector('.pactor-chat-menu')).toBeNull();
-    expect(screen.getByText('品牌区')).toBeTruthy();
+    // brand 双位置（决策 D3）：移动端顶栏 + 桌面侧栏品牌行
+    expect(screen.getAllByText('品牌区')).toHaveLength(2);
   });
 
   it('content 为 ReactNode：原样渲染（路由出口形态，spec scenario: 路由出口内容槽）', () => {
@@ -119,6 +120,57 @@ describe('ChatShell（spec: chat-dsl-component / ChatShell 外壳组件）', () 
 
     rerender(<ChatShell menu={shellMenu()} content={<Content page="chat" />} />);
     expect(screen.getByText('既有消息')).toBeTruthy();
+  });
+});
+
+describe('ChatShell 侧栏增强（spec: chat-dsl-component，决策 D3/D4）', () => {
+  it('菜单项 dot: true 在 label 右侧渲染状态圆点；缺省不渲染（spec: 状态点渲染 / 缺省无状态点）', () => {
+    render(
+      <ChatShell
+        menu={[
+          { key: 'chat', label: '对话', icon: 'chat', dot: true },
+          { key: 'settings', label: '系统设置', icon: 'settings' },
+        ]}
+        content={<div>内容</div>}
+      />,
+    );
+    const items = document.querySelectorAll('.pactor-chat-menu__item');
+    expect(items[0]!.querySelector('.pactor-chat-menu__dot')).toBeTruthy();
+    expect(items[1]!.querySelector('.pactor-chat-menu__dot')).toBeNull();
+  });
+
+  it('dot 与 badge 可共存（spec: 菜单项状态点）', () => {
+    render(
+      <ChatShell
+        menu={[{ key: 'rec', label: '录音', icon: 'chat', badge: 3, dot: true }]}
+        content={<div>内容</div>}
+      />,
+    );
+    const item = document.querySelector('.pactor-chat-menu__item')!;
+    expect(item.querySelector('.pactor-chat-menu__dot')).toBeTruthy();
+    expect(item.querySelector('.pactor-chat-menu__badge')?.textContent).toBe('3');
+  });
+
+  it('collapsible / sidebarFooter 透传 AppShell：折叠钮渲染且底部槽固定渲染', () => {
+    render(
+      <ChatShell
+        menu={shellMenu()}
+        brand={<span>品牌</span>}
+        collapsible
+        sidebarFooter={<div data-testid="footer">用户卡</div>}
+        content={<div>内容</div>}
+      />,
+    );
+    const button = screen.getByRole('button', { name: '折叠侧栏' });
+    fireEvent.click(button);
+    expect(
+      document.querySelector('.pactor-chat-shell__sidebar--collapsed'),
+    ).toBeTruthy();
+    expect(
+      document.querySelector(
+        '.pactor-chat-shell__sidebar-footer [data-testid="footer"]',
+      ),
+    ).toBeTruthy();
   });
 });
 

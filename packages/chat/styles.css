@@ -21,7 +21,8 @@
 .pactor-chat-workspace,
 .pactor-chat-inspector,
 .pactor-chat-notice {
-  --pactor-chat-bg: #ffffff;
+  --pactor-chat-bg: #f7f6f4;
+  --pactor-chat-sidebar-bg: #efedea;
   --pactor-chat-fg: #1a1d26;
   --pactor-chat-muted: #f4f4f6;
   --pactor-chat-muted-fg: #6b7180;
@@ -85,6 +86,7 @@
 .pactor-chat-workspace[data-pactor-theme='dark'],
 .pactor-chat-notice[data-pactor-theme='dark'] {
   --pactor-chat-bg: #14161c;
+  --pactor-chat-sidebar-bg: #1b1e26;
   --pactor-chat-fg: #e4e6ee;
   --pactor-chat-muted: #1e2129;
   --pactor-chat-muted-fg: #8b90a0;
@@ -205,12 +207,88 @@
   line-height: 1.6;
 }
 
-/* 桌面：侧栏为固定宽度 flex 列 */
+/* 桌面：侧栏为固定宽度 flex 列；背景独立令牌（决策 D5：比工作区
+ * 暖白灰深一档），暗色经令牌覆盖自动生效 */
 .pactor-chat-shell__sidebar {
   width: var(--pactor-chat-sidebar-width);
   flex-shrink: 0;
   border-right: 1px solid var(--pactor-chat-border);
-  background: var(--pactor-chat-bg);
+  background: var(--pactor-chat-sidebar-bg);
+}
+
+/* 框架模式（提供 brand / sidebarFooter 时）：品牌行 + 滚动区 + 底部区
+ * 的 flex 列；未提供时侧栏直挂调用方内容（零渲染承诺） */
+.pactor-chat-shell__sidebar--framed {
+  display: flex;
+  flex-direction: column;
+}
+
+/* 桌面品牌行（决策 D3）：brand 左对齐，折叠钮在右 */
+.pactor-chat-shell__sidebar-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  flex-shrink: 0;
+  padding: 12px 12px 4px;
+}
+
+.pactor-chat-shell__brand {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* 侧栏滚动区：菜单（height:100% + 自有 overflow）之外的任意内容
+ * 也可滚动；底部区固定不随滚动 */
+.pactor-chat-shell__sidebar-body {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+}
+
+.pactor-chat-shell__sidebar-footer {
+  flex-shrink: 0;
+  padding: 12px;
+  border-top: 1px solid var(--pactor-chat-border);
+}
+
+/* 桌面折叠（icon rail，决策 D3）：收窄为图标栏——菜单只显图标，
+ * label / badge / dot / 分组标题 / 底部区 / 品牌文案隐藏（图标以
+ * title 属性兜底可访问名，见 ChatSidebarMenu）。仅桌面生效：移动端
+ * 抽屉语义不受影响 */
+@media (min-width: 768px) {
+  .pactor-chat-shell__sidebar--collapsed {
+    width: 64px;
+  }
+
+  .pactor-chat-shell__sidebar--collapsed .pactor-chat-shell__sidebar-header {
+    justify-content: center;
+    padding-inline: 8px;
+  }
+
+  .pactor-chat-shell__sidebar--collapsed .pactor-chat-shell__brand {
+    display: none;
+  }
+
+  .pactor-chat-shell__sidebar--collapsed .pactor-chat-menu {
+    padding-inline: 8px;
+  }
+
+  .pactor-chat-shell__sidebar--collapsed .pactor-chat-menu__item {
+    justify-content: center;
+    padding-inline: 0;
+  }
+
+  .pactor-chat-shell__sidebar--collapsed .pactor-chat-menu__label,
+  .pactor-chat-shell__sidebar--collapsed .pactor-chat-menu__badge,
+  .pactor-chat-shell__sidebar--collapsed .pactor-chat-menu__dot,
+  .pactor-chat-shell__sidebar--collapsed .pactor-chat-menu__group,
+  .pactor-chat-shell__sidebar--collapsed .pactor-chat-shell__sidebar-footer {
+    display: none;
+  }
 }
 
 .pactor-chat-shell__main {
@@ -276,6 +354,11 @@
     box-shadow: var(--pactor-chat-shadow-composer);
     transform: translateX(-100%);
     transition: transform 0.2s ease-out;
+  }
+
+  /* 移动端品牌维持顶栏现状（决策 D3）：抽屉内不重复渲染品牌行 */
+  .pactor-chat-shell__sidebar-header {
+    display: none;
   }
 
   .pactor-chat-shell__sidebar[data-open='true'] {
@@ -537,7 +620,7 @@
   width: 100%;
   padding: 8px 10px;
   border: none;
-  border-radius: var(--pactor-chat-radius-md);
+  border-radius: var(--pactor-chat-radius);
   background: transparent;
   color: var(--pactor-chat-fg);
   font-size: 14px;
@@ -605,6 +688,16 @@
   color: var(--pactor-chat-primary);
 }
 
+/* 菜单项状态圆点（spec: chat-dsl-component / 菜单项状态点，决策 D4）：
+ * label 右侧的 danger 系小圆点（参考图红点），与 badge 可共存 */
+.pactor-chat-menu__dot {
+  flex-shrink: 0;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--pactor-chat-danger);
+}
+
 /* Chat 服务缺失的受控提示块（未配置 ChatServicesProvider 时渲染） */
 .pactor-chat-notice {
   padding: 24px 16px;
@@ -669,6 +762,24 @@
 /* ============================================================
  * 3. 空状态（spec: chat-empty-state）
  * ============================================================ */
+
+/* 空态居中组（决策 D1）：EmptyState 与 Composer 同一垂直居中列。
+ * margin auto 在消息区（flex 列容器）内双向居中；内容高于视口时
+ * auto 边距归零，配合消息区 overflow-y auto 从顶部自然滚动
+ * （极矮视口不裁切） */
+.pactor-chat-view__empty-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  width: 100%;
+  max-width: var(--pactor-chat-content-width);
+  margin: auto;
+  padding: 16px 0;
+}
+
+.pactor-chat-view__empty-stack .pactor-chat-empty {
+  flex: none;
+}
 
 .pactor-chat-empty {
   flex: 1;
@@ -1512,6 +1623,15 @@ button.pactor-chat-trace__header:hover,
 }
 
 /* 内建 header 操作组 + 可编辑标题（spec: chat-dsl-component / Header 配置） */
+/* header 位模型 chip（spec: chat-model-selector，决策 D2）：chip + title
+ * 组成左端组（chip 在 title 之前）；未配置 headerStart 槽时不渲染本容器 */
+.pactor-chat-workspace__header-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+
 .pactor-chat-workspace__header-right {
   display: flex;
   align-items: center;

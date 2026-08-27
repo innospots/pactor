@@ -5,6 +5,11 @@
  *   令牌（--demo-bg/--demo-fg，暗色由包内建 theme 操作写
  *   documentElement 的 data-pactor-theme 触发覆盖）；
  * - 宿主 DSL 页面（agents/settings 等非对话页）的限宽居中规则。
+ * 参考默认形态（spec: chat-default-skin）的布局——空态居中组、极简
+ * 头部、侧栏品牌行/折叠/「最近」分组/底部用户卡——全部由 pactor-chat
+ * 包内样式与 pactor-ui/ui 原语承担，本文件 MUST NOT 为其编写私有 CSS
+ * （品牌行的 text-sm/font-semibold 来自 pactor-ui/styles.css 预编译
+ * 工具类，非示例私有样式）。
  * 本文件须在 pactor-ui / pactor-chat 样式之后导入（皮肤覆盖顺序约定）。
  */
 

@@ -25,6 +25,8 @@ import {
 } from 'pactor-runtime';
 import { createShadcnComponentRegistry } from 'pactor-ui/components';
 import { ShadcnInteractionProvider } from 'pactor-ui/interaction';
+import { Badge, Button, Card, CardAction, CardDescription, CardHeader, CardTitle } from 'pactor-ui/ui';
+import { Bell } from 'lucide-react';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { HashRouter, Navigate, useLocation } from 'react-router-dom';
 
@@ -50,20 +52,36 @@ import { showConfirm, showMessage, uiBridge } from './ui-bridge';
  *   DynamicDslRoute 路由出口（按 pageId 渲染对应 page.yaml 的
  *   PageRuntime，runtime 注入 createRouterAdapter(bridge) 使页内
  *   DSL navigate 动作可用，route.query/params 注入页面作用域）；
- * - 聊天页结构（内建 header 操作组与可编辑标题、模型选择、@/+
- *   上下文弹层与 chips）全部经 chat.page.yaml 的 Chat props 声明
- *   （spec: chat-builtin-features），宿主零槽位组件；
+ * - 聊天页结构（极简头部模型选择、@/+ 上下文弹层与 chips）全部经
+ *   chat.page.yaml 的 Chat props 声明（spec: chat-builtin-features /
+ *   chat-default-skin），宿主零槽位组件；
  * - 聊天服务（transport / safeRegistry / capabilities / confirm /
  *   附件伪上传 / callService 服务桥）经 ChatServicesProvider 在根部
  *   注入一次；ConversationStore 按会话 id 缓存于宿主 Map，chat 页以
  *   嵌套 provider 就近注入——跨页面切换对话消息不丢。
  */
 
-/** 菜单声明：对话 / 我的智能体 / 系统设置（各带 pageId，hash 路径） */
-const DEMO_MENUS: MenuItem[] = [
+/**
+ * 示例菜单项：router MenuItem + ChatShell 展示扩展字段
+ * （group 分组标题 / dot 状态点；badge 为 MenuItem 既有字段，透传给
+ * ChatMenuItem）
+ */
+type DemoMenuItem = MenuItem & { group?: string; dot?: boolean };
+
+/**
+ * 菜单声明：功能菜单（对话 / 我的智能体 / 系统设置，设置带 badge 演示）
+ * + 「最近」分组历史会话（group + dot 演示，spec: chat-default-skin）。
+ * 历史会话项与「对话」共用 /chat 路由，以 ?id= 区分会话
+ * （chat.page.yaml conversationId 消费 query.id，刷新可还原）
+ */
+const DEMO_MENUS: DemoMenuItem[] = [
   { id: 'chat', type: 'page', title: '对话', path: '/chat', pageId: 'chat', icon: 'chat', order: 1 },
   { id: 'agents', type: 'page', title: '我的智能体', path: '/agents', pageId: 'agents', icon: 'user', order: 2 },
-  { id: 'settings', type: 'page', title: '系统设置', path: '/settings', pageId: 'settings', icon: 'settings', order: 3 },
+  { id: 'settings', type: 'page', title: '系统设置', path: '/settings', pageId: 'settings', icon: 'settings', order: 3, badge: 3 },
+  { id: 'conv-desktop', type: 'page', title: '桌面框架调整', path: '/chat', pageId: 'chat', icon: 'history', order: 11, group: '最近', dot: true },
+  { id: 'conv-weekly', type: 'page', title: '整理本周产品进展', path: '/chat', pageId: 'chat', icon: 'history', order: 12, group: '最近', dot: true },
+  { id: 'conv-meeting', type: 'page', title: '会议行动项汇总', path: '/chat', pageId: 'chat', icon: 'history', order: 13, group: '最近' },
+  { id: 'conv-roadmap', type: 'page', title: 'Q3 路线图梳理', path: '/chat', pageId: 'chat', icon: 'history', order: 14, group: '最近' },
 ];
 
 /** pageId → 页面 DSL（vite-plugin 编译的 *.page.yaml 静态导入） */
@@ -83,14 +101,21 @@ registerChatComponent(PAGE_COMPONENTS);
 /** 缺省会话 id（/chat 无 ?id= 时） */
 const DEFAULT_CONVERSATION_ID = 'conv-demo';
 
-/** MenuItem（registry 可见树）→ ChatMenuItem（图标名透传白名单映射） */
+/** MenuItem（registry 可见树）→ ChatMenuItem（图标名透传白名单映射，
+ * badge / group / dot 展示扩展随项透传） */
 function toChatMenu(items: MenuItem[]): ChatMenuItem[] {
-  return items.map((item) => ({
-    key: item.id,
-    label: item.title,
-    icon: item.icon,
-    disabled: item.disabled,
-  }));
+  return items.map((item) => {
+    const { group, dot } = item as DemoMenuItem;
+    return {
+      key: item.id,
+      label: item.title,
+      icon: item.icon,
+      badge: item.badge,
+      group,
+      dot,
+      disabled: item.disabled,
+    };
+  });
 }
 
 /**
@@ -240,6 +265,16 @@ function Shell() {
     search: location.search,
   });
 
+  // 高亮修正：/chat?id=xxx 且 xxx 为「最近」分组历史会话项时高亮该项
+  // 自身；否则回退路由推导（findByPath 按 pathname 命中基础「对话」项，
+  // 智能体列表带来的 /chat?id=<agentId> 也回退高亮「对话」）
+  const queryId = route?.pageId === 'chat' ? route.query['id'] : undefined;
+  const historyItem = queryId ? menuRegistry.findById(queryId) : undefined;
+  const activeMenuKey =
+    queryId && historyItem?.pageId === 'chat' && queryId !== 'chat'
+      ? queryId
+      : route?.activeMenu;
+
   // 聊天服务：全部运行时依赖经 provider 注入一次（useMemo 保持稳定
   // 引用；store 由 chat 页嵌套 provider 就近注入）。
   // 附件受控状态由 Chat 组件自持：onAttachFiles 回传（data URL 伪上传）
@@ -271,18 +306,46 @@ function Shell() {
       <div className="demo-app">
         {/* 菜单外壳：menu 来自 registry 可见树，高亮由 URL 推导，
             点击 → bridge.push（菜单切换 = URL 变化）；内容槽为路由出口。
-            聊天页 header（标题 / 导出 / 明暗 / 清空）为包内建，
-            由 chat.page.yaml 的 headerActions / editableTitle 声明 */}
+            侧栏参考形态（spec: chat-default-skin）：brand 品牌行 +
+            collapsible 折叠钮 + 「最近」分组（group/dot）+ sidebarFooter
+            用户卡（pactor-ui/ui 原语构建，视觉全部由包内样式承担）。
+            sidebarFooter 传 ReactNode：DslNode 槽需页面运行时上下文
+            （renderChildren），此层为 React 直连不可用。
+            聊天页头部为极简形态（仅模型选择，modelPlacement: header），
+            由 chat.page.yaml 声明 */}
         <main className="demo-main">
           <ChatShell
             menu={toChatMenu(menuRegistry.tree())}
-            activeMenuKey={route?.activeMenu}
+            activeMenuKey={activeMenuKey}
             brand={<span className="text-sm font-semibold">Pactor Chat</span>}
+            collapsible
+            sidebarFooter={
+              <Card>
+                <CardHeader>
+                  <CardTitle>
+                    <Badge variant="secondary">A</Badge> Ariake
+                  </CardTitle>
+                  <CardDescription>ariake@pactor.dev</CardDescription>
+                  <CardAction>
+                    <Button variant="ghost" size="icon" aria-label="通知">
+                      <Bell />
+                    </Button>
+                  </CardAction>
+                </CardHeader>
+              </Card>
+            }
             onMenuSelect={(key) => {
               const menu = menuRegistry.findById(key);
-              if (menu?.path) {
-                bridge.push(menu.path);
+              if (!menu?.path) {
+                return;
               }
+              // 「最近」分组历史会话与「对话」共用 /chat 路由，
+              // 以 ?id= 区分会话（刷新可还原）
+              bridge.push(
+                menu.pageId === 'chat' && key !== 'chat'
+                  ? `/chat?id=${key}`
+                  : menu.path,
+              );
             }}
             content={
               <DynamicDslRoute

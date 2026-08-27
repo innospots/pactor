@@ -91,3 +91,47 @@ describe('EmptyState（spec: chat-empty-state）', () => {
     expect(document.querySelector('.pactor-chat-empty__greeting')).toBeTruthy();
   });
 });
+
+describe('空态居中组（spec: chat-empty-state，决策 D1）', () => {
+  it('空态：EmptyState 与 Composer 在同一居中列内相邻渲染（spec: 空态居中组）', () => {
+    const store = createStore();
+    render(<ChatView store={store} greeting="早上好" />);
+    const view = document.querySelector('.pactor-chat-view')!;
+    expect(view.classList.contains('pactor-chat-view--empty')).toBe(true);
+
+    const stack = document.querySelector('.pactor-chat-view__empty-stack')!;
+    expect(stack).toBeTruthy();
+    // 问候组与 Composer 同为居中列子节点，Composer 在问候组正下方
+    const empty = stack.querySelector(':scope > .pactor-chat-empty');
+    const composer = stack.querySelector(':scope > .pactor-chat-composer');
+    expect(empty).toBeTruthy();
+    expect(composer).toBeTruthy();
+    // 居中列位于消息区内（溢出滚动兜底）
+    expect(
+      document.querySelector(
+        '.pactor-chat-messages > .pactor-chat-view__empty-stack',
+      ),
+    ).toBeTruthy();
+  });
+
+  it('首条消息进入后居中组消失，Composer 恢复钉底布局（spec: 有消息后隐藏）', async () => {
+    const store = createStore();
+    render(<ChatView store={store} />);
+    expect(document.querySelector('.pactor-chat-view__empty-stack')).toBeTruthy();
+
+    applyChatEvent(store, { type: 'message.start', messageId: 'a1' });
+    applyChatEvent(store, { type: 'text.delta', messageId: 'a1', delta: '你好' });
+    await screen.findByText('你好');
+
+    const view = document.querySelector('.pactor-chat-view')!;
+    expect(view.classList.contains('pactor-chat-view--empty')).toBe(false);
+    expect(document.querySelector('.pactor-chat-view__empty-stack')).toBeNull();
+    // Composer 回到消息区之外的钉底位置
+    expect(
+      document.querySelector('.pactor-chat-messages .pactor-chat-composer'),
+    ).toBeNull();
+    expect(
+      document.querySelector('.pactor-chat-view > .pactor-chat-composer'),
+    ).toBeTruthy();
+  });
+});
