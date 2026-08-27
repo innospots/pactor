@@ -1,9 +1,14 @@
 import { useRef, useState } from 'react';
 
 import type { ChatArtifact } from '../artifact.js';
-import type { ChatMessage } from '../model.js';
+import type {
+  BuiltinMessageAction,
+  ChatMessage,
+  ChatMessageAction,
+} from '../model.js';
 import type { ChatRuntime, ChatScope } from '../scope.js';
 import { ActivityTrace } from './ActivityTrace.js';
+import type { CallChatService } from './context-sources.js';
 import { collectMessageText, MessageActions } from './MessageActions.js';
 import { PartRenderer } from './PartRenderer.js';
 
@@ -33,6 +38,15 @@ export interface MessageBubbleProps {
    * turn）；取消编辑不触任何回调。
    */
   onEditResend?: (text: string) => void;
+  /**
+   * 消息操作条声明式配置（spec: chat-message-actions，透传 MessageActions）：
+   * 缺省渲染内建 copy / regenerate / retry / edit（与历史行为一致）
+   */
+  messageActions?: Array<BuiltinMessageAction | ChatMessageAction>;
+  /** 自定义动作服务派发出口（ChatServices.callService 透传） */
+  callService?: CallChatService;
+  /** 全部动作（含内建）点击的并行通知 */
+  onMessageAction?: (actionId: string, message: ChatMessage) => void;
   /** artifact 卡片"在面板中打开"回调（透传 PartRenderer） */
   onOpenArtifact?: (artifact: ChatArtifact) => void;
 }
@@ -104,6 +118,9 @@ export function MessageBubble({
   onRegenerate,
   onRetry,
   onEditResend,
+  messageActions,
+  callService,
+  onMessageAction,
   onOpenArtifact,
 }: MessageBubbleProps) {
   const [editing, setEditing] = useState(false);
@@ -167,18 +184,18 @@ export function MessageBubble({
           )}
         </div>
       )}
-      {message.role === 'assistant' && message.status === 'completed' && (
+      {!editing && (
         <MessageActions
           message={message}
+          actions={messageActions}
           showRegenerate={showRegenerate}
           onRegenerate={onRegenerate}
+          onRetry={onRetry}
+          onEdit={onEditResend ? () => setEditing(true) : undefined}
+          forceVisible={message.status === 'error'}
+          callService={callService}
+          onMessageAction={onMessageAction}
         />
-      )}
-      {message.role === 'assistant' && message.status === 'error' && (
-        <MessageActions message={message} onRetry={onRetry} forceVisible />
-      )}
-      {message.role === 'user' && !editing && onEditResend && (
-        <MessageActions message={message} onEdit={() => setEditing(true)} />
       )}
     </div>
   );

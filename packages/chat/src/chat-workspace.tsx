@@ -10,9 +10,12 @@ import type {
 import { ChatComposition, DslNodeSlot } from './chat-composition.js';
 import { ChatServicesProvider } from './chat-services.js';
 import type {
+  BuiltinMessageAction,
   ChatAttachment,
   ChatContextItem,
   ChatContextSource,
+  ChatMessage,
+  ChatMessageAction,
   ChatModelOption,
 } from './model.js';
 import type { ConversationStore } from './store.js';
@@ -139,6 +142,10 @@ export interface ChatWorkspaceProps {
   /** 内建上下文数据源（spec: chat-context-sources） */
   contexts?: ChatContextSource[];
   onContextsChange?: (chips: ChatContextItem[]) => void;
+  /** 消息操作条声明式配置（spec: chat-message-actions；DSL 可序列化数据） */
+  messageActions?: Array<BuiltinMessageAction | ChatMessageAction>;
+  /** 消息动作点击通知（runtime 绑定 events.onMessageAction 时以函数形态传入） */
+  onMessageAction?: (actionId: string, message: ChatMessage) => void;
   className?: string;
 }
 
@@ -180,6 +187,8 @@ export function createChatWorkspace(
     modelPlacement,
     contexts,
     onContextsChange,
+    messageActions,
+    onMessageAction,
     className,
   }: ChatWorkspaceProps): ReactNode {
     return (
@@ -222,6 +231,8 @@ export function createChatWorkspace(
           modelPlacement={modelPlacement}
           contexts={contexts}
           onContextsChange={onContextsChange}
+          messageActions={messageActions}
+          onMessageAction={onMessageAction}
         />
       </ChatServicesProvider>
     );

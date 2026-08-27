@@ -73,7 +73,7 @@ driver.complete();
 - **`<ChatView store transport? onSend? safeRegistry? capabilities? permission? confirm? conversationId? user? params? greeting? subtitle? suggestions?>`**：消息列表 + Composer。发送时 `onSend` 回调先行，注入 `transport` 时同时驱动一轮 turn。空会话渲染 `<EmptyState>`：问候语（`--pactor-chat-font-display` 衬线展示字体）+ 副标题 + `suggestions` 起始建议（字符串或 `{ label, prompt? }`，点击即发送，空数组不渲染建议区）。Composer 扩展 props（`attachments` / `onAttachmentsChange` / `onAttachFiles` / `onAttachmentClick` / `toolbarStart` / `toolbarEnd` / `onMentionTrigger` / `onPlusMenu`）原样透传给内建 Composer，语义见下方 `<Composer>`。
 - **`<MessageBubble>` / `<PartRenderer>`**：按 role 区分气泡；parts 按类型渲染（text / markdown / dsl / thinking 折叠卡：流式展开 + 进行中指示、答案阶段自动折叠、支持 pin / error 附重试入口 / status）；tool-call / tool-result 移交 `<ActivityTrace>` 配对渲染。
 - **`<ActivityTrace>`**：流式状态头（动画图标 + 呼吸文案 + 秒级计时，结束定格）+ 配对工具轨迹条目（单行：名称 + 参数摘要 + 状态图标，展开显示参数与结果/错误）；流式展开 → 答案阶段自动折叠 → 用户 pin 后不再自动变更（按消息记忆）。
-- **`<MessageActions>`**：消息操作条（hover 显现）——复制（`collectMessageText` 汇总文本写入剪贴板）、末条 completed assistant 重新生成、user 消息气泡内联编辑重发（确认 → 截断 + 重跑，取消不改 store）、error 消息重试。
+- **`<MessageActions>`**：消息操作条（hover 显现），数据驱动渲染——`actions` 缺省为 `['copy', 'regenerate', 'retry', 'edit']`：复制（`collectMessageText` 汇总文本写入剪贴板）、末条 completed assistant 重新生成、user 消息气泡内联编辑重发（确认 → 截断 + 重跑，取消不改 store）、error 消息重试。传入数组时严格按数组渲染（数组即真相），内建动作可按字段覆盖 label / icon / roles / visibleWhen，自定义动作经 `callService(service, { actionId, message })` 派发；图标名走 `MESSAGE_ACTION_ICONS` 白名单（未知名渲染占位图标）。详见下文「消息操作条：messageActions」。
 - **`<Composer>`**：自适应高度 textarea；IME 合成守卫（合成中 Enter 不发送）；发送按钮状态机（disabled / ready / streaming 停止，同元素切换 + 纯 CSS 光环）；受控附件 `attachments` + `onAttachmentsChange`（图片缩略图/文档卡片 + 移除），拖拽悬停态、粘贴与文件选择产出 `File[]` 经 `onAttachFiles` 交给调用方（包内不上传），点击卡片经 `onAttachmentClick` 通知；`toolbarStart` / `toolbarEnd` 渲染槽；词边界 `@` 触发 `onMentionTrigger(query, anchorRect)`，"+" 按钮触发 `onPlusMenu(anchorRect)`（未传回调不渲染入口，弹层由调用方实现）。
 - **`<AppShell sidebar brand? locationKey? className?>`**：应用外壳——侧栏插槽 + 主区。桌面（≥768px）侧栏与主区 flex 同行；移动端（<768px）侧栏退出文档流变为覆盖抽屉（遮罩 + 顶栏菜单按钮 + `brand` 品牌区），断点由 CSS 媒体查询表达，JS 只管开合。抽屉打开时 Escape / 遮罩点击关闭；`locationKey` 变化（路由 / 会话切换）渲染期自动关闭；移动端关闭时侧栏容器 `inert`。侧栏内容经 `useSidebarDrawer()` 取 `{ close }`（壳外返回 null），导航后可关闭抽屉。
 - **`registerChatLayout(layoutRegistry)`**：注册 `chat` 布局（header 标题区 + ChatView 区，V1 无会话历史侧栏），`resolveLayout(registry, 'chat')` 命中。
@@ -135,6 +135,33 @@ body:
 - **Header 三层**：`title` 标量 → `headerExtra?: DslNode | ReactNode`（标题右侧槽）→ `header?: DslNode | ReactNode`（整体替换内建 header）；`showHeader: false` 关闭。DslNode 槽仅在页面运行时（DslRenderer）上下文内经 `useRenderer().renderChildren` 渲染；纯 React 场景传 ReactNode，误传 DslNode 时告警并跳过（不抛错）。
 - **侧栏槽**：`sidebar?: DslNode | ReactNode` 提供时整体替代内建菜单侧栏（仍以 AppShell 承载）。
 - **React 直连**：`<ChatServicesProvider>` + `<Chat>` 同样可直接作为 React 组件使用（events 即普通函数 props：`onSend?(text)` / `onMenuSelect?(key, item)`）。`createChatWorkspace` 工厂保留为兼容路径，内部已改为 provider + 同一组合逻辑（`ChatComposition`），行为不变。
+
+### 消息操作条：messageActions
+
+消息气泡下方的操作条（复制 / 重新生成 / 重试 / 编辑）以可序列化 `messageActions` 数组完整声明（spec: chat-message-actions），`ChatView` / `ChatComposition` / `ChatWorkspace` / `Chat` 逐层透传：
+
+```yaml
+body:
+  type: Chat
+  props:
+    # 数组即真相：顺序即渲染顺序，未列出的内建动作不出现；
+    # 缺省（不配置）等价于 ['copy', 'regenerate', 'retry', 'edit']，与历史行为一致
+    messageActions:
+      - copy                                  # 字符串项等价于 { id: copy, builtin: copy }
+      - retry
+      - regenerate
+      - { id: edit, builtin: edit, label: 修改并重发 }   # 内建动作按字段覆盖
+      - { id: quote, label: 引用回复, icon: quote, service: quoteMessage }  # 自定义动作
+  events:
+    onMessageAction:          # 任意动作（含内建）点击触发；event 作用域含 action 与 message
+      - action: message
+        params: { text: 触发消息操作：${event.action} }
+```
+
+- **配置形状**：`Array<BuiltinMessageAction | ChatMessageAction>`；`ChatMessageAction = { id, builtin?, label?, icon?, roles?, visibleWhen?, service? }`（全部为 DSL 可表达数据）。`builtin` 指定时复用内建行为与默认描述（copy = assistant+completed；regenerate = assistant+completed 且仅末条且注入 transport；retry = assistant+error 且 transport；edit = user+completed），`label` / `icon` / `roles` / `visibleWhen` 按字段覆盖；「regenerate 仅末条 assistant」与 transport 依赖为不可覆盖的包内约束。
+- **可见性**：`roles` 过滤角色后按 `visibleWhen` 匹配消息状态——`'completed'` 匹配非流式非错误终态（含 cancelled），`'error'` 匹配 error，`'always'` 含 streaming（自定义动作缺省 `roles: ['assistant']`、`visibleWhen: 'completed'`）。
+- **自定义动作派发**：无 `builtin` 的动作点击时经 `ChatServices.callService(service, { actionId, message })` 派发（未注入 callService 时 console.warn 跳过，不抛错）；内建与自定义动作点击均并行触发 `onMessageAction(actionId, message)` 通知（DSL 侧为 `events.onMessageAction`，event 作用域含 `action` 与 `message`），内建默认行为不受影响。
+- **图标**：`icon` 为字符串名，走 `MESSAGE_ACTION_ICONS` 白名单（copy / check / rotate-ccw / pencil / quote / thumbs-up / thumbs-down / share / bookmark），未知名渲染占位图标，不抛错。
 
 完整参考见 `examples/chat`（`chat.page.yaml` 菜单 / state / events + `App.tsx` 宿主装配）。
 

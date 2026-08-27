@@ -117,6 +117,39 @@ export interface ChatModelOption {
   label: string;
 }
 
+/**
+ * 内建消息动作名（spec: chat-message-actions，设计决策 D1）：
+ * 数组项为字符串时等价于 `{ id: <name>, builtin: <name> }`
+ */
+export type BuiltinMessageAction = 'copy' | 'regenerate' | 'retry' | 'edit';
+
+/**
+ * 消息操作条动作描述（spec: chat-message-actions，设计决策 D1）：
+ * 全部为 DSL 可表达数据——`builtin` 指定时复用内建行为（label / icon /
+ * roles / visibleWhen 按字段覆盖内建默认描述）；无 `builtin` 为自定义
+ * 动作，点击经 `ChatServices.callService(service, { actionId, message })`
+ * 派发并并行触发 `onMessageAction` 通知。
+ */
+export interface ChatMessageAction {
+  /** 动作标识（服务派发 actionId 与事件 event.action 用） */
+  id: string;
+  /** 指定则复用内建行为与默认描述（可逐字段覆盖） */
+  builtin?: BuiltinMessageAction;
+  /** tooltip 文案；缺省用内建默认（自定义动作缺省回退为 id） */
+  label?: string;
+  /** 图标名（MESSAGE_ACTION_ICONS 白名单）；未知名渲染占位图标 */
+  icon?: string;
+  /** 可见角色；自定义动作缺省 ['assistant'] */
+  roles?: Array<'user' | 'assistant'>;
+  /**
+   * 可见状态：'completed' 匹配非流式非错误终态（含 cancelled），
+   * 'error' 匹配 error，'always' 含 streaming；自定义动作缺省 'completed'
+   */
+  visibleWhen?: 'completed' | 'error' | 'always';
+  /** 自定义动作的派发服务名（经注入的 callService 解析） */
+  service?: string;
+}
+
 /** Chat 消息 */
 export interface ChatMessage {
   id: string;

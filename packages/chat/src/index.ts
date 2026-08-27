@@ -1,10 +1,12 @@
 // 消息模型与 Store（零 React）
 export {
   createChatId,
+  type BuiltinMessageAction,
   type ChatAttachment,
   type ChatContextItem,
   type ChatContextSource,
   type ChatMessage,
+  type ChatMessageAction,
   type ChatModelOption,
   type ChatPart,
   type ChatRole,
@@ -134,6 +136,7 @@ export {
 export { MessageBubble, type MessageBubbleProps } from './view/MessageBubble.js';
 export {
   collectMessageText,
+  MESSAGE_ACTION_ICONS,
   MessageActions,
   type MessageActionsProps,
 } from './view/MessageActions.js';

@@ -34,7 +34,7 @@ pnpm --filter example-chat dev   # http://localhost:5399
 - **对话页 header**（包内建，`headerActions` / `editableTitle` 声明）：左侧会话标题默认「新的对话」，点击进入编辑，Enter / blur 提交（Esc 取消）；右侧操作组依次为导出 Markdown（当前会话）、明暗切换、清空当前会话——默认行为在包内执行，事件经 DSL `events` 接 toast 提示
 - **空状态**：空会话渲染问候语 + 起始建议，点击建议立即发送
 - **活动轨迹**：流式状态头（呼吸文案 + 秒级计时）+ tool-call/tool-result 配对单行轨迹（可展开查看参数与结果），进入答案阶段自动折叠
-- **消息操作**：hover assistant 消息复制 / 末条重新生成；hover user 消息编辑重发；error 消息重试
+- **消息操作**（包内建，`messageActions` 声明，spec: chat-message-actions）：操作条按数组渲染——内建 copy / retry / regenerate + edit（label 覆盖为「修改并重发」，内建编辑重发行为不变）+ 自定义「引用回复」动作（icon `quote`，点击经宿主 `callService('quoteMessage')` 派发并 toast 引用文本）；任意动作点击并行触发 `events.onMessageAction`（event 作用域含 `action` / `message`），DSL 侧接 toast 提示。hover assistant 消息复制 / 末条重新生成；hover user 消息编辑重发；error 消息重试的缺省语义不变
 - **Composer 扩展**（内建于 ChatView 底部输入区）：
   - 受控附件：粘贴/拖拽/选择文件 → data URL 伪上传，图片缩略图 / 文档卡片，点击新标签页打开
   - 模型选择 chip（包内建，`models` / `model` 受控闭环）：下拉 3 个 mock 模型，选中值进 `ChatInput.model`
@@ -45,7 +45,7 @@ pnpm --filter example-chat dev   # http://localhost:5399
 
 ## 代码导览
 
-- `src/chat.page.yaml` — 对话页 DSL：无侧栏形态 `Chat` 节点（greeting / suggestions / conversationId 取路由 query）+ 内建 header（`title` / `editableTitle` / `headerActions: [export, theme, clear]`）+ 内建模型选择（`models` + 受控 `model` ↔ `onModelChange`）+ 内建上下文源（`contexts`：`@` 智能体 / `+` 上下文，service 引用）+ 产出物面板受控闭环（`onArtifact` / `onPanelClose` → setState）
+- `src/chat.page.yaml` — 对话页 DSL：无侧栏形态 `Chat` 节点（greeting / suggestions / conversationId 取路由 query）+ 内建 header（`title` / `editableTitle` / `headerActions: [export, theme, clear]`）+ 内建模型选择（`models` + 受控 `model` ↔ `onModelChange`）+ 内建上下文源（`contexts`：`@` 智能体 / `+` 上下文，service 引用）+ 消息操作条（`messageActions`：内建 edit 覆盖 label + 自定义 quote 动作 service 派发，`events.onMessageAction` 接 toast）+ 产出物面板受控闭环（`onArtifact` / `onPanelClose` → setState）
 - `src/agents.page.yaml` — 智能体列表页 DSL：mock 卡片列表，点击经 `navigate` 动作跳 `/chat?id=xxx`
 - `src/settings.page.yaml` — 设置表单页 DSL：Form 提交 → setState 保存回显 + message 提示
 - `src/main.tsx` — 入口：引入 `pactor-ui/styles.css`（shadcn 交互层样式）、`pactor-chat/styles.css` 皮肤、`katex/dist/katex.min.css`（公式渲染）与 `app.css`，渲染 `App`

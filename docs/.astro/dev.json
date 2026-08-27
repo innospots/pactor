@@ -1,0 +1,14 @@
+{
+	"pid": 93462,
+	"port": 4334,
+	"url": "http://localhost:4334",
+	"urls": {
+		"local": [
+			"http://localhost:4334/"
+		],
+		"network": [],
+		"networkInterfaceNames": []
+	},
+	"background": false,
+	"startedAt": "2026-08-27T11:00:40.234Z"
+}
