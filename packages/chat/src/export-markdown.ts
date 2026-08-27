@@ -1,8 +1,10 @@
-import type { ChatMessage, ChatRole } from 'pactor-chat';
+import type { ChatMessage, ChatRole } from './model.js';
 
 /**
- * 会话导出为 Markdown：序列化 store.getMessages() 的角色与
- * text / markdown part（thinking / tool / dsl 等结构性 part 不导出）。
+ * 会话导出为 Markdown（spec: chat-dsl-component / Header 配置，
+ * 设计决策 D4）：逻辑自 examples/chat 下沉——序列化 store 消息的角色与
+ * text / markdown part（thinking / tool / dsl 等结构性 part 不导出），
+ * 触发浏览器下载（Blob + a[download]，无网络）。
  */
 
 const ROLE_LABELS: Record<ChatRole, string> = {
@@ -12,7 +14,10 @@ const ROLE_LABELS: Record<ChatRole, string> = {
 };
 
 /** 序列化消息列表为 Markdown 文本 */
-export function serializeMessages(title: string, messages: ChatMessage[]): string {
+export function serializeMessages(
+  title: string,
+  messages: ChatMessage[],
+): string {
   const lines: string[] = [`# ${title}`, ''];
   for (const message of messages) {
     const content = message.parts
@@ -32,8 +37,11 @@ export function serializeMessages(title: string, messages: ChatMessage[]): strin
   return lines.join('\n');
 }
 
-/** 序列化并触发 .md 文件下载（data URL / Blob，无网络） */
-export function downloadMessagesAsMarkdown(title: string, messages: ChatMessage[]): void {
+/** 序列化并触发 .md 文件下载（Blob + a[download]，无网络） */
+export function downloadMessagesAsMarkdown(
+  title: string,
+  messages: ChatMessage[],
+): void {
   const markdown = serializeMessages(title, messages);
   const blob = new Blob([markdown], { type: 'text/markdown;charset=utf-8' });
   const url = URL.createObjectURL(blob);

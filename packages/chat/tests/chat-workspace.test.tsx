@@ -7,9 +7,11 @@ import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import {
+  ChatServicesProvider,
   ConversationStore,
   createChatWorkspace,
   createManualDriver,
+  useChatServices,
 } from '../src/index.js';
 
 afterEach(cleanup);
@@ -245,3 +247,106 @@ describe('createChatWorkspace（spec: chat-dsl-page / 页面运行时集成）',
     await runtime.destroy();
   });
 });
+
+describe('ChatServicesProvider 服务透传（spec: chat-context-sources / callService）', () => {
+  it('注入的 callService 经 useChatServices 可被消费方读到（引用一致）', () => {
+    const driver = createManualDriver();
+    const callService = vi.fn(async () => []);
+
+    let consumed: ReturnType<typeof useChatServices> = null;
+    function Probe(): null {
+      consumed = useChatServices();
+      return null;
+    }
+
+    render(
+      <ChatServicesProvider
+        value={{ transport: driver.transport, callService }}
+      >
+        <Probe />
+      </ChatServicesProvider>,
+    );
+
+    expect(consumed).not.toBeNull();
+    expect(consumed!.callService).toBe(callService);
+  });
+});
+
+describe('ChatWorkspace 内建特性 props 透传（spec: chat-model-selector / chat-context-sources / chat-dsl-component）', () => {
+  it('models / onModelChange 透传：渲染模型 chip，React 直连回调收到原始值', () => {
+    const driver = createManualDriver();
+    const ChatWorkspace = createChatWorkspace({ transport: driver.transport });
+    const onModelChange = vi.fn();
+    render(
+      <ChatWorkspace
+        models={[
+          { value: 'demo', label: 'demo-mock' },
+          { value: 'pro', label: 'pro-max' },
+        ]}
+        model="demo"
+        onModelChange={onModelChange}
+      />,
+    );
+
+    expect(
+      screen.getByRole('button', { name: '选择模型' }).textContent,
+    ).toContain('demo-mock');
+    fireEvent.click(screen.getByRole('button', { name: '选择模型' }));
+    fireEvent.click(screen.getByText('pro-max'));
+    expect(onModelChange).toHaveBeenCalledWith('pro');
+  });
+
+  it('contexts 透传：静态源输入 @ 出内建弹层，选中成 chip 并回调', () => {
+    const driver = createManualDriver();
+    const ChatWorkspace = createChatWorkspace({ transport: driver.transport });
+    const onContextsChange = vi.fn();
+    render(
+      <ChatWorkspace
+        contexts={[
+          {
+            trigger: '@',
+            label: '智能体',
+            items: [{ id: 'a1', label: '报表助手' }],
+          },
+        ]}
+        onContextsChange={onContextsChange}
+      />,
+    );
+
+    fireEvent.change(getTextarea(), { target: { value: '@' } });
+    fireEvent.click(screen.getByText('报表助手'));
+    expect(
+      document.querySelector('.pactor-chat-context-chip__label')?.textContent,
+    ).toBe('报表助手');
+    expect(onContextsChange).toHaveBeenCalledWith([
+      expect.objectContaining({ id: 'a1' }),
+    ]);
+  });
+
+  it('headerActions / editableTitle / onTitleChange 透传到内建 header', () => {
+    const driver = createManualDriver();
+    const ChatWorkspace = createChatWorkspace({ transport: driver.transport });
+    const onTitleChange = vi.fn();
+    render(
+      <ChatWorkspace
+        title="原标题"
+        headerActions={['export', 'theme', 'clear']}
+        editableTitle
+        onTitleChange={onTitleChange}
+      />,
+    );
+
+    expect(screen.getByRole('button', { name: '导出 Markdown' })).toBeTruthy();
+    expect(screen.getByRole('button', { name: '切换明暗主题' })).toBeTruthy();
+    expect(screen.getByRole('button', { name: '清空会话' })).toBeTruthy();
+
+    fireEvent.click(
+      document.querySelector('.pactor-chat-workspace__title--editable')!,
+    );
+    const input = screen.getByRole('textbox', { name: '编辑标题' });
+    fireEvent.change(input, { target: { value: '新标题' } });
+    fireEvent.keyDown(input, { key: 'Enter' });
+    expect(onTitleChange).toHaveBeenCalledWith('新标题');
+  });
+});
+

@@ -1,9 +1,9 @@
 /**
- * examples/chat 私有样式（瘦身版，spec: export-ui-primitives/D3）：
- * 槽位自定义 UI（顶栏/chip/弹层/modal）已全部改经 `pactor-ui/ui`
- * 原语与语义令牌表达，视觉不再依赖本样式表；这里只保留：
+ * examples/chat 私有样式：槽位自定义 UI 已随内建特性下沉
+ * （spec: chat-builtin-features），这里只保留：
  * - 页面壳高度链（html/body/#root、.demo-app、.demo-main）与外壳皮肤
- *   令牌（--demo-bg/--demo-fg，含暗色覆盖）；
+ *   令牌（--demo-bg/--demo-fg，暗色由包内建 theme 操作写
+ *   documentElement 的 data-pactor-theme 触发覆盖）；
  * - 宿主 DSL 页面（agents/settings 等非对话页）的限宽居中规则。
  * 本文件须在 pactor-ui / pactor-chat 样式之后导入（皮肤覆盖顺序约定）。
  */
@@ -22,12 +22,13 @@ body,
   --demo-fg: #1a1d26;
 }
 
-.demo-app[data-pactor-theme='dark'] {
+/* 暗色覆盖：内建 theme 操作把 data-pactor-theme 写在 documentElement 上 */
+[data-pactor-theme='dark'] .demo-app {
   --demo-bg: #101216;
   --demo-fg: #e4e6ee;
 }
 
-/* 页壳：全高列布局（顶栏 + 主区） */
+/* 页壳：全高列布局（主区承载菜单外壳；聊天页 header 为包内建） */
 .demo-app {
   display: flex;
   flex-direction: column;

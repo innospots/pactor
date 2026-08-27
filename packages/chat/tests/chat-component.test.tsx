@@ -213,6 +213,152 @@ describe('Chat 事件 props（spec: chat-dsl-component / 发送事件）', () =>
   });
 });
 
+describe('ChatDslAdapter 新事件折算（spec: chat-dsl-component / chat-model-selector / chat-context-sources，决策 D4/D5）', () => {
+  /** 取注册表中的 Chat DSL 适配器组件 */
+  function getAdapter(): React.ComponentType<Record<string, unknown>> {
+    const registry = new Registry<unknown>('ComponentRegistry');
+    registerChatComponent(registry);
+    return registry.get('Chat') as React.ComponentType<
+      Record<string, unknown>
+    >;
+  }
+
+  it('events.onModelChange：event 作用域含 model（{ model: value }）', () => {
+    const Adapter = getAdapter();
+    const onModelChange = vi.fn();
+    renderChat(
+      <Adapter
+        models={[
+          { value: 'demo', label: 'demo-mock' },
+          { value: 'pro', label: 'pro-max' },
+        ]}
+        onModelChange={onModelChange}
+      />,
+    );
+
+    fireEvent.click(screen.getByRole('button', { name: '选择模型' }));
+    fireEvent.click(screen.getByText('pro-max'));
+    expect(onModelChange).toHaveBeenCalledWith({ model: 'pro' });
+  });
+
+  it('events.onContextsChange：event 作用域含 contexts（chips 数组）', () => {
+    const Adapter = getAdapter();
+    const onContextsChange = vi.fn();
+    renderChat(
+      <Adapter
+        contexts={[
+          {
+            trigger: '@',
+            label: '智能体',
+            items: [{ id: 'a1', label: '报表助手' }],
+          },
+        ]}
+        onContextsChange={onContextsChange}
+      />,
+    );
+
+    fireEvent.change(getTextarea(), { target: { value: '@' } });
+    fireEvent.click(screen.getByText('报表助手'));
+    expect(onContextsChange).toHaveBeenCalledWith({
+      contexts: [expect.objectContaining({ id: 'a1', label: '报表助手' })],
+    });
+  });
+
+  it('events.onExport / onClear 为空对象 {}；onThemeChange 含 theme；onTitleChange 含 title', () => {
+    const Adapter = getAdapter();
+    const createObjectURL = vi.fn(() => 'blob:mock');
+    const revokeObjectURL = vi.fn();
+    Object.assign(URL, { createObjectURL, revokeObjectURL });
+    const clickSpy = vi
+      .spyOn(HTMLAnchorElement.prototype, 'click')
+      .mockImplementation(() => {});
+
+    const onExport = vi.fn();
+    const onClear = vi.fn();
+    const onThemeChange = vi.fn();
+    const onTitleChange = vi.fn();
+    renderChat(
+      <Adapter
+        title="原标题"
+        headerActions={['export', 'theme', 'clear']}
+        editableTitle
+        onExport={onExport}
+        onClear={onClear}
+        onThemeChange={onThemeChange}
+        onTitleChange={onTitleChange}
+      />,
+    );
+
+    fireEvent.click(screen.getByRole('button', { name: '导出 Markdown' }));
+    expect(onExport).toHaveBeenCalledWith({});
+
+    fireEvent.click(screen.getByRole('button', { name: '切换明暗主题' }));
+    expect(onThemeChange).toHaveBeenCalledWith({ theme: 'dark' });
+    document.documentElement.removeAttribute('data-pactor-theme');
+
+    fireEvent.click(screen.getByRole('button', { name: '清空会话' }));
+    expect(onClear).toHaveBeenCalledWith({});
+
+    fireEvent.click(
+      document.querySelector('.pactor-chat-workspace__title--editable')!,
+    );
+    const input = screen.getByRole('textbox', { name: '编辑标题' });
+    fireEvent.change(input, { target: { value: '新标题' } });
+    fireEvent.keyDown(input, { key: 'Enter' });
+    expect(onTitleChange).toHaveBeenCalledWith({ title: '新标题' });
+
+    clickSpy.mockRestore();
+  });
+
+  it('DSL 受控模型闭环：model: ${state.model} + events.onModelChange → setState（spec: 受控闭环）', async () => {
+    const driver = createManualDriver();
+    const components = new Registry<unknown>('ComponentRegistry');
+    registerChatComponent(components);
+    const runtime = createPageRuntime(
+      {
+        dsl: '1.0',
+        page: { id: 'chat', title: '聊天页' },
+        state: { model: 'demo' },
+        body: {
+          type: 'Chat',
+          props: {
+            models: [
+              { value: 'demo', label: 'demo-mock' },
+              { value: 'pro', label: 'pro-max' },
+            ],
+            model: '${state.model}',
+          },
+          events: {
+            onModelChange: [
+              { action: 'setState', params: { model: '${event.model}' } },
+            ],
+          },
+        },
+      },
+      { components },
+    );
+
+    render(
+      <ChatServicesProvider value={{ transport: driver.transport }}>
+        {runtime.render()}
+      </ChatServicesProvider>,
+    );
+
+    expect(
+      screen.getByRole('button', { name: '选择模型' }).textContent,
+    ).toContain('demo-mock');
+
+    fireEvent.click(screen.getByRole('button', { name: '选择模型' }));
+    fireEvent.click(screen.getByText('pro-max'));
+    await vi.waitFor(() => {
+      expect(
+        screen.getByRole('button', { name: '选择模型' }).textContent,
+      ).toContain('pro-max');
+    });
+    await runtime.destroy();
+  });
+});
+
 describe('Chat（spec: chat-dsl-component / 页面运行时集成）', () => {
   function createChatPageDsl(body: PageDsl['body']): PageDsl {
     return {

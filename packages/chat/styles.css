@@ -1349,6 +1349,210 @@ button.pactor-chat-trace__header:hover,
   flex: 1;
 }
 
+/* ------------------------------------------------------------
+ * 内建锚定弹层 AnchoredPopover（chat-builtin-features 设计决策 D3）：
+ * position: fixed，top/bottom/left 由 JS 按锚点计算（上方优先、
+ * 空间不足翻转为 --below）；首帧 visibility:hidden 量高后显示。
+ * 浮于 chat 内其它浮层之上（侧栏抽屉 50 / 遮罩 40 之上）。
+ * ------------------------------------------------------------ */
+
+.pactor-chat-popover {
+  position: fixed;
+  z-index: 60;
+  padding: 4px;
+  max-height: 280px;
+  overflow-y: auto;
+  border: 1px solid var(--pactor-chat-border);
+  border-radius: var(--pactor-chat-radius-md);
+  background: var(--pactor-chat-card);
+  color: var(--pactor-chat-fg);
+  box-shadow: var(--pactor-chat-shadow-composer);
+  font-size: 14px;
+  line-height: 1.5;
+  scrollbar-width: thin;
+  scrollbar-color: var(--pactor-chat-border) transparent;
+}
+
+/* ------------------------------------------------------------
+ * 内建特性（chat-builtin-features）：模型 chip / 上下文 chips /
+ * 弹层候选列表 / header 操作组与可编辑标题。全部只用既有
+ * --pactor-chat-* 语义令牌，暗色经令牌覆盖自动生效。
+ * ------------------------------------------------------------ */
+
+/* 弹层候选行（模型列表 / 上下文候选共用） */
+.pactor-chat-popover__item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  min-width: 160px;
+  padding: 6px 10px;
+  border: none;
+  border-radius: var(--pactor-chat-radius-sm);
+  background: transparent;
+  color: var(--pactor-chat-fg);
+  font-size: 13px;
+  text-align: left;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.pactor-chat-popover__item:hover {
+  background: var(--pactor-chat-muted);
+}
+
+.pactor-chat-popover__item-label {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* 选中项勾选标记 */
+.pactor-chat-popover__item-check {
+  flex-shrink: 0;
+  color: var(--pactor-chat-primary);
+}
+
+/* 上下文候选列表：分组头 / loading 与空态提示 / 内联错误 */
+.pactor-chat-source-list {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 180px;
+}
+
+.pactor-chat-source-list__group {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.pactor-chat-source-list__group-label {
+  padding: 6px 10px 2px;
+  color: var(--pactor-chat-muted-fg);
+  font-size: 12px;
+}
+
+.pactor-chat-source-list__hint {
+  padding: 6px 10px;
+  color: var(--pactor-chat-muted-fg);
+  font-size: 12.5px;
+}
+
+.pactor-chat-source-list__error {
+  padding: 6px 10px;
+  color: var(--pactor-chat-danger);
+  font-size: 12.5px;
+}
+
+/* 内建模型 chip（Composer 工具栏右端，toolbarEnd 槽内容之前） */
+.pactor-chat-model-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 10px;
+  border: 1px solid var(--pactor-chat-border);
+  border-radius: 999px;
+  background: var(--pactor-chat-card);
+  color: var(--pactor-chat-muted-fg);
+  font-size: 12.5px;
+  cursor: pointer;
+  transition:
+    border-color 0.15s ease,
+    color 0.15s ease;
+}
+
+.pactor-chat-model-chip:hover {
+  border-color: var(--pactor-chat-primary);
+  color: var(--pactor-chat-fg);
+}
+
+.pactor-chat-model-chip__label {
+  max-width: 160px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* 上下文 chips 区（输入区上方） */
+.pactor-chat-composer__contexts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.pactor-chat-context-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  padding: 3px 4px 3px 10px;
+  border: 1px solid var(--pactor-chat-border);
+  border-radius: 999px;
+  background: var(--pactor-chat-muted);
+  color: var(--pactor-chat-fg);
+  font-size: 12.5px;
+}
+
+.pactor-chat-context-chip__label {
+  max-width: 180px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.pactor-chat-context-chip__remove {
+  padding: 2px;
+}
+
+.pactor-chat-context-chip__remove svg {
+  width: 12px;
+  height: 12px;
+}
+
+/* 内建 header 操作组 + 可编辑标题（spec: chat-dsl-component / Header 配置） */
+.pactor-chat-workspace__header-right {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.pactor-chat-workspace__header-actions {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+/* 可编辑标题：按钮形态继承标题排版，hover 提示可点击 */
+.pactor-chat-workspace__title--editable {
+  border: none;
+  border-radius: var(--pactor-chat-radius-sm);
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+  padding: 2px 6px;
+}
+
+.pactor-chat-workspace__title--editable:hover {
+  background: var(--pactor-chat-muted);
+}
+
+.pactor-chat-workspace__title-input {
+  border: 1px solid var(--pactor-chat-border);
+  border-radius: var(--pactor-chat-radius-sm);
+  background: var(--pactor-chat-card);
+  color: var(--pactor-chat-fg);
+  font: inherit;
+  font-size: 14px;
+  padding: 2px 8px;
+  outline: none;
+}
+
+.pactor-chat-workspace__title-input:focus {
+  border-color: var(--pactor-chat-primary);
+}
+
 /* ============================================================
  * 10. 动效降级（prefers-reduced-motion）
  * ============================================================ */

@@ -5,6 +5,7 @@ import {
   createManualDriver,
   runChatTurn,
   runRegenerateTurn,
+  type ChatInput,
 } from '../src/index.js';
 
 describe('runChatTurn + createManualDriver（spec: chat-streaming / ChatTransport）', () => {
@@ -97,6 +98,32 @@ describe('runChatTurn + createManualDriver（spec: chat-streaming / ChatTranspor
       .map((p) => (p as { content: string }).content)
       .join('');
     expect(text).toBe('半截内容');
+  });
+
+  it('输入携带模型与上下文：transport.send 收到 model 与 contexts，text 仅为用户文本（spec: 输入携带模型与上下文）', async () => {
+    const store = new ConversationStore();
+    const send = vi.fn(async function* (_input: ChatInput) {
+      yield { type: 'message.end', messageId: 'x' } as const;
+    });
+
+    const contexts = [
+      { id: 'a1', label: '报表助手' },
+      { id: 'c1', label: '销售数据表', trigger: '+' as const, data: { tableId: 't1' } },
+    ];
+    await runChatTurn(store, { send }, {
+      text: '帮我看下数据',
+      model: 'demo',
+      contexts,
+    });
+
+    expect(send).toHaveBeenCalledTimes(1);
+    const input = send.mock.calls[0]![0];
+    expect(input.text).toBe('帮我看下数据');
+    expect(input.model).toBe('demo');
+    expect(input.contexts).toEqual(contexts);
+    // contexts 不拼接进 text：user 消息正文仍为用户原文
+    const user = store.getMessages().find((m) => m.role === 'user')!;
+    expect(user.parts[0]).toMatchObject({ type: 'text', content: '帮我看下数据' });
   });
 
   it('skipUserMessage：不追加 user 消息，仍追加 assistant 占位并 reduce 事件', async () => {
