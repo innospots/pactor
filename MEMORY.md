@@ -1,6 +1,6 @@
 # MEMORY.md
 
-> 项目记忆文件——供后续会话快速恢复上下文。最后更新：2026-08-11。
+> 项目记忆文件——供后续会话快速恢复上下文。最后更新：2026-08-27。
 
 ## 项目定位
 
@@ -48,12 +48,13 @@
 - **Chat 组件样式自持**（2026-08-26 chat-self-contained-styles）：组件结构布局（高度/对话列居中/面板贴右）全在 `pactor-chat/styles.css`，调用端零覆盖；高度语义 = 填满父容器（`height: 100%`，**宿主须给容器显式定高**，父级无定高退化为内容高度，不再硬编码 100dvh）；可调令牌 `--pactor-chat-content-width`（对话列 768px）/ `--pactor-chat-inspector-width` / `--pactor-chat-sidebar-width`。示例 app.css 只管 demo 自有 UI（顶栏/chip/弹层）。
 - **Chat 产出物面板与 ChatShell**（2026-08-26 add-chat-artifact-panel）：`ChatArtifact`（markdown/code/text/dsl 四 kind，dsl 经 Safe Registry 守卫活预览）+ `ArtifactStore`；`Chat` 受控 props `artifact`/`panelOpen`/`onPanelClose` + `inspector` 槽 + `events.onArtifact`（artifact part 就绪触发，框架不擅自开面板）；`ChatShell` = AppShell + 菜单侧栏 + `content` 槽（无聊天/路由逻辑），随 `registerChatComponent` 一并注册。**坑：面板开合不得改变子树深度**——面板功能使用时恒渲染 host 包裹层，否则 ChatView 重挂载导致 onArtifact 重放（有回归测试）。**examples/chat 已路由化**：HashRouter + pactor-router（MenuRegistry/DynamicDslRoute/createRouterAdapter），三页 YAML（chat/agents/settings），刷新按 URL 还原；ConversationStore 按会话 id 缓存于宿主 Map 跨页存活。
 - **Chat 安全**：LLM DSL 走 Safe Registry 白名单（`guardChatDsl` 替换为 ChatDenied 占位）；AI 动作走 capability 链（registry → permission → confirm → execute）。
+- **Chat 内建模型选择/上下文弹层/header 操作组**（2026-08-27 chat-builtin-features，第 49 个归档变更）：`models`/`model`/`onModelChange` 内建模型 chip、`contexts` 声明式数据源（静态 items 或 `service` 经 `ChatServices.callService` 桥解析）驱动 @/＋ 内建弹层与 chips、`headerActions`（export/theme/clear）+ `editableTitle`；examples/chat 宿主槽位组件（Header/ModelSelector/PlusMenu 等）已全部清空。**约定/坑**：chat 包保持对 pactor-ui 零运行时依赖（内建弹层为包内 AnchoredPopover 自实现，不导出）；chip 去重键为「同 trigger 同 id」；内建 theme 操作写 `documentElement` 的 `data-pactor-theme`——宿主暗色令牌选择器须挂在 documentElement 链上（examples/chat app.css 已改为 `[data-pactor-theme='dark'] .demo-app`）；调用方 `onPlusMenu`/`onMentionTrigger` 回调优先于内建弹层。
 - **应用级槽位**（2026-08-12 add-antd-skin-settings）：`providers`（Router 内、InteractionKit 外，业务 ConfigProvider/全局 Context 入口，皮肤主题等运行时切换经此注入）+ `headerExtra`（admin 头部右侧插槽）。example-admin 皮肤设置：`skin.ts` store（localStorage + 订阅）→ 写 DOM 属性（`data-pactor-theme` / `data-pactor-accent` / `--radius` 内联变量）→ `SkinSettings`（头部按钮 → 面板：预设色板/取色/暗黑/圆角/恢复默认）。
 
 ## OpenSpec 工作流（本项目标准流程）
 
 - 每个变更：`openspec new change <name>` → proposal/design/specs/tasks 四件 → 实现（多由 coder 子代理完成）→ 主代理独立复跑验收 → tasks 勾选 → 归档时同步 delta specs 到 `openspec/specs/`（主 spec 无 ADDED/MODIFIED 头）→ `mv` 到 `changes/archive/YYYY-MM-DD-<name>`。
-- 已归档 48 个变更；主 specs 50 个能力（`openspec/specs/`）是现状基准。
+- 已归档 49 个变更；主 specs 52 个能力（`openspec/specs/`）是现状基准。
 - 规范细节：scenario 必须 4 个 `#`（####）；MODIFIED 需全量需求块；MODIFIED 合并时注意变更间依赖顺序。
 
 ## 环境与命令

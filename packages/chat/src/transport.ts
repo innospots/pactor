@@ -1,5 +1,9 @@
 import { applyChatEvent, type ChatEvent } from './events.js';
-import { createChatId, type ChatPart } from './model.js';
+import {
+  createChatId,
+  type ChatContextItem,
+  type ChatPart,
+} from './model.js';
 import type { ConversationStore } from './store.js';
 
 /**
@@ -14,6 +18,17 @@ import type { ConversationStore } from './store.js';
 export interface ChatInput {
   text: string;
   conversationId?: string;
+  /**
+   * 当前选中模型 value（spec: chat-streaming，设计决策 D2）：
+   * 由视图层在发送时注入；可选字段，既有 transport 实现无需修改
+   */
+  model?: string;
+  /**
+   * 当前生效的上下文 chips（spec: chat-streaming，设计决策 D2/D6）：
+   * 由视图层在发送时注入；MUST NOT 拼接进 `text` 字段（不污染用户
+   * 原文），transport 自行结构化消费；可选字段，既有实现无需修改
+   */
+  contexts?: ChatContextItem[];
 }
 
 /** Chat 传输层：发送输入，返回流式事件 */

@@ -11,12 +11,21 @@ import {
 
 import { ArtifactStore, type ChatArtifact } from './artifact.js';
 import type { ChatWorkspaceServices } from './chat-workspace.js';
-import type { ChatAttachment } from './model.js';
+import type {
+  ChatAttachment,
+  ChatContextItem,
+  ChatContextSource,
+  ChatModelOption,
+} from './model.js';
 import { ConversationStore } from './store.js';
 import { AppShell } from './view/AppShell.js';
 import { ArtifactPanel } from './view/ArtifactPanel.js';
 import { ChatView } from './view/ChatView.js';
 import type { ChatSuggestion } from './view/EmptyState.js';
+import {
+  WorkspaceHeader,
+  type ChatHeaderAction,
+} from './view/WorkspaceHeader.js';
 
 /**
  * 渲染内嵌 DslNode 槽：经 useRenderer().renderChildren 以当前作用域渲染
@@ -109,6 +118,29 @@ export interface ChatCompositionProps {
   header?: ReactNode;
   /** 内建 header 标题右侧扩展区 */
   headerExtra?: ReactNode;
+  /**
+   * 内建 header 操作组（spec: chat-dsl-component / Header 配置，决策 D4）：
+   * 按数组顺序渲染在 headerExtra 槽之前；缺省 / 空数组不渲染任何操作按钮。
+   * 默认行为总在包内执行（export 下载 Markdown / theme 切换
+   * data-pactor-theme / clear 清空 store），事件为并行通知
+   */
+  headerActions?: ChatHeaderAction[];
+  /** 标题可编辑（点击进入编辑，Enter / blur 提交）；缺省 false */
+  editableTitle?: boolean;
+  onExport?: () => void;
+  onThemeChange?: (theme: 'light' | 'dark') => void;
+  onClear?: () => void;
+  onTitleChange?: (title: string) => void;
+  /**
+   * 内建模型选择（spec: chat-model-selector，决策 D5）：透传 ChatView；
+   * model + onModelChange 同时提供即受控，仅 models 时非受控缺省 models[0]
+   */
+  models?: ChatModelOption[];
+  model?: string;
+  onModelChange?: (value: string) => void;
+  /** 内建上下文数据源（spec: chat-context-sources）：透传 ChatView */
+  contexts?: ChatContextSource[];
+  onContextsChange?: (chips: ChatContextItem[]) => void;
   /** 侧栏内容（提供时以 AppShell 包裹工作区，含移动端抽屉） */
   sidebar?: ReactNode;
   /** Composer 工具栏右端附加槽（与服务注入的 toolbarEnd 先后渲染） */
@@ -156,6 +188,17 @@ export function ChatComposition({
   showHeader,
   header,
   headerExtra,
+  headerActions,
+  editableTitle,
+  onExport,
+  onThemeChange,
+  onClear,
+  onTitleChange,
+  models,
+  model,
+  onModelChange,
+  contexts,
+  onContextsChange,
   sidebar,
   toolbarEnd,
   className,
@@ -249,14 +292,17 @@ export function ChatComposition({
     >
       {showHeader ? (
         (header ?? (
-          <header className="pactor-chat-workspace__header">
-            <div className="pactor-chat-workspace__title">{title}</div>
-            {headerExtra !== undefined ? (
-              <div className="pactor-chat-workspace__header-extra">
-                {headerExtra}
-              </div>
-            ) : null}
-          </header>
+          <WorkspaceHeader
+            title={title}
+            headerExtra={headerExtra}
+            headerActions={headerActions}
+            editableTitle={editableTitle}
+            store={store}
+            onExport={onExport}
+            onThemeChange={onThemeChange}
+            onClear={onClear}
+            onTitleChange={onTitleChange}
+          />
         ))
       ) : null}
       <ChatView
@@ -283,6 +329,12 @@ export function ChatComposition({
         onPlusMenu={services.onPlusMenu}
         onArtifact={onArtifact}
         onOpenArtifact={handleOpenArtifact}
+        models={models}
+        model={model}
+        onModelChange={onModelChange}
+        contexts={contexts}
+        onContextsChange={onContextsChange}
+        callService={services.callService}
       />
     </div>
   );

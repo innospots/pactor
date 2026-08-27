@@ -9,10 +9,16 @@ import type {
 } from './capability-action.js';
 import { ChatComposition, DslNodeSlot } from './chat-composition.js';
 import { ChatServicesProvider } from './chat-services.js';
-import type { ChatAttachment } from './model.js';
+import type {
+  ChatAttachment,
+  ChatContextItem,
+  ChatContextSource,
+  ChatModelOption,
+} from './model.js';
 import type { ConversationStore } from './store.js';
 import type { ChatTransport } from './transport.js';
 import type { ChatSuggestion } from './view/EmptyState.js';
+import type { ChatHeaderAction } from './view/WorkspaceHeader.js';
 
 /**
  * ChatWorkspace 宿主服务（spec: chat-dsl-page，设计决策 D1）：
@@ -49,6 +55,16 @@ export interface ChatWorkspaceServices {
   onAttachmentClick?: (attachment: ChatAttachment) => void;
   /** 发送回调（在 transport 驱动 turn 之前触发） */
   onSend?: (text: string) => void;
+  /**
+   * 声明式数据源解析出口（spec: chat-context-sources，设计决策 D1）：
+   * contexts 的 service 引用（`{ service, params? }`）经此调用解析为
+   * 候选数据；宿主桥到 ServiceRegistry 或自有实现。函数不进 DSL
+   * props，统一经 ChatServices 注入。
+   */
+  callService?: (
+    name: string,
+    params?: Record<string, unknown>,
+  ) => Promise<unknown>;
   /** 词边界 `@` 输入触发：query 为 `@` 后文本，anchorRect 为弹层锚点 */
   onMentionTrigger?: (query: string, anchorRect: DOMRect) => void;
   /** "+" 按钮触发弹层入口 */
@@ -99,6 +115,24 @@ export interface ChatWorkspaceProps {
   onArtifact?: (artifact: ChatArtifact) => void;
   /** 产出物卡片"在面板中打开"回调（runtime 绑定 events.onOpenArtifact 时传入） */
   onOpenArtifact?: (artifact: ChatArtifact) => void;
+  /**
+   * 内建 header 操作组（spec: chat-dsl-component / Header 配置，决策 D4）：
+   * 按数组顺序渲染（headerExtra 槽之前）；缺省不渲染
+   */
+  headerActions?: ChatHeaderAction[];
+  /** 标题可编辑（点击进入编辑，Enter / blur 提交）；缺省 false */
+  editableTitle?: boolean;
+  onExport?: () => void;
+  onThemeChange?: (theme: 'light' | 'dark') => void;
+  onClear?: () => void;
+  onTitleChange?: (title: string) => void;
+  /** 内建模型选择（spec: chat-model-selector，决策 D5 受控规则） */
+  models?: ChatModelOption[];
+  model?: string;
+  onModelChange?: (value: string) => void;
+  /** 内建上下文数据源（spec: chat-context-sources） */
+  contexts?: ChatContextSource[];
+  onContextsChange?: (chips: ChatContextItem[]) => void;
   className?: string;
 }
 
@@ -128,6 +162,17 @@ export function createChatWorkspace(
     inspector,
     onArtifact,
     onOpenArtifact,
+    headerActions,
+    editableTitle,
+    onExport,
+    onThemeChange,
+    onClear,
+    onTitleChange,
+    models,
+    model,
+    onModelChange,
+    contexts,
+    onContextsChange,
     className,
   }: ChatWorkspaceProps): ReactNode {
     return (
@@ -153,6 +198,17 @@ export function createChatWorkspace(
           inspector={inspector ? <DslNodeSlot node={inspector} /> : undefined}
           onArtifact={onArtifact}
           onOpenArtifact={onOpenArtifact}
+          headerActions={headerActions}
+          editableTitle={editableTitle}
+          onExport={onExport}
+          onThemeChange={onThemeChange}
+          onClear={onClear}
+          onTitleChange={onTitleChange}
+          models={models}
+          model={model}
+          onModelChange={onModelChange}
+          contexts={contexts}
+          onContextsChange={onContextsChange}
         />
       </ChatServicesProvider>
     );

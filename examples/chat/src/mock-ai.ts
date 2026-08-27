@@ -270,6 +270,23 @@ export function createMockAiTransport(): ChatTransport {
       const messageId = 'assistant';
       const text = input.text;
       await sleep(300);
+      // 消费内建特性的新输入（spec: chat-builtin-features，决策 D2/D6）：
+      // 选中模型（input.model）与上下文 chips（input.contexts）在回复开头
+      // 注明，让模型切换 / 上下文选择的效果在演示中可感知
+      const notes: string[] = [];
+      if (input.model) {
+        notes.push(`当前模型：\`${input.model}\``);
+      }
+      if (input.contexts && input.contexts.length > 0) {
+        notes.push(
+          `引用上下文：${input.contexts.map((item) => item.label).join('、')}`,
+        );
+      }
+      if (notes.length > 0) {
+        yield* streamText(messageId, `> ${notes.join(' · ')}\n\n`, {
+          format: 'markdown',
+        });
+      }
       if (text.includes('天气')) {
         yield* weatherTurn(messageId);
       } else if (/页面|统计页/.test(text)) {

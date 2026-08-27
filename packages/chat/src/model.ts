@@ -79,6 +79,44 @@ export interface ChatAttachment {
   url?: string;
 }
 
+/**
+ * 上下文项（spec: chat-context-sources，设计决策 D6）：
+ * 选中候选追加为 Composer 上方 chips；`label` 用于 chip 展示，
+ * `trigger` 标记来源入口（'@' 提及 / '+' 菜单），`data` 为 source 项
+ * 原始数据（如 agentId），transport 可结构化消费。
+ */
+export interface ChatContextItem {
+  id: string;
+  label: string;
+  trigger?: '@' | '+';
+  data?: unknown;
+}
+
+/**
+ * 上下文数据源（spec: chat-context-sources，设计决策 D1）：
+ * `trigger` 标记入口（'@' 提及弹层 / '+' 菜单）；`items` 为静态候选
+ * 数组；`service` + `params` 为声明式服务引用，经注入的
+ * `ChatServices.callService(name, params)` 解析为 `ChatContextItem[]`
+ * （结果按 source 键会话级缓存）。全部为 DSL 可表达数据。
+ */
+export interface ChatContextSource {
+  trigger: '@' | '+';
+  /** 来源名（弹层分组展示 / 错误提示用） */
+  label: string;
+  /** 静态候选数组；与 service 二选一 */
+  items?: ChatContextItem[];
+  /** 声明式服务引用（经 callService 解析） */
+  service?: string;
+  /** service 调用参数 */
+  params?: Record<string, unknown>;
+}
+
+/** 模型选项（spec: chat-model-selector）：value 进 ChatInput.model，label 用于 chip 展示 */
+export interface ChatModelOption {
+  value: string;
+  label: string;
+}
+
 /** Chat 消息 */
 export interface ChatMessage {
   id: string;

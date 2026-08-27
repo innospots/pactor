@@ -2,7 +2,10 @@
 export {
   createChatId,
   type ChatAttachment,
+  type ChatContextItem,
+  type ChatContextSource,
   type ChatMessage,
+  type ChatModelOption,
   type ChatPart,
   type ChatRole,
   type MessagePatch,
@@ -109,6 +112,7 @@ export {
   ArtifactPanel,
   type ArtifactPanelProps,
 } from './view/ArtifactPanel.js';
+export { type ChatHeaderAction } from './view/WorkspaceHeader.js';
 
 // React 视图
 export {

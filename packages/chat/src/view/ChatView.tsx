@@ -1,13 +1,18 @@
 import { ArrowDown } from 'lucide-react';
 import { Registry } from 'pactor-core';
-import { useEffect, useMemo, useRef, useSyncExternalStore } from 'react';
+import { useEffect, useMemo, useRef, useState, useSyncExternalStore } from 'react';
 
 import type { ChatArtifact } from '../artifact.js';
 import type { ChatConfirm, ChatPermissionChecker } from '../capability-action.js';
 import type { ChatCapabilityRegistry } from '../capability-action.js';
 import { CHAT_DENIED_TYPE } from '../dsl-guard.js';
 import { useChatAutoScroll } from '../hooks/use-chat-auto-scroll.js';
-import type { ChatMessage } from '../model.js';
+import type {
+  ChatContextItem,
+  ChatContextSource,
+  ChatMessage,
+  ChatModelOption,
+} from '../model.js';
 import {
   createChatRuntime,
   type ChatRuntime,
@@ -20,6 +25,7 @@ import {
   type ChatTransport,
 } from '../transport.js';
 import { Composer, type ComposerProps } from './Composer.js';
+import type { CallChatService } from './context-sources.js';
 import { EmptyState, type ChatSuggestion } from './EmptyState.js';
 import { MessageBubble } from './MessageBubble.js';
 import { ChatDenied } from './PartRenderer.js';
@@ -81,6 +87,24 @@ export interface ChatViewProps
   onArtifact?: (artifact: ChatArtifact) => void;
   /** artifact 卡片"在面板中打开"回调（透传 PartRenderer） */
   onOpenArtifact?: (artifact: ChatArtifact) => void;
+  /**
+   * 内建模型选择（spec: chat-model-selector，决策 D5）：
+   * `model` + `onModelChange` 同时提供即受控（以 props 为准）；
+   * 仅提供 `models` 时组件自持选中态（缺省 models[0]）；
+   * 未配置 models 时不渲染 chip 且 ChatInput.model 为 undefined
+   */
+  models?: ChatModelOption[];
+  model?: string;
+  onModelChange?: (value: string) => void;
+  /**
+   * 内建上下文数据源（spec: chat-context-sources）：chips 状态由
+   * ChatView 自持（选中追加 / 单独移除 / 发送后清空），
+   * `onContextsChange` 并行通知；未配置时不启用内建弹层与 "+" 入口
+   */
+  contexts?: ChatContextSource[];
+  onContextsChange?: (chips: ChatContextItem[]) => void;
+  /** service 引用解析出口（ChatServices.callService 透传 Composer） */
+  callService?: CallChatService;
   className?: string;
 }
 
@@ -121,6 +145,12 @@ export function ChatView({
   toolbarEnd,
   onMentionTrigger,
   onPlusMenu,
+  models,
+  model,
+  onModelChange,
+  contexts,
+  onContextsChange,
+  callService,
 }: ChatViewProps) {
   const messages = useSyncExternalStore(
     (listener) => store.subscribe(listener),
@@ -192,14 +222,54 @@ export function ChatView({
     isStreaming,
   });
 
+  // 模型选择（spec: chat-model-selector，决策 D5）：model + onModelChange
+  // 同时提供即受控；仅 models 时自持选中态（缺省 models[0]）
+  const modelsEnabled = models !== undefined && models.length > 0;
+  const modelControlled = model !== undefined && onModelChange !== undefined;
+  const [innerModel, setInnerModel] = useState<string | undefined>(
+    () => models?.[0]?.value,
+  );
+  const currentModel = modelsEnabled
+    ? (modelControlled ? model : (innerModel ?? models[0]!.value))
+    : undefined;
+
+  const handleModelChange = (value: string): void => {
+    if (!modelControlled) {
+      setInnerModel(value);
+    }
+    onModelChange?.(value);
+  };
+
+  // 上下文 chips（spec: chat-context-sources，决策 D5/D6）：ChatView
+  // 自持状态（发送路径要消费）；变更 / 清空均触发 onContextsChange
+  const [contextChips, setContextChips] = useState<ChatContextItem[]>([]);
+  const handleContextChipsChange = (chips: ChatContextItem[]): void => {
+    setContextChips(chips);
+    onContextsChange?.(chips);
+  };
+
   const handleSend = (text: string): void => {
     onSend?.(text);
     if (transport) {
       const controller = new AbortController();
       abortRef.current = controller;
-      void runChatTurn(store, transport, { text, conversationId }, {
-        signal: controller.signal,
-      });
+      void runChatTurn(
+        store,
+        transport,
+        {
+          text,
+          conversationId,
+          model: currentModel,
+          contexts: contextChips.length > 0 ? contextChips : undefined,
+        },
+        {
+          signal: controller.signal,
+        },
+      );
+    }
+    // 发送后清空 chips（附件同款语义：一轮一清）并通知 []
+    if (contextChips.length > 0) {
+      handleContextChipsChange([]);
     }
   };
 
@@ -287,6 +357,13 @@ export function ChatView({
         toolbarEnd={toolbarEnd}
         onMentionTrigger={onMentionTrigger}
         onPlusMenu={onPlusMenu}
+        models={models}
+        model={currentModel}
+        onModelChange={handleModelChange}
+        contextSources={contexts}
+        contextChips={contextChips}
+        onContextChipsChange={handleContextChipsChange}
+        callService={callService}
       />
     </div>
   );

@@ -19,9 +19,15 @@ import {
 import { ChatComposition, resolveSlot } from '../chat-composition.js';
 import { useChatServices } from '../chat-services.js';
 import type { ChatArtifact } from '../artifact.js';
+import type {
+  ChatContextItem,
+  ChatContextSource,
+  ChatModelOption,
+} from '../model.js';
 import { useSidebarDrawer } from './AppShell.js';
 import { registerChatShellComponent } from './ChatShell.js';
 import type { ChatSuggestion } from './EmptyState.js';
+import type { ChatHeaderAction } from './WorkspaceHeader.js';
 
 /**
  * 菜单项（spec: chat-dsl-component，设计决策 D2）：纯数据驱动——
@@ -70,6 +76,29 @@ export interface ChatProps {
   headerExtra?: DslNode | ReactNode;
   /** header 槽：整体替换内建 header */
   header?: DslNode | ReactNode;
+  /**
+   * 内建 header 操作组（spec: chat-dsl-component / Header 配置，决策 D4）：
+   * 按数组顺序渲染 export / theme / clear 图标按钮（headerExtra 槽之前）；
+   * 缺省不渲染。默认行为总在包内执行，事件为并行通知
+   */
+  headerActions?: ChatHeaderAction[];
+  /** 标题可编辑（点击进入编辑，Enter / blur 提交）；缺省 false */
+  editableTitle?: boolean;
+  onExport?: () => void;
+  onThemeChange?: (theme: 'light' | 'dark') => void;
+  onClear?: () => void;
+  onTitleChange?: (title: string) => void;
+  /**
+   * 内建模型选择（spec: chat-model-selector）：DSL 可表达数据；
+   * model + onModelChange 构成受控闭环（典型接法：
+   * model: ${state.model} + events.onModelChange → setState）
+   */
+  models?: ChatModelOption[];
+  model?: string;
+  onModelChange?: (value: string) => void;
+  /** 内建上下文数据源（spec: chat-context-sources）；service 引用经 ChatServices.callService 解析 */
+  contexts?: ChatContextSource[];
+  onContextsChange?: (chips: ChatContextItem[]) => void;
   /**
    * 产出物面板（spec: chat-artifact-panel / chat-dsl-component，决策 D2）：
    * `artifact` / `panelOpen` 可绑 DSL state；任一提供即全受控，
@@ -192,6 +221,17 @@ export function Chat({
   sidebar,
   headerExtra,
   header,
+  headerActions,
+  editableTitle,
+  onExport,
+  onThemeChange,
+  onClear,
+  onTitleChange,
+  models,
+  model,
+  onModelChange,
+  contexts,
+  onContextsChange,
   artifact,
   panelOpen,
   onPanelClose,
@@ -247,6 +287,17 @@ export function Chat({
       showHeader={showHeader !== false}
       header={resolveSlot(header)}
       headerExtra={resolveSlot(headerExtra) ?? services.headerExtra}
+      headerActions={headerActions}
+      editableTitle={editableTitle}
+      onExport={onExport}
+      onThemeChange={onThemeChange}
+      onClear={onClear}
+      onTitleChange={onTitleChange}
+      models={models}
+      model={model}
+      onModelChange={onModelChange}
+      contexts={contexts}
+      onContextsChange={onContextsChange}
       sidebar={sidebarContent}
       onSend={onSend}
       artifact={artifact}
@@ -268,7 +319,9 @@ type DslEventHandler = (event: unknown) => void;
  * DSL 适配层（决策 D4）：renderer 把 events.onX 绑成单参函数（入参进
  * event 作用域），而 Chat 的 React 签名是 onSend(text) /
  * onMenuSelect(key, item)——适配器把调用折算为事件对象，
- * DSL 侧即 event.text / event.key / event.item / event.artifact。
+ * DSL 侧即 event.text / event.key / event.item / event.artifact /
+ * event.model / event.contexts / event.theme / event.title
+ * （onExport / onClear / onPanelClose 为空对象 {}）。
  */
 function ChatDslAdapter({
   onSend,
@@ -276,16 +329,38 @@ function ChatDslAdapter({
   onPanelClose,
   onArtifact,
   onOpenArtifact,
+  onModelChange,
+  onContextsChange,
+  onExport,
+  onThemeChange,
+  onClear,
+  onTitleChange,
   ...rest
 }: Omit<
   ChatProps,
-  'onSend' | 'onMenuSelect' | 'onPanelClose' | 'onArtifact' | 'onOpenArtifact'
+  | 'onSend'
+  | 'onMenuSelect'
+  | 'onPanelClose'
+  | 'onArtifact'
+  | 'onOpenArtifact'
+  | 'onModelChange'
+  | 'onContextsChange'
+  | 'onExport'
+  | 'onThemeChange'
+  | 'onClear'
+  | 'onTitleChange'
 > & {
   onSend?: DslEventHandler;
   onMenuSelect?: DslEventHandler;
   onPanelClose?: DslEventHandler;
   onArtifact?: DslEventHandler;
   onOpenArtifact?: DslEventHandler;
+  onModelChange?: DslEventHandler;
+  onContextsChange?: DslEventHandler;
+  onExport?: DslEventHandler;
+  onThemeChange?: DslEventHandler;
+  onClear?: DslEventHandler;
+  onTitleChange?: DslEventHandler;
 }): ReactNode {
   return (
     <Chat
@@ -308,6 +383,24 @@ function ChatDslAdapter({
         onOpenArtifact
           ? (artifact: ChatArtifact) => onOpenArtifact({ artifact })
           : undefined
+      }
+      onModelChange={
+        onModelChange ? (model: string) => onModelChange({ model }) : undefined
+      }
+      onContextsChange={
+        onContextsChange
+          ? (contexts: ChatContextItem[]) => onContextsChange({ contexts })
+          : undefined
+      }
+      onExport={onExport ? () => onExport({}) : undefined}
+      onThemeChange={
+        onThemeChange
+          ? (theme: 'light' | 'dark') => onThemeChange({ theme })
+          : undefined
+      }
+      onClear={onClear ? () => onClear({}) : undefined}
+      onTitleChange={
+        onTitleChange ? (title: string) => onTitleChange({ title }) : undefined
       }
     />
   );

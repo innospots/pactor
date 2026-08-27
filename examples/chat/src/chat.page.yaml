@@ -7,21 +7,29 @@ page:
 # artifact part 就绪 → events.onArtifact → setState 写入 artifact 并打开面板；
 # 面板关闭按钮 / 窄屏遮罩 → events.onPanelClose → setState 关闭。
 # artifact / panelOpen 为受控 props（任一提供即全受控）。
+# model 为内建模型选择的受控闭环状态（决策 D5，初值为 models[0]）。
 state:
   panelOpen: false
   artifact: null
+  model: demo-mock
 
-# 聊天页 body 为一等组件 Chat（spec: chat-dsl-component）：无侧栏形态
-# （菜单外壳由宿主 App.tsx 的 ChatShell + MenuRegistry 承担，菜单切换 =
-# URL 变化）；会话 id 取路由 query（智能体列表 navigate /chat?id=xxx
-# 进入独立会话），缺省 conv-demo。transport / safeRegistry / capabilities /
-# 附件与弹层回调等运行时服务由宿主经 ChatServicesProvider 注入（见 App.tsx）。
+# 聊天页 body 为一等组件 Chat（spec: chat-dsl-component / example-chat）：
+# 无侧栏形态（菜单外壳由宿主 App.tsx 的 ChatShell + MenuRegistry 承担，
+# 菜单切换 = URL 变化）；会话 id 取路由 query（智能体列表 navigate
+# /chat?id=xxx 进入独立会话），缺省 conv-demo。
+# header（可编辑标题 + 导出/明暗/清空操作组）、模型选择、@/+ 上下文弹层
+# 均为包内建特性，由下方 props 声明开启；transport / safeRegistry /
+# capabilities / 附件伪上传 / callService 服务桥由宿主经
+# ChatServicesProvider 注入（见 App.tsx）。
 body:
   type: Chat
   props:
-    # 宿主顶栏（可编辑标题 / 导出 / 明暗切换 / 清空）仍是 DSL 页面之外的
-    # 应用壳，故关闭 Chat 内建 header
-    showHeader: false
+    # 内建 header：可编辑标题 + 操作组（默认行为在包内执行：导出
+    # Markdown 下载 / 明暗切换写 documentElement 的 data-pactor-theme /
+    # 清空 store；事件经下方 events 接 toast 提示）
+    title: 新的对话
+    editableTitle: true
+    headerActions: [export, theme, clear]
     greeting: 你好，我是 Pactor Chat 示例
     subtitle: 数据全部由调用方经接口注入；点击下方建议立即开始
     conversationId: ${route.query.id || 'conv-demo'}
@@ -29,6 +37,18 @@ body:
       agentId: ${route.query.id || ''}
     artifact: ${state.artifact}
     panelOpen: ${state.panelOpen}
+    # 内建模型选择（spec: chat-model-selector）：受控闭环
+    # model: ${state.model} + events.onModelChange → setState
+    models:
+      - { value: demo-mock, label: demo-mock }
+      - { value: demo-fast, label: demo-fast }
+      - { value: demo-pro, label: demo-pro }
+    model: ${state.model}
+    # 内建上下文数据源（spec: chat-context-sources）：@ 智能体 / + 上下文，
+    # service 引用经宿主 callService 服务桥解析（见 App.tsx）
+    contexts:
+      - { trigger: '@', label: 智能体, service: agents }
+      - { trigger: '+', label: 上下文, service: contexts }
     suggestions:
       - { label: 今天天气怎么样, prompt: 今天天气怎么样 }
       - { label: 看一下本月报表, prompt: 看一下本月报表 }
@@ -54,3 +74,25 @@ body:
         params:
           artifact: ${event.artifact}
           panelOpen: true
+    # 模型切换：受控闭环（event.model 回写 state.model）
+    onModelChange:
+      - action: setState
+        params:
+          model: ${event.model}
+    # 内建 header 操作的并行事件（默认行为已在包内执行）：toast 提示。
+    # onContextsChange 不接（chips 由包内自持，发送后自动清空）
+    onExport:
+      - action: message
+        params:
+          type: success
+          text: 已导出 Markdown
+    onClear:
+      - action: message
+        params:
+          type: success
+          text: 会话已清空
+    onTitleChange:
+      - action: message
+        params:
+          type: success
+          text: 标题已更新为「${event.title}」
