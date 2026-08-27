@@ -1,4 +1,4 @@
-import { Check, ChevronsUpDown, FileText, Paperclip, Plus, Send, Square, X } from 'lucide-react';
+import { ArrowUp, FileText, Paperclip, Plus, Square, X } from 'lucide-react';
 import { useLayoutEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 
 import type {
@@ -8,6 +8,7 @@ import type {
   ChatModelOption,
 } from '../model.js';
 import { AnchoredPopover } from './AnchoredPopover.js';
+import { ModelChip } from './ModelChip.js';
 import {
   ContextSourceList,
   type CallChatService,
@@ -131,17 +132,12 @@ export function Composer({
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const plusButtonRef = useRef<HTMLButtonElement>(null);
-  const modelChipRef = useRef<HTMLButtonElement>(null);
   // IME 合成状态（compositionstart/end；keydown.isComposing 兜底）
   const composingRef = useRef(false);
 
   // 内建模型 chip（spec: chat-model-selector）：models 非空才渲染；
-  // 弹层锚点缺省 null 即关闭
+  // chip 与弹层实现抽为 ModelChip（header 位复用，决策 D2）
   const modelChipEnabled = models !== undefined && models.length > 0;
-  const [modelAnchor, setModelAnchor] = useState<DOMRect | null>(null);
-  const currentModelOption = modelChipEnabled
-    ? (models.find((option) => option.value === model) ?? models[0]!)
-    : undefined;
 
   // 内建上下文（spec: chat-context-sources，决策 D5）：调用方回调优先——
   // 注入 onMentionTrigger / onPlusMenu 时对应内建入口 / 弹层完全不启用
@@ -376,7 +372,7 @@ export function Composer({
           disabled={streaming ? false : disabled || !text.trim()}
           onClick={streaming ? onStop : send}
         >
-          {streaming ? <Square size={14} fill="currentColor" /> : <Send size={14} />}
+          {streaming ? <Square size={14} fill="currentColor" /> : <ArrowUp size={16} />}
         </button>
       </div>
       {showToolbar && (
@@ -414,24 +410,12 @@ export function Composer({
               <Paperclip size={14} />
             </button>
           )}
-          {modelChipEnabled && currentModelOption && (
-            <button
-              ref={modelChipRef}
-              type="button"
-              className="pactor-chat-model-chip"
-              title="选择模型"
-              aria-label="选择模型"
-              onClick={() =>
-                setModelAnchor(
-                  modelChipRef.current!.getBoundingClientRect(),
-                )
-              }
-            >
-              <span className="pactor-chat-model-chip__label">
-                {currentModelOption.label}
-              </span>
-              <ChevronsUpDown size={12} />
-            </button>
+          {modelChipEnabled && (
+            <ModelChip
+              models={models!}
+              model={model}
+              onModelChange={onModelChange}
+            />
           )}
           {toolbarEnd}
         </div>
@@ -451,34 +435,6 @@ export function Composer({
             event.target.value = '';
           }}
         />
-      )}
-      {modelChipEnabled && modelAnchor && (
-        <AnchoredPopover
-          anchorRect={modelAnchor}
-          onClose={() => setModelAnchor(null)}
-          role="listbox"
-        >
-          {models.map((option) => (
-            <button
-              key={option.value}
-              type="button"
-              className="pactor-chat-popover__item"
-              role="option"
-              aria-selected={option.value === currentModelOption?.value}
-              onClick={() => {
-                onModelChange?.(option.value);
-                setModelAnchor(null);
-              }}
-            >
-              <span className="pactor-chat-popover__item-label">
-                {option.label}
-              </span>
-              {option.value === currentModelOption?.value && (
-                <Check size={13} className="pactor-chat-popover__item-check" />
-              )}
-            </button>
-          ))}
-        </AnchoredPopover>
       )}
       {builtinMentionEnabled && mentionState && (
         <AnchoredPopover

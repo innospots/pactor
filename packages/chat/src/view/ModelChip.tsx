@@ -1,0 +1,77 @@
+import { Check, ChevronsUpDown } from 'lucide-react';
+import { useRef, useState, type ReactNode } from 'react';
+
+import type { ChatModelOption } from '../model.js';
+import { AnchoredPopover } from './AnchoredPopover.js';
+
+/**
+ * ModelChip（spec: chat-model-selector，决策 D2）：内建模型选择 chip。
+ * 自含弹层锚点状态，供 Composer 工具栏（composer 位）与 WorkspaceHeader
+ * （header 位）共用；选中语义（受控/非受控解析）由调用方经
+ * useChatModel 解析后传入，本组件纯展示 + 选中回调。
+ */
+export interface ModelChipProps {
+  /** 候选模型列表（非空才应渲染本组件，由调用方保证） */
+  models: ChatModelOption[];
+  /** 当前选中模型 value（未命中时展示 models[0]） */
+  model?: string;
+  /** 弹层中选中模型时触发 */
+  onModelChange?: (value: string) => void;
+}
+
+export function ModelChip({
+  models,
+  model,
+  onModelChange,
+}: ModelChipProps): ReactNode {
+  const chipRef = useRef<HTMLButtonElement>(null);
+  // 弹层锚点：缺省 null 即关闭
+  const [anchor, setAnchor] = useState<DOMRect | null>(null);
+  const currentOption = models.find((option) => option.value === model) ?? models[0]!;
+
+  return (
+    <>
+      <button
+        ref={chipRef}
+        type="button"
+        className="pactor-chat-model-chip"
+        title="选择模型"
+        aria-label="选择模型"
+        onClick={() => setAnchor(chipRef.current!.getBoundingClientRect())}
+      >
+        <span className="pactor-chat-model-chip__label">
+          {currentOption.label}
+        </span>
+        <ChevronsUpDown size={12} />
+      </button>
+      {anchor && (
+        <AnchoredPopover
+          anchorRect={anchor}
+          onClose={() => setAnchor(null)}
+          role="listbox"
+        >
+          {models.map((option) => (
+            <button
+              key={option.value}
+              type="button"
+              className="pactor-chat-popover__item"
+              role="option"
+              aria-selected={option.value === currentOption.value}
+              onClick={() => {
+                onModelChange?.(option.value);
+                setAnchor(null);
+              }}
+            >
+              <span className="pactor-chat-popover__item-label">
+                {option.label}
+              </span>
+              {option.value === currentOption.value && (
+                <Check size={13} className="pactor-chat-popover__item-check" />
+              )}
+            </button>
+          ))}
+        </AnchoredPopover>
+      )}
+    </>
+  );
+}

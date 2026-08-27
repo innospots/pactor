@@ -1,4 +1,4 @@
-import { Menu } from 'lucide-react';
+import { Menu, PanelLeft } from 'lucide-react';
 import {
   createContext,
   useCallback,
@@ -12,23 +12,43 @@ import {
  * 侧栏抽屉 context（spec: chat-app-shell）：侧栏内容（如导航项）在导航后
  * 调用 `close()` 关闭移动端抽屉；不在 AppShell 内时返回 null，
  * 调用方以可选链安全调用（`drawer?.close()`），不抛错。
+ * `collapsed` 为桌面折叠（icon rail）状态（决策 D3）：侧栏内容可据此
+ * 降级为纯图标展示（如菜单项以 title 兜底可访问名）。
  */
-const SidebarDrawerContext = createContext<{ close: () => void } | null>(null);
+const SidebarDrawerContext = createContext<{
+  close: () => void;
+  collapsed: boolean;
+} | null>(null);
 
-export function useSidebarDrawer(): { close: () => void } | null {
+export function useSidebarDrawer(): {
+  close: () => void;
+  collapsed: boolean;
+} | null {
   return useContext(SidebarDrawerContext);
 }
 
 export interface AppShellProps {
   /** 侧栏内容（会话列表等），完全由调用方注入 */
   sidebar: ReactNode;
-  /** 移动端顶栏品牌区内容（logo / 名称），由调用方注入 */
+  /** 品牌区内容（logo / 名称）：移动端渲染在顶栏；桌面端渲染在侧栏顶部品牌行（决策 D3） */
   brand?: ReactNode;
   /**
    * 路由 / 会话切换标识：值变化时抽屉在渲染期关闭
    * （compare-during-render，框架无关，替代路由 hook 耦合）
    */
   locationKey?: string;
+  /**
+   * 侧栏底部固定区（spec: chat-app-shell / 侧栏底部槽）：渲染在侧栏
+   * 滚动区之后（不随菜单滚动）；未提供时不渲染容器（零渲染承诺）
+   */
+  sidebarFooter?: ReactNode;
+  /**
+   * 桌面端可折叠（spec: chat-app-shell / 桌面侧栏头部与折叠，决策 D3）：
+   * 为 true 时品牌行右端渲染折叠按钮，点击切换内部非受控 collapsed
+   * 状态——折叠后桌面侧栏收窄为 icon rail；移动端不渲染折叠按钮、
+   * 抽屉语义不受影响。缺省 false
+   */
+  collapsible?: boolean;
   children: ReactNode;
   className?: string;
 }
@@ -73,11 +93,20 @@ function useIsMobileViewport(): boolean {
  * 布局切换全部在 styles.css 媒体查询（`.pactor-chat-shell*`）中表达，
  * JS 只拥有抽屉开合状态 `drawerOpen`。
  */
-export function AppShell({ sidebar, brand, locationKey, children, className }: AppShellProps) {
+export function AppShell({ sidebar, brand, locationKey, sidebarFooter, collapsible = false, children, className }: AppShellProps) {
   const [drawerOpen, setDrawerOpen] = useState(false);
   const isMobile = useIsMobileViewport();
 
   const close = useCallback(() => setDrawerOpen(false), []);
+
+  // 桌面折叠（决策 D3）：内部非受控；移动端不参与（抽屉语义不变）
+  const [collapsed, setCollapsed] = useState(false);
+  const collapsedEffective = collapsible && collapsed && !isMobile;
+
+  // 侧栏框架模式：提供 brand（桌面品牌行）或 sidebarFooter（底部固定区）
+  // 时侧栏变为 品牌行 + 滚动区 + 底部区 的 flex 列；都未提供时保持
+  // sidebar 直挂容器的既有 DOM（零渲染承诺）
+  const framed = brand !== undefined || sidebarFooter !== undefined;
 
   // locationKey 变化（路由 / 会话切换）即关抽屉：渲染期比较，
   // 抽屉不会在新会话内容之上多画一帧
@@ -102,7 +131,7 @@ export function AppShell({ sidebar, brand, locationKey, children, className }: A
   }, [drawerOpen]);
 
   return (
-    <SidebarDrawerContext.Provider value={{ close }}>
+    <SidebarDrawerContext.Provider value={{ close, collapsed: collapsedEffective }}>
       {/* 100dvh 而非 100vh：iOS Safari 的 100vh 包含可收起的地址栏，
           vh 定高会把主区内容推到地址栏下（同参考实现的取舍） */}
       <div className={`pactor-chat-shell${className ? ` ${className}` : ''}`}>
@@ -111,11 +140,41 @@ export function AppShell({ sidebar, brand, locationKey, children, className }: A
         ) : null}
 
         <div
-          className="pactor-chat-shell__sidebar"
+          className={`pactor-chat-shell__sidebar${framed ? ' pactor-chat-shell__sidebar--framed' : ''}${collapsedEffective ? ' pactor-chat-shell__sidebar--collapsed' : ''}`}
           data-open={drawerOpen ? 'true' : 'false'}
           inert={isMobile && !drawerOpen ? true : undefined}
         >
-          {sidebar}
+          {framed ? (
+            <>
+              {brand !== undefined && (
+                // 桌面品牌行（决策 D3）：brand 左、折叠钮右；移动端由
+                // CSS 隐藏（品牌维持顶栏现状）
+                <div className="pactor-chat-shell__sidebar-header">
+                  <div className="pactor-chat-shell__brand">{brand}</div>
+                  {collapsible && !isMobile && (
+                    <button
+                      type="button"
+                      className="pactor-chat-icon-button pactor-chat-shell__collapse"
+                      aria-label={collapsedEffective ? '展开侧栏' : '折叠侧栏'}
+                      aria-expanded={!collapsedEffective}
+                      title={collapsedEffective ? '展开侧栏' : '折叠侧栏'}
+                      onClick={() => setCollapsed((value) => !value)}
+                    >
+                      <PanelLeft size={16} strokeWidth={1.7} />
+                    </button>
+                  )}
+                </div>
+              )}
+              <div className="pactor-chat-shell__sidebar-body">{sidebar}</div>
+              {sidebarFooter !== undefined && (
+                <div className="pactor-chat-shell__sidebar-footer">
+                  {sidebarFooter}
+                </div>
+              )}
+            </>
+          ) : (
+            sidebar
+          )}
         </div>
 
         <main className="pactor-chat-shell__main">

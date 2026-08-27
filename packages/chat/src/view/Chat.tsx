@@ -41,6 +41,8 @@ export interface ChatMenuItem {
   /** 字符串图标名（plus / chat / history / settings / star / search / user / folder）；未知名渲染占位圆点 */
   icon?: string;
   badge?: string | number;
+  /** 状态圆点（spec: chat-dsl-component / 菜单项状态点，决策 D4）：label 右侧渲染 danger 系小圆点；与 badge 可共存 */
+  dot?: boolean;
   disabled?: boolean;
   /** 分组标题（相邻同组只渲染一次） */
   group?: string;
@@ -96,6 +98,8 @@ export interface ChatProps {
   models?: ChatModelOption[];
   model?: string;
   onModelChange?: (value: string) => void;
+  /** 模型 chip 渲染位置（spec: chat-model-selector / 模型选择位置配置，决策 D2；DSL 可序列化标量，缺省 'composer'） */
+  modelPlacement?: 'composer' | 'header';
   /** 内建上下文数据源（spec: chat-context-sources）；service 引用经 ChatServices.callService 解析 */
   contexts?: ChatContextSource[];
   onContextsChange?: (chips: ChatContextItem[]) => void;
@@ -168,6 +172,8 @@ export function ChatSidebarMenu({
               className={`pactor-chat-menu__item${active ? ' pactor-chat-menu__item--active' : ''}`}
               disabled={item.disabled === true}
               aria-current={active ? 'true' : undefined}
+              // icon rail（桌面折叠态，决策 D3）下 label 隐藏，title 兜底可访问名
+              title={drawer?.collapsed ? item.label : undefined}
               onClick={() => {
                 if (item.disabled) {
                   return;
@@ -189,6 +195,9 @@ export function ChatSidebarMenu({
                 )
               ) : null}
               <span className="pactor-chat-menu__label">{item.label}</span>
+              {item.dot === true ? (
+                <span className="pactor-chat-menu__dot" aria-hidden />
+              ) : null}
               {item.badge !== undefined ? (
                 <span className="pactor-chat-menu__badge">{item.badge}</span>
               ) : null}
@@ -230,6 +239,7 @@ export function Chat({
   models,
   model,
   onModelChange,
+  modelPlacement,
   contexts,
   onContextsChange,
   artifact,
@@ -296,6 +306,7 @@ export function Chat({
       models={models}
       model={model}
       onModelChange={onModelChange}
+      modelPlacement={modelPlacement}
       contexts={contexts}
       onContextsChange={onContextsChange}
       sidebar={sidebarContent}

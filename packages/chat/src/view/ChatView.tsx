@@ -7,6 +7,7 @@ import type { ChatConfirm, ChatPermissionChecker } from '../capability-action.js
 import type { ChatCapabilityRegistry } from '../capability-action.js';
 import { CHAT_DENIED_TYPE } from '../dsl-guard.js';
 import { useChatAutoScroll } from '../hooks/use-chat-auto-scroll.js';
+import { useChatModel } from '../hooks/use-chat-model.js';
 import type {
   ChatContextItem,
   ChatContextSource,
@@ -97,6 +98,13 @@ export interface ChatViewProps
   model?: string;
   onModelChange?: (value: string) => void;
   /**
+   * 模型 chip 渲染位置（spec: chat-model-selector / 模型选择位置配置，
+   * 决策 D2）：缺省 'composer'（Composer 工具栏右端）；'header' 时
+   * Composer 不再渲染 chip（chip 由 ChatComposition 渲染到工作区头部
+   * 左端——ChatView 单独使用时 'header' 等效于不渲染 chip）
+   */
+  modelPlacement?: 'composer' | 'header';
+  /**
    * 内建上下文数据源（spec: chat-context-sources）：chips 状态由
    * ChatView 自持（选中追加 / 单独移除 / 发送后清空），
    * `onContextsChange` 并行通知；未配置时不启用内建弹层与 "+" 入口
@@ -148,6 +156,7 @@ export function ChatView({
   models,
   model,
   onModelChange,
+  modelPlacement = 'composer',
   contexts,
   onContextsChange,
   callService,
@@ -222,23 +231,15 @@ export function ChatView({
     isStreaming,
   });
 
-  // 模型选择（spec: chat-model-selector，决策 D5）：model + onModelChange
-  // 同时提供即受控；仅 models 时自持选中态（缺省 models[0]）
-  const modelsEnabled = models !== undefined && models.length > 0;
-  const modelControlled = model !== undefined && onModelChange !== undefined;
-  const [innerModel, setInnerModel] = useState<string | undefined>(
-    () => models?.[0]?.value,
-  );
-  const currentModel = modelsEnabled
-    ? (modelControlled ? model : (innerModel ?? models[0]!.value))
-    : undefined;
-
-  const handleModelChange = (value: string): void => {
-    if (!modelControlled) {
-      setInnerModel(value);
-    }
-    onModelChange?.(value);
-  };
+  // 模型选择（spec: chat-model-selector，决策 D5）：受控/非受控解析
+  // 收敛到 useChatModel——ChatView 单独使用时在此自持；经
+  // ChatComposition 使用时由组合层解析后以受控形态传入（决策 D2，
+  // header 位 chip 与 composer 位共享同一状态）
+  const { currentModel, handleModelChange } = useChatModel({
+    models,
+    model,
+    onModelChange,
+  });
 
   // 上下文 chips（spec: chat-context-sources，决策 D5/D6）：ChatView
   // 自持状态（发送路径要消费）；变更 / 清空均触发 onContextsChange
@@ -307,18 +308,49 @@ export function ChatView({
       ? lastMessage.id
       : undefined;
 
+  // 空态居中组（spec: chat-empty-state，决策 D1）：messages 为空时
+  // EmptyState 与 Composer 作为同一居中列的相邻子节点渲染在消息区内
+  // （Composer 不钉底）；有消息后恢复消息列表 + 钉底 Composer
+  const isEmpty = messages.length === 0;
+
+  const composerNode = (
+    <Composer
+      onSend={handleSend}
+      streaming={isStreaming}
+      onStop={handleStop}
+      attachments={attachments}
+      onAttachmentsChange={onAttachmentsChange}
+      onAttachFiles={onAttachFiles}
+      onAttachmentClick={onAttachmentClick}
+      toolbarStart={toolbarStart}
+      toolbarEnd={toolbarEnd}
+      onMentionTrigger={onMentionTrigger}
+      onPlusMenu={onPlusMenu}
+      models={modelPlacement === 'header' ? undefined : models}
+      model={currentModel}
+      onModelChange={handleModelChange}
+      contextSources={contexts}
+      contextChips={contextChips}
+      onContextChipsChange={handleContextChipsChange}
+      callService={callService}
+    />
+  );
+
   return (
     <div
-      className={`pactor-chat-view${className ? ` ${className}` : ''}`}
+      className={`pactor-chat-view${isEmpty ? ' pactor-chat-view--empty' : ''}${className ? ` ${className}` : ''}`}
     >
       <div className="pactor-chat-messages" ref={containerRef}>
-        {messages.length === 0 ? (
-          <EmptyState
-            greeting={greeting}
-            subtitle={subtitle}
-            suggestions={suggestions}
-            onSuggestionClick={handleSend}
-          />
+        {isEmpty ? (
+          <div className="pactor-chat-view__empty-stack">
+            <EmptyState
+              greeting={greeting}
+              subtitle={subtitle}
+              suggestions={suggestions}
+              onSuggestionClick={handleSend}
+            />
+            {composerNode}
+          </div>
         ) : (
           messages.map((message) => (
             <MessageBubble
@@ -345,26 +377,7 @@ export function ChatView({
           </button>
         )}
       </div>
-      <Composer
-        onSend={handleSend}
-        streaming={isStreaming}
-        onStop={handleStop}
-        attachments={attachments}
-        onAttachmentsChange={onAttachmentsChange}
-        onAttachFiles={onAttachFiles}
-        onAttachmentClick={onAttachmentClick}
-        toolbarStart={toolbarStart}
-        toolbarEnd={toolbarEnd}
-        onMentionTrigger={onMentionTrigger}
-        onPlusMenu={onPlusMenu}
-        models={models}
-        model={currentModel}
-        onModelChange={handleModelChange}
-        contextSources={contexts}
-        contextChips={contextChips}
-        onContextChipsChange={handleContextChipsChange}
-        callService={callService}
-      />
+      {!isEmpty && composerNode}
     </div>
   );
 }

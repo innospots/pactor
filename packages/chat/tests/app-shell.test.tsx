@@ -25,7 +25,14 @@ describe('AppShell（spec: chat-app-shell）', () => {
     renderShell();
     expect(screen.getByTestId('sidebar')).toBeTruthy();
     expect(screen.getByTestId('content')).toBeTruthy();
-    expect(screen.getByTestId('brand')).toBeTruthy();
+    // brand 双位置（决策 D3）：移动端顶栏 + 桌面侧栏品牌行
+    expect(screen.getAllByTestId('brand')).toHaveLength(2);
+    expect(
+      document.querySelector('.pactor-chat-shell__topbar [data-testid="brand"]'),
+    ).toBeTruthy();
+    expect(
+      document.querySelector('.pactor-chat-shell__sidebar-header [data-testid="brand"]'),
+    ).toBeTruthy();
     expect(document.querySelector('.pactor-chat-shell')).toBeTruthy();
     expect(document.querySelector('.pactor-chat-shell__sidebar')).toBeTruthy();
     expect(document.querySelector('.pactor-chat-shell__main')).toBeTruthy();
@@ -134,5 +141,122 @@ describe('AppShell（spec: chat-app-shell）', () => {
     }
     render(<Outside />);
     expect(screen.getByText('null')).toBeTruthy();
+  });
+});
+
+/** 把 matchMedia 桩为移动视口分支（与 inert 测试同款手法） */
+function mockMobileViewport(): () => void {
+  const originalMatchMedia = window.matchMedia;
+  window.matchMedia = ((query: string) => ({
+    matches: query.includes('max-width'),
+    media: query,
+    onchange: null,
+    addListener: () => {},
+    removeListener: () => {},
+    addEventListener: () => {},
+    removeEventListener: () => {},
+    dispatchEvent: () => false,
+  })) as typeof window.matchMedia;
+  return () => {
+    window.matchMedia = originalMatchMedia;
+  };
+}
+
+describe('AppShell 侧栏增强（spec: chat-app-shell / 桌面侧栏头部与折叠，决策 D3）', () => {
+  it('折叠切换：侧栏加 --collapsed 修饰，折叠钮 aria-expanded / aria-label 更新（spec: 折叠为图标栏）', () => {
+    render(
+      <AppShell
+        sidebar={<nav data-testid="sidebar">侧栏</nav>}
+        brand={<span>品牌</span>}
+        collapsible
+      >
+        <div>主区</div>
+      </AppShell>,
+    );
+    const sidebar = document.querySelector('.pactor-chat-shell__sidebar')!;
+    const button = screen.getByRole('button', { name: '折叠侧栏' });
+    expect(button.getAttribute('aria-expanded')).toBe('true');
+    expect(sidebar.classList.contains('pactor-chat-shell__sidebar--collapsed')).toBe(false);
+
+    fireEvent.click(button);
+    expect(sidebar.classList.contains('pactor-chat-shell__sidebar--collapsed')).toBe(true);
+    const expandButton = screen.getByRole('button', { name: '展开侧栏' });
+    expect(expandButton.getAttribute('aria-expanded')).toBe('false');
+
+    fireEvent.click(expandButton);
+    expect(sidebar.classList.contains('pactor-chat-shell__sidebar--collapsed')).toBe(false);
+    expect(screen.getByRole('button', { name: '折叠侧栏' })).toBeTruthy();
+  });
+
+  it('缺省无折叠：未配置 collapsible 不渲染折叠钮（spec: 缺省无折叠）', () => {
+    render(
+      <AppShell sidebar={<nav>侧栏</nav>} brand={<span>品牌</span>}>
+        <div>主区</div>
+      </AppShell>,
+    );
+    expect(screen.queryByRole('button', { name: '折叠侧栏' })).toBeNull();
+    expect(
+      document.querySelector('.pactor-chat-shell__sidebar--collapsed'),
+    ).toBeNull();
+  });
+
+  it('移动端不渲染折叠钮，抽屉行为不变（spec: 移动端不受影响）', () => {
+    const restore = mockMobileViewport();
+    try {
+      render(
+        <AppShell
+          sidebar={<nav data-testid="sidebar">侧栏</nav>}
+          brand={<span>品牌</span>}
+          collapsible
+        >
+          <div>主区</div>
+        </AppShell>,
+      );
+      expect(screen.queryByRole('button', { name: '折叠侧栏' })).toBeNull();
+      expect(
+        document.querySelector('.pactor-chat-shell__sidebar--collapsed'),
+      ).toBeNull();
+
+      // 抽屉语义不变：菜单按钮打开抽屉 + 遮罩
+      fireEvent.click(screen.getByRole('button', { name: '打开导航' }));
+      expect(document.querySelector('.pactor-chat-shell__scrim')).toBeTruthy();
+    } finally {
+      restore();
+    }
+  });
+});
+
+describe('AppShell 侧栏底部槽（spec: chat-app-shell / 侧栏底部槽）', () => {
+  it('sidebarFooter 固定在侧栏底部渲染（spec: 底部卡片）', () => {
+    render(
+      <AppShell
+        sidebar={<nav data-testid="sidebar">侧栏</nav>}
+        sidebarFooter={<div data-testid="footer">用户卡</div>}
+      >
+        <div>主区</div>
+      </AppShell>,
+    );
+    const footer = document.querySelector('.pactor-chat-shell__sidebar-footer')!;
+    expect(footer).toBeTruthy();
+    expect(footer.querySelector('[data-testid="footer"]')).toBeTruthy();
+    // 底部区在侧栏内、滚动区之后
+    const body = document.querySelector('.pactor-chat-shell__sidebar-body')!;
+    expect(
+      body.compareDocumentPosition(footer) & Node.DOCUMENT_POSITION_FOLLOWING,
+    ).toBeTruthy();
+  });
+
+  it('未提供 sidebarFooter 时不渲染底部区容器（零渲染承诺）', () => {
+    render(
+      <AppShell sidebar={<nav>侧栏</nav>}>
+        <div>主区</div>
+      </AppShell>,
+    );
+    expect(
+      document.querySelector('.pactor-chat-shell__sidebar-footer'),
+    ).toBeNull();
+    expect(
+      document.querySelector('.pactor-chat-shell__sidebar-body'),
+    ).toBeNull();
   });
 });

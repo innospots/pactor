@@ -27,6 +27,12 @@ export interface WorkspaceHeaderProps {
   headerExtra?: ReactNode;
   headerActions?: ChatHeaderAction[];
   editableTitle?: boolean;
+  /**
+   * 头部左端槽（spec: chat-model-selector / 模型选择位置配置，决策 D2）：
+   * 渲染在 title 之前（如 header 位的模型 chip）；未提供时 DOM 与既有
+   * 内建 header 逐字节一致（零渲染承诺）
+   */
+  headerStart?: ReactNode;
   /** 会话 store（export 序列化 / clear 清空的默认行为对象） */
   store: ConversationStore;
   onExport?: () => void;
@@ -50,6 +56,7 @@ export function WorkspaceHeader({
   headerExtra,
   headerActions,
   editableTitle = false,
+  headerStart,
   store,
   onExport,
   onThemeChange,
@@ -145,40 +152,50 @@ export function WorkspaceHeader({
     ),
   };
 
+  const titleNode = editableTitle ? (
+    editing ? (
+      <input
+        className="pactor-chat-workspace__title-input"
+        value={draft}
+        autoFocus
+        aria-label="编辑标题"
+        onChange={(event) => setDraft(event.target.value)}
+        onBlur={commitTitle}
+        onKeyDown={(event) => {
+          if (event.key === 'Enter') {
+            commitTitle();
+          } else if (event.key === 'Escape') {
+            setEditing(false);
+          }
+        }}
+      />
+    ) : (
+      <button
+        type="button"
+        className="pactor-chat-workspace__title pactor-chat-workspace__title--editable"
+        title="点击编辑标题"
+        onClick={() => {
+          setDraft(displayTitle ?? '');
+          setEditing(true);
+        }}
+      >
+        {displayTitle}
+      </button>
+    )
+  ) : (
+    <div className="pactor-chat-workspace__title">{title}</div>
+  );
+
   return (
     <header className="pactor-chat-workspace__header">
-      {editableTitle ? (
-        editing ? (
-          <input
-            className="pactor-chat-workspace__title-input"
-            value={draft}
-            autoFocus
-            aria-label="编辑标题"
-            onChange={(event) => setDraft(event.target.value)}
-            onBlur={commitTitle}
-            onKeyDown={(event) => {
-              if (event.key === 'Enter') {
-                commitTitle();
-              } else if (event.key === 'Escape') {
-                setEditing(false);
-              }
-            }}
-          />
-        ) : (
-          <button
-            type="button"
-            className="pactor-chat-workspace__title pactor-chat-workspace__title--editable"
-            title="点击编辑标题"
-            onClick={() => {
-              setDraft(displayTitle ?? '');
-              setEditing(true);
-            }}
-          >
-            {displayTitle}
-          </button>
-        )
+      {headerStart !== undefined ? (
+        // header 位模型 chip（决策 D2）：与 title 组成左端组，chip 在前
+        <div className="pactor-chat-workspace__header-left">
+          {headerStart}
+          {titleNode}
+        </div>
       ) : (
-        <div className="pactor-chat-workspace__title">{title}</div>
+        titleNode
       )}
       {hasActions ? (
         <div className="pactor-chat-workspace__header-right">

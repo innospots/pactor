@@ -11,6 +11,7 @@ import {
 
 import { ArtifactStore, type ChatArtifact } from './artifact.js';
 import type { ChatWorkspaceServices } from './chat-workspace.js';
+import { useChatModel } from './hooks/use-chat-model.js';
 import type {
   ChatAttachment,
   ChatContextItem,
@@ -22,6 +23,7 @@ import { AppShell } from './view/AppShell.js';
 import { ArtifactPanel } from './view/ArtifactPanel.js';
 import { ChatView } from './view/ChatView.js';
 import type { ChatSuggestion } from './view/EmptyState.js';
+import { ModelChip } from './view/ModelChip.js';
 import {
   WorkspaceHeader,
   type ChatHeaderAction,
@@ -138,6 +140,12 @@ export interface ChatCompositionProps {
   models?: ChatModelOption[];
   model?: string;
   onModelChange?: (value: string) => void;
+  /**
+   * 模型 chip 渲染位置（spec: chat-model-selector / 模型选择位置配置，
+   * 决策 D2）：缺省 'composer'；'header' 时 chip 渲染在工作区头部左端
+   * （title 之前），Composer 不再渲染 chip
+   */
+  modelPlacement?: 'composer' | 'header';
   /** 内建上下文数据源（spec: chat-context-sources）：透传 ChatView */
   contexts?: ChatContextSource[];
   onContextsChange?: (chips: ChatContextItem[]) => void;
@@ -197,6 +205,7 @@ export function ChatComposition({
   models,
   model,
   onModelChange,
+  modelPlacement = 'composer',
   contexts,
   onContextsChange,
   sidebar,
@@ -277,6 +286,24 @@ export function ChatComposition({
     setAttachments([]);
   };
 
+  // 模型状态上移（spec: chat-model-selector，决策 D2）：组合层解析
+  // 受控/非受控选中态，解析结果以受控形态同时下发 WorkspaceHeader
+  // （header 位 chip）与 ChatView（composer 位 chip + ChatInput.model），
+  // 两个位置共享同一状态；ChatView 单独使用时仍自持（同 hook 兜底）
+  const { modelsEnabled, currentModel, handleModelChange } = useChatModel({
+    models,
+    model,
+    onModelChange,
+  });
+  const headerModelChip =
+    modelPlacement === 'header' && modelsEnabled ? (
+      <ModelChip
+        models={models!}
+        model={currentModel}
+        onModelChange={handleModelChange}
+      />
+    ) : undefined;
+
   // 工具栏右端：宿主闭包 ReactNode 槽 + 附加槽（如 DSL toolbarEnd）先后渲染
   const mergedToolbarEnd =
     services.toolbarEnd !== undefined || toolbarEnd !== undefined ? (
@@ -297,6 +324,7 @@ export function ChatComposition({
             headerExtra={headerExtra}
             headerActions={headerActions}
             editableTitle={editableTitle}
+            headerStart={headerModelChip}
             store={store}
             onExport={onExport}
             onThemeChange={onThemeChange}
@@ -330,8 +358,9 @@ export function ChatComposition({
         onArtifact={onArtifact}
         onOpenArtifact={handleOpenArtifact}
         models={models}
-        model={model}
-        onModelChange={onModelChange}
+        model={currentModel}
+        onModelChange={handleModelChange}
+        modelPlacement={modelPlacement}
         contexts={contexts}
         onContextsChange={onContextsChange}
         callService={services.callService}
