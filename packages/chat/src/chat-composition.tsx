@@ -13,9 +13,12 @@ import { ArtifactStore, type ChatArtifact } from './artifact.js';
 import type { ChatWorkspaceServices } from './chat-workspace.js';
 import { useChatModel } from './hooks/use-chat-model.js';
 import type {
+  BuiltinMessageAction,
   ChatAttachment,
   ChatContextItem,
   ChatContextSource,
+  ChatMessage,
+  ChatMessageAction,
   ChatModelOption,
 } from './model.js';
 import { ConversationStore } from './store.js';
@@ -149,6 +152,13 @@ export interface ChatCompositionProps {
   /** 内建上下文数据源（spec: chat-context-sources）：透传 ChatView */
   contexts?: ChatContextSource[];
   onContextsChange?: (chips: ChatContextItem[]) => void;
+  /**
+   * 消息操作条声明式配置（spec: chat-message-actions，决策 D1/D5）：
+   * 透传 ChatView；缺省渲染内建 copy / regenerate / retry / edit
+   */
+  messageActions?: Array<BuiltinMessageAction | ChatMessageAction>;
+  /** 全部消息动作（含内建）点击的并行通知（透传 ChatView） */
+  onMessageAction?: (actionId: string, message: ChatMessage) => void;
   /** 侧栏内容（提供时以 AppShell 包裹工作区，含移动端抽屉） */
   sidebar?: ReactNode;
   /** Composer 工具栏右端附加槽（与服务注入的 toolbarEnd 先后渲染） */
@@ -208,6 +218,8 @@ export function ChatComposition({
   modelPlacement = 'composer',
   contexts,
   onContextsChange,
+  messageActions,
+  onMessageAction,
   sidebar,
   toolbarEnd,
   className,
@@ -364,6 +376,8 @@ export function ChatComposition({
         contexts={contexts}
         onContextsChange={onContextsChange}
         callService={services.callService}
+        messageActions={messageActions}
+        onMessageAction={onMessageAction}
       />
     </div>
   );

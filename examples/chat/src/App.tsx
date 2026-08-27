@@ -232,9 +232,12 @@ function Shell() {
   // 声明式数据源服务桥（spec: chat-context-sources，设计决策 D1）：
   // chat.page.yaml contexts 的 service 引用（agents / contexts）经此解析为
   // ChatContextItem[]（{ id, label, data }——label 用于弹层与 chip 展示，
-  // data 为原始条目，transport 可结构化消费）
+  // data 为原始条目，transport 可结构化消费）；
+  // quoteMessage（spec: chat-message-actions）：消息操作条自定义 quote 动作
+  // 的派发服务——入参 { actionId, message }，演示实现把引用文本 toast 出来
+  // （真实场景可写入 Composer 草稿或引用回复区）
   const callService = useMemo<NonNullable<ChatServices['callService']>>(
-    () => (name) => {
+    () => (name, params) => {
       switch (name) {
         case 'agents':
           return Promise.resolve(
@@ -252,6 +255,25 @@ function Shell() {
               data: entry,
             })),
           );
+        case 'quoteMessage': {
+          const message = params?.['message'] as
+            | { id?: string; parts?: Array<{ type: string; content?: string }> }
+            | undefined;
+          const text = (message?.parts ?? [])
+            .filter(
+              (part) =>
+                (part.type === 'text' || part.type === 'markdown') &&
+                typeof part.content === 'string',
+            )
+            .map((part) => part.content)
+            .join('\n');
+          console.info('[example-chat] quoteMessage', params);
+          showMessage(
+            'info',
+            `已引用回复：${text.length > 40 ? `${text.slice(0, 40)}…` : text}`,
+          );
+          return Promise.resolve({ ok: true });
+        }
         default:
           return Promise.reject(new Error(`未知服务：${name}`));
       }

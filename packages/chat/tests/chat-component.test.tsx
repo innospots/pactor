@@ -9,6 +9,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 import {
   Chat,
   ChatServicesProvider,
+  ConversationStore,
   createManualDriver,
   registerChatComponent,
   useChatServices,
@@ -505,6 +506,114 @@ describe('Chat（spec: chat-dsl-component / 页面运行时集成）', () => {
     );
     await screen.findByText('DSL 侧栏槽');
     expect(document.querySelector('.pactor-chat-menu')).toBeNull();
+    await runtime.destroy();
+  });
+});
+
+
+describe('Chat messageActions（spec: chat-message-actions / chat-dsl-component 消息操作配置）', () => {
+  function createStore(): ConversationStore {
+    const store = new ConversationStore();
+    store.appendMessage({
+      id: 'u1',
+      role: 'user',
+      status: 'completed',
+      parts: [{ type: 'text', content: '问题', status: 'ready' }],
+    });
+    store.appendMessage({
+      id: 'a1',
+      role: 'assistant',
+      status: 'completed',
+      parts: [{ type: 'markdown', content: '回答', status: 'ready' }],
+    });
+    return store;
+  }
+
+  function createActionComponents(): Registry<unknown> {
+    const components = new Registry<unknown>('ComponentRegistry');
+    registerChatComponent(components);
+    components.register('Echo', ({ text }: { text?: string }) => (
+      <div>回显：{text}</div>
+    ));
+    components.register(
+      'Stack',
+      ({ children }: { children?: React.ReactNode }) => <div>{children}</div>,
+    );
+    return components;
+  }
+
+  it('DSL 配置操作条：按数组渲染，onMessageAction 折算 event.action / event.message；内建动作亦通知', async () => {
+    const driver = createManualDriver();
+    const store = createStore();
+    const callService = vi.fn().mockResolvedValue(undefined);
+    const runtime = createPageRuntime(
+      {
+        dsl: '1.0',
+        page: { id: 'chat', title: '聊天页' },
+        state: { lastAction: '', lastMessage: '' },
+        body: {
+          type: 'Stack',
+          children: [
+            {
+              type: 'Chat',
+              props: {
+                messageActions: [
+                  'copy',
+                  {
+                    id: 'quote',
+                    label: '引用回复',
+                    icon: 'quote',
+                    service: 'quoteMessage',
+                  },
+                ],
+              },
+              events: {
+                onMessageAction: [
+                  {
+                    action: 'setState',
+                    params: {
+                      lastAction: '${event.action}',
+                      lastMessage: '${event.message.id}',
+                    },
+                  },
+                ],
+              },
+            },
+            { type: 'Echo', props: { text: '${state.lastAction}' } },
+            { type: 'Echo', props: { text: '${state.lastMessage}' } },
+          ],
+        },
+      },
+      { components: createActionComponents() },
+    );
+
+    render(
+      <ChatServicesProvider
+        value={{ transport: driver.transport, store, callService }}
+      >
+        {runtime.render()}
+      </ChatServicesProvider>,
+    );
+
+    // 数组即真相：操作条仅含复制与引用回复两个按钮
+    const assistantNode = document.querySelector('[data-message-id="a1"]')!;
+    const labels = Array.from(
+      assistantNode.querySelectorAll('.pactor-chat-message__actions button'),
+    ).map((button) => button.getAttribute('aria-label'));
+    expect(labels).toEqual(['复制', '引用回复']);
+
+    // 点击自定义动作：callService 派发 + DSL 事件（event.action / event.message）
+    fireEvent.click(screen.getByRole('button', { name: '引用回复' }));
+    expect(callService).toHaveBeenCalledWith('quoteMessage', {
+      actionId: 'quote',
+      message: expect.objectContaining({ id: 'a1' }),
+    });
+    await screen.findByText('回显：quote');
+    await screen.findByText('回显：a1');
+
+    // 内建动作点击同样触发事件通知（默认行为不受影响）
+    fireEvent.click(screen.getByRole('button', { name: '复制' }));
+    await screen.findByText('回显：copy');
     await runtime.destroy();
   });
 });

@@ -224,3 +224,246 @@ describe('用户消息编辑重发（spec: chat-message-actions / 用户消息�
     expect(screen.getByText('原始文本')).toBeTruthy();
   });
 });
+
+
+describe('messageActions 声明式配置（spec: chat-message-actions / 消息操作条声明式配置）', () => {
+  it('缺省回归：streaming 中不渲染操作条；cancelled 终态显示复制', () => {
+    const store = createStore();
+    store.appendMessage(userMessage('u1', '问题'));
+    store.appendMessage(assistantMessage('a1', '生成中', 'streaming'));
+    store.appendMessage(assistantMessage('a2', '被中断', 'cancelled'));
+
+    render(<ChatView store={store} />);
+    const streamingNode = document.querySelector('[data-message-id="a1"]')!;
+    expect(
+      streamingNode.querySelector('.pactor-chat-message__actions'),
+    ).toBeNull();
+    // cancelled 归入 'completed'（非流式非错误终态）：复制入口可见
+    const cancelledNode = document.querySelector('[data-message-id="a2"]')!;
+    expect(
+      cancelledNode.querySelector('button[aria-label="复制"]'),
+    ).not.toBeNull();
+  });
+
+  it('数组即真相：未列出的内建动作不出现，顺序与数组一致', () => {
+    const store = createStore();
+    store.appendMessage(userMessage('u1', '问题'));
+    store.appendMessage(assistantMessage('a1', '回答'));
+    const driver = createManualDriver();
+
+    render(
+      <ChatView
+        store={store}
+        transport={driver.transport}
+        messageActions={[
+          'copy',
+          { id: 'quote', label: '引用', icon: 'quote', service: 'quoteMessage' },
+        ]}
+      />,
+    );
+
+    const assistantNode = document.querySelector('[data-message-id="a1"]')!;
+    const labels = Array.from(
+      assistantNode.querySelectorAll(
+        '.pactor-chat-message__actions button',
+      ),
+    ).map((button) => button.getAttribute('aria-label'));
+    // 严格按数组：仅复制与引用；regenerate / retry 未列出不出现
+    expect(labels).toEqual(['复制', '引用']);
+    const userNode = document.querySelector('[data-message-id="u1"]')!;
+    // edit 未列出：user 消息不出现编辑入口
+    expect(userNode.querySelector('button[aria-label="编辑"]')).toBeNull();
+    expect(screen.queryByRole('button', { name: '重新生成' })).toBeNull();
+  });
+
+  it('渲染顺序与配置数组一致', () => {
+    const store = createStore();
+    store.appendMessage(assistantMessage('a1', '回答'));
+
+    render(
+      <ChatView
+        store={store}
+        messageActions={[
+          { id: 'zeta', label: '乙' },
+          { id: 'alpha', label: '甲' },
+        ]}
+      />,
+    );
+
+    const labels = Array.from(
+      document.querySelectorAll('.pactor-chat-message__actions button'),
+    ).map((button) => button.getAttribute('aria-label'));
+    expect(labels).toEqual(['乙', '甲']);
+  });
+
+  it('内建字段覆盖：edit 改 label 并放宽 roles，点击仍执行内建编辑行为', () => {
+    const store = createStore();
+    store.appendMessage(userMessage('u1', '原始文本'));
+    store.appendMessage(assistantMessage('a1', '回答'));
+
+    render(
+      <ChatView
+        store={store}
+        messageActions={[
+          'copy',
+          {
+            id: 'edit',
+            builtin: 'edit',
+            label: '修改并重发',
+            roles: ['user', 'assistant'],
+          },
+        ]}
+      />,
+    );
+
+    // user 与 assistant 消息均显示该按钮，tooltip 为覆盖后的文案
+    expect(
+      screen.getAllByRole('button', { name: '修改并重发' }),
+    ).toHaveLength(2);
+
+    // 点击 user 消息上的按钮：仍进入内联编辑框（内建行为不变）
+    const userNode = document.querySelector('[data-message-id="u1"]')!;
+    fireEvent.click(
+      userNode.querySelector('button[aria-label="修改并重发"]') as HTMLButtonElement,
+    );
+    const editor = screen.getByRole('textbox', { name: '编辑消息' });
+    expect((editor as HTMLTextAreaElement).value).toBe('原始文本');
+  });
+
+  it('末条约束不可覆盖：regenerate 放宽 roles / visibleWhen 仍仅末条 assistant 出现', () => {
+    const store = createStore();
+    store.appendMessage(userMessage('u1', '第一问'));
+    store.appendMessage(assistantMessage('a1', '第一答'));
+    store.appendMessage(userMessage('u2', '第二问'));
+    store.appendMessage(assistantMessage('a2', '第二答'));
+    const driver = createManualDriver();
+
+    render(
+      <ChatView
+        store={store}
+        transport={driver.transport}
+        messageActions={[
+          {
+            id: 'regen',
+            builtin: 'regenerate',
+            roles: ['user', 'assistant'],
+            visibleWhen: 'always',
+          },
+        ]}
+      />,
+    );
+
+    const buttons = screen.getAllByRole('button', { name: '重新生成' });
+    expect(buttons).toHaveLength(1);
+    const lastNode = document.querySelector('[data-message-id="a2"]')!;
+    expect(lastNode.contains(buttons[0]!)).toBe(true);
+  });
+
+  it('自定义动作点击经 callService(service, { actionId, message }) 派发', () => {
+    const store = createStore();
+    store.appendMessage(assistantMessage('a1', '回答'));
+    const callService = vi.fn().mockResolvedValue(undefined);
+
+    render(
+      <ChatView
+        store={store}
+        callService={callService}
+        messageActions={[
+          { id: 'quote', label: '引用', icon: 'quote', service: 'quoteMessage' },
+        ]}
+      />,
+    );
+
+    fireEvent.click(screen.getByRole('button', { name: '引用' }));
+    expect(callService).toHaveBeenCalledWith('quoteMessage', {
+      actionId: 'quote',
+      message: expect.objectContaining({ id: 'a1', role: 'assistant' }),
+    });
+  });
+
+  it('未注入 callService：console.warn 跳过派发，事件仍触发，不抛错', () => {
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
+    const store = createStore();
+    store.appendMessage(assistantMessage('a1', '回答'));
+    const onMessageAction = vi.fn();
+
+    render(
+      <ChatView
+        store={store}
+        onMessageAction={onMessageAction}
+        messageActions={[
+          { id: 'quote', label: '引用', icon: 'quote', service: 'quoteMessage' },
+        ]}
+      />,
+    );
+
+    fireEvent.click(screen.getByRole('button', { name: '引用' }));
+    expect(warn).toHaveBeenCalled();
+    expect(onMessageAction).toHaveBeenCalledWith(
+      'quote',
+      expect.objectContaining({ id: 'a1' }),
+    );
+    warn.mockRestore();
+  });
+
+  it('onMessageAction 通知：内建动作点击同样触发（默认行为不受影响）', async () => {
+    const writeText = vi.fn().mockResolvedValue(undefined);
+    Object.defineProperty(navigator, 'clipboard', {
+      value: { writeText },
+      configurable: true,
+    });
+    const store = createStore();
+    store.appendMessage(assistantMessage('a1', '回答'));
+    const onMessageAction = vi.fn();
+
+    render(<ChatView store={store} onMessageAction={onMessageAction} />);
+    fireEvent.click(screen.getByRole('button', { name: '复制' }));
+
+    expect(onMessageAction).toHaveBeenCalledWith(
+      'copy',
+      expect.objectContaining({ id: 'a1' }),
+    );
+    // 内建默认行为照常执行
+    expect(writeText).toHaveBeenCalledWith('回答');
+    await screen.findByRole('button', { name: '已复制' });
+  });
+
+  it('未知图标名渲染占位图标，不抛错', () => {
+    const store = createStore();
+    store.appendMessage(assistantMessage('a1', '回答'));
+
+    render(
+      <ChatView
+        store={store}
+        messageActions={[{ id: 'x', label: '神秘动作', icon: 'no-such-icon' }]}
+      />,
+    );
+
+    const button = screen.getByRole('button', { name: '神秘动作' });
+    expect(button.querySelector('[data-icon-placeholder]')).not.toBeNull();
+  });
+
+  it("visibleWhen 'always'：流式中的自定义动作可见可点击", () => {
+    const store = createStore();
+    store.appendMessage(userMessage('u1', '问题'));
+    store.appendMessage(assistantMessage('a1', '生成中', 'streaming'));
+    const onMessageAction = vi.fn();
+
+    render(
+      <ChatView
+        store={store}
+        onMessageAction={onMessageAction}
+        messageActions={[
+          { id: 'live', label: '流式动作', visibleWhen: 'always' },
+        ]}
+      />,
+    );
+
+    const button = screen.getByRole('button', { name: '流式动作' });
+    fireEvent.click(button);
+    expect(onMessageAction).toHaveBeenCalledWith(
+      'live',
+      expect.objectContaining({ id: 'a1' }),
+    );
+  });
+});

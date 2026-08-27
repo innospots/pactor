@@ -381,3 +381,107 @@ rules:
 - 登录页：`examples/admin/src/pages/login.page.yaml`（Form 校验、`type: password`、命名动作 + `if` 分支、loading 绑定）
 - 列表页：`examples/admin/src/pages/customer-list.page.yaml`（service 数据源、cell 行模板、overlay.open 抽屉、权限禁用）
 - 工作台：`examples/admin/src/pages/dashboard.page.yaml`（static 数据源、Grid/Statistic、navigate）
+
+## 聊天页完整示例（pactor-chat）
+
+以下为 `examples/chat/src/chat.page.yaml` 全文——一个完整 AI 对话页的 DSL 声明。`Chat` 不是内置组件，需由 `registerChatComponent(registry)` 注册（见 [pactor-chat](../packages/chat.md)）；`transport` / `safeRegistry` / `callService` 服务桥等函数与实例无法从 DSL 产生，由宿主经 `ChatServicesProvider` 注入（见 `examples/chat/src/App.tsx`）。
+
+```yaml
+dsl: '1.0'
+page:
+  id: chat
+  title: 对话
+
+# 页面级 state：产出物面板闭环（spec: chat-artifact-panel）——
+# artifact part 就绪 → events.onArtifact → setState 写入 artifact 并打开面板；
+# 面板关闭按钮 / 窄屏遮罩 → events.onPanelClose → setState 关闭。
+# artifact / panelOpen 为受控 props（任一提供即全受控）。
+# model 为内建模型选择的受控闭环状态（初值为 models[0]）。
+state:
+  panelOpen: false
+  artifact: null
+  model: demo-mock
+
+body:
+  type: Chat
+  props:
+    # 模型 chip 渲染在工作区头部左端（spec: chat-model-selector）：
+    # 仅配置 models 也渲染极简头部
+    modelPlacement: header
+    greeting: 你好，我是 Pactor Chat 示例
+    subtitle: 数据全部由调用方经接口注入；点击下方建议立即开始
+    conversationId: ${route.query.id || 'conv-demo'}
+    params:
+      agentId: ${route.query.id || ''}
+    artifact: ${state.artifact}
+    panelOpen: ${state.panelOpen}
+    # 内建模型选择（spec: chat-model-selector）：受控闭环
+    # model: ${state.model} + events.onModelChange → setState
+    models:
+      - { value: demo-mock, label: demo-mock }
+      - { value: demo-fast, label: demo-fast }
+      - { value: demo-pro, label: demo-pro }
+    model: ${state.model}
+    # 内建上下文数据源（spec: chat-context-sources）：@ 智能体 / + 上下文，
+    # service 引用经宿主 callService 服务桥解析
+    contexts:
+      - { trigger: '@', label: 智能体, service: agents }
+      - { trigger: '+', label: 上下文, service: contexts }
+    # 消息操作条（spec: chat-message-actions）：数组即真相——
+    # 内建 copy / retry / regenerate + edit 覆盖 label（内建行为不变）
+    # + 自定义 quote 动作（service 派发，宿主 callService 注册 quoteMessage）
+    messageActions:
+      - copy
+      - retry
+      - regenerate
+      - { id: edit, builtin: edit, label: 修改并重发 }
+      - { id: quote, label: 引用回复, icon: quote, service: quoteMessage }
+    suggestions:
+      - { label: 今天天气怎么样, prompt: 今天天气怎么样 }
+      - { label: 看一下本月报表, prompt: 看一下本月报表 }
+      - { label: 生成一份月报, prompt: 帮我生成一份月报 }
+      - { label: 写一段代码, prompt: 帮我写一段代码 }
+      - { label: 生成统计页面, prompt: 帮我生成一个统计页面 }
+      - { label: 导出客户数据, prompt: 导出客户数据 }
+  events:
+    # artifact part 就绪：event.artifact 为产出物对象，setState 开面板
+    onArtifact:
+      - action: setState
+        params:
+          artifact: ${event.artifact}
+          panelOpen: true
+    # 面板关闭按钮 / 窄屏遮罩点击
+    onPanelClose:
+      - action: setState
+        params:
+          panelOpen: false
+    # 消息流产出物卡片"在面板中打开"：受控场景的重开面板入口
+    onOpenArtifact:
+      - action: setState
+        params:
+          artifact: ${event.artifact}
+          panelOpen: true
+    # 模型切换：受控闭环（event.model 回写 state.model）
+    onModelChange:
+      - action: setState
+        params:
+          model: ${event.model}
+    # 消息操作条点击通知（spec: chat-message-actions）：event.action 为
+    # 动作 id（内建动作为内建名），event.message 为对应消息数据；
+    # 与 service 派发并行（自定义 quote 动作同时经 quoteMessage 服务处理）
+    onMessageAction:
+      # 注意：params 勿带 type 键——带 type/action 键的对象会被动作引擎
+      # 视作内嵌 DslNode/ActionConfig 而跳过表达式求值（engine resolveDeep
+      # 的 isOpaque 约定）；message 动作缺省即 info
+      - action: message
+        params:
+          text: 触发消息操作：${event.action}
+```
+
+要点说明：
+
+- **受控闭环是本页的主线**：模型选择（`model: ${state.model}` ↔ `onModelChange` → setState）、产出物面板（`artifact` / `panelOpen` ↔ `onArtifact` / `onPanelClose` / `onOpenArtifact` → setState）都是"props 绑 state、事件回写 state"的标准闭环；`Chat` 本身不擅自开面板、不擅自改模型。
+- **`conversationId` 取路由 query**（`${route.query.id || 'conv-demo'}`）：智能体列表页与侧栏「最近」分组经 `navigate` 动作跳 `/chat?id=xxx` 进入独立会话，刷新后按 URL 还原——路由化多页装配由宿主 `App.tsx`（HashRouter + MenuRegistry + DynamicDslRoute）承担，DSL 只消费 `route.query`。
+- **service 引用是 DSL 与宿主函数的边界**：`contexts[].service`（`agents` / `contexts`）与 `messageActions[].service`（`quoteMessage`）都是字符串引用，运行时经 `ChatServices.callService(name, params)` 派发到宿主注册的服务——函数不进 DSL，符合"DSL 只承载可序列化数据"的约束。
+- **`messageActions` 数组即真相**：渲染顺序与内容严格按数组，未列出的内建动作不出现；内建项（字符串或 `{ builtin }`）保留包内默认行为，可覆盖 `label` / `icon` / `roles` / `visibleWhen`；自定义项（无 `builtin`）点击经 service 派发并并行触发 `onMessageAction` 事件（内建动作点击同样通知）。
+- **两个易踩的坑**：① DSL `message` 动作的 `params` 勿带 `type` 键（触发动作引擎 isOpaque 约定，跳过 `${...}` 求值，缺省即 info）；② `events.onMessageAction` 的 `event.message` 是完整消息对象（含 parts 数组），toast 类动作只取 `event.action` 即可。

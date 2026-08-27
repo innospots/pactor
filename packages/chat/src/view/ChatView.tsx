@@ -9,9 +9,11 @@ import { CHAT_DENIED_TYPE } from '../dsl-guard.js';
 import { useChatAutoScroll } from '../hooks/use-chat-auto-scroll.js';
 import { useChatModel } from '../hooks/use-chat-model.js';
 import type {
+  BuiltinMessageAction,
   ChatContextItem,
   ChatContextSource,
   ChatMessage,
+  ChatMessageAction,
   ChatModelOption,
 } from '../model.js';
 import {
@@ -111,8 +113,16 @@ export interface ChatViewProps
    */
   contexts?: ChatContextSource[];
   onContextsChange?: (chips: ChatContextItem[]) => void;
-  /** service 引用解析出口（ChatServices.callService 透传 Composer） */
+  /** service 引用解析出口（ChatServices.callService 透传 Composer 与消息动作条） */
   callService?: CallChatService;
+  /**
+   * 消息操作条声明式配置（spec: chat-message-actions，决策 D1）：
+   * 缺省等价于 `['copy', 'regenerate', 'retry', 'edit']`（与历史行为一致）；
+   * 传入数组时严格按数组顺序与内容渲染，未列出的内建动作不出现
+   */
+  messageActions?: Array<BuiltinMessageAction | ChatMessageAction>;
+  /** 全部消息动作（含内建）点击的并行通知（event 语义，不影响内建默认行为） */
+  onMessageAction?: (actionId: string, message: ChatMessage) => void;
   className?: string;
 }
 
@@ -160,6 +170,8 @@ export function ChatView({
   contexts,
   onContextsChange,
   callService,
+  messageActions,
+  onMessageAction,
 }: ChatViewProps) {
   const messages = useSyncExternalStore(
     (listener) => store.subscribe(listener),
@@ -362,6 +374,9 @@ export function ChatView({
               onRegenerate={transport ? handleRegenerate : undefined}
               onRetry={transport ? handleRegenerate : undefined}
               onEditResend={(text) => handleEditResend(message.id, text)}
+              messageActions={messageActions}
+              callService={callService}
+              onMessageAction={onMessageAction}
               onOpenArtifact={onOpenArtifact}
             />
           ))

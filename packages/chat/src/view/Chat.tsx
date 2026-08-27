@@ -20,8 +20,11 @@ import { ChatComposition, resolveSlot } from '../chat-composition.js';
 import { useChatServices } from '../chat-services.js';
 import type { ChatArtifact } from '../artifact.js';
 import type {
+  BuiltinMessageAction,
   ChatContextItem,
   ChatContextSource,
+  ChatMessage,
+  ChatMessageAction,
   ChatModelOption,
 } from '../model.js';
 import { useSidebarDrawer } from './AppShell.js';
@@ -103,6 +106,15 @@ export interface ChatProps {
   /** 内建上下文数据源（spec: chat-context-sources）；service 引用经 ChatServices.callService 解析 */
   contexts?: ChatContextSource[];
   onContextsChange?: (chips: ChatContextItem[]) => void;
+  /**
+   * 消息操作条声明式配置（spec: chat-message-actions，决策 D1）：
+   * DSL 可序列化数据；缺省渲染内建 copy / regenerate / retry / edit；
+   * 传入数组时严格按数组渲染（数组即真相），自定义动作 service 引用经
+   * ChatServices.callService 派发
+   */
+  messageActions?: Array<BuiltinMessageAction | ChatMessageAction>;
+  /** 消息动作点击通知（event 作用域含 action 与 message；内建动作亦通知） */
+  onMessageAction?: (actionId: string, message: ChatMessage) => void;
   /**
    * 产出物面板（spec: chat-artifact-panel / chat-dsl-component，决策 D2）：
    * `artifact` / `panelOpen` 可绑 DSL state；任一提供即全受控，
@@ -242,6 +254,8 @@ export function Chat({
   modelPlacement,
   contexts,
   onContextsChange,
+  messageActions,
+  onMessageAction,
   artifact,
   panelOpen,
   onPanelClose,
@@ -309,6 +323,8 @@ export function Chat({
       modelPlacement={modelPlacement}
       contexts={contexts}
       onContextsChange={onContextsChange}
+      messageActions={messageActions}
+      onMessageAction={onMessageAction}
       sidebar={sidebarContent}
       onSend={onSend}
       artifact={artifact}
@@ -331,7 +347,8 @@ type DslEventHandler = (event: unknown) => void;
  * event 作用域），而 Chat 的 React 签名是 onSend(text) /
  * onMenuSelect(key, item)——适配器把调用折算为事件对象，
  * DSL 侧即 event.text / event.key / event.item / event.artifact /
- * event.model / event.contexts / event.theme / event.title
+ * event.model / event.contexts / event.theme / event.title /
+ * event.action / event.message（onMessageAction）
  * （onExport / onClear / onPanelClose 为空对象 {}）。
  */
 function ChatDslAdapter({
@@ -342,6 +359,7 @@ function ChatDslAdapter({
   onOpenArtifact,
   onModelChange,
   onContextsChange,
+  onMessageAction,
   onExport,
   onThemeChange,
   onClear,
@@ -356,6 +374,7 @@ function ChatDslAdapter({
   | 'onOpenArtifact'
   | 'onModelChange'
   | 'onContextsChange'
+  | 'onMessageAction'
   | 'onExport'
   | 'onThemeChange'
   | 'onClear'
@@ -368,6 +387,7 @@ function ChatDslAdapter({
   onOpenArtifact?: DslEventHandler;
   onModelChange?: DslEventHandler;
   onContextsChange?: DslEventHandler;
+  onMessageAction?: DslEventHandler;
   onExport?: DslEventHandler;
   onThemeChange?: DslEventHandler;
   onClear?: DslEventHandler;
@@ -401,6 +421,12 @@ function ChatDslAdapter({
       onContextsChange={
         onContextsChange
           ? (contexts: ChatContextItem[]) => onContextsChange({ contexts })
+          : undefined
+      }
+      onMessageAction={
+        onMessageAction
+          ? (action: string, message: ChatMessage) =>
+              onMessageAction({ action, message })
           : undefined
       }
       onExport={onExport ? () => onExport({}) : undefined}
