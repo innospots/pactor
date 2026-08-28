@@ -102,5 +102,5 @@ pactor create my-app        # 模板参数 -t app（当前唯一模板，可省�
 模板中的 `__APP_NAME__` 占位替换为目标目录名。目标目录已存在且非空时报错（退出码 2），不覆盖任何内容；已存在的空目录允许生成。
 
 :::note
-设计文档第 84 节 CLI 清单中的 `preview` 命令在 V1 未实现（裁剪）；watch 模式与交互式 create 问答同为 Non-Goal。
+`preview` 命令暂未实现；watch 模式与交互式 create 问答同样不在当前版本范围内。
 :::

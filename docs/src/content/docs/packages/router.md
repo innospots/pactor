@@ -33,7 +33,7 @@ const registry = new MenuRegistry([
 ]);
 ```
 
-`MenuItem` 对齐设计文档第 30 节字段（id/type/title/icon/order/path/pageId/permission/hidden/disabled/external/target/keepAlive/badge/activeMenu/defaultOpen/breadcrumb/tab/children），`permission` 为 pactor-core 的 `PermissionConfig`。
+`MenuItem` 字段一览（id/type/title/icon/order/path/pageId/permission/hidden/disabled/external/target/keepAlive/badge/activeMenu/defaultOpen/breadcrumb/tab/children），`permission` 为 pactor-core 的 `PermissionConfig`。
 
 - **`tree()`**：可见菜单树（过滤 `hidden` 项连同子树），供 layout 渲染。
 - **`list()`**：扁平可路由条目（`type` 非 group 且有 `path`），按 `order` 升序，未指定 order 的保持声明顺序置于其后。
@@ -57,7 +57,7 @@ const route = resolveRoute(registry, {
 //   pageId: 'customer-edit', menuId: 'customer-edit', activeMenu: 'customer-list' }
 ```
 
-模式语法仅支持静态段与 `:param` 段，整路径精确匹配；V1 不支持 `*` 通配与可选段。`activeMenu` 取菜单项 `activeMenu ?? id`（隐藏详情页高亮列表页）；未命中返回 `null`。
+模式语法仅支持静态段与 `:param` 段，整路径精确匹配；当前版本不支持 `*` 通配与可选段。`activeMenu` 取菜单项 `activeMenu ?? id`（隐藏详情页高亮列表页）；未命中返回 `null`。
 
 ## 导航桥接
 

@@ -33,11 +33,11 @@ const off = store.subscribe(() => {
 });
 ```
 
-V1 为精确匹配，不做通配符（`customer:*`）匹配；权限在 bootstrap 阶段一次性设置，不做异步加载。
+当前版本为精确匹配，不做通配符（`customer:*`）匹配；权限在 bootstrap 阶段一次性设置，不做异步加载。
 
 ## 权限配置的三种形态
 
-pactor-core 的 `PermissionConfig` 支持三种形态（设计文档第 41 节）：
+pactor-core 的 `PermissionConfig` 支持三种形态：
 
 ```ts
 'customer:edit'                                      // 单个权限码

@@ -81,7 +81,7 @@ import 'pactor-ui/styles.css';
 
 ## components 层
 
-12 个 V1 DSL 组件的 shadcn 实现，props 契约类型由本包定义并导出：
+12 个 DSL 组件的 shadcn 实现，props 契约类型由本包定义并导出：
 
 | 维度 | 说明 |
 | --- | --- |

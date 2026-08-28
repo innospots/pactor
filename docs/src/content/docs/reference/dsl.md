@@ -384,7 +384,7 @@ rules:
 
 ## 聊天页完整示例（pactor-chat）
 
-以下为 `examples/chat/src/chat.page.yaml` 全文——一个完整 AI 对话页的 DSL 声明。`Chat` 不是内置组件，需由 `registerChatComponent(registry)` 注册（见 [pactor-chat](../packages/chat.md)）；`transport` / `safeRegistry` / `callService` 服务桥等函数与实例无法从 DSL 产生，由宿主经 `ChatServicesProvider` 注入（见 `examples/chat/src/App.tsx`）。
+以下为 `examples/chat/src/chat.page.yaml` 的完整内容（注释中的内部 spec 引用已略去）——一个完整 AI 对话页的 DSL 声明。`Chat` 不是内置组件，需由 `registerChatComponent(registry)` 注册（见 [pactor-chat](../packages/chat.md)）；`transport` / `safeRegistry` / `callService` 服务桥等函数与实例无法从 DSL 产生，由宿主经 `ChatServicesProvider` 注入（见 `examples/chat/src/App.tsx`）。
 
 ```yaml
 dsl: '1.0'
@@ -392,7 +392,7 @@ page:
   id: chat
   title: 对话
 
-# 页面级 state：产出物面板闭环（spec: chat-artifact-panel）——
+# 页面级 state：产出物面板闭环——
 # artifact part 就绪 → events.onArtifact → setState 写入 artifact 并打开面板；
 # 面板关闭按钮 / 窄屏遮罩 → events.onPanelClose → setState 关闭。
 # artifact / panelOpen 为受控 props（任一提供即全受控）。
@@ -405,7 +405,7 @@ state:
 body:
   type: Chat
   props:
-    # 模型 chip 渲染在工作区头部左端（spec: chat-model-selector）：
+    # 模型 chip 渲染在工作区头部左端：
     # 仅配置 models 也渲染极简头部
     modelPlacement: header
     greeting: 你好，我是 Pactor Chat 示例
@@ -415,19 +415,19 @@ body:
       agentId: ${route.query.id || ''}
     artifact: ${state.artifact}
     panelOpen: ${state.panelOpen}
-    # 内建模型选择（spec: chat-model-selector）：受控闭环
+    # 内建模型选择：受控闭环
     # model: ${state.model} + events.onModelChange → setState
     models:
       - { value: demo-mock, label: demo-mock }
       - { value: demo-fast, label: demo-fast }
       - { value: demo-pro, label: demo-pro }
     model: ${state.model}
-    # 内建上下文数据源（spec: chat-context-sources）：@ 智能体 / + 上下文，
+    # 内建上下文数据源：@ 智能体 / + 上下文，
     # service 引用经宿主 callService 服务桥解析
     contexts:
       - { trigger: '@', label: 智能体, service: agents }
       - { trigger: '+', label: 上下文, service: contexts }
-    # 消息操作条（spec: chat-message-actions）：数组即真相——
+    # 消息操作条：数组即真相——
     # 内建 copy / retry / regenerate + edit 覆盖 label（内建行为不变）
     # + 自定义 quote 动作（service 派发，宿主 callService 注册 quoteMessage）
     messageActions:
@@ -466,7 +466,7 @@ body:
       - action: setState
         params:
           model: ${event.model}
-    # 消息操作条点击通知（spec: chat-message-actions）：event.action 为
+    # 消息操作条点击通知：event.action 为
     # 动作 id（内建动作为内建名），event.message 为对应消息数据；
     # 与 service 派发并行（自定义 quote 动作同时经 quoteMessage 服务处理）
     onMessageAction:

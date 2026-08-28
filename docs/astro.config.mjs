@@ -48,10 +48,6 @@ export default defineConfig({
             { label: 'pactor-skill', slug: 'pactor-skill' },
           ],
         },
-        {
-          label: '设计',
-          items: [{ label: '框架设计规范', slug: 'framework-design' }],
-        },
       ],
     }),
   ],
