@@ -103,7 +103,7 @@ await data.reload();          // 缺省刷新全部 autoLoad 源
 - props 深度表达式解析：字符串经模板求值（整体单表达式保留原始类型），对象 / 数组递归；`on*` 字符串 prop 原样保留。
 - `when` 为 false 时渲染 null。
 - `events.onClick` 等绑定为同名 prop，事件对象放入 `event` 作用域，动作数组串行执行。
-- 任一 state / data 变化重渲染整棵 DSL 树（V1 简化策略）。
+- 任一 state / data 变化重渲染整棵 DSL 树（当前版本的简化策略）。
 
 子作用域：以 `{ component, withScope: true }` 注册的组件经 `useRenderer().renderChildren` 自行渲染 children 并注入局部作用域（Table 行、Repeat 项等）：
 

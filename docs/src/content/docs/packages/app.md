@@ -3,7 +3,7 @@ title: pactor-app
 description: 一站式组合层——createPactorApplication 启动编排（loader/bootstrap/权限/菜单/布局）、共享 registries、react-router 动态路由、页面加载与错误兜底、mount/unmount 与扩展注册 API
 ---
 
-`pactor-app` 是框架的一站式组合层（设计文档第 86–89 节）。业务工程不再需要逐包组装：一个 `createPactorApplication` 调用完成 DSL 资源加载、bootstrap 编排、共享 registries、动态路由、布局外壳、页面运行时、Overlay/Provider 集成与错误兜底。
+`pactor-app` 是框架的一站式组合层。业务工程不再需要逐包组装：一个 `createPactorApplication` 调用完成 DSL 资源加载、bootstrap 编排、共享 registries、动态路由、布局外壳、页面运行时、Overlay/Provider 集成与错误兜底。
 
 ```bash
 pnpm add pactor-app react react-dom react-router-dom
@@ -65,7 +65,7 @@ src/
 | `loader` | 自定义 `DslResourceLoader`（优先于 api；测试/本地用 `StaticDslLoader`） |
 | `layout` | 布局类型覆盖（优先级：`options.layout` > `bootstrap.layout.type` > `'admin'`） |
 | `brand` | `{ title, logo? }`，品牌区覆盖 |
-| `router` | `{ type?: 'browser' \| 'hash', basename?: string }`；V1 支持 browser + basename |
+| `router` | `{ type?: 'browser' \| 'hash', basename?: string }`；当前版本支持 browser + basename |
 | `components` | 业务组件（写入应用级共享 registry，可覆盖同名内置组件） |
 | `actions` | 业务动作（可覆盖同名内置/交互动作） |
 | `services` / `capabilities` | 业务服务与能力扩展 |
@@ -95,7 +95,7 @@ mount 后依次：加载 bootstrap（全屏 loading）→ `PermissionStore` 写�
 - **actions**：runtime 内置动作（setState / request / if 等，页面运行时创建时注册）+ 交互动作（`overlay.open` / `overlay.close` / `confirm` / `message`，应用级 OverlayManager / UiBridge 单例）+ `navigate` 动作（经 react-router 导航）+ `options.actions`；
 - **services / capabilities**：`options` 扩展 + 运行期注册。
 
-页面运行时创建时注入 permission / router / http adapters 与 route context（`${route.params.*}` / `${route.query.*}`）、`user`（bootstrap.user）、`app`（bootstrap.app）。同 `pageId` 导航往返或 `route.params` 变化时销毁重建（V1 无 keepAlive）。
+页面运行时创建时注入 permission / router / http adapters 与 route context（`${route.params.*}` / `${route.query.*}`）、`user`（bootstrap.user）、`app`（bootstrap.app）。同 `pageId` 导航往返或 `route.params` 变化时销毁重建（当前版本无 keepAlive）。
 
 ## React 组合结构
 
@@ -140,5 +140,5 @@ app.mount('#root');
 注册写入应用级共享 registry（同名覆盖）：新创建/重建的页面即可用，当前已创建页面下次重建后生效。
 
 :::note
-V1 边界（Non-Goals）：登录流程/auth.login 动作、Theme、i18n、telemetry/audit、灰度多租户、页面 keepAlive。布局类型未命中时回退 BlankLayout 并告警（pactor-ui layout 层 resolveLayout 行为）。
+当前版本边界（暂未支持）：登录流程/auth.login 动作、Theme、i18n、telemetry/audit、灰度多租户、页面 keepAlive。布局类型未命中时回退 BlankLayout 并告警（pactor-ui layout 层 resolveLayout 行为）。
 :::

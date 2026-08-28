@@ -60,7 +60,7 @@ loader.clear();                                  // 清空缓存与版本表
 - **无版本表时退化**：缓存条目有 etag → 下次请求带 `If-None-Match`，304 返回缓存副本、200 更新缓存；无 etag → 普通缓存直接命中。
 - **并发去重**：同一资源的并发加载复用同一个进行中 Promise，不重复发起请求。
 
-`MemoryResourceCache` 可独立使用（`get` / `set` / `delete` / `clear` / `keys`），也可通过 `new HttpDslResourceLoader({ cache })` 注入自有实例以观察缓存内容。V1 不做 IndexedDB / Browser Cache 持久化。
+`MemoryResourceCache` 可独立使用（`get` / `set` / `delete` / `clear` / `keys`），也可通过 `new HttpDslResourceLoader({ cache })` 注入自有实例以观察缓存内容。当前版本不做 IndexedDB / Browser Cache 持久化。
 
 ## StaticDslLoader
 
