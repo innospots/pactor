@@ -13,15 +13,23 @@ Pactor 是一套基于 YAML/JSON DSL 的 Server-Driven UI 前端运行时框架�
 
 ## 安装
 
-按使用场景选择包组合（包名无 scope，统一 `pactor-` 前缀）：
+最简单的方式是装聚合包 `pactor`（meta package）——一次带入全部 `@pactor/*` 模块与 CLI，入口直接转发 `@pactor/app`：
+
+```bash
+pnpm add pactor
+```
+
+也可以按场景只装需要的 `@pactor/*` scope 模块：
 
 | 场景 | 安装 |
 | --- | --- |
-| 完整应用（推荐） | `pnpm add pactor-app pactor-ui`（shadcn kit，唯一内置实现） |
-| 只要 DSL 渲染器（自己组合） | `pnpm add pactor-runtime` |
-| AI 对话视图 | `pnpm add pactor-chat pactor-markdown` |
-| YAML 即模块（构建期校验 + HMR） | `pnpm add -D pactor-vite-plugin` |
-| 命令行校验 / 脚手架 | `pnpm add -D pactor-cli` |
+| 完整应用 | `pnpm add @pactor/app @pactor/ui`（shadcn kit，唯一内置实现） |
+| 只要 DSL 渲染器（自己组合） | `pnpm add @pactor/runtime` |
+| AI 对话视图 | `pnpm add @pactor/chat @pactor/markdown` |
+| YAML 即模块（构建期校验 + HMR） | `pnpm add -D @pactor/vite-plugin` |
+| 命令行校验 / 脚手架 | `pnpm add -D @pactor/cli` |
+
+两种方式可混用：meta 包只是依赖聚合，与各模块统一版本发布，功能无差异。下面的最小接入以 `pnpm add pactor` 为例。
 
 ## 最小接入（四步）
 
@@ -32,7 +40,7 @@ Pactor 是一套基于 YAML/JSON DSL 的 Server-Driven UI 前端运行时框架�
 ```ts
 import react from '@vitejs/plugin-react';
 import { defineConfig } from 'vite';
-import pactor from 'pactor-vite-plugin';
+import pactor from '@pactor/vite-plugin';
 
 export default defineConfig({
   plugins: [react(), pactor()],
@@ -43,7 +51,7 @@ export default defineConfig({
 
 ```ts
 declare module '*.page.yaml' {
-  import type { PageDsl } from 'pactor-core';
+  import type { PageDsl } from '@pactor/core';
   const page: PageDsl;
   export const dslVersion: string;
   export default page;
@@ -94,9 +102,9 @@ body:
 **4. `src/main.tsx` 挂载**
 
 ```tsx
-import { createPactorApplication } from 'pactor-app';
-import { StaticDslLoader } from 'pactor-resource';
-import 'pactor-ui/styles.css'; // shadcn kit 预建样式（必需）
+import { createPactorApplication } from 'pactor'; // meta 包入口，转发 @pactor/app
+import { StaticDslLoader } from '@pactor/resource'; // 已由 meta 包带入，直接导入即可
+import '@pactor/ui/styles.css'; // shadcn kit 预建样式（必需）
 
 import homePage from './pages/home.page.yaml';
 
@@ -120,6 +128,8 @@ createPactorApplication({
 ```
 
 真实项目中 bootstrap 与页面 DSL 由服务端下发：把 `loader` 换成 `api: { baseURL: 'https://your-dsl-center' }`（HttpDslResourceLoader）即可，本地 import 的 yaml 只是静态开发形态。
+
+> 若选择按需安装（`@pactor/app` + `@pactor/ui`）而非 meta 包，把第 4 步的 `from 'pactor'` 改为 `from '@pactor/app'` 即可，其余代码不变。
 
 ## createPactorApplication 参数
 
@@ -145,10 +155,10 @@ createPactorApplication({
 
 ## 自定义 UI kit
 
-内置 UI 实现只有 shadcn 一套（`pactor-ui`）。业务需要自定义组件 / 布局 / 交互层时，通过保留的覆盖点逐槽位替换（详见 [pactor-ui](/packages/ui/) 的「自定义 UI kit」与迁移对照表）：
+内置 UI 实现只有 shadcn 一套（`@pactor/ui`）。业务需要自定义组件 / 布局 / 交互层时，通过保留的覆盖点逐槽位替换（详见 [@pactor/ui](/packages/ui/) 的「自定义 UI kit」与迁移对照表）：
 
 ```tsx
-import { shadcnUiKit } from 'pactor-ui';
+import { shadcnUiKit } from '@pactor/ui';
 
 createPactorApplication({
   appId: 'my-app',
@@ -158,9 +168,9 @@ createPactorApplication({
 });
 ```
 
-从旧 `pactor-ui-antd` / `pactor-ui-radix` 包迁移的符号对照见 [pactor-ui 迁移说明](/packages/ui/#从-pactor-ui-antd--pactor-ui-radix-迁移)。
+从旧 `pactor-ui-antd` / `pactor-ui-radix` 包迁移的符号对照见 [@pactor/ui 迁移说明](/packages/ui/#从-pactor-ui-antd--pactor-ui-radix-迁移)。
 
-## 命令行（pactor-cli）
+## 命令行（@pactor/cli）
 
 ```bash
 pnpm pactor validate src/pages/**/*.page.yaml   # 校验 DSL

@@ -1,4 +1,4 @@
-import { useI18n } from 'pactor-runtime';
+import { useI18n } from '@pactor/runtime';
 import { useEffect, useId } from 'react';
 
 import {

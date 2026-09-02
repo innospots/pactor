@@ -1,15 +1,15 @@
 import { existsSync, readdirSync, readFileSync, statSync } from 'node:fs';
 import { join } from 'node:path';
 
-import type { DslNode, PageDsl } from 'pactor-core';
-import { validatePageDsl, type DslValidationError } from 'pactor-schema';
+import type { DslNode, PageDsl } from '@pactor/core';
+import { validatePageDsl, type DslValidationError } from '@pactor/schema';
 import { parseDocument } from 'yaml';
 
 /**
  * dsl-io 共享层：DSL 文件读取 / YAML 解析 / page 与 fragment 判定 /
  * 校验聚合 / 目录递归收集 / DSL 树遍历。
  *
- * 语义与 pactor-vite-plugin 的构建期转换一致（独立实现，不相互依赖）。
+ * 语义与 @pactor/vite-plugin 的构建期转换一致（独立实现，不相互依赖）。
  */
 
 /** DSL 文件匹配约定：仅 `.page.` / `.fragment.` 后缀的 YAML 文件 */
@@ -146,7 +146,7 @@ export interface TemplateExpressions {
 
 /**
  * 从模板字符串中抽取 `${...}` 表达式源码。
- * 与 pactor-expression 的模板切分同语义：表达式内支持字符串字面量
+ * 与 @pactor/expression 的模板切分同语义：表达式内支持字符串字面量
  * （其中可含 `}` / `${`）与嵌套花括号。
  */
 export function extractTemplateExpressions(value: string): TemplateExpressions {

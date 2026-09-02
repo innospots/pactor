@@ -7,7 +7,7 @@ import {
   MenuRegistry,
   type MenuItem,
   type RouteContext,
-} from 'pactor-router';
+} from '@pactor/router';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import { ShadcnAdminLayout } from '../../src/layout/index.js';

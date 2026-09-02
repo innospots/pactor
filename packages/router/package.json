@@ -1,5 +1,5 @@
 {
-  "name": "pactor-router",
+  "name": "@pactor/router",
   "version": "0.1.0",
   "description": "Pactor router: menu registry, path matcher, navigation bridge and React Router dynamic route bindings",
   "keywords": [
@@ -60,8 +60,8 @@
     "access": "public"
   },
   "dependencies": {
-    "pactor-core": "workspace:*",
-    "pactor-permission": "workspace:*"
+    "@pactor/core": "workspace:*",
+    "@pactor/permission": "workspace:*"
   },
   "peerDependencies": {
     "react": ">=18",
@@ -73,7 +73,7 @@
     "@types/react": "^19.2.18",
     "@types/react-dom": "^19.2.4",
     "jsdom": "^30.0.1",
-    "pactor-runtime": "workspace:*",
+    "@pactor/runtime": "workspace:*",
     "react": "^19.2.8",
     "react-dom": "^19.2.8",
     "react-router-dom": "^7.18.2"

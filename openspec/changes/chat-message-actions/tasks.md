@@ -31,5 +31,5 @@
 
 ## 6. 验收
 
-- [x] 6.1 `pnpm --filter pactor-chat build && pnpm --filter example-chat build` 通过；chat 包测试全绿
+- [x] 6.1 `pnpm --filter @pactor/chat build && pnpm --filter example-chat build` 通过；chat 包测试全绿
 - [x] 6.2 playwright 目检 examples/chat：默认渲染无回归；配置后操作条按数组渲染；自定义动作点击闭环（service + 事件）

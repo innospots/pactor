@@ -1,10 +1,10 @@
 # Spec: chat-dsl-page
 
-聊天页的 DSL 构建（`pactor-chat`）：`createChatWorkspace` 工厂与 ChatWorkspace 组件的 DSL 页面集成。
+聊天页的 DSL 构建（`@pactor/chat`）：`createChatWorkspace` 工厂与 ChatWorkspace 组件的 DSL 页面集成。
 
 ### Requirement: createChatWorkspace 工厂
 
-`pactor-chat` SHALL 导出 `createChatWorkspace(services)`：宿主以闭包注入运行时服务（`transport` 必填；`store` 或 `storeFactory`、`safeRegistry`、`capabilities`、`permission`、`confirm`、`user`、附件回调、`onMentionTrigger`、`onPlusMenu`、工具栏槽位等可选），返回可注册进 DSL 组件注册表的 `ChatWorkspace` 组件。组件 SHALL 自持 ConversationStore（未提供 store 时经 storeFactory 或默认构造创建）与附件受控状态，且在 props 变化导致的重渲染中 MUST NOT 重建 store。
+`@pactor/chat` SHALL 导出 `createChatWorkspace(services)`：宿主以闭包注入运行时服务（`transport` 必填；`store` 或 `storeFactory`、`safeRegistry`、`capabilities`、`permission`、`confirm`、`user`、附件回调、`onMentionTrigger`、`onPlusMenu`、工具栏槽位等可选），返回可注册进 DSL 组件注册表的 `ChatWorkspace` 组件。组件 SHALL 自持 ConversationStore（未提供 store 时经 storeFactory 或默认构造创建）与附件受控状态，且在 props 变化导致的重渲染中 MUST NOT 重建 store。
 
 #### Scenario: 工厂创建组件
 

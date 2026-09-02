@@ -1,7 +1,7 @@
 import {
   checkPagePermission,
   type PermissionChecker,
-} from 'pactor-permission';
+} from '@pactor/permission';
 import { useMemo, useRef, type ReactNode } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 
@@ -24,7 +24,7 @@ export interface DynamicDslRouteProps {
   fallback?: ReactNode;
   /** 无权限（403）渲染内容，缺省为 null */
   forbidden?: ReactNode;
-  /** 权限判定（pactor-permission PermissionChecker，直接传 PermissionStore 即可） */
+  /** 权限判定（@pactor/permission PermissionChecker，直接传 PermissionStore 即可） */
   permissionChecker?: PermissionChecker;
 }
 

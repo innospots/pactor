@@ -4,7 +4,7 @@ Overlay 相关动作注册与命名动作结果作用域（`pactor-ui-antd` inte
 
 ### Requirement: ActionConfig.id 与 actions 作用域
 
-pactor-core 的 `ActionConfig` SHALL 支持可选 `id`。pactor-runtime 的 Action 引擎 SHALL 把命名动作的结果数据记录到表达式作用域 `actions`：`actions.<id>` 为成功时动作的返回数据，失败时为 `{ ok: false, error }`；未命名动作行为不变。
+@pactor/core 的 `ActionConfig` SHALL 支持可选 `id`。@pactor/runtime 的 Action 引擎 SHALL 把命名动作的结果数据记录到表达式作用域 `actions`：`actions.<id>` 为成功时动作的返回数据，失败时为 `{ ok: false, error }`；未命名动作行为不变。
 
 #### Scenario: 命名动作结果可引用
 

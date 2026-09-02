@@ -1,5 +1,5 @@
 // @vitest-environment jsdom
-import type { DslNode } from 'pactor-core';
+import type { DslNode } from '@pactor/core';
 import { act, cleanup, render, screen } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 

@@ -6,7 +6,7 @@ import type {
   FragmentDsl,
   PageDsl,
   PermissionConfig,
-} from 'pactor-core';
+} from '@pactor/core';
 
 import type { CliIo, ParsedArgs } from '../args.js';
 import {

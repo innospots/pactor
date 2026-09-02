@@ -1,10 +1,10 @@
 # Spec: chat-dsl-component
 
-Chat 作为一等 DSL 组件（`pactor-chat`）：context 服务注入、菜单/header/侧栏区域配置、DSL 事件。
+Chat 作为一等 DSL 组件（`@pactor/chat`）：context 服务注入、菜单/header/侧栏区域配置、DSL 事件。
 
 ### Requirement: Chat 组件注册
 
-`pactor-chat` SHALL 导出 `registerChatComponent(registry)`：向 DSL 组件注册表注册 `Chat` 类型（已存在同名类型时 MUST NOT 覆盖）。注册后页面 DSL 可以 `{ type: 'Chat', props, events }` 声明完整聊天工作区，与内置组件用法一致。
+`@pactor/chat` SHALL 导出 `registerChatComponent(registry)`：向 DSL 组件注册表注册 `Chat` 类型（已存在同名类型时 MUST NOT 覆盖）。注册后页面 DSL 可以 `{ type: 'Chat', props, events }` 声明完整聊天工作区，与内置组件用法一致。
 
 #### Scenario: 注册并声明
 
@@ -100,7 +100,7 @@ SHALL 导出 `ChatServicesProvider` 与 `useChatServices()`：宿主在应用根
 
 ### Requirement: ChatShell 外壳组件
 
-`pactor-chat` SHALL 提供 `ChatShell` DSL 组件（注册函数 SHALL 一并注册，已存在同名类型时 MUST NOT 覆盖）：AppShell + 内建菜单侧栏（复用 ChatMenuItem 数据与图标白名单、`activeMenuKey` 高亮、`events.onMenuSelect` 事件，event 作用域含 `key` 与 `item`）+ `content` 主区内容槽（接受 DslNode——经 renderChildren 渲染；或 ReactNode——纯 React 场景可传路由出口等元素）。ChatShell MUST NOT 含聊天逻辑与路由逻辑——菜单点击只触发事件，导航或状态切换由宿主/DSL 决定；`sidebar?: DslNode | ReactNode` 槽提供时 SHALL 替代内建菜单侧栏。典型用法：DSL 场景 content 槽内放若干带 `when` 条件的子树（onMenuSelect → setState 闭环）；应用场景 content 传路由出口，onMenuSelect → bridge.push，刷新后由路由还原页面。
+`@pactor/chat` SHALL 提供 `ChatShell` DSL 组件（注册函数 SHALL 一并注册，已存在同名类型时 MUST NOT 覆盖）：AppShell + 内建菜单侧栏（复用 ChatMenuItem 数据与图标白名单、`activeMenuKey` 高亮、`events.onMenuSelect` 事件，event 作用域含 `key` 与 `item`）+ `content` 主区内容槽（接受 DslNode——经 renderChildren 渲染；或 ReactNode——纯 React 场景可传路由出口等元素）。ChatShell MUST NOT 含聊天逻辑与路由逻辑——菜单点击只触发事件，导航或状态切换由宿主/DSL 决定；`sidebar?: DslNode | ReactNode` 槽提供时 SHALL 替代内建菜单侧栏。典型用法：DSL 场景 content 槽内放若干带 `when` 条件的子树（onMenuSelect → setState 闭环）；应用场景 content 传路由出口，onMenuSelect → bridge.push，刷新后由路由还原页面。
 
 ChatShell SHALL 支持侧栏增强（设计决策 D3/D4）：`brand` 提供时桌面端渲染于侧栏头部品牌行；`collapsible?: boolean`（DSL 可序列化布尔，缺省 false）透传 AppShell 折叠能力；`sidebarFooter?: DslNode | ReactNode` 侧栏底部槽（DslNode 经 renderChildren 渲染，ReactNode 原样渲染）。
 

@@ -1,7 +1,7 @@
 // @vitest-environment jsdom
 import { fireEvent, render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { ActionEngine } from 'pactor-runtime';
+import { ActionEngine } from '@pactor/runtime';
 import { describe, expect, it, vi } from 'vitest';
 
 import { Input } from '../../src/components/index.js';

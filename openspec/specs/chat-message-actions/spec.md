@@ -1,6 +1,6 @@
 # Spec: chat-message-actions
 
-消息操作与轮次恢复（`pactor-chat`）：复制、重新生成、编辑重发、错误重试。
+消息操作与轮次恢复（`@pactor/chat`）：复制、重新生成、编辑重发、错误重试。
 
 ### Requirement: 重新生成
 

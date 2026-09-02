@@ -1,4 +1,4 @@
-import type { DataSourceConfig } from 'pactor-core';
+import type { DataSourceConfig } from '@pactor/core';
 import { describe, expect, it, vi } from 'vitest';
 
 import type { HttpAdapter, HttpRequestConfig } from '../context/adapters.js';

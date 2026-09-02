@@ -1,5 +1,5 @@
 import { ArrowDown } from 'lucide-react';
-import { Registry } from 'pactor-core';
+import { Registry } from '@pactor/core';
 import { useEffect, useMemo, useRef, useState, useSyncExternalStore } from 'react';
 
 import type { ChatArtifact } from '../artifact.js';

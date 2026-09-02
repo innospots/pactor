@@ -2,13 +2,13 @@
 import './setup.js';
 
 import { cleanup, fireEvent, screen } from '@testing-library/react';
-import type { PageDsl } from 'pactor-core';
-import { StaticDslLoader } from 'pactor-resource';
-import { createShadcnLayoutRegistry } from 'pactor-ui/layout';
+import type { PageDsl } from '@pactor/core';
+import { StaticDslLoader } from '@pactor/resource';
+import { createShadcnLayoutRegistry } from '@pactor/ui/layout';
 import type {
   InteractionProviderProps,
   OverlayHostProps,
-} from 'pactor-ui/interaction';
+} from '@pactor/ui/interaction';
 import { useEffect, useSyncExternalStore, type ReactNode } from 'react';
 import { afterEach, describe, expect, it } from 'vitest';
 

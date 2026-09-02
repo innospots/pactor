@@ -6,7 +6,7 @@ import {
   ActionEngine,
   createRuntimeContext,
   registerBuiltinActions,
-} from 'pactor-runtime';
+} from '@pactor/runtime';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import {

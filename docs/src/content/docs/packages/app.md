@@ -1,29 +1,29 @@
 ---
-title: pactor-app
+title: "@pactor/app"
 description: 一站式组合层——createPactorApplication 启动编排（loader/bootstrap/权限/菜单/布局）、共享 registries、react-router 动态路由、页面加载与错误兜底、mount/unmount 与扩展注册 API
 ---
 
-`pactor-app` 是框架的一站式组合层。业务工程不再需要逐包组装：一个 `createPactorApplication` 调用完成 DSL 资源加载、bootstrap 编排、共享 registries、动态路由、布局外壳、页面运行时、Overlay/Provider 集成与错误兜底。
+`@pactor/app` 是框架的一站式组合层。业务工程不再需要逐包组装：一个 `createPactorApplication` 调用完成 DSL 资源加载、bootstrap 编排、共享 registries、动态路由、布局外壳、页面运行时、Overlay/Provider 集成与错误兜底。
 
 ```bash
-pnpm add pactor-app react react-dom react-router-dom
+pnpm add @pactor/app react react-dom react-router-dom
 ```
 
 `react >= 18`、`react-dom >= 18`、`react-router-dom >= 6` 为 peer dependency（开发基准为 react-router-dom v7）。
 
-**默认 UI kit 为 shadcn**（pactor-ui，随 pactor-app 传递依赖）。组件样式为构建期预编译的 Tailwind 工具类，**必须导入预建样式表**（消费方无需 Tailwind 配置）：
+**默认 UI kit 为 shadcn**（@pactor/ui，随 @pactor/app 传递依赖）。组件样式为构建期预编译的 Tailwind 工具类，**必须导入预建样式表**（消费方无需 Tailwind 配置）：
 
 ```ts
-import 'pactor-ui/styles.css';
+import '@pactor/ui/styles.css';
 ```
 
-如需自定义组件 / 布局 / 交互层实现，使用 `componentRegistry` / `layoutRegistry` / `interactionKit` / `ui` 覆盖点（见 [pactor-ui](/packages/ui/)）。
+如需自定义组件 / 布局 / 交互层实现，使用 `componentRegistry` / `layoutRegistry` / `interactionKit` / `ui` 覆盖点（见 [@pactor/ui](/packages/ui/)）。
 
 ## 一站式用法
 
 ```tsx
-import { createPactorApplication } from 'pactor-app';
-import 'pactor-ui/styles.css'; // 默认 shadcn UI kit 的预建样式（必需）
+import { createPactorApplication } from '@pactor/app';
+import '@pactor/ui/styles.css'; // 默认 shadcn UI kit 的预建样式（必需）
 
 createPactorApplication({
   appId: 'risk-admin',
@@ -41,7 +41,7 @@ src/
 └── main.tsx
 ```
 
-服务端按 pactor-resource Envelope 协议提供 `{baseURL}/bootstrap` 与 `{baseURL}/pages/{id}` 端点。bootstrap 字段全部可选（缺省按空处理）：
+服务端按 @pactor/resource Envelope 协议提供 `{baseURL}/bootstrap` 与 `{baseURL}/pages/{id}` 端点。bootstrap 字段全部可选（缺省按空处理）：
 
 | 字段 | 说明 |
 | --- | --- |
@@ -91,7 +91,7 @@ mount 后依次：加载 bootstrap（全屏 loading）→ `PermissionStore` 写�
 
 应用级共享 registries 被所有页面 PageRuntime 共享：
 
-- **components**：所选 UI kit 的全部内置组件（缺省 pactor-ui，shadcn——唯一内置实现）+ `options.components` + 运行期注册；
+- **components**：所选 UI kit 的全部内置组件（缺省 @pactor/ui，shadcn——唯一内置实现）+ `options.components` + 运行期注册；
 - **actions**：runtime 内置动作（setState / request / if 等，页面运行时创建时注册）+ 交互动作（`overlay.open` / `overlay.close` / `confirm` / `message`，应用级 OverlayManager / UiBridge 单例）+ `navigate` 动作（经 react-router 导航）+ `options.actions`；
 - **services / capabilities**：`options` 扩展 + 运行期注册。
 
@@ -140,5 +140,5 @@ app.mount('#root');
 注册写入应用级共享 registry（同名覆盖）：新创建/重建的页面即可用，当前已创建页面下次重建后生效。
 
 :::note
-当前版本边界（暂未支持）：登录流程/auth.login 动作、Theme、i18n、telemetry/audit、灰度多租户、页面 keepAlive。布局类型未命中时回退 BlankLayout 并告警（pactor-ui layout 层 resolveLayout 行为）。
+当前版本边界（暂未支持）：登录流程/auth.login 动作、Theme、i18n、telemetry/audit、灰度多租户、页面 keepAlive。布局类型未命中时回退 BlankLayout 并告警（@pactor/ui layout 层 resolveLayout 行为）。
 :::

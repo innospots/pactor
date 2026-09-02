@@ -1,5 +1,5 @@
-import { Registry } from 'pactor-core';
-import type { ComponentRegistry } from 'pactor-runtime';
+import { Registry } from '@pactor/core';
+import type { ComponentRegistry } from '@pactor/runtime';
 
 import { Alert } from './components/Alert/index.js';
 import { Button } from './components/Button/index.js';

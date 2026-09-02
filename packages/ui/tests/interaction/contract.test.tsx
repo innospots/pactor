@@ -7,7 +7,7 @@ import {
   createRuntimeContext,
   DslRenderer,
   registerBuiltinActions,
-} from 'pactor-runtime';
+} from '@pactor/runtime';
 import { afterEach, describe, expect, it } from 'vitest';
 
 import { createShadcnComponentRegistry } from '../../src/components/index.js';
@@ -23,7 +23,7 @@ import {
 
 afterEach(cleanup);
 
-describe('交互契约：props 类型与核心均来自 pactor-ui 本地导出', () => {
+describe('交互契约：props 类型与核心均来自 @pactor/ui 本地导出', () => {
   it('ShadcnOverlayHost / ShadcnInteractionProvider 满足 props 契约（编译期断言）', () => {
     const host: ComponentType<OverlayHostProps> = ShadcnOverlayHost;
     const provider: ComponentType<InteractionProviderProps> =

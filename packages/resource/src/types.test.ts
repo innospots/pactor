@@ -1,4 +1,4 @@
-import type { PageDsl } from 'pactor-core';
+import type { PageDsl } from '@pactor/core';
 import { describe, expect, it } from 'vitest';
 
 import {

@@ -2,7 +2,7 @@
 import './setup.js';
 
 import { cleanup, render, screen } from '@testing-library/react';
-import { Registry } from 'pactor-core';
+import { Registry } from '@pactor/core';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import {

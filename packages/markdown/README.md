@@ -1,13 +1,13 @@
-# pactor-markdown
+# @pactor/markdown
 
 [Pactor](https://github.com/426-330/pactor) 的 Markdown 模块：安全的 Markdown 渲染器（`MarkdownRenderer`）与 DSL Markdown 组件适配（`type: Markdown`）。Chat 消息与 Page/Overlay DSL 共用同一渲染器。
 
 ## 安装
 
 ```bash
-npm install pactor-markdown react
+npm install @pactor/markdown react
 # 或
-pnpm add pactor-markdown react
+pnpm add @pactor/markdown react
 ```
 
 `react >= 18` 为 peer dependency。开发基准：react-markdown v10（^10.1.0）+ remark-gfm v4（^4.0.1）。
@@ -21,18 +21,18 @@ pnpm add pactor-markdown react
 ## 独立使用
 
 ```tsx
-import { MarkdownRenderer } from 'pactor-markdown';
+import { MarkdownRenderer } from '@pactor/markdown';
 
 <MarkdownRenderer content={'### 标题\n\n- 列表项\n\n| 表 | 格 |\n| - | - |\n| 1 | 2 |'} />;
 ```
 
-支持：标题 / 段落 / 粗体 / 斜体 / 有序与无序列表 / GFM 表格与删除线 / 围栏代码块（`<pre><code class="language-xxx">`，供后续语法高亮扩展）与行内代码 / 引用 / 链接 / 图片。容器带基础 class `pactor-markdown`，样式由宿主主题决定。
+支持：标题 / 段落 / 粗体 / 斜体 / 有序与无序列表 / GFM 表格与删除线 / 围栏代码块（`<pre><code class="language-xxx">`，供后续语法高亮扩展）与行内代码 / 引用 / 链接 / 图片。容器带基础 class `@pactor/markdown`，样式由宿主主题决定。
 
 ## DSL 使用
 
 ```tsx
-import { createPageRuntime, PageRuntimeView } from 'pactor-runtime';
-import { registerMarkdownComponents } from 'pactor-markdown';
+import { createPageRuntime, PageRuntimeView } from '@pactor/runtime';
+import { registerMarkdownComponents } from '@pactor/markdown';
 
 const runtime = createPageRuntime(pageDsl);
 registerMarkdownComponents(runtime.context.components); // 注册 DSL 类型 'Markdown'

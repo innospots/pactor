@@ -1,8 +1,8 @@
-import { Registry, type ActionConfig } from 'pactor-core';
+import { Registry, type ActionConfig } from '@pactor/core';
 import {
   resolveTemplate,
   type ExpressionScope,
-} from 'pactor-expression';
+} from '@pactor/expression';
 
 import type { RuntimeContext } from '../context/context.js';
 import { buildScope } from '../context/scope.js';
@@ -77,7 +77,7 @@ export class ActionEngine {
         result = {
           ok: false,
           error: new Error(
-            `[pactor-runtime] permission denied for action "${action.action}"`,
+            `[@pactor/runtime] permission denied for action "${action.action}"`,
           ),
         };
         this.recordNamedResult(action, result);
@@ -89,7 +89,7 @@ export class ActionEngine {
         result = {
           ok: false,
           error: new Error(
-            `[pactor-runtime] action not registered: "${action.action}"`,
+            `[@pactor/runtime] action not registered: "${action.action}"`,
           ),
         };
         this.recordNamedResult(action, result);

@@ -1,6 +1,6 @@
 # Spec: vite-plugin-dsl
 
-YAML DSL 导入转换插件（`pactor-vite-plugin`，设计文档第 34、85 节）。
+YAML DSL 导入转换插件（`@pactor/vite-plugin`，设计文档第 34、85 节）。
 
 
 ### Requirement: page DSL 导入转换

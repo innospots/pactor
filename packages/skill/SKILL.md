@@ -12,15 +12,15 @@ version: 1.0.0
 Activate this skill when the user works with **Pactor** or any `pactor-*` package:
 
 - Building or extending a Pactor application
-- Using `createPactorApplication`, `pactor-app`, or `StaticDslLoader`
+- Using `createPactorApplication`, `@pactor/app`, or `StaticDslLoader`
 - Writing YAML/JSON DSL pages, components, events, or actions
 - Creating or registering custom components / actions / services
 - Switching or customizing UI kits (shadcn / custom registries)
 - Configuring themes, skins, layouts, or menus
 - Integrating data sources, routers, resources, or permissions
 - Handling form linkage, event linkage, or action orchestration
-- Using `pactor-vite-plugin` or `pactor-cli`
-- Mentioning packages: `pactor-core`, `pactor-runtime`, `pactor-app`, `pactor-ui`, `pactor-router`, `pactor-resource`, `pactor-permission`, `pactor-expression`, `pactor-schema`, `pactor-chat`, `pactor-markdown`
+- Using `@pactor/vite-plugin` or `@pactor/cli`
+- Mentioning packages: `@pactor/core`, `@pactor/runtime`, `@pactor/app`, `@pactor/ui`, `@pactor/router`, `@pactor/resource`, `@pactor/permission`, `@pactor/expression`, `@pactor/schema`, `@pactor/chat`, `@pactor/markdown`
 
 ## What you can do with this skill
 
@@ -39,19 +39,19 @@ Activate this skill when the user works with **Pactor** or any `pactor-*` packag
 
 | Directory | Package | What it provides |
 |-----------|---------|------------------|
-| `packages/core` | `pactor-core` | DSL protocol types, AST, Registry interfaces |
-| `packages/schema` | `pactor-schema` | JSON Schema, TS types, validation rules |
-| `packages/expression` | `pactor-expression` | Controlled expression engine (no eval) |
-| `packages/runtime` | `pactor-runtime` | Renderer, RuntimeContext, State, DataSource, Action, Page Runtime |
-| `packages/resource` | `pactor-resource` | DSL loaders (HTTP / static), cache, versioning |
-| `packages/router` | `pactor-router` | Dynamic routing, Path Matcher, menu registry |
-| `packages/permission` | `pactor-permission` | Page/menu/component/action guards |
-| `packages/ui` | `pactor-ui` | shadcn UI kit — the single built-in kit (`shadcnUiKit` + prebuilt stylesheet + contracts/interaction core) |
-| `packages/markdown` | `pactor-markdown` | Markdown + DSL Part rendering |
-| `packages/chat` | `pactor-chat` | AI conversation, streaming, capabilities |
-| `packages/vite-plugin` | `pactor-vite-plugin` | Vite YAML modules, build-time validation, HMR |
-| `packages/cli` | `pactor-cli` | DSL validation, inspection, scaffolding |
-| `packages/app` | `pactor-app` | One-stop composition (`createPactorApplication`) |
+| `packages/core` | `@pactor/core` | DSL protocol types, AST, Registry interfaces |
+| `packages/schema` | `@pactor/schema` | JSON Schema, TS types, validation rules |
+| `packages/expression` | `@pactor/expression` | Controlled expression engine (no eval) |
+| `packages/runtime` | `@pactor/runtime` | Renderer, RuntimeContext, State, DataSource, Action, Page Runtime |
+| `packages/resource` | `@pactor/resource` | DSL loaders (HTTP / static), cache, versioning |
+| `packages/router` | `@pactor/router` | Dynamic routing, Path Matcher, menu registry |
+| `packages/permission` | `@pactor/permission` | Page/menu/component/action guards |
+| `packages/ui` | `@pactor/ui` | shadcn UI kit — the single built-in kit (`shadcnUiKit` + prebuilt stylesheet + contracts/interaction core) |
+| `packages/markdown` | `@pactor/markdown` | Markdown + DSL Part rendering |
+| `packages/chat` | `@pactor/chat` | AI conversation, streaming, capabilities |
+| `packages/vite-plugin` | `@pactor/vite-plugin` | Vite YAML modules, build-time validation, HMR |
+| `packages/cli` | `@pactor/cli` | DSL validation, inspection, scaffolding |
+| `packages/app` | `@pactor/app` | One-stop composition (`createPactorApplication`) |
 
 ## Dependency rules
 
@@ -63,7 +63,7 @@ core ← schema ← expression ← runtime
         {permission, resource, router, ui} ← app
 ```
 
-- Business apps depend only on `pactor-app` + `pactor-ui` (the single built-in shadcn UI kit).
+- Business apps depend only on `@pactor/app` + `@pactor/ui` (the single built-in shadcn UI kit), or install the `pactor` meta package to get every module at once.
 - Never import implementation details from sibling packages.
 - Renderer logic must resolve components via Registry, not `if (type === 'X')` branches.
 
@@ -73,14 +73,14 @@ core ← schema ← expression ← runtime
 
 ```bash
 # shadcn UI kit (the single built-in kit)
-pnpm add pactor-app pactor-ui
+pnpm add @pactor/app @pactor/ui
 ```
 
 ### Bootstrap with API loader
 
 ```tsx
-import { createPactorApplication } from 'pactor-app';
-import 'pactor-ui/styles.css'; // required
+import { createPactorApplication } from '@pactor/app';
+import '@pactor/ui/styles.css'; // required
 
 createPactorApplication({
   appId: 'my-app',
@@ -96,9 +96,9 @@ Server must provide the Envelope endpoints:
 ### Bootstrap locally with StaticDslLoader
 
 ```tsx
-import { createPactorApplication } from 'pactor-app';
-import { StaticDslLoader } from 'pactor-resource';
-import 'pactor-ui/styles.css';
+import { createPactorApplication } from '@pactor/app';
+import { StaticDslLoader } from '@pactor/resource';
+import '@pactor/ui/styles.css';
 import homePage from './pages/home.page.yaml';
 
 const loader = new StaticDslLoader({
@@ -113,7 +113,7 @@ const loader = new StaticDslLoader({
 createPactorApplication({ appId: 'my-app', loader }).mount('#root');
 ```
 
-For YAML imports add `pactor-vite-plugin` to `vite.config.ts` and declare `*.page.yaml` modules.
+For YAML imports add `@pactor/vite-plugin` to `vite.config.ts` and declare `*.page.yaml` modules.
 
 ## Workflow: custom component
 
@@ -122,7 +122,7 @@ For YAML imports add `pactor-vite-plugin` to `vite.config.ts` and declare `*.pag
 3. Reference in DSL by `type`
 
 ```tsx
-import { createPactorApplication } from 'pactor-app';
+import { createPactorApplication } from '@pactor/app';
 import { RiskScore } from './components/RiskScore';
 
 createPactorApplication({
@@ -143,10 +143,10 @@ Custom components receive RuntimeContext (state, data, permissions, routing, ser
 
 ## Workflow: theming and skins
 
-- The built-in UI kit is shadcn (`pactor-ui`); theming = overriding its CSS variable tokens (`--primary` / `--muted` / ...), dark via `data-pactor-theme="dark"`
+- The built-in UI kit is shadcn (`@pactor/ui`); theming = overriding its CSS variable tokens (`--primary` / `--muted` / ...), dark via `data-pactor-theme="dark"`
 - Layout and theme config usually come from bootstrap
 - For business skin settings, see `examples/admin` (`skin.ts` / `SkinSettings`)
-- Use `providers` and `headerExtra` slots in `pactor-app` to inject global providers and settings entry
+- Use `providers` and `headerExtra` slots in `@pactor/app` to inject global providers and settings entry
 
 ## Workflow: events and data flow
 
@@ -179,9 +179,9 @@ Standard actions: `request`, `reload`, `setState`, `resetState`, `navigate`, `me
 
 ## Workflow: routing, resources, permissions
 
-- **Routing** (`pactor-router`): dynamic routes from bootstrap `menus`, supports Path Matcher, params, hidden routes
-- **Resources** (`pactor-resource`): loads page/fragment DSL with HttpDslResourceLoader or StaticDslLoader, cache, versioning
-- **Permissions** (`pactor-permission`): page/menu/component/action guards. Frontend permissions only control UI; backend APIs must still authorize
+- **Routing** (`@pactor/router`): dynamic routes from bootstrap `menus`, supports Path Matcher, params, hidden routes
+- **Resources** (`@pactor/resource`): loads page/fragment DSL with HttpDslResourceLoader or StaticDslLoader, cache, versioning
+- **Permissions** (`@pactor/permission`): page/menu/component/action guards. Frontend permissions only control UI; backend APIs must still authorize
 
 Bootstrap orchestration:
 
@@ -212,7 +212,7 @@ pnpm --filter example-vite-starter dev   # minimal starter
 pnpm --filter example-admin dev          # shadcn admin dashboard (skin settings)
 pnpm --filter example-chat dev           # AI chat example
 
-# pactor-cli
+# @pactor/cli
 pnpm pactor validate src/pages/**/*.page.yaml
 pnpm pactor inspect src/pages/home.page.yaml
 pnpm pactor create my-app
@@ -235,13 +235,13 @@ pnpm pactor create my-app
 - **Do not** write `if (type === 'Button')` branches in a Renderer; use `ComponentRegistry`.
 - **Do not** inject JavaScript from the server into DSL; register actions/services/capabilities in the frontend.
 - **Do not** rely on frontend permission checks for security; enforce authorization on backend APIs.
-- **Do not** forget to import `pactor-ui/styles.css` when using the default shadcn kit.
+- **Do not** forget to import `@pactor/ui/styles.css` when using the default shadcn kit.
 
 ## References
 
 - Framework design specification: `docs/src/content/docs/framework-design.md`
 - Quick start: `docs/src/content/docs/guides/getting-started.md`
-- pactor-app docs: `docs/src/content/docs/packages/app.md`
+- @pactor/app docs: `docs/src/content/docs/packages/app.md`
 - Example projects:
   - `examples/vite-starter` — minimal starter
   - `examples/admin` — shadcn admin dashboard with skin settings

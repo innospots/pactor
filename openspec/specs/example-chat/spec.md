@@ -27,7 +27,7 @@
 
 ### Requirement: AI DSL 安全渲染
 
-示例 SHALL 以 Safe Registry 白名单渲染 LLM 下发的 dsl part，白名单组件来自 `pactor-ui`（shadcn）；白名单外组件类型 SHALL 渲染为 ChatDenied 受控占位，不抛错、不执行。示例 MUST NOT 依赖 antd——toast/confirm 等反馈经 `pactor-ui` 交互层（createUiBridge + ShadcnInteractionProvider）或等价手段实现。
+示例 SHALL 以 Safe Registry 白名单渲染 LLM 下发的 dsl part，白名单组件来自 `@pactor/ui`（shadcn）；白名单外组件类型 SHALL 渲染为 ChatDenied 受控占位，不抛错、不执行。示例 MUST NOT 依赖 antd——toast/confirm 等反馈经 `@pactor/ui` 交互层（createUiBridge + ShadcnInteractionProvider）或等价手段实现。
 
 #### Scenario: 白名单内 DSL 卡片
 
@@ -71,7 +71,7 @@
 
 ### Requirement: 默认形态对齐参考布局
 
-示例的对话页 SHALL 对齐主流 AI 对话产品默认形态（chat-default-skin 变更）：`modelPlacement: 'header'` 呈现极简头部（仅模型选择）；空态下问候语与 Composer 垂直居中成组；侧栏含品牌行（collapsible 折叠）、功能菜单（badge）、「最近」分组会话列表（dot 状态点）与 sidebarFooter 底部卡片（DSL 声明）。示例 MUST NOT 为上述布局编写私有 CSS——布局全部由 pactor-chat 包内样式承担，示例私有样式表仍只允许承载宿主页面壳与品牌色等自有视觉。
+示例的对话页 SHALL 对齐主流 AI 对话产品默认形态（chat-default-skin 变更）：`modelPlacement: 'header'` 呈现极简头部（仅模型选择）；空态下问候语与 Composer 垂直居中成组；侧栏含品牌行（collapsible 折叠）、功能菜单（badge）、「最近」分组会话列表（dot 状态点）与 sidebarFooter 底部卡片（DSL 声明）。示例 MUST NOT 为上述布局编写私有 CSS——布局全部由 @pactor/chat 包内样式承担，示例私有样式表仍只允许承载宿主页面壳与品牌色等自有视觉。
 
 #### Scenario: 空态居中组可见
 

@@ -1,6 +1,6 @@
 # Spec: chat-model-selector
 
-Chat 内建模型选择（`pactor-chat`）：models 受控 props、内建模型 chip、选中值进入 transport 输入。
+Chat 内建模型选择（`@pactor/chat`）：models 受控 props、内建模型 chip、选中值进入 transport 输入。
 
 ## ADDED Requirements
 

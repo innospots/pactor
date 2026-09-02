@@ -1,5 +1,5 @@
 {
-  "name": "pactor-chat",
+  "name": "@pactor/chat",
   "version": "0.1.0",
   "description": "Pactor chat: AI message rendering protocol (message model, streaming reducer, safe registry, capability action) and chat runtime view (ChatView / MessageBubble / PartRenderer / Composer / chat layout)",
   "keywords": [
@@ -56,10 +56,10 @@
   },
   "dependencies": {
     "lucide-react": "^1.31.0",
-    "pactor-core": "workspace:*",
-    "pactor-markdown": "workspace:*",
-    "pactor-permission": "workspace:*",
-    "pactor-runtime": "workspace:*"
+    "@pactor/core": "workspace:*",
+    "@pactor/markdown": "workspace:*",
+    "@pactor/permission": "workspace:*",
+    "@pactor/runtime": "workspace:*"
   },
   "peerDependencies": {
     "react": ">=18"
@@ -70,7 +70,7 @@
     "@types/react": "^19.2.18",
     "@types/react-dom": "^19.2.4",
     "jsdom": "^30.0.1",
-    "pactor-ui": "workspace:*",
+    "@pactor/ui": "workspace:*",
     "react": "^19.2.8",
     "react-dom": "^19.2.8"
   }

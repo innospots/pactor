@@ -7,7 +7,7 @@ import './setup.js';
 
 /** Markdown 元素渲染（spec: markdown-renderer / Requirement: Markdown 元素渲染） */
 describe('MarkdownRenderer 元素渲染', () => {
-  it('容器带 pactor-markdown 基础 class，可追加自定义 class', () => {
+  it('容器带 @pactor/markdown 基础 class，可追加自定义 class', () => {
     const { container } = render(
       <MarkdownRenderer content="正文" className="chat-message" />,
     );

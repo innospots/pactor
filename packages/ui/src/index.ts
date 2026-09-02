@@ -12,13 +12,13 @@ import {
 import { createShadcnLayoutRegistry } from './layout/index.js';
 
 /**
- * shadcn UI kit 预设对象：一次性提供 pactor-app `ui` 选项的三个槽位
+ * shadcn UI kit 预设对象：一次性提供 @pactor/app `ui` 选项的三个槽位
  * （组件注册表工厂 / 布局注册表工厂 / 交互层组件对），实现整站 shadcn 切换：
  *
  * ```ts
- * import { createPactorApplication } from 'pactor-app';
- * import { shadcnUiKit } from 'pactor-ui';
- * import 'pactor-ui/styles.css';
+ * import { createPactorApplication } from '@pactor/app';
+ * import { shadcnUiKit } from '@pactor/ui';
+ * import '@pactor/ui/styles.css';
  *
  * createPactorApplication({
  *   appId: 'risk-admin',

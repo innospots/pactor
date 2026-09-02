@@ -31,7 +31,7 @@
 
 ### Requirement: DSL 参考完整性
 
-`reference/dsl` 组件目录 SHALL 覆盖全部可经 DSL 使用的组件（含 pactor-markdown 注册的 Markdown），并指向自定义组件指南。
+`reference/dsl` 组件目录 SHALL 覆盖全部可经 DSL 使用的组件（含 @pactor/markdown 注册的 Markdown），并指向自定义组件指南。
 
 #### Scenario: Markdown 组件可查
 

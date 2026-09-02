@@ -1,4 +1,4 @@
-import type { FragmentDsl, PageDsl, RequiresConfig } from 'pactor-core';
+import type { FragmentDsl, PageDsl, RequiresConfig } from '@pactor/core';
 
 /**
  * DSL 资源模型（设计文档附录 C）：Envelope 与加载器接口。
@@ -70,7 +70,7 @@ function isRecord(value: unknown): value is Record<string, unknown> {
 
 /**
  * 宽容解析 envelope：字段缺失时给默认值，不做强行校验。
- * DSL 本体校验留给 PageRuntime（pactor-schema）；服务端直接返回裸 DSL（无 schema 字段）时整体作为 schema。
+ * DSL 本体校验留给 PageRuntime（@pactor/schema）；服务端直接返回裸 DSL（无 schema 字段）时整体作为 schema。
  */
 export function parseEnvelope<T>(
   raw: unknown,

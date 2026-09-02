@@ -1,10 +1,10 @@
 # Spec: chat-view
 
-Chat React 视图与布局（`pactor-chat`）：ChatView / MessageBubble / PartRenderer / Composer 与 chat 布局注册。
+Chat React 视图与布局（`@pactor/chat`）：ChatView / MessageBubble / PartRenderer / Composer 与 chat 布局注册。
 
 ### Requirement: 消息列表渲染
 
-`<ChatView store>` SHALL 订阅 ConversationStore 渲染消息列表：user 消息渲染为右侧圆角气泡（最大宽度约 75%），assistant 消息渲染为左侧通栏排版；parts 按序逐个渲染。会话为空时 SHALL 渲染空状态区（见 chat-empty-state）。消息滚动区 SHALL 带上下边缘渐隐 mask。视图 MUST NOT 依赖 antd，颜色、圆角、字体 MUST 经 `--pactor-chat-*` CSS 变量表达（`pactor-chat/styles.css`），暗色主题经 `[data-pactor-theme='dark']` 覆盖。
+`<ChatView store>` SHALL 订阅 ConversationStore 渲染消息列表：user 消息渲染为右侧圆角气泡（最大宽度约 75%），assistant 消息渲染为左侧通栏排版；parts 按序逐个渲染。会话为空时 SHALL 渲染空状态区（见 chat-empty-state）。消息滚动区 SHALL 带上下边缘渐隐 mask。视图 MUST NOT 依赖 antd，颜色、圆角、字体 MUST 经 `--pactor-chat-*` CSS 变量表达（`@pactor/chat/styles.css`），暗色主题经 `[data-pactor-theme='dark']` 覆盖。
 
 #### Scenario: 渲染对话
 
@@ -23,7 +23,7 @@ Chat React 视图与布局（`pactor-chat`）：ChatView / MessageBubble / PartR
 
 ### Requirement: PartRenderer
 
-按 part 类型渲染：text → 文本段落；markdown → pactor-markdown；dsl → runtime Renderer（Safe Registry + chat 作用域）；tool-call / tool-result → 由活动轨迹配对渲染（见 chat-activity-trace），MUST NOT 再渲染为独立状态卡；thinking → 自绘折叠卡（流式期间展开并带进行中指示，进入答案阶段自动折叠，用户操作后固定，正文支持 markdown）；error → 自绘错误警示条（error 状态消息附重试入口，见 chat-message-actions）；status → 弱提示。折叠卡与警示条 MUST 为 chat 包自绘组件（不依赖 antd）。
+按 part 类型渲染：text → 文本段落；markdown → @pactor/markdown；dsl → runtime Renderer（Safe Registry + chat 作用域）；tool-call / tool-result → 由活动轨迹配对渲染（见 chat-activity-trace），MUST NOT 再渲染为独立状态卡；thinking → 自绘折叠卡（流式期间展开并带进行中指示，进入答案阶段自动折叠，用户操作后固定，正文支持 markdown）；error → 自绘错误警示条（error 状态消息附重试入口，见 chat-message-actions）；status → 弱提示。折叠卡与警示条 MUST 为 chat 包自绘组件（不依赖 antd）。
 
 #### Scenario: dsl part 渲染白名单组件
 

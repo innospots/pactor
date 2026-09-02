@@ -3,9 +3,9 @@ title: DSL 参考
 description: 页面 DSL 的完整结构、表达式作用域、数据源、动作与内置组件属性说明
 ---
 
-Pactor 页面以 YAML / JSON DSL 描述（`.page.yaml`，经 `pactor-vite-plugin` 构建期校验）。本页是 DSL 的完整参考：顶层结构、表达式作用域、数据源、动作目录与内置组件属性。
+Pactor 页面以 YAML / JSON DSL 描述（`.page.yaml`，经 `@pactor/vite-plugin` 构建期校验）。本页是 DSL 的完整参考：顶层结构、表达式作用域、数据源、动作目录与内置组件属性。
 
-DSL 的类型定义以 `pactor-core` 为准（`PageDsl` / `DslNode` / `ActionConfig`）；组件 props 契约以 `pactor-ui` components 层为准。
+DSL 的类型定义以 `@pactor/core` 为准（`PageDsl` / `DslNode` / `ActionConfig`）；组件 props 契约以 `@pactor/ui` components 层为准。
 
 ## 顶层结构（PageDsl）
 
@@ -92,11 +92,11 @@ permission: { code: customer:delete, denied: disabled }  # 对象形式
 
 ## 表达式与作用域
 
-属性值、动作参数中的 `${...}` 由 `pactor-expression` 求值（受控 AST，禁 eval，window/fetch 不可达，`__proto__` / `constructor` 隔离）：
+属性值、动作参数中的 `${...}` 由 `@pactor/expression` 求值（受控 AST，禁 eval，window/fetch 不可达，`__proto__` / `constructor` 隔离）：
 
 - 字符串整体恰好是一个 `${...}`：**保留原始类型**（`${state.count}` → number）
 - 与其他文本混合：拼接为字符串（`共 ${state.count} 条`）；`null` / `undefined` 渲染为空串
-- 支持成员访问、字面量（含对象字面量 `{ name: user.name }`，常用作 `t()` 插值参数）、常见二元/逻辑/一元运算符与白名单函数调用（成员方法调用被拒绝）；详见 [pactor-expression](/packages/expression/)
+- 支持成员访问、字面量（含对象字面量 `{ name: user.name }`，常用作 `t()` 插值参数）、常见二元/逻辑/一元运算符与白名单函数调用（成员方法调用被拒绝）；详见 [@pactor/expression](/packages/expression/)
 
 ### 全局作用域键
 
@@ -159,7 +159,7 @@ lifecycle:
 
 ## 动作目录
 
-### 运行时内置（pactor-runtime，UI 无关）
+### 运行时内置（@pactor/runtime，UI 无关）
 
 | 动作 | params | 说明 |
 | --- | --- | --- |
@@ -173,7 +173,7 @@ lifecycle:
 | `delay` | `ms` | 等待指定毫秒 |
 | `form.setValues` | `values`（必填）、`form?`（缺省 `default`） | 表单联动：写入目标表单字段值；不触发校验与 `onValuesChange`；表单未注册时受控失败 |
 
-### 应用层注册（pactor-app / 交互 kit）
+### 应用层注册（@pactor/app / 交互 kit）
 
 | 动作 | params | 说明 |
 | --- | --- | --- |
@@ -198,7 +198,7 @@ overlay 内容的表达式以 overlay 作用域求值（`${params.x}` 取注入�
 
 ## 组件目录
 
-内置 12 个组件（shadcn 实现，pactor-ui）+ pactor-markdown 注册的 Markdown。业务组件注册见[自定义组件](/guides/custom-components/)。
+内置 12 个组件（shadcn 实现，@pactor/ui）+ @pactor/markdown 注册的 Markdown。业务组件注册见[自定义组件](/guides/custom-components/)。
 
 ### Page
 
@@ -362,7 +362,7 @@ rules:
 
 ### Markdown
 
-安全 Markdown 渲染（禁 raw HTML、链接协议白名单，含代码高亮与 KaTeX 数学），由 pactor-markdown 提供，需经 `registerMarkdownComponents(runtime.context.components)` 注册后可用（chat 场景经 Safe Registry 白名单放行）。
+安全 Markdown 渲染（禁 raw HTML、链接协议白名单，含代码高亮与 KaTeX 数学），由 @pactor/markdown 提供，需经 `registerMarkdownComponents(runtime.context.components)` 注册后可用（chat 场景经 Safe Registry 白名单放行）。
 
 | prop | 类型 | 说明 |
 | --- | --- | --- |
@@ -382,9 +382,9 @@ rules:
 - 列表页：`examples/admin/src/pages/customer-list.page.yaml`（service 数据源、cell 行模板、overlay.open 抽屉、权限禁用）
 - 工作台：`examples/admin/src/pages/dashboard.page.yaml`（static 数据源、Grid/Statistic、navigate）
 
-## 聊天页完整示例（pactor-chat）
+## 聊天页完整示例（@pactor/chat）
 
-以下为 `examples/chat/src/chat.page.yaml` 的完整内容（注释中的内部 spec 引用已略去）——一个完整 AI 对话页的 DSL 声明。`Chat` 不是内置组件，需由 `registerChatComponent(registry)` 注册（见 [pactor-chat](../packages/chat.md)）；`transport` / `safeRegistry` / `callService` 服务桥等函数与实例无法从 DSL 产生，由宿主经 `ChatServicesProvider` 注入（见 `examples/chat/src/App.tsx`）。
+以下为 `examples/chat/src/chat.page.yaml` 的完整内容（注释中的内部 spec 引用已略去）——一个完整 AI 对话页的 DSL 声明。`Chat` 不是内置组件，需由 `registerChatComponent(registry)` 注册（见 [@pactor/chat](../packages/chat.md)）；`transport` / `safeRegistry` / `callService` 服务桥等函数与实例无法从 DSL 产生，由宿主经 `ChatServicesProvider` 注入（见 `examples/chat/src/App.tsx`）。
 
 ```yaml
 dsl: '1.0'

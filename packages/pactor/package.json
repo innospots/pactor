@@ -1,0 +1,80 @@
+{
+  "name": "pactor",
+  "version": "0.1.0",
+  "description": "Pactor meta package: installs the full Server-Driven UI + AI-Native runtime stack (@pactor/*) and re-exports the one-stop application API (createPactorApplication)",
+  "keywords": [
+    "pactor",
+    "dsl",
+    "server-driven-ui",
+    "dynamic-ui",
+    "ai-native",
+    "runtime",
+    "react"
+  ],
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/426-330/pactor.git",
+    "directory": "packages/pactor"
+  },
+  "homepage": "https://github.com/426-330/pactor/tree/main/packages/pactor",
+  "bugs": "https://github.com/426-330/pactor/issues",
+  "type": "module",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.js"
+      },
+      "require": {
+        "types": "./dist/index.d.cts",
+        "default": "./dist/index.cjs"
+      }
+    }
+  },
+  "sideEffects": false,
+  "engines": {
+    "node": ">=18"
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsup",
+    "typecheck": "tsc --noEmit",
+    "prepublishOnly": "pnpm build"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "dependencies": {
+    "@pactor/app": "workspace:*",
+    "@pactor/chat": "workspace:*",
+    "@pactor/cli": "workspace:*",
+    "@pactor/core": "workspace:*",
+    "@pactor/expression": "workspace:*",
+    "@pactor/markdown": "workspace:*",
+    "@pactor/permission": "workspace:*",
+    "@pactor/resource": "workspace:*",
+    "@pactor/router": "workspace:*",
+    "@pactor/runtime": "workspace:*",
+    "@pactor/schema": "workspace:*",
+    "@pactor/ui": "workspace:*",
+    "@pactor/vite-plugin": "workspace:*"
+  },
+  "peerDependencies": {
+    "react": ">=18",
+    "react-dom": ">=18",
+    "react-router-dom": ">=6"
+  },
+  "devDependencies": {
+    "@types/react": "^19.2.18",
+    "@types/react-dom": "^19.2.4",
+    "react": "^19.2.8",
+    "react-dom": "^19.2.8",
+    "react-router-dom": "^7.18.2"
+  }
+}

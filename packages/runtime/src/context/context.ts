@@ -1,5 +1,5 @@
-import { Registry, createI18nContext, type DataSourceConfig, type I18nContext, type PageMeta } from 'pactor-core';
-import type { ExpressionScope } from 'pactor-expression';
+import { Registry, createI18nContext, type DataSourceConfig, type I18nContext, type PageMeta } from '@pactor/core';
+import type { ExpressionScope } from '@pactor/expression';
 
 import type { ActionRegistry } from '../action/engine.js';
 import { DataStore } from '../datasource/data-store.js';

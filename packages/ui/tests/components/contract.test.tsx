@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 import { screen } from '@testing-library/react';
-import type { DslNode } from 'pactor-core';
+import type { DslNode } from '@pactor/core';
 import { describe, expect, it, vi } from 'vitest';
 
 import { createShadcnComponentRegistry } from '../../src/components/index.js';

@@ -1,7 +1,7 @@
 import { existsSync, mkdirSync, statSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 
-import type { FragmentDsl, PageDsl } from 'pactor-core';
+import type { FragmentDsl, PageDsl } from '@pactor/core';
 
 import { flagValue, type CliIo, type ParsedArgs } from '../args.js';
 import {

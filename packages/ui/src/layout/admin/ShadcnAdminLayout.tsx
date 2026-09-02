@@ -1,16 +1,16 @@
 import type { AdminLayoutProps } from '../types.js';
 import { findMenuChain } from './menu-chain.js';
 import { collectDefaultOpenKeys } from './menu-items.js';
-import type { PermissionChecker } from 'pactor-permission';
-import { filterMenusByPermission } from 'pactor-permission';
+import type { PermissionChecker } from '@pactor/permission';
+import { filterMenusByPermission } from '@pactor/permission';
 import {
   resolveRoute,
   type MenuItem,
   type MenuRegistry,
   type NavigationBridge,
   type RouteContext,
-} from 'pactor-router';
-import { useI18n } from 'pactor-runtime';
+} from '@pactor/router';
+import { useI18n } from '@pactor/runtime';
 import { useEffect, useMemo, useRef, useState } from 'react';
 
 import { cn } from '../../lib/utils.js';

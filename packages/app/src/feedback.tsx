@@ -2,8 +2,8 @@ import type { CSSProperties, ReactNode } from 'react';
 
 /**
  * 应用外壳的轻量反馈组件（加载占位 / 结果页 / 主按钮）：
- * pactor-app 不依赖任何 UI 库的成品组件，这些占位只用内联样式 +
- * className 钩子（pactor-app-*），不消费 pactor-ui 的样式表。
+ * @pactor/app 不依赖任何 UI 库的成品组件，这些占位只用内联样式 +
+ * className 钩子（pactor-app-*），不消费 @pactor/ui 的样式表。
  */
 
 const centerStyle: CSSProperties = {

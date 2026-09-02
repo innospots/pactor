@@ -324,4 +324,4 @@ events:
 ## 相关参考
 
 - [DSL 参考](/reference/dsl/)：动作目录、组件 props、作用域完整表
-- [pactor-expression](/packages/expression/)：表达式语法细节（类型保留规则、白名单函数）
+- [@pactor/expression](/packages/expression/)：表达式语法细节（类型保留规则、白名单函数）

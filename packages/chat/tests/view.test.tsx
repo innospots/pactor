@@ -1,9 +1,9 @@
 // @vitest-environment jsdom
 import './setup.js';
 
-import { Registry } from 'pactor-core';
-import { createShadcnComponentRegistry } from 'pactor-ui/components';
-import { createShadcnLayoutRegistry, resolveLayout } from 'pactor-ui/layout';
+import { Registry } from '@pactor/core';
+import { createShadcnComponentRegistry } from '@pactor/ui/components';
+import { createShadcnLayoutRegistry, resolveLayout } from '@pactor/ui/layout';
 import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 

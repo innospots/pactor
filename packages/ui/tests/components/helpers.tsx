@@ -1,7 +1,7 @@
 // @vitest-environment jsdom
 import './setup.js';
 
-import type { DslNode } from 'pactor-core';
+import type { DslNode } from '@pactor/core';
 import {
   createRuntimeContext,
   DslRenderer,
@@ -9,7 +9,7 @@ import {
   type ComponentRegistry,
   type CreateRuntimeContextOptions,
   type RuntimeContext,
-} from 'pactor-runtime';
+} from '@pactor/runtime';
 import { cleanup, render, type RenderResult } from '@testing-library/react';
 import { afterEach } from 'vitest';
 

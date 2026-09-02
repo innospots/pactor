@@ -1,4 +1,4 @@
-import type { DslNode } from 'pactor-core';
+import type { DslNode } from '@pactor/core';
 
 /**
  * Overlay 打开配置（设计文档第 45 节，决策 D1）。
@@ -13,7 +13,7 @@ export interface OverlayConfig {
   title?: string;
   /** 宽度（antd Modal width / Drawer size，v6 起 Drawer width 废弃） */
   width?: number | string;
-  /** 内联 DSL 内容，经 pactor-runtime Renderer 渲染 */
+  /** 内联 DSL 内容，经 @pactor/runtime Renderer 渲染 */
   content?: DslNode;
   /** 动态页面：经 OverlayHost 注入的 resolvePage(pageId) 加载渲染 */
   page?: { pageId: string };

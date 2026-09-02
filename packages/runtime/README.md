@@ -1,13 +1,13 @@
-# pactor-runtime
+# @pactor/runtime
 
 [Pactor](https://github.com/426-330/pactor) 的运行时引擎包：把 PageDsl 运行起来——RuntimeContext 组装、StateStore、DataSource 运行时、Action 引擎、React Renderer 与 PageRuntime 完整链路。
 
 ## 安装
 
 ```bash
-npm install pactor-runtime react
+npm install @pactor/runtime react
 # 或
-pnpm add pactor-runtime react
+pnpm add @pactor/runtime react
 ```
 
 `react >= 18` 为 peer dependency。非 React 部分（context / state / datasource / action）零 React 依赖，可脱离 React 单独使用与测试。
@@ -15,7 +15,7 @@ pnpm add pactor-runtime react
 ## 示例
 
 ```tsx
-import { createPageRuntime, PageRuntimeView } from 'pactor-runtime';
+import { createPageRuntime, PageRuntimeView } from '@pactor/runtime';
 
 const runtime = createPageRuntime(pageDsl, {
   // 可选：注入自定义 Registry / Adapter

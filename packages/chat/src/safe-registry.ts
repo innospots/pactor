@@ -1,4 +1,4 @@
-import { Registry } from 'pactor-core';
+import { Registry } from '@pactor/core';
 
 /**
  * Safe Registry（设计决策 D3，设计文档第 63、81.4 节）：

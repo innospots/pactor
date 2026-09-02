@@ -1,6 +1,6 @@
 # Spec: datasource-runtime
 
-DataSource 运行时：按类型加载数据并维护 `loading / error / data` 状态（`pactor-runtime`）。
+DataSource 运行时：按类型加载数据并维护 `loading / error / data` 状态（`@pactor/runtime`）。
 
 ### Requirement: DataStore 状态管理
 

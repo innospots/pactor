@@ -6,8 +6,8 @@ import {
   useChatServices,
   type ChatMenuItem,
   type ChatServices,
-} from 'pactor-chat';
-import { Registry, type PageDsl } from 'pactor-core';
+} from '@pactor/chat';
+import { Registry, type PageDsl } from '@pactor/core';
 import {
   MenuRegistry,
   createRouterAdapter,
@@ -15,17 +15,17 @@ import {
   type MenuItem,
   type NavigationBridge,
   type RouteContext,
-} from 'pactor-router';
-import { DynamicDslRoute, useReactRouterBridge } from 'pactor-router/react';
+} from '@pactor/router';
+import { DynamicDslRoute, useReactRouterBridge } from '@pactor/router/react';
 import {
   PageRuntimeView,
   createPageRuntime,
   type ActionHandler,
   type PageRuntime,
-} from 'pactor-runtime';
-import { createShadcnComponentRegistry } from 'pactor-ui/components';
-import { ShadcnInteractionProvider } from 'pactor-ui/interaction';
-import { Badge, Button, Card, CardAction, CardDescription, CardHeader, CardTitle } from 'pactor-ui/ui';
+} from '@pactor/runtime';
+import { createShadcnComponentRegistry } from '@pactor/ui/components';
+import { ShadcnInteractionProvider } from '@pactor/ui/interaction';
+import { Badge, Button, Card, CardAction, CardDescription, CardHeader, CardTitle } from '@pactor/ui/ui';
 import { Bell } from 'lucide-react';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { HashRouter, Navigate, useLocation } from 'react-router-dom';
@@ -323,14 +323,14 @@ function Shell() {
 
   return (
     <ChatServicesProvider value={chatServices}>
-      {/* pactor-ui 交互层：toast / confirm 经 UiBridge 注入（宿主根部挂载） */}
+      {/* @pactor/ui 交互层：toast / confirm 经 UiBridge 注入（宿主根部挂载） */}
       <ShadcnInteractionProvider bridge={uiBridge}>
       <div className="demo-app">
         {/* 菜单外壳：menu 来自 registry 可见树，高亮由 URL 推导，
             点击 → bridge.push（菜单切换 = URL 变化）；内容槽为路由出口。
             侧栏参考形态（spec: chat-default-skin）：brand 品牌行 +
             collapsible 折叠钮 + 「最近」分组（group/dot）+ sidebarFooter
-            用户卡（pactor-ui/ui 原语构建，视觉全部由包内样式承担）。
+            用户卡（@pactor/ui/ui 原语构建，视觉全部由包内样式承担）。
             sidebarFooter 传 ReactNode：DslNode 槽需页面运行时上下文
             （renderChildren），此层为 React 直连不可用。
             聊天页头部为极简形态（仅模型选择，modelPlacement: header），

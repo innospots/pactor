@@ -7,7 +7,7 @@ import {
   dslNodeSchema,
   PAGE_DSL_SCHEMA_ID,
   pageDslSchema,
-} from 'pactor-schema';
+} from '@pactor/schema';
 
 import { flagValue, type CliIo, type ParsedArgs } from '../args.js';
 
