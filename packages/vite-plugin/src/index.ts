@@ -1,10 +1,10 @@
 import { parseDocument } from 'yaml';
 import type { Plugin } from 'vite';
-import { validatePageDsl } from '@pactor/schema';
-import type { FragmentDsl, PageDsl } from '@pactor/core';
+import { validatePageDsl } from '@pactor-app/schema';
+import type { FragmentDsl, PageDsl } from '@pactor-app/core';
 
 /**
- * @pactor/vite-plugin：把 `.page.yaml` / `.fragment.yaml` DSL 文件
+ * @pactor-app/vite-plugin：把 `.page.yaml` / `.fragment.yaml` DSL 文件
  * 在构建期转换为 JS 模块（设计文档第 34、85 节）。
  */
 

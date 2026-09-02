@@ -1,7 +1,7 @@
 /**
- * @pactor/ui 聚合包测试：
+ * @pactor-app/ui 聚合包测试：
  * - 关键符号可从聚合包导入并使用（三层 re-export）
- * - shadcnUiKit 预设形状（三槽位为对应 shadcn 工厂/组件，与 @pactor/app
+ * - shadcnUiKit 预设形状（三槽位为对应 shadcn 工厂/组件，与 @pactor-app/app
  *   UiKit 类型结构兼容——由 typecheck 保证，这里断言运行期解析）
  */
 import { describe, expect, it } from 'vitest';

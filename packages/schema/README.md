@@ -1,19 +1,19 @@
-# @pactor/schema
+# @pactor-app/schema
 
 [Pactor](https://github.com/426-330/pactor) 的 Schema 校验包：DSL 版本常量、Page DSL 与 DslNode 的 JSON Schema、基于 Ajv 的结构化校验器。
 
 ## 安装
 
 ```bash
-npm install @pactor/schema
+npm install @pactor-app/schema
 # 或
-pnpm add @pactor/schema
+pnpm add @pactor-app/schema
 ```
 
 ## 示例
 
 ```ts
-import { DSL_VERSION, validatePageDsl } from '@pactor/schema';
+import { DSL_VERSION, validatePageDsl } from '@pactor-app/schema';
 
 DSL_VERSION; // "1.0"
 

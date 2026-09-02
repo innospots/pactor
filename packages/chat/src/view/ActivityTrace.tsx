@@ -6,7 +6,7 @@ import {
   Loader2,
   XCircle,
 } from 'lucide-react';
-import { MarkdownRenderer } from '@pactor/markdown';
+import { MarkdownRenderer } from '@pactor-app/markdown';
 import { useEffect, useRef, useState, type ReactNode } from 'react';
 
 import {

@@ -1,7 +1,7 @@
 import type {
   PermissionConfig,
   PermissionDeniedStrategy,
-} from '@pactor/core';
+} from '@pactor-app/core';
 
 /**
  * 结构化权限判定接口（决策 D3）：只需 `hasAny`。

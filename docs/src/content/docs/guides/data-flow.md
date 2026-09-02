@@ -24,7 +24,7 @@ React Renderer 渲染 body 子树
 ```
 
 - **bootstrap**：应用的"目录"——有哪些页面、什么布局、用户有什么权限。真实项目由服务端下发；本地开发用 `StaticDslLoader` 直接喂入。
-- **页面 DSL**：`pageId@version` 经 ResourceLoader 加载（HTTP 或静态），带 ETag 缓存与 inflight 去重（见 [@pactor/resource](/packages/resource/)）。
+- **页面 DSL**：`pageId@version` 经 ResourceLoader 加载（HTTP 或静态），带 ETag 缓存与 inflight 去重（见 [@pactor-app/resource](/packages/resource/)）。
 - **PageRuntime**：每个页面实例持有独立的 StateStore 与 DataStore。
 
 ## 四条数据通路

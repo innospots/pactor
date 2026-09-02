@@ -1,19 +1,19 @@
-# @pactor/resource
+# @pactor-app/resource
 
 [Pactor](https://github.com/426-330/pactor) 的资源加载包：DSL 资源 Envelope 模型、HTTP / Static 两种资源加载器、带版本控制与 ETag 条件请求的内存缓存。
 
 ## 安装
 
 ```bash
-npm install @pactor/resource
+npm install @pactor-app/resource
 # 或
-pnpm add @pactor/resource
+pnpm add @pactor-app/resource
 ```
 
 ## 示例
 
 ```ts
-import { HttpDslResourceLoader, StaticDslLoader } from '@pactor/resource';
+import { HttpDslResourceLoader, StaticDslLoader } from '@pactor-app/resource';
 
 // HTTP 加载器：默认访问 /api/runtime/{pages,fragments,bootstrap}
 const loader = new HttpDslResourceLoader({ baseUrl: '/api/runtime' });
@@ -32,10 +32,10 @@ const staticLoader = new StaticDslLoader({
 
 特点：
 
-- 零 React 依赖，仅依赖 `@pactor/core` 类型，浏览器 / Node 通用
+- 零 React 依赖，仅依赖 `@pactor-app/core` 类型，浏览器 / Node 通用
 - HTTP 层可替换：结构化 `HttpAdapter` 接口 + 默认 fetch 实现，便于统一认证与测试
 - 内存缓存：`id@version` 键、bootstrap 版本表自动失效、ETag 条件请求、并发 inflight 去重
-- Envelope 宽容解析：缺省字段给默认值，DSL 本体校验由 PageRuntime（@pactor/schema）负责
+- Envelope 宽容解析：缺省字段给默认值，DSL 本体校验由 PageRuntime（@pactor-app/schema）负责
 
 ## 文档
 

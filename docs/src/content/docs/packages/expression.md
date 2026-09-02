@@ -1,12 +1,12 @@
 ---
-title: "@pactor/expression"
+title: "@pactor-app/expression"
 description: 受控表达式引擎 —— ${...} 模板、受控 AST、白名单函数，禁止 eval
 ---
 
-`@pactor/expression` 是 DSL 中 `${...}` 表达式的解析与求值引擎。基于受控 AST：**不使用 `eval` / `new Function`，无法访问 window / document / fetch 等全局对象**。
+`@pactor-app/expression` 是 DSL 中 `${...}` 表达式的解析与求值引擎。基于受控 AST：**不使用 `eval` / `new Function`，无法访问 window / document / fetch 等全局对象**。
 
 ```bash
-pnpm add @pactor/expression
+pnpm add @pactor-app/expression
 ```
 
 ## 模板求值
@@ -14,7 +14,7 @@ pnpm add @pactor/expression
 `resolveTemplate` 处理 DSL 属性值中的 `${...}`：
 
 ```ts
-import { resolveTemplate } from '@pactor/expression';
+import { resolveTemplate } from '@pactor-app/expression';
 
 const scope = {
   state: { count: 42, user: { name: 'Alice' } },
@@ -37,7 +37,7 @@ resolveTemplate('普通文本', scope);              // "普通文本"
 ## 表达式求值
 
 ```ts
-import { evaluateExpression, parseExpression } from '@pactor/expression';
+import { evaluateExpression, parseExpression } from '@pactor-app/expression';
 
 // 直接求值（源码不含 ${} 定界符）
 evaluateExpression("state.status == 'ACTIVE' && state.count > 0", {
@@ -84,15 +84,15 @@ evaluateExpression('window.location');                                          
 函数调用只允许两种来源，且 callee 必须是直接标识符：
 
 ```ts
-import { evaluateExpression } from '@pactor/expression';
-import { Registry } from '@pactor/core';
+import { evaluateExpression } from '@pactor-app/expression';
+import { Registry } from '@pactor-app/core';
 
 // 方式一：Record
 evaluateExpression("!permission('customer:edit')", {}, {
   functions: { permission: (code) => code === 'customer:edit' },
 }); // false
 
-// 方式二：@pactor/core 的 Registry
+// 方式二：@pactor-app/core 的 Registry
 const functions = new Registry<ExpressionFunction>('FunctionRegistry');
 functions.register('formatDate', (v) => String(v).slice(0, 10));
 evaluateExpression('formatDate(data.createdAt)', scope, { functions });
@@ -104,7 +104,7 @@ evaluateExpression('formatDate(data.createdAt)', scope, { functions });
 ## 错误处理
 
 ```ts
-import { ExpressionError, parseExpression } from '@pactor/expression';
+import { ExpressionError, parseExpression } from '@pactor-app/expression';
 
 try {
   parseExpression('state.x = 1');

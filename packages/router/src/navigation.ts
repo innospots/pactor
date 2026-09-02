@@ -89,15 +89,15 @@ export class MemoryNavigation implements NavigationBridge {
 }
 
 /**
- * runtime RouterAdapter 的结构化形状（与 @pactor/runtime 的 RouterAdapter
- * 结构化兼容，避免对 @pactor/runtime 的运行时依赖；编译期断言见测试）。
+ * runtime RouterAdapter 的结构化形状（与 @pactor-app/runtime 的 RouterAdapter
+ * 结构化兼容，避免对 @pactor-app/runtime 的运行时依赖；编译期断言见测试）。
  */
 export interface RouterAdapterLike {
   navigate(to: string): void;
 }
 
 /**
- * 桥接 @pactor/runtime 的 RouterAdapter（决策 D4）：DSL navigate 动作
+ * 桥接 @pactor-app/runtime 的 RouterAdapter（决策 D4）：DSL navigate 动作
  * 经 runtime `route.navigate(to)` → `adapter.navigate(to)` → `bridge.push(to)`。
  */
 export function createRouterAdapter(

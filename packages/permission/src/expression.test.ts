@@ -1,7 +1,7 @@
 import {
   evaluateExpression,
   type ExpressionFunction,
-} from '@pactor/expression';
+} from '@pactor-app/expression';
 import { describe, expect, it } from 'vitest';
 
 import { createPermissionFunction } from './expression.js';

@@ -8,13 +8,13 @@ importers:
 
   .:
     devDependencies:
-      '@pactor/core':
+      '@pactor-app/core':
         specifier: workspace:*
         version: link:packages/core
-      '@pactor/expression':
+      '@pactor-app/expression':
         specifier: workspace:*
         version: link:packages/expression
-      '@pactor/schema':
+      '@pactor-app/schema':
         specifier: workspace:*
         version: link:packages/schema
       tsup:
@@ -42,19 +42,19 @@ importers:
 
   examples/admin:
     dependencies:
-      '@pactor/app':
+      '@pactor-app/app':
         specifier: workspace:*
         version: link:../../packages/app
-      '@pactor/chat':
+      '@pactor-app/chat':
         specifier: workspace:*
         version: link:../../packages/chat
-      '@pactor/core':
+      '@pactor-app/core':
         specifier: workspace:*
         version: link:../../packages/core
-      '@pactor/resource':
+      '@pactor-app/resource':
         specifier: workspace:*
         version: link:../../packages/resource
-      '@pactor/ui':
+      '@pactor-app/ui':
         specifier: workspace:*
         version: link:../../packages/ui
       react:
@@ -67,7 +67,7 @@ importers:
         specifier: ^7.18.2
         version: 7.18.2(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
     devDependencies:
-      '@pactor/vite-plugin':
+      '@pactor-app/vite-plugin':
         specifier: workspace:*
         version: link:../../packages/vite-plugin
       '@types/react':
@@ -88,19 +88,19 @@ importers:
 
   examples/chat:
     dependencies:
-      '@pactor/chat':
+      '@pactor-app/chat':
         specifier: workspace:*
         version: link:../../packages/chat
-      '@pactor/core':
+      '@pactor-app/core':
         specifier: workspace:*
         version: link:../../packages/core
-      '@pactor/router':
+      '@pactor-app/router':
         specifier: workspace:*
         version: link:../../packages/router
-      '@pactor/runtime':
+      '@pactor-app/runtime':
         specifier: workspace:*
         version: link:../../packages/runtime
-      '@pactor/ui':
+      '@pactor-app/ui':
         specifier: workspace:*
         version: link:../../packages/ui
       katex:
@@ -119,7 +119,7 @@ importers:
         specifier: ^7.18.2
         version: 7.18.2(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
     devDependencies:
-      '@pactor/vite-plugin':
+      '@pactor-app/vite-plugin':
         specifier: workspace:*
         version: link:../../packages/vite-plugin
       '@types/react':
@@ -140,13 +140,13 @@ importers:
 
   examples/vite-starter:
     dependencies:
-      '@pactor/app':
+      '@pactor-app/app':
         specifier: workspace:*
         version: link:../../packages/app
-      '@pactor/resource':
+      '@pactor-app/resource':
         specifier: workspace:*
         version: link:../../packages/resource
-      '@pactor/ui':
+      '@pactor-app/ui':
         specifier: workspace:*
         version: link:../../packages/ui
       react:
@@ -156,7 +156,7 @@ importers:
         specifier: ^19.2.8
         version: 19.2.8(react@19.2.8)
     devDependencies:
-      '@pactor/vite-plugin':
+      '@pactor-app/vite-plugin':
         specifier: workspace:*
         version: link:../../packages/vite-plugin
       '@types/react':
@@ -177,28 +177,28 @@ importers:
 
   packages/app:
     dependencies:
-      '@pactor/core':
+      '@pactor-app/core':
         specifier: workspace:*
         version: link:../core
-      '@pactor/expression':
+      '@pactor-app/expression':
         specifier: workspace:*
         version: link:../expression
-      '@pactor/permission':
+      '@pactor-app/permission':
         specifier: workspace:*
         version: link:../permission
-      '@pactor/resource':
+      '@pactor-app/resource':
         specifier: workspace:*
         version: link:../resource
-      '@pactor/router':
+      '@pactor-app/router':
         specifier: workspace:*
         version: link:../router
-      '@pactor/runtime':
+      '@pactor-app/runtime':
         specifier: workspace:*
         version: link:../runtime
-      '@pactor/schema':
+      '@pactor-app/schema':
         specifier: workspace:*
         version: link:../schema
-      '@pactor/ui':
+      '@pactor-app/ui':
         specifier: workspace:*
         version: link:../ui
     devDependencies:
@@ -229,23 +229,23 @@ importers:
 
   packages/chat:
     dependencies:
-      '@pactor/core':
+      '@pactor-app/core':
         specifier: workspace:*
         version: link:../core
-      '@pactor/markdown':
+      '@pactor-app/markdown':
         specifier: workspace:*
         version: link:../markdown
-      '@pactor/permission':
+      '@pactor-app/permission':
         specifier: workspace:*
         version: link:../permission
-      '@pactor/runtime':
+      '@pactor-app/runtime':
         specifier: workspace:*
         version: link:../runtime
       lucide-react:
         specifier: ^1.31.0
         version: 1.31.0(react@19.2.8)
     devDependencies:
-      '@pactor/ui':
+      '@pactor-app/ui':
         specifier: workspace:*
         version: link:../ui
       '@testing-library/dom':
@@ -272,13 +272,13 @@ importers:
 
   packages/cli:
     dependencies:
-      '@pactor/core':
+      '@pactor-app/core':
         specifier: workspace:*
         version: link:../core
-      '@pactor/expression':
+      '@pactor-app/expression':
         specifier: workspace:*
         version: link:../expression
-      '@pactor/schema':
+      '@pactor-app/schema':
         specifier: workspace:*
         version: link:../schema
       yaml:
@@ -289,13 +289,13 @@ importers:
 
   packages/expression:
     dependencies:
-      '@pactor/core':
+      '@pactor-app/core':
         specifier: workspace:*
         version: link:../core
 
   packages/markdown:
     dependencies:
-      '@pactor/core':
+      '@pactor-app/core':
         specifier: workspace:*
         version: link:../core
       katex:
@@ -317,7 +317,7 @@ importers:
         specifier: ^6.0.0
         version: 6.0.0
     devDependencies:
-      '@pactor/runtime':
+      '@pactor-app/runtime':
         specifier: workspace:*
         version: link:../runtime
       '@testing-library/dom':
@@ -347,43 +347,43 @@ importers:
 
   packages/pactor:
     dependencies:
-      '@pactor/app':
+      '@pactor-app/app':
         specifier: workspace:*
         version: link:../app
-      '@pactor/chat':
+      '@pactor-app/chat':
         specifier: workspace:*
         version: link:../chat
-      '@pactor/cli':
+      '@pactor-app/cli':
         specifier: workspace:*
         version: link:../cli
-      '@pactor/core':
+      '@pactor-app/core':
         specifier: workspace:*
         version: link:../core
-      '@pactor/expression':
+      '@pactor-app/expression':
         specifier: workspace:*
         version: link:../expression
-      '@pactor/markdown':
+      '@pactor-app/markdown':
         specifier: workspace:*
         version: link:../markdown
-      '@pactor/permission':
+      '@pactor-app/permission':
         specifier: workspace:*
         version: link:../permission
-      '@pactor/resource':
+      '@pactor-app/resource':
         specifier: workspace:*
         version: link:../resource
-      '@pactor/router':
+      '@pactor-app/router':
         specifier: workspace:*
         version: link:../router
-      '@pactor/runtime':
+      '@pactor-app/runtime':
         specifier: workspace:*
         version: link:../runtime
-      '@pactor/schema':
+      '@pactor-app/schema':
         specifier: workspace:*
         version: link:../schema
-      '@pactor/ui':
+      '@pactor-app/ui':
         specifier: workspace:*
         version: link:../ui
-      '@pactor/vite-plugin':
+      '@pactor-app/vite-plugin':
         specifier: workspace:*
         version: link:../vite-plugin
     devDependencies:
@@ -405,14 +405,14 @@ importers:
 
   packages/permission:
     dependencies:
-      '@pactor/core':
+      '@pactor-app/core':
         specifier: workspace:*
         version: link:../core
     devDependencies:
-      '@pactor/expression':
+      '@pactor-app/expression':
         specifier: workspace:*
         version: link:../expression
-      '@pactor/runtime':
+      '@pactor-app/runtime':
         specifier: workspace:*
         version: link:../runtime
       '@types/react':
@@ -424,20 +424,20 @@ importers:
 
   packages/resource:
     dependencies:
-      '@pactor/core':
+      '@pactor-app/core':
         specifier: workspace:*
         version: link:../core
 
   packages/router:
     dependencies:
-      '@pactor/core':
+      '@pactor-app/core':
         specifier: workspace:*
         version: link:../core
-      '@pactor/permission':
+      '@pactor-app/permission':
         specifier: workspace:*
         version: link:../permission
     devDependencies:
-      '@pactor/runtime':
+      '@pactor-app/runtime':
         specifier: workspace:*
         version: link:../runtime
       '@testing-library/dom':
@@ -467,13 +467,13 @@ importers:
 
   packages/runtime:
     dependencies:
-      '@pactor/core':
+      '@pactor-app/core':
         specifier: workspace:*
         version: link:../core
-      '@pactor/expression':
+      '@pactor-app/expression':
         specifier: workspace:*
         version: link:../expression
-      '@pactor/schema':
+      '@pactor-app/schema':
         specifier: workspace:*
         version: link:../schema
     devDependencies:
@@ -501,7 +501,7 @@ importers:
 
   packages/schema:
     dependencies:
-      '@pactor/core':
+      '@pactor-app/core':
         specifier: workspace:*
         version: link:../core
       ajv:
@@ -515,16 +515,16 @@ importers:
       '@base-ui/react':
         specifier: ^1.7.0
         version: 1.7.0(@types/react@19.2.18)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
-      '@pactor/core':
+      '@pactor-app/core':
         specifier: workspace:*
         version: link:../core
-      '@pactor/permission':
+      '@pactor-app/permission':
         specifier: workspace:*
         version: link:../permission
-      '@pactor/router':
+      '@pactor-app/router':
         specifier: workspace:*
         version: link:../router
-      '@pactor/runtime':
+      '@pactor-app/runtime':
         specifier: workspace:*
         version: link:../runtime
       class-variance-authority:
@@ -576,10 +576,10 @@ importers:
 
   packages/vite-plugin:
     dependencies:
-      '@pactor/core':
+      '@pactor-app/core':
         specifier: workspace:*
         version: link:../core
-      '@pactor/schema':
+      '@pactor-app/schema':
         specifier: workspace:*
         version: link:../schema
       yaml:

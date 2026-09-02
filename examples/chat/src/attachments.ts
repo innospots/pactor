@@ -1,4 +1,4 @@
-import { createChatId, type ChatAttachment } from '@pactor/chat';
+import { createChatId, type ChatAttachment } from '@pactor-app/chat';
 
 /**
  * 把 File 读成 data URL，产出 ChatAttachment（伪上传：无网络，引用留在内存）

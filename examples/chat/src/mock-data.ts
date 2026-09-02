@@ -17,7 +17,7 @@ export const MOCK_CONTEXT_ENTRIES: { id: string; name: string; description: stri
   { id: 'h2', name: '历史：周报整理', description: '周一例会的纪要整理' },
   { id: 'h3', name: '历史：产品评审', description: '新功能评审记录' },
   { id: 'm1', name: '记忆：偏好设置', description: '回答尽量简洁，先给结论' },
-  { id: 'm2', name: '记忆：项目背景', description: '当前在做 @pactor/chat 示例' },
+  { id: 'm2', name: '记忆：项目背景', description: '当前在做 @pactor-app/chat 示例' },
   { id: 'm3', name: '记忆：常用口径', description: '数据口径以月度报表为准' },
   { id: 'p1', name: '人设：严谨分析师', description: '重数据、给依据' },
   { id: 'p2', name: '人设：敏捷教练', description: '引导式提问' },

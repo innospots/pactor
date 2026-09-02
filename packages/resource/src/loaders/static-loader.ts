@@ -1,4 +1,4 @@
-import type { FragmentDsl, PageDsl } from '@pactor/core';
+import type { FragmentDsl, PageDsl } from '@pactor-app/core';
 
 import { ResourceError } from '../errors.js';
 import {

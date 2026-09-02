@@ -1,10 +1,10 @@
 # Spec: page-runtime
 
-PageRuntime：PageDsl 从校验到渲染的完整运行链路与生命周期编排（`@pactor/runtime`）。
+PageRuntime：PageDsl 从校验到渲染的完整运行链路与生命周期编排（`@pactor-app/runtime`）。
 
 ### Requirement: PageDsl 加载校验
 
-`createPageRuntime(pageDsl, options)` MUST 先经 @pactor/schema 校验；校验失败 MUST 抛出包含结构化错误列表的 `PageRuntimeError`，不进入后续初始化。
+`createPageRuntime(pageDsl, options)` MUST 先经 @pactor-app/schema 校验；校验失败 MUST 抛出包含结构化错误列表的 `PageRuntimeError`，不进入后续初始化。
 
 #### Scenario: 非法 DSL 抛 PageRuntimeError
 

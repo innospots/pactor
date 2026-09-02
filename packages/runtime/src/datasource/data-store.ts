@@ -1,5 +1,5 @@
-import type { DataSourceConfig } from '@pactor/core';
-import type { ExpressionScope } from '@pactor/expression';
+import type { DataSourceConfig } from '@pactor-app/core';
+import type { ExpressionScope } from '@pactor-app/expression';
 
 import type {
   HttpAdapter,
@@ -96,7 +96,7 @@ export class DataStore {
   async load(name: string): Promise<void> {
     const config = this.configs[name];
     if (!config) {
-      throw new Error(`[@pactor/runtime] unknown dataSource: "${name}"`);
+      throw new Error(`[@pactor-app/runtime] unknown dataSource: "${name}"`);
     }
     const previous = this.get(name);
     this.update(name, { loading: true, error: undefined, data: previous.data });
@@ -143,7 +143,7 @@ export class DataStore {
         const handler = this.services.get(serviceName);
         if (!handler) {
           throw new Error(
-            `[@pactor/runtime] service not registered: "${serviceName}"`,
+            `[@pactor-app/runtime] service not registered: "${serviceName}"`,
           );
         }
         const params = resolveDeep(config.params ?? {}, this.getScope()) as Record<
@@ -154,7 +154,7 @@ export class DataStore {
       }
       case 'http': {
         if (!config.request) {
-          throw new Error('[@pactor/runtime] http dataSource 缺少 request 配置');
+          throw new Error('[@pactor-app/runtime] http dataSource 缺少 request 配置');
         }
         const request = resolveDeep(
           config.request,
@@ -163,9 +163,9 @@ export class DataStore {
         return this.http.request(request);
       }
       default:
-        // computed / resource：留待 @pactor/resource 或后续迭代
+        // computed / resource：留待 @pactor-app/resource 或后续迭代
         throw new Error(
-          `[@pactor/runtime] unsupported dataSource type: "${config.type}"`,
+          `[@pactor-app/runtime] unsupported dataSource type: "${config.type}"`,
         );
     }
   }

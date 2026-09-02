@@ -1,4 +1,4 @@
-import { Registry } from '@pactor/core';
+import { Registry } from '@pactor-app/core';
 import type { ComponentType } from 'react';
 
 import { ShadcnAdminLayout } from './admin/ShadcnAdminLayout.js';

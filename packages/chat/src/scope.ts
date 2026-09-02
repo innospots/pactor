@@ -1,12 +1,12 @@
-import type { Registry } from '@pactor/core';
-import { createPermissionAdapter } from '@pactor/permission';
-import type { PermissionStore } from '@pactor/permission';
+import type { Registry } from '@pactor-app/core';
+import { createPermissionAdapter } from '@pactor-app/permission';
+import type { PermissionStore } from '@pactor-app/permission';
 import {
   ActionEngine,
   createRuntimeContext,
   registerBuiltinActions,
   type RuntimeContext,
-} from '@pactor/runtime';
+} from '@pactor-app/runtime';
 
 import {
   registerCapabilityAction,
@@ -48,7 +48,7 @@ export interface CreateChatRuntimeOptions {
   capabilities?: ChatCapabilityRegistry;
   /** 权限检查器（与 permissionStore 二选一，permission 优先） */
   permission?: ChatPermissionChecker;
-  /** @pactor/permission 的 PermissionStore，用于构造权限检查器 */
+  /** @pactor-app/permission 的 PermissionStore，用于构造权限检查器 */
   permissionStore?: PermissionStore;
   /** 高风险 capability 确认回调 */
   confirm?: ChatConfirm;
@@ -68,7 +68,7 @@ export interface ChatRuntime {
  * - 注册 runtime 内置动作（setState 等）；注入 capabilities 时注册
  *   `capability` 动作（Safe Registry 只挡组件，动作侧由 capability
  *   白名单兜底——AI DSL 建议只配置 capability 动作）
- * - permissionStore 经 @pactor/permission 构造 PermissionAdapter，
+ * - permissionStore 经 @pactor-app/permission 构造 PermissionAdapter，
  *   供 Renderer 的 `permission` 字段与 capability 链共用
  */
 export function createChatRuntime(

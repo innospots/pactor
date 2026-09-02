@@ -1,4 +1,4 @@
-import type { DslNode, Registry } from '@pactor/core';
+import type { DslNode, Registry } from '@pactor-app/core';
 import {
   Folder,
   History,
@@ -271,7 +271,7 @@ export function Chat({
   useEffect(() => {
     if (!services) {
       console.warn(
-        '[@pactor/chat] Chat 未检测到 ChatServicesProvider：请在应用根部以 ' +
+        '[@pactor-app/chat] Chat 未检测到 ChatServicesProvider：请在应用根部以 ' +
           '<ChatServicesProvider> 注入 transport 等服务',
       );
     }

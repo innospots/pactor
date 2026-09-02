@@ -1,5 +1,5 @@
 /**
- * DslNode 与 Action 的 JSON Schema（对应 @pactor/core 的 DslNode / ActionConfig）。
+ * DslNode 与 Action 的 JSON Schema（对应 @pactor-app/core 的 DslNode / ActionConfig）。
  *
  * 通过 $id 引用实现 children 递归。
  */

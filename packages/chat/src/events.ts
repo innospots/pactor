@@ -1,4 +1,4 @@
-import type { DslNode } from '@pactor/core';
+import type { DslNode } from '@pactor-app/core';
 
 import type { ChatArtifact } from './artifact.js';
 import type { ChatMessage, ChatPart } from './model.js';
@@ -248,7 +248,7 @@ export function applyChatEvent(store: ConversationStore, event: ChatEvent): void
       const message = store.getMessage(event.messageId);
       if (!message) {
         console.warn(
-          `[@pactor/chat] message.end for unknown message "${event.messageId}", ignored`,
+          `[@pactor-app/chat] message.end for unknown message "${event.messageId}", ignored`,
         );
         return;
       }
@@ -276,7 +276,7 @@ export function applyChatEvent(store: ConversationStore, event: ChatEvent): void
 
     default: {
       console.warn(
-        `[@pactor/chat] unknown chat event, ignored:`,
+        `[@pactor-app/chat] unknown chat event, ignored:`,
         (event as { type?: string }).type ?? event,
       );
     }

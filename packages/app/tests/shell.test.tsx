@@ -2,9 +2,9 @@
 import './setup.js';
 
 import { cleanup, fireEvent, screen, within } from '@testing-library/react';
-import type { PageDsl } from '@pactor/core';
-import type { DslResourceLoader } from '@pactor/resource';
-import { StaticDslLoader } from '@pactor/resource';
+import type { PageDsl } from '@pactor-app/core';
+import type { DslResourceLoader } from '@pactor-app/resource';
+import { StaticDslLoader } from '@pactor-app/resource';
 import { afterEach, describe, expect, it } from 'vitest';
 
 import {

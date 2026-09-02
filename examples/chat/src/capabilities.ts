@@ -1,5 +1,5 @@
-import { Registry } from '@pactor/core';
-import type { CapabilityHandler, ChatCapabilityRegistry } from '@pactor/chat';
+import { Registry } from '@pactor-app/core';
+import type { CapabilityHandler, ChatCapabilityRegistry } from '@pactor-app/chat';
 
 import { showMessage } from './ui-bridge';
 

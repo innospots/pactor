@@ -1,5 +1,5 @@
 {
-  "name": "@pactor/runtime",
+  "name": "@pactor-app/runtime",
   "version": "0.1.0",
   "description": "Pactor runtime: RuntimeContext, StateStore, DataSource runtime, action engine, React renderer and page runtime",
   "keywords": [
@@ -51,9 +51,9 @@
     "access": "public"
   },
   "dependencies": {
-    "@pactor/core": "workspace:*",
-    "@pactor/expression": "workspace:*",
-    "@pactor/schema": "workspace:*"
+    "@pactor-app/core": "workspace:*",
+    "@pactor-app/expression": "workspace:*",
+    "@pactor-app/schema": "workspace:*"
   },
   "peerDependencies": {
     "react": ">=18"

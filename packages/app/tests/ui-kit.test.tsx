@@ -2,9 +2,9 @@
 import './setup.js';
 
 import { cleanup, screen } from '@testing-library/react';
-import type { PageDsl } from '@pactor/core';
-import { Registry } from '@pactor/core';
-import { StaticDslLoader } from '@pactor/resource';
+import type { PageDsl } from '@pactor-app/core';
+import { Registry } from '@pactor-app/core';
+import { StaticDslLoader } from '@pactor-app/resource';
 import type { ReactNode } from 'react';
 import { afterEach, describe, expect, it } from 'vitest';
 
@@ -79,7 +79,7 @@ function createCustomComponentRegistry(): Registry<unknown> {
 }
 
 describe('ui-kit-selection：componentRegistry 选项', () => {
-  it('缺省为 shadcn：不传 componentRegistry 渲染 shadcn 实现（@pactor/ui，唯一内置实现）', async () => {
+  it('缺省为 shadcn：不传 componentRegistry 渲染 shadcn 实现（@pactor-app/ui，唯一内置实现）', async () => {
     app = createAppWithKit();
     const target = await mountApp(app);
 

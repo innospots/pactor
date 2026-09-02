@@ -1,5 +1,5 @@
 {
-  "name": "@pactor/app",
+  "name": "@pactor-app/app",
   "version": "0.1.0",
   "description": "Pactor application: one-stop composition layer (createPactorApplication) wiring loader, bootstrap, registries, router, layout, interaction and page runtimes",
   "keywords": [
@@ -52,14 +52,14 @@
     "access": "public"
   },
   "dependencies": {
-    "@pactor/core": "workspace:*",
-    "@pactor/expression": "workspace:*",
-    "@pactor/permission": "workspace:*",
-    "@pactor/resource": "workspace:*",
-    "@pactor/router": "workspace:*",
-    "@pactor/runtime": "workspace:*",
-    "@pactor/schema": "workspace:*",
-    "@pactor/ui": "workspace:*"
+    "@pactor-app/core": "workspace:*",
+    "@pactor-app/expression": "workspace:*",
+    "@pactor-app/permission": "workspace:*",
+    "@pactor-app/resource": "workspace:*",
+    "@pactor-app/router": "workspace:*",
+    "@pactor-app/runtime": "workspace:*",
+    "@pactor-app/schema": "workspace:*",
+    "@pactor-app/ui": "workspace:*"
   },
   "peerDependencies": {
     "react": ">=18",

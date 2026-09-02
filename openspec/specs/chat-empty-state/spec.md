@@ -1,6 +1,6 @@
 # Spec: chat-empty-state
 
-空会话欢迎页（`@pactor/chat`）：问候语与起始建议。
+空会话欢迎页（`@pactor-app/chat`）：问候语与起始建议。
 
 ### Requirement: 空状态问候
 

@@ -1,4 +1,4 @@
-import type { DslNode, Registry } from '@pactor/core';
+import type { DslNode, Registry } from '@pactor-app/core';
 import type { ReactNode } from 'react';
 
 import { resolveSlot } from '../chat-composition.js';

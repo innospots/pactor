@@ -1,21 +1,21 @@
-# @pactor/app
+# @pactor-app/app
 
 [Pactor](https://github.com/426-330/pactor) 的一站式组合层（设计文档第 86–89 节）。业务工程只调 `createPactorApplication({ appId, api }).mount('#root')` 即可完成：DSL 资源加载（loader）→ bootstrap 编排（权限 / 菜单 / 布局）→ 共享 registries（内置组件 + 交互动作 + 业务扩展）→ react-router 动态路由 → 布局外壳 → PageRuntime 页面渲染 → Overlay/Provider 集成 → 启动与页面错误兜底。
 
 ## 安装
 
 ```bash
-npm install @pactor/app @pactor/ui react react-dom react-router-dom
+npm install @pactor-app/app @pactor-app/ui react react-dom react-router-dom
 # 或
-pnpm add @pactor/app @pactor/ui react react-dom react-router-dom
+pnpm add @pactor-app/app @pactor-app/ui react react-dom react-router-dom
 ```
 
-`react >= 18`、`react-dom >= 18`、`react-router-dom >= 6` 为 peer dependency（开发基准为 react-router-dom v7）。内置 UI kit 为 `@pactor/ui`（shadcn，传递依赖），需导入其预建样式表 `import '@pactor/ui/styles.css'`。
+`react >= 18`、`react-dom >= 18`、`react-router-dom >= 6` 为 peer dependency（开发基准为 react-router-dom v7）。内置 UI kit 为 `@pactor-app/ui`（shadcn，传递依赖），需导入其预建样式表 `import '@pactor-app/ui/styles.css'`。
 
 ## 一站式用法
 
 ```tsx
-import { createPactorApplication } from '@pactor/app';
+import { createPactorApplication } from '@pactor-app/app';
 
 createPactorApplication({
   appId: 'risk-admin',
@@ -24,7 +24,7 @@ createPactorApplication({
 }).mount('#root');
 ```
 
-服务端需提供 `{baseURL}/bootstrap` 与 `{baseURL}/pages/{id}` 端点（@pactor/resource Envelope 协议）；bootstrap 期望字段（全部可选）：`app.name`、`user`、`permissions`、`menus`、`layout.type` 与布局开关（`header`/`sidebar`/`tabs`/`breadcrumb`/`footer`）、`pageVersions`。
+服务端需提供 `{baseURL}/bootstrap` 与 `{baseURL}/pages/{id}` 端点（@pactor-app/resource Envelope 协议）；bootstrap 期望字段（全部可选）：`app.name`、`user`、`permissions`、`menus`、`layout.type` 与布局开关（`header`/`sidebar`/`tabs`/`breadcrumb`/`footer`）、`pageVersions`。
 
 ## Options
 
@@ -43,7 +43,7 @@ createPactorApplication({
 
 mount 后依次：加载 bootstrap（全屏 loading）→ `PermissionStore` 写入 `permissions`（缺省 `[]`）→ `MenuRegistry(menus)`（缺省 `[]`）→ 解析布局 → 组装共享 registries 与 adapters。bootstrap 失败渲染含**重试**按钮的启动错误页，不白屏。
 
-应用级共享 registries 被所有页面 PageRuntime 共享：内置组件（@pactor/ui components 层）+ 交互动作（overlay.open / overlay.close / confirm / message，应用级 OverlayManager / UiBridge 单例）+ navigate 动作 + options 扩展。页面运行时创建时注入 permission / router / http adapters 与 route context（`route.params` / `route.query`）、`user`（bootstrap.user）、`app`（bootstrap.app）。
+应用级共享 registries 被所有页面 PageRuntime 共享：内置组件（@pactor-app/ui components 层）+ 交互动作（overlay.open / overlay.close / confirm / message，应用级 OverlayManager / UiBridge 单例）+ navigate 动作 + options 扩展。页面运行时创建时注入 permission / router / http adapters 与 route context（`route.params` / `route.query`）、`user`（bootstrap.user）、`app`（bootstrap.app）。
 
 ## 扩展注册 API
 

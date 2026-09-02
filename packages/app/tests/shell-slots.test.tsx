@@ -5,7 +5,7 @@
 import './setup.js';
 
 import { cleanup, screen, within } from '@testing-library/react';
-import { StaticDslLoader } from '@pactor/resource';
+import { StaticDslLoader } from '@pactor-app/resource';
 import type { ReactNode } from 'react';
 import { afterEach, describe, expect, it } from 'vitest';
 

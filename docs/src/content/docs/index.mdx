@@ -25,30 +25,30 @@ hero:
 
 ## 模块全景
 
-**聚合安装**（一次带入全部模块，入口转发 `@pactor/app`）
+**聚合安装**（一次带入全部模块，入口转发 `@pactor-app/app`）
 
-- [pactor（meta）](/packages/pactor/)：`npm install pactor` 装齐全栈；也可按需只装下方单模块
+- [pactor-app（meta）](/packages/pactor/)：`npm install pactor-app` 装齐全栈；也可按需只装下方单模块
 
 **基础协议层**（零 React 依赖）
 
-- [@pactor/core](/packages/core/)：DSL 核心协议类型与通用 Registry
-- [@pactor/schema](/packages/schema/)：JSON Schema 与 Ajv 结构化校验
-- [@pactor/expression](/packages/expression/)：受控表达式引擎（无 eval，无全局访问）
+- [@pactor-app/core](/packages/core/)：DSL 核心协议类型与通用 Registry
+- [@pactor-app/schema](/packages/schema/)：JSON Schema 与 Ajv 结构化校验
+- [@pactor-app/expression](/packages/expression/)：受控表达式引擎（无 eval，无全局访问）
 
 **运行时层**
 
-- [@pactor/runtime](/packages/runtime/)：Runtime 引擎（上下文 / 状态 / 数据源 / 动作 / 生命周期）+ React Renderer
+- [@pactor-app/runtime](/packages/runtime/)：Runtime 引擎（上下文 / 状态 / 数据源 / 动作 / 生命周期）+ React Renderer
 
 **能力层**
 
-- [@pactor/ui（shadcn）](/packages/ui/)：唯一内置 UI kit（vendored shadcn/ui 源码；components / interaction / layout 三层 + `shadcnUiKit` 预设 + 预建样式表；**@pactor/app 内置默认**）
-- [@pactor/permission](/packages/permission/)：权限 Store 与四层守卫
-- [@pactor/resource](/packages/resource/)：DSL 资源加载、缓存与版本控制
-- [@pactor/router](/packages/router/)：菜单注册、动态路由与导航桥接
+- [@pactor-app/ui（shadcn）](/packages/ui/)：唯一内置 UI kit（vendored shadcn/ui 源码；components / interaction / layout 三层 + `shadcnUiKit` 预设 + 预建样式表；**@pactor-app/app 内置默认**）
+- [@pactor-app/permission](/packages/permission/)：权限 Store 与四层守卫
+- [@pactor-app/resource](/packages/resource/)：DSL 资源加载、缓存与版本控制
+- [@pactor-app/router](/packages/router/)：菜单注册、动态路由与导航桥接
 
 **集成层**
 
-- [@pactor/app](/packages/app/)：一站式组合层——`createPactorApplication({ appId, api }).mount('#root')`
+- [@pactor-app/app](/packages/app/)：一站式组合层——`createPactorApplication({ appId, api }).mount('#root')`
 
 ## 设计原则
 

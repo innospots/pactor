@@ -1,6 +1,6 @@
 # Spec: action-engine
 
-Action 引擎：Action Registry、动作编排执行、内置标准动作、condition/permission 前置拦截（`@pactor/runtime`）。
+Action 引擎：Action Registry、动作编排执行、内置标准动作、condition/permission 前置拦截（`@pactor-app/runtime`）。
 
 ### Requirement: Action 注册与执行
 

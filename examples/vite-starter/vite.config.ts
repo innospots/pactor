@@ -1,6 +1,6 @@
 import react from '@vitejs/plugin-react';
 import { defineConfig } from 'vite';
-import pactor from '@pactor/vite-plugin';
+import pactor from '@pactor-app/vite-plugin';
 
 export default defineConfig({
   plugins: [react(), pactor()],

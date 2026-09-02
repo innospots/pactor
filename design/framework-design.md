@@ -45,7 +45,7 @@ description: 基于 YAML/JSON DSL 的企业级 Server-Driven UI 与 AI-Native �
 命名约定：
 
 - 框架名：**pactor**
-- npm 包不使用 scope，各模块包名统一 `pactor-` 前缀，如 `@pactor/core`、`@pactor/schema`、`@pactor/expression`、`@pactor/app`
+- npm 包不使用 scope，各模块包名统一 `pactor-` 前缀，如 `@pactor-app/core`、`@pactor-app/schema`、`@pactor-app/expression`、`@pactor-app/app`
 - Monorepo 目录名保持简短（如 `packages/core`），与包名分离
 
 不建议将项目命名为：
@@ -161,7 +161,7 @@ React Renderer
 
 ```mermaid
 flowchart TB
-    A[Business Application] --> B[@pactor/app]
+    A[Business Application] --> B[@pactor-app/app]
     B --> C[Application Shell]
     C --> D[Layout Runtime]
     C --> E[Navigation Runtime]
@@ -185,7 +185,7 @@ flowchart TB
 ```text
 ┌──────────────────────────────────────────────────────────────┐
 │                      Business Application                    │
-│                 npm install @pactor/app                     │
+│                 npm install @pactor-app/app                     │
 ├──────────────────────────────────────────────────────────────┤
 │                       Application Shell                      │
 │     Auth / Bootstrap / Theme / Error / Loading / Session     │
@@ -266,31 +266,31 @@ flowchart TB
 采用 Monorepo，将能力拆为独立 npm package。包名不使用 scope，统一 `pactor-` 前缀（见第 2 节命名约定）。
 
 ```text
-@pactor/core
-@pactor/schema
-@pactor/expression
+@pactor-app/core
+@pactor-app/schema
+@pactor-app/expression
 
-@pactor/runtime
-@pactor/resource
-@pactor/router
-@pactor/permission
+@pactor-app/runtime
+@pactor-app/resource
+@pactor-app/router
+@pactor-app/permission
 
-@pactor/ui
+@pactor-app/ui
 pactor-theme
 
-@pactor/markdown
-@pactor/chat
+@pactor-app/markdown
+@pactor-app/chat
 
 pactor-devtools
-@pactor/vite-plugin
-@pactor/cli
+@pactor-app/vite-plugin
+@pactor-app/cli
 
-@pactor/app
+@pactor-app/app
 ```
 
 ## 6.1 包职责
 
-### `@pactor/core`
+### `@pactor-app/core`
 
 负责与 React 无关的核心协议：
 
@@ -302,7 +302,7 @@ pactor-devtools
 - Event 定义
 - Page / Fragment 基础类型
 
-### `@pactor/schema`
+### `@pactor-app/schema`
 
 负责：
 
@@ -315,7 +315,7 @@ pactor-devtools
 - Chat Message Schema
 - Validation Rules
 
-### `@pactor/expression`
+### `@pactor-app/expression`
 
 负责受控表达式：
 
@@ -325,7 +325,7 @@ pactor-devtools
 - Function Registry
 - Scope Resolve
 
-### `@pactor/runtime`
+### `@pactor-app/runtime`
 
 负责：
 
@@ -338,7 +338,7 @@ pactor-devtools
 - Action
 - Page Runtime
 
-### `@pactor/resource`
+### `@pactor-app/resource`
 
 负责：
 
@@ -350,7 +350,7 @@ pactor-devtools
 - ETag
 - Resource Metadata
 
-### `@pactor/router`
+### `@pactor-app/router`
 
 负责：
 
@@ -361,7 +361,7 @@ pactor-devtools
 - Menu Route Registry
 - Hidden Route
 
-### `@pactor/permission`
+### `@pactor-app/permission`
 
 负责：
 
@@ -371,11 +371,11 @@ pactor-devtools
 - Component Guard
 - Action Guard
 
-### `@pactor/ui`（shadcn）
+### `@pactor-app/ui`（shadcn）
 
-唯一内置 UI kit 单元（shadcn 风格）：vendored shadcn/ui 组件源码（Base UI 原语 + cva + tailwind-merge + lucide-react），自持 components / interaction / layout 三层（12 组件 props 契约类型、交互核心 OverlayManager / createUiBridge / registerInteractionActions / UiBridge、布局类型与 resolveLayout 均为本包自有），导出 `shadcnUiKit` 预设与预建样式表（Tailwind v4 构建期编译，消费方零 Tailwind 配置；preflight 开启 + tw-animate-css 动画层，对齐 shadcn 官方主题脚手架，令牌挂 `:root` / `[data-pactor-theme='dark']`）。**@pactor/app 的内置默认 UI kit（唯一内置实现）**；自定义组件 / 布局 / 交互层经 componentRegistry / layoutRegistry / interactionKit / ui 覆盖点接入。
+唯一内置 UI kit 单元（shadcn 风格）：vendored shadcn/ui 组件源码（Base UI 原语 + cva + tailwind-merge + lucide-react），自持 components / interaction / layout 三层（12 组件 props 契约类型、交互核心 OverlayManager / createUiBridge / registerInteractionActions / UiBridge、布局类型与 resolveLayout 均为本包自有），导出 `shadcnUiKit` 预设与预建样式表（Tailwind v4 构建期编译，消费方零 Tailwind 配置；preflight 开启 + tw-animate-css 动画层，对齐 shadcn 官方主题脚手架，令牌挂 `:root` / `[data-pactor-theme='dark']`）。**@pactor-app/app 的内置默认 UI kit（唯一内置实现）**；自定义组件 / 布局 / 交互层经 componentRegistry / layoutRegistry / interactionKit / ui 覆盖点接入。
 
-### `@pactor/chat`
+### `@pactor-app/chat`
 
 负责：
 
@@ -389,14 +389,14 @@ pactor-devtools
 - Capability
 - AI Context Bridge
 
-### `@pactor/app`
+### `@pactor-app/app`
 
 对业务工程提供一站式集成能力。
 
 业务项目优先：
 
 ```bash
-npm install @pactor/app
+npm install @pactor-app/app
 ```
 
 ---
@@ -3178,7 +3178,7 @@ DevTools 建议包含：
 安装：
 
 ```bash
-npm install -g @pactor/cli
+npm install -g @pactor-app/cli
 ```
 
 建议命令：
@@ -3200,11 +3200,11 @@ pactor preview
 对于需要本地 DSL 的项目：
 
 ```bash
-npm install @pactor/vite-plugin
+npm install @pactor-app/vite-plugin
 ```
 
 ```ts
-import pactor from '@pactor/vite-plugin';
+import pactor from '@pactor-app/vite-plugin';
 
 export default defineConfig({
   plugins: [
@@ -3243,13 +3243,13 @@ Optimized JSON / JS
 安装：
 
 ```bash
-npm install @pactor/app
+npm install @pactor-app/app
 ```
 
 入口：
 
 ```tsx
-import { createPactorApplication } from '@pactor/app';
+import { createPactorApplication } from '@pactor-app/app';
 
 createPactorApplication({
   appId: 'risk-admin',
@@ -4061,13 +4061,13 @@ flowchart TB
 业务工程：
 
 ```bash
-npm install @pactor/app
+npm install @pactor-app/app
 ```
 
 入口：
 
 ```tsx
-import { createPactorApplication } from '@pactor/app';
+import { createPactorApplication } from '@pactor-app/app';
 
 createPactorApplication({
   appId: 'risk-console',
@@ -4139,22 +4139,22 @@ Capability
 # 附录 A：推荐 npm 依赖关系
 
 ```text
-@pactor/core
+@pactor-app/core
       ↑
-@pactor/schema
+@pactor-app/schema
       ↑
-@pactor/expression
+@pactor-app/expression
       ↑
-@pactor/runtime
+@pactor-app/runtime
       ↑
-├── @pactor/resource
-├── @pactor/router
-├── @pactor/permission
-├── @pactor/ui
-├── @pactor/markdown
-└── @pactor/chat
+├── @pactor-app/resource
+├── @pactor-app/router
+├── @pactor-app/permission
+├── @pactor-app/ui
+├── @pactor-app/markdown
+└── @pactor-app/chat
       ↑
-@pactor/app
+@pactor-app/app
 ```
 
 ---

@@ -1,5 +1,5 @@
 /**
- * `@pactor/ui/ui` 子路径（vendored shadcn 原语）测试：
+ * `@pactor-app/ui/ui` 子路径（vendored shadcn 原语）测试：
  * - 全部公开符号可从汇总入口导入（src/ui/index.ts 即 ./ui 子路径入口）
  * - 关键原语（Button/Input/Popover/Dialog/Select）可渲染
  */

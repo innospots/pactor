@@ -1,4 +1,4 @@
-import type { DslNode } from '@pactor/core';
+import type { DslNode } from '@pactor-app/core';
 import { describe, expect, it, vi } from 'vitest';
 
 import type { ChatArtifact, ChatEvent } from '../src/index.js';

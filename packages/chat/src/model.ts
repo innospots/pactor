@@ -1,4 +1,4 @@
-import type { DslNode } from '@pactor/core';
+import type { DslNode } from '@pactor-app/core';
 
 import type { ChatArtifact } from './artifact.js';
 

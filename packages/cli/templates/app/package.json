@@ -9,10 +9,10 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@pactor/app": "^0.1.0",
-    "@pactor/core": "^0.1.0",
-    "@pactor/resource": "^0.1.0",
-    "@pactor/ui": "^0.1.0",
+    "@pactor-app/app": "^0.1.0",
+    "@pactor-app/core": "^0.1.0",
+    "@pactor-app/resource": "^0.1.0",
+    "@pactor-app/ui": "^0.1.0",
     "react": "^18.3.1",
     "react-dom": "^18.3.1"
   },
@@ -20,7 +20,7 @@
     "@types/react": "^18.3.12",
     "@types/react-dom": "^18.3.1",
     "@vitejs/plugin-react": "^4.3.4",
-    "@pactor/vite-plugin": "^0.1.0",
+    "@pactor-app/vite-plugin": "^0.1.0",
     "typescript": "^5.6.3",
     "vite": "^5.4.11"
   }

@@ -1,5 +1,5 @@
-import type { DslNode } from '@pactor/core';
-import { useRenderer } from '@pactor/runtime';
+import type { DslNode } from '@pactor-app/core';
+import { useRenderer } from '@pactor-app/runtime';
 
 import {
   Tabs as ShadcnTabs,

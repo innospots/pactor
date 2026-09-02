@@ -1,4 +1,4 @@
-import type { DslNode } from '@pactor/core';
+import type { DslNode } from '@pactor-app/core';
 
 /**
  * 产出物模型与 ArtifactStore（spec: chat-artifact-panel，设计决策 D1）。
@@ -45,7 +45,7 @@ export class ArtifactStore {
   /** 部分更新当前产出物（id 不可改）；未 open 时告警并忽略 */
   update(patch: ArtifactPatch): void {
     if (!this.artifact) {
-      console.warn('[@pactor/chat] artifact not open, update ignored');
+      console.warn('[@pactor-app/chat] artifact not open, update ignored');
       return;
     }
     this.artifact = { ...this.artifact, ...patch, id: this.artifact.id };

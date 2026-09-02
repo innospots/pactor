@@ -12,11 +12,11 @@
   "dependencies": {
     "katex": "^0.18.4",
     "lucide-react": "^1.31.0",
-    "@pactor/chat": "workspace:*",
-    "@pactor/core": "workspace:*",
-    "@pactor/router": "workspace:*",
-    "@pactor/runtime": "workspace:*",
-    "@pactor/ui": "workspace:*",
+    "@pactor-app/chat": "workspace:*",
+    "@pactor-app/core": "workspace:*",
+    "@pactor-app/router": "workspace:*",
+    "@pactor-app/runtime": "workspace:*",
+    "@pactor-app/ui": "workspace:*",
     "react": "^19.2.8",
     "react-dom": "^19.2.8",
     "react-router-dom": "^7.18.2"
@@ -25,7 +25,7 @@
     "@types/react": "^19.2.18",
     "@types/react-dom": "^19.2.4",
     "@vitejs/plugin-react": "^5.0.0",
-    "@pactor/vite-plugin": "workspace:*",
+    "@pactor-app/vite-plugin": "workspace:*",
     "typescript": "^5.6.3",
     "vite": "^8.2.1"
   }

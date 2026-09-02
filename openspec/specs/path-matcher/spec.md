@@ -1,6 +1,6 @@
 # Spec: path-matcher
 
-路径模式匹配与 RouteContext 构建（`@pactor/router`，设计文档第 31/32 节）。
+路径模式匹配与 RouteContext 构建（`@pactor-app/router`，设计文档第 31/32 节）。
 
 ### Requirement: 路径模式编译与匹配
 

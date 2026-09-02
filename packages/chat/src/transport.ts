@@ -144,7 +144,7 @@ export async function runRegenerateTurn(
     }
   }
   if (lastUserIndex < 0) {
-    console.warn('[@pactor/chat] runRegenerateTurn: no user message, ignored');
+    console.warn('[@pactor-app/chat] runRegenerateTurn: no user message, ignored');
     return undefined;
   }
 
@@ -204,7 +204,7 @@ export function createManualDriver(): ManualChatDriver {
     transport: {
       async *send(): AsyncIterable<ChatEvent> {
         if (started) {
-          throw new Error('[@pactor/chat] manual driver transport can only be sent once');
+          throw new Error('[@pactor-app/chat] manual driver transport can only be sent once');
         }
         started = true;
         for (;;) {

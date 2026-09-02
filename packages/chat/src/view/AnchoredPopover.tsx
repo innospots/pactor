@@ -9,7 +9,7 @@ import {
 /**
  * AnchoredPopover（spec: chat-context-sources，设计决策 D3）：
  * 包内迷你锚定弹层，内部组件（不从 index.ts 导出）——模型 chip /
- * +菜单 / @提及弹层共用。不依赖 @pactor/ui（守零运行时依赖契约），
+ * +菜单 / @提及弹层共用。不依赖 @pactor-app/ui（守零运行时依赖契约），
  * 样式进 styles.css 用语义令牌。
  *
  * 定位：`position: fixed` 按 anchorRect 定位，上方优先、垂直空间
