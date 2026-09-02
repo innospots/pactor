@@ -1,8 +1,8 @@
 import { DEMO_ACCOUNT, clearSession, writeSession } from './auth';
 
 /**
- * 与 pactor-runtime 的 ServiceHandler 结构一致
- *（示例不直接依赖 pactor-runtime，经 pactor-app options.services 注入）
+ * 与 @pactor/runtime 的 ServiceHandler 结构一致
+ *（示例不直接依赖 @pactor/runtime，经 @pactor/app options.services 注入）
  */
 type ServiceHandler = (
   params: Record<string, unknown>,

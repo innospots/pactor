@@ -2,8 +2,8 @@
  * 跨包冒烟测试（tasks 5.4）：
  * 用设计文档第 10 节的 Page DSL 示例，走一遍 schema 校验 + 表达式求值。
  */
-import { resolveTemplate } from 'pactor-expression';
-import { DSL_VERSION, validatePageDsl } from 'pactor-schema';
+import { resolveTemplate } from '@pactor/expression';
+import { DSL_VERSION, validatePageDsl } from '@pactor/schema';
 import { describe, expect, it } from 'vitest';
 
 // 设计文档第 10 节的标准 Page DSL 示例（JSON 运行时格式）

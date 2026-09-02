@@ -1,5 +1,5 @@
 {
-  "name": "pactor-expression",
+  "name": "@pactor/expression",
   "version": "0.1.0",
   "description": "Pactor expression: controlled AST expression engine (no eval, no global access)",
   "keywords": [
@@ -52,6 +52,6 @@
     "access": "public"
   },
   "dependencies": {
-    "pactor-core": "workspace:*"
+    "@pactor/core": "workspace:*"
   }
 }

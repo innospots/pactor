@@ -1,6 +1,6 @@
 # Spec: dsl-cli
 
-pactor CLI（`pactor-cli`）：本地 DSL 开发工具链，设计文档第 84 节。
+pactor CLI（`@pactor/cli`）：本地 DSL 开发工具链，设计文档第 84 节。
 
 
 ### Requirement: validate 命令
@@ -60,7 +60,7 @@ pactor CLI（`pactor-cli`）：本地 DSL 开发工具链，设计文档第 84 �
 
 ### Requirement: create 命令
 
-`pactor create <name>` SHALL 从模板生成业务工程（vite + react + pactor-app + pactor-ui + pactor-vite-plugin + 示例 page.yaml + 样式导入）；目标目录已存在且非空 MUST 报错（退出码 2），不覆盖。
+`pactor create <name>` SHALL 从模板生成业务工程（vite + react + @pactor/app + @pactor/ui + @pactor/vite-plugin + 示例 page.yaml + 样式导入）；目标目录已存在且非空 MUST 报错（退出码 2），不覆盖。
 
 #### Scenario: 生成工程骨架
 

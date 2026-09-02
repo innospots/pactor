@@ -1,5 +1,5 @@
-import type { PageDsl } from 'pactor-core';
-import { createPageRuntime, type RouterAdapter } from 'pactor-runtime';
+import type { PageDsl } from '@pactor/core';
+import { createPageRuntime, type RouterAdapter } from '@pactor/runtime';
 import { describe, expect, it, vi } from 'vitest';
 
 import { MenuRegistry, type MenuItem } from './menu.js';
@@ -98,7 +98,7 @@ const menus: MenuItem[] = [
   },
 ];
 
-describe('与 pactor-runtime 集成', () => {
+describe('与 @pactor/runtime 集成', () => {
   it('DSL navigate 动作驱动路由', async () => {
     const nav = new MemoryNavigation();
     const runtime = createPageRuntime(pageDsl, {

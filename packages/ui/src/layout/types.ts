@@ -1,9 +1,9 @@
-import type { PermissionChecker } from 'pactor-permission';
+import type { PermissionChecker } from '@pactor/permission';
 import type {
   MenuRegistry,
   NavigationBridge,
   RouteContext,
-} from 'pactor-router';
+} from '@pactor/router';
 import type { ReactNode } from 'react';
 
 /** 结构模式（管理后台外壳布局形态） */

@@ -1,4 +1,4 @@
-import { useRenderer } from 'pactor-runtime';
+import { useRenderer } from '@pactor/runtime';
 import {
   useCallback,
   useEffect,

@@ -13,7 +13,7 @@
 
 ### Requirement: 最小插件工作流演示
 
-示例 SHALL 以 pactor-vite-plugin 直接 import `*.page.yaml` 模块并经 pactor-app 渲染：单页面覆盖 state、Form 提交（setState + reload）、service 数据源与 Table；dev 时修改 YAML SHALL 触发热更新，YAML 校验失败 SHALL 使构建报错。
+示例 SHALL 以 @pactor/vite-plugin 直接 import `*.page.yaml` 模块并经 @pactor/app 渲染：单页面覆盖 state、Form 提交（setState + reload）、service 数据源与 Table；dev 时修改 YAML SHALL 触发热更新，YAML 校验失败 SHALL 使构建报错。
 
 #### Scenario: 页面渲染与查询
 

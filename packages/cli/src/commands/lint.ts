@@ -4,8 +4,8 @@ import type {
   FragmentDsl,
   PageDsl,
   PermissionConfig,
-} from 'pactor-core';
-import { ExpressionError, hasExpression, parseExpression } from 'pactor-expression';
+} from '@pactor/core';
+import { ExpressionError, hasExpression, parseExpression } from '@pactor/expression';
 
 import type { CliIo, ParsedArgs } from '../args.js';
 import {

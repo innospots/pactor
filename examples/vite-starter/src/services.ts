@@ -3,7 +3,7 @@
  * 服务名经 createPactorApplication({ services }) 注入，
  * DSL 数据源以 type: service + service: todo.list 引用。
  *
- * 与 pactor-runtime 的 ServiceHandler 结构一致（示例不直接依赖 runtime）。
+ * 与 @pactor/runtime 的 ServiceHandler 结构一致（示例不直接依赖 runtime）。
  */
 type ServiceHandler = (
   params: Record<string, unknown>,

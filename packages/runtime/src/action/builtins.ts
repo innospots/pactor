@@ -1,4 +1,4 @@
-import type { ActionConfig } from 'pactor-core';
+import type { ActionConfig } from '@pactor/core';
 
 import type {
   ActionHandler,
@@ -10,7 +10,7 @@ import type {
  * 内置 UI 无关标准动作（设计文档第 17 节，决策 D4）。
  *
  * `navigate` / `message` / `confirm` / `overlay.*` 依赖上层模块，
- * 不在此处实现，由 pactor-router / pactor-ui 的 interaction 层注册。
+ * 不在此处实现，由 @pactor/router / @pactor/ui 的 interaction 层注册。
  * 已注册的同名动作不会被覆盖。
  */
 export function registerBuiltinActions(registry: ActionRegistry): void {
@@ -47,7 +47,7 @@ export function registerBuiltinActions(registry: ActionRegistry): void {
     if (typeof url !== 'string' || !url) {
       return {
         ok: false,
-        error: new Error('[pactor-runtime] request 动作缺少 url 参数'),
+        error: new Error('[@pactor/runtime] request 动作缺少 url 参数'),
       };
     }
     try {
@@ -127,7 +127,7 @@ export function registerBuiltinActions(registry: ActionRegistry): void {
       return {
         ok: false,
         error: new Error(
-          `[pactor-runtime] form.setValues 目标表单未注册: "${name}"`,
+          `[@pactor/runtime] form.setValues 目标表单未注册: "${name}"`,
         ),
       };
     }
@@ -135,7 +135,7 @@ export function registerBuiltinActions(registry: ActionRegistry): void {
     if (!isRecord(values)) {
       return {
         ok: false,
-        error: new Error('[pactor-runtime] form.setValues 缺少 params.values（object）'),
+        error: new Error('[@pactor/runtime] form.setValues 缺少 params.values（object）'),
       };
     }
     handle.setValues(values);

@@ -33,7 +33,7 @@ export class ConversationStore {
   appendMessage(message: ChatMessage): void {
     if (this.getMessage(message.id)) {
       console.warn(
-        `[pactor-chat] duplicate message id "${message.id}", ignored`,
+        `[@pactor/chat] duplicate message id "${message.id}", ignored`,
       );
       return;
     }
@@ -44,7 +44,7 @@ export class ConversationStore {
   updateMessage(id: string, patch: MessagePatch): void {
     const index = this.messages.findIndex((message) => message.id === id);
     if (index < 0) {
-      console.warn(`[pactor-chat] message not found: "${id}"`);
+      console.warn(`[@pactor/chat] message not found: "${id}"`);
       return;
     }
     const next = [...this.messages];
@@ -72,7 +72,7 @@ export class ConversationStore {
           : message.parts.findIndex((part) => part.id === partRef);
       if (index < 0 || index >= message.parts.length) {
         console.warn(
-          `[pactor-chat] part not found: message "${messageId}", ref "${String(partRef)}"`,
+          `[@pactor/chat] part not found: message "${messageId}", ref "${String(partRef)}"`,
         );
         return message;
       }
@@ -94,7 +94,7 @@ export class ConversationStore {
   removeMessagesFrom(messageId: string): void {
     const index = this.messages.findIndex((message) => message.id === messageId);
     if (index < 0) {
-      console.warn(`[pactor-chat] message not found: "${messageId}"`);
+      console.warn(`[@pactor/chat] message not found: "${messageId}"`);
       return;
     }
     this.commit(this.messages.slice(0, index));
@@ -123,7 +123,7 @@ export class ConversationStore {
   ): void {
     const index = this.messages.findIndex((message) => message.id === id);
     if (index < 0) {
-      console.warn(`[pactor-chat] message not found: "${id}"`);
+      console.warn(`[@pactor/chat] message not found: "${id}"`);
       return;
     }
     const nextMessage = mutate(this.messages[index]!);

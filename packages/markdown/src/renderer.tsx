@@ -101,7 +101,7 @@ const highlightingComponents: Components = {
 export interface MarkdownRendererProps {
   /** Markdown 源文本（DSL 场景下表达式已由 Renderer 解析后传入） */
   content?: string;
-  /** 附加 className，与基础 class `pactor-markdown` 并存 */
+  /** 附加 className，与基础 class `@pactor/markdown` 并存 */
   className?: string;
   /** 数学公式（remark-math + rehype-katex），默认 true；需自行引入 katex css */
   math?: boolean;
@@ -111,7 +111,7 @@ export interface MarkdownRendererProps {
 
 /**
  * Markdown 渲染器：标题 / 列表 / 表格（GFM）/ 代码块 / 引用 / 链接 / 图片 /
- * 数学公式（KaTeX）。容器带基础 class `pactor-markdown`，样式由宿主主题决定。
+ * 数学公式（KaTeX）。容器带基础 class `@pactor/markdown`，样式由宿主主题决定。
  * 技术选型参考 DeepTutor web：react-markdown + remark-gfm + remark-math +
  * rehype-katex + react-syntax-highlighter（Light 构建）。
  *

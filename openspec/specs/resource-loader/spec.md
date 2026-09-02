@@ -1,6 +1,6 @@
 # Spec: resource-loader
 
-DSL 资源模型与加载器（`pactor-resource`）：Page / Fragment / Bootstrap 的统一加载接口与 HTTP、Static 实现。
+DSL 资源模型与加载器（`@pactor/resource`）：Page / Fragment / Bootstrap 的统一加载接口与 HTTP、Static 实现。
 
 ### Requirement: 资源 Envelope 模型
 

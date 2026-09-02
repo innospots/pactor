@@ -1,6 +1,6 @@
 # Spec: chat-context-sources
 
-Chat 内建上下文弹层与声明式数据源（`pactor-chat`）：contexts 配置驱动 +/＠ 内建弹层，选中项成 chips 并进入 transport 输入。
+Chat 内建上下文弹层与声明式数据源（`@pactor/chat`）：contexts 配置驱动 +/＠ 内建弹层，选中项成 chips 并进入 transport 输入。
 
 ## ADDED Requirements
 

@@ -1,8 +1,8 @@
-import type { LifecycleEventName, PageDsl } from 'pactor-core';
+import type { LifecycleEventName, PageDsl } from '@pactor/core';
 import {
   validatePageDsl,
   type DslValidationError,
-} from 'pactor-schema';
+} from '@pactor/schema';
 import type { ReactNode } from 'react';
 
 import { registerBuiltinActions } from '../action/builtins.js';

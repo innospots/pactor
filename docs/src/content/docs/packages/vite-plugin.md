@@ -1,12 +1,12 @@
 ---
-title: pactor-vite-plugin
+title: "@pactor/vite-plugin"
 description: Vite 插件——构建期把 .page.yaml / .fragment.yaml 转换为 JS 模块（Parse → Validate → Compile），支持 HMR
 ---
 
-`pactor-vite-plugin` 让业务工程可以 `import page from './user-list.page.yaml'`：YAML 是开发格式，插件在构建期执行 Parse → Validate → Compile，输出优化后的 JS 模块（浏览器不解析 YAML）。校验复用 pactor-schema 的 `validatePageDsl`，fragment 做结构宽松检查（存在 `dsl` 与 `body`）。
+`@pactor/vite-plugin` 让业务工程可以 `import page from './user-list.page.yaml'`：YAML 是开发格式，插件在构建期执行 Parse → Validate → Compile，输出优化后的 JS 模块（浏览器不解析 YAML）。校验复用 @pactor/schema 的 `validatePageDsl`，fragment 做结构宽松检查（存在 `dsl` 与 `body`）。
 
 ```bash
-pnpm add pactor-vite-plugin
+pnpm add @pactor/vite-plugin
 ```
 
 `vite >= 5` 为 peer dependency；插件零 React 依赖。
@@ -16,7 +16,7 @@ pnpm add pactor-vite-plugin
 ```ts
 // vite.config.ts
 import { defineConfig } from 'vite';
-import pactor from 'pactor-vite-plugin';
+import pactor from '@pactor/vite-plugin';
 
 export default defineConfig({
   plugins: [pactor()],
@@ -59,14 +59,14 @@ pactor({
 
 ```ts
 declare module '*.page.yaml' {
-  import type { PageDsl } from 'pactor-core';
+  import type { PageDsl } from '@pactor/core';
   const page: PageDsl;
   export const dslVersion: string;
   export default page;
 }
 
 declare module '*.fragment.yaml' {
-  import type { FragmentDsl } from 'pactor-core';
+  import type { FragmentDsl } from '@pactor/core';
   const fragment: FragmentDsl;
   export const dslVersion: string;
   export default fragment;
@@ -75,10 +75,10 @@ declare module '*.fragment.yaml' {
 
 ## 与 StaticDslLoader 组合
 
-构建期 import 的 DSL 可喂给 pactor-resource 的 `StaticDslLoader`，用于 examples、单测与本地 DSL 开发：
+构建期 import 的 DSL 可喂给 @pactor/resource 的 `StaticDslLoader`，用于 examples、单测与本地 DSL 开发：
 
 ```ts
-import { StaticDslLoader } from 'pactor-resource';
+import { StaticDslLoader } from '@pactor/resource';
 import userListPage from './user-list.page.yaml';
 
 const loader = new StaticDslLoader({
@@ -87,5 +87,5 @@ const loader = new StaticDslLoader({
 ```
 
 :::note
-主推荐模式仍是 Runtime API 动态加载：服务端按 Envelope 协议提供 DSL 端点，业务工程通过 `HttpDslResourceLoader`（或 pactor-app 的 `api` 配置）在运行时拉取，支持版本控制与 ETag 缓存。本插件面向本地开发、示例与测试场景。
+主推荐模式仍是 Runtime API 动态加载：服务端按 Envelope 协议提供 DSL 端点，业务工程通过 `HttpDslResourceLoader`（或 @pactor/app 的 `api` 配置）在运行时拉取，支持版本控制与 ETag 缓存。本插件面向本地开发、示例与测试场景。
 :::

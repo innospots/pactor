@@ -1,8 +1,8 @@
 // @vitest-environment jsdom
 import './setup.js';
 
-import { Registry, type DslNode, type PageDsl } from 'pactor-core';
-import { createPageRuntime } from 'pactor-runtime';
+import { Registry, type DslNode, type PageDsl } from '@pactor/core';
+import { createPageRuntime } from '@pactor/runtime';
 import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 

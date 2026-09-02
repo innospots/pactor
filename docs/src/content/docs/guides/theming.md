@@ -1,12 +1,12 @@
 ---
 title: 主题与换肤
-description: pactor-ui（shadcn kit）的 token 化主题体系——覆盖 CSS 变量换肤、内置暗色皮肤、data-slot 结构覆盖
+description: "@pactor/ui（shadcn kit）的 token 化主题体系——覆盖 CSS 变量换肤、内置暗色皮肤、data-slot 结构覆盖"
 ---
 
-`pactor-ui/styles.css`（shadcn kit 预建样式表）采用 **shadcn 语义令牌 + Tailwind 工具类**结构：语义变量（`--background` / `--foreground` / `--primary` / `--muted` / `--border` / `--ring` / `--radius` 等）定义在 `:root`，经 `@theme inline` 桥接为 `bg-primary` / `text-muted-foreground` 等工具类——**工具类运行时读 `var()`，覆盖变量即换肤，无需重新构建**。
+`@pactor/ui/styles.css`（shadcn kit 预建样式表）采用 **shadcn 语义令牌 + Tailwind 工具类**结构：语义变量（`--background` / `--foreground` / `--primary` / `--muted` / `--border` / `--ring` / `--radius` 等）定义在 `:root`，经 `@theme inline` 桥接为 `bg-primary` / `text-muted-foreground` 等工具类——**工具类运行时读 `var()`，覆盖变量即换肤，无需重新构建**。
 
 ```ts
-import 'pactor-ui/styles.css';
+import '@pactor/ui/styles.css';
 ```
 
 ## 方式一：覆盖 CSS 变量（推荐）
@@ -16,7 +16,7 @@ import 'pactor-ui/styles.css';
 只改主色的最小示例：
 
 ```css
-/* your-theme.css —— 在 pactor-ui/styles.css 之后导入 */
+/* your-theme.css —— 在 @pactor/ui/styles.css 之后导入 */
 :root {
   --primary: oklch(0.55 0.2 260);          /* 主按钮、激活态 */
   --primary-foreground: oklch(0.985 0 0);  /* 主色上的文字 */
@@ -26,7 +26,7 @@ import 'pactor-ui/styles.css';
 ```
 
 ```ts
-import 'pactor-ui/styles.css';
+import '@pactor/ui/styles.css';
 import './your-theme.css';
 ```
 
@@ -94,5 +94,5 @@ document.documentElement.removeAttribute('data-pactor-theme');
 语义令牌经 `@theme inline` 映射为 Tailwind 颜色工具类（`bg-background` / `text-foreground` / `bg-card` / `bg-popover` / `bg-primary` / `text-primary-foreground` / `bg-secondary` / `bg-muted` / `text-muted-foreground` / `bg-accent` / `bg-destructive` / `border-border` / `border-input` / `ring-ring` 等）与圆角阶梯（`rounded-sm` … `rounded-xl`）。业务自写的扩展组件也可以直接使用这些工具类，自动跟随皮肤。
 
 :::note[preflight 开启（shadcn 官方基线）]
-预建样式表与 [shadcn 官方主题脚手架](https://ui.shadcn.com/docs/theming)一致：完整 `tailwindcss`（含 preflight）+ `tw-animate-css` 动画层 + 官方 base layer（`* { border-border outline-ring/50 }`、`body { bg-background text-foreground }`）。导入 `pactor-ui/styles.css` 即接受该基线全局样式；宿主自定义皮肤 CSS 须在其后导入。
+预建样式表与 [shadcn 官方主题脚手架](https://ui.shadcn.com/docs/theming)一致：完整 `tailwindcss`（含 preflight）+ `tw-animate-css` 动画层 + 官方 base layer（`* { border-border outline-ring/50 }`、`body { bg-background text-foreground }`）。导入 `@pactor/ui/styles.css` 即接受该基线全局样式；宿主自定义皮肤 CSS 须在其后导入。
 :::

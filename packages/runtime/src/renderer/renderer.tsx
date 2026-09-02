@@ -1,8 +1,8 @@
-import type { DslNode, PermissionDeniedStrategy } from 'pactor-core';
+import type { DslNode, PermissionDeniedStrategy } from '@pactor/core';
 import {
   resolveTemplate,
   type ExpressionScope,
-} from 'pactor-expression';
+} from '@pactor/expression';
 import {
   createElement,
   useMemo,
@@ -113,7 +113,7 @@ function renderNode(
     } catch (cause) {
       // 表达式错误不击穿渲染层：视为不渲染并告警
       console.warn(
-        `[pactor-runtime] when 表达式求值失败（节点 "${node.type}"）`,
+        `[@pactor/runtime] when 表达式求值失败（节点 "${node.type}"）`,
         cause,
       );
       visible = false;

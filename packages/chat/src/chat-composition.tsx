@@ -1,5 +1,5 @@
-import type { DslNode } from 'pactor-core';
-import { useRenderer } from 'pactor-runtime';
+import type { DslNode } from '@pactor/core';
+import { useRenderer } from '@pactor/runtime';
 import {
   Component,
   isValidElement,
@@ -59,7 +59,7 @@ class DslSlotGuard extends Component<
 
   override componentDidCatch(): void {
     console.warn(
-      '[pactor-chat] DslNode 槽仅在页面运行时（DslRenderer）上下文内可渲染，已跳过',
+      '[@pactor/chat] DslNode 槽仅在页面运行时（DslRenderer）上下文内可渲染，已跳过',
     );
   }
 

@@ -1,5 +1,5 @@
 // @vitest-environment jsdom
-import { Registry, type PageDsl } from 'pactor-core';
+import { Registry, type PageDsl } from '@pactor/core';
 import { act, cleanup, render, screen } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 

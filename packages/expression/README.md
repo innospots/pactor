@@ -1,19 +1,19 @@
-# pactor-expression
+# @pactor/expression
 
 [Pactor](https://github.com/426-330/pactor) 的受控表达式引擎：解析与求值 DSL 中的 `${...}` 表达式。基于受控 AST —— **不使用 `eval` / `new Function`，无法访问全局对象**。
 
 ## 安装
 
 ```bash
-npm install pactor-expression
+npm install @pactor/expression
 # 或
-pnpm add pactor-expression
+pnpm add @pactor/expression
 ```
 
 ## 示例
 
 ```ts
-import { evaluateExpression, resolveTemplate } from 'pactor-expression';
+import { evaluateExpression, resolveTemplate } from '@pactor/expression';
 
 const scope = { state: { count: 42, status: 'ACTIVE' } };
 

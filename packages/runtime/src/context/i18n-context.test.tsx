@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 import { renderHook } from '@testing-library/react';
-import { createI18nContext } from 'pactor-core';
+import { createI18nContext } from '@pactor/core';
 import type { ReactNode } from 'react';
 import { createElement } from 'react';
 import { describe, expect, it } from 'vitest';

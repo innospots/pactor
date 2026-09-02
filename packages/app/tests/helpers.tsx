@@ -3,8 +3,8 @@
  * 端到端测试共享工具：标准 bootstrap / 页面 DSL / 挂载辅助。
  */
 import { act } from '@testing-library/react';
-import type { PageDsl } from 'pactor-core';
-import type { DslResourceLoader, StaticDslLoaderData } from 'pactor-resource';
+import type { PageDsl } from '@pactor/core';
+import type { DslResourceLoader, StaticDslLoaderData } from '@pactor/resource';
 
 import type { PactorApplication } from '../src/index.js';
 

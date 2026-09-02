@@ -1,4 +1,4 @@
-import type { PermissionConfig } from 'pactor-core';
+import type { PermissionConfig } from '@pactor/core';
 
 import {
   resolvePermissionCheck,

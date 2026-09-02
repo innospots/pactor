@@ -1,10 +1,10 @@
 # Spec: permission-store
 
-权限码集合的存储、查询、订阅与表达式函数（`pactor-permission`）。浏览器只持有 Permission Set，DSL 不出现 Role。
+权限码集合的存储、查询、订阅与表达式函数（`@pactor/permission`）。浏览器只持有 Permission Set，DSL 不出现 Role。
 
 ### Requirement: PermissionStore
 
-SHALL 提供 `PermissionStore`：`setPermissions(codes)`（整体替换）、`clear()`、`has(code)`、`hasAny(codes)`、`hasAll(codes)`、`subscribe(listener)`（返回退订函数）。`has` 对未设置的权限码 MUST 返回 `false`。MUST 不依赖 React 与 pactor-runtime。
+SHALL 提供 `PermissionStore`：`setPermissions(codes)`（整体替换）、`clear()`、`has(code)`、`hasAny(codes)`、`hasAll(codes)`、`subscribe(listener)`（返回退订函数）。`has` 对未设置的权限码 MUST 返回 `false`。MUST 不依赖 React 与 @pactor/runtime。
 
 #### Scenario: 设置并查询权限
 
@@ -23,7 +23,7 @@ SHALL 提供 `PermissionStore`：`setPermissions(codes)`（整体替换）、`cl
 
 ### Requirement: Runtime 权限适配器
 
-SHALL 提供 `createPermissionAdapter(store)`，返回结构化兼容 pactor-runtime `PermissionAdapter` 的对象：`check(permission)` 支持 string / string[] / `{ code, denied }` 三种配置形态，数组语义为 hasAny，对象形式只判定 `code`。
+SHALL 提供 `createPermissionAdapter(store)`，返回结构化兼容 @pactor/runtime `PermissionAdapter` 的对象：`check(permission)` 支持 string / string[] / `{ code, denied }` 三种配置形态，数组语义为 hasAny，对象形式只判定 `code`。
 
 #### Scenario: 三种形态检查
 

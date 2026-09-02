@@ -2,7 +2,7 @@ import {
   hasExpression,
   resolveTemplate,
   type ExpressionScope,
-} from 'pactor-expression';
+} from '@pactor/expression';
 
 function isPlainRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null && !Array.isArray(value);
@@ -21,7 +21,7 @@ export interface ResolveDeepOptions {
 /**
  * 深度表达式求值（设计文档第 21 节，D5）：
  *
- * - 字符串经 pactor-expression `resolveTemplate` 求值
+ * - 字符串经 @pactor/expression `resolveTemplate` 求值
  *   （整体单表达式保留原始类型，无 `${` 快速返回）
  * - 数组 / 普通对象递归处理
  * - 其余类型原样保留

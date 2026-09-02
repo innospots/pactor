@@ -1,6 +1,6 @@
 # Spec: menu-registry
 
-Menu Model 与 MenuRegistry（`pactor-router`）：菜单树注册、按路径/ID 查找（设计文档第 30 节）。
+Menu Model 与 MenuRegistry（`@pactor/router`）：菜单树注册、按路径/ID 查找（设计文档第 30 节）。
 
 ### Requirement: MenuItem 模型
 

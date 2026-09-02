@@ -1,6 +1,6 @@
 import { readFileSync } from 'node:fs';
 
-import { Registry } from 'pactor-core';
+import { Registry } from '@pactor/core';
 import { describe, expect, it } from 'vitest';
 
 import {

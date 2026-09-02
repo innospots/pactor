@@ -1,5 +1,5 @@
-import type { DslNode } from 'pactor-core';
-import type { Registry } from 'pactor-core';
+import type { DslNode } from '@pactor/core';
+import type { Registry } from '@pactor/core';
 
 /**
  * DSL part 的白名单守卫（设计决策 D3/D5）：渲染前把白名单之外的

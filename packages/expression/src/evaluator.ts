@@ -1,4 +1,4 @@
-import { Registry } from 'pactor-core';
+import { Registry } from '@pactor/core';
 
 import type { ExpressionNode } from './ast.js';
 import { ExpressionError } from './error.js';
@@ -11,7 +11,7 @@ export type ExpressionFunction = (...args: unknown[]) => unknown;
 export type ExpressionScope = Record<string, unknown>;
 
 export interface EvaluateOptions {
-  /** 额外的白名单函数表（Record 或 pactor-core Registry） */
+  /** 额外的白名单函数表（Record 或 @pactor/core Registry） */
   functions?: Record<string, ExpressionFunction> | Registry<ExpressionFunction>;
 }
 

@@ -1,4 +1,4 @@
-# pactor-skill
+# @pactor/skill
 
 Agent skill for rapidly building [Pactor](https://github.com/426-330/pactor) Server-Driven UI applications.
 

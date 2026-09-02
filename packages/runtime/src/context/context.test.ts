@@ -1,4 +1,4 @@
-import { Registry } from 'pactor-core';
+import { Registry } from '@pactor/core';
 import { describe, expect, it, vi } from 'vitest';
 
 import {

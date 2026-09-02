@@ -1,6 +1,6 @@
-import type { PageDsl } from 'pactor-core';
-import type { PermissionAdapter } from 'pactor-runtime';
-import { createPageRuntime } from 'pactor-runtime';
+import type { PageDsl } from '@pactor/core';
+import type { PermissionAdapter } from '@pactor/runtime';
+import { createPageRuntime } from '@pactor/runtime';
 import { describe, expect, it } from 'vitest';
 
 import { createPermissionAdapter } from './adapter.js';
@@ -38,7 +38,7 @@ describe('createPermissionAdapter：三种形态检查', () => {
   });
 });
 
-describe('与 pactor-runtime 的类型兼容（编译期断言）', () => {
+describe('与 @pactor/runtime 的类型兼容（编译期断言）', () => {
   it('结构化兼容 runtime 的 PermissionAdapter 接口', () => {
     // 编译期断言：类型不兼容时 tsc --noEmit 直接失败
     const adapter: PermissionAdapter = createPermissionAdapter(

@@ -1,7 +1,7 @@
 // @vitest-environment jsdom
-import type { PageDsl } from 'pactor-core';
-import { Registry } from 'pactor-core';
-import { createPageRuntime, PageRuntimeView } from 'pactor-runtime';
+import type { PageDsl } from '@pactor/core';
+import { Registry } from '@pactor/core';
+import { createPageRuntime, PageRuntimeView } from '@pactor/runtime';
 import { render, screen } from '@testing-library/react';
 import { describe, expect, it } from 'vitest';
 

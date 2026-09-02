@@ -1,6 +1,6 @@
 {
-  "name": "pactor-skill",
-  "version": "1.0.0",
+  "name": "@pactor/skill",
+  "version": "0.1.0",
   "description": "Agent skill for rapidly building pactor Server-Driven UI applications",
   "keywords": [
     "pactor",

@@ -1,4 +1,4 @@
-import type { FragmentDsl, PageDsl } from 'pactor-core';
+import type { FragmentDsl, PageDsl } from '@pactor/core';
 import { describe, expect, it } from 'vitest';
 
 import { MemoryResourceCache } from '../cache/memory-cache.js';

@@ -1,12 +1,12 @@
 import { XIcon } from 'lucide-react';
-import type { PageDsl } from 'pactor-core';
+import type { PageDsl } from '@pactor/core';
 import {
   createPageRuntime,
   PageRuntimeView,
   useRenderer,
   type PageRuntime,
   type RendererContextValue,
-} from 'pactor-runtime';
+} from '@pactor/runtime';
 import { useEffect, useState, useSyncExternalStore, type ReactNode } from 'react';
 
 import { cn } from '../lib/utils.js';
@@ -21,7 +21,7 @@ import type { OverlayEntry, OverlayManager } from './manager.js';
 
 // props 契约类型（本地定义）
 /**
- * page overlay 的页面加载函数（通常包装 pactor-resource loader）：
+ * page overlay 的页面加载函数（通常包装 @pactor/resource loader）：
  * pageId → PageDsl（可异步）。
  */
 export type ResolvePageFn = (pageId: string) => PageDsl | Promise<PageDsl>;
@@ -260,7 +260,7 @@ function PageOverlayBody({
     if (!resolvePage) {
       setError(
         new Error(
-          `[pactor-ui] page overlay（pageId: "${entry.page?.pageId}"）需要 ShadcnOverlayHost 注入 resolvePage`,
+          `[@pactor/ui] page overlay（pageId: "${entry.page?.pageId}"）需要 ShadcnOverlayHost 注入 resolvePage`,
         ),
       );
       return;

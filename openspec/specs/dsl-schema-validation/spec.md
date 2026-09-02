@@ -1,6 +1,6 @@
 # Spec: dsl-schema-validation
 
-DSL Schema 与校验模块（`pactor-schema`），提供 DSL 版本常量、Page DSL 根结构及 DslNode 的 JSON Schema 定义，以及基于 Ajv 的结构化校验器。
+DSL Schema 与校验模块（`@pactor/schema`），提供 DSL 版本常量、Page DSL 根结构及 DslNode 的 JSON Schema 定义，以及基于 Ajv 的结构化校验器。
 
 ### Requirement: DSL 版本常量
 

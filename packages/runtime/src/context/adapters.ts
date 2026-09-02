@@ -1,10 +1,10 @@
-import type { PermissionConfig } from 'pactor-core';
+import type { PermissionConfig } from '@pactor/core';
 
 /**
  * 适配接口（设计文档第 15、17 节，决策 D2）：
  *
  * 动作能力边界 —— `navigate` / 权限判定 / HTTP 传输依赖上层模块
- * （pactor-router / pactor-permission / 宿主应用），本包只定义接口与
+ * （@pactor/router / @pactor/permission / 宿主应用），本包只定义接口与
  * 默认实现，真实现经 `createRuntimeContext` 注入。
  */
 
@@ -36,17 +36,17 @@ export interface HttpAdapter {
   request(config: HttpRequestConfig): Promise<unknown>;
 }
 
-/** 默认权限适配器：全部放行（真实权限由 pactor-permission 提供） */
+/** 默认权限适配器：全部放行（真实权限由 @pactor/permission 提供） */
 export function createDefaultPermissionAdapter(): PermissionAdapter {
   return { check: () => true };
 }
 
-/** 默认路由适配器：no-op 并告警（真实导航由 pactor-router 提供） */
+/** 默认路由适配器：no-op 并告警（真实导航由 @pactor/router 提供） */
 export function createDefaultRouterAdapter(): RouterAdapter {
   return {
     navigate(to: string) {
       console.warn(
-        `[pactor-runtime] RouterAdapter 未注入，navigate("${to}") 已忽略`,
+        `[@pactor/runtime] RouterAdapter 未注入，navigate("${to}") 已忽略`,
       );
     },
   };
@@ -85,7 +85,7 @@ export function createFetchHttpAdapter(): HttpAdapter {
       const response = await fetch(url, { method, headers, body });
       if (!response.ok) {
         throw new Error(
-          `[pactor-runtime] http request failed: ${response.status} ${response.statusText} (${config.url})`,
+          `[@pactor/runtime] http request failed: ${response.status} ${response.statusText} (${config.url})`,
         );
       }
       const text = await response.text();

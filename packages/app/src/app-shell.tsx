@@ -1,8 +1,8 @@
-import { createI18nContext } from 'pactor-core';
-import { resolveLayout } from 'pactor-ui/layout';
-import { resolveRoute } from 'pactor-router';
-import { DynamicDslRoute, useReactRouterBridge } from 'pactor-router/react';
-import { I18nContextProvider } from 'pactor-runtime';
+import { createI18nContext } from '@pactor/core';
+import { resolveLayout } from '@pactor/ui/layout';
+import { resolveRoute } from '@pactor/router';
+import { DynamicDslRoute, useReactRouterBridge } from '@pactor/router/react';
+import { I18nContextProvider } from '@pactor/runtime';
 import { useEffect, useState, type ReactNode } from 'react';
 import {
   BrowserRouter,
