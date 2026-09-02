@@ -1,4 +1,4 @@
-import type { PermissionConfig } from '@pactor/core';
+import type { PermissionConfig } from '@pactor-app/core';
 
 import { match } from './path-matcher.js';
 
@@ -7,7 +7,7 @@ import { match } from './path-matcher.js';
  *
  * 菜单声明 `path` + `pageId`，不绑定 React 组件；Dynamic Router 把
  * URL 解析为 pageId 与路由上下文。`keepAlive` / `tab` / `breadcrumb`
- * 等 UI 语义字段由 @pactor/ui 的 layout 层消费，本包只保留字段与 activeMenu 解析。
+ * 等 UI 语义字段由 @pactor-app/ui 的 layout 层消费，本包只保留字段与 activeMenu 解析。
  */
 export interface MenuItem {
   id: string;
@@ -17,7 +17,7 @@ export interface MenuItem {
   order?: number;
   path?: string;
   pageId?: string;
-  /** 访问权限（@pactor/core PermissionConfig，守卫由 @pactor/permission 提供） */
+  /** 访问权限（@pactor-app/core PermissionConfig，守卫由 @pactor-app/permission 提供） */
   permission?: PermissionConfig;
   /** 隐藏页：不出现在可见菜单树，但参与路径匹配（详情页场景） */
   hidden?: boolean;

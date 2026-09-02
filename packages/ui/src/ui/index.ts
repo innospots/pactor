@@ -1,5 +1,5 @@
 /**
- * vendored shadcn 原语组件汇总出口（子路径 `@pactor/ui/ui`）：
+ * vendored shadcn 原语组件汇总出口（子路径 `@pactor-app/ui/ui`）：
  * 供宿主构建自定义槽位 UI 与业务组件，视觉随语义令牌皮肤。
  * DSL 编排仍走 `/components` 适配器；此处为裸 React 原语。
  *

@@ -1,5 +1,5 @@
-import type { DslNode } from '@pactor/core';
-import { useI18n, useRenderer } from '@pactor/runtime';
+import type { DslNode } from '@pactor-app/core';
+import { useI18n, useRenderer } from '@pactor-app/runtime';
 import { useState } from 'react';
 
 import { Button as ShadcnButton } from '../../../ui/button.js';

@@ -1,6 +1,6 @@
 import { CircleAlert, PanelRightOpen } from 'lucide-react';
-import { MarkdownRenderer } from '@pactor/markdown';
-import { DslRenderer, useRenderer } from '@pactor/runtime';
+import { MarkdownRenderer } from '@pactor-app/markdown';
+import { DslRenderer, useRenderer } from '@pactor-app/runtime';
 
 import type { ChatArtifact } from '../artifact.js';
 import { guardChatDsl } from '../dsl-guard.js';
@@ -11,7 +11,7 @@ import { buildChatScope, type ChatRuntime, type ChatScope } from '../scope.js';
 /**
  * PartRenderer：按 part 类型渲染。
  *
- * - text → 文本段落；markdown → @pactor/markdown 安全渲染器
+ * - text → 文本段落；markdown → @pactor-app/markdown 安全渲染器
  *   （streaming 期间经 useSmoothStreamText 打字机揭示）
  * - dsl → runtime DslRenderer（Safe Registry + chat 作用域），
  *   白名单外节点经 guardChatDsl 替换为受控"不允许"占位
@@ -21,7 +21,7 @@ import { buildChatScope, type ChatRuntime, type ChatScope } from '../scope.js';
  * - artifact → 产出物卡片（标题 + kind 角标 + "在面板中打开"按钮，
  *   spec: chat-artifact-panel）
  *
- * 视图零 antd 依赖，颜色经 `@pactor/chat/styles.css` 的
+ * 视图零 antd 依赖，颜色经 `@pactor-app/chat/styles.css` 的
  * `--pactor-chat-*` 变量表达。
  */
 export interface PartRendererProps {

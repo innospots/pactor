@@ -1,6 +1,6 @@
 # example-vite-starter
 
-最小 pactor 应用：演示 `@pactor/vite-plugin` 的"YAML 即模块"工作流——`.page.yaml` 在构建期完成 Parse → Validate → Compile，像普通 TS 模块一样 import，改文件即热更新。
+最小 pactor 应用：演示 `@pactor-app/vite-plugin` 的"YAML 即模块"工作流——`.page.yaml` 在构建期完成 Parse → Validate → Compile，像普通 TS 模块一样 import，改文件即热更新。
 
 ## 启动
 

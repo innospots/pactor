@@ -1,5 +1,5 @@
-import { Registry } from '@pactor/core';
-import type { DslNode } from '@pactor/core';
+import { Registry } from '@pactor-app/core';
+import type { DslNode } from '@pactor-app/core';
 import { describe, expect, it } from 'vitest';
 
 import { CHAT_DENIED_TYPE, createSafeRegistry, guardChatDsl } from '../src/index.js';

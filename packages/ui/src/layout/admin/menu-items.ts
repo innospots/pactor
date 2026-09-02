@@ -1,4 +1,4 @@
-import type { MenuItem, MenuRegistry } from '@pactor/router';
+import type { MenuItem, MenuRegistry } from '@pactor-app/router';
 
 import { findMenuChain } from './menu-chain.js';
 

@@ -1,10 +1,10 @@
-import { Registry } from '@pactor/core';
-import { PermissionStore, createPermissionAdapter } from '@pactor/permission';
+import { Registry } from '@pactor-app/core';
+import { PermissionStore, createPermissionAdapter } from '@pactor-app/permission';
 import {
   ActionEngine,
   createRuntimeContext,
   registerBuiltinActions,
-} from '@pactor/runtime';
+} from '@pactor-app/runtime';
 import { describe, expect, it, vi } from 'vitest';
 
 import type { CapabilityHandler, ChatCapabilityRegistry } from '../src/index.js';

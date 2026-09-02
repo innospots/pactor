@@ -1,5 +1,5 @@
 {
-  "name": "@pactor/permission",
+  "name": "@pactor-app/permission",
   "version": "0.1.0",
   "description": "Pactor permission: permission code store, runtime permission adapter, menu/page guards and expression function",
   "keywords": [
@@ -50,12 +50,12 @@
     "access": "public"
   },
   "dependencies": {
-    "@pactor/core": "workspace:*"
+    "@pactor-app/core": "workspace:*"
   },
   "devDependencies": {
     "@types/react": "^19.2.18",
-    "@pactor/expression": "workspace:*",
-    "@pactor/runtime": "workspace:*",
+    "@pactor-app/expression": "workspace:*",
+    "@pactor-app/runtime": "workspace:*",
     "react": "^19.2.8"
   }
 }

@@ -1,10 +1,10 @@
-import type { PermissionConfig } from '@pactor/core';
-import { Registry } from '@pactor/core';
+import type { PermissionConfig } from '@pactor-app/core';
+import { Registry } from '@pactor-app/core';
 import type {
   ActionContext,
   ActionRegistry,
   ActionResult,
-} from '@pactor/runtime';
+} from '@pactor-app/runtime';
 
 /**
  * capability 动作（设计决策 D4，设计文档第 64、81.5 节）：
@@ -28,7 +28,7 @@ export interface CapabilityHandler {
 /** Capability Registry：能力名 → handler */
 export type ChatCapabilityRegistry = Registry<CapabilityHandler>;
 
-/** 结构化权限检查器（兼容 @pactor/runtime PermissionAdapter 与 @pactor/permission createPermissionAdapter 的返回） */
+/** 结构化权限检查器（兼容 @pactor-app/runtime PermissionAdapter 与 @pactor-app/permission createPermissionAdapter 的返回） */
 export interface ChatPermissionChecker {
   check(permission: PermissionConfig): boolean;
 }
@@ -76,11 +76,11 @@ export function registerCapabilityAction(
   actions.register('capability', async (action, ctx) => {
     const name = action.params?.['name'];
     if (typeof name !== 'string' || !name) {
-      return failure('[@pactor/chat] capability 动作缺少 name 参数');
+      return failure('[@pactor-app/chat] capability 动作缺少 name 参数');
     }
     const capability = deps.capabilities.get(name);
     if (!capability) {
-      return failure(`[@pactor/chat] capability not registered: "${name}"`);
+      return failure(`[@pactor-app/chat] capability not registered: "${name}"`);
     }
 
     if (
@@ -89,7 +89,7 @@ export function registerCapabilityAction(
       !deps.permission.check(capability.permission)
     ) {
       return failure(
-        `[@pactor/chat] permission denied for capability "${name}"`,
+        `[@pactor-app/chat] permission denied for capability "${name}"`,
       );
     }
 
@@ -101,7 +101,7 @@ export function registerCapabilityAction(
     if (capability.risk === 'high') {
       if (!deps.confirm) {
         return failure(
-          `[@pactor/chat] capability "${name}" 为高风险操作，但未注入 confirm`,
+          `[@pactor-app/chat] capability "${name}" 为高风险操作，但未注入 confirm`,
         );
       }
       const confirmed = await deps.confirm({ name, params });

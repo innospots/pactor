@@ -1,10 +1,10 @@
 # example-chat
 
-`@pactor/chat` 对话示例：路由化的多页面工作台（设计决策 D7）——HashRouter + `MenuRegistry`（对话 `/chat`、我的智能体 `/agents`、系统设置 `/settings`），菜单切换 = URL 变化，刷新按 URL 还原页面；外壳为 `ChatShell`（menu 来自 registry 可见树，`onMenuSelect` → `bridge.push`，content 槽为 `DynamicDslRoute` 路由出口），三个页面各自以 `.page.yaml` 声明（@pactor/vite-plugin 编译），命中的 pageId 在 render 回调里建 PageRuntime 渲染，页内 runtime 注入 `createRouterAdapter(bridge)`（DSL `navigate` 动作可用）与 `route.query/params` 页面作用域。
+`@pactor-app/chat` 对话示例：路由化的多页面工作台（设计决策 D7）——HashRouter + `MenuRegistry`（对话 `/chat`、我的智能体 `/agents`、系统设置 `/settings`），菜单切换 = URL 变化，刷新按 URL 还原页面；外壳为 `ChatShell`（menu 来自 registry 可见树，`onMenuSelect` → `bridge.push`，content 槽为 `DynamicDslRoute` 路由出口），三个页面各自以 `.page.yaml` 声明（@pactor-app/vite-plugin 编译），命中的 pageId 在 render 回调里建 PageRuntime 渲染，页内 runtime 注入 `createRouterAdapter(bridge)`（DSL `navigate` 动作可用）与 `route.query/params` 页面作用域。
 
 对话页演示产出物面板（spec: chat-artifact-panel）完整链路：建议词 / 口令触发 → mock transport 产出 artifact part（markdown / code / dsl 三种 kind）→ `events.onArtifact` → `setState` 打开右侧面板（dsl kind 经 Safe Registry 白名单活预览）→ `onPanelClose` 关闭。运行时服务（transport / safeRegistry / capabilities / confirm / 附件伪上传 / callService 服务桥）由 `App.tsx` 经 `ChatServicesProvider` 在根部注入一次；`ConversationStore` 按会话 id 缓存于宿主并由 chat 页嵌套 provider 就近注入——跨页面切换 / 切换智能体会话消息不丢。
 
-聊天页结构全部经 `chat.page.yaml` 的 `Chat` props 声明（spec: chat-builtin-features）：内建 header（可编辑标题 + 导出 / 明暗 / 清空操作组）、模型选择（受控闭环 `model` + `onModelChange`）、`@` / `+` 上下文弹层与 chips（`contexts` 的 service 引用经宿主 `callService` 解析），宿主不含任何槽位组件。明暗主题由内建 theme 操作写 `documentElement` 的 `data-pactor-theme` 切换（@pactor/chat 皮肤与示例外壳令牌随之响应）。移动端 <768px：侧栏变抽屉（顶栏品牌区 + 菜单按钮），产出物面板变右侧覆盖抽屉（遮罩点击关闭）。
+聊天页结构全部经 `chat.page.yaml` 的 `Chat` props 声明（spec: chat-builtin-features）：内建 header（可编辑标题 + 导出 / 明暗 / 清空操作组）、模型选择（受控闭环 `model` + `onModelChange`）、`@` / `+` 上下文弹层与 chips（`contexts` 的 service 引用经宿主 `callService` 解析），宿主不含任何槽位组件。明暗主题由内建 theme 操作写 `documentElement` 的 `data-pactor-theme` 切换（@pactor-app/chat 皮肤与示例外壳令牌随之响应）。移动端 <768px：侧栏变抽屉（顶栏品牌区 + 菜单按钮），产出物面板变右侧覆盖抽屉（遮罩点击关闭）。
 
 ## 启动
 
@@ -48,14 +48,14 @@ pnpm --filter example-chat dev   # http://localhost:5399
 - `src/chat.page.yaml` — 对话页 DSL：无侧栏形态 `Chat` 节点（greeting / suggestions / conversationId 取路由 query）+ 内建 header（`title` / `editableTitle` / `headerActions: [export, theme, clear]`）+ 内建模型选择（`models` + 受控 `model` ↔ `onModelChange`）+ 内建上下文源（`contexts`：`@` 智能体 / `+` 上下文，service 引用）+ 消息操作条（`messageActions`：内建 edit 覆盖 label + 自定义 quote 动作 service 派发，`events.onMessageAction` 接 toast）+ 产出物面板受控闭环（`onArtifact` / `onPanelClose` → setState）
 - `src/agents.page.yaml` — 智能体列表页 DSL：mock 卡片列表，点击经 `navigate` 动作跳 `/chat?id=xxx`
 - `src/settings.page.yaml` — 设置表单页 DSL：Form 提交 → setState 保存回显 + message 提示
-- `src/main.tsx` — 入口：引入 `@pactor/ui/styles.css`（shadcn 交互层样式）、`@pactor/chat/styles.css` 皮肤、`katex/dist/katex.min.css`（公式渲染）与 `app.css`，渲染 `App`
+- `src/main.tsx` — 入口：引入 `@pactor-app/ui/styles.css`（shadcn 交互层样式）、`@pactor-app/chat/styles.css` 皮肤、`katex/dist/katex.min.css`（公式渲染）与 `app.css`，渲染 `App`
 - `src/App.tsx` — 宿主装配：`HashRouter` + `MenuRegistry`（三页菜单）+ 根部 `ChatServicesProvider` 注入全部运行时服务（transport / safeRegistry / capabilities / confirm / 附件伪上传 / `callService` 服务桥，useMemo 保持稳定引用；store 由 chat 页嵌套 provider 按会话注入）+ `ChatShell` 外壳（menu 映射自 registry 可见树，`onMenuSelect` → `bridge.push`）+ `DynamicDslRoute` 出口按 pageId 建 PageRuntime（组件注册表 = shadcn 全集 + `registerChatComponent`；动作注册表扩展 `navigate`（委托 router adapter）与 `message`（toast）；注入 `route.params/query`）。聊天页结构与弹层全部为包内建特性，宿主零槽位组件
 - `vite.config.ts` — 接入 `pactor()` 插件（`*.page.yaml` 编译为 JS 模块）
 - `src/dsl-modules.d.ts` — `*.page.yaml` 模块类型声明
 - `src/mock-data.ts` — mock 数据：`@` 智能体与 `+` 上下文候选（纯静态，经 `callService` 服务桥提供给包内建弹层）
 - `src/attachments.ts` — `readAsAttachment`：File 读为 data URL 伪上传
 - `src/mock-ai.ts` — mock `ChatTransport`：async generator 按意图分片产出 `ChatEvent`（`tool.start` 携带 `args`；artifact 事件产出 markdown / code / dsl 三种 kind 产出物），模拟 SSE 节奏；回复开头注明 `input.model` / `input.contexts`（演示内建模型选择与上下文 chips 的输入载荷）；真实接入时替换为对接服务端的实现
-- `src/safe-registry.ts` — Safe Registry 白名单（`createSafeRegistry` 包装 @pactor/ui 的 `createShadcnComponentRegistry`）
+- `src/safe-registry.ts` — Safe Registry 白名单（`createSafeRegistry` 包装 @pactor-app/ui 的 `createShadcnComponentRegistry`）
 - `src/capabilities.ts` — capability 白名单：`weather.query`（低风险直执行）、`data.export`（高风险，confirm 确认链）
 
 协议细节见文档站 `packages/chat` 页面（`pnpm docs:dev`）。

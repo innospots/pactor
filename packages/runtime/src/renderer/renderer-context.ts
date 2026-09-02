@@ -1,5 +1,5 @@
-import type { DslNode } from '@pactor/core';
-import type { ExpressionScope } from '@pactor/expression';
+import type { DslNode } from '@pactor-app/core';
+import type { ExpressionScope } from '@pactor-app/expression';
 import {
   createContext,
   useContext,
@@ -35,7 +35,7 @@ export const RendererContextProvider = RendererReactContext.Provider;
 export function useRenderer(): RendererContextValue {
   const value = useContext(RendererReactContext);
   if (!value) {
-    throw new Error('[@pactor/runtime] useRenderer 必须在 <DslRenderer> 内使用');
+    throw new Error('[@pactor-app/runtime] useRenderer 必须在 <DslRenderer> 内使用');
   }
   return value;
 }

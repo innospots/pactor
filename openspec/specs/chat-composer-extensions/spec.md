@@ -1,6 +1,6 @@
 # Spec: chat-composer-extensions
 
-Composer 增强（`@pactor/chat`）：IME 守卫、发送按钮状态、附件引用、扩展槽。
+Composer 增强（`@pactor-app/chat`）：IME 守卫、发送按钮状态、附件引用、扩展槽。
 
 ### Requirement: IME 合成守卫
 

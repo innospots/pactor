@@ -1,10 +1,10 @@
 # Spec: markdown-renderer
 
-Markdown 渲染组件与 DSL 注册（`@pactor/markdown`，设计文档第 60、81.3 节）。
+Markdown 渲染组件与 DSL 注册（`@pactor-app/markdown`，设计文档第 60、81.3 节）。
 
 ### Requirement: Markdown 元素渲染
 
-`<MarkdownRenderer content>` SHALL 渲染：标题、段落、粗体/斜体、有序/无序列表、表格（GFM）、代码块与行内代码、引用、链接、图片。容器 MUST 带基础 class（`@pactor/markdown`）供宿主样式挂接。
+`<MarkdownRenderer content>` SHALL 渲染：标题、段落、粗体/斜体、有序/无序列表、表格（GFM）、代码块与行内代码、引用、链接、图片。容器 MUST 带基础 class（`@pactor-app/markdown`）供宿主样式挂接。
 
 #### Scenario: 渲染标题与列表
 

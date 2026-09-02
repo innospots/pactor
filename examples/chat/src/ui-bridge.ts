@@ -1,9 +1,9 @@
-import { createUiBridge } from '@pactor/ui/interaction';
+import { createUiBridge } from '@pactor-app/ui/interaction';
 
 /**
  * 示例级 UiBridge（examples/chat）：宿主根部挂载
  * `ShadcnInteractionProvider` 后注入 modal / message 实现，
- * toast / confirm 等反馈统一走 @pactor/ui 交互层（无 antd 依赖）。
+ * toast / confirm 等反馈统一走 @pactor-app/ui 交互层（无 antd 依赖）。
  */
 export const uiBridge = createUiBridge();
 

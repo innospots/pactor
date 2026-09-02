@@ -12,7 +12,7 @@ import {
   type LoginLayoutProps,
 } from '../../src/layout/index.js';
 
-describe('布局契约：props 类型为 @pactor/ui 本地导出', () => {
+describe('布局契约：props 类型为 @pactor-app/ui 本地导出', () => {
   it('shadcn 布局组件满足 props 契约（编译期断言）', () => {
     const admin: ComponentType<AdminLayoutProps> = ShadcnAdminLayout;
     const blank: ComponentType<BlankLayoutProps> = ShadcnBlankLayout;

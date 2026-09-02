@@ -1,5 +1,5 @@
 {
-  "name": "@pactor/markdown",
+  "name": "@pactor-app/markdown",
   "version": "0.1.0",
   "description": "Pactor Markdown module: safe Markdown renderer (react-markdown AST, no raw HTML) and DSL Markdown component adapter",
   "keywords": [
@@ -51,7 +51,7 @@
   },
   "dependencies": {
     "katex": "^0.18.4",
-    "@pactor/core": "workspace:*",
+    "@pactor-app/core": "workspace:*",
     "react-markdown": "^10.1.0",
     "react-syntax-highlighter": "^16.1.1",
     "rehype-katex": "^7.0.1",
@@ -68,7 +68,7 @@
     "@types/react-dom": "^19.2.4",
     "@types/react-syntax-highlighter": "^15.5.13",
     "jsdom": "^30.0.1",
-    "@pactor/runtime": "workspace:*",
+    "@pactor-app/runtime": "workspace:*",
     "react": "^19.2.8",
     "react-dom": "^19.2.8"
   }

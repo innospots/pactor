@@ -32,9 +32,9 @@
     "release": "pnpm build && pnpm test && pnpm -r publish"
   },
   "devDependencies": {
-    "@pactor/core": "workspace:*",
-    "@pactor/expression": "workspace:*",
-    "@pactor/schema": "workspace:*",
+    "@pactor-app/core": "workspace:*",
+    "@pactor-app/expression": "workspace:*",
+    "@pactor-app/schema": "workspace:*",
     "tsup": "^8.3.5",
     "typescript": "^5.6.3",
     "vitest": "^2.1.9"

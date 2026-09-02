@@ -1,12 +1,12 @@
 ---
-title: "@pactor/runtime"
+title: "@pactor-app/runtime"
 description: Runtime 引擎——RuntimeContext、StateStore、DataSource 运行时、Action 引擎、React Renderer 与 PageRuntime
 ---
 
-`@pactor/runtime` 是框架的核心引擎层：把 PageDsl 运行起来。它组装 RuntimeContext、管理状态与数据源、执行事件与动作，并驱动 React 渲染。
+`@pactor-app/runtime` 是框架的核心引擎层：把 PageDsl 运行起来。它组装 RuntimeContext、管理状态与数据源、执行事件与动作，并驱动 React 渲染。
 
 ```bash
-pnpm add @pactor/runtime react
+pnpm add @pactor-app/runtime react
 ```
 
 `react >= 18` 为 peer dependency。非 React 部分（context / state / datasource / action）不 import react，可脱离 React 单独使用与测试。
@@ -16,7 +16,7 @@ pnpm add @pactor/runtime react
 `createPageRuntime(pageDsl, options)` 依次完成：Schema 校验 → 创建 RuntimeContext → 注册内置动作 → 初始化 dataSources（autoLoad）→ 执行 onInit / onLoad 生命周期。
 
 ```tsx
-import { createPageRuntime, PageRuntimeView } from '@pactor/runtime';
+import { createPageRuntime, PageRuntimeView } from '@pactor-app/runtime';
 
 const runtime = createPageRuntime(pageDsl, {
   // 可选注入：services / components / actions / permission / router / http
@@ -37,7 +37,7 @@ await runtime.initialized; // autoLoad + onInit + onLoad 执行完毕
 ## RuntimeContext 与 StateStore
 
 ```ts
-import { createRuntimeContext } from '@pactor/runtime';
+import { createRuntimeContext } from '@pactor-app/runtime';
 
 const context = createRuntimeContext({
   page: { id: 'customer-list' },
@@ -56,7 +56,7 @@ const off = context.state.subscribe(() => {/* ... */});
 
 表达式求值作用域由 `buildScope(context, local?)` 组装：`state` / `data` 取当前值，`form` 为 state 的 `form` 路径别名（Form 提交后 `${form.x}` 可用），另含 `app` / `page` / `route` / `user` / `params`；局部作用域（`row` / `rowIndex` / `event` / `item`）覆盖同名全局键。
 
-适配接口（`PermissionAdapter` / `RouterAdapter` / `HttpAdapter`）只定义最小契约，真实实现由 @pactor/permission / @pactor/router / 宿主应用注入。
+适配接口（`PermissionAdapter` / `RouterAdapter` / `HttpAdapter`）只定义最小契约，真实实现由 @pactor-app/permission / @pactor-app/router / 宿主应用注入。
 
 ## DataSource 运行时
 
@@ -93,7 +93,7 @@ await data.reload();          // 缺省刷新全部 autoLoad 源
 | `if` | 按 `params.condition` 执行 `then` / `else` |
 | `delay` | 等待 `params.ms` 毫秒 |
 
-`navigate` / `message` / `confirm` / `overlay.*` 依赖上层模块，由 @pactor/router / @pactor/ui 的 interaction 层注册。
+`navigate` / `message` / `confirm` / `overlay.*` 依赖上层模块，由 @pactor-app/router / @pactor-app/ui 的 interaction 层注册。
 
 ## React Renderer
 
@@ -108,7 +108,7 @@ await data.reload();          // 缺省刷新全部 autoLoad 源
 子作用域：以 `{ component, withScope: true }` 注册的组件经 `useRenderer().renderChildren` 自行渲染 children 并注入局部作用域（Table 行、Repeat 项等）：
 
 ```tsx
-import { useRenderer } from '@pactor/runtime';
+import { useRenderer } from '@pactor-app/runtime';
 
 function Table({ dslChildren }) {
   const { renderChildren } = useRenderer();
@@ -123,5 +123,5 @@ context.components.register('Table', { component: Table, withScope: true });
 另提供 `useRuntimeState(path?)` / `useDataSource(name)` hooks（基于 `useSyncExternalStore`）供组件直接订阅状态。
 
 :::note
-本包不内置任何具体组件。Level 1+ 组件由 @pactor/ui 的 components 层提供，经 ComponentRegistry 注册即可被 Renderer 渲染。
+本包不内置任何具体组件。Level 1+ 组件由 @pactor-app/ui 的 components 层提供，经 ComponentRegistry 注册即可被 Renderer 渲染。
 :::

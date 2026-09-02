@@ -1,4 +1,4 @@
-import type { MenuItem, MenuRegistry } from '@pactor/router';
+import type { MenuItem, MenuRegistry } from '@pactor-app/router';
 
 /**
  * 菜单链（设计决策 D2）：沿可见树查找 menuId 的父链，

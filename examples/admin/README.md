@@ -1,6 +1,6 @@
 # example-admin
 
-Pactor 管理后台示例：纯前端可跑（无后端）——页面 DSL 本地 `.page.yaml` 导入（`@pactor/vite-plugin` 构建期 Parse → Validate → Compile），bootstrap 与数据均为内存 mock。
+Pactor 管理后台示例：纯前端可跑（无后端）——页面 DSL 本地 `.page.yaml` 导入（`@pactor-app/vite-plugin` 构建期 Parse → Validate → Compile），bootstrap 与数据均为内存 mock。
 
 ## 启动
 
@@ -14,7 +14,7 @@ pnpm --filter example-admin build  # 构建（插件构建期强校验全部页�
 
 ## 技术要点
 
-- `src/main.tsx`：`createPactorApplication` + `StaticDslLoader`（bootstrap + 页面 import）+ `options.services` 注入 mock 服务；默认 shadcn UI kit（@pactor/ui，唯一内置实现），导入 `@pactor/ui/styles.css`。未登录/已登录的路由守卫（整页跳转）也在此——认证跳转属于应用外壳职责，在 DSL 之外。
+- `src/main.tsx`：`createPactorApplication` + `StaticDslLoader`（bootstrap + 页面 import）+ `options.services` 注入 mock 服务；默认 shadcn UI kit（@pactor-app/ui，唯一内置实现），导入 `@pactor-app/ui/styles.css`。未登录/已登录的路由守卫（整页跳转）也在此——认证跳转属于应用外壳职责，在 DSL 之外。
 - `src/auth.ts`：本地会话读写（localStorage `example-admin.session`），演示账号写死于此。
 - `src/bootstrap.ts`：`createBootstrap()` 按当前会话返回两种形态——未登录：`login` 布局 + 仅 `/login` 菜单；已登录：`admin` 布局 + 业务菜单/权限。
 - `src/services.ts`：`auth.login` / `auth.logout`（500ms 延迟）+ 内存 customer mock（`customer.list` 关键词过滤 / `customer.detail` / `customer.update`，约 300ms 延迟）。

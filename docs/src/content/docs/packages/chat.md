@@ -1,26 +1,26 @@
 ---
-title: "@pactor/chat"
+title: "@pactor-app/chat"
 description: Chat——AI Message Rendering Protocol（消息模型 / Streaming reducer / Safe Registry / capability 动作）与 Chat Runtime 视图（ChatView / MessageBubble / PartRenderer / Composer / chat 布局）
 ---
 
-`@pactor/chat` 的核心是"协议 + Runtime"而非单个组件：消息模型与 `ConversationStore`、Streaming 事件与纯 reducer、LLM DSL 的 Safe Registry 白名单、Capability → Permission → Confirmation → Execute 的 AI Action 链，以及独立的 React 视图族。model / store / events / reducer / safe-registry / capability 零 React，可纯 Node 测试。
+`@pactor-app/chat` 的核心是"协议 + Runtime"而非单个组件：消息模型与 `ConversationStore`、Streaming 事件与纯 reducer、LLM DSL 的 Safe Registry 白名单、Capability → Permission → Confirmation → Execute 的 AI Action 链，以及独立的 React 视图族。model / store / events / reducer / safe-registry / capability 零 React，可纯 Node 测试。
 
 ```bash
-pnpm add @pactor/chat @pactor/runtime @pactor/markdown react
+pnpm add @pactor-app/chat @pactor-app/runtime @pactor-app/markdown react
 ```
 
-`react >= 18` 为 peer dependency。视图层零 antd 依赖：图标用 lucide-react，皮肤经 `@pactor/chat/styles.css` 提供（技术选型参考 [DeepTutor web](https://github.com/HKUDS/DeepTutor/tree/main/web)）。
+`react >= 18` 为 peer dependency。视图层零 antd 依赖：图标用 lucide-react，皮肤经 `@pactor-app/chat/styles.css` 提供（技术选型参考 [DeepTutor web](https://github.com/HKUDS/DeepTutor/tree/main/web)）。
 
 ## 组合结构
 
 ```tsx
-import { createShadcnComponentRegistry } from '@pactor/ui/components';
+import { createShadcnComponentRegistry } from '@pactor-app/ui/components';
 import {
   ChatView,
   ConversationStore,
   createManualDriver,
   createSafeRegistry,
-} from '@pactor/chat';
+} from '@pactor-app/chat';
 
 const store = new ConversationStore();
 // Safe Registry：LLM 生成的 DSL 只渲染白名单内的组件
@@ -115,14 +115,14 @@ Safe Registry 只挡组件；动作侧由 capability 白名单兜底——AI DSL
 
 DSL part 经 runtime Renderer 渲染：ComponentRegistry 为 Safe Registry；作用域在 runtime 全局作用域之上注入 `conversation`（`{ id }`）、`message`（`{ id }`）、`params`（`user` 经 RuntimeContext 注入）——沿用表达式引擎约束，不暴露浏览器全局对象。`${message.id}` 求值为当前消息 id。
 
-`createChatRuntime({ safeRegistry, capabilities?, permission?, permissionStore?, confirm?, user? })` 一步组装渲染运行时（注册内置动作与 capability 动作；`permissionStore` 经 @pactor/permission 构造权限适配器）；`<ChatView>` 注入 props 后内部自动组装。
+`createChatRuntime({ safeRegistry, capabilities?, permission?, permissionStore?, confirm?, user? })` 一步组装渲染运行时（注册内置动作与 capability 动作；`permissionStore` 经 @pactor-app/permission 构造权限适配器）；`<ChatView>` 注入 props 后内部自动组装。
 
 ## React 视图
 
 - **`<ChatView store transport? onSend? safeRegistry? capabilities? permission? confirm? conversationId? user? params? greeting? subtitle? suggestions? models? model? onModelChange? modelPlacement? contexts? onContextsChange? messageActions? onMessageAction?>`**：`useSyncExternalStore` 订阅消息列表 + Composer。发送时 `onSend` 回调先行，注入 `transport` 时同时驱动一轮 turn（通常二选一）。流式中 Composer 按钮变为停止按钮（点击 abort 当前 turn）；消息区贴底自动跟随，上翻释放、回底恢复，释放期间显示"回到底部"浮动按钮。空会话渲染空状态：问候语（`--pactor-chat-font-display` 衬线展示字体）+ 可选副标题 + `suggestions` 起始建议（字符串或 `{ label, prompt? }`，点击即发送；空数组 / 未传不渲染建议区）。空态布局：会话为空时问候组与 Composer 组成同一垂直居中列（`pactor-chat-view--empty` 变体，Composer 不钉底，列宽沿用 `--pactor-chat-content-width`，极矮视口溢出可滚动）；首条消息进入后恢复消息列表 + 钉底 Composer 的既有布局。Composer 扩展 props（`attachments` / `onAttachmentsChange` / `onAttachFiles` / `onAttachmentClick` / `toolbarStart` / `toolbarEnd` / `onMentionTrigger` / `onPlusMenu`）原样透传给内建 Composer，语义见下方 `<Composer>`。
 - **`<MessageBubble>`**：user 右侧圆角气泡、assistant 左侧通栏排版、system 居中弱提示，parts 按序逐个渲染。
 - **`<ActivityTrace>`**：assistant 消息顶部的活动轨迹——流式状态头（动画图标 + 呼吸文案 + 秒级计时，结束定格）+ tool-call / tool-result 配对轨迹条目（单行：名称 + 参数摘要 + 状态图标，展开显示参数与结果/错误）。折叠状态机：流式展开 → 进入答案阶段自动折叠 → 用户手动操作后 pin（按消息记忆）。
-- **`<PartRenderer>`**：text → 文本段落；markdown → @pactor/markdown 安全渲染器（streaming 期间经 `useSmoothStreamText` 打字机揭示）；dsl → runtime 渲染（Safe Registry + chat 作用域）；tool-call / tool-result → 移交 ActivityTrace 配对渲染；thinking → 自绘折叠卡（markdown 正文，流式展开 + 进行中指示，答案阶段自动折叠，支持 pin）；error → 自绘警示条（附重试入口）；status → 弱提示。
+- **`<PartRenderer>`**：text → 文本段落；markdown → @pactor-app/markdown 安全渲染器（streaming 期间经 `useSmoothStreamText` 打字机揭示）；dsl → runtime 渲染（Safe Registry + chat 作用域）；tool-call / tool-result → 移交 ActivityTrace 配对渲染；thinking → 自绘折叠卡（markdown 正文，流式展开 + 进行中指示，答案阶段自动折叠，支持 pin）；error → 自绘警示条（附重试入口）；status → 弱提示。
 - **`<MessageActions>`**：hover 显现的消息操作条，经 `messageActions?: Array<BuiltinMessageAction | ChatMessageAction>` 声明式配置——**数组即真相**：传入数组时严格按数组顺序与内容渲染，未列出的内建动作不出现；未配置时等价于 `['copy', 'regenerate', 'retry', 'edit']`（与历史行为一致）。内建动作保留包内默认行为——复制（写入剪贴板并反馈已复制）、末条 completed assistant 重新生成（接入 `runRegenerateTurn`，仅末条且注入 transport，该约束不可覆盖）、user 消息内联编辑重发（确认 → 截断 + 重跑，取消不改 store）、error 消息重试；`label` / `icon` / `roles` / `visibleWhen`（`'completed'` 含 cancelled 终态 / `'error'` / `'always'` 含 streaming）按字段覆盖默认描述。自定义动作（`{ id, label?, icon?, roles?, visibleWhen?, service? }`，无 `builtin`）点击经 `ChatServices.callService(service, { actionId, message })` 派发（未注入 callService 时 console.warn 跳过、不抛错）；内建与自定义动作点击均并行触发 `onMessageAction?(actionId, message)` 通知，不影响内建默认行为。`icon` 为字符串名，走 `MESSAGE_ACTION_ICONS` 白名单（copy / check / rotate-ccw / pencil / quote / thumbs-up / thumbs-down / share / bookmark），未知名渲染占位图标。
 - **`<Composer>`**：自适应高度 textarea（上限 200px）；Enter 发送、Shift+Enter 换行；IME 合成进行中 Enter 不发送；空文本不发送；发送/停止按钮为深色实心圆钮（发送为 ArrowUp 上箭头、停止为 Square 方块，禁用态降透明度），状态机（disabled / ready / streaming 停止）同一按钮元素切换。扩展点：`attachments` + `onAttachmentsChange` 受控附件（图片缩略图 / 文档卡片 + 移除），粘贴 / 拖拽 / 文件选择产出 `File[]` 经 `onAttachFiles` 交给调用方（包内不上传），点击卡片经 `onAttachmentClick` 通知；`toolbarStart` / `toolbarEnd` 渲染槽；词边界 `@` 触发 `onMentionTrigger(query, anchorRect)`，"+" 按钮触发 `onPlusMenu(anchorRect)`（未传回调不渲染入口，弹层由调用方渲染）。
 - **内建模型选择**：`models?: ChatModelOption[]`（`{ value, label }`）提供非空时，Composer 工具栏右端渲染内建模型 chip（显示当前模型 label，点击打开锚定弹层选择，渲染在 `toolbarEnd` 槽内容之前），未配置或为空数组不渲染。`model?` + `onModelChange?(value)` 同时提供为受控；仅提供 `models` 为非受控（组件自持选中态，缺省 `models[0]`）。选中值在发送时作为 `ChatInput.model` 进入 transport。`modelPlacement?: 'composer' | 'header'`（缺省 `'composer'`）控制 chip 渲染位置：`'header'` 时模型 chip 渲染在工作区头部左端（title 之前）、Composer 不再渲染；此时即使未配置 title / headerExtra / headerActions，仅配置 models 也渲染"顶栏仅模型选择"的极简头部。受控/非受控选中态与 `ChatInput.model` 语义不随位置变化。
@@ -139,15 +139,15 @@ DSL part 经 runtime Renderer 渲染：ComponentRegistry 为 Safe Registry；作
 
 ## 皮肤
 
-视图颜色全部经 `--pactor-chat-*` CSS 变量表达，样式表 `@pactor/chat/styles.css`（使用前必须引入）：
+视图颜色全部经 `--pactor-chat-*` CSS 变量表达，样式表 `@pactor-app/chat/styles.css`（使用前必须引入）：
 
 ```ts
-import '@pactor/chat/styles.css';
+import '@pactor-app/chat/styles.css';
 ```
 
 **嵌入契约**：组件样式自持——结构布局（高度、对话列居中、面板贴右）全部由包内样式承担，调用端无需任何覆盖。高度语义为"填满父容器"（`height: 100%`）：嵌入时宿主须给容器显式定高（flex 链或固定高度），standalone 顶层挂载同理（如容器 `height: 100vh`）；父级无定高时退化为内容高度。可调令牌：`--pactor-chat-content-width`（对话列限宽，缺省 768px，置 `none` 关闭）、`--pactor-chat-inspector-width`（产出物面板宽，缺省 320px）、`--pactor-chat-sidebar-width`（侧栏宽）。
 
-换肤契约与 @pactor/ui 一致：覆盖 CSS 变量 / `<html data-pactor-theme="dark">` 启用内置暗色 / 直接覆盖 `.pactor-chat-*` class。主要变量：`--pactor-chat-bg`（工作区底色，缺省暖白灰）`/fg/muted/muted-fg/card/border/primary/primary-fg/danger/success`、`--pactor-chat-sidebar-bg`（侧栏底色，较工作区深一档）、`--pactor-chat-user-bubble-bg/border`、`--pactor-chat-code-bg`、`--pactor-chat-radius`、`--pactor-chat-font-display`（衬线展示字体栈，用于空状态问候与布局标题）。动画（呼吸文案、发送按钮 streaming 光环、状态图标脉冲）为纯 CSS keyframes。
+换肤契约与 @pactor-app/ui 一致：覆盖 CSS 变量 / `<html data-pactor-theme="dark">` 启用内置暗色 / 直接覆盖 `.pactor-chat-*` class。主要变量：`--pactor-chat-bg`（工作区底色，缺省暖白灰）`/fg/muted/muted-fg/card/border/primary/primary-fg/danger/success`、`--pactor-chat-sidebar-bg`（侧栏底色，较工作区深一档）、`--pactor-chat-user-bubble-bg/border`、`--pactor-chat-code-bg`、`--pactor-chat-radius`、`--pactor-chat-font-display`（衬线展示字体栈，用于空状态问候与布局标题）。动画（呼吸文案、发送按钮 streaming 光环、状态图标脉冲）为纯 CSS keyframes。
 
 ## chat 布局注册
 
@@ -158,9 +158,9 @@ import '@pactor/chat/styles.css';
 `Chat` 是与 Button / Input 同级的 DSL 组件：`registerChatComponent(registry)` 注册一次（已存在同名类型时不覆盖），页面 DSL 以 `{ type: 'Chat', props, events }` 声明完整聊天工作区（AppShell 侧栏 + header + ChatView）。服务注入与组件声明解耦：宿主在根部用 `ChatServicesProvider` 注入一次 `ChatServices`（与 `ChatWorkspaceServices` 同型，`transport` 必填；可选 `callService(name, params)` 服务桥供 contexts 的 service 引用解析），`Chat` 就近从 context 读取；未注入时渲染受控「未配置聊天服务」提示并 `console.warn`，不抛错。
 
 ```tsx
-import { Registry } from '@pactor/core';
-import { createPageRuntime } from '@pactor/runtime';
-import { ChatServicesProvider, registerChatComponent } from '@pactor/chat';
+import { Registry } from '@pactor-app/core';
+import { createPageRuntime } from '@pactor-app/runtime';
+import { ChatServicesProvider, registerChatComponent } from '@pactor-app/chat';
 import chatPageDsl from './chat.page.yaml';
 
 const components = new Registry<unknown>('ComponentRegistry');
@@ -234,7 +234,7 @@ body:
 
 - **模型**：`ChatArtifact { id, kind: 'markdown' | 'code' | 'text' | 'dsl', title, content, language?, meta? }`；`ArtifactStore`（`get/subscribe/open/update/close`，ConversationStore 同模式，可经 services `artifactStore` 注入）。
 - **受控配置**：`artifact` / `panelOpen` 可绑 `${state.x}`；`events.onPanelClose` 在关闭按钮/遮罩点击时触发（典型接法 setState panelOpen=false）；`inspector?: DslNode | ReactNode` 槽整体替代面板内建渲染。
-- **内建渲染器**按 kind 分发：`markdown` 走 @pactor/markdown 安全渲染、`code` 只读代码块（language 角标）、`text` 预格式文本、`dsl` 经 Safe Registry 守卫 + renderChildren 活预览（拦截/失败降级不抛错）。
+- **内建渲染器**按 kind 分发：`markdown` 走 @pactor-app/markdown 安全渲染、`code` 只读代码块（language 角标）、`text` 预格式文本、`dsl` 经 Safe Registry 守卫 + renderChildren 活预览（拦截/失败降级不抛错）。
 - **卡片重开**：消息流内产出物卡片的"在面板中打开"按钮无条件触发 `events.onOpenArtifact`（event 含 artifact），受控 DSL 场景借此重开面板；非受控场景直接 store.open。
 - **LLM → 面板联动**：`ChatPart` 新增 `artifact` part，消息流内联渲染"产出物卡片"（含"在面板中打开"按钮）；part 就绪时触发 `events.onArtifact`（event 作用域含 `artifact`），DSL 侧典型接法 `setState artifact=${event.artifact}, panelOpen=true`——框架不擅自开面板。
 - **布局**：桌面固定宽右栏（`--pactor-chat-inspector-width`，缺省 320px），左缘可拖拽实时调宽（夹取 240px ~ 容器宽 70%，内部状态无需受控接线）；窄屏（<768px）退化为右侧覆盖抽屉（遮罩点击关闭）。未配置面板时零渲染。

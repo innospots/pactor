@@ -1,6 +1,6 @@
 # Spec: dsl-expression-engine
 
-受控表达式引擎模块（`@pactor/expression`），负责 DSL 中 `${...}` 表达式的解析与求值。基于受控 AST，禁止 `eval` / `new Function`，禁止访问任意全局对象。
+受控表达式引擎模块（`@pactor-app/expression`），负责 DSL 中 `${...}` 表达式的解析与求值。基于受控 AST，禁止 `eval` / `new Function`，禁止访问任意全局对象。
 
 ### Requirement: 模板表达式识别
 

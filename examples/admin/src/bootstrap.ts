@@ -1,4 +1,4 @@
-import type { BootstrapResource } from '@pactor/resource';
+import type { BootstrapResource } from '@pactor-app/resource';
 
 import { readSession } from './auth';
 

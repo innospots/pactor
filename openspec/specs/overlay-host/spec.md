@@ -18,7 +18,7 @@ Overlay 的 React 渲染层（`pactor-ui-antd` interaction 层）：antd Modal/D
 
 ### Requirement: DSL content 渲染
 
-条目的 `content`（DslNode）SHALL 经 @pactor/runtime Renderer 渲染，作用域注入 `params`（entry.params）与 `parent`（打开时的父作用域快照）。
+条目的 `content`（DslNode）SHALL 经 @pactor-app/runtime Renderer 渲染，作用域注入 `params`（entry.params）与 `parent`（打开时的父作用域快照）。
 
 #### Scenario: content 访问 params
 

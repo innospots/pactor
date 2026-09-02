@@ -2,14 +2,14 @@
 import './setup.js';
 
 import { cleanup, fireEvent, render, screen, act } from '@testing-library/react';
-import type { PageDsl } from '@pactor/core';
+import type { PageDsl } from '@pactor-app/core';
 import {
   ActionEngine,
   createRuntimeContext,
   DslRenderer,
   registerBuiltinActions,
   type RuntimeContext,
-} from '@pactor/runtime';
+} from '@pactor-app/runtime';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import {

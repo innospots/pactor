@@ -1,13 +1,13 @@
-# @pactor/core
+# @pactor-app/core
 
 [Pactor](https://github.com/426-330/pactor) 的核心协议包：DSL 类型定义与通用 Registry。零运行时依赖，与 React 无关，可用于浏览器、Node 与构建工具等任意环境。
 
 ## 安装
 
 ```bash
-npm install @pactor/core
+npm install @pactor-app/core
 # 或
-pnpm add @pactor/core
+pnpm add @pactor-app/core
 ```
 
 ## 包含内容
@@ -20,7 +20,7 @@ pnpm add @pactor/core
 ## 示例
 
 ```ts
-import { Registry, type DslNode, type PageDsl } from '@pactor/core';
+import { Registry, type DslNode, type PageDsl } from '@pactor-app/core';
 
 const node: DslNode = {
   type: 'Button',

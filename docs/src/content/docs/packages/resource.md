@@ -1,20 +1,20 @@
 ---
-title: "@pactor/resource"
+title: "@pactor-app/resource"
 description: 资源模块——DSL 资源 Envelope、HTTP / Static 加载器、id@version 内存缓存与 ETag 条件请求
 ---
 
-`@pactor/resource` 解决「DSL 从哪来」：定义 Page / Fragment / Bootstrap 的统一资源 Envelope 与加载接口，提供 HTTP 与 Static 两种加载器实现，以及带版本控制、ETag 条件请求与并发去重的内存缓存。
+`@pactor-app/resource` 解决「DSL 从哪来」：定义 Page / Fragment / Bootstrap 的统一资源 Envelope 与加载接口，提供 HTTP 与 Static 两种加载器实现，以及带版本控制、ETag 条件请求与并发去重的内存缓存。
 
 ```bash
-pnpm add @pactor/resource
+pnpm add @pactor-app/resource
 ```
 
-零 React 依赖，运行时仅依赖 @pactor/core 类型，浏览器 / Node 通用。HTTP 层为可替换的结构化 `HttpAdapter` 接口（默认 fetch 实现），便于统一认证与测试；Envelope 宽容解析（缺省字段给默认值），DSL 本体校验由 PageRuntime（@pactor/schema）负责。
+零 React 依赖，运行时仅依赖 @pactor-app/core 类型，浏览器 / Node 通用。HTTP 层为可替换的结构化 `HttpAdapter` 接口（默认 fetch 实现），便于统一认证与测试；Envelope 宽容解析（缺省字段给默认值），DSL 本体校验由 PageRuntime（@pactor-app/schema）负责。
 
 ## 资源 Envelope
 
 ```ts
-import type { DslResourceEnvelope, PageResource } from '@pactor/resource';
+import type { DslResourceEnvelope, PageResource } from '@pactor-app/resource';
 
 interface DslResourceEnvelope<T> {
   id: string;
@@ -33,7 +33,7 @@ interface DslResourceEnvelope<T> {
 ## HttpDslResourceLoader
 
 ```ts
-import { HttpDslResourceLoader } from '@pactor/resource';
+import { HttpDslResourceLoader } from '@pactor-app/resource';
 
 const loader = new HttpDslResourceLoader({
   baseUrl: '/api/runtime',   // 默认值，可配置
@@ -65,7 +65,7 @@ loader.clear();                                  // 清空缓存与版本表
 ## StaticDslLoader
 
 ```ts
-import { StaticDslLoader } from '@pactor/resource';
+import { StaticDslLoader } from '@pactor-app/resource';
 
 const loader = new StaticDslLoader({
   pages: { demo: pageDsl },            // 裸 DSL 或完整 envelope
@@ -80,7 +80,7 @@ const page = await loader.loadPage('demo'); // 裸 DSL 包装为 version 1 的 e
 ## 自定义 HttpAdapter
 
 ```ts
-import type { HttpAdapter } from '@pactor/resource';
+import type { HttpAdapter } from '@pactor-app/resource';
 
 const adapter: HttpAdapter = async ({ url, method, headers }) => {
   const response = await fetch(url, {

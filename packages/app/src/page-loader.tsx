@@ -1,5 +1,5 @@
-import type { RouteContext } from '@pactor/router';
-import { PageRuntimeView, type PageRuntime } from '@pactor/runtime';
+import type { RouteContext } from '@pactor-app/router';
+import { PageRuntimeView, type PageRuntime } from '@pactor-app/runtime';
 import { useEffect, useState } from 'react';
 
 import type { PactorApplicationHandle } from './application.js';

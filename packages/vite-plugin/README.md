@@ -1,13 +1,13 @@
-# @pactor/vite-plugin
+# @pactor-app/vite-plugin
 
-[Pactor](https://github.com/426-330/pactor) 的 Vite 插件：把 `.page.yaml` / `.fragment.yaml` DSL 文件在构建期转换为 JS 模块（Parse → Validate → Compile），支持 HMR。校验复用 @pactor/schema 的 `validatePageDsl`。
+[Pactor](https://github.com/426-330/pactor) 的 Vite 插件：把 `.page.yaml` / `.fragment.yaml` DSL 文件在构建期转换为 JS 模块（Parse → Validate → Compile），支持 HMR。校验复用 @pactor-app/schema 的 `validatePageDsl`。
 
 ## 安装
 
 ```bash
-npm install @pactor/vite-plugin
+npm install @pactor-app/vite-plugin
 # 或
-pnpm add @pactor/vite-plugin
+pnpm add @pactor-app/vite-plugin
 ```
 
 `vite >= 5` 为 peer dependency。
@@ -17,7 +17,7 @@ pnpm add @pactor/vite-plugin
 ```ts
 // vite.config.ts
 import { defineConfig } from 'vite';
-import pactor from '@pactor/vite-plugin';
+import pactor from '@pactor-app/vite-plugin';
 
 export default defineConfig({
   plugins: [pactor()],
@@ -59,14 +59,14 @@ pactor({
 
 ```ts
 declare module '*.page.yaml' {
-  import type { PageDsl } from '@pactor/core';
+  import type { PageDsl } from '@pactor-app/core';
   const page: PageDsl;
   export const dslVersion: string;
   export default page;
 }
 
 declare module '*.fragment.yaml' {
-  import type { FragmentDsl } from '@pactor/core';
+  import type { FragmentDsl } from '@pactor-app/core';
   const fragment: FragmentDsl;
   export const dslVersion: string;
   export default fragment;
@@ -75,10 +75,10 @@ declare module '*.fragment.yaml' {
 
 ## 与 StaticDslLoader 组合
 
-构建期 import 的 DSL 可喂给 @pactor/resource 的 `StaticDslLoader`（examples / 单测 / 本地 DSL 开发）：
+构建期 import 的 DSL 可喂给 @pactor-app/resource 的 `StaticDslLoader`（examples / 单测 / 本地 DSL 开发）：
 
 ```ts
-import { StaticDslLoader } from '@pactor/resource';
+import { StaticDslLoader } from '@pactor-app/resource';
 import userListPage from './user-list.page.yaml';
 
 const loader = new StaticDslLoader({

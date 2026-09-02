@@ -1,8 +1,8 @@
 import { X } from 'lucide-react';
-import { Registry } from '@pactor/core';
-import type { DslNode } from '@pactor/core';
-import { MarkdownRenderer } from '@pactor/markdown';
-import { DslRenderer, useRenderer } from '@pactor/runtime';
+import { Registry } from '@pactor-app/core';
+import type { DslNode } from '@pactor-app/core';
+import { MarkdownRenderer } from '@pactor-app/markdown';
+import { DslRenderer, useRenderer } from '@pactor-app/runtime';
 import {
   Component,
   useMemo,
@@ -20,7 +20,7 @@ import { ChatDenied } from './PartRenderer.js';
  * ArtifactPanel（spec: chat-artifact-panel，设计决策 D2/D3）：
  * 产出物预览面板 = 标题栏（标题 + kind 角标 + 关闭按钮）+ 内容区。
  *
- * 内容按 artifact.kind 分发内建渲染器：markdown 经 @pactor/markdown
+ * 内容按 artifact.kind 分发内建渲染器：markdown 经 @pactor-app/markdown
  * 安全渲染；code 只读代码块（language 仅作角标，不引高亮依赖）；
  * text 预格式文本；dsl 经 guardChatDsl 白名单守卫 + renderChildren
  * 活预览（与消息流 dsl part 同安全级），被拦截 / 渲染失败一律降级为
@@ -76,7 +76,7 @@ class ArtifactDslGuard extends Component<
   }
 
   override componentDidCatch(error: unknown): void {
-    console.warn('[@pactor/chat] DSL 产出物渲染失败，已降级展示', error);
+    console.warn('[@pactor-app/chat] DSL 产出物渲染失败，已降级展示', error);
   }
 
   override render(): ReactNode {

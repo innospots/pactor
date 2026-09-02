@@ -7,7 +7,7 @@ description: 开发并注册业务组件——Renderer 契约、容器组件、�
 
 ## Renderer 契约（六条）
 
-渲染器对组件的约定（实现见 `@pactor/runtime` 的 renderer）：
+渲染器对组件的约定（实现见 `@pactor-app/runtime` 的 renderer）：
 
 1. **props 已求值**：DSL props 中的 `${...}` 表达式在到达组件前已深度求值完毕——组件**不要**再调 `resolveTemplate`，把 props 当普通 React props 用。
 2. **events 变成函数 props**：DSL 的 `events: { onClick: ... }` 会被绑定为 `props.onClick = (event) => 执行动作`。组件在合适的时机调用它并传出事件载荷（Button 无参、Input 传 string、Form 传 values），动作引擎会把载荷放进 `event` 作用域键。
@@ -55,8 +55,8 @@ createPactorApplication({
 需要自己控制子树渲染时机（行模板、页签 pane、虚拟列表等）时，以 `{ component, withScope: true }` 注册：组件收到**原始 DSL 子树** `dslChildren` prop（不预渲染），经 `useRenderer().renderChildren(children, extraScope)` 在注入局部作用域后渲染：
 
 ```tsx
-import { useRenderer } from '@pactor/runtime';
-import type { DslNode } from '@pactor/core';
+import { useRenderer } from '@pactor-app/runtime';
+import type { DslNode } from '@pactor-app/core';
 
 interface RowCardProps {
   dslChildren?: DslNode[];
@@ -101,14 +101,14 @@ components: {
 | --- | --- |
 | `createPactorApplication({ components })` | 最常用：应用级业务组件，叠加在内置注册表之上，可覆盖同名内置组件 |
 | `componentRegistry` 工厂 / `ui` 预设 | 整体替换组件集（自研 UI kit） |
-| `registerMarkdownComponents(registry)` 模式 | 包级扩展组件（参考 @pactor/markdown 的注册函数约定） |
+| `registerMarkdownComponents(registry)` 模式 | 包级扩展组件（参考 @pactor-app/markdown 的注册函数约定） |
 | chat 的 Safe Registry | AI 下发 DSL 场景：`createSafeRegistry(source, ['BizTag'])` 白名单放行后才可被 LLM DSL 使用 |
 
-不用 @pactor/app 的组合方式下，直接 `registry.register('BizTag', BizTag)` 即可（Registry 来自 @pactor/core）。
+不用 @pactor-app/app 的组合方式下，直接 `registry.register('BizTag', BizTag)` 即可（Registry 来自 @pactor-app/core）。
 
 ## 注意事项
 
-自定义组件与槽位内容需要 UI 元素时，推荐用 `@pactor/ui/ui` 子路径导出的原语组件（Button / Input / Popover / Dialog 等）——视觉自动跟随语义令牌皮肤，无需自写样式。
+自定义组件与槽位内容需要 UI 元素时，推荐用 `@pactor-app/ui/ui` 子路径导出的原语组件（Button / Input / Popover / Dialog 等）——视觉自动跟随语义令牌皮肤，无需自写样式。
 
 - **props 命名避开 `on*`**：props 里 key 以 `on` 开头且值为字符串时渲染器原样保留不求值（事件统一走 `events` 字段）。
 - **组件要"受控友好"**：state/data 变化会触发整棵子树重渲染，组件应纯由 props 驱动，避免内部状态与 DSL 状态双写。

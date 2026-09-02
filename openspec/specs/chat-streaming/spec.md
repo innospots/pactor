@@ -1,6 +1,6 @@
 # Spec: chat-streaming
 
-Chat Streaming 事件模型与 reducer（`@pactor/chat`，设计文档第 69 节）。
+Chat Streaming 事件模型与 reducer（`@pactor-app/chat`，设计文档第 69 节）。
 
 ### Requirement: SSE 事件模型
 

@@ -1,6 +1,6 @@
 # Spec: runtime-context
 
-RuntimeContext 组装、StateStore、表达式作用域构建与 Service Registry（`@pactor/runtime` 的非 React 基础层）。
+RuntimeContext 组装、StateStore、表达式作用域构建与 Service Registry（`@pactor-app/runtime` 的非 React 基础层）。
 
 ### Requirement: RuntimeContext 组装
 
@@ -61,7 +61,7 @@ StateStore SHALL 提供 `getState()`、`get(path)`（支持 `'a.b.c'` 点路径�
 
 ### Requirement: Service Registry 与适配接口
 
-模块 SHALL 基于 @pactor/core `Registry<T>` 提供 ServiceRegistry（service 名为键，如 `customer.list`），并定义 `PermissionAdapter`（`check(permission): boolean`）、`RouterAdapter`（`navigate(to)`）、`HttpAdapter`（`request(config): Promise<unknown>`）接口。默认 PermissionAdapter MUST 放行，默认 RouterAdapter MUST 为 no-op。
+模块 SHALL 基于 @pactor-app/core `Registry<T>` 提供 ServiceRegistry（service 名为键，如 `customer.list`），并定义 `PermissionAdapter`（`check(permission): boolean`）、`RouterAdapter`（`navigate(to)`）、`HttpAdapter`（`request(config): Promise<unknown>`）接口。默认 PermissionAdapter MUST 放行，默认 RouterAdapter MUST 为 no-op。
 
 #### Scenario: 注册并解析服务
 

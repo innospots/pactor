@@ -1,6 +1,6 @@
 # Spec: dynamic-route
 
-导航桥接与动态路由（`@pactor/router`）：NavigationBridge 抽象、runtime RouterAdapter 桥接、React Router 绑定与路由守卫。
+导航桥接与动态路由（`@pactor-app/router`）：NavigationBridge 抽象、runtime RouterAdapter 桥接、React Router 绑定与路由守卫。
 
 ### Requirement: NavigationBridge 抽象与 Memory 实现
 
@@ -18,7 +18,7 @@ SHALL 定义 `NavigationBridge`（`getLocation` / `push` / `replace` / `subscrib
 
 ### Requirement: runtime RouterAdapter 桥接
 
-`createRouterAdapter(bridge)` SHALL 返回结构化兼容 @pactor/runtime `RouterAdapter` 的对象：`navigate(to)` 调用 `bridge.push(to)`。
+`createRouterAdapter(bridge)` SHALL 返回结构化兼容 @pactor-app/runtime `RouterAdapter` 的对象：`navigate(to)` 调用 `bridge.push(to)`。
 
 #### Scenario: DSL navigate 动作驱动路由
 
@@ -27,7 +27,7 @@ SHALL 定义 `NavigationBridge`（`getLocation` / `push` / `replace` / `subscrib
 
 ### Requirement: React Router 绑定
 
-子入口 `@pactor/router/react` SHALL 提供 `<DynamicDslRoute>` 组件与 `useReactRouterBridge()`：组件接受 `registry`、`render({ pageId, route })`、可选 `fallback`（未命中 404）、`forbidden`（无权限 403）、`permissionChecker`；useLocation 变化时重新解析。核心入口 MUST NOT import react 或 react-router-dom。
+子入口 `@pactor-app/router/react` SHALL 提供 `<DynamicDslRoute>` 组件与 `useReactRouterBridge()`：组件接受 `registry`、`render({ pageId, route })`、可选 `fallback`（未命中 404）、`forbidden`（无权限 403）、`permissionChecker`；useLocation 变化时重新解析。核心入口 MUST NOT import react 或 react-router-dom。
 
 #### Scenario: 命中渲染页面
 

@@ -1,5 +1,5 @@
-import type { I18nContext } from '@pactor/core';
-import { createI18nContext } from '@pactor/core';
+import type { I18nContext } from '@pactor-app/core';
+import { createI18nContext } from '@pactor-app/core';
 import { createContext, useContext } from 'react';
 
 /**

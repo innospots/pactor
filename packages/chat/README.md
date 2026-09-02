@@ -1,13 +1,13 @@
-# @pactor/chat
+# @pactor-app/chat
 
 [Pactor](https://github.com/426-330/pactor) 的 Chat 包：AI Message Rendering Protocol（消息模型 / Streaming reducer / Safe Registry / capability 动作）与 Chat Runtime 视图（`<ChatView>` / `<MessageBubble>` / `<PartRenderer>` / `<Composer>` / chat 布局）。核心是"协议 + Runtime"而非单个组件；model / store / events / reducer / safe-registry / capability 零 React，可纯 Node 测试。
 
 ## 安装
 
 ```bash
-npm install @pactor/chat @pactor/runtime @pactor/markdown react
+npm install @pactor-app/chat @pactor-app/runtime @pactor-app/markdown react
 # 或
-pnpm add @pactor/chat @pactor/runtime @pactor/markdown react
+pnpm add @pactor-app/chat @pactor-app/runtime @pactor-app/markdown react
 ```
 
 `react >= 18` 为 peer dependency。
@@ -15,19 +15,19 @@ pnpm add @pactor/chat @pactor/runtime @pactor/markdown react
 视图组件（ChatView / Chat / ChatShell 等）样式自持，使用前引入样式表并给宿主容器显式定高（组件填满父容器，`height: 100%`）：
 
 ```ts
-import '@pactor/chat/styles.css';
+import '@pactor-app/chat/styles.css';
 ```
 
 ## 示例
 
 ```tsx
-import { createShadcnComponentRegistry } from '@pactor/ui/components';
+import { createShadcnComponentRegistry } from '@pactor-app/ui/components';
 import {
   ChatView,
   ConversationStore,
   createManualDriver,
   createSafeRegistry,
-} from '@pactor/chat';
+} from '@pactor-app/chat';
 
 const store = new ConversationStore();
 // Safe Registry：LLM 生成的 DSL 只渲染白名单内的组件
@@ -85,12 +85,12 @@ driver.complete();
 `Chat` 是与 Button / Input 同级的 DSL 组件：注册一次后，任意页面 DSL 里 `{ type: 'Chat', props, events }` 即可声明完整聊天工作区（AppShell 侧栏 + header + ChatView）。与 `createChatWorkspace` 的区别是**服务注入与组件声明解耦**——宿主在应用根部用 `ChatServicesProvider` 注入一次服务，`Chat` 组件就近从 context 读取；未注入时渲染受控「未配置聊天服务」提示并 `console.warn`，不抛错。
 
 ```tsx
-import { Registry } from '@pactor/core';
-import { createPageRuntime } from '@pactor/runtime';
+import { Registry } from '@pactor-app/core';
+import { createPageRuntime } from '@pactor-app/runtime';
 import {
   ChatServicesProvider,
   registerChatComponent,
-} from '@pactor/chat';
+} from '@pactor-app/chat';
 import chatPageDsl from './chat.page.yaml';
 
 const components = new Registry<unknown>('ComponentRegistry');
@@ -171,10 +171,10 @@ body:
 聊天页可以像其他 pactor 页面一样以 `*.page.yaml` 声明、经 `createPageRuntime` 渲染。表达式作用域只承载可序列化数据，函数 / 实例无法从 DSL 产生——因此运行时服务一律由宿主经工厂闭包注入，DSL 只携带标量配置：
 
 ```tsx
-import { Registry } from '@pactor/core';
-import { createPageRuntime } from '@pactor/runtime';
-import { createChatWorkspace } from '@pactor/chat';
-import chatPageDsl from './chat.page.yaml'; // 经 @pactor/vite-plugin 编译
+import { Registry } from '@pactor-app/core';
+import { createPageRuntime } from '@pactor-app/runtime';
+import { createChatWorkspace } from '@pactor-app/chat';
+import chatPageDsl from './chat.page.yaml'; // 经 @pactor-app/vite-plugin 编译
 
 // 宿主装配：全部运行时服务与交互回调经闭包注入（只创建一次，
 // 组件身份稳定，内部 store 才不会重建）
@@ -217,7 +217,7 @@ body:
 
 - LLM 生成的 DSL 只经 Safe Registry 渲染（白名单外组件一律受控占位，props 内嵌 DSL 子树由 runtime 的 UnsupportedComponent 兜底）。
 - AI Action 必须经 Capability → Permission → Confirmation → Execute 链；AI DSL 建议只配置 `capability` 动作（Safe Registry 只挡组件，动作侧由 capability 白名单兜底）。
-- Markdown 渲染复用 @pactor/markdown 安全渲染器（不启用 raw HTML、URL 协议白名单）。
+- Markdown 渲染复用 @pactor-app/markdown 安全渲染器（不启用 raw HTML、URL 协议白名单）。
 
 ## 文档
 

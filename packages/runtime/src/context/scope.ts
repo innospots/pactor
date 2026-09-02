@@ -1,4 +1,4 @@
-import type { ExpressionScope } from '@pactor/expression';
+import type { ExpressionScope } from '@pactor-app/expression';
 
 import type { RuntimeContext } from './context.js';
 

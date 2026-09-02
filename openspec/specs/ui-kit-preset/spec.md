@@ -1,14 +1,14 @@
 # Spec: ui-kit-preset
 
-`@pactor/ui` 聚合包与 @pactor/app `ui` 预设选项。
+`@pactor-app/ui` 聚合包与 @pactor-app/app `ui` 预设选项。
 
 ### Requirement: 聚合包导出
 
-`@pactor/ui` SHALL 导出其 components / interaction / layout 三层的全部公开 API（含收敛后自有的契约类型与交互核心），自身不含超出三层实现之外的新实现。
+`@pactor-app/ui` SHALL 导出其 components / interaction / layout 三层的全部公开 API（含收敛后自有的契约类型与交互核心），自身不含超出三层实现之外的新实现。
 
 #### Scenario: 关键符号可用
 
-- **WHEN** 从 @pactor/ui 导入 createShadcnComponentRegistry / ShadcnOverlayHost / createShadcnLayoutRegistry / OverlayManager
+- **WHEN** 从 @pactor-app/ui 导入 createShadcnComponentRegistry / ShadcnOverlayHost / createShadcnLayoutRegistry / OverlayManager
 - **THEN** 均可正常导入并使用
 
 ### Requirement: shadcnUiKit 预设对象
@@ -22,14 +22,14 @@ SHALL 导出 `shadcnUiKit`，包含三个槽位：`componentRegistry`（createSh
 
 ### Requirement: 合并样式入口
 
-SHALL 提供 `@pactor/ui/styles.css`（预建样式表），exports 暴露该入口并标注 sideEffects。
+SHALL 提供 `@pactor-app/ui/styles.css`（预建样式表），exports 暴露该入口并标注 sideEffects。
 
 #### Scenario: 样式入口
 
 - **WHEN** 查看包 exports
 - **THEN** 存在 `./styles.css` 入口
 
-### Requirement: @pactor/app ui 选项
+### Requirement: @pactor-app/app ui 选项
 
 `createPactorApplication` SHALL 支持可选 `ui?: UiKit`（`{ componentRegistry?, layoutRegistry?, interactionKit? }`）。每个槽位的取值优先级 MUST 为：显式细粒度选项 > `ui` 预设 > 内置 shadcn 默认。不传 `ui` 时行为与现状完全一致。
 

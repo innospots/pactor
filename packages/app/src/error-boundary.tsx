@@ -25,7 +25,7 @@ export class PageErrorBoundary extends Component<
   }
 
   override componentDidCatch(error: Error, info: ErrorInfo): void {
-    console.error('[@pactor/app] 页面渲染异常', error, info.componentStack);
+    console.error('[@pactor-app/app] 页面渲染异常', error, info.componentStack);
   }
 
   override render(): ReactNode {

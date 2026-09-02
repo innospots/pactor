@@ -1,18 +1,18 @@
-import { createPactorApplication } from "@pactor/app";
+import { createPactorApplication } from "@pactor-app/app";
 import {
   ChatServicesProvider,
   createSafeRegistry,
   registerChatComponent,
   type ChatServices,
-} from "@pactor/chat";
+} from "@pactor-app/chat";
 // Chat 一等组件（AI 工作区页）的皮肤样式表
-import "@pactor/chat/styles.css";
-import { StaticDslLoader } from "@pactor/resource";
-// 默认 UI kit 为 shadcn（@pactor/ui），样式表导入为必需步骤
-import "@pactor/ui/styles.css";
-import { createShadcnComponentRegistry } from "@pactor/ui/components";
+import "@pactor-app/chat/styles.css";
+import { StaticDslLoader } from "@pactor-app/resource";
+// 默认 UI kit 为 shadcn（@pactor-app/ui），样式表导入为必需步骤
+import "@pactor-app/ui/styles.css";
+import { createShadcnComponentRegistry } from "@pactor-app/ui/components";
 import type { ReactNode } from "react";
-// 示例皮肤：换肤契约参考实现（须在 @pactor/ui/styles.css 之后导入）
+// 示例皮肤：换肤契约参考实现（须在 @pactor-app/ui/styles.css 之后导入）
 import "./theme.css";
 // 皮肤 store：模块加载即把持久化的皮肤应用到 DOM（data-pactor-theme 等），
 // 须在首屏渲染前执行

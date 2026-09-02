@@ -1,8 +1,8 @@
 import type {
   ActionRegistry,
   ActionResult,
-} from '@pactor/runtime';
-import { resolveDeep } from '@pactor/runtime';
+} from '@pactor-app/runtime';
+import { resolveDeep } from '@pactor-app/runtime';
 
 import { OverlayManager, type OverlayConfig } from './manager.js';
 

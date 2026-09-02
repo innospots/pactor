@@ -6,26 +6,26 @@ Dynamic Application Runtime — 基于 YAML/JSON DSL 的企业级 Server-Driven 
 
 ## 命名约定
 
-框架名为 **pactor**，npm 上使用 `@pactor/*` scope 发布各模块（如 `@pactor/core`、`@pactor/schema`、`@pactor/expression`），另有聚合安装包 `pactor`（meta package，依赖全部模块、入口转发 `@pactor/app`）。设计文档中的 `@company/dsl-*` 为文档占位命名。目录名保持简短（`packages/core`），与包名分离。
+框架名为 **pactor**，npm 上使用 `@pactor-app/*` scope 发布各模块（如 `@pactor-app/core`、`@pactor-app/schema`、`@pactor-app/expression`），另有聚合安装包 `pactor-app`（meta package，依赖全部模块、入口转发 `@pactor-app/app`）。设计文档中的 `@company/dsl-*` 为文档占位命名。目录名保持简短（`packages/core`），与包名分离。
 
 ## 工程结构
 
 ```text
 packages/
-  core/        @pactor/core        DSL 核心协议类型 + 通用 Registry（零依赖）
-  schema/      @pactor/schema      JSON Schema + Ajv 校验器
-  expression/  @pactor/expression  受控表达式引擎（无 eval）
-  runtime/     @pactor/runtime     Runtime 引擎 + React Renderer
-  permission/  @pactor/permission  权限 Store + 四层守卫
-  resource/    @pactor/resource    DSL 资源加载 + 缓存 + 版本控制
-  router/      @pactor/router      菜单注册 + 动态路由 + 导航桥接
-  ui/          @pactor/ui          唯一内置 UI kit（shadcn：vendored shadcn/ui + 契约/交互核心/布局三层 + shadcnUiKit + 预建样式表）
-  app/         @pactor/app         一站式集成（createPactorApplication）
-  pactor/      pactor              聚合安装包（meta）：依赖全部模块，入口转发 @pactor/app
+  core/        @pactor-app/core        DSL 核心协议类型 + 通用 Registry（零依赖）
+  schema/      @pactor-app/schema      JSON Schema + Ajv 校验器
+  expression/  @pactor-app/expression  受控表达式引擎（无 eval）
+  runtime/     @pactor-app/runtime     Runtime 引擎 + React Renderer
+  permission/  @pactor-app/permission  权限 Store + 四层守卫
+  resource/    @pactor-app/resource    DSL 资源加载 + 缓存 + 版本控制
+  router/      @pactor-app/router      菜单注册 + 动态路由 + 导航桥接
+  ui/          @pactor-app/ui          唯一内置 UI kit（shadcn：vendored shadcn/ui + 契约/交互核心/布局三层 + shadcnUiKit + 预建样式表）
+  app/         @pactor-app/app         一站式集成（createPactorApplication）
+  pactor/      pactor-app          聚合安装包（meta）：依赖全部模块，入口转发 @pactor-app/app
 examples/
   vite-starter/ example-vite-starter 最小上手示例（vite-plugin 工作流，端口 5499）
   admin/       example-admin      管理后台示例（shadcn kit，StaticDslLoader + 内存 mock，端口 5199）
-  chat/        example-chat       @pactor/chat 对话示例（mock AI 流式 transport，端口 5399）
+  chat/        example-chat       @pactor-app/chat 对话示例（mock AI 流式 transport，端口 5399）
 docs/          pactor-docs        Astro Starlight 文档站
 ```
 
@@ -47,7 +47,7 @@ pnpm docs:build     # 构建文档站
 ```bash
 pnpm --filter example-vite-starter dev   # 最小上手示例（vite-plugin 工作流），http://localhost:5499
 pnpm --filter example-admin dev          # 管理后台示例（shadcn kit，含皮肤设置），http://localhost:5199
-pnpm --filter example-chat dev           # @pactor/chat 对话示例，http://localhost:5399
+pnpm --filter example-chat dev           # @pactor-app/chat 对话示例，http://localhost:5399
 ```
 
 > 示例引用 workspace 包的 dist 产物：改包代码后需先 `pnpm build`，示例才能看到效果。

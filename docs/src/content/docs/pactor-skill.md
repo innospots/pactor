@@ -1,9 +1,9 @@
 ---
-title: "@pactor/skill"
+title: "@pactor-app/skill"
 description: 面向 AI agent 的 Pactor 开发 skill，用于快速构建 Server-Driven UI 应用
 ---
 
-`@pactor/skill` 是一个 agent skill 包，帮助任意 AI agent 在协助开发者使用 Pactor 框架时提供上下文感知的指导。
+`@pactor-app/skill` 是一个 agent skill 包，帮助任意 AI agent 在协助开发者使用 Pactor 框架时提供上下文感知的指导。
 
 ## 位置
 
@@ -26,12 +26,12 @@ description: 面向 AI agent 的 Pactor 开发 skill，用于快速构建 Server
 skill 在以下场景激活：
 
 - 构建、启动或扩展 Pactor 应用
-- 使用 `createPactorApplication` 或 `@pactor/app`
+- 使用 `createPactorApplication` 或 `@pactor-app/app`
 - 编写 Pactor YAML/JSON DSL
 - 创建自定义组件或切换 UI kit
 - 配置主题、布局、菜单、路由、资源、权限
 - 处理事件联动、表单联动、动作编排
-- 提到 `@pactor/core`、`@pactor/runtime`、`@pactor/app` 等包名
+- 提到 `@pactor-app/core`、`@pactor-app/runtime`、`@pactor-app/app` 等包名
 
 ## 内容结构
 
@@ -57,4 +57,4 @@ skill 在以下场景激活：
 
 ## 与文档站的关系
 
-本页是 `@pactor/skill` 的说明入口；详细的 skill 内容请直接阅读 `packages/skill/SKILL.md`。skill 内容使用英文编写，以便不同 agent 平台通用。
+本页是 `@pactor-app/skill` 的说明入口；详细的 skill 内容请直接阅读 `packages/skill/SKILL.md`。skill 内容使用英文编写，以便不同 agent 平台通用。

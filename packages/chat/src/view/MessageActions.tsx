@@ -250,7 +250,7 @@ export function MessageActions({
             });
           } else {
             console.warn(
-              `[@pactor/chat] 消息动作「${action.id}」配置了 service「${action.service}」但未注入 callService，已跳过派发`,
+              `[@pactor-app/chat] 消息动作「${action.id}」配置了 service「${action.service}」但未注入 callService，已跳过派发`,
             );
           }
         }

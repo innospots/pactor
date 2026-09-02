@@ -1,18 +1,18 @@
 ---
-title: "@pactor/schema"
+title: "@pactor-app/schema"
 description: DSL 版本常量、JSON Schema 与基于 Ajv 的结构化校验器
 ---
 
-`@pactor/schema` 提供 DSL 版本常量、Page DSL 与 DslNode 的 JSON Schema，以及输出结构化错误的校验器。用于 DSL 发布前校验、服务端/CLI 复用 Schema、以及 Runtime 加载前检查。
+`@pactor-app/schema` 提供 DSL 版本常量、Page DSL 与 DslNode 的 JSON Schema，以及输出结构化错误的校验器。用于 DSL 发布前校验、服务端/CLI 复用 Schema、以及 Runtime 加载前检查。
 
 ```bash
-pnpm add @pactor/schema
+pnpm add @pactor-app/schema
 ```
 
 ## DSL 版本
 
 ```ts
-import { DSL_VERSION } from '@pactor/schema';
+import { DSL_VERSION } from '@pactor-app/schema';
 
 DSL_VERSION; // "1.0"
 ```
@@ -22,7 +22,7 @@ DSL 文档根节点必须携带 `dsl` 字段声明其遵循的规范版本，Run
 ## 校验 Page DSL
 
 ```ts
-import { validatePageDsl } from '@pactor/schema';
+import { validatePageDsl } from '@pactor-app/schema';
 
 const result = validatePageDsl(pageDsl);
 
@@ -86,7 +86,7 @@ import {
   PAGE_DSL_SCHEMA_ID,
   DSL_NODE_SCHEMA_ID,
   ACTION_CONFIG_SCHEMA_ID,
-} from '@pactor/schema';
+} from '@pactor-app/schema';
 ```
 
 Schema 之间通过 `$id` / `$ref` 关联，使用时需将全部 Schema 注册到同一个 Ajv 实例。

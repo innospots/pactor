@@ -1,5 +1,5 @@
-import type { ChatEvent, ChatInput, ChatTransport } from '@pactor/chat';
-import type { DslNode } from '@pactor/core';
+import type { ChatEvent, ChatInput, ChatTransport } from '@pactor-app/chat';
+import type { DslNode } from '@pactor-app/core';
 
 /**
  * mock AI transport（examples/chat 专用）：
@@ -256,7 +256,7 @@ async function* defaultTurn(messageId: string, text: string): AsyncGenerator<Cha
   yield* streamThinking(messageId, `收到用户输入「${text}」，组织回复……`);
   yield* streamText(
     messageId,
-    `你刚才说：「${text}」。\n\n我是 **@pactor/chat** 的 mock AI，可以演示这些能力：\n\n- 发送「**天气**」：思考过程 + 工具调用 + 结论\n- 发送「**报表**」：LLM 下发 DSL 卡片（Safe Registry 渲染）\n- 发送「**导出**」：高风险 capability 确认链\n- 发送「**月报**」：markdown 产出物 → 右侧面板\n- 发送「**代码**」：code 产出物 → 右侧面板\n- 发送「**页面**」：dsl 产出物 → 右侧面板活预览\n\n支持数学公式（KaTeX）：行内 $E=mc^2$，块级：\n\n$$\\bar{x} = \\frac{1}{n}\\sum_{i=1}^{n} x_i$$\n\n\`\`\`ts\n// 真实接入：实现 ChatTransport 对接你的 SSE / WebSocket 服务端\ninterface ChatTransport {\n  send(input: ChatInput): AsyncIterable<ChatEvent>;\n}\n\`\`\``,
+    `你刚才说：「${text}」。\n\n我是 **@pactor-app/chat** 的 mock AI，可以演示这些能力：\n\n- 发送「**天气**」：思考过程 + 工具调用 + 结论\n- 发送「**报表**」：LLM 下发 DSL 卡片（Safe Registry 渲染）\n- 发送「**导出**」：高风险 capability 确认链\n- 发送「**月报**」：markdown 产出物 → 右侧面板\n- 发送「**代码**」：code 产出物 → 右侧面板\n- 发送「**页面**」：dsl 产出物 → 右侧面板活预览\n\n支持数学公式（KaTeX）：行内 $E=mc^2$，块级：\n\n$$\\bar{x} = \\frac{1}{n}\\sum_{i=1}^{n} x_i$$\n\n\`\`\`ts\n// 真实接入：实现 ChatTransport 对接你的 SSE / WebSocket 服务端\ninterface ChatTransport {\n  send(input: ChatInput): AsyncIterable<ChatEvent>;\n}\n\`\`\``,
     { format: 'markdown', chunk: 4 },
   );
 }

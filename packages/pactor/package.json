@@ -1,7 +1,7 @@
 {
-  "name": "pactor",
+  "name": "pactor-app",
   "version": "0.1.0",
-  "description": "Pactor meta package: installs the full Server-Driven UI + AI-Native runtime stack (@pactor/*) and re-exports the one-stop application API (createPactorApplication)",
+  "description": "Pactor meta package: installs the full Server-Driven UI + AI-Native runtime stack (@pactor-app/*) and re-exports the one-stop application API (createPactorApplication)",
   "keywords": [
     "pactor",
     "dsl",
@@ -51,19 +51,19 @@
     "access": "public"
   },
   "dependencies": {
-    "@pactor/app": "workspace:*",
-    "@pactor/chat": "workspace:*",
-    "@pactor/cli": "workspace:*",
-    "@pactor/core": "workspace:*",
-    "@pactor/expression": "workspace:*",
-    "@pactor/markdown": "workspace:*",
-    "@pactor/permission": "workspace:*",
-    "@pactor/resource": "workspace:*",
-    "@pactor/router": "workspace:*",
-    "@pactor/runtime": "workspace:*",
-    "@pactor/schema": "workspace:*",
-    "@pactor/ui": "workspace:*",
-    "@pactor/vite-plugin": "workspace:*"
+    "@pactor-app/app": "workspace:*",
+    "@pactor-app/chat": "workspace:*",
+    "@pactor-app/cli": "workspace:*",
+    "@pactor-app/core": "workspace:*",
+    "@pactor-app/expression": "workspace:*",
+    "@pactor-app/markdown": "workspace:*",
+    "@pactor-app/permission": "workspace:*",
+    "@pactor-app/resource": "workspace:*",
+    "@pactor-app/router": "workspace:*",
+    "@pactor-app/runtime": "workspace:*",
+    "@pactor-app/schema": "workspace:*",
+    "@pactor-app/ui": "workspace:*",
+    "@pactor-app/vite-plugin": "workspace:*"
   },
   "peerDependencies": {
     "react": ">=18",

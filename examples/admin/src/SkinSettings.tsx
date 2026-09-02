@@ -1,5 +1,5 @@
 /**
- * SkinSettings（@pactor/app headerExtra 槽位）：头部「皮肤」按钮 → 下拉面板
+ * SkinSettings（@pactor-app/app headerExtra 槽位）：头部「皮肤」按钮 → 下拉面板
  * （主色预设 / 暗黑开关 / 圆角滑杆 / 恢复默认）。
  *
  * shadcn kit 没有设置面板类组件，面板用原生控件 + 语义 token

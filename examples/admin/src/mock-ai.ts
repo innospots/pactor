@@ -1,5 +1,5 @@
-import type { ChatEvent, ChatInput, ChatTransport } from '@pactor/chat';
-import type { DslNode } from '@pactor/core';
+import type { ChatEvent, ChatInput, ChatTransport } from '@pactor-app/chat';
+import type { DslNode } from '@pactor-app/core';
 
 /**
  * mock AI transport（examples/admin「AI 工作区」页专用，仿写自

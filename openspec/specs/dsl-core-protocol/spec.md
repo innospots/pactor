@@ -1,6 +1,6 @@
 # Spec: dsl-core-protocol
 
-DSL 核心协议模块（`@pactor/core`），提供与 React 无关的 DSL 类型定义与通用 Registry 实现，是框架所有上层包的契约基座。
+DSL 核心协议模块（`@pactor-app/core`），提供与 React 无关的 DSL 类型定义与通用 Registry 实现，是框架所有上层包的契约基座。
 
 ### Requirement: DslNode 核心节点类型
 
@@ -88,7 +88,7 @@ DSL 核心协议模块（`@pactor/core`），提供与 React 无关的 DSL 类�
 
 ### Requirement: 零运行时依赖
 
-`@pactor/core` MUST 不依赖任何第三方运行时包，也 MUST NOT 依赖 React。
+`@pactor-app/core` MUST 不依赖任何第三方运行时包，也 MUST NOT 依赖 React。
 
 #### Scenario: 依赖检查
 

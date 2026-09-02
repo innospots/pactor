@@ -1,4 +1,4 @@
-import type { ActionConfig } from '@pactor/core';
+import type { ActionConfig } from '@pactor-app/core';
 import { describe, expect, it, vi } from 'vitest';
 
 import { createRuntimeContext } from '../context/context.js';

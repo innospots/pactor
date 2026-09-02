@@ -31,7 +31,7 @@
 - **customer-list**（`/customers`）：页面说明区 + 查询区（Form submit → setState + reload）+ 数据区（Table service 数据源 + cell 行模板 + overlay.open 抽屉编辑——**抽屉表单回填当前行的 name/phone/level（params 传递 + 字段级初始值）**，关闭成功后 if 分支 reload + message）+ 删除按钮按 denied 策略 disabled。
 - **customer-edit**（`/customers/:id/edit`）：返回操作 + `${route.params.id}` 驱动详情数据源；提交后 navigate 回列表。
 
-示例 SHALL 含 `src/theme.css`（在 `@pactor/ui/styles.css` 后导入）：token 覆盖与结构性美化（欢迎横幅、指标卡强调条），作为换肤契约的参考实现。
+示例 SHALL 含 `src/theme.css`（在 `@pactor-app/ui/styles.css` 后导入）：token 覆盖与结构性美化（欢迎横幅、指标卡强调条），作为换肤契约的参考实现。
 
 #### Scenario: 列表查询链路
 
@@ -56,7 +56,7 @@
 #### Scenario: theme.css 存在且被导入
 
 - **WHEN** 检查 examples/admin
-- **THEN** 存在 src/theme.css 且在 @pactor/ui/styles.css 之后导入
+- **THEN** 存在 src/theme.css 且在 @pactor-app/ui/styles.css 之后导入
 
 #### Scenario: 视觉评审
 

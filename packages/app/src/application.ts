@@ -1,6 +1,6 @@
-import type { I18nMessages, PageDsl } from '@pactor/core';
-import { Registry } from '@pactor/core';
-import { createShadcnComponentRegistry } from '@pactor/ui/components';
+import type { I18nMessages, PageDsl } from '@pactor-app/core';
+import { Registry } from '@pactor-app/core';
+import { createShadcnComponentRegistry } from '@pactor-app/ui/components';
 import {
   createUiBridge,
   OverlayManager,
@@ -10,20 +10,20 @@ import {
   type InteractionProviderProps,
   type OverlayHostProps,
   type UiBridge,
-} from '@pactor/ui/interaction';
+} from '@pactor-app/ui/interaction';
 import {
   createShadcnLayoutRegistry,
   type AdminLayoutConfig,
   type LayoutRegistry,
-} from '@pactor/ui/layout';
-import { createPermissionAdapter, PermissionStore } from '@pactor/permission';
+} from '@pactor-app/ui/layout';
+import { createPermissionAdapter, PermissionStore } from '@pactor-app/permission';
 import {
   createFetchAdapter,
   HttpDslResourceLoader,
   type BootstrapResource,
   type DslResourceLoader,
   type HttpAdapter as ResourceHttpAdapter,
-} from '@pactor/resource';
+} from '@pactor-app/resource';
 import {
   createRouterAdapter,
   MenuRegistry,
@@ -32,7 +32,7 @@ import {
   type NavigationListener,
   type NavigationLocation,
   type RouteContext,
-} from '@pactor/router';
+} from '@pactor-app/router';
 import {
   createFetchHttpAdapter,
   createPageRuntime,
@@ -43,7 +43,7 @@ import {
   type PageRuntime,
   type ServiceHandler,
   type ServiceRegistry,
-} from '@pactor/runtime';
+} from '@pactor-app/runtime';
 import { createElement, type ComponentType, type ReactNode } from 'react';
 import { createRoot, type Root } from 'react-dom/client';
 
@@ -81,15 +81,15 @@ export interface PactorApplicationOptions {
   components?: Record<string, unknown>;
   /**
    * UI 库切换（设计决策 D4，ui-kit-selection spec）：组件注册表工厂，
-   * 缺省 createShadcnComponentRegistry（shadcn，@pactor/ui——唯一内置
+   * 缺省 createShadcnComponentRegistry（shadcn，@pactor-app/ui——唯一内置
    * 实现）；传入自定义工厂可整体替换。
    * options.components 与运行期 registerComponent 叠加在所选注册表之上。
-   * 注意：默认路径需导入 `@pactor/ui/styles.css`。
+   * 注意：默认路径需导入 `@pactor-app/ui/styles.css`。
    */
   componentRegistry?: () => Registry<unknown>;
   /**
    * UI 库切换（shell-ui-kit-selection spec）：布局注册表工厂，
-   * 缺省 createShadcnLayoutRegistry（shadcn，@pactor/ui——唯一内置
+   * 缺省 createShadcnLayoutRegistry（shadcn，@pactor-app/ui——唯一内置
    * 实现）；传入自定义工厂可整体替换外壳布局。
    * bootstrap 的 layout.type 解析逻辑不变。
    */
@@ -97,9 +97,9 @@ export interface PactorApplicationOptions {
   /**
    * UI 库切换（shell-ui-kit-selection spec）：交互层组件对，
    * 缺省 shadcn 版 ShadcnInteractionProvider / ShadcnOverlayHost
-   * （@pactor/ui——唯一内置实现）；传入自定义组件对可替换
+   * （@pactor-app/ui——唯一内置实现）；传入自定义组件对可替换
    * overlay / message / confirm 链路。props 类型为
-   * @pactor/ui/interaction 的 InteractionProviderProps / OverlayHostProps。
+   * @pactor-app/ui/interaction 的 InteractionProviderProps / OverlayHostProps。
    */
   interactionKit?: {
     Provider: ComponentType<InteractionProviderProps>;
@@ -107,7 +107,7 @@ export interface PactorApplicationOptions {
   };
   /**
    * UI kit 预设（ui-kit-preset spec）：一次性提供三个 UI 库切换槽位
-   * （内置预设为 @pactor/ui 的 shadcnUiKit）。
+   * （内置预设为 @pactor-app/ui 的 shadcnUiKit）。
    * 每个槽位独立合并，优先级：显式细粒度选项 > ui 预设 > 内置
    * shadcn 默认。
    */
@@ -256,7 +256,7 @@ export class ReactRouterBinding implements NavigationBridge {
 
   push(to: string): void {
     if (this.delegate === undefined) {
-      console.warn(`[@pactor/app] 路由尚未挂载，push("${to}") 已忽略`);
+      console.warn(`[@pactor-app/app] 路由尚未挂载，push("${to}") 已忽略`);
       return;
     }
     this.delegate.push(to);
@@ -264,7 +264,7 @@ export class ReactRouterBinding implements NavigationBridge {
 
   replace(to: string): void {
     if (this.delegate === undefined) {
-      console.warn(`[@pactor/app] 路由尚未挂载，replace("${to}") 已忽略`);
+      console.warn(`[@pactor-app/app] 路由尚未挂载，replace("${to}") 已忽略`);
       return;
     }
     this.delegate.replace(to);
@@ -433,7 +433,7 @@ export function createPactorApplication(
   options: PactorApplicationOptions,
 ): PactorApplication {
   if (typeof options.appId !== 'string' || options.appId === '') {
-    throw new Error('[@pactor/app] createPactorApplication: appId 必填');
+    throw new Error('[@pactor-app/app] createPactorApplication: appId 必填');
   }
   const { appId } = options;
   const routerOptions = options.router ?? {};
@@ -478,7 +478,7 @@ export function createPactorApplication(
     if (typeof to !== 'string' || to === '') {
       return {
         ok: false,
-        error: new Error('[@pactor/app] navigate 动作缺少 params.to（string）'),
+        error: new Error('[@pactor-app/app] navigate 动作缺少 params.to（string）'),
       };
     }
     navigation.push(to);
@@ -601,7 +601,7 @@ export function createPactorApplication(
     mount(selector: string) {
       const target = document.querySelector(selector);
       if (target === null) {
-        throw new Error(`[@pactor/app] mount 目标元素不存在: ${selector}`);
+        throw new Error(`[@pactor-app/app] mount 目标元素不存在: ${selector}`);
       }
       // 重复 mount 先卸载旧根
       if (root !== null) {
@@ -634,7 +634,7 @@ export function createPactorApplication(
 
     setLocale(locale: string, messages?: I18nMessages): void {
       if (session === null) {
-        console.warn('[@pactor/app] setLocale 在 bootstrap 完成前调用已忽略');
+        console.warn('[@pactor-app/app] setLocale 在 bootstrap 完成前调用已忽略');
         return;
       }
       session = { ...session, locale, messages: messages ?? session.messages };
