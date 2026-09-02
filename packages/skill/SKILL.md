@@ -2,14 +2,14 @@
 name: pactor
 description: |
   Agent skill for rapidly building Pactor Server-Driven UI applications. Covers app bootstrapping, DSL authoring, custom components, theming, events, routing, resources, permissions, and project commands.
-version: 1.0.0
+version: 0.1.1
 ---
 
 # pactor-app
 
 ## When to activate
 
-Activate this skill when the user works with **Pactor** or any `pactor-*` package:
+Activate this skill when the user works with **Pactor** — any `@pactor-app/*` package or the `pactor-app` meta package:
 
 - Building or extending a Pactor application
 - Using `createPactorApplication`, `@pactor-app/app`, or `StaticDslLoader`
@@ -52,6 +52,7 @@ Activate this skill when the user works with **Pactor** or any `pactor-*` packag
 | `packages/vite-plugin` | `@pactor-app/vite-plugin` | Vite YAML modules, build-time validation, HMR |
 | `packages/cli` | `@pactor-app/cli` | DSL validation, inspection, scaffolding |
 | `packages/app` | `@pactor-app/app` | One-stop composition (`createPactorApplication`) |
+| `packages/pactor` | `pactor-app` | Meta package — depends on all modules, re-exports `@pactor-app/app` |
 
 ## Dependency rules
 
@@ -72,7 +73,10 @@ core ← schema ← expression ← runtime
 ### Install
 
 ```bash
-# shadcn UI kit (the single built-in kit)
+# meta package: installs every module at once
+pnpm add pactor-app
+
+# or install only what you need (shadcn is the single built-in UI kit)
 pnpm add @pactor-app/app @pactor-app/ui
 ```
 
