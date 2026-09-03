@@ -444,6 +444,129 @@ describe('编排动作 sequence / parallel / if / delay', () => {
   });
 });
 
+describe('call 页面级命名动作复用', () => {
+  it('按名执行 namedActions 中的动作数组', async () => {
+    const order: string[] = [];
+    const { engine, context } = setup({
+      namedActions: {
+        refreshAndNotify: [
+          { action: 'mark', params: { name: 'reload' } },
+          { action: 'mark', params: { name: 'notify' } },
+        ],
+      },
+    });
+    context.actions.register('mark', (action) => {
+      order.push(String(action.params?.['name']));
+      return { ok: true };
+    });
+
+    const result = await engine.execute({
+      action: 'call',
+      params: { name: 'refreshAndNotify' },
+    });
+
+    expect(result.ok).toBe(true);
+    expect(order).toEqual(['reload', 'notify']);
+  });
+
+  it('继承调用方局部作用域（row / event 原样可用）', async () => {
+    const { engine, context } = setup({
+      namedActions: {
+        removeRow: {
+          action: 'setState',
+          params: { removed: '${row.id}-${event.extra}' },
+        },
+      },
+    });
+
+    await engine.execute(
+      { action: 'call', params: { name: 'removeRow' } },
+      { row: { id: 7 }, event: { extra: 'x' } },
+    );
+
+    expect(context.state.get('removed')).toBe('7-x');
+  });
+
+  it('命名动作内可继续 call 其它命名动作', async () => {
+    const order: string[] = [];
+    const { engine, context } = setup({
+      namedActions: {
+        a: [{ action: 'mark', params: { name: 'a' } }, { action: 'call', params: { name: 'b' } }],
+        b: { action: 'mark', params: { name: 'b' } },
+      },
+    });
+    context.actions.register('mark', (action) => {
+      order.push(String(action.params?.['name']));
+      return { ok: true };
+    });
+
+    await engine.execute({ action: 'call', params: { name: 'a' } });
+
+    expect(order).toEqual(['a', 'b']);
+  });
+
+  it('子动作失败即中断并返回该失败', async () => {
+    const order: string[] = [];
+    const { engine, context } = setup({
+      namedActions: {
+        flow: [
+          { action: 'mark', params: { name: 'a' } },
+          { action: 'fail' },
+          { action: 'mark', params: { name: 'b' } },
+        ],
+      },
+    });
+    context.actions.register('mark', (action) => {
+      order.push(String(action.params?.['name']));
+      return { ok: true };
+    });
+    context.actions.register('fail', () => ({
+      ok: false,
+      error: new Error('boom'),
+    }));
+
+    const result = await engine.execute({ action: 'call', params: { name: 'flow' } });
+
+    expect(result.ok).toBe(false);
+    expect(result.error?.message).toBe('boom');
+    expect(order).toEqual(['a']);
+  });
+
+  it('未知命名动作受控失败，不抛出', async () => {
+    const { engine } = setup();
+
+    const result = await engine.execute({ action: 'call', params: { name: 'ghost' } });
+
+    expect(result.ok).toBe(false);
+    expect(result.error?.message).toContain('ghost');
+    expect(result.error?.message).toContain('unknown named action');
+  });
+
+  it('缺少 name 参数受控失败', async () => {
+    const { engine } = setup();
+
+    const result = await engine.execute({ action: 'call', params: {} });
+
+    expect(result.ok).toBe(false);
+    expect(result.error?.message).toContain('name');
+  });
+
+  it('循环引用按深度守卫受控失败', async () => {
+    const { engine, context } = setup({
+      namedActions: {
+        loop: { action: 'call', params: { name: 'loop' } },
+      },
+    });
+    const spy = vi.spyOn(context.state, 'set');
+
+    const result = await engine.execute({ action: 'call', params: { name: 'loop' } });
+
+    expect(result.ok).toBe(false);
+    expect(result.error?.message).toContain('循环引用');
+    expect(spy).not.toHaveBeenCalled();
+  });
+});
+
 describe('事件动作数组串行', () => {
   it('executeAll 按声明顺序串行执行', async () => {
     const order: number[] = [];

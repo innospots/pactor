@@ -117,6 +117,32 @@ describe('buildScope', () => {
     expect(scope['data']).toEqual({ users: [{ name: '张三' }] });
   });
 
+  it('dataStatus 暴露各数据源 loading / error 状态', async () => {
+    const context = createRuntimeContext({
+      dataSources: {
+        users: { type: 'static', value: [1] },
+        bad: { type: 'service', service: 'missing' },
+      },
+    });
+
+    // 加载前：未加载的源 loading 为 false
+    expect(buildScope(context)['dataStatus']).toEqual({
+      users: { loading: false, error: undefined },
+      bad: { loading: false, error: undefined },
+    });
+
+    await context.data.load('users');
+    await context.data.load('bad');
+
+    const status = buildScope(context)['dataStatus'] as Record<
+      string,
+      { loading: boolean; error?: Error }
+    >;
+    expect(status['users']).toEqual({ loading: false, error: undefined });
+    expect(status['bad']?.loading).toBe(false);
+    expect(status['bad']?.error).toBeInstanceOf(Error);
+  });
+
   it('局部作用域覆盖同名全局键', () => {
     const context = createRuntimeContext({ state: { count: 1 } });
     const row = { name: 'row-0' };

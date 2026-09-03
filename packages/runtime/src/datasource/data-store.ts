@@ -72,6 +72,15 @@ export class DataStore {
     return out;
   }
 
+  /** 各数据源的加载状态（loading / error），供表达式作用域的 `dataStatus` 键使用 */
+  getAllStatus(): Record<string, { loading: boolean; error?: Error }> {
+    const out: Record<string, { loading: boolean; error?: Error }> = {};
+    for (const [name, status] of this.statuses) {
+      out[name] = { loading: status.loading, error: status.error };
+    }
+    return out;
+  }
+
   subscribe(listener: () => void): () => void {
     this.listeners.add(listener);
     return () => {
@@ -101,7 +110,8 @@ export class DataStore {
     const previous = this.get(name);
     this.update(name, { loading: true, error: undefined, data: previous.data });
     try {
-      const data = await this.loadByType(config);
+      const raw = await this.loadByType(config);
+      const data = applyOptionMapping(raw, config);
       this.update(name, { loading: false, data, error: undefined });
     } catch (cause) {
       this.update(name, {
@@ -177,4 +187,34 @@ export class DataStore {
       listener();
     }
   }
+}
+
+/**
+ * 选项字段映射：dataSource 声明了 valueField / labelField / disabledField
+ * 且加载结果为数组时，每项归一化出 `{ label, value, disabled }` 键
+ * （原字段经展开保留，已规范的 { label, value } 数据声明与否均不破坏）。
+ */
+function applyOptionMapping(data: unknown, config: DataSourceConfig): unknown {
+  if (!config.valueField && !config.labelField && !config.disabledField) {
+    return data;
+  }
+  if (!Array.isArray(data)) {
+    return data;
+  }
+  const valueField = config.valueField ?? 'value';
+  const labelField = config.labelField ?? 'label';
+  return data.map((item) => {
+    if (item === null || typeof item !== 'object') {
+      return item;
+    }
+    const record = item as Record<string, unknown>;
+    return {
+      ...record,
+      label: record[labelField],
+      value: record[valueField],
+      disabled: config.disabledField
+        ? Boolean(record[config.disabledField])
+        : Boolean(record.disabled),
+    };
+  });
 }

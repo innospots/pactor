@@ -47,7 +47,7 @@ StateStore SHALL 提供 `getState()`、`get(path)`（支持 `'a.b.c'` 点路径�
 
 ### Requirement: 表达式作用域构建
 
-模块 SHALL 提供把 RuntimeContext + 局部作用域组装为表达式求值作用域的能力：`state` 取自 StateStore 当前值，`data` 取自 DataStore 各数据源当前数据，另含 `route`、`user`、`app`、`page`、`params` 等；局部作用域（如 `row`、`rowIndex`、`event`、`item`）MUST 覆盖同名全局键。
+模块 SHALL 提供把 RuntimeContext + 局部作用域组装为表达式求值作用域的能力：`state` 取自 StateStore 当前值，`data` 取自 DataStore 各数据源当前数据，`dataStatus` 为各数据源的 `{ loading, error }` 状态，另含 `route`、`user`、`app`、`page`、`params` 等；局部作用域（如 `row`、`rowIndex`、`event`、`item`）MUST 覆盖同名全局键。
 
 #### Scenario: 作用域包含 state 与 data 当前值
 
@@ -72,3 +72,8 @@ StateStore SHALL 提供 `getState()`、`get(path)`（支持 `'a.b.c'` 点路径�
 
 - **WHEN** 使用默认 PermissionAdapter 检查任意权限码
 - **THEN** 返回 `true`
+
+#### Scenario: dataStatus 暴露加载状态
+
+- **WHEN** 数据源 `detail` 正在加载中，构建作用域
+- **THEN** `dataStatus.detail.loading === true`；加载失败时 `dataStatus.detail.error` 为该错误

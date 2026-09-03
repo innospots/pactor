@@ -15,6 +15,8 @@ import type { FieldRule } from '../Input/index.js';
 export interface SelectOption {
   label: string;
   value: string | number | boolean;
+  /** 单个选项禁用 */
+  disabled?: boolean;
 }
 
 export interface SelectProps {
@@ -97,7 +99,11 @@ export function Select({
         </SelectTrigger>
         <SelectContent>
           {options.map((option) => (
-            <SelectItem key={String(option.value)} value={option.value}>
+            <SelectItem
+              key={String(option.value)}
+              value={option.value}
+              disabled={option.disabled}
+            >
               {option.label}
             </SelectItem>
           ))}

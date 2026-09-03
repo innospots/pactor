@@ -15,6 +15,9 @@ page:                   # 必填，页面元信息
   id: customer-list
   title: 客户列表
   permission: customer:view
+meta:                   # 可选，页面扩展元数据（自由键值，Runtime 不消费）
+  version: '1.0'
+  author: platform-team
 state:                  # 可选，页面初始状态
   keyword: ''
 dataSources:            # 可选，数据源集合
@@ -32,7 +35,10 @@ body:                   # 可选，UI 树根节点（DslNode）
 | `dsl` | string（必填） | DSL 规范版本，如 `'1.0'` |
 | `requires` | object | 能力声明：`runtime`（semver range）、`components`（组件名 → range） |
 | `page` | PageMeta（必填） | 见下表 |
+| `meta` | Record<string, unknown> | 页面扩展元数据（如 `version` / `author` / 业务自定义标记）；Runtime 不消费，仅供宿主与工具链读取 |
 | `state` | object | 页面初始状态，经 `${state.x}` 引用、`setState` 动作更新 |
+| `actions` | Record<string, ActionConfig \| ActionConfig[]> | 页面级命名动作定义，供 `call` 动作按名引用复用（见[动作目录](#动作目录)） |
+| `components` | Record<string, DslNode> | 页面级命名组件定义（子树复用，防嵌套过深），body 中以 `{ type: 'Fragment', props: { name } }` 引用 |
 | `dataSources` | Record<string, DataSourceConfig> | 见[数据源](#数据源datasources) |
 | `lifecycle` | object | 见[生命周期](#生命周期lifecycle) |
 | `body` | DslNode | UI 树根节点 |
@@ -43,6 +49,8 @@ body:                   # 可选，UI 树根节点（DslNode）
 | --- | --- | --- |
 | `id` | string（必填） | 页面唯一标识，与资源加载的 pageId 对应 |
 | `title` | string | 页面标题（布局页签/面包屑展示） |
+| `name` | string | 页面名称（标识用途，区别于展示的 `title`） |
+| `description` | string | 页面描述 |
 | `type` | string | 页面类型 / Page Pattern，如 `list`、`detail`、`form` |
 | `permission` | PermissionConfig | 页面级权限（无权限时路由层渲染 403） |
 
@@ -108,6 +116,7 @@ permission: { code: customer:delete, denied: disabled }  # 对象形式
 | `state` | 页面状态（`setState` 更新） |
 | `form` | `state.form` 别名（Form 提交后写入，`${form.<field>}`） |
 | `data` | 数据源结果（`${data.customers}`） |
+| `dataStatus` | 各数据源的 `{ loading, error }` 状态（`${dataStatus.detail.loading}`，加载态/错误态展示用） |
 | `route` | 路由上下文（`${route.params.id}`、`${route.query.x}`） |
 | `params` | `route.params` 别名；overlay 内为 overlay 注入的 params |
 | `actions` | 命名动作结果（`${actions.editResult.success}`） |
@@ -143,8 +152,29 @@ dataSources:
 | `request` | http | `{ method?, url, params?, headers?, body? }`，经 HttpAdapter 发出 |
 | `autoLoad` | 全部 | `true` 时页面初始化自动加载 |
 | `pagination` | — | 分页参数映射 `{ page, pageSize }`（值可含表达式） |
+| `valueField` / `labelField` | 全部 | 选项字段映射：声明后数组结果每项归一化出 `label` / `value` 键（原字段保留），供 Select 经 `${data.x}` 直接绑定 |
+| `disabledField` | 全部 | 选项禁用标记字段：数组项中该字段为真值时归一化出 `disabled: true` |
 
 结果经 `${data.<name>}` 引用。`reload` 动作：指定 `dataSource` 刷新该源，缺省刷新全部 `autoLoad` 源。
+
+选项源示例（远程字段名任意，声明映射即可直接绑 Select）：
+
+```yaml
+dataSources:
+  statusOptions:
+    type: http
+    request: { method: GET, url: /api/status-options }
+    autoLoad: true
+    valueField: code        # 后端字段 → value
+    labelField: name        # 后端字段 → label
+    disabledField: off      # 后端字段为真值 → 该选项禁用
+
+body:
+  type: Select
+  props:
+    name: status
+    options: ${data.statusOptions}
+```
 
 ## 生命周期（lifecycle）
 
@@ -170,6 +200,7 @@ lifecycle:
 | `sequence` | `actions` | 子动作串行，任一失败即中断 |
 | `parallel` | `actions` | 子动作并行，全部完成返回；任一失败则整体失败 |
 | `if` | `condition`、`then?`、`else?` | 条件分支（condition 为整体单表达式时保留布尔类型） |
+| `call` | `name`（必填） | 执行页面级命名动作（顶层 `actions` 中的定义）；以调用方作用域执行，`${row}` / `${event}` 等原样可用；子动作任一失败即中断；嵌套超过 20 层（循环引用）受控失败 |
 | `delay` | `ms` | 等待指定毫秒 |
 | `form.setValues` | `values`（必填）、`form?`（缺省 `default`） | 表单联动：写入目标表单字段值；不触发校验与 `onValuesChange`；表单未注册时受控失败 |
 
@@ -182,6 +213,73 @@ lifecycle:
 | `confirm` | `title?`、`content?` | 确认弹窗；结果 data：确认 `true` / 取消 `false` |
 | `overlay.open` | `overlay`（见下） | 打开弹层并等待关闭；结果 data 为 close 的 payload |
 | `overlay.close` | `id?`、`payload?` | 关闭弹层（缺省栈顶）；payload 缺省为取消语义 |
+
+### 页面级命名动作（actions + call）
+
+顶层 `actions` 定义可复用的命名动作，事件中用 `call` 按名引用——`call` 继承调用方作用域，定义体里的 `${row}` / `${event}` 与内联写法语义一致：
+
+```yaml
+actions:
+  deleteRow:
+    - id: cfm
+      action: confirm
+      params: { title: 确认删除, content: 删除「${row.name}」后不可恢复 }
+    - action: if                    # confirm 取消时 data 为 false，整段跳过
+      params:
+        condition: ${actions.cfm}
+        then:
+          - action: request
+            params: { method: DELETE, url: /api/items/${row.id} }
+          - action: message
+            params: { type: success, text: 删除成功 }
+
+body:
+  type: Button
+  props: { text: 删除 }
+  events:
+    onClick: { action: call, params: { name: deleteRow } }
+```
+
+### 页面级命名组件（components + Fragment）
+
+顶层 `components` 定义可复用的命名子树，body 中用 `Fragment` 节点按名引用——与 `call` 同语义：**以引用处作用域渲染**，行模板内的 `${row.x}` 逐行求值。适合把深层嵌套的表单、操作列等抽平：
+
+```yaml
+components:
+  searchForm:                    # 命名子树定义
+    type: Form
+    props: { layout: inline }
+    children:
+      - type: Input
+        props: { name: keyword, label: 关键词 }
+      - type: Button
+        props: { text: 查询, variant: primary, submit: true }
+  rowActions:
+    type: Flex
+    props: { gap: 8 }
+    children:
+      - type: Button
+        props: { text: 编辑, size: small }
+        events:
+          onClick: { action: call, params: { name: editRow } }
+
+body:
+  type: Page
+  children:
+    - type: Fragment
+      props: { name: searchForm }
+    - type: Table
+      props:
+        dataSource: ${data.list}
+        columns:
+          - { title: 名称, dataIndex: name }
+          - title: 操作
+            cell:
+              type: Fragment
+              props: { name: rowActions }   # ${row} 在行作用域逐行求值
+```
+
+`name` 之外的 props 会透传到子树根节点（引用处覆盖定义处同名字段），如 `props: { name: detailPanel, style: { flex: 1 } }`。未定义的 `name` 渲染 Unsupported 占位（不抛错）；直接/间接循环引用（a → b → a）不渲染并 console.warn。跨页面复用的远程片段（`resource` 加载）见设计文档第 50 节，当前版本未实现。
 
 ### overlay.open 的 overlay 配置
 
@@ -207,6 +305,7 @@ overlay 内容的表达式以 overlay 作用域求值（`${params.x}` 取注入�
 | prop | 类型 | 说明 |
 | --- | --- | --- |
 | `title` | string | 页面标题 |
+| `style` | object | 根节点内联样式（布局逃逸口） |
 
 ### Grid
 
@@ -216,6 +315,7 @@ overlay 内容的表达式以 overlay 作用域求值（`${params.x}` 取注入�
 | --- | --- | --- |
 | `columns` | number（默认 1） | 列数 |
 | `gap` | number | 栏间距 |
+| `style` | object | 根节点内联样式（布局逃逸口） |
 
 ### Flex
 
@@ -225,6 +325,7 @@ overlay 内容的表达式以 overlay 作用域求值（`${params.x}` 取注入�
 | `gap` | number \| `small` \| `middle` \| `large` | 间距 |
 | `justify` | `start` \| `center` \| `end` \| `space-between` \| `space-around` \| `space-evenly` | 主轴对齐 |
 | `align` | `start` \| `center` \| `end` \| `baseline` \| `stretch` | 交叉轴对齐 |
+| `style` | object | 根节点内联样式（布局逃逸口，如 `{ flex: 1 }`；与数字 gap 合并） |
 
 ### Card
 
@@ -232,6 +333,7 @@ overlay 内容的表达式以 overlay 作用域求值（`${params.x}` 取注入�
 | --- | --- | --- |
 | `title` | string | 卡片标题 |
 | `bordered` | boolean（默认 true） | 是否有边框 |
+| `style` | object | 根节点内联样式（布局逃逸口） |
 
 ### Button
 
@@ -343,7 +445,7 @@ Form 内声明 `name` 的 Input / Select 自动成为表单项（label / rules �
 | prop | 类型 | 说明 |
 | --- | --- | --- |
 | `name` / `label` / `rules` / `placeholder` / `disabled` | 同 Input | — |
-| `options` | `{ label, value }[]`（value: string \| number \| boolean） | 选项列表 |
+| `options` | `{ label, value, disabled? }[]`（value: string \| number \| boolean） | 选项列表；`disabled: true` 的选项不可选 |
 | `value` | string \| number \| boolean | 同 Input 的初始值语义 |
 | `allowClear` | boolean | 可清空 |
 | 事件 `onChange` | — | 传出选中 value |

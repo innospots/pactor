@@ -84,6 +84,49 @@ export function registerBuiltinActions(registry: ActionRegistry): void {
     return { ok: true };
   });
 
+  // 页面级命名动作复用（PageDsl.actions）：以调用方作用域执行，
+  // ${row} / ${event} 等局部作用域原样可用；子动作任一失败即中断
+  register('call', async (action, ctx) => {
+    const name = action.params?.['name'];
+    if (typeof name !== 'string' || !name) {
+      return {
+        ok: false,
+        error: new Error('[@pactor-app/runtime] call 动作缺少 name 参数'),
+      };
+    }
+    const target = ctx.context.namedActions[name];
+    if (target === undefined) {
+      return {
+        ok: false,
+        error: new Error(
+          `[@pactor-app/runtime] unknown named action: "${name}"`,
+        ),
+      };
+    }
+    // 循环引用守卫：命名动作直接或间接 call 自身时按深度受控失败
+    const depth = (callDepth.get(ctx.context) ?? 0) + 1;
+    if (depth > MAX_CALL_DEPTH) {
+      return {
+        ok: false,
+        error: new Error(
+          `[@pactor-app/runtime] call 嵌套超过 ${MAX_CALL_DEPTH} 层（疑似循环引用）: "${name}"`,
+        ),
+      };
+    }
+    callDepth.set(ctx.context, depth);
+    try {
+      for (const child of asActions(target)) {
+        const result = await ctx.execute(child);
+        if (!result.ok) {
+          return result;
+        }
+      }
+      return { ok: true };
+    } finally {
+      callDepth.set(ctx.context, depth - 1);
+    }
+  });
+
   // 并行：全部完成后返回；任一失败则整体失败
   register('parallel', async (action, ctx) => {
     const results = await Promise.all(
@@ -152,6 +195,10 @@ function asActions(value: unknown): ActionConfig[] {
   }
   return [];
 }
+
+/** call 动作的嵌套深度（按 RuntimeContext 计，防命名动作循环引用） */
+const callDepth = new WeakMap<object, number>();
+const MAX_CALL_DEPTH = 20;
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null && !Array.isArray(value);

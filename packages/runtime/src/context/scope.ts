@@ -6,6 +6,7 @@ import type { RuntimeContext } from './context.js';
  * 组装表达式求值作用域（设计文档第 15、16 节，决策 D2）：
  *
  * - `state` / `data` 取 Store 当前值快照
+ * - `dataStatus` 为各数据源的 `{ loading, error }` 状态（加载态/错误态展示用）
  * - `form` 为 state 的 `form` 路径别名（Form 提交写入 `state.form`，
  *   使 `${form.<field>}` 可用，设计文档第 15 节 form 作用域层级）
  * - 另含 `app` / `page` / `route` / `user` / `params`（route.params 的别名）
@@ -23,6 +24,7 @@ export function buildScope(
     state: context.state.getState(),
     form: context.state.get('form'),
     data: context.data.getAllData(),
+    dataStatus: context.data.getAllStatus(),
     route: context.route,
     user: context.user,
     params: context.route.params,

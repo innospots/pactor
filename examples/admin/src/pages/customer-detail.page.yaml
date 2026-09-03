@@ -1,0 +1,130 @@
+dsl: '1.0'
+page:
+  id: customer-detail
+  title: 客户 360
+  name: customerDetail
+  description: master-detail 演示：左侧列表点击 → 调用接口 → 右侧展示详情（含 loading 态）
+  permission: customer:view
+
+meta:
+  version: '1.0'
+  author: platform-team
+
+state:
+  # 当前选中行（未选中时右侧显示空态提示）
+  currentId: null
+  currentName: ''
+
+dataSources:
+  # 左侧列表（内存 mock，约 300ms 延迟）
+  customers:
+    type: service
+    service: customer.list
+    autoLoad: true
+  # 右侧详情：params 引用 state.currentId，加载时才求值；
+  # 点击列表项 = setState + reload（见下方 cell 的 onClick）
+  detail:
+    type: service
+    service: customer.detail
+    params:
+      id: ${state.currentId}
+
+components:
+  # 右侧详情面板（命名子树：dataStatus.detail.loading 演示加载态切换）
+  detailPanel:
+    type: Card
+    props:
+      title: ${state.currentName}
+    children:
+      # 加载中：loading 为 true 时只显示提示
+      - type: Alert
+        props:
+          message: 详情加载中…
+          variant: info
+        when: ${dataStatus.detail.loading}
+      # 加载完成：展示字段
+      - type: Flex
+        props: { gap: 16 }
+        when: ${!dataStatus.detail.loading}
+        children:
+          - type: Statistic
+            props:
+              title: 编号
+              value: ${data.detail.id}
+          - type: Statistic
+            props:
+              title: 电话
+              value: ${data.detail.phone}
+      - type: Flex
+        props: { gap: 16 }
+        when: ${!dataStatus.detail.loading}
+        children:
+          - type: Statistic
+            props:
+              title: 等级
+              value: ${data.detail.level}
+          - type: Statistic
+            props:
+              title: 城市
+              value: ${data.detail.region} ${data.detail.city}
+      - type: Flex
+        props: { gap: 16 }
+        when: ${!dataStatus.detail.loading}
+        children:
+          - type: Statistic
+            props:
+              title: 负责人
+              value: ${data.detail.owner}
+          - type: Statistic
+            props:
+              title: 创建时间
+              value: ${data.detail.createdAt}
+
+body:
+  type: Page
+  props:
+    title: 客户 360
+  children:
+    - type: Alert
+      props:
+        message: master-detail 演示：点击左侧列表项，右侧经 dataSource 重新加载详情；dataStatus.detail.loading 驱动加载态切换。
+        variant: info
+    - type: Flex
+      props: { gap: 16 }
+      children:
+        # 左：单列 Table 充当可点列表（cell 行模板，row 作用域）
+        - type: Card
+          props: { title: 客户列表 }
+          children:
+            - type: Table
+              props:
+                dataSource: ${data.customers}
+                loading: ${dataStatus.customers.loading}
+                columns:
+                  - title: 客户
+                    cell:
+                      type: Button
+                      props:
+                        text: ${row.name}
+                        variant: link
+                        disabled: ${state.currentId == row.id}
+                      events:
+                        onClick:
+                          - action: setState
+                            params:
+                              currentId: ${row.id}
+                              currentName: ${row.name}
+                          - action: reload
+                            params: { dataSource: detail }
+        # 右：空态 / 详情二选一
+        - type: Alert
+          props:
+            message: 请选择左侧客户查看详情
+            variant: info
+          when: ${state.currentId == null}
+        - type: Fragment
+          # name 之外的 props 透传到 detailPanel 根 Card；style 为布局逃逸口
+          props:
+            name: detailPanel
+            style: { flex: 1 }
+          when: ${state.currentId != null}

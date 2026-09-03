@@ -92,3 +92,17 @@ Renderer 触发的 `events` 中 Action 数组 MUST 按声明顺序串行执行�
 
 - **WHEN** 某节点 `events.onClick` 配置两个动作
 - **THEN** 第一个完成后再执行第二个
+
+### Requirement: 页面级命名动作复用（call）
+
+引擎 SHALL 提供内置 `call` 动作：`params.name` 按名查找页面级命名动作（PageDsl `actions`，经 RuntimeContext `namedActions` 暴露），以调用方局部作用域执行其动作或动作数组（`${row}` / `${event}` 等原样可用）；子动作任一失败 MUST 中断并返回该失败。`name` 缺失或未定义时 MUST 返回受控失败；命名动作直接或间接循环引用 MUST 按深度上限（20 层）受控失败，不得堆栈溢出。
+
+#### Scenario: 按名复用页面级动作
+
+- **WHEN** PageDsl `actions.deleteRow` 定义动作数组，按钮 `onClick` 为 `{ action: call, params: { name: deleteRow } }`
+- **THEN** 点击后按序执行 deleteRow 的动作，且 `${row}` 取调用处的行作用域
+
+#### Scenario: 循环引用受控失败
+
+- **WHEN** 命名动作 `a` 的定义为 `call: a`（自引用）
+- **THEN** 返回受控失败且错误信息提示循环引用，进程不崩溃
