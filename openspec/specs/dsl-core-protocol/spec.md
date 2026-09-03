@@ -18,11 +18,11 @@ DSL 核心协议模块（`@pactor-app/core`），提供与 React 无关的 DSL �
 
 ### Requirement: DSL 文档结构类型
 
-模块 SHALL 定义 Page DSL、Fragment DSL、Application DSL 的根结构类型。Page DSL MUST 包含 `dsl` 版本字段、`page` 元信息（`id`、`title`、`type`），并支持可选的 `requires`、`state`、`dataSources`、`lifecycle`、`body` 字段，与设计文档第 10 节的标准根结构一致。
+模块 SHALL 定义 Page DSL、Fragment DSL、Application DSL 的根结构类型。Page DSL MUST 包含 `dsl` 版本字段、`page` 元信息（`id`、`title`、`name`、`description`、`type`），并支持可选的 `requires`、`meta`（页面扩展元数据，自由键值）、`state`、`dataSources`、`actions`（页面级命名动作定义）、`components`（页面级命名组件子树，供 Fragment 引用）、`lifecycle`、`body` 字段，与设计文档第 10 节的标准根结构一致。
 
 #### Scenario: 完整 Page DSL 类型检查
 
-- **WHEN** 开发者声明包含 `dsl`、`requires`、`page`、`state`、`dataSources`、`lifecycle`、`body` 的完整 Page DSL 对象
+- **WHEN** 开发者声明包含 `dsl`、`requires`、`page`、`meta`、`state`、`dataSources`、`lifecycle`、`body` 的完整 Page DSL 对象
 - **THEN** TypeScript 编译通过
 
 #### Scenario: 缺少 dsl 版本字段被拒绝

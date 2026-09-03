@@ -391,6 +391,30 @@ describe('Select 选项', () => {
     });
   });
 
+  it('disabled 选项标记 data-disabled 且点击不触发 onChange', async () => {
+    const user = userEvent.setup();
+    const { context } = renderDsl({
+      type: 'Select',
+      props: {
+        options: [
+          { label: '可选', value: 'a' },
+          { label: '禁用项', value: 'b', disabled: true },
+        ],
+      },
+      events: {
+        onChange: { action: 'setState', params: { picked: '${event}' } },
+      },
+    });
+
+    await user.click(screen.getByRole('combobox'));
+    const disabledOption = await screen.findByRole('option', { name: '禁用项' });
+    expect(disabledOption.hasAttribute('data-disabled')).toBe(true);
+
+    await user.click(disabledOption);
+    await new Promise((resolve) => setTimeout(resolve, 50));
+    expect(context.state.get('picked')).toBeUndefined();
+  });
+
   it('Form 内声明 name 的 Select 自动包装为表单项', () => {
     const { container } = renderDsl({
       type: 'Form',

@@ -1,4 +1,4 @@
-import type { ReactNode } from 'react';
+import type { CSSProperties, ReactNode } from 'react';
 
 import { cn } from '../../../lib/utils.js';
 import {
@@ -13,14 +13,17 @@ export interface CardProps {
   title?: string;
   /** 是否有边框，默认 true（false 去边框与阴影） */
   bordered?: boolean;
+  /** 根节点内联样式（布局逃逸口，如 `{ flex: 1 }`） */
+  style?: CSSProperties;
   children?: ReactNode;
 }
 
 /** Card 适配器（shadcn kit）：可选标题 + 边框开关（bordered=false 去边框与阴影） */
-export function Card({ title, bordered = true, children }: CardProps) {
+export function Card({ title, bordered = true, style, children }: CardProps) {
   return (
     <ShadcnCard
       className={cn('gap-4 py-4', !bordered && 'border-transparent shadow-none')}
+      style={style}
     >
       {title ? (
         <CardHeader className="px-4">

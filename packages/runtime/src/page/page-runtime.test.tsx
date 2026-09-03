@@ -88,6 +88,7 @@ describe('初始化链路', () => {
     const runtime = createPageRuntime(minimalDsl());
 
     expect(runtime.context.actions.list().sort()).toEqual([
+      'call',
       'delay',
       'form.setValues',
       'if',
@@ -318,6 +319,55 @@ describe('命名动作结果（页面级 actionResults）', () => {
 
     await runtime.destroy();
     expect(runtime.context.actionResults).toEqual({});
+  });
+});
+
+describe('页面级命名动作（PageDsl.actions + call）', () => {
+  it('DSL 中的 actions 挂入 context，call 按名执行并共享页面 state', async () => {
+    const runtime = createPageRuntime(
+      minimalDsl({
+        actions: {
+          refreshAndMark: [
+            { action: 'setState', params: { step: 'done' } },
+          ],
+        },
+      }),
+    );
+    await act(async () => {
+      await runtime.initialized;
+    });
+
+    expect(runtime.context.namedActions['refreshAndMark']).toBeDefined();
+
+    const result = await runtime.engine.execute({
+      action: 'call',
+      params: { name: 'refreshAndMark' },
+    });
+
+    expect(result.ok).toBe(true);
+    expect(runtime.context.state.get('step')).toBe('done');
+
+    await runtime.destroy();
+  });
+});
+
+describe('页面级命名组件（PageDsl.components + Fragment）', () => {
+  it('DSL 中的 components 挂入 context，Fragment 组件自动注册', async () => {
+    const runtime = createPageRuntime(
+      minimalDsl({
+        components: {
+          header: { type: 'Page', children: [] },
+        },
+      }),
+    );
+    await act(async () => {
+      await runtime.initialized;
+    });
+
+    expect(runtime.context.pageComponents['header']).toBeDefined();
+    expect(runtime.context.components.has('Fragment')).toBe(true);
+
+    await runtime.destroy();
   });
 });
 

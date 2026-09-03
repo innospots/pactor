@@ -58,6 +58,11 @@ export {
 } from './renderer/renderer-context.js';
 export type { RendererContextValue } from './renderer/renderer-context.js';
 export { UnsupportedComponent } from './renderer/unsupported.js';
+export {
+  FRAGMENT_COMPONENT_TYPE,
+  FragmentComponent,
+} from './renderer/fragment.js';
+export type { FragmentProps } from './renderer/fragment.js';
 
 // page：PageRuntime
 export {

@@ -61,3 +61,17 @@ PageRuntime 初始化时 MUST 触发所有 `autoLoad: true` 的数据源。`refr
 
 - **WHEN** 调用 `reload()` 且存在两个 autoLoad 数据源与一个非 autoLoad 数据源
 - **THEN** 两个 autoLoad 源重新加载，非 autoLoad 源不加载
+
+### Requirement: 选项字段映射
+
+dataSource 声明 `valueField` / `labelField` / `disabledField` 时，DataStore SHALL 在加载结果为数组时对每项归一化：`label` 取 `labelField`（缺省 `label`）、`value` 取 `valueField`（缺省 `value`）、`disabled` 取 `disabledField` 的真值（未声明时取项自身 `disabled`）；原字段 MUST 经展开保留。未声明任一映射字段、或加载结果非数组时 MUST 原样返回。
+
+#### Scenario: 声明映射后归一化
+
+- **WHEN** 数据源声明 `valueField: code`、`labelField: name`、`disabledField: off`，加载返回 `[{ code, name, off }]`
+- **THEN** `data` 中每项为原字段加 `{ label, value, disabled }` 归一化键
+
+#### Scenario: 未声明映射时原样返回
+
+- **WHEN** 数据源未声明任何映射字段
+- **THEN** `data` 与加载结果完全一致（引用不变）

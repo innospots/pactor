@@ -488,4 +488,39 @@ describe('permission 组件权限（Component Guard）', () => {
     expect(button.textContent).toBe('编辑');
     expect(button.disabled).toBe(false);
   });
+
+  it('权限检查与组件类型无关：自定义组件与被拒容器的子树同样生效', () => {
+    const Item = ({ text }: { text?: string }) => <span>{text}</span>;
+    const Box = ({ children }: { children?: React.ReactNode }) => (
+      <div>{children}</div>
+    );
+    const context = createRuntimeContext({
+      permission: { check: () => false },
+    });
+    context.components.register('Item', Item);
+    context.components.register('Box', Box);
+
+    render(
+      <DslRenderer
+        context={context}
+        node={{
+          type: 'Box',
+          children: [
+            { type: 'Item', props: { text: 'denied' }, permission: 'any.code' },
+            {
+              type: 'Box',
+              permission: 'any.code',
+              children: [{ type: 'Item', props: { text: 'nested' } }],
+            },
+            { type: 'Item', props: { text: 'granted' } },
+          ],
+        }}
+      />,
+    );
+
+    expect(screen.queryByText('denied')).toBeNull();
+    // 父容器被拒时整棵子树不渲染
+    expect(screen.queryByText('nested')).toBeNull();
+    expect(screen.getByText('granted').textContent).toBe('granted');
+  });
 });

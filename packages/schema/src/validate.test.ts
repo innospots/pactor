@@ -68,6 +68,42 @@ describe('validatePageDsl', () => {
     expect(result.errors).toEqual([]);
   });
 
+  it('accepts free-form page meta（如 version / author / 业务自定义键）', () => {
+    const result = validatePageDsl({
+      ...validPage,
+      meta: { version: '1.0', author: 'platform-team', tags: ['demo'] },
+    });
+
+    expect(result.valid).toBe(true);
+    expect(result.errors).toEqual([]);
+  });
+
+  it('accepts page.name / page.description，拒绝非字符串', () => {
+    const ok = validatePageDsl({
+      ...validPage,
+      page: { ...validPage.page, name: 'customerList', description: '客户列表页' },
+    });
+    expect(ok.valid).toBe(true);
+
+    const bad = validatePageDsl({
+      ...validPage,
+      page: { ...validPage.page, name: 123 },
+    });
+    expect(bad.valid).toBe(false);
+    expect(bad.errors).toContainEqual(
+      expect.objectContaining({ path: '/page/name', keyword: 'type' }),
+    );
+  });
+
+  it('rejects a non-object meta', () => {
+    const result = validatePageDsl({ ...validPage, meta: 'v1' });
+
+    expect(result.valid).toBe(false);
+    expect(result.errors).toContainEqual(
+      expect.objectContaining({ path: '/meta', keyword: 'type' }),
+    );
+  });
+
   it('rejects a document missing the dsl version field', () => {
     const { dsl: _dsl, ...doc } = validPage;
     const result = validatePageDsl(doc);
@@ -136,6 +172,68 @@ describe('validatePageDsl', () => {
 
     expect(result.valid).toBe(false);
     expect(result.errors[0]?.keyword).toBe('enum');
+  });
+
+  it('accepts dataSource 选项字段映射（valueField / labelField / disabledField）', () => {
+    const doc = clone(validPage) as Record<string, any>;
+    doc.dataSources.statusOptions = {
+      type: 'http',
+      request: { url: '/api/status-options' },
+      valueField: 'code',
+      labelField: 'name',
+      disabledField: 'off',
+    };
+    const ok = validatePageDsl(doc);
+    expect(ok.valid).toBe(true);
+
+    doc.dataSources.statusOptions = { type: 'static', value: [], valueField: 1 };
+    const bad = validatePageDsl(doc);
+    expect(bad.valid).toBe(false);
+    expect(bad.errors).toContainEqual(
+      expect.objectContaining({
+        path: '/dataSources/statusOptions/valueField',
+        keyword: 'type',
+      }),
+    );
+  });
+
+  it('accepts 页面级命名动作 actions（单个动作或动作数组）', () => {
+    const ok = validatePageDsl({
+      ...validPage,
+      actions: {
+        refresh: { action: 'reload' },
+        deleteRow: [
+          { action: 'confirm', params: { title: '确认删除' } },
+          { action: 'request', params: { method: 'DELETE', url: '/api/items' } },
+        ],
+      },
+    });
+    expect(ok.valid).toBe(true);
+
+    const bad = validatePageDsl({
+      ...validPage,
+      actions: { bad: { params: {} } },
+    });
+    expect(bad.valid).toBe(false);
+  });
+
+  it('accepts 页面级命名组件 components（DslNode 子树），拒绝非法节点', () => {
+    const ok = validatePageDsl({
+      ...validPage,
+      components: {
+        searchForm: {
+          type: 'Form',
+          children: [{ type: 'Input', props: { name: 'keyword' } }],
+        },
+      },
+    });
+    expect(ok.valid).toBe(true);
+
+    const bad = validatePageDsl({
+      ...validPage,
+      components: { broken: { props: {} } },
+    });
+    expect(bad.valid).toBe(false);
   });
 
   it('accepts object-form permission on page, node and action', () => {

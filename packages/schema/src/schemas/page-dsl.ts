@@ -42,6 +42,11 @@ const dataSourceSchema = {
     service: { type: 'string', minLength: 1 },
     autoLoad: { type: 'boolean' },
     params: { type: 'object' },
+    /** 选项字段映射（该数据源用作选项源时声明） */
+    valueField: { type: 'string', minLength: 1 },
+    labelField: { type: 'string', minLength: 1 },
+    /** 选项禁用标记字段 */
+    disabledField: { type: 'string', minLength: 1 },
     request: {
       type: 'object',
       required: ['url'],
@@ -93,15 +98,31 @@ export const pageDslSchema = {
       properties: {
         id: { type: 'string', minLength: 1 },
         title: { type: 'string' },
+        /** 页面名称（标识用途） */
+        name: { type: 'string' },
+        /** 页面描述 */
+        description: { type: 'string' },
         type: { type: 'string' },
         permission: permissionSchema,
       },
       additionalProperties: false,
     },
+    /** 页面扩展元数据（自由键值，如 version / author），Runtime 不消费 */
+    meta: { type: 'object' },
     state: { type: 'object' },
     dataSources: {
       type: 'object',
       additionalProperties: dataSourceSchema,
+    },
+    /** 页面级命名动作定义（供 call 动作按名引用复用） */
+    actions: {
+      type: 'object',
+      additionalProperties: actionOrArraySchema,
+    },
+    /** 页面级命名组件定义（Fragment 子树复用） */
+    components: {
+      type: 'object',
+      additionalProperties: { $ref: DSL_NODE_SCHEMA_ID },
     },
     lifecycle: {
       type: 'object',

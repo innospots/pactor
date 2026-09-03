@@ -84,3 +84,17 @@ Renderer SHALL 支持组件在渲染 children 时注入局部作用域（如 Tab
 
 - **WHEN** 节点含两个 children
 - **THEN** 两者按声明顺序出现在父组件中
+
+### Requirement: Fragment 页面级命名组件引用
+
+Renderer SHALL 支持内置 `Fragment` 组件（createPageRuntime 自动注册，已注册同名不覆盖）：按 `props.name` 从 RuntimeContext `pageComponents`（PageDsl `components`）取 DslNode 子树并以引用处作用域渲染（`${row}` 等局部作用域原样可用）。`name` 缺失或未定义时 MUST 渲染 Unsupported 占位而不抛错；直接/间接循环引用 MUST 经引用链守卫，命中时不渲染并告警。
+
+#### Scenario: 按名引用页面级组件
+
+- **WHEN** PageDsl `components.searchForm` 定义 Form 子树，body 中 `{ type: 'Fragment', props: { name: 'searchForm' } }`
+- **THEN** 该位置渲染 searchForm 子树，表达式以引用处作用域求值
+
+#### Scenario: 循环引用守卫
+
+- **WHEN** `components.a` 引用 `b`、`b` 引用 `a`
+- **THEN** 渲染不崩溃，循环命中处不渲染并输出告警

@@ -13,6 +13,7 @@ import {
   type RuntimeContext,
 } from '../context/context.js';
 import { DslRenderer } from '../renderer/renderer.js';
+import { FragmentComponent } from '../renderer/fragment.js';
 
 /** Page DSL 校验失败错误：内含结构化错误列表 */
 export class PageRuntimeError extends Error {
@@ -79,8 +80,13 @@ export function createPageRuntime(
     page: pageDsl.page,
     state: pageDsl.state ?? options.state,
     dataSources: pageDsl.dataSources ?? options.dataSources,
+    namedActions: pageDsl.actions ?? options.namedActions,
+    pageComponents: pageDsl.components ?? options.pageComponents,
   });
   registerBuiltinActions(context.actions);
+  if (!context.components.has('Fragment')) {
+    context.components.register('Fragment', FragmentComponent);
+  }
   const engine = new ActionEngine(context);
 
   let destroyed = false;

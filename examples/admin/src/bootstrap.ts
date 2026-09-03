@@ -59,6 +59,15 @@ export function createBootstrap(): Partial<BootstrapResource> &
             pageId: 'customer-list',
             permission: 'customer:view',
           },
+          {
+            // master-detail 演示页：左侧列表点击 → 右侧详情（含 loading 态）
+            id: 'customer-detail',
+            type: 'page',
+            title: '客户 360',
+            path: '/customers/360',
+            pageId: 'customer-detail',
+            permission: 'customer:view',
+          },
         ],
       },
       {
@@ -93,6 +102,6 @@ export function createBootstrap(): Partial<BootstrapResource> &
       },
     ],
     layout: { type: 'admin', tabs: true, fixedHeader: true, fixedSider: true, breadcrumb: true, collapsible: true, breakpoint: 'lg' },
-    pageVersions: { dashboard: 1, 'customer-list': 1, 'customer-edit': 1, 'ai-workspace': 1 },
+    pageVersions: { dashboard: 1, 'customer-list': 1, 'customer-detail': 1, 'customer-edit': 1, 'ai-workspace': 1 },
   };
 }

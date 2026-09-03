@@ -83,6 +83,7 @@ export function DslRenderer({ context, node, engine, children }: DslRendererProp
       context,
       engine: resolvedEngine,
       scope: {},
+      fragmentStack: [],
       renderChildren: (children, extraScope) =>
         renderChildrenOf(root, children, extraScope),
     };
@@ -186,7 +187,7 @@ function resolveDeniedStrategy(
   return 'hidden';
 }
 
-function renderChildrenOf(
+export function renderChildrenOf(
   value: RendererContextValue,
   children: DslNode[] | undefined,
   extraScope?: ExpressionScope,
@@ -204,6 +205,7 @@ function renderChildrenOf(
     context: value.context,
     engine: value.engine,
     scope: { ...value.scope, ...extraScope },
+    fragmentStack: value.fragmentStack,
     renderChildren: (nested, nestedScope) =>
       renderChildrenOf(scoped, nested, nestedScope),
   };

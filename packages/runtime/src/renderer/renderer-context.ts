@@ -17,6 +17,8 @@ export interface RendererContextValue {
   engine: ActionEngine;
   /** 当前局部作用域（row / rowIndex / event / item 等） */
   scope: ExpressionScope;
+  /** 内部：Fragment 引用链（页面级命名组件的循环引用守卫） */
+  fragmentStack?: string[];
   /**
    * 渲染 DSL 子节点；`extraScope` 注入的局部作用域覆盖同名全局键，
    * 且仅作用于该子树（Table 行、Repeat 项等场景，设计文档第 21 节）。

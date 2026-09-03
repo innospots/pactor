@@ -1,0 +1,348 @@
+# UiSpec 标准模板
+# 对应 Java 类型: com.innospots.nexus.base.ui.spec.UiSpec
+# 放置路径（默认）: ui-spec/{moduleKey}/{pageKey}.yaml
+# pageInfo.pageId 必须与 pageKey 一致
+
+# ── 页面身份（必填）────────────────────────────────────────────
+pageInfo:
+  pageId: example-page          # 必填，与资源文件名中的 pageKey 一致
+  title:
+    en: Example Page
+    zh: 示例页面
+  name:
+    en: Example
+    zh: 示例
+  description:
+    en: A complete UiSpec template for reference.
+    zh: 完整 UiSpec 参考模板。
+
+# ── 页面类型 ───────────────────────────────────────────────────
+# 默认 general；常见值: table | dashboard | form
+pageType: general
+
+# ── 页面扩展元数据 ─────────────────────────────────────────────
+meta:
+  version: "1.0"
+  author: platform-team
+
+# ── 页面变量（供表达式与请求模板使用）──────────────────────────
+variables:
+  canView:
+    name: canView
+    type: Boolean
+    defaultValue: true
+    required: false
+  canDelete:
+    name: canDelete
+    type: Boolean
+    defaultValue: false
+    required: false
+  groupIds:
+    name: groupIds
+    type: String
+    defaultValue: ""
+  status:
+    name: status
+    type: String
+    defaultValue: active
+
+# ── 命名数据源 ─────────────────────────────────────────────────
+datasources:
+  listData:
+    method: GET
+    url: /api/example/items
+    params:
+      status: ${status}
+      groupIds: ${groupIds}
+    headers: {}
+    body: {}
+  createItem:
+    method: POST
+    url: /api/example/items
+    body:
+      name: ${name}
+
+# ── 可复用下拉选项源 ───────────────────────────────────────────
+optionSources:
+  statusOptions:
+    items:
+      - value: active
+        label:
+          en: Active
+          zh: 启用
+      - value: inactive
+        label:
+          en: Inactive
+          zh: 停用
+        disabled: false
+    valueField: value
+    labelField: label
+  remoteStatusOptions:
+    datasource:
+      method: GET
+      uri: /api/example/status-options
+    valueField: code
+    labelField: name
+
+# ── 组件定义（Map 键须等于 componentId）────────────────────────
+components:
+  searchForm:
+    componentId: searchForm
+    type: form
+    title:
+      en: Search
+      zh: 搜索
+    formFields:
+      - field: keyword
+        name: keyword
+        type: input
+        label:
+          en: Keyword
+          zh: 关键词
+        placeholder:
+          en: Enter keyword
+          zh: 请输入关键词
+        span: 8
+      - field: status
+        name: status
+        type: select
+        label:
+          en: Status
+          zh: 状态
+        optionSource: statusOptions
+        span: 8
+        required: false
+      - field: createdAt
+        name: createdAt
+        type: date
+        label:
+          en: Created At
+          zh: 创建时间
+        format: yyyy-MM-dd
+        span: 8
+
+  dataTable:
+    componentId: dataTable
+    type: table
+    title:
+      en: Items
+      zh: 数据列表
+    datasource: listData
+    icon: table
+    width: 100%
+    visibleIf:
+      expression: ${canView}
+      context: {}
+    table:
+      pagination: true
+      pageSize: 20
+      displayMode: default
+      columns:
+        - title: Name
+          label:
+            en: Name
+            zh: 名称
+          field: name
+          valueType: String
+          sortable: true
+          copyable: true
+          width: 200
+        - title: Status
+          label:
+            en: Status
+            zh: 状态
+          field: status
+          valueType: String
+          sortable: false
+        - title: Actions
+          label:
+            en: Actions
+            zh: 操作
+          field: _actions
+          valueType: Action
+          action:
+            actionId: rowMenu
+            actionType: dropdown
+            label:
+              en: More
+              zh: 更多
+            children:
+              - actionId: view
+                actionType: link
+                label:
+                  en: View
+                  zh: 查看
+                target: /example/items/${id}
+              - actionId: delete
+                actionType: api
+                label:
+                  en: Delete
+                  zh: 删除
+                request:
+                  method: DELETE
+                  uri: /api/example/items/${id}
+                visibleIf:
+                  expression: ${canDelete}
+                confirm:
+                  title:
+                    en: Confirm Delete
+                    zh: 确认删除
+                  message:
+                    en: This action cannot be undone.
+                    zh: 此操作不可撤销。
+                feedback:
+                  items:
+                    - status: success
+                      message:
+                        en: Deleted
+                        zh: 已删除
+      rowAction:
+        actionId: rowActions
+        actionType: dropdown
+        label:
+          en: Actions
+          zh: 操作
+    actions:
+      - actionId: inlineRefresh
+        actionType: refresh
+        label:
+          en: Refresh
+          zh: 刷新
+        icon: refresh
+        datasourceKey: listData
+
+  metricCard:
+    componentId: metricCard
+    type: metric-card
+    title:
+      en: Total Items
+      zh: 总数
+    datasource: listData
+    properties:
+      metricField: total
+      unit: ""
+
+  infoPanel:
+    componentId: infoPanel
+    type: info-card
+    title:
+      en: Information
+      zh: 说明
+    description:
+      en: Supplementary information for this page.
+      zh: 页面补充说明。
+    properties: {}
+
+# ── 页面根布局 ─────────────────────────────────────────────────
+layout:
+  layoutId: main
+  type: grid
+  gap: 12
+  components:
+    - componentId: searchForm
+      span: 12
+      area: top
+      properties: {}
+    - componentId: metricCard
+      span: 4
+      area: content
+    - componentId: dataTable
+      span: 12
+      area: content
+  properties: {}
+
+# ── 可复用动作定义（Map 键须等于 actionId）──────────────────────
+actionDefinitions:
+  refresh:
+    actionId: refresh
+    actionType: refresh
+    label:
+      en: Refresh
+      zh: 刷新
+    icon: refresh
+    scope: page
+    datasourceKey: listData
+    style:
+      variant: default
+      color: primary
+      size: middle
+    visibleIf:
+      expression: ${canView}
+
+  create:
+    actionId: create
+    actionType: modal
+    label:
+      en: Create
+      zh: 新建
+    icon: plus
+    scope: page
+    target: createFormModal
+    style:
+      variant: primary
+      color: primary
+      size: middle
+
+  export:
+    actionId: export
+    actionType: download
+    label:
+      en: Export
+      zh: 导出
+    icon: download
+    scope: page
+    request:
+      method: GET
+      uri: /api/example/items/export
+      params:
+        status: ${status}
+    properties: {}
+
+  delete:
+    actionId: delete
+    actionType: api
+    label:
+      en: Delete
+      zh: 删除
+    icon: delete
+    scope: batch
+    request:
+      method: DELETE
+      uri: /api/example/items
+      body:
+        ids: ${selectedIds}
+    visibleIf:
+      expression: ${canDelete}
+    confirm:
+      title:
+        en: Confirm Delete
+        zh: 确认删除
+      message:
+        en: Delete selected items?
+        zh: 确认删除选中项？
+    feedback:
+      items:
+        - status: success
+          message:
+            en: Deleted successfully
+            zh: 删除成功
+        - status: error
+          message:
+            en: Delete failed
+            zh: 删除失败
+
+# ── AI 动作（结构同 actionDefinitions）─────────────────────────
+aiActions:
+  summarize:
+    actionId: summarize
+    actionType: ai
+    label:
+      en: AI Summary
+      zh: AI 摘要
+    icon: robot
+    scope: page
+    tooltip:
+      en: Generate a summary of current data
+      zh: 生成当前数据摘要
+    properties:
+      prompt: Summarize the current table data

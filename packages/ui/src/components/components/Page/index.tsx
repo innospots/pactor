@@ -1,15 +1,17 @@
-import type { ReactNode } from 'react';
+import type { CSSProperties, ReactNode } from 'react';
 
 export interface PageProps {
   /** 页面标题，可选 */
   title?: string;
+  /** 根节点内联样式（布局逃逸口） */
+  style?: CSSProperties;
   children?: ReactNode;
 }
 
 /** Page 容器（shadcn kit）：可选标题 + 内容区（纵向节奏 space-y-5） */
-export function Page({ title, children }: PageProps) {
+export function Page({ title, style, children }: PageProps) {
   return (
-    <div data-slot="page" className="p-6">
+    <div data-slot="page" className="p-6" style={style}>
       {title ? (
         <h2 data-slot="page-title" className="mb-5 text-xl font-semibold">
           {title}

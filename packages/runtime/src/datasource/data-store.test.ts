@@ -102,6 +102,84 @@ describe('static 类型数据源', () => {
   });
 });
 
+describe('选项字段映射（valueField / labelField / disabledField）', () => {
+  it('声明映射后数组项归一化出 label/value/disabled，原字段保留', async () => {
+    const services = {
+      get: () => async () => [
+        { code: 'active', name: '启用', off: false },
+        { code: 'archived', name: '已归档', off: true },
+      ],
+    };
+    const { store } = setup(
+      {
+        statusOptions: {
+          type: 'service',
+          service: 'options.list',
+          valueField: 'code',
+          labelField: 'name',
+          disabledField: 'off',
+        },
+      },
+      { services: services as never },
+    );
+
+    await store.load('statusOptions');
+
+    expect(store.getData('statusOptions')).toEqual([
+      { code: 'active', name: '启用', off: false, label: '启用', value: 'active', disabled: false },
+      { code: 'archived', name: '已归档', off: true, label: '已归档', value: 'archived', disabled: true },
+    ]);
+  });
+
+  it('未声明映射时数据原样返回', async () => {
+    const { store } = setup({
+      raw: {
+        type: 'static',
+        value: [{ code: 'a', name: 'A' }],
+      },
+    });
+
+    await store.load('raw');
+
+    expect(store.getData('raw')).toEqual([{ code: 'a', name: 'A' }]);
+  });
+
+  it('加载结果非数组时不做映射', async () => {
+    const { store } = setup({
+      obj: {
+        type: 'static',
+        value: { code: 'a', name: 'A' },
+        valueField: 'code',
+        labelField: 'name',
+      },
+    });
+
+    await store.load('obj');
+
+    expect(store.getData('obj')).toEqual({ code: 'a', name: 'A' });
+  });
+
+  it('缺省 value/label 字段名回退为 item.value / item.label', async () => {
+    const { store } = setup({
+      opts: {
+        type: 'static',
+        value: [
+          { label: '启用', value: 'active' },
+          { label: '停用', value: 'inactive', disabled: true },
+        ],
+        disabledField: 'disabled',
+      },
+    });
+
+    await store.load('opts');
+
+    expect(store.getData('opts')).toEqual([
+      { label: '启用', value: 'active', disabled: false },
+      { label: '停用', value: 'inactive', disabled: true },
+    ]);
+  });
+});
+
 describe('service 类型数据源', () => {
   it('调用已注册服务，params 经当前作用域求值', async () => {
     const handler = vi.fn(async (params: Record<string, unknown>) => params);

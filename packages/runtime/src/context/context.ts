@@ -1,4 +1,4 @@
-import { Registry, createI18nContext, type DataSourceConfig, type I18nContext, type PageMeta } from '@pactor-app/core';
+import { Registry, createI18nContext, type ActionConfig, type DataSourceConfig, type DslNode, type I18nContext, type PageMeta } from '@pactor-app/core';
 import type { ExpressionScope } from '@pactor-app/expression';
 
 import type { ActionRegistry } from '../action/engine.js';
@@ -78,6 +78,16 @@ export interface RuntimeContext {
    * destroy 时清理。
    */
   actionResults: Record<string, unknown>;
+  /**
+   * 页面级命名动作定义（PageDsl.actions）：动作名 → 单个或多个动作，
+   * 供内置 `call` 动作按名引用复用；缺省为空对象
+   */
+  namedActions: Record<string, ActionConfig | ActionConfig[]>;
+  /**
+   * 页面级命名组件定义（PageDsl.components）：组件名 → DslNode 子树，
+   * 供内置 `Fragment` 组件按 `props.name` 引用渲染；缺省为空对象
+   */
+  pageComponents: Record<string, DslNode>;
   permission: PermissionAdapter;
   capabilities: CapabilityRegistry;
   /** HTTP 出口适配器（DataSource / request 动作共用） */
@@ -94,6 +104,10 @@ export interface CreateRuntimeContextOptions {
   /** 页面初始 state */
   state?: Record<string, unknown>;
   dataSources?: Record<string, DataSourceConfig>;
+  /** 页面级命名动作定义（PageDsl.actions），供 `call` 动作按名引用 */
+  namedActions?: Record<string, ActionConfig | ActionConfig[]>;
+  /** 页面级命名组件定义（PageDsl.components），供 `Fragment` 组件按名渲染 */
+  pageComponents?: Record<string, DslNode>;
   route?: {
     params?: Record<string, unknown>;
     query?: Record<string, unknown>;
@@ -165,6 +179,8 @@ export function createRuntimeContext(
     actions,
     forms,
     actionResults: {},
+    namedActions: options.namedActions ?? {},
+    pageComponents: options.pageComponents ?? {},
     permission,
     capabilities,
     http,

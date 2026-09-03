@@ -19,6 +19,10 @@ export interface RequiresConfig {
 export interface PageMeta {
   id: string;
   title?: string;
+  /** 页面名称（标识用途，区别于展示的 title） */
+  name?: string;
+  /** 页面描述 */
+  description?: string;
   /** 页面类型 / Page Pattern，如 "list"、"detail"、"form" */
   type?: string;
   permission?: PermissionConfig;
@@ -35,6 +39,15 @@ export interface DataSourceConfig {
   autoLoad?: boolean;
   /** 调用参数，值可含表达式字符串 */
   params?: Record<string, unknown>;
+  /**
+   * 选项字段映射（该数据源用作选项源时声明）：加载结果为数组时，
+   * 每项归一化出 `{ label, value, disabled }` 键（原字段保留），
+   * 供 Select 等组件经 `${data.x}` 直接绑定
+   */
+  valueField?: string;
+  labelField?: string;
+  /** 选项禁用标记字段：数组项中该字段为真值时选项禁用 */
+  disabledField?: string;
   /** type 为 http 时的请求描述 */
   request?: {
     method?: string;
@@ -72,9 +85,23 @@ export interface PageDsl {
   dsl: DslVersion;
   requires?: RequiresConfig;
   page: PageMeta;
+  /** 页面扩展元数据（自由键值，如 version / author / 业务自定义标记），Runtime 不消费，仅供宿主与工具链读取 */
+  meta?: Record<string, unknown>;
   /** 页面初始状态 */
   state?: Record<string, unknown>;
   dataSources?: Record<string, DataSourceConfig>;
+  /**
+   * 页面级命名动作定义：动作名 → 单个动作或动作数组，
+   * 供事件中的 `call` 动作按名引用复用（以调用方作用域执行，
+   * `${row}` / `${event}` 等局部作用域原样可用）
+   */
+  actions?: Record<string, ActionConfig | ActionConfig[]>;
+  /**
+   * 页面级命名组件定义（设计文档第 50 节 Fragment 的页面局部形态）：
+   * 组件名 → DslNode 子树，body 中以 `{ type: 'Fragment', props: { name } }`
+   * 引用复用，防止 DSL 嵌套过深；以引用处作用域渲染
+   */
+  components?: Record<string, DslNode>;
   lifecycle?: LifecycleConfig;
   /** UI 树根 */
   body?: DslNode;
