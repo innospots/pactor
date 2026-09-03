@@ -16,6 +16,13 @@ describe('MarkdownRenderer 元素渲染', () => {
     expect(root.classList.contains('chat-message')).toBe(true);
   });
 
+  it('通用 props：style 内联到根节点', () => {
+    const { container } = render(
+      <MarkdownRenderer content="正文" style={{ flex: 1 }} />,
+    );
+    expect((container.firstElementChild as HTMLElement).style.flexGrow).toBe('1');
+  });
+
   it('渲染标题与列表（Scenario: 渲染标题与列表）', () => {
     render(<MarkdownRenderer content={'### 标题\n\n- 项目一\n- 项目二'} />);
     expect(screen.getByRole('heading', { level: 3, name: '标题' })).toBeTruthy();

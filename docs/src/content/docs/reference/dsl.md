@@ -296,6 +296,8 @@ overlay 内容的表达式以 overlay 作用域求值（`${params.x}` 取注入�
 
 ## 组件目录
 
+通用 props（所有组件一致）：`className`（根节点 class，与内置样式合并）、`style`（根节点内联样式对象，如 `{ flex: 1 }`）、`permission`、`when`、`events`。下表只列各组件特有 props。
+
 内置 12 个组件（shadcn 实现，@pactor-app/ui）+ @pactor-app/markdown 注册的 Markdown。业务组件注册见[自定义组件](/guides/custom-components/)。
 
 ### Page
@@ -305,7 +307,6 @@ overlay 内容的表达式以 overlay 作用域求值（`${params.x}` 取注入�
 | prop | 类型 | 说明 |
 | --- | --- | --- |
 | `title` | string | 页面标题 |
-| `style` | object | 根节点内联样式（布局逃逸口） |
 
 ### Grid
 
@@ -315,7 +316,6 @@ overlay 内容的表达式以 overlay 作用域求值（`${params.x}` 取注入�
 | --- | --- | --- |
 | `columns` | number（默认 1） | 列数 |
 | `gap` | number | 栏间距 |
-| `style` | object | 根节点内联样式（布局逃逸口） |
 
 ### Flex
 
@@ -325,7 +325,6 @@ overlay 内容的表达式以 overlay 作用域求值（`${params.x}` 取注入�
 | `gap` | number \| `small` \| `middle` \| `large` | 间距 |
 | `justify` | `start` \| `center` \| `end` \| `space-between` \| `space-around` \| `space-evenly` | 主轴对齐 |
 | `align` | `start` \| `center` \| `end` \| `baseline` \| `stretch` | 交叉轴对齐 |
-| `style` | object | 根节点内联样式（布局逃逸口，如 `{ flex: 1 }`；与数字 gap 合并） |
 
 ### Card
 
@@ -333,7 +332,6 @@ overlay 内容的表达式以 overlay 作用域求值（`${params.x}` 取注入�
 | --- | --- | --- |
 | `title` | string | 卡片标题 |
 | `bordered` | boolean（默认 true） | 是否有边框 |
-| `style` | object | 根节点内联样式（布局逃逸口） |
 
 ### Button
 

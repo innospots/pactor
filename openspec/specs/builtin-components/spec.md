@@ -95,3 +95,12 @@ Input SHALL 支持框架级 `type` prop，取值为 `'text' | 'password'`，缺�
 
 - **WHEN** Input 不在 Form 内且 props 含 `type: 'password'`
 - **THEN** 渲染掩码输入框，onChange 仍传出 string 值
+
+### Requirement: 通用 props（className / style）
+
+全部内置组件 SHALL 支持通用 props `className`（根节点 class，与内置样式合并）与 `style`（根节点内联样式对象）；Form 内的 Input / Select MUST 将其挂载到 `form-item` 容器（独立渲染时挂控件根节点）。
+
+#### Scenario: 通用 props 作用于根节点
+
+- **WHEN** 任意内置组件声明 `props: { className: 'x', style: { flex: 1 } }`
+- **THEN** 渲染结果的根节点 class 列表包含 `x` 且内联样式包含 `flex: 1`

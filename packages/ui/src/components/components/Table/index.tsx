@@ -1,7 +1,8 @@
 import type { DslNode } from '@pactor-app/core';
 import { useI18n, useRenderer } from '@pactor-app/runtime';
-import { useState } from 'react';
+import { useState, type CSSProperties } from 'react';
 
+import { cn } from '../../../lib/utils.js';
 import { Button as ShadcnButton } from '../../../ui/button.js';
 import {
   Table as ShadcnTable,
@@ -43,6 +44,10 @@ export interface TableProps {
   pagination?: TablePagination;
   /** 分页 / 排序变化事件，传出 pagination 信息 */
   onChange?: (pagination: TablePaginationInfo) => void;
+  /** 通用：根节点 class（与内置样式合并） */
+  className?: string;
+  /** 通用：根节点内联样式 */
+  style?: CSSProperties;
 }
 
 function renderCellValue(value: unknown): string {
@@ -68,6 +73,8 @@ export function Table({
   loading,
   pagination,
   onChange,
+  className,
+  style,
 }: TableProps) {
   const { renderChildren } = useRenderer();
   const { t } = useI18n();
@@ -90,7 +97,7 @@ export function Table({
   };
 
   return (
-    <div data-slot="dsl-table" className="relative">
+    <div data-slot="dsl-table" className={cn('relative', className)} style={style}>
       {loading ? (
         <div
           data-slot="table-loading"

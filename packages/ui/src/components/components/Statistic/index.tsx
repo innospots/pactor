@@ -1,3 +1,7 @@
+import type { CSSProperties } from 'react';
+
+import { cn } from '../../../lib/utils.js';
+
 export interface StatisticProps {
   /** 指标标题 */
   title?: string;
@@ -7,16 +11,20 @@ export interface StatisticProps {
   precision?: number;
   /** 后缀（如单位） */
   suffix?: string;
+  /** 通用：根节点 class（与内置样式合并） */
+  className?: string;
+  /** 通用：根节点内联样式 */
+  style?: CSSProperties;
 }
 
 /** Statistic 适配器（shadcn kit）：标题 + 数值（precision 精度 / suffix 后缀） */
-export function Statistic({ title, value, precision, suffix }: StatisticProps) {
+export function Statistic({ title, value, precision, suffix, className, style }: StatisticProps) {
   const display =
     typeof value === 'number' && precision !== undefined
       ? value.toFixed(precision)
       : value;
   return (
-    <div data-slot="statistic">
+    <div data-slot="statistic" className={cn(className)} style={style}>
       {title ? (
         <div data-slot="statistic-title" className="text-sm text-muted-foreground">
           {title}

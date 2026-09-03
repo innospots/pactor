@@ -1,3 +1,4 @@
+import type { CSSProperties } from 'react';
 import type { Components } from 'react-markdown';
 import Markdown from 'react-markdown';
 import rehypeKatex from 'rehype-katex';
@@ -103,6 +104,8 @@ export interface MarkdownRendererProps {
   content?: string;
   /** 附加 className，与基础 class `@pactor-app/markdown` 并存 */
   className?: string;
+  /** 通用：根节点内联样式 */
+  style?: CSSProperties;
   /** 数学公式（remark-math + rehype-katex），默认 true；需自行引入 katex css */
   math?: boolean;
   /** fenced 代码块语法高亮，默认 true */
@@ -120,6 +123,7 @@ export interface MarkdownRendererProps {
 export function MarkdownRenderer({
   content = '',
   className,
+  style,
   math = true,
   codeHighlight = true,
 }: MarkdownRendererProps) {
@@ -128,7 +132,7 @@ export function MarkdownRenderer({
   }
   const containerClass = className ? `pactor-markdown ${className}` : 'pactor-markdown';
   return (
-    <div className={containerClass}>
+    <div className={containerClass} style={style}>
       <Markdown
         remarkPlugins={math ? [remarkGfm, remarkMath] : [remarkGfm]}
         rehypePlugins={math ? [rehypeKatex] : []}

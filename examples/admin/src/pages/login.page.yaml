@@ -47,6 +47,7 @@ body:
         variant: info
         message: 演示账号 admin / pactor123
         description: 登录成功后写入本地会话并整页重载，bootstrap 按会话返回 admin 布局。
+        style: { marginBottom: 16 }
     - type: Input
       props:
         name: username
@@ -65,9 +66,12 @@ body:
         rules:
           - required: true
             message: 请输入密码
-    - type: Button
-      props:
-        text: 登 录
-        variant: primary
-        submit: true
-        loading: ${state.submitting}
+    - type: Flex
+      props: { justify: end }
+      children:
+        - type: Button
+          props:
+            text: 登 录
+            variant: primary
+            submit: true
+            loading: ${state.submitting}

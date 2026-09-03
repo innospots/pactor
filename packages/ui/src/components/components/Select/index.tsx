@@ -1,6 +1,7 @@
 import { useI18n } from '@pactor-app/runtime';
-import { useEffect, useId } from 'react';
+import { useEffect, useId, type CSSProperties } from 'react';
 
+import { cn } from '../../../lib/utils.js';
 import {
   Select as ShadcnSelect,
   SelectContent,
@@ -35,6 +36,10 @@ export interface SelectProps {
   allowClear?: boolean;
   /** 选中变化事件，传出选中的 value */
   onChange?: (value: unknown) => void;
+  /** 通用：根节点 class（Form 内为 form-item 容器，独立渲染时为控件包裹） */
+  className?: string;
+  /** 通用：根节点内联样式（同 className 的挂载规则） */
+  style?: CSSProperties;
 }
 
 /**
@@ -57,6 +62,8 @@ export function Select({
   disabled,
   allowClear,
   onChange,
+  className,
+  style,
 }: SelectProps) {
   const form = useFormContext();
   const { t } = useI18n();
@@ -85,8 +92,12 @@ export function Select({
     onChange?.(next ?? undefined);
   };
 
+  const inFormRoot = inForm === true;
   const select = (
-    <span className="inline-flex items-center gap-1">
+    <span
+      className={cn('inline-flex items-center gap-1', !inFormRoot && className)}
+      style={inFormRoot ? undefined : style}
+    >
       <ShadcnSelect<SelectOption['value']>
         items={options}
         value={selectedValue}
@@ -130,7 +141,11 @@ export function Select({
   if (inForm && form && name) {
     const error = form.errors[name];
     return (
-      <div data-slot="form-item" className={formItemClass(form.layout)}>
+      <div
+        data-slot="form-item"
+        className={cn(formItemClass(form.layout), className)}
+        style={style}
+      >
         {label ? (
           <label
             htmlFor={controlId}

@@ -1,5 +1,5 @@
 import { Loader2 } from 'lucide-react';
-import type { ReactNode } from 'react';
+import type { CSSProperties, ReactNode } from 'react';
 
 import { cn } from '../../../lib/utils.js';
 import {
@@ -28,6 +28,10 @@ export interface ButtonProps {
   submit?: boolean;
   /** 点击事件（Renderer 绑定 events.onClick） */
   onClick?: () => void;
+  /** 通用：根节点 class（与内置样式合并） */
+  className?: string;
+  /** 通用：根节点内联样式 */
+  style?: CSSProperties;
   children?: ReactNode;
 }
 
@@ -67,6 +71,8 @@ export function Button({
   disabled,
   submit,
   onClick,
+  className,
+  style,
   children,
 }: ButtonProps) {
   const textual = variant === 'link' || variant === 'text';
@@ -78,9 +84,11 @@ export function Button({
       disabled={disabled ?? loading}
       aria-busy={loading || undefined}
       onClick={() => onClick?.()}
+      style={style}
       className={cn(
         variant === 'dashed' && 'border-dashed',
         danger && textual && 'text-destructive hover:text-destructive',
+        className,
       )}
     >
       {loading ? <Loader2 aria-hidden className="animate-spin" /> : null}
