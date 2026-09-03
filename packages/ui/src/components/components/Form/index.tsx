@@ -5,6 +5,7 @@ import {
   useMemo,
   useRef,
   useState,
+  type CSSProperties,
   type ReactNode,
 } from 'react';
 
@@ -19,6 +20,10 @@ export interface FormProps {
   layout?: 'horizontal' | 'vertical' | 'inline';
   /** 表单初始值（创建时生效；字段级 value 优先于 initialValues[name]） */
   initialValues?: Record<string, unknown>;
+  /** 通用：根节点 class（与内置样式合并） */
+  className?: string;
+  /** 通用：根节点内联样式 */
+  style?: CSSProperties;
   children?: ReactNode;
   /** 提交事件（校验通过后触发），参数为表单 values */
   onSubmit?: (values: Record<string, unknown>) => void;
@@ -47,6 +52,8 @@ export function Form({
   name = 'default',
   layout = 'vertical',
   initialValues,
+  className,
+  style,
   children,
   onSubmit,
   onValuesChange,
@@ -137,7 +144,8 @@ export function Form({
     <FormContextProvider value={formContext}>
       <form
         data-slot="form"
-        className={cn(layout === 'inline' && 'flex flex-wrap items-center gap-3')}
+        className={cn(layout === 'inline' && 'flex flex-wrap items-center gap-3', className)}
+        style={style}
         onSubmit={handleSubmit}
       >
         {children}

@@ -1,5 +1,6 @@
-import { useEffect, useId } from 'react';
+import { useEffect, useId, type CSSProperties } from 'react';
 
+import { cn } from '../../../lib/utils.js';
 import { Input as ShadcnInput } from '../../../ui/input.js';
 import { formItemClass, useFormContext } from '../Form/context.js';
 
@@ -24,6 +25,10 @@ export interface InputProps {
   disabled?: boolean;
   /** 输入事件，传出 string 值（非原生 event，设计决策 D2） */
   onChange?: (value: string) => void;
+  /** 通用：根节点 class（Form 内为 form-item 容器，独立渲染时为控件本身） */
+  className?: string;
+  /** 通用：根节点内联样式（同 className 的挂载规则） */
+  style?: CSSProperties;
 }
 
 /**
@@ -42,6 +47,8 @@ export function Input({
   placeholder,
   disabled,
   onChange,
+  className,
+  style,
 }: InputProps) {
   const form = useFormContext();
   const controlId = useId();
@@ -61,7 +68,11 @@ export function Input({
     const fieldValue = form.values[name];
     const error = form.errors[name];
     return (
-      <div data-slot="form-item" className={formItemClass(form.layout)}>
+      <div
+        data-slot="form-item"
+        className={cn(formItemClass(form.layout), className)}
+        style={style}
+      >
         {label ? (
           <label
             htmlFor={controlId}
@@ -96,6 +107,8 @@ export function Input({
       value={value ?? ''}
       placeholder={placeholder}
       disabled={disabled}
+      className={className}
+      style={style}
       onChange={(event) => onChange?.(event.target.value)}
     />
   );

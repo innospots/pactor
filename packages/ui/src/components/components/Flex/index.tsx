@@ -11,7 +11,9 @@ export interface FlexProps {
   justify?: 'start' | 'center' | 'end' | 'space-between' | 'space-around' | 'space-evenly';
   /** 交叉轴对齐 */
   align?: 'start' | 'center' | 'end' | 'baseline' | 'stretch';
-  /** 根节点内联样式（布局逃逸口，如 `{ flex: 1 }`；与数字 gap 合并） */
+  /** 通用：根节点 class（与内置样式合并） */
+  className?: string;
+  /** 通用：根节点内联样式（布局逃逸口，如 `{ flex: 1 }`；与数字 gap 合并） */
   style?: CSSProperties;
   children?: ReactNode;
 }
@@ -45,6 +47,7 @@ export function Flex({
   gap,
   justify,
   align,
+  className,
   style,
   children,
 }: FlexProps) {
@@ -57,6 +60,7 @@ export function Flex({
         typeof gap === 'string' && gapClass[gap],
         justify && justifyClass[justify],
         align && alignClass[align],
+        className,
       )}
       style={
         typeof gap === 'number' || style
