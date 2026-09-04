@@ -231,3 +231,22 @@ export function walkDslTree(
     });
   }
 }
+
+/**
+ * 遍历 Page DSL 的 UI 树根：body 存在时遍历 body（路径基 /body）；
+ * 否则遍历根级 children（路径基 /children/<i>）。与 resolveRootNodes 同语义。
+ */
+export function walkPageTrees(
+  data: Partial<PageDsl>,
+  visit: (node: DslNode, path: string) => void,
+): void {
+  if (data.body !== undefined) {
+    walkDslTree(data.body, visit, '/body');
+    return;
+  }
+  if (Array.isArray(data.children)) {
+    data.children.forEach((child, index) => {
+      walkDslTree(child, visit, `/children/${index}`);
+    });
+  }
+}

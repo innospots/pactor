@@ -303,4 +303,41 @@ describe('validatePageDsl', () => {
 
     expect(result.valid).toBe(false);
   });
+
+  it('accepts root-level children without body（局部描述形态）', () => {
+    const doc = clone(validPage) as Record<string, any>;
+    delete doc.body;
+    doc.children = [
+      { type: 'Alert', props: { message: '局部区块' } },
+      { type: 'Button', props: { text: '操作' } },
+    ];
+    const result = validatePageDsl(doc);
+
+    expect(result.valid).toBe(true);
+    expect(result.errors).toEqual([]);
+    expect(result.warnings).toEqual([]);
+  });
+
+  it('rejects an invalid node inside root-level children', () => {
+    const doc = clone(validPage) as Record<string, any>;
+    delete doc.body;
+    doc.children = [{ props: { message: '缺 type' } }];
+    const result = validatePageDsl(doc);
+
+    expect(result.valid).toBe(false);
+    expect(result.errors).toContainEqual(
+      expect.objectContaining({ path: '/children/0/type', keyword: 'required' }),
+    );
+  });
+
+  it('warns (without failing) when body and root children coexist', () => {
+    const doc = clone(validPage) as Record<string, any>;
+    doc.children = [{ type: 'Alert' }];
+    const result = validatePageDsl(doc);
+
+    expect(result.valid).toBe(true);
+    expect(result.warnings).toContainEqual(
+      expect.objectContaining({ path: '/children', keyword: 'conflict' }),
+    );
+  });
 });

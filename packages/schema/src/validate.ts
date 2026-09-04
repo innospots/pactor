@@ -16,6 +16,8 @@ export interface DslValidationError {
 export interface DslValidationResult {
   valid: boolean;
   errors: DslValidationError[];
+  /** 提示级信息（不阻断校验），如 body 与根级 children 共存 */
+  warnings: DslValidationError[];
 }
 
 const ajv = new Ajv({ allErrors: true, strict: false });
@@ -51,10 +53,32 @@ function getValidator(): ValidateFunction {
 
 /**
  * 校验 Page DSL 文档是否符合根结构 Schema。
- * 校验通过时 errors 为空数组。
+ * 校验通过时 errors 为空数组；warnings 为提示级信息（不阻断校验）。
  */
 export function validatePageDsl(document: unknown): DslValidationResult {
   const validate = getValidator();
   const valid = validate(document) as boolean;
-  return { valid, errors: valid ? [] : toStructuredErrors(validate.errors ?? []) };
+  return {
+    valid,
+    errors: valid ? [] : toStructuredErrors(validate.errors ?? []),
+    warnings: collectWarnings(document),
+  };
+}
+
+/** 收集提示级信息（与 Schema 校验正交，不影响 valid） */
+function collectWarnings(document: unknown): DslValidationError[] {
+  if (typeof document !== 'object' || document === null) {
+    return [];
+  }
+  const doc = document as Record<string, unknown>;
+  if (doc.body !== undefined && doc.children !== undefined) {
+    return [
+      {
+        path: '/children',
+        message: 'body 与根级 children 同时声明，children 将被忽略（body 优先）',
+        keyword: 'conflict',
+      },
+    ];
+  }
+  return [];
 }

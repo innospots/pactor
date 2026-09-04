@@ -3,7 +3,7 @@ page:
   id: layout-demo
   title: 布局组件演示
   name: layoutDemo
-  description: 'Layout / Header / Sider / Content / Footer / Menu 页面级自由组合（spec: layout-components）'
+  description: 'Layout / Header / Sider / Content / Footer / Menu 页面级自由组合（spec: layout-components）；根级 children 局部描述形态（无 Page 包装）'
   permission: customer:view
 
 meta:
@@ -39,6 +39,8 @@ components:
           variant: info
   toolContent:
     type: Content
+    props:
+      style: { padding: 16 }
     children:
       - type: Statistic
         props:
@@ -49,46 +51,44 @@ components:
           message: 左侧菜单切换经 onSelect → setState 闭环驱动
           variant: success
 
-body:
-  type: Page
-  props:
-    title: 布局组件演示
-  children:
-    - type: Alert
-      props:
-        message: Layout / Header / Sider / Content / Footer / Menu 自由组合：Sider 折叠与 Menu 选中均为受控闭环（绑 state + 事件回写）。
-        variant: info
-    # Layout 含 Sider 子节点 → 自动横向；Footer 在纵向外层
-    - type: Layout
-      props:
-        style: { height: 420, border: 1px solid var(--border), borderRadius: 8 }
-      children:
-        - type: Sider
-          props:
-            collapsible: true
-            collapsed: ${state.siderCollapsed}
-          events:
-            onCollapse:
-              - action: setState
-                params:
-                  siderCollapsed: ${event}
-          children:
-            - type: Menu
-              props:
-                items: ${data.toolMenus}
-                selectedKey: ${state.currentTool}
-              events:
-                onSelect:
-                  - action: setState
-                    params:
-                      currentTool: ${event}
-        - type: Layout
-          children:
-            - component: toolbar
-            - component: toolContent
-            - type: Footer
-              children:
-                - type: Alert
-                  props:
-                    message: 页内 Footer
-                    variant: info
+# 根级 children：DSL 作为页面局部描述，无需 body / Page 包装节点
+children:
+  - type: Alert
+    props:
+      message: Layout / Header / Sider / Content / Footer / Menu 自由组合：Sider 折叠与 Menu 选中均为受控闭环（绑 state + 事件回写）。
+      variant: info
+      style: { marginBottom: 16 }
+  # Layout 含 Sider 子节点 → 自动横向；Footer 在纵向外层
+  - type: Layout
+    props:
+      style: { height: 420, border: 1px solid var(--border), borderRadius: 8 }
+    children:
+      - type: Sider
+        props:
+          collapsible: true
+          collapsed: ${state.siderCollapsed}
+        events:
+          onCollapse:
+            - action: setState
+              params:
+                siderCollapsed: ${event}
+        children:
+          - type: Menu
+            props:
+              items: ${data.toolMenus}
+              selectedKey: ${state.currentTool}
+            events:
+              onSelect:
+                - action: setState
+                  params:
+                    currentTool: ${event}
+      - type: Layout
+        children:
+          - component: toolbar
+          - component: toolContent
+          - type: Footer
+            children:
+              - type: Alert
+                props:
+                  message: 页内 Footer
+                  variant: info

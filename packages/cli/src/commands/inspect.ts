@@ -2,7 +2,6 @@ import { existsSync, statSync } from 'node:fs';
 
 import type {
   ActionConfig,
-  DslNode,
   FragmentDsl,
   PageDsl,
   PermissionConfig,
@@ -14,7 +13,7 @@ import {
   extractTemplateExpressions,
   isFragmentFile,
   readDslFile,
-  walkDslTree,
+  walkPageTrees,
 } from '../dsl-io.js';
 
 /** 权限配置归一化为权限码数组 */
@@ -83,12 +82,12 @@ export function runInspect(args: ParsedArgs, io: CliIo): number {
     lines.push(`  - ${name} (type=${config.type}${service})`);
   }
 
-  // 组件类型计数（递归 body）+ 事件动作清单 + 组件级权限
+  // 组件类型计数（递归 UI 树）+ 事件动作清单 + 组件级权限
   const componentCounts = new Map<string, number>();
   const actions: string[] = [];
   const permissions: string[] = [];
 
-  walkDslTree(data.body as DslNode | undefined, (node, path) => {
+  walkPageTrees(data as Partial<PageDsl>, (node, path) => {
     const nodeKey = node.type ?? `→${node.component ?? '?'}`;
     componentCounts.set(nodeKey, (componentCounts.get(nodeKey) ?? 0) + 1);
     for (const [event, config] of Object.entries(node.events ?? {})) {

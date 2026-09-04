@@ -210,6 +210,53 @@ describe('渲染入口', () => {
 
     expect(container.innerHTML).toBe('');
   });
+
+  it('根级 children（无 body）：多节点按序渲染且共享同一 state 作用域', () => {
+    const Label = ({ text }: { text?: string }) => <span>{text}</span>;
+    const runtime = createPageRuntime(
+      minimalDsl({
+        state: { name: '世界' },
+        children: [
+          { type: 'Label', props: { text: '你好 ${state.name}' } },
+          { type: 'Label', props: { text: '再见 ${state.name}' } },
+        ],
+      }),
+    );
+    runtime.context.components.register('Label', Label);
+
+    render(<PageRuntimeView runtime={runtime} />);
+
+    expect(screen.getByText('你好 世界')).toBeTruthy();
+    expect(screen.getByText('再见 世界')).toBeTruthy();
+  });
+
+  it('body 与根级 children 共存时 body 优先', () => {
+    const Label = ({ text }: { text?: string }) => <span>{text}</span>;
+    const runtime = createPageRuntime(
+      minimalDsl({
+        body: { type: 'Label', props: { text: 'from-body' } },
+        children: [{ type: 'Label', props: { text: 'from-children' } }],
+      }),
+    );
+    runtime.context.components.register('Label', Label);
+
+    render(<PageRuntimeView runtime={runtime} />);
+
+    expect(screen.getByText('from-body')).toBeTruthy();
+    expect(screen.queryByText('from-children')).toBeNull();
+  });
+
+  it('runtime.render() 支持根级 children', () => {
+    const Label = ({ text }: { text?: string }) => <span>{text}</span>;
+    const runtime = createPageRuntime(
+      minimalDsl({ children: [{ type: 'Label', props: { text: 'partial' } }] }),
+    );
+    runtime.context.components.register('Label', Label);
+
+    render(<>{runtime.render()}</>);
+
+    expect(screen.getByText('partial')).toBeTruthy();
+  });
 });
 
 /**

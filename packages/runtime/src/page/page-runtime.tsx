@@ -1,4 +1,5 @@
 import type { LifecycleEventName, PageDsl } from '@pactor-app/core';
+import { resolveRootNodes } from '@pactor-app/core';
 import {
   validatePageDsl,
   type DslValidationError,
@@ -42,7 +43,7 @@ export interface PageRuntime {
   readonly initialized: Promise<void>;
   /** 是否已销毁 */
   readonly destroyed: boolean;
-  /** 渲染 body 子树；未配置 body 时渲染空内容 */
+  /** 渲染 UI 树根（body 或根级 children）；两者皆无时渲染空内容 */
   render(): ReactNode;
   /** 宿主（Router）触发生命周期：onReady */
   ready(): Promise<void>;
@@ -126,11 +127,16 @@ export function createPageRuntime(
       return destroyed;
     },
     render(): ReactNode {
-      if (!pageDsl.body) {
+      const roots = resolveRootNodes(pageDsl);
+      if (roots.length === 0) {
         return null;
       }
       return (
-        <DslRenderer context={context} node={pageDsl.body} engine={engine} />
+        <>
+          {roots.map((node, index) => (
+            <DslRenderer key={node.id ?? index} context={context} node={node} engine={engine} />
+          ))}
+        </>
       );
     },
     ready: () => triggerWhenAlive('onReady'),
@@ -172,13 +178,23 @@ export function PageRuntimeView({
   runtime: PageRuntime;
   children?: ReactNode;
 }) {
-  const body = runtime.pageDsl.body;
-  if (!body) {
+  const roots = resolveRootNodes(runtime.pageDsl);
+  if (roots.length === 0) {
     return <>{children ?? null}</>;
   }
   return (
-    <DslRenderer context={runtime.context} node={body} engine={runtime.engine}>
-      {children}
-    </DslRenderer>
+    <>
+      {roots.map((node, index) => (
+        <DslRenderer
+          key={node.id ?? index}
+          context={runtime.context}
+          node={node}
+          engine={runtime.engine}
+        >
+          {/* 附加子树挂在最后一个根节点的 Renderer 上下文内，行为与单根一致 */}
+          {index === roots.length - 1 ? children : null}
+        </DslRenderer>
+      ))}
+    </>
   );
 }
