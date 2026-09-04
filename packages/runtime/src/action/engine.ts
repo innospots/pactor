@@ -105,7 +105,8 @@ export class ActionEngine {
         params: resolveDeep(action.params ?? {}, scope, {
           isOpaque: (value) =>
             typeof value['action'] === 'string' ||
-            typeof value['type'] === 'string',
+            typeof value['type'] === 'string' ||
+            typeof value['component'] === 'string',
         }) as Record<string, unknown>,
       };
       const ctx: ActionContext = {

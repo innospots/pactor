@@ -35,7 +35,7 @@ dataSources:                  # 可选，数据源集合
 actions:                      # 可选，页面级命名动作（call 引用）
   refresh:
     - action: reload
-components:                   # 可选，页面级命名组件（Fragment 引用）
+components:                   # 可选，页面级命名组件（component 引用）
   searchForm:
     type: Form
     children: [...]
@@ -384,11 +384,11 @@ body:
 - 命名动作可以互相 `call` 组合；直接或间接循环引用按深度上限（20 层）受控失败，不会爆栈
 - `call` 未找到名称或缺 `name` 参数时返回受控失败（不抛出）
 
-与 `components`（结构复用）配合使用：行为复用走 `actions` + `call`，结构复用走 `components` + `Fragment`。
+与 `components`（结构复用）配合使用：行为复用走 `actions` + `call`，结构复用走 `components` + `component` 引用节点。
 
 ## components（页面级命名组件）
 
-顶层 `components` 定义**可复用的命名 UI 子树**，body 中用 `Fragment` 节点按名引用。防止 DSL 嵌套过深：把深层表单、操作列等抽平到顶层定义。
+顶层 `components` 定义**可复用的命名 UI 子树**，body 中用 `component` 字段按 key 引用。防止 DSL 嵌套过深：把深层表单、操作列等抽平到顶层定义。
 
 ```yaml
 components:
@@ -412,8 +412,7 @@ components:
 body:
   type: Page
   children:
-    - type: Fragment                 # 引用：渲染 searchForm 子树
-      props: { name: searchForm }
+    - component: searchForm          # 引用：渲染 searchForm 子树
     - type: Table
       props:
         dataSource: ${data.list}
@@ -421,24 +420,22 @@ body:
           - { title: 名称, dataIndex: name }
           - title: 操作
             cell:
-              type: Fragment         # 行模板内引用，${row} 逐行求值
-              props: { name: rowActions }
+              component: rowActions  # 行模板内引用，${row} 逐行求值
 ```
 
 **语义要点**：
 
 - **以引用处作用域渲染**（与 `call` 一致）：Table 行模板里引用，`${row.id}` 逐行正确求值
-- **props 透传**：`name` 之外的 props 透传到子树根节点，引用处覆盖定义处同名字段。常用于布局微调：
+- **引用处覆盖**：引用节点的 `props` / `events` 覆盖子树根节点同名字段；`when` / `permission` 引用处优先。常用于布局微调：
 
 ```yaml
-- type: Fragment
+- component: detailPanel
   props:
-    name: detailPanel
-    style: { flex: 1 }               # 透传到 detailPanel 的根节点
+    style: { flex: 1 }               # 覆盖 detailPanel 根节点的 style
 ```
 
-- 未定义的 `name` 渲染 Unsupported 占位（不抛错）；直接/间接循环引用（a → b → a）不渲染并 `console.warn`
-- `Fragment` 是注册进组件注册表的普通组件（可被业务覆盖实现）；跨页面复用的远程片段（`resource` 加载）见设计文档第 50 节，当前版本未实现
+- 未定义的 key 渲染 Unsupported 占位（不抛错）；直接/间接循环引用（a → b → a）不渲染并 `console.warn`
+- 引用节点是 `DslNode` 的第二种形态（`component` 与 `type` 二选一）；跨页面复用的远程片段（`resource` 加载）见设计文档第 50 节，当前版本未实现
 
 ## lifecycle（生命周期）
 
@@ -485,7 +482,8 @@ lifecycle:
 
 | 字段 | 类型 | 说明 |
 | --- | --- | --- |
-| `type` | string（必填） | 组件类型名，对应 Component Registry 注册名（内置 12 个见[组件目录](#组件目录)，业务可扩展） |
+| `type` | string | 组件类型名，对应 Component Registry 注册名（内置组件见[组件目录](#组件目录)，业务可扩展）；与 `component` 二选一 |
+| `component` | string | 引用节点：页面级命名组件（顶层 `components`）的 key，渲染该子树；与 `type` 二选一 |
 | `id` | string | 节点标识（React key 等用途，一般省略） |
 | `props` | object | 组件属性，值可含 `${...}` 表达式 |
 | `children` | DslNode[] | 子节点数组 |
@@ -800,7 +798,7 @@ overlay 内容的表达式以 overlay 作用域求值（`${params.x}` 取注入�
 
 ## 组件目录
 
-内置 12 个组件（shadcn 实现，@pactor-app/ui）+ @pactor-app/markdown 注册的 Markdown + 引用组件 `Fragment`。业务组件注册见[自定义组件](/guides/custom-components/)。
+内置组件（shadcn 实现，@pactor-app/ui）+ @pactor-app/markdown 注册的 Markdown。业务组件注册见[自定义组件](/guides/custom-components/)。
 
 通用 props（所有组件一致）：`className`（根节点 class，与内置样式合并）、`style`（根节点内联样式对象，如 `{ flex: 1 }`）、`permission`、`when`、`events`。下表只列各组件特有 props。
 
@@ -949,14 +947,82 @@ rules:
     content: '当前筛选：**${state.keyword}**'
 ```
 
-### Fragment
+### Layout / Header / Sider / Content / Footer
 
-页面级命名组件引用（见 [components 详解](#components页面级命名组件)）。
+页面级布局组件（spec: layout-components），可在 `body` 中自由组合页面结构。**与外壳布局的关系**：应用级外壳（菜单/品牌/页签）继续由 bootstrap `layout.type` 承担；页面需要完全自控结构时外壳用 `blank`，body 以 `Layout` 起手组合——两者混用（admin 外壳里再套 Layout+Sider）通常意味着设计问题。
+
+`Layout`：flex 容器；直接子节点含 `Sider` 时横向、否则纵向（`component` 引用的 Sider 子树同样计入推导），`direction` 显式覆盖。
 
 | prop | 类型 | 说明 |
 | --- | --- | --- |
-| `name` | string（必填） | 顶层 `components` 中的组件名 |
-| 其余任意 props | — | 透传到子树根节点（引用处覆盖定义处同名字段） |
+| `direction` | `horizontal` \| `vertical` | 主轴方向（缺省按子节点推导） |
+
+`Header`：顶部区域（横向 flex、垂直居中、下边框）。`Content`：主内容区（`flex: 1`）。`Footer`：底部区域（居中弱化文本）。三者均为纯语义容器，无特有 props。
+
+`Sider`：侧边区域，折叠为受控闭环。
+
+| prop | 类型 | 说明 |
+| --- | --- | --- |
+| `width` | number（默认 200） | 展开宽度 |
+| `collapsible` | boolean | 渲染底部折叠触发器 |
+| `collapsed` | boolean | 受控折叠态（绑 `${state.x}`） |
+| `collapsedWidth` | number（默认 64） | 折叠后宽度 |
+| 事件 `onCollapse` | — | 折叠触发器点击，传出 boolean |
+
+### Menu
+
+导航菜单（哑渲染：items 经表达式注入，不读外壳层 MenuRegistry）。
+
+| prop | 类型 | 说明 |
+| --- | --- | --- |
+| `items` | `{ key, label, icon?, children? }[]` | 菜单树（如 `${data.menus}`；`icon` 为预留字段，当前不渲染） |
+| `mode` | `inline`（默认）\| `horizontal` | inline 用于 Sider，horizontal 用于 Header |
+| `selectedKey` | string | 受控选中项 |
+| 事件 `onSelect` | — | 点选传出 key（典型接 `navigate` 或 `setState`） |
+
+自由组合示例（见 `examples/admin/src/pages/layout-demo.page.yaml`）：
+
+```yaml
+body:
+  type: Layout                   # 含 Sider 子节点 → 自动横向
+  children:
+    - type: Sider
+      props:
+        collapsible: true
+        collapsed: ${state.siderCollapsed}
+      events:
+        onCollapse:
+          - action: setState
+            params: { siderCollapsed: ${event} }
+      children:
+        - type: Menu
+          props:
+            items: ${data.menus}
+            selectedKey: ${state.currentMenu}
+          events:
+            onSelect:
+              - action: setState
+                params: { currentMenu: ${event} }
+    - type: Layout               # 无 Sider → 纵向
+      children:
+        - type: Header
+          children: [...]
+        - type: Content
+          children: [...]
+        - type: Footer
+          children: [...]
+```
+
+
+### Link
+
+原生锚点链接（嵌入模式的主要跳转方式，见[两种使用形态](/guides/getting-started/#两种使用形态)）。
+
+| prop | 类型 | 说明 |
+| --- | --- | --- |
+| `href` | string | 链接地址（可含表达式插值，如 `/items/${row.id}`） |
+| `text` | string | 链接文本（也可用 children） |
+| `target` | `_self`（默认）\| `_blank` \| `_parent` \| `_top` | 打开方式；`_blank` 自动带 `rel="noreferrer"` |
 
 ## 完整示例
 
@@ -964,7 +1030,7 @@ rules:
 
 - 登录页：`examples/admin/src/pages/login.page.yaml`（Form 校验、`type: password`、命名动作 + `if` 分支、loading 绑定）
 - 列表页：`examples/admin/src/pages/customer-list.page.yaml`（service 数据源、cell 行模板、overlay.open 抽屉、权限禁用）
-- master-detail 页：`examples/admin/src/pages/customer-detail.page.yaml`（点击列表项 → reload 详情、`dataStatus` loading 态切换、`components` + `Fragment`、`meta` / `page.name` / `page.description`）
+- master-detail 页：`examples/admin/src/pages/customer-detail.page.yaml`（点击列表项 → reload 详情、`dataStatus` loading 态切换、`components` + `component` 引用、`meta` / `page.name` / `page.description`）
 - 工作台：`examples/admin/src/pages/dashboard.page.yaml`（static 数据源、Grid/Statistic、navigate）
 
 ## 聊天页完整示例（@pactor-app/chat）

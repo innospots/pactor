@@ -83,7 +83,7 @@ export function DslRenderer({ context, node, engine, children }: DslRendererProp
       context,
       engine: resolvedEngine,
       scope: {},
-      fragmentStack: [],
+      referenceStack: [],
       renderChildren: (children, extraScope) =>
         renderChildrenOf(root, children, extraScope),
     };
@@ -104,6 +104,43 @@ function renderNode(
   key: Key,
 ): ReactNode {
   const scope = buildScope(value.context, value.scope);
+
+  // 引用节点：解析页面级命名组件（PageDsl.components）子树——
+  // 引用处 props / events 覆盖定义处同名字段，when / permission 引用处优先；
+  // 循环引用经 referenceStack 守卫（命中不渲染并告警，不击穿渲染层）
+  if (node.component !== undefined) {
+    const name = node.component;
+    const stack = value.referenceStack ?? [];
+    if (stack.includes(name)) {
+      console.warn(
+        `[@pactor-app/runtime] 组件引用循环：${[...stack, name].join(' → ')}`,
+      );
+      return null;
+    }
+    const subtree = value.context.pageComponents[name];
+    if (!subtree) {
+      return <UnsupportedComponent key={key} type={`component(${name})`} />;
+    }
+    const scoped: RendererContextValue = {
+      ...value,
+      referenceStack: [...stack, name],
+    };
+    scoped.renderChildren = (children, extraScope) =>
+      renderChildrenOf(scoped, children, extraScope);
+    const merged: DslNode = {
+      ...subtree,
+      props: { ...subtree.props, ...node.props },
+      events: { ...subtree.events, ...node.events },
+      when: node.when ?? subtree.when,
+      permission: node.permission ?? subtree.permission,
+      id: node.id ?? subtree.id,
+    };
+    return (
+      <RendererContextProvider key={key} value={scoped}>
+        {renderNode(merged, scoped, key)}
+      </RendererContextProvider>
+    );
+  }
 
   if (node.when !== undefined) {
     const expression =
@@ -205,7 +242,7 @@ export function renderChildrenOf(
     context: value.context,
     engine: value.engine,
     scope: { ...value.scope, ...extraScope },
-    fragmentStack: value.fragmentStack,
+    referenceStack: value.referenceStack,
     renderChildren: (nested, nestedScope) =>
       renderChildrenOf(scoped, nested, nestedScope),
   };
@@ -260,5 +297,5 @@ function resolveProps(
 
 /** 判断普通对象是否为内嵌 DslNode（有字符串 `type` 字段即视为 DSL 节点） */
 function isEmbeddedDslNode(value: Record<string, unknown>): boolean {
-  return typeof value.type === 'string';
+  return typeof value.type === 'string' || typeof value.component === 'string';
 }

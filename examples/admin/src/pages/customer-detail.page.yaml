@@ -122,9 +122,8 @@ body:
             message: 请选择左侧客户查看详情
             variant: info
           when: ${state.currentId == null}
-        - type: Fragment
-          # name 之外的 props 透传到 detailPanel 根 Card；style 为布局逃逸口
+        - component: detailPanel
+          # 引用处 props 覆盖定义处根节点同名字段；style 为布局逃逸口
           props:
-            name: detailPanel
             style: { flex: 1 }
           when: ${state.currentId != null}

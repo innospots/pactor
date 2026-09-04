@@ -67,6 +67,25 @@ app.mount('#root');
 - 未命中路径渲染 404，命中但无权限渲染 403（菜单项 `permission` 配置）；
 - `overlay.open` 的 page 类型 overlay 经 loader 加载页面 DSL，子运行时共享应用级 registries。
 
+## 嵌入式使用（PactorPage / createPactorPage）
+
+存量项目（已有自己的路由，或 Next.js 等框架）中局部嵌入 DSL 页面，不接管路由：
+
+```tsx
+import { createPactorPage } from '@pactor-app/app';
+import '@pactor-app/ui/styles.css';
+
+// 工厂：组装一次（registries / 交互层 / i18n），多页面实例共享
+const Page = createPactorPage({ loader, services, permissions: ['customer:view'] });
+
+<Page pageId="customer-detail" route={{ params: { id } }} />
+// 或直接传 PageDsl：<Page page={pageDsl} />
+```
+
+- 交互层（confirm / message / overlay）与整应用模式一致；多实例状态互相隔离
+- 跳转为自然导航：`Link` 组件渲染原生 `<a href>`，`navigate` 动作退化为 `location.assign`——不注入宿主路由对象
+- `route.params` / `route.query` 经 props 纯数据注入（如 Next.js 的 `searchParams`）
+
 ## 文档
 
 完整文档见 <https://github.com/426-330/pactor/tree/main/docs>（`pnpm docs:dev` 本地启动文档站）。

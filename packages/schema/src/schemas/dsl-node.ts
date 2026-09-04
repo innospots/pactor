@@ -65,14 +65,16 @@ const actionOrArraySchema = {
   ],
 } as const;
 
-/** DslNode：type 必填，children 递归 */
+/** DslNode：type（组件节点）或 component（引用页面级命名组件）二选一，children 递归 */
 export const dslNodeSchema = {
   $id: DSL_NODE_SCHEMA_ID,
   type: 'object',
-  required: ['type'],
+  anyOf: [{ required: ['type'] }, { required: ['component'] }],
   properties: {
     id: { type: 'string' },
     type: { type: 'string', minLength: 1 },
+    /** 引用节点：页面级命名组件（PageDsl.components）的 key */
+    component: { type: 'string', minLength: 1 },
     props: { type: 'object' },
     children: {
       type: 'array',

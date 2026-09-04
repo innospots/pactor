@@ -22,17 +22,24 @@ const BUILTIN_TYPES = [
   'Form',
   'Input',
   'Select',
+  'Layout',
+  'Header',
+  'Sider',
+  'Content',
+  'Footer',
+  'Menu',
+  'Link',
 ];
 
 describe('组件注册入口', () => {
-  it('createShadcnComponentRegistry 注册后 12 个类型名全部可解析', () => {
+  it('createShadcnComponentRegistry 注册后 19 个类型名全部可解析', () => {
     const registry = createShadcnComponentRegistry();
     for (const type of BUILTIN_TYPES) {
       expect(registry.has(type), type).toBe(true);
     }
   });
 
-  it('createShadcnComponentRegistry 的类型名集合恰为 12 个内置类型（硬编码断言）', () => {
+  it('createShadcnComponentRegistry 的类型名集合恰为 19 个内置类型（硬编码断言）', () => {
     const registry = createShadcnComponentRegistry();
     expect(registry.list().sort()).toEqual([...BUILTIN_TYPES].sort());
   });

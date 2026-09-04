@@ -68,6 +68,15 @@ export function createBootstrap(): Partial<BootstrapResource> &
             pageId: 'customer-detail',
             permission: 'customer:view',
           },
+          {
+            // 布局组件演示页（Layout/Sider/Menu 等页面级自由组合）
+            id: 'layout-demo',
+            type: 'page',
+            title: '布局演示',
+            path: '/layout-demo',
+            pageId: 'layout-demo',
+            permission: 'customer:view',
+          },
         ],
       },
       {
@@ -102,6 +111,6 @@ export function createBootstrap(): Partial<BootstrapResource> &
       },
     ],
     layout: { type: 'admin', tabs: true, fixedHeader: true, fixedSider: true, breadcrumb: true, collapsible: true, breakpoint: 'lg' },
-    pageVersions: { dashboard: 1, 'customer-list': 1, 'customer-detail': 1, 'customer-edit': 1, 'ai-workspace': 1 },
+    pageVersions: { dashboard: 1, 'customer-list': 1, 'customer-detail': 1, 'layout-demo': 1, 'customer-edit': 1, 'ai-workspace': 1 },
   };
 }

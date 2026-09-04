@@ -1,0 +1,253 @@
+import type { I18nMessages, PageDsl } from '@pactor-app/core';
+import { createI18nContext } from '@pactor-app/core';
+import { createPermissionAdapter, PermissionStore } from '@pactor-app/permission';
+import type { DslResourceLoader } from '@pactor-app/resource';
+import {
+  createDefaultPermissionAdapter,
+  createPageRuntime,
+  I18nContextProvider,
+  PageRuntimeView,
+  type PageRuntime,
+  type PermissionAdapter,
+} from '@pactor-app/runtime';
+import {
+  useEffect,
+  useRef,
+  useState,
+  type ComponentType,
+} from 'react';
+
+import {
+  createPactorAssembly,
+  type PactorAssembly,
+  type PactorAssemblyOptions,
+} from './assembly.js';
+import type { AuthTokenProvider } from './application.js';
+import { PageErrorBoundary } from './error-boundary.js';
+import { BootstrapSpinner, PrimaryButton, ResultView } from './feedback.js';
+
+/**
+ * 嵌入式页面 props（spec: embedded-page-view）：
+ * `pageId`（经 loader 加载）与 `page`（直接传入）二选一。
+ */
+export interface PactorPageProps {
+  /** 页面 id（经 options.loader 加载） */
+  pageId?: string;
+  /** 直接传入的 PageDsl（不经 loader） */
+  page?: PageDsl;
+  /** 路由作用域注入：DSL 内 `${route.params.x}` / `${route.query.x}` 可读 */
+  route?: { params?: Record<string, unknown>; query?: Record<string, unknown> };
+}
+
+/**
+ * 嵌入式页面工厂选项（设计决策 D1/D2）：整应用模式的组装选项子集
+ * （无路由、无外壳布局）；route 上下文经 props 纯数据注入。
+ */
+export interface PactorPageOptions extends Omit<PactorAssemblyOptions, 'navigate'> {
+  /** 资源加载器（按 pageId 加载页面时需要） */
+  loader?: DslResourceLoader;
+  /** 权限码列表（缺省全部放行；细粒度控制可传 permission 适配器） */
+  permissions?: string[];
+  /** 权限适配器（优先于 permissions） */
+  permission?: PermissionAdapter;
+  /** 认证令牌（注入页面 HTTP 出口） */
+  authTokenProvider?: AuthTokenProvider;
+  /** 当前语言代码（缺省 'zh-CN'） */
+  locale?: string;
+  /** 回退语言代码（缺省 'zh-CN'） */
+  defaultLocale?: string;
+  /** 翻译消息表 */
+  messages?: I18nMessages;
+  /** 页面加载/校验失败回调 */
+  onError?: (error: Error) => void;
+}
+
+type EmbeddedPageState =
+  | { status: 'loading' }
+  | { status: 'error'; error: Error }
+  | { status: 'ready'; runtime: PageRuntime };
+
+/**
+ * 嵌入式页面工厂（spec: embedded-page-view）：返回预配置的 PactorPage 组件。
+ * 组装一次（registries / 交互层 / i18n），每个组件实例自持独立
+ * PageRuntime（多实例隔离）。
+ */
+export function createPactorPage(
+  options: PactorPageOptions = {},
+): ComponentType<PactorPageProps> {
+  const assembly = createPactorAssembly({
+    ...options,
+    // 嵌入模式：navigate 退化为自然跳转（设计决策 D2，不注入宿主路由对象）
+    navigate: (to) => {
+      if (typeof window !== 'undefined') {
+        window.location.assign(to);
+      }
+    },
+  });
+  // 权限：显式适配器 > 权限码列表 > 缺省全部放行（嵌入模式无 bootstrap）
+  let permission: PermissionAdapter;
+  if (options.permission !== undefined) {
+    permission = options.permission;
+  } else if (options.permissions !== undefined) {
+    const store = new PermissionStore();
+    store.setPermissions(options.permissions);
+    permission = createPermissionAdapter(store);
+  } else {
+    permission = createDefaultPermissionAdapter();
+  }
+  const i18n = createI18nContext({
+    locale: options.locale,
+    defaultLocale: options.defaultLocale,
+    messages: options.messages,
+  });
+
+  function createRuntime(pageDsl: PageDsl, route: PactorPageProps['route']) {
+    return createPageRuntime(pageDsl, {
+      components: assembly.components,
+      actions: assembly.actions,
+      services: assembly.services,
+      capabilities: assembly.capabilities,
+      permission,
+      http: assembly.httpAdapter,
+      route: { params: route?.params ?? {}, query: route?.query ?? {} },
+      locale: options.locale ?? 'zh-CN',
+      defaultLocale: options.defaultLocale ?? 'zh-CN',
+      messages: options.messages ?? {},
+    });
+  }
+
+  return function ConfiguredPactorPage(props: PactorPageProps) {
+    return <EmbeddedPage assembly={assembly} options={options} i18n={i18n} createRuntime={createRuntime} resolvePage={options.loader ? resolvePage : undefined} {...props} />;
+  };
+
+  async function resolvePage(pageId: string): Promise<PageDsl> {
+    if (!options.loader) {
+      throw new Error('[@pactor-app/app] PactorPage: 按 pageId 加载需要 options.loader');
+    }
+    const resource = await options.loader.loadPage(pageId);
+    return resource.schema;
+  }
+}
+
+/**
+ * PactorPage 组件（spec: embedded-page-view）：嵌入式 DSL 页面。
+ * 直接使用时把工厂选项一并作为 props 传入（首次渲染时组装一次）；
+ * 需要复用同一组装配时优先用 `createPactorPage(options)` 工厂。
+ */
+export function PactorPage(props: PactorPageProps & PactorPageOptions) {
+  const { pageId, page, route, ...options } = props;
+  const factoryRef = useRef<ComponentType<PactorPageProps> | null>(null);
+  if (factoryRef.current === null) {
+    factoryRef.current = createPactorPage(options);
+  }
+  const ConfiguredPage = factoryRef.current;
+  return <ConfiguredPage pageId={pageId} page={page} route={route} />;
+}
+
+/** 嵌入页状态机：pageId/page → PageRuntime（对齐 DslPageLoader 语义） */
+function EmbeddedPage({
+  assembly,
+  options,
+  i18n,
+  createRuntime,
+  resolvePage,
+  pageId,
+  page,
+  route,
+}: PactorPageProps & {
+  assembly: PactorAssembly;
+  options: PactorPageOptions;
+  i18n: ReturnType<typeof createI18nContext>;
+  createRuntime: (pageDsl: PageDsl, route: PactorPageProps['route']) => PageRuntime;
+  resolvePage?: (pageId: string) => Promise<PageDsl>;
+}) {
+  const [state, setState] = useState<EmbeddedPageState>({ status: 'loading' });
+  const [retryTick, setRetryTick] = useState(0);
+  const onError = options.onError;
+
+  useEffect(() => {
+    let cancelled = false;
+    let runtime: PageRuntime | null = null;
+    void (async () => {
+      try {
+        let pageDsl = page;
+        if (pageDsl === undefined) {
+          if (pageId === undefined) {
+            throw new Error('[@pactor-app/app] PactorPage: pageId 与 page 必传其一');
+          }
+          if (resolvePage === undefined) {
+            throw new Error('[@pactor-app/app] PactorPage: 按 pageId 加载需要 options.loader');
+          }
+          pageDsl = await resolvePage(pageId);
+        }
+        if (cancelled) {
+          return;
+        }
+        runtime = createRuntime(pageDsl, route);
+        setState({ status: 'ready', runtime });
+        void runtime.ready();
+        void runtime.show();
+      } catch (cause) {
+        if (!cancelled) {
+          const error = cause instanceof Error ? cause : new Error(String(cause));
+          onError?.(error);
+          setState({ status: 'error', error });
+        }
+      }
+    })();
+    return () => {
+      cancelled = true;
+      if (runtime !== null && !runtime.destroyed) {
+        void runtime.hide();
+        void runtime.destroy();
+      }
+    };
+    // route 由宿主以 key 控制重建（与整应用模式一致）；retryTick 驱动重试
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pageId, page, retryTick]);
+
+  const InteractionProvider = assembly.interactionKit.Provider;
+  const OverlayHost = assembly.interactionKit.OverlayHost;
+
+  let content;
+  if (state.status === 'loading') {
+    content = (
+      <div className="pactor-app-page-loading">
+        <BootstrapSpinner style={{ minHeight: 0, padding: 48 }} />
+      </div>
+    );
+  } else if (state.status === 'error') {
+    content = (
+      <ResultView
+        className="pactor-app-page-load-error"
+        title="页面加载失败"
+        subTitle={state.error.message}
+        extra={
+          <PrimaryButton onClick={() => setRetryTick((n) => n + 1)}>
+            重试
+          </PrimaryButton>
+        }
+      />
+    );
+  } else {
+    content = (
+      <PageErrorBoundary>
+        <PageRuntimeView runtime={state.runtime}>
+          {resolvePage !== undefined ? (
+            <OverlayHost manager={assembly.overlayManager} resolvePage={resolvePage} />
+          ) : (
+            <OverlayHost manager={assembly.overlayManager} />
+          )}
+        </PageRuntimeView>
+      </PageErrorBoundary>
+    );
+  }
+
+  return (
+    <I18nContextProvider value={i18n}>
+      <InteractionProvider bridge={assembly.uiBridge}>
+        {content}
+      </InteractionProvider>
+    </I18nContextProvider>
+  );
+}

@@ -217,6 +217,24 @@ describe('validatePageDsl', () => {
     expect(bad.valid).toBe(false);
   });
 
+  it('accepts 引用节点（component 无 type），拒绝两者皆缺', () => {
+    const ok = validatePageDsl({
+      ...validPage,
+      components: { header: { type: 'Page', children: [] } },
+      body: {
+        type: 'Page',
+        children: [{ component: 'header' }],
+      },
+    });
+    expect(ok.valid).toBe(true);
+
+    const bad = validatePageDsl({
+      ...validPage,
+      body: { type: 'Page', children: [{ props: {} }] },
+    });
+    expect(bad.valid).toBe(false);
+  });
+
   it('accepts 页面级命名组件 components（DslNode 子树），拒绝非法节点', () => {
     const ok = validatePageDsl({
       ...validPage,

@@ -25,10 +25,12 @@ export function guardChatDsl(
   node: DslNode,
   registry: Registry<unknown>,
 ): DslNode {
-  if (node.type !== CHAT_DENIED_TYPE && !registry.has(node.type)) {
+  // 引用节点（component）依赖页面级命名组件，chat 安全白名单场景一律拒绝
+  const type = node.type ?? '(reference)';
+  if (type !== CHAT_DENIED_TYPE && !registry.has(type)) {
     return {
       type: CHAT_DENIED_TYPE,
-      props: { deniedType: node.type },
+      props: { deniedType: type },
     };
   }
   if (!node.children || node.children.length === 0) {

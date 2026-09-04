@@ -105,6 +105,10 @@ function lintComponentNaming(
   findings: LintFinding[],
 ): void {
   walkDslTree(body, (node, path) => {
+    // 引用节点（component）没有组件类型名，跳过命名检查
+    if (node.component !== undefined) {
+      return;
+    }
     if (typeof node.type !== 'string' || !PASCAL_CASE_RE.test(node.type)) {
       findings.push({
         level: 'warning',

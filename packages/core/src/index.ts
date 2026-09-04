@@ -1,7 +1,10 @@
 export type {
   ActionConfig,
   ConditionConfig,
+  DslComponentNode,
   DslNode,
+  DslNodeBase,
+  DslReferenceNode,
   EventMap,
   ExpressionString,
   PermissionConfig,

@@ -17,3 +17,7 @@ export type { ApplicationProps } from './app-shell.js';
 export { DslPageLoader } from './page-loader.js';
 export type { DslPageLoaderProps } from './page-loader.js';
 export { PageErrorBoundary } from './error-boundary.js';
+
+// 嵌入式页面（spec: embedded-page-view）：存量项目局部嵌入，不接管路由
+export { createPactorPage, PactorPage } from './embedded.js';
+export type { PactorPageOptions, PactorPageProps } from './embedded.js';

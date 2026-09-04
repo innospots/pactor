@@ -1,16 +1,11 @@
 import type { I18nMessages, PageDsl } from '@pactor-app/core';
 import { Registry } from '@pactor-app/core';
-import { createShadcnComponentRegistry } from '@pactor-app/ui/components';
 import {
-  createUiBridge,
-  OverlayManager,
-  registerInteractionActions,
-  ShadcnInteractionProvider,
-  ShadcnOverlayHost,
   type InteractionProviderProps,
   type OverlayHostProps,
   type UiBridge,
 } from '@pactor-app/ui/interaction';
+import { OverlayManager } from '@pactor-app/ui/interaction';
 import {
   createShadcnLayoutRegistry,
   type AdminLayoutConfig,
@@ -34,20 +29,16 @@ import {
   type RouteContext,
 } from '@pactor-app/router';
 import {
-  createFetchHttpAdapter,
   createPageRuntime,
   type ActionHandler,
-  type ActionRegistry,
-  type CapabilityRegistry,
-  type HttpAdapter,
   type PageRuntime,
   type ServiceHandler,
-  type ServiceRegistry,
 } from '@pactor-app/runtime';
 import { createElement, type ComponentType, type ReactNode } from 'react';
 import { createRoot, type Root } from 'react-dom/client';
 
 import { Application } from './app-shell.js';
+import { createPactorAssembly, upsert } from './assembly.js';
 
 /** 认证令牌提供者：同步或异步返回 Bearer token（无令牌返回 undefined） */
 export type AuthTokenProvider = () =>
@@ -282,23 +273,6 @@ function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null && !Array.isArray(value);
 }
 
-/** 同名覆盖式注册（Registry.register 对重名抛错，这里先注销再注册） */
-function upsert<T>(registry: Registry<T>, name: string, item: T): void {
-  if (registry.has(name)) {
-    registry.unregister(name);
-  }
-  registry.register(name, item);
-}
-
-function upsertAll<T>(
-  registry: Registry<T>,
-  entries: Record<string, T> | undefined,
-): void {
-  for (const [name, item] of Object.entries(entries ?? {})) {
-    upsert(registry, name, item);
-  }
-}
-
 /** 创建 DSL 资源 loader 的 HTTP 适配器：注入 Authorization: Bearer 头 */
 function createResourceHttpAdapter(
   authTokenProvider: AuthTokenProvider | undefined,
@@ -316,28 +290,6 @@ function createResourceHttpAdapter(
       ...request,
       headers: { ...request.headers, authorization: `Bearer ${token}` },
     });
-  };
-}
-
-/** 创建页面运行时 HTTP 出口适配器：同样注入 Authorization 头 */
-function createRuntimeHttpAdapter(
-  authTokenProvider: AuthTokenProvider | undefined,
-): HttpAdapter {
-  const base = createFetchHttpAdapter();
-  if (authTokenProvider === undefined) {
-    return base;
-  }
-  return {
-    async request(config) {
-      const token = await authTokenProvider();
-      if (token === undefined || token === '') {
-        return base.request(config);
-      }
-      return base.request({
-        ...config,
-        headers: { ...config.headers, authorization: `Bearer ${token}` },
-      });
-    },
   };
 }
 
@@ -438,20 +390,27 @@ export function createPactorApplication(
   const { appId } = options;
   const routerOptions = options.router ?? {};
 
-  // ---- 应用级单例（决策 D2）----
-  const overlayManager = new OverlayManager();
-  const uiBridge = createUiBridge();
   const permissionStore = new PermissionStore();
-  // 外壳层 UI kit：每槽位独立合并（显式选项 > ui 预设 > shadcn 默认）
+  // 外壳层 UI kit：布局注册表槽位独立合并（显式选项 > ui 预设 > shadcn 默认）
   const layoutRegistry =
     (options.layoutRegistry ?? options.ui?.layoutRegistry)?.() ??
     createShadcnLayoutRegistry();
-  const interactionKit = options.interactionKit ??
-    options.ui?.interactionKit ?? {
-      Provider: ShadcnInteractionProvider,
-      OverlayHost: ShadcnOverlayHost,
-    };
   const navigation = new ReactRouterBinding();
+
+  // ---- 组装内核（spec: application-bootstrap，与嵌入模式共享）----
+  const assembly = createPactorAssembly({
+    componentRegistry: options.componentRegistry,
+    ui: options.ui,
+    interactionKit: options.interactionKit,
+    components: options.components,
+    actions: options.actions,
+    services: options.services,
+    capabilities: options.capabilities,
+    authTokenProvider: options.authTokenProvider,
+    navigate: (to) => navigation.push(to),
+  });
+  const { components, actions, services, capabilities, httpAdapter } = assembly;
+  const { overlayManager, uiBridge, interactionKit } = assembly;
 
   // ---- loader 与 adapters ----
   const loader =
@@ -460,37 +419,8 @@ export function createPactorApplication(
       baseUrl: options.api?.baseURL,
       adapter: createResourceHttpAdapter(options.authTokenProvider),
     });
-  const httpAdapter = createRuntimeHttpAdapter(options.authTokenProvider);
   const permissionAdapter = createPermissionAdapter(permissionStore);
   const routerAdapter = createRouterAdapter(navigation);
-
-  // ---- 共享 registries：所选 UI kit 注册表 + 交互 + 业务扩展 ----
-  const components =
-    (options.componentRegistry ?? options.ui?.componentRegistry)?.() ??
-    createShadcnComponentRegistry();
-  upsertAll(components, options.components);
-
-  const actions: ActionRegistry = new Registry('ActionRegistry');
-  registerInteractionActions(actions, overlayManager, uiBridge);
-  // navigate 动作：DSL 导航经 NavigationBridge（react-router）
-  upsert(actions, 'navigate', (action) => {
-    const to = action.params?.['to'];
-    if (typeof to !== 'string' || to === '') {
-      return {
-        ok: false,
-        error: new Error('[@pactor-app/app] navigate 动作缺少 params.to（string）'),
-      };
-    }
-    navigation.push(to);
-    return { ok: true };
-  });
-  upsertAll(actions, options.actions);
-
-  const services: ServiceRegistry = new Registry('ServiceRegistry');
-  upsertAll(services, options.services);
-
-  const capabilities: CapabilityRegistry = new Registry('CapabilityRegistry');
-  upsertAll(capabilities, options.capabilities);
 
   // bootstrap 成功后缓存会话，供页面运行时工厂读取 user/app
   let session: PactorAppSession | null = null;

@@ -170,6 +170,29 @@ createPactorApplication({
 
 从旧 `pactor-ui-antd` / `pactor-ui-radix` 包迁移的符号对照见 [@pactor-app/ui 迁移说明](/packages/ui/#从-pactor-ui-antd--pactor-ui-radix-迁移)。
 
+## 两种使用形态
+
+**整应用模式**（上文）：`createPactorApplication` 接管整个应用——按 bootstrap 菜单生成路由、外壳布局、权限与页面装配全部由框架负责。
+
+**嵌入模式**：存量项目（已有自己的路由，或 Next.js 等框架）中局部嵌入 DSL 页面，框架**不接管路由**：
+
+```tsx
+import { createPactorPage } from '@pactor-app/app';
+import { StaticDslLoader } from '@pactor-app/resource';
+import '@pactor-app/ui/styles.css';
+
+// 工厂：组装一次（registries / 交互层 / i18n），多页面实例共享
+const Page = createPactorPage({ loader, services });
+
+// 嵌入任意位置；route 上下文经 props 纯数据注入
+<Page pageId="customer-detail" route={{ params: { id }, query: searchParams }} />
+
+// 或直接传 PageDsl 对象（不经 loader）
+<Page page={pageDsl} />
+```
+
+嵌入模式的跳转是**自然导航**（不注入宿主路由对象）：`Link` 组件渲染原生 `<a href>`，`navigate` 动作退化为 `location.assign` 整页跳转，目标页由宿主路由系统承接。权限默认全部放行，需管控时传 `permissions: string[]`。
+
 ## 命令行（@pactor-app/cli）
 
 ```bash

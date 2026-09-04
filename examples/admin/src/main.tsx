@@ -27,6 +27,7 @@ import aiWorkspacePage from "./pages/ai-workspace.page.yaml";
 import customerEditPage from "./pages/customer-edit.page.yaml";
 import customerListPage from "./pages/customer-list.page.yaml";
 import customerDetailPage from "./pages/customer-detail.page.yaml";
+import layoutDemoPage from "./pages/layout-demo.page.yaml";
 import dashboardPage from "./pages/dashboard.page.yaml";
 import loginPage from "./pages/login.page.yaml";
 
@@ -48,6 +49,7 @@ const loader = new StaticDslLoader({
     dashboard: dashboardPage,
     "customer-list": customerListPage,
     "customer-detail": customerDetailPage,
+    "layout-demo": layoutDemoPage,
     "customer-edit": customerEditPage,
     "ai-workspace": aiWorkspacePage,
   },
