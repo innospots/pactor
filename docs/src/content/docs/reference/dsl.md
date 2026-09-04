@@ -497,8 +497,8 @@ body:
   children:
     - component: detailPanel
 
-# 4. PactorPage 的 page prop（嵌入模式整页远端下发，TS 侧）：
-#    <PactorPage page={{ source: { type: 'service', service: 'dsl.page' } }} />
+# 4. PactorPage 的 pageDsl prop（嵌入模式整页远端下发，TS 侧）：
+#    <PactorPage pageDsl={{ source: { type: 'service', service: 'dsl.page' } }} />
 ```
 
 **混排形态**：children 数组的元素可以是内联节点或引用，任意混排——不需要为一次性的远端内容绕道 `components` 起名：
@@ -950,6 +950,26 @@ overlay 内容的表达式以 overlay 作用域求值（`${params.x}` 取注入�
 | `value` | number \| string | 数值（通常为表达式结果） |
 | `precision` | number | 小数精度 |
 | `suffix` | string | 后缀（如单位） |
+
+### Text
+
+普通文本渲染，支持语义类型与修饰。
+
+| prop | 类型 | 说明 |
+| --- | --- | --- |
+| `text` | string | 文本内容（可含表达式）；也可用 children |
+| `type` | `default`（默认）\| `secondary` \| `success` \| `warning` \| `danger` | 语义类型（颜色） |
+| `strong` | boolean | 加粗 |
+| `delete` | boolean | 删除线 |
+| `underline` | boolean | 下划线 |
+| `italic` | boolean | 斜体 |
+
+```yaml
+- type: Text
+  props: { text: 共 ${state.count} 条记录, type: secondary }
+- type: Text
+  props: { text: 重要提示, type: danger, strong: true }
+```
 
 ### Tabs
 

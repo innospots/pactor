@@ -69,5 +69,5 @@ const remoteServices = {
 };
 
 export function RemoteDemoClient() {
-  return <PactorPage page={remoteDemoPage} services={remoteServices} />;
+  return <PactorPage pageDsl={remoteDemoPage} services={remoteServices} />;
 }
