@@ -1,15 +1,19 @@
 export type {
   ActionConfig,
   ConditionConfig,
+  DslChildren,
+  DslChildrenItem,
   DslComponentNode,
   DslNode,
   DslNodeBase,
   DslReferenceNode,
+  DslSourceRef,
   EventMap,
   ExpressionString,
   PermissionConfig,
   PermissionDeniedStrategy,
 } from './node.js';
+export { isDslSourceRef } from './node.js';
 
 export type {
   ApplicationDsl,

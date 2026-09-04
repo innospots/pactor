@@ -7,7 +7,7 @@ import type {
   PermissionConfig,
   RuntimeScope,
 } from './index.js';
-import { RUNTIME_SCOPES } from './index.js';
+import { isDslSourceRef, RUNTIME_SCOPES } from './index.js';
 
 describe('DslNode', () => {
   it('accepts a nested tree with events, when and permission', () => {
@@ -32,7 +32,9 @@ describe('DslNode', () => {
     };
 
     expect(node.type).toBe('Button');
-    expect(node.children?.[0]?.type).toBe('Icon');
+    const children = node.children;
+    const first = Array.isArray(children) ? children[0] : undefined;
+    expect(first && !isDslSourceRef(first) && first.type).toBe('Icon');
     expectTypeOf(node.events?.onClick).toEqualTypeOf<
       ActionConfig | ActionConfig[] | undefined
     >();

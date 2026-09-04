@@ -1,6 +1,12 @@
 import Ajv, { type ErrorObject, type ValidateFunction } from 'ajv';
 
-import { actionConfigSchema, dslNodeSchema } from './schemas/dsl-node.js';
+import {
+  actionConfigSchema,
+  DSL_NODE_SCHEMA_ID,
+  DSL_SOURCE_REF_SCHEMA_ID,
+  dslNodeSchema,
+  dslSourceRefSchema,
+} from './schemas/dsl-node.js';
 import { PAGE_DSL_SCHEMA_ID, pageDslSchema } from './schemas/page-dsl.js';
 
 /** 结构化校验错误（不暴露 Ajv 原始错误对象） */
@@ -22,6 +28,7 @@ export interface DslValidationResult {
 
 const ajv = new Ajv({ allErrors: true, strict: false });
 ajv.addSchema(actionConfigSchema);
+ajv.addSchema(dslSourceRefSchema);
 ajv.addSchema(dslNodeSchema);
 ajv.addSchema(pageDslSchema);
 
@@ -81,4 +88,49 @@ function collectWarnings(document: unknown): DslValidationError[] {
     ];
   }
   return [];
+}
+
+/**
+ * 校验单个 DslNode（如远端动态加载的子树），返回结构化错误列表（空数组为通过）。
+ */
+export function validateDslNode(value: unknown): DslValidationError[] {
+  const validate = ajv.getSchema(DSL_NODE_SCHEMA_ID);
+  if (!validate) {
+    throw new Error(`schema not registered: ${DSL_NODE_SCHEMA_ID}`);
+  }
+  const valid = validate(value) as boolean;
+  return valid ? [] : toStructuredErrors(validate.errors ?? []);
+}
+
+/** 校验单个 DslSourceRef（children 数组中的引用元素） */
+export function validateDslSourceRef(value: unknown): DslValidationError[] {
+  const validate = ajv.getSchema(DSL_SOURCE_REF_SCHEMA_ID);
+  if (!validate) {
+    throw new Error(`schema not registered: ${DSL_SOURCE_REF_SCHEMA_ID}`);
+  }
+  const valid = validate(value) as boolean;
+  return valid ? [] : toStructuredErrors(validate.errors ?? []);
+}
+
+/**
+ * 校验 DslChildrenItem 数组（如远端动态加载的根级/节点级 children），
+ * 元素可为 DslNode 或 DslSourceRef 混排。返回结构化错误列表（空数组为通过）。
+ */
+export function validateDslNodes(value: unknown): DslValidationError[] {
+  if (!Array.isArray(value)) {
+    return [{ path: '/', message: '必须是 DslNode 数组', keyword: 'type' }];
+  }
+  return value.flatMap((item, index) => {
+    // 含 source 字段按引用形态校验，否则按节点形态
+    const isRef =
+      typeof item === 'object' &&
+      item !== null &&
+      !Array.isArray(item) &&
+      'source' in item;
+    const errors = isRef ? validateDslSourceRef(item) : validateDslNode(item);
+    return errors.map((error) => ({
+      ...error,
+      path: `/${index}${error.path === '/' ? '' : error.path}`,
+    }));
+  });
 }

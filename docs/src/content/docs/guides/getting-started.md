@@ -189,7 +189,13 @@ const Page = createPactorPage({ loader, services });
 
 // 或直接传 PageDsl 对象（不经 loader）
 <Page page={pageDsl} />
+
+// 或传动态引用：经 service/http 通道远端加载 PageDsl（失败走错误态，可重试）
+<Page page={{ source: { type: 'service', service: 'dsl.page' } }} />
+<Page page={{ source: { type: 'http', request: { url: '/api/dsl/login' } } }} />
 ```
+
+DSL 内部的局部子树也支持同样的动态引用（根级 `children`、节点 `children`、`components` 命名组件），完整语义见 [DSL 参考 - 动态 DSL 引用](/reference/dsl/#动态-dsl-引用dlsourceref)。
 
 嵌入模式的跳转是**自然导航**（不注入宿主路由对象）：`Link` 组件渲染原生 `<a href>`，`navigate` 动作退化为 `location.assign` 整页跳转，目标页由宿主路由系统承接。权限默认全部放行，需管控时传 `permissions: string[]`。
 

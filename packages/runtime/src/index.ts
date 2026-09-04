@@ -33,6 +33,11 @@ export type {
   DataSourceStatus,
   DataStoreDeps,
 } from './datasource/data-store.js';
+export {
+  DslSourceResolver,
+  dslSourceKey,
+} from './datasource/dsl-source-resolver.js';
+export type { DslSourceResolverDeps } from './datasource/dsl-source-resolver.js';
 
 // action：Action 引擎与内置动作（非 React）
 export { registerBuiltinActions } from './action/builtins.js';
@@ -58,6 +63,8 @@ export {
 } from './renderer/renderer-context.js';
 export type { RendererContextValue } from './renderer/renderer-context.js';
 export { UnsupportedComponent } from './renderer/unsupported.js';
+export { DslSourceBoundary } from './renderer/dsl-source-boundary.js';
+export type { DslSourceBoundaryProps } from './renderer/dsl-source-boundary.js';
 
 // page：PageRuntime
 export {

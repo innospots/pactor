@@ -1,10 +1,11 @@
-import type { I18nMessages, PageDsl } from '@pactor-app/core';
-import { createI18nContext } from '@pactor-app/core';
+import type { DslSourceRef, I18nMessages, PageDsl } from '@pactor-app/core';
+import { createI18nContext, isDslSourceRef } from '@pactor-app/core';
 import { createPermissionAdapter, PermissionStore } from '@pactor-app/permission';
 import type { DslResourceLoader } from '@pactor-app/resource';
 import {
   createDefaultPermissionAdapter,
   createPageRuntime,
+  DslSourceResolver,
   I18nContextProvider,
   PageRuntimeView,
   type PageRuntime,
@@ -33,8 +34,12 @@ import { BootstrapSpinner, PrimaryButton, ResultView } from './feedback.js';
 export interface PactorPageProps {
   /** 页面 id（经 options.loader 加载） */
   pageId?: string;
-  /** 直接传入的 PageDsl（不经 loader） */
-  page?: PageDsl;
+  /**
+   * 直接传入的 PageDsl（不经 loader），或 DslSourceRef 动态引用——
+   * 经 service/http 通道远端加载 PageDsl，校验通过后创建运行时；
+   * 加载失败走错误态与 onError，重试重新请求
+   */
+  page?: PageDsl | DslSourceRef;
   /** 路由作用域注入：DSL 内 `${route.params.x}` / `${route.query.x}` 可读 */
   route?: { params?: Record<string, unknown>; query?: Record<string, unknown> };
 }
@@ -179,6 +184,18 @@ function EmbeddedPage({
             throw new Error('[@pactor-app/app] PactorPage: 按 pageId 加载需要 options.loader');
           }
           pageDsl = await resolvePage(pageId);
+        } else if (isDslSourceRef(pageDsl)) {
+          // page 为动态引用：经 service/http 通道加载 PageDsl；
+          // 每次 effect 执行（含重试）新建解析器——缓存不跨重试复用
+          const resolver = new DslSourceResolver({
+            services: assembly.services,
+            http: assembly.httpAdapter,
+            getScope: () => ({
+              route: { params: route?.params ?? {}, query: route?.query ?? {} },
+            }),
+          });
+          // createPageRuntime 会对结果做 validatePageDsl，校验失败按加载失败处理
+          pageDsl = (await resolver.resolve(pageDsl)) as PageDsl;
         }
         if (cancelled) {
           return;

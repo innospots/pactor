@@ -1,8 +1,10 @@
-import type { DslNode, PermissionDeniedStrategy } from '@pactor-app/core';
+import type { DslChildren, DslChildrenItem, DslNode, PermissionDeniedStrategy } from '@pactor-app/core';
+import { isDslSourceRef } from '@pactor-app/core';
 import {
   resolveTemplate,
   type ExpressionScope,
 } from '@pactor-app/expression';
+import { validateDslNode, validateDslNodes } from '@pactor-app/schema';
 import {
   createElement,
   useMemo,
@@ -16,6 +18,7 @@ import { ActionEngine } from '../action/engine.js';
 import type { RuntimeContext } from '../context/context.js';
 import { buildScope } from '../context/scope.js';
 import { resolveDeep } from '../utils/resolve.js';
+import { DslSourceBoundary } from './dsl-source-boundary.js';
 import {
   RendererContextProvider,
   type RendererContextValue,
@@ -127,17 +130,32 @@ function renderNode(
     };
     scoped.renderChildren = (children, extraScope) =>
       renderChildrenOf(scoped, children, extraScope);
-    const merged: DslNode = {
-      ...subtree,
-      props: { ...subtree.props, ...node.props },
-      events: { ...subtree.events, ...node.events },
-      when: node.when ?? subtree.when,
-      permission: node.permission ?? subtree.permission,
-      id: node.id ?? subtree.id,
-    };
+    // 动态引用形态：惰性解析远端子树，成功后再套用引用处覆盖
+    if (isDslSourceRef(subtree)) {
+      const ref = subtree;
+      return (
+        <RendererContextProvider key={key} value={scoped}>
+          <DslSourceBoundary
+            context={value.context}
+            sourceRef={ref}
+            placeholder={
+              ref.placeholder ? renderNode(ref.placeholder, scoped, 'placeholder') : null
+            }
+          >
+            {(content) => {
+              const resolved = validateResolvedNode(content, `components.${name}`);
+              if (!resolved) {
+                return null;
+              }
+              return renderNode(mergeReferenceNode(resolved, node), scoped, key);
+            }}
+          </DslSourceBoundary>
+        </RendererContextProvider>
+      );
+    }
     return (
       <RendererContextProvider key={key} value={scoped}>
-        {renderNode(merged, scoped, key)}
+        {renderNode(mergeReferenceNode(subtree, node), scoped, key)}
       </RendererContextProvider>
     );
   }
@@ -224,17 +242,122 @@ function resolveDeniedStrategy(
   return 'hidden';
 }
 
-export function renderChildrenOf(
-  value: RendererContextValue,
-  children: DslNode[] | undefined,
-  extraScope?: ExpressionScope,
-): ReactNode {
-  if (!children || children.length === 0) {
+/** 引用处（component 节点）对定义子树的覆盖合并 */
+function mergeReferenceNode(definition: DslNode, reference: DslNode): DslNode {
+  return {
+    ...definition,
+    props: { ...definition.props, ...reference.props },
+    events: { ...definition.events, ...reference.events },
+    when: reference.when ?? definition.when,
+    permission: reference.permission ?? definition.permission,
+    id: reference.id ?? definition.id,
+  };
+}
+
+/** 校验远端加载的单个 DslNode；失败告警并返回 null（不击穿渲染层） */
+function validateResolvedNode(content: unknown, label: string): DslNode | null {
+  const errors = validateDslNode(content);
+  if (errors.length > 0) {
+    console.warn(
+      `[@pactor-app/runtime] 动态引用（${label}）返回内容未通过校验`,
+      errors,
+    );
     return null;
   }
+  return content as DslNode;
+}
+
+/** 校验远端加载的子树元素数组；失败告警并返回 null（不击穿渲染层） */
+function validateResolvedNodes(
+  content: unknown,
+  label: string,
+): DslChildrenItem[] | null {
+  const errors = validateDslNodes(content);
+  if (errors.length > 0) {
+    console.warn(
+      `[@pactor-app/runtime] 动态引用（${label}）返回内容未通过校验`,
+      errors,
+    );
+    return null;
+  }
+  return content as DslChildrenItem[];
+}
+
+/**
+ * 渲染 children 数组中的单个元素：内联节点走 renderNode；
+ * 动态引用元素经 DslSourceBoundary 异步解析（独立占位/失败边界），
+ * 解析结果按子树元素数组展开（可继续嵌套引用）。
+ */
+function renderChildItem(
+  value: RendererContextValue,
+  item: DslChildrenItem,
+  key: Key,
+): ReactNode {
+  if (isDslSourceRef(item)) {
+    const ref = item;
+    return (
+      <DslSourceBoundary
+        key={key}
+        context={value.context}
+        sourceRef={ref}
+        placeholder={
+          ref.placeholder ? renderNode(ref.placeholder, value, 'placeholder') : null
+        }
+      >
+        {(content) => {
+          const nodes = validateResolvedNodes(content, 'children');
+          if (!nodes) {
+            return null;
+          }
+          return nodes.map((child, index) =>
+            renderChildItem(value, child, isDslSourceRef(child) ? `ref-${index}` : (child.id ?? index)),
+          );
+        }}
+      </DslSourceBoundary>
+    );
+  }
+  return renderNode(item, value, key);
+}
+
+export function renderChildrenOf(
+  value: RendererContextValue,
+  children: DslChildren | undefined,
+  extraScope?: ExpressionScope,
+): ReactNode {
+  if (!children || (Array.isArray(children) && children.length === 0)) {
+    return null;
+  }
+  // 整体动态引用形态：经边界组件异步解析渲染（extraScope 场景同样生效，
+  // 解析结果以当前 scoped value 渲染）
+  if (isDslSourceRef(children)) {
+    const ref = children;
+    return (
+      <DslSourceBoundary
+        key="dsl-source"
+        context={value.context}
+        sourceRef={ref}
+        placeholder={
+          ref.placeholder ? renderNode(ref.placeholder, value, 'placeholder') : null
+        }
+      >
+        {(content) => {
+          const nodes = validateResolvedNodes(content, 'children');
+          if (!nodes) {
+            return null;
+          }
+          return nodes.map((child, index) =>
+            renderChildItem(value, child, isDslSourceRef(child) ? `ref-${index}` : (child.id ?? index)),
+          );
+        }}
+      </DslSourceBoundary>
+    );
+  }
+  // 数组形态：元素可为内联节点或动态引用（混排，顺序与声明一致）
+  const itemKey = (child: DslChildrenItem, index: number): Key =>
+    isDslSourceRef(child) ? `ref-${index}` : (child.id ?? index);
   if (!extraScope) {
     return children.map((child, index) =>
-      renderNode(child, value, child.id ?? index),
+      renderChildItem(value, child, itemKey(child, index)),
     );
   }
   // 注入局部作用域：新建 scoped value 并经 Provider 传递给子树
@@ -249,7 +372,7 @@ export function renderChildrenOf(
   return (
     <RendererContextProvider value={scoped}>
       {children.map((child, index) =>
-        renderNode(child, scoped, child.id ?? index),
+        renderChildItem(scoped, child, itemKey(child, index)),
       )}
     </RendererContextProvider>
   );

@@ -6,6 +6,7 @@ import type {
   PageDsl,
   PermissionConfig,
 } from '@pactor-app/core';
+import { isDslSourceRef } from '@pactor-app/core';
 
 import type { CliIo, ParsedArgs } from '../args.js';
 import {
@@ -90,6 +91,20 @@ export function runInspect(args: ParsedArgs, io: CliIo): number {
   walkPageTrees(data as Partial<PageDsl>, (node, path) => {
     const nodeKey = node.type ?? `→${node.component ?? '?'}`;
     componentCounts.set(nodeKey, (componentCounts.get(nodeKey) ?? 0) + 1);
+    // 动态引用形态的 children 无内联子树可遍历，标记来源
+    if (isDslSourceRef(node.children)) {
+      const key = `source(${node.children.source.type})`;
+      componentCounts.set(key, (componentCounts.get(key) ?? 0) + 1);
+    }
+    // 数组中混排的引用元素
+    if (Array.isArray(node.children)) {
+      for (const child of node.children) {
+        if (isDslSourceRef(child)) {
+          const key = `source(${child.source.type})`;
+          componentCounts.set(key, (componentCounts.get(key) ?? 0) + 1);
+        }
+      }
+    }
     for (const [event, config] of Object.entries(node.events ?? {})) {
       for (const action of actionList(config)) {
         actions.push(`  - ${path} events.${event} → ${action.action}`);
@@ -99,6 +114,21 @@ export function runInspect(args: ParsedArgs, io: CliIo): number {
       permissions.push(`  - ${path} → ${code}`);
     }
   });
+
+  // 根级 children 为动态引用（无内联子树可遍历）
+  if (!data.body && isDslSourceRef(data.children)) {
+    const key = `source(${data.children.source.type})`;
+    componentCounts.set(key, (componentCounts.get(key) ?? 0) + 1);
+  }
+  // 根级 children 数组中混排的引用元素
+  if (!data.body && Array.isArray(data.children)) {
+    for (const child of data.children) {
+      if (isDslSourceRef(child)) {
+        const key = `source(${child.source.type})`;
+        componentCounts.set(key, (componentCounts.get(key) ?? 0) + 1);
+      }
+    }
+  }
 
   lines.push(`组件: ${[...componentCounts.values()].reduce((a, b) => a + b, 0)} 个`);
   for (const [type, count] of [...componentCounts.entries()].sort()) {

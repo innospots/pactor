@@ -161,4 +161,48 @@ describe('PactorPage 嵌入式页面', () => {
       expect(screen.getByRole('button', { name: '跳转' })).toBeDefined();
     });
   });
+
+  it('page 为 service 引用：远端加载 PageDsl 后渲染', async () => {
+    const service = vi.fn(async () => detailPage);
+    const Page = createPactorPage({ services: { 'dsl.page': service } });
+
+    render(<Page page={{ source: { type: 'service', service: 'dsl.page' } }} route={{ params: { id: '5' } }} />);
+
+    expect(await screen.findByText('ID：5')).toBeDefined();
+    expect(service).toHaveBeenCalledTimes(1);
+  });
+
+  it('page 引用加载失败：错误页 + 重试重新请求', async () => {
+    let fail = true;
+    const service = vi.fn(async () => {
+      if (fail) {
+        throw new Error('远端 500');
+      }
+      return detailPage;
+    });
+    const onError = vi.fn();
+    const Page = createPactorPage({ services: { 'dsl.page': service }, onError });
+
+    render(<Page page={{ source: { type: 'service', service: 'dsl.page' } }} route={{ params: { id: '3' } }} />);
+
+    expect(await screen.findByText('页面加载失败')).toBeDefined();
+    expect(onError).toHaveBeenCalledOnce();
+
+    fail = false;
+    fireEvent.click(screen.getByRole('button', { name: '重试' }));
+
+    expect(await screen.findByText('ID：3')).toBeDefined();
+    expect(service).toHaveBeenCalledTimes(2);
+  });
+
+  it('page 引用返回非法 PageDsl：按加载失败处理', async () => {
+    const service = vi.fn(async () => ({ not: 'a-page-dsl' }));
+    const onError = vi.fn();
+    const Page = createPactorPage({ services: { 'dsl.page': service }, onError });
+
+    render(<Page page={{ source: { type: 'service', service: 'dsl.page' } }} />);
+
+    expect(await screen.findByText('页面加载失败')).toBeDefined();
+    expect(onError).toHaveBeenCalledOnce();
+  });
 });

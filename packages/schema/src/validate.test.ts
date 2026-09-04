@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { DSL_VERSION, validatePageDsl } from './index.js';
+import { DSL_VERSION, validateDslNode, validateDslNodes, validatePageDsl } from './index.js';
 
 const validPage = {
   dsl: '1.0',
@@ -339,5 +339,89 @@ describe('validatePageDsl', () => {
     expect(result.warnings).toContainEqual(
       expect.objectContaining({ path: '/children', keyword: 'conflict' }),
     );
+  });
+
+  it('accepts DslSourceRef at node children / root children / components value', () => {
+    const doc = clone(validPage) as Record<string, any>;
+    delete doc.body;
+    doc.children = { source: { type: 'service', service: 'dsl.root' } };
+    doc.components = {
+      detail: {
+        source: { type: 'http', request: { url: '/api/dsl/detail' } },
+        placeholder: { type: 'Alert' },
+      },
+      local: { type: 'Card', children: { source: { type: 'service', service: 'dsl.items' } } },
+    };
+    const result = validatePageDsl(doc);
+
+    expect(result.valid).toBe(true);
+    expect(result.errors).toEqual([]);
+  });
+
+  it('accepts children arrays mixing inline nodes and source refs', () => {
+    const doc = clone(validPage) as Record<string, any>;
+    delete doc.body;
+    doc.children = [
+      { type: 'Alert' },
+      { source: { type: 'service', service: 'dsl.a' } },
+      { type: 'Button', children: [{ source: { type: 'http', request: { url: '/x' } } }] },
+    ];
+    const result = validatePageDsl(doc);
+
+    expect(result.valid).toBe(true);
+    expect(result.errors).toEqual([]);
+  });
+
+  it('rejects an invalid element inside a mixed children array', () => {
+    const doc = clone(validPage) as Record<string, any>;
+    delete doc.body;
+    doc.children = [{ type: 'Alert' }, { props: {} }, { source: { type: 'http' } }];
+    const result = validatePageDsl(doc);
+
+    expect(result.valid).toBe(false);
+    expect(result.errors.length).toBeGreaterThan(0);
+  });
+
+  it('rejects a source ref missing required fields', () => {
+    const doc = clone(validPage) as Record<string, any>;
+    delete doc.body;
+    doc.children = { source: { type: 'http' } };
+    const result = validatePageDsl(doc);
+
+    expect(result.valid).toBe(false);
+    expect(result.errors.length).toBeGreaterThan(0);
+  });
+});
+
+describe('validateDslNode / validateDslNodes', () => {
+  it('validateDslNode passes a valid node and rejects one missing type', () => {
+    expect(validateDslNode({ type: 'Alert', props: {} })).toEqual([]);
+    const errors = validateDslNode({ props: {} });
+    expect(errors).toContainEqual(
+      expect.objectContaining({ path: '/type', keyword: 'required' }),
+    );
+  });
+
+  it('validateDslNodes validates arrays with indexed paths', () => {
+    expect(validateDslNodes([{ type: 'A' }, { type: 'B' }])).toEqual([]);
+    expect(validateDslNodes({ type: 'A' })).toContainEqual(
+      expect.objectContaining({ path: '/', keyword: 'type' }),
+    );
+    const errors = validateDslNodes([{ type: 'A' }, { props: {} }]);
+    expect(errors).toContainEqual(
+      expect.objectContaining({ path: '/1/type', keyword: 'required' }),
+    );
+  });
+
+  it('validateDslNodes accepts mixed node/ref elements', () => {
+    expect(
+      validateDslNodes([
+        { type: 'A' },
+        { source: { type: 'service', service: 'dsl.x' } },
+      ]),
+    ).toEqual([]);
+    const errors = validateDslNodes([{ source: { type: 'http' } }]);
+    expect(errors.length).toBeGreaterThan(0);
+    expect(errors[0]!.path.startsWith('/0')).toBe(true);
   });
 });

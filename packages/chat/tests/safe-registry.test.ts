@@ -63,11 +63,50 @@ describe('guardChatDsl（DSL part 白名单守卫）', () => {
       ],
     };
     const guarded = guardChatDsl(schema, safe);
+    const guardedChildren = Array.isArray(guarded.children) ? guarded.children : [];
     expect(guarded.type).toBe('Card');
-    expect(guarded.children?.[0]).toEqual({ type: 'Statistic', props: { value: 1 } });
-    expect(guarded.children?.[1]).toEqual({
+    expect(guardedChildren[0]).toEqual({ type: 'Statistic', props: { value: 1 } });
+    expect(guardedChildren[1]).toEqual({
       type: CHAT_DENIED_TYPE,
       props: { deniedType: 'Table' },
+    });
+  });
+
+  it('动态引用（DslSourceRef）children 一律拒绝（远端内容无法静态过白名单）', () => {
+    const source = new Registry<unknown>('ComponentRegistry');
+    source.register('Card', () => 'Card');
+    const safe = createSafeRegistry(source, ['Card']);
+
+    const schema: DslNode = {
+      type: 'Card',
+      children: { source: { type: 'service', service: 'dsl.items' } },
+    };
+    const guarded = guardChatDsl(schema, safe);
+    expect(guarded).toEqual({
+      type: CHAT_DENIED_TYPE,
+      props: { deniedType: 'Card(remote)' },
+    });
+  });
+
+  it('children 数组中混排的引用元素替换为受控占位，内联元素保留', () => {
+    const source = new Registry<unknown>('ComponentRegistry');
+    source.register('Card', () => 'Card');
+    source.register('Alert', () => 'Alert');
+    const safe = createSafeRegistry(source, ['Card', 'Alert']);
+
+    const schema: DslNode = {
+      type: 'Card',
+      children: [
+        { type: 'Alert', props: { message: '内联' } },
+        { source: { type: 'service', service: 'dsl.x' } },
+      ],
+    };
+    const guarded = guardChatDsl(schema, safe);
+    const children = Array.isArray(guarded.children) ? guarded.children : [];
+    expect(children[0]).toEqual({ type: 'Alert', props: { message: '内联' } });
+    expect(children[1]).toEqual({
+      type: CHAT_DENIED_TYPE,
+      props: { deniedType: '(remote)' },
     });
   });
 });

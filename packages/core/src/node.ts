@@ -43,11 +43,57 @@ export interface ActionConfig {
 /** 事件映射：事件名 → 单个或多个动作 */
 export type EventMap = Record<string, ActionConfig | ActionConfig[]>;
 
+/**
+ * 动态 DSL 引用（设计文档：DSL 各位置支持远端加载）：
+ * `source` 为二选一形态——`service`（经 ServiceRegistry 调用）或
+ * `http`（经 HttpAdapter 请求），返回 DSL 内容（PageDsl / DslNode / DslNode[]）；
+ * `params` 值可含表达式字符串，按**首次解析时**的作用域求值一次（不做联动重载）。
+ * `placeholder` 为解析期间渲染的占位子树（缺省渲染空）。
+ */
+export interface DslSourceRef {
+  source:
+    | {
+        type: 'service';
+        service: string;
+        params?: Record<string, unknown>;
+      }
+    | {
+        type: 'http';
+        request: {
+          method?: string;
+          url: string;
+          params?: Record<string, unknown>;
+          headers?: Record<string, string>;
+        };
+      };
+  placeholder?: DslNode;
+}
+
+/** DslSourceRef 类型守卫 */
+export function isDslSourceRef(value: unknown): value is DslSourceRef {
+  if (typeof value !== 'object' || value === null || Array.isArray(value)) {
+    return false;
+  }
+  const source = (value as { source?: unknown }).source;
+  return (
+    typeof source === 'object' &&
+    source !== null &&
+    ((source as { type?: unknown }).type === 'service' ||
+      (source as { type?: unknown }).type === 'http')
+  );
+}
+
+/** 子树元素：内联节点或动态引用（children 数组中可混排） */
+export type DslChildrenItem = DslNode | DslSourceRef;
+
+/** 子树声明：内联数组（元素可为节点或动态引用混排），或整体远端动态引用 */
+export type DslChildren = DslChildrenItem[] | DslSourceRef;
+
 /** UI DSL 树基础节点共有字段 */
 export interface DslNodeBase {
   id?: string;
   props?: Record<string, unknown>;
-  children?: DslNode[];
+  children?: DslChildren;
   events?: EventMap;
   permission?: PermissionConfig;
   /** 条件渲染 */

@@ -65,6 +65,65 @@ const actionOrArraySchema = {
   ],
 } as const;
 
+/** DslSourceRef：动态 DSL 引用（service / http 二选一）+ 可选占位子树 */
+export const DSL_SOURCE_REF_SCHEMA_ID = 'pactor:dsl-source-ref';
+
+export const dslSourceRefSchema = {
+  $id: DSL_SOURCE_REF_SCHEMA_ID,
+  type: 'object',
+  required: ['source'],
+  properties: {
+    source: {
+      anyOf: [
+        {
+          type: 'object',
+          required: ['type', 'service'],
+          properties: {
+            type: { const: 'service' },
+            service: { type: 'string', minLength: 1 },
+            params: { type: 'object' },
+          },
+          additionalProperties: false,
+        },
+        {
+          type: 'object',
+          required: ['type', 'request'],
+          properties: {
+            type: { const: 'http' },
+            request: {
+              type: 'object',
+              required: ['url'],
+              properties: {
+                method: { type: 'string' },
+                url: { type: 'string', minLength: 1 },
+                params: { type: 'object' },
+                headers: { type: 'object', additionalProperties: { type: 'string' } },
+              },
+              additionalProperties: false,
+            },
+          },
+          additionalProperties: false,
+        },
+      ],
+    },
+    placeholder: { $ref: DSL_NODE_SCHEMA_ID },
+  },
+  additionalProperties: false,
+} as const;
+
+/** 子树声明：内联数组（元素可为节点或动态引用混排）或整体动态引用（节点级 / 根级 children 共用） */
+export const dslChildrenSchema = {
+  anyOf: [
+    {
+      type: 'array',
+      items: {
+        anyOf: [{ $ref: DSL_NODE_SCHEMA_ID }, { $ref: DSL_SOURCE_REF_SCHEMA_ID }],
+      },
+    },
+    { $ref: DSL_SOURCE_REF_SCHEMA_ID },
+  ],
+} as const;
+
 /** DslNode：type（组件节点）或 component（引用页面级命名组件）二选一，children 递归 */
 export const dslNodeSchema = {
   $id: DSL_NODE_SCHEMA_ID,
@@ -76,10 +135,7 @@ export const dslNodeSchema = {
     /** 引用节点：页面级命名组件（PageDsl.components）的 key */
     component: { type: 'string', minLength: 1 },
     props: { type: 'object' },
-    children: {
-      type: 'array',
-      items: { $ref: DSL_NODE_SCHEMA_ID },
-    },
+    children: dslChildrenSchema,
     events: {
       type: 'object',
       additionalProperties: actionOrArraySchema,

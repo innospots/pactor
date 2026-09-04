@@ -1,8 +1,9 @@
-import { Registry, createI18nContext, type ActionConfig, type DataSourceConfig, type DslNode, type I18nContext, type PageMeta } from '@pactor-app/core';
+import { Registry, createI18nContext, type ActionConfig, type DataSourceConfig, type DslNode, type DslSourceRef, type I18nContext, type PageMeta } from '@pactor-app/core';
 import type { ExpressionScope } from '@pactor-app/expression';
 
 import type { ActionRegistry } from '../action/engine.js';
 import { DataStore } from '../datasource/data-store.js';
+import { DslSourceResolver } from '../datasource/dsl-source-resolver.js';
 import {
   createDefaultPermissionAdapter,
   createDefaultRouterAdapter,
@@ -84,14 +85,16 @@ export interface RuntimeContext {
    */
   namedActions: Record<string, ActionConfig | ActionConfig[]>;
   /**
-   * 页面级命名组件定义（PageDsl.components）：组件名 → DslNode 子树，
-   * 供内置 `Fragment` 组件按 `props.name` 引用渲染；缺省为空对象
+   * 页面级命名组件定义（PageDsl.components）：组件名 → DslNode 子树
+   * 或 DslSourceRef 动态引用，供 `component` 引用节点按名渲染；缺省为空对象
    */
-  pageComponents: Record<string, DslNode>;
+  pageComponents: Record<string, DslNode | DslSourceRef>;
   permission: PermissionAdapter;
   capabilities: CapabilityRegistry;
   /** HTTP 出口适配器（DataSource / request 动作共用） */
   http: HttpAdapter;
+  /** 动态 DSL 引用解析器（service/http 分派 + 页面级缓存） */
+  dslSources: DslSourceResolver;
   /** 当前语言代码（如 'zh-CN'） */
   locale: string;
   /** i18n 上下文：提供 `t(key, params?)` 翻译函数 */
@@ -106,8 +109,8 @@ export interface CreateRuntimeContextOptions {
   dataSources?: Record<string, DataSourceConfig>;
   /** 页面级命名动作定义（PageDsl.actions），供 `call` 动作按名引用 */
   namedActions?: Record<string, ActionConfig | ActionConfig[]>;
-  /** 页面级命名组件定义（PageDsl.components），供 `Fragment` 组件按名渲染 */
-  pageComponents?: Record<string, DslNode>;
+  /** 页面级命名组件定义（PageDsl.components），供 `component` 引用节点按名渲染 */
+  pageComponents?: Record<string, DslNode | DslSourceRef>;
   route?: {
     params?: Record<string, unknown>;
     query?: Record<string, unknown>;
@@ -158,10 +161,15 @@ export function createRuntimeContext(
     navigate: (to) => router.navigate(to),
   };
 
-  // DataStore 加载时经 getScope 取当前作用域，故延迟引用 context
+  // DataStore / DslSourceResolver 加载时经 getScope 取当前作用域，故延迟引用 context
   let context: RuntimeContext;
   const data = new DataStore({
     dataSources: options.dataSources ?? {},
+    services,
+    http,
+    getScope: () => buildScope(context),
+  });
+  const dslSources = new DslSourceResolver({
     services,
     http,
     getScope: () => buildScope(context),
@@ -184,6 +192,7 @@ export function createRuntimeContext(
     permission,
     capabilities,
     http,
+    dslSources,
     locale: options.locale ?? 'zh-CN',
     i18n: createI18nContext({
       locale: options.locale,
