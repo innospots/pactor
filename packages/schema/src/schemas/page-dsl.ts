@@ -137,6 +137,14 @@ export const pageDslSchema = {
       additionalProperties: false,
     },
     body: { $ref: DSL_NODE_SCHEMA_ID },
+    /**
+     * UI 树根（节点数组形态）：`body` 缺失时作为替代，
+     * 用于 DSL 描述页面局部（无需 Page 等包装节点）
+     */
+    children: {
+      type: 'array',
+      items: { $ref: DSL_NODE_SCHEMA_ID },
+    },
   },
   additionalProperties: false,
 } as const;

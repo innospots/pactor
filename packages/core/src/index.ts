@@ -23,6 +23,7 @@ export type {
   PageMeta,
   RequiresConfig,
 } from './document.js';
+export { resolveRootNodes } from './document.js';
 
 export { RUNTIME_SCOPES } from './scope.js';
 export type { RuntimeScope } from './scope.js';

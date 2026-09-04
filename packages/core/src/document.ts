@@ -103,8 +103,27 @@ export interface PageDsl {
    */
   components?: Record<string, DslNode>;
   lifecycle?: LifecycleConfig;
-  /** UI 树根 */
+  /**
+   * UI 树根（单个 DslNode）。
+   * 与根级 `children` 为两种等价声明形态：`body` 存在时优先使用 `body`；
+   * `body` 缺失且 `children` 存在时以根级 `children` 作为 UI 树
+   * （隐式片段根，无需 Page 等包装节点，DSL 可描述页面局部）；
+   * 两者均缺失时按空树处理。读取入口见 `resolveRootNodes`
+   */
   body?: DslNode;
+  /** UI 树根（节点数组形态），`body` 缺失时生效 */
+  children?: DslNode[];
+}
+
+/**
+ * 读取 Page DSL 的 UI 树根节点列表（官方入口）：
+ * `body` 存在 → `[body]`；否则根级 `children ?? []`
+ */
+export function resolveRootNodes(pageDsl: PageDsl): DslNode[] {
+  if (pageDsl.body) {
+    return [pageDsl.body];
+  }
+  return pageDsl.children ?? [];
 }
 
 /** Fragment DSL（第 50 节）：可复用的 UI 片段 */

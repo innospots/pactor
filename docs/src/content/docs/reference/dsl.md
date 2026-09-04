@@ -9,7 +9,7 @@ DSL 的类型定义以 `@pactor-app/core` 为准（`PageDsl` / `DslNode` / `Acti
 
 ## 顶层结构（PageDsl）
 
-一份页面 DSL 的完整骨架（所有可选字段都标出，实际页面只需 `dsl` + `page` + `body`）：
+一份页面 DSL 的完整骨架（所有可选字段都标出，实际页面只需 `dsl` + `page` + UI 树）：
 
 ```yaml
 dsl: '1.0'                    # 必填，DSL 规范版本
@@ -43,10 +43,11 @@ lifecycle:                    # 可选，生命周期动作
   onInit:
     - action: setState
       params: { ready: true }
-body:                         # 可选，UI 树根节点（DslNode）
+body:                         # 可选，UI 树根节点（DslNode），与根级 children 二选一
   type: Page
   props: { title: 客户列表 }
   children: [...]
+# children: [...]             # 可选，UI 树根（节点数组），body 缺失时生效
 ```
 
 | 字段 | 类型 | 必填 | 说明 |
@@ -60,7 +61,27 @@ body:                         # 可选，UI 树根节点（DslNode）
 | `actions` | Record<string, ActionConfig \| ActionConfig[]> | 否 | 命名动作复用，见 [actions 详解](#actions页面级命名动作) |
 | `components` | Record<string, DslNode> | 否 | 命名组件子树，见 [components 详解](#components页面级命名组件) |
 | `lifecycle` | LifecycleConfig | 否 | 生命周期动作，见 [lifecycle 详解](#lifecycle生命周期) |
-| `body` | DslNode | 否 | UI 树根节点，见 [节点结构](#节点dslnode) |
+| `body` | DslNode | 否 | UI 树根节点，见 [节点结构](#节点dslnode)；与根级 `children` 的优先级见下 |
+| `children` | DslNode[] | 否 | UI 树根（节点数组形态），`body` 缺失时生效——DSL 描述页面局部，见下 |
+
+### body 与根级 children（局部描述形态）
+
+UI 树有两种等价声明形态：
+
+- **`body`（完整页面形态）**：单个 DslNode，惯例以 `type: Page` 包装（自带页边距、标题、纵向节奏）。
+- **根级 `children`（局部描述形态）**：节点数组，`body` 缺失时直接作为 UI 树渲染——一份 DSL 不一定描述整个页面，也可以只是页面中的一个区块（嵌入宿主页面的局部、演示页等），无需任何包装节点：
+
+```yaml
+dsl: '1.0'
+page: { id: layout-demo, title: 布局组件演示 }
+children:                    # 无 body / Page 包装，直接列出根节点
+  - type: Alert
+    props: { message: 说明, variant: info }
+  - type: Layout
+    children: [...]
+```
+
+优先级规则：**`body` 存在时优先使用 `body`**，根级 `children` 被忽略（schema 校验与 `pactor lint` 会对共存输出 warning，不报错）；两者都缺失按空树处理（渲染为空，不抛错）。多根节点共享同一 `state` / `data` 作用域。工具侧读取根节点的官方入口是 `@pactor-app/core` 导出的 `resolveRootNodes(pageDsl)`。
 
 ### dsl（规范版本）
 

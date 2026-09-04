@@ -1,6 +1,5 @@
 import type {
   ActionConfig,
-  DslNode,
   FragmentDsl,
   PageDsl,
   PermissionConfig,
@@ -15,7 +14,7 @@ import {
   isFragmentFile,
   readDslFile,
   validateDsl,
-  walkDslTree,
+  walkPageTrees,
 } from '../dsl-io.js';
 
 /** lint 分级 */
@@ -101,10 +100,10 @@ function lintExpressions(data: unknown, findings: LintFinding[]): void {
 
 /** component-naming：组件 type 应为 PascalCase（warning） */
 function lintComponentNaming(
-  body: DslNode | undefined,
+  data: Partial<PageDsl>,
   findings: LintFinding[],
 ): void {
-  walkDslTree(body, (node, path) => {
+  walkPageTrees(data, (node, path) => {
     // 引用节点（component）没有组件类型名，跳过命名检查
     if (node.component !== undefined) {
       return;
@@ -137,7 +136,7 @@ function lintPermissionFormat(data: Partial<PageDsl & FragmentDsl>, findings: Li
 
   check(permissionCodes(data.page?.permission), '/page/permission');
 
-  walkDslTree(data.body as DslNode | undefined, (node, path) => {
+  walkPageTrees(data as Partial<PageDsl>, (node, path) => {
     check(permissionCodes(node.permission), `${path}/permission`);
     for (const [event, config] of Object.entries(node.events ?? {})) {
       for (const action of actionList(config)) {
@@ -168,9 +167,25 @@ export function lintDslData(data: unknown, isFragment: boolean): LintFinding[] {
 
   lintExpressions(data, findings);
   const typed = data as Partial<PageDsl & FragmentDsl>;
-  lintComponentNaming(typed.body as DslNode | undefined, findings);
+  lintComponentNaming(typed, findings);
   lintPermissionFormat(typed, findings);
+  lintBodyChildrenConflict(typed, findings);
   return findings;
+}
+
+/** body-children-conflict：body 与根级 children 共存时 children 被忽略（warning） */
+function lintBodyChildrenConflict(
+  data: Partial<PageDsl>,
+  findings: LintFinding[],
+): void {
+  if (data.body !== undefined && data.children !== undefined) {
+    findings.push({
+      level: 'warning',
+      rule: 'body-children-conflict',
+      path: '/children',
+      message: 'body 与根级 children 同时声明，children 将被忽略（body 优先）',
+    });
+  }
 }
 
 /**
