@@ -20,6 +20,7 @@ import { Sider } from './components/Sider/index.js';
 import { Statistic } from './components/Statistic/index.js';
 import { Table } from './components/Table/index.js';
 import { Tabs } from './components/Tabs/index.js';
+import { Text } from './components/Text/index.js';
 
 /**
  * shadcn kit 组件表：DSL 类型名 → 组件适配器。
@@ -47,6 +48,7 @@ export const shadcnComponents = {
   Footer,
   Menu,
   Link,
+  Text,
 } as const;
 
 /** 把全部 V1 内置组件（shadcn 实现）按 DSL 类型名注册到给定 ComponentRegistry */

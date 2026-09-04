@@ -70,7 +70,7 @@ const loginPage: PageDsl = {
                       action: "message",
                       params: { type: "success", text: "登录成功，正在跳转…" },
                     },
-                    { action: "navigate", params: { to: "/" } },
+                    { action: "navigate", params: { to: "/dashboard" } },
                   ],
                 },
               },
@@ -119,7 +119,7 @@ const DEMO_ACCOUNT = { username: "admin", password: "pactor123" };
 export function LoginClient() {
   return (
     <PactorPage
-      page={loginPage}
+      pageDsl={loginPage}
       actions={{
         // 本地 mock 登录：命名结果 data 写入 ${actions.login}
         "auth.login": async (action) => {

@@ -16,6 +16,7 @@ import {
   type ActionRegistry,
   type CapabilityRegistry,
   type HttpAdapter,
+  type HttpRequestConfig,
   type ServiceHandler,
   type ServiceRegistry,
 } from '@pactor-app/runtime';
@@ -63,6 +64,37 @@ export function createRuntimeHttpAdapter(
 }
 
 /**
+ * HTTP 钩子（组装层）：对页面运行时所有 HTTP 出口做统一加工。
+ * - `request`：发出前加工请求配置（如注入 token、改写 URL、追加公共 headers）
+ * - `response`：收到后加工返回数据（如把后端包裹结构 `{ code, data }`
+ *   归一化为 Pactor 需要的内容）
+ * 两个钩子均可异步；缺省时直通。
+ */
+export interface PactorHttpHooks {
+  request?: (
+    config: HttpRequestConfig,
+  ) => HttpRequestConfig | Promise<HttpRequestConfig>;
+  response?: (data: unknown) => unknown | Promise<unknown>;
+}
+
+/** 把 PactorHttpHooks 包装到 HttpAdapter 上（无钩子则原样返回） */
+export function wrapHttpAdapter(
+  base: HttpAdapter,
+  hooks: PactorHttpHooks | undefined,
+): HttpAdapter {
+  if (!hooks) {
+    return base;
+  }
+  return {
+    async request(config) {
+      const finalConfig = hooks.request ? await hooks.request(config) : config;
+      const data = await base.request(finalConfig);
+      return hooks.response ? hooks.response(data) : data;
+    },
+  };
+}
+
+/**
  * 组装内核选项（spec: embedded-page-view / application-bootstrap）：
  * 整应用模式与嵌入模式共享的装配输入。
  */
@@ -86,6 +118,8 @@ export interface PactorAssemblyOptions {
   capabilities?: Record<string, unknown>;
   /** 认证令牌：注入页面 HTTP 出口 */
   authTokenProvider?: AuthTokenProvider;
+  /** HTTP 钩子：加工页面运行时所有 HTTP 出口（request 改配置 / response 改数据） */
+  httpAdapter?: PactorHttpHooks;
   /**
    * DSL `navigate` 动作的跳转实现（两种形态的差异点）：
    * 整应用模式 = 导航桥 push（react-router）；嵌入模式 = location.assign
@@ -161,6 +195,9 @@ export function createPactorAssembly(
     overlayManager,
     uiBridge,
     interactionKit,
-    httpAdapter: createRuntimeHttpAdapter(options.authTokenProvider),
+    httpAdapter: wrapHttpAdapter(
+      createRuntimeHttpAdapter(options.authTokenProvider),
+      options.httpAdapter,
+    ),
   };
 }

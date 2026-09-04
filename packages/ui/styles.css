@@ -8,6 +8,10 @@
       "Segoe UI Symbol", "Noto Color Emoji";
     --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono",
       "Courier New", monospace;
+    --color-amber-400: oklch(82.8% 0.189 84.429);
+    --color-amber-600: oklch(66.6% 0.179 58.318);
+    --color-green-400: oklch(79.2% 0.209 151.711);
+    --color-green-600: oklch(62.7% 0.194 149.214);
     --color-black: #000;
     --spacing: 0.25rem;
     --container-sm: 24rem;
@@ -892,6 +896,9 @@
   .text-accent-foreground {
     color: var(--accent-foreground);
   }
+  .text-amber-600 {
+    color: var(--color-amber-600);
+  }
   .text-card-foreground {
     color: var(--card-foreground);
   }
@@ -903,6 +910,9 @@
   }
   .text-foreground {
     color: var(--foreground);
+  }
+  .text-green-600 {
+    color: var(--color-green-600);
   }
   .text-info {
     color: var(--info);
@@ -928,9 +938,18 @@
   .text-warning {
     color: var(--warning);
   }
+  .italic {
+    font-style: italic;
+  }
   .tabular-nums {
     --tw-numeric-spacing: tabular-nums;
     font-variant-numeric: var(--tw-ordinal,) var(--tw-slashed-zero,) var(--tw-numeric-figure,) var(--tw-numeric-spacing,) var(--tw-numeric-fraction,);
+  }
+  .line-through {
+    text-decoration-line: line-through;
+  }
+  .underline {
+    text-decoration-line: underline;
   }
   .underline-offset-4 {
     text-underline-offset: 4px;
@@ -1172,6 +1191,14 @@
     }
     .sm\:text-left {
       text-align: left;
+    }
+  }
+  @media (prefers-color-scheme: dark) {
+    .dark\:text-amber-400 {
+      color: var(--color-amber-400);
+    }
+    .dark\:text-green-400 {
+      color: var(--color-green-400);
     }
   }
   .data-open\:animate-accordion-down:where([data-open]:not([data-open='false'])) {

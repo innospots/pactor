@@ -39,6 +39,7 @@ import { createRoot, type Root } from 'react-dom/client';
 
 import { Application } from './app-shell.js';
 import { createPactorAssembly, upsert } from './assembly.js';
+import type { PactorHttpHooks } from './assembly.js';
 
 /** 认证令牌提供者：同步或异步返回 Bearer token（无令牌返回 undefined） */
 export type AuthTokenProvider = () =>
@@ -119,6 +120,8 @@ export interface PactorApplicationOptions {
   headerExtra?: ReactNode;
   /** 认证令牌：注入 DSL 资源请求与页面 HTTP 出口（Authorization: Bearer） */
   authTokenProvider?: AuthTokenProvider;
+  /** HTTP 钩子：加工页面运行时所有 HTTP 出口（request 改配置 / response 改数据） */
+  httpAdapter?: PactorHttpHooks;
   /** 当前语言代码（优先级高于 bootstrap.locale 与浏览器语言） */
   locale?: string;
   /** 回退语言代码（缺省 'zh-CN'） */
@@ -407,6 +410,7 @@ export function createPactorApplication(
     services: options.services,
     capabilities: options.capabilities,
     authTokenProvider: options.authTokenProvider,
+    httpAdapter: options.httpAdapter,
     navigate: (to) => navigation.push(to),
   });
   const { components, actions, services, capabilities, httpAdapter } = assembly;

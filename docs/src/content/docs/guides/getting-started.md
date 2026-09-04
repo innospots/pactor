@@ -188,16 +188,36 @@ const Page = createPactorPage({ loader, services });
 <Page pageId="customer-detail" route={{ params: { id }, query: searchParams }} />
 
 // 或直接传 PageDsl 对象（不经 loader）
-<Page page={pageDsl} />
+<Page pageDsl={pageDsl} />
 
 // 或传动态引用：经 service/http 通道远端加载 PageDsl（失败走错误态，可重试）
-<Page page={{ source: { type: 'service', service: 'dsl.page' } }} />
-<Page page={{ source: { type: 'http', request: { url: '/api/dsl/login' } } }} />
+<Page pageDsl={{ source: { type: 'service', service: 'dsl.page' } }} />
+<Page pageDsl={{ source: { type: 'http', request: { url: '/api/dsl/login' } } }} />
 ```
 
 DSL 内部的局部子树也支持同样的动态引用（根级 `children`、节点 `children`、`components` 命名组件），完整语义见 [DSL 参考 - 动态 DSL 引用](/reference/dsl/#动态-dsl-引用dlsourceref)。
 
 嵌入模式的跳转是**自然导航**（不注入宿主路由对象）：`Link` 组件渲染原生 `<a href>`，`navigate` 动作退化为 `location.assign` 整页跳转，目标页由宿主路由系统承接。权限默认全部放行，需管控时传 `permissions: string[]`。
+
+**HTTP 钩子**（`httpAdapter`）：对页面运行时所有 HTTP 出口做统一加工——`request` 在发出前加工请求配置（如注入 token），`response` 在收到后加工返回数据（如归一化后端包裹结构）：
+
+```tsx
+const Page = createPactorPage({
+  loader,
+  services,
+  httpAdapter: {
+    // 发出前：注入认证头
+    request: (config) => ({
+      ...config,
+      headers: { ...config.headers, authorization: `Bearer ${getToken()}` },
+    }),
+    // 收到后：把 { code, data } 归一化为 Pactor 需要的结构
+    response: (data) => (data as { data?: unknown })?.data ?? data,
+  },
+});
+```
+
+`httpAdapter` 同样可用于 `createPactorApplication`，与 `authTokenProvider` 叠加生效（authTokenProvider 先注入 Authorization 头，httpAdapter.request 再加工）。
 
 ## 命令行（@pactor-app/cli）
 

@@ -29,7 +29,7 @@ import { BootstrapSpinner, PrimaryButton, ResultView } from './feedback.js';
 
 /**
  * 嵌入式页面 props（spec: embedded-page-view）：
- * `pageId`（经 loader 加载）与 `page`（直接传入）二选一。
+ * `pageId`（经 loader 加载）与 `pageDsl`（直接传入或动态引用）二选一。
  */
 export interface PactorPageProps {
   /** 页面 id（经 options.loader 加载） */
@@ -39,7 +39,7 @@ export interface PactorPageProps {
    * 经 service/http 通道远端加载 PageDsl，校验通过后创建运行时；
    * 加载失败走错误态与 onError，重试重新请求
    */
-  page?: PageDsl | DslSourceRef;
+  pageDsl?: PageDsl | DslSourceRef;
   /** 路由作用域注入：DSL 内 `${route.params.x}` / `${route.query.x}` 可读 */
   route?: { params?: Record<string, unknown>; query?: Record<string, unknown> };
 }
@@ -140,16 +140,16 @@ export function createPactorPage(
  * 需要复用同一组装配时优先用 `createPactorPage(options)` 工厂。
  */
 export function PactorPage(props: PactorPageProps & PactorPageOptions) {
-  const { pageId, page, route, ...options } = props;
+  const { pageId, pageDsl, route, ...options } = props;
   const factoryRef = useRef<ComponentType<PactorPageProps> | null>(null);
   if (factoryRef.current === null) {
     factoryRef.current = createPactorPage(options);
   }
   const ConfiguredPage = factoryRef.current;
-  return <ConfiguredPage pageId={pageId} page={page} route={route} />;
+  return <ConfiguredPage pageId={pageId} pageDsl={pageDsl} route={route} />;
 }
 
-/** 嵌入页状态机：pageId/page → PageRuntime（对齐 DslPageLoader 语义） */
+/** 嵌入页状态机：pageId/pageDsl → PageRuntime（对齐 DslPageLoader 语义） */
 function EmbeddedPage({
   assembly,
   options,
@@ -157,7 +157,7 @@ function EmbeddedPage({
   createRuntime,
   resolvePage,
   pageId,
-  page,
+  pageDsl,
   route,
 }: PactorPageProps & {
   assembly: PactorAssembly;
@@ -175,17 +175,17 @@ function EmbeddedPage({
     let runtime: PageRuntime | null = null;
     void (async () => {
       try {
-        let pageDsl = page;
-        if (pageDsl === undefined) {
+        let resolved = pageDsl;
+        if (resolved === undefined) {
           if (pageId === undefined) {
-            throw new Error('[@pactor-app/app] PactorPage: pageId 与 page 必传其一');
+            throw new Error('[@pactor-app/app] PactorPage: pageId 与 pageDsl 必传其一');
           }
           if (resolvePage === undefined) {
             throw new Error('[@pactor-app/app] PactorPage: 按 pageId 加载需要 options.loader');
           }
-          pageDsl = await resolvePage(pageId);
-        } else if (isDslSourceRef(pageDsl)) {
-          // page 为动态引用：经 service/http 通道加载 PageDsl；
+          resolved = await resolvePage(pageId);
+        } else if (isDslSourceRef(resolved)) {
+          // pageDsl 为动态引用：经 service/http 通道加载 PageDsl；
           // 每次 effect 执行（含重试）新建解析器——缓存不跨重试复用
           const resolver = new DslSourceResolver({
             services: assembly.services,
@@ -195,12 +195,12 @@ function EmbeddedPage({
             }),
           });
           // createPageRuntime 会对结果做 validatePageDsl，校验失败按加载失败处理
-          pageDsl = (await resolver.resolve(pageDsl)) as PageDsl;
+          resolved = (await resolver.resolve(resolved)) as PageDsl;
         }
         if (cancelled) {
           return;
         }
-        runtime = createRuntime(pageDsl, route);
+        runtime = createRuntime(resolved, route);
         setState({ status: 'ready', runtime });
         void runtime.ready();
         void runtime.show();
@@ -221,7 +221,7 @@ function EmbeddedPage({
     };
     // route 由宿主以 key 控制重建（与整应用模式一致）；retryTick 驱动重试
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [pageId, page, retryTick]);
+  }, [pageId, pageDsl, retryTick]);
 
   const InteractionProvider = assembly.interactionKit.Provider;
   const OverlayHost = assembly.interactionKit.OverlayHost;

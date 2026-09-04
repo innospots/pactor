@@ -39,7 +39,7 @@ export function Layout({ direction, className, style, dslChildren }: LayoutProps
       data-slot="layout"
       data-direction={dir}
       className={cn(
-        'flex min-h-0 w-full',
+        'flex min-h-0 w-full h-full flex-1',
         dir === 'vertical' ? 'flex-col' : 'flex-row',
         className,
       )}

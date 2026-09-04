@@ -53,7 +53,7 @@ describe('PactorPage 嵌入式页面', () => {
   });
 
   it('直接传 page 渲染（不经 loader）', async () => {
-    render(<PactorPage page={detailPage} route={{ params: { id: '7' } }} />);
+    render(<PactorPage pageDsl={detailPage} route={{ params: { id: '7' } }} />);
 
     expect(await screen.findByText('ID：7')).toBeDefined();
   });
@@ -111,7 +111,7 @@ describe('PactorPage 嵌入式页面', () => {
     };
     const Page = createPactorPage({});
 
-    render(<Page page={page} />);
+    render(<Page pageDsl={page} />);
     fireEvent.click(await screen.findByRole('button', { name: '打开' }));
 
     expect(await screen.findByText('弹层内容')).toBeDefined();
@@ -122,8 +122,8 @@ describe('PactorPage 嵌入式页面', () => {
 
     render(
       <div>
-        <Page page={listPage} />
-        <Page page={detailPage} route={{ params: { id: '9' } }} />
+        <Page pageDsl={listPage} />
+        <Page pageDsl={detailPage} route={{ params: { id: '9' } }} />
       </div>,
     );
 
@@ -153,7 +153,7 @@ describe('PactorPage 嵌入式页面', () => {
     };
     const Page = createPactorPage({});
 
-    render(<Page page={page} />);
+    render(<Page pageDsl={page} />);
     // jsdom 的 location.assign 未实现（virtual console 报错但不抛异常）
     fireEvent.click(await screen.findByRole('button', { name: '跳转' }));
 
@@ -166,7 +166,7 @@ describe('PactorPage 嵌入式页面', () => {
     const service = vi.fn(async () => detailPage);
     const Page = createPactorPage({ services: { 'dsl.page': service } });
 
-    render(<Page page={{ source: { type: 'service', service: 'dsl.page' } }} route={{ params: { id: '5' } }} />);
+    render(<Page pageDsl={{ source: { type: 'service', service: 'dsl.page' } }} route={{ params: { id: '5' } }} />);
 
     expect(await screen.findByText('ID：5')).toBeDefined();
     expect(service).toHaveBeenCalledTimes(1);
@@ -183,7 +183,7 @@ describe('PactorPage 嵌入式页面', () => {
     const onError = vi.fn();
     const Page = createPactorPage({ services: { 'dsl.page': service }, onError });
 
-    render(<Page page={{ source: { type: 'service', service: 'dsl.page' } }} route={{ params: { id: '3' } }} />);
+    render(<Page pageDsl={{ source: { type: 'service', service: 'dsl.page' } }} route={{ params: { id: '3' } }} />);
 
     expect(await screen.findByText('页面加载失败')).toBeDefined();
     expect(onError).toHaveBeenCalledOnce();
@@ -200,7 +200,7 @@ describe('PactorPage 嵌入式页面', () => {
     const onError = vi.fn();
     const Page = createPactorPage({ services: { 'dsl.page': service }, onError });
 
-    render(<Page page={{ source: { type: 'service', service: 'dsl.page' } }} />);
+    render(<Page pageDsl={{ source: { type: 'service', service: 'dsl.page' } }} />);
 
     expect(await screen.findByText('页面加载失败')).toBeDefined();
     expect(onError).toHaveBeenCalledOnce();

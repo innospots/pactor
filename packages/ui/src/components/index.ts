@@ -24,6 +24,8 @@ export { Alert } from './components/Alert/index.js';
 export type { AlertProps, AlertVariant } from './components/Alert/index.js';
 export { Statistic } from './components/Statistic/index.js';
 export type { StatisticProps } from './components/Statistic/index.js';
+export { Text } from './components/Text/index.js';
+export type { TextProps, TextType } from './components/Text/index.js';
 export { Tabs } from './components/Tabs/index.js';
 export type { TabItem, TabsProps } from './components/Tabs/index.js';
 
