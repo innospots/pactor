@@ -47,7 +47,7 @@ body:                         # 可选，UI 树根节点（DslNode），与根�
   type: Page
   props: { title: 客户列表 }
   children: [...]
-# children: [...]             # 可选，UI 树根（节点数组），body 缺失时生效
+# children: [...]             # 可选，UI 树根（节点数组或 DslSourceRef），body 缺失时生效
 ```
 
 | 字段 | 类型 | 必填 | 说明 |
@@ -62,7 +62,7 @@ body:                         # 可选，UI 树根节点（DslNode），与根�
 | `components` | Record<string, DslNode> | 否 | 命名组件子树，见 [components 详解](#components页面级命名组件) |
 | `lifecycle` | LifecycleConfig | 否 | 生命周期动作，见 [lifecycle 详解](#lifecycle生命周期) |
 | `body` | DslNode | 否 | UI 树根节点，见 [节点结构](#节点dslnode)；与根级 `children` 的优先级见下 |
-| `children` | DslNode[] | 否 | UI 树根（节点数组形态），`body` 缺失时生效——DSL 描述页面局部，见下 |
+| `children` | DslNode[] \| DslSourceRef | 否 | UI 树根（节点数组或[动态引用](#动态-dsl-引用dlsourceref)），`body` 缺失时生效——DSL 描述页面局部，见下 |
 
 ### body 与根级 children（局部描述形态）
 
@@ -456,7 +456,72 @@ body:
 ```
 
 - 未定义的 key 渲染 Unsupported 占位（不抛错）；直接/间接循环引用（a → b → a）不渲染并 `console.warn`
-- 引用节点是 `DslNode` 的第二种形态（`component` 与 `type` 二选一）；跨页面复用的远程片段（`resource` 加载）见设计文档第 50 节，当前版本未实现
+- 引用节点是 `DslNode` 的第二种形态（`component` 与 `type` 二选一）；命名子树也可以不内联、改为**远端动态加载**，见下节
+
+## 动态 DSL 引用（DslSourceRef）
+
+DSL 的各个位置不一定都要静态内联——可以声明一个**动态引用**，由运行时经 `service` / `http` 通道远端加载 DSL 内容。适用场景：列表行点击后加载的详情子树、按角色差异化下发的区块、大页面拆片按需加载。
+
+```yaml
+# 引用形态：source 二选一（service / http），placeholder 可选（解析期间渲染）
+source:
+  type: service                  # 经 ServiceRegistry 调用（宿主注册的服务）
+  service: dsl.detailSection
+  params: { id: 42 }             # 值可含表达式，按首次解析时的作用域求值一次
+# source:
+#   type: http                   # 经 HttpAdapter 请求
+#   request: { method: GET, url: /api/dsl/section, params: {...}, headers: {...} }
+placeholder:                     # 可选，加载中的占位子树（缺省渲染空）
+  type: Alert
+  props: { message: 加载中…, variant: info }
+```
+
+**四个支持位置**：
+
+```yaml
+# 1. 根级 children（整页/整片远端下发；数组元素也可混排引用）
+children:
+  source: { type: http, request: { url: /api/dsl/home } }
+
+# 2. 组件节点的 children（局部子树远端加载；数组元素也可混排引用）
+- type: Card
+  children:
+    source: { type: service, service: dsl.items }
+
+# 3. 命名组件的值（引用处首次渲染时惰性加载）
+components:
+  detailPanel:
+    source: { type: http, request: { url: /api/dsl/detail } }
+body:
+  type: Page
+  children:
+    - component: detailPanel
+
+# 4. PactorPage 的 page prop（嵌入模式整页远端下发，TS 侧）：
+#    <PactorPage page={{ source: { type: 'service', service: 'dsl.page' } }} />
+```
+
+**混排形态**：children 数组的元素可以是内联节点或引用，任意混排——不需要为一次性的远端内容绕道 `components` 起名：
+
+```yaml
+children:
+  - type: Alert                          # 内联节点
+    props: { message: 说明, variant: info }
+  - source: { type: service, service: dsl.sectionA }   # 引用元素
+  - type: Card                           # 内联节点
+    children: [...]
+  - source: { type: http, request: { url: /api/dsl/b } }  # 引用元素
+```
+
+各引用元素独立解析（独立 placeholder / 失败降级 / 缓存），渲染顺序与声明顺序一致；单个引用失败不影响其他元素。
+
+**语义要点**：
+
+- 加载通道与 dataSources 相同（ServiceRegistry / HttpAdapter）；返回内容先经 Schema 校验，**非法内容告警并渲染空，绝不击穿渲染层**
+- **一次性加载**：`params` 里的表达式按首次解析时的作用域求值一次，state 变化**不会**自动重拉——需要联动刷新的数据用 [dataSources](#datasources数据源) + `reload`，引用用于"结构下发"
+- **缓存**：同一引用（source 原文相同）在页面运行时内只请求一次，多处渲染共享结果
+- 渲染位置语义：children 位置期望远端返回 `DslNode[]`；命名组件位置期望返回单个 `DslNode`；`PactorPage page` 期望返回完整 `PageDsl`（加载失败走嵌入页错误态，可重试）
+- 与 dataSources 的分工：dataSources 加载**数据**（`data.x` 绑定展示），DslSourceRef 加载**结构**（UI 子树本身）
 
 ## lifecycle（生命周期）
 
@@ -507,7 +572,7 @@ lifecycle:
 | `component` | string | 引用节点：页面级命名组件（顶层 `components`）的 key，渲染该子树；与 `type` 二选一 |
 | `id` | string | 节点标识（React key 等用途，一般省略） |
 | `props` | object | 组件属性，值可含 `${...}` 表达式 |
-| `children` | DslNode[] | 子节点数组 |
+| `children` | DslNode[] \| DslSourceRef | 子节点数组，或[动态引用](#动态-dsl-引用dlsourceref)（远端加载子树） |
 | `events` | EventMap | 事件名 → 动作或动作数组（数组按声明顺序**串行执行，失败不中断**——需要失败即停用 `sequence` 包裹） |
 | `permission` | PermissionConfig | 组件级权限，见[权限](#权限permissionconfig) |
 | `when` | 表达式 | 条件渲染：表达式为假时不渲染该节点（子树一并跳过） |

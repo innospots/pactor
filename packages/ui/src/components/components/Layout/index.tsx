@@ -1,4 +1,5 @@
-import type { DslNode } from '@pactor-app/core';
+import type { DslChildren, DslNode } from '@pactor-app/core';
+import { isDslSourceRef } from '@pactor-app/core';
 import { useRenderer, type RuntimeContext } from '@pactor-app/runtime';
 import type { CSSProperties } from 'react';
 
@@ -14,20 +15,24 @@ export interface LayoutProps {
   className?: string;
   /** 通用：根节点内联样式 */
   style?: CSSProperties;
-  /** 内部：withScope 注册时由 Renderer 传入的原始 DSL 子树 */
-  dslChildren?: DslNode[];
+  /** 内部：withScope 注册时由 Renderer 传入的原始 DSL 子树（可为动态引用） */
+  dslChildren?: DslChildren;
 }
 
 /**
  * Layout 布局容器（shadcn kit，语义对齐 antd Layout）：flex 容器。
  * 方向推导基于直接子节点的 DSL 类型；`component` 引用解析到子树根类型
- * （页面级命名组件里放 Sider 同样计入推导）。
+ * （页面级命名组件里放 Sider 同样计入推导）。动态引用（DslSourceRef）
+ * 形态无法静态推导方向，按 vertical 处理（可用 direction 显式指定）。
  */
 export function Layout({ direction, className, style, dslChildren }: LayoutProps) {
   const { renderChildren, context } = useRenderer();
-  const hasSider = (dslChildren ?? []).some(
-    (child) => resolveRootType(child, context) === 'Sider',
-  );
+  // 引用元素（DslSourceRef）无法静态判定类型，跳过不参与方向推导
+  const hasSider = Array.isArray(dslChildren)
+    ? dslChildren.some(
+        (child) => !isDslSourceRef(child) && resolveRootType(child, context) === 'Sider',
+      )
+    : false;
   const dir = direction ?? (hasSider ? 'horizontal' : 'vertical');
   return (
     <div
@@ -51,7 +56,8 @@ function resolveRootType(
   context: RuntimeContext,
 ): string | undefined {
   if (node.component !== undefined) {
-    return context.pageComponents[node.component]?.type;
+    const def = context.pageComponents[node.component];
+    return def !== undefined && 'type' in def ? def.type : undefined;
   }
   return node.type;
 }

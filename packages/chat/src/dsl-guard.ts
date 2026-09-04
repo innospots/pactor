@@ -1,4 +1,5 @@
 import type { DslNode } from '@pactor-app/core';
+import { isDslSourceRef } from '@pactor-app/core';
 import type { Registry } from '@pactor-app/core';
 
 /**
@@ -33,11 +34,26 @@ export function guardChatDsl(
       props: { deniedType: type },
     };
   }
-  if (!node.children || node.children.length === 0) {
+  if (node.children === undefined) {
+    return node;
+  }
+  // 动态引用（DslSourceRef）children：远端内容无法静态过白名单，一律拒绝
+  if (!Array.isArray(node.children)) {
+    return {
+      type: CHAT_DENIED_TYPE,
+      props: { deniedType: `${type}(remote)` },
+    };
+  }
+  if (node.children.length === 0) {
     return node;
   }
   return {
     ...node,
-    children: node.children.map((child) => guardChatDsl(child, registry)),
+    // 数组中混排的引用元素同样无法静态过白名单：替换为受控占位
+    children: node.children.map((child) =>
+      isDslSourceRef(child)
+        ? { type: CHAT_DENIED_TYPE, props: { deniedType: '(remote)' } }
+        : guardChatDsl(child, registry),
+    ),
   };
 }

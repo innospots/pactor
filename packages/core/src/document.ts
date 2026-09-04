@@ -1,4 +1,4 @@
-import type { ActionConfig, DslNode, PermissionConfig } from './node.js';
+import type { ActionConfig, DslChildren, DslChildrenItem, DslNode, DslSourceRef, PermissionConfig } from './node.js';
 
 /**
  * DSL 文档结构（设计文档第 9、10、37 节）。
@@ -98,10 +98,11 @@ export interface PageDsl {
   actions?: Record<string, ActionConfig | ActionConfig[]>;
   /**
    * 页面级命名组件定义（设计文档第 50 节 Fragment 的页面局部形态）：
-   * 组件名 → DslNode 子树，body 中以 `{ type: 'Fragment', props: { name } }`
-   * 引用复用，防止 DSL 嵌套过深；以引用处作用域渲染
+   * 组件名 → DslNode 子树（或 DslSourceRef 动态引用，引用处渲染时惰性解析），
+   * body 中以 `{ component: '名称' }` 引用节点复用，防止 DSL 嵌套过深；
+   * 以引用处作用域渲染
    */
-  components?: Record<string, DslNode>;
+  components?: Record<string, DslNode | DslSourceRef>;
   lifecycle?: LifecycleConfig;
   /**
    * UI 树根（单个 DslNode）。
@@ -111,19 +112,28 @@ export interface PageDsl {
    * 两者均缺失时按空树处理。读取入口见 `resolveRootNodes`
    */
   body?: DslNode;
-  /** UI 树根（节点数组形态），`body` 缺失时生效 */
-  children?: DslNode[];
+  /**
+   * UI 树根（`body` 缺失时生效）：数组形态（元素可为 DslNode 或
+   * DslSourceRef 混排）或整体动态引用
+   */
+  children?: DslChildren;
 }
 
 /**
- * 读取 Page DSL 的 UI 树根节点列表（官方入口）：
- * `body` 存在 → `[body]`；否则根级 `children ?? []`
+ * 读取 Page DSL 的 UI 树根元素列表（官方入口）：
+ * `body` 存在 → `[body]`；根级 `children` 为数组 → 原样返回
+ * （元素可为 DslNode 或 DslSourceRef）；根级 `children` 为整体
+ * DslSourceRef 或缺失 → 空数组（整体引用形态由渲染入口经
+ * DslSourceBoundary 异步解析）
  */
-export function resolveRootNodes(pageDsl: PageDsl): DslNode[] {
+export function resolveRootNodes(pageDsl: PageDsl): DslChildrenItem[] {
   if (pageDsl.body) {
     return [pageDsl.body];
   }
-  return pageDsl.children ?? [];
+  if (Array.isArray(pageDsl.children)) {
+    return pageDsl.children;
+  }
+  return [];
 }
 
 /** Fragment DSL（第 50 节）：可复用的 UI 片段 */

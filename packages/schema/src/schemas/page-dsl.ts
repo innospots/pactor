@@ -1,4 +1,9 @@
-import { ACTION_CONFIG_SCHEMA_ID, DSL_NODE_SCHEMA_ID } from './dsl-node.js';
+import {
+  ACTION_CONFIG_SCHEMA_ID,
+  DSL_NODE_SCHEMA_ID,
+  DSL_SOURCE_REF_SCHEMA_ID,
+  dslChildrenSchema,
+} from './dsl-node.js';
 
 /**
  * Page DSL 根结构 JSON Schema（设计文档第 10、37 节）。
@@ -119,10 +124,12 @@ export const pageDslSchema = {
       type: 'object',
       additionalProperties: actionOrArraySchema,
     },
-    /** 页面级命名组件定义（Fragment 子树复用） */
+    /** 页面级命名组件定义（子树复用；值可为 DslSourceRef 远端惰性加载） */
     components: {
       type: 'object',
-      additionalProperties: { $ref: DSL_NODE_SCHEMA_ID },
+      additionalProperties: {
+        anyOf: [{ $ref: DSL_NODE_SCHEMA_ID }, { $ref: DSL_SOURCE_REF_SCHEMA_ID }],
+      },
     },
     lifecycle: {
       type: 'object',
@@ -138,13 +145,10 @@ export const pageDslSchema = {
     },
     body: { $ref: DSL_NODE_SCHEMA_ID },
     /**
-     * UI 树根（节点数组形态）：`body` 缺失时作为替代，
+     * UI 树根（节点数组形态，或 DslSourceRef 动态引用）：`body` 缺失时作为替代，
      * 用于 DSL 描述页面局部（无需 Page 等包装节点）
      */
-    children: {
-      type: 'array',
-      items: { $ref: DSL_NODE_SCHEMA_ID },
-    },
+    children: dslChildrenSchema,
   },
   additionalProperties: false,
 } as const;

@@ -2,3 +2,7 @@ packages:
   - 'packages/*'
   - 'examples/*'
   - 'docs'
+
+ignoredBuiltDependencies:
+  - sharp
+  - unrs-resolver

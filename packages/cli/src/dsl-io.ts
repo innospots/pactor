@@ -2,6 +2,7 @@ import { existsSync, readdirSync, readFileSync, statSync } from 'node:fs';
 import { join } from 'node:path';
 
 import type { DslNode, PageDsl } from '@pactor-app/core';
+import { isDslSourceRef } from '@pactor-app/core';
 import { validatePageDsl, type DslValidationError } from '@pactor-app/schema';
 import { parseDocument } from 'yaml';
 
@@ -217,7 +218,7 @@ export function extractTemplateExpressions(value: string): TemplateExpressions {
   return { sources, unterminated };
 }
 
-/** 递归遍历 DSL 组件树（body 根 + children） */
+/** 递归遍历 DSL 组件树（body 根 + children）；children 为 DslSourceRef 或数组中含引用元素时跳过（无内联子树） */
 export function walkDslTree(
   root: DslNode | undefined,
   visit: (node: DslNode, path: string) => void,
@@ -227,6 +228,8 @@ export function walkDslTree(
   visit(root, basePath);
   if (Array.isArray(root.children)) {
     root.children.forEach((child, index) => {
+      // 数组中混排的引用元素无内联子树可遍历
+      if (isDslSourceRef(child)) return;
       walkDslTree(child, visit, `${basePath}/children/${index}`);
     });
   }
@@ -246,6 +249,8 @@ export function walkPageTrees(
   }
   if (Array.isArray(data.children)) {
     data.children.forEach((child, index) => {
+      // 根级数组中混排的引用元素无内联子树可遍历
+      if (isDslSourceRef(child)) return;
       walkDslTree(child, visit, `/children/${index}`);
     });
   }

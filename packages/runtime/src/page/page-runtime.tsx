@@ -1,6 +1,7 @@
-import type { LifecycleEventName, PageDsl } from '@pactor-app/core';
-import { resolveRootNodes } from '@pactor-app/core';
+import type { DslChildrenItem, DslNode, LifecycleEventName, PageDsl } from '@pactor-app/core';
+import { isDslSourceRef, resolveRootNodes } from '@pactor-app/core';
 import {
+  validateDslNodes,
   validatePageDsl,
   type DslValidationError,
 } from '@pactor-app/schema';
@@ -13,6 +14,8 @@ import {
   type CreateRuntimeContextOptions,
   type RuntimeContext,
 } from '../context/context.js';
+import { DslSourceBoundary } from '../renderer/dsl-source-boundary.js';
+import { dslSourceKey } from '../datasource/dsl-source-resolver.js';
 import { DslRenderer } from '../renderer/renderer.js';
 
 /** Page DSL 校验失败错误：内含结构化错误列表 */
@@ -127,17 +130,7 @@ export function createPageRuntime(
       return destroyed;
     },
     render(): ReactNode {
-      const roots = resolveRootNodes(pageDsl);
-      if (roots.length === 0) {
-        return null;
-      }
-      return (
-        <>
-          {roots.map((node, index) => (
-            <DslRenderer key={node.id ?? index} context={context} node={node} engine={engine} />
-          ))}
-        </>
-      );
+      return renderRoots(pageDsl, context, engine);
     },
     ready: () => triggerWhenAlive('onReady'),
     show: () => triggerWhenAlive('onShow'),
@@ -178,23 +171,93 @@ export function PageRuntimeView({
   runtime: PageRuntime;
   children?: ReactNode;
 }) {
-  const roots = resolveRootNodes(runtime.pageDsl);
+  return renderRoots(runtime.pageDsl, runtime.context, runtime.engine, children);
+}
+
+/**
+ * 渲染 UI 树根（body / 根级 children 数组 / 根级动态引用）。
+ * 附加子树（OverlayHost 等宿主扩展）挂在最后一个根节点的 Renderer 上下文内。
+ */
+function renderRoots(
+  pageDsl: PageDsl,
+  context: RuntimeContext,
+  engine: ActionEngine,
+  children?: ReactNode,
+): ReactNode {
+  // body 缺失且根级 children 为动态引用：经边界组件异步解析远端子树
+  if (!pageDsl.body && isDslSourceRef(pageDsl.children)) {
+    const ref = pageDsl.children;
+    return (
+      <DslSourceBoundary
+        context={context}
+        sourceRef={ref}
+        placeholder={
+          ref.placeholder ? (
+            <DslRenderer context={context} node={ref.placeholder} engine={engine} />
+          ) : null
+        }
+      >
+        {(content) => renderResolvedRoots(content, context, engine, children)}
+      </DslSourceBoundary>
+    );
+  }
+  const roots = resolveRootNodes(pageDsl);
   if (roots.length === 0) {
     return <>{children ?? null}</>;
   }
+  return renderRootItems(roots, context, engine, children);
+}
+
+function renderResolvedRoots(
+  content: unknown,
+  context: RuntimeContext,
+  engine: ActionEngine,
+  children?: ReactNode,
+): ReactNode {
+  const errors = validateDslNodes(content);
+  if (errors.length > 0) {
+    console.warn(
+      '[@pactor-app/runtime] 根级 children 动态引用返回内容未通过校验',
+      errors,
+    );
+    return <>{children ?? null}</>;
+  }
+  return renderRootItems(content as DslNode[], context, engine, children);
+}
+
+function renderRootItems(
+  items: DslChildrenItem[],
+  context: RuntimeContext,
+  engine: ActionEngine,
+  children?: ReactNode,
+): ReactNode {
   return (
     <>
-      {roots.map((node, index) => (
-        <DslRenderer
-          key={node.id ?? index}
-          context={runtime.context}
-          node={node}
-          engine={runtime.engine}
-        >
-          {/* 附加子树挂在最后一个根节点的 Renderer 上下文内，行为与单根一致 */}
-          {index === roots.length - 1 ? children : null}
-        </DslRenderer>
-      ))}
+      {items.map((item, index) =>
+        isDslSourceRef(item) ? (
+          <DslSourceBoundary
+            key={dslSourceKey(item)}
+            context={context}
+            sourceRef={item}
+            placeholder={
+              item.placeholder ? (
+                <DslRenderer context={context} node={item.placeholder} engine={engine} />
+              ) : null
+            }
+          >
+            {(content) => renderResolvedRoots(content, context, engine, children)}
+          </DslSourceBoundary>
+        ) : (
+          <DslRenderer
+            key={item.id ?? index}
+            context={context}
+            node={item}
+            engine={engine}
+          >
+            {index === items.length - 1 ? children : null}
+          </DslRenderer>
+        ),
+      )}
     </>
   );
 }

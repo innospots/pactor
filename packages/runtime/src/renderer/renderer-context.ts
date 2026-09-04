@@ -1,4 +1,4 @@
-import type { DslNode } from '@pactor-app/core';
+import type { DslChildren } from '@pactor-app/core';
 import type { ExpressionScope } from '@pactor-app/expression';
 import {
   createContext,
@@ -20,11 +20,13 @@ export interface RendererContextValue {
   /** 内部：命名组件引用链（PageDsl.components 的循环引用守卫） */
   referenceStack?: string[];
   /**
-   * 渲染 DSL 子节点；`extraScope` 注入的局部作用域覆盖同名全局键，
-   * 且仅作用于该子树（Table 行、Repeat 项等场景，设计文档第 21 节）。
+   * 渲染 DSL 子节点（内联数组或 DslSourceRef 动态引用——引用形态经
+   * DslSourceBoundary 异步解析渲染）；`extraScope` 注入的局部作用域
+   * 覆盖同名全局键，且仅作用于该子树（Table 行、Repeat 项等场景，
+   * 设计文档第 21 节）。
    */
   renderChildren(
-    children: DslNode[] | undefined,
+    children: DslChildren | undefined,
     extraScope?: ExpressionScope,
   ): ReactNode;
 }
