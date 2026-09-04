@@ -43,11 +43,9 @@ export interface ActionConfig {
 /** 事件映射：事件名 → 单个或多个动作 */
 export type EventMap = Record<string, ActionConfig | ActionConfig[]>;
 
-/** UI DSL 树基础节点 */
-export interface DslNode {
+/** UI DSL 树基础节点共有字段 */
+export interface DslNodeBase {
   id?: string;
-  /** 组件类型，对应 Component Registry 中的注册名 */
-  type: string;
   props?: Record<string, unknown>;
   children?: DslNode[];
   events?: EventMap;
@@ -55,3 +53,21 @@ export interface DslNode {
   /** 条件渲染 */
   when?: ConditionConfig;
 }
+
+/** 组件节点：`type` 对应 Component Registry 中的注册名 */
+export interface DslComponentNode extends DslNodeBase {
+  type: string;
+  component?: undefined;
+}
+
+/**
+ * 引用节点：`component` 引用页面级命名组件（PageDsl.components）的 key，
+ * 渲染该子树；引用处的 props / events 覆盖定义处同名字段
+ */
+export interface DslReferenceNode extends DslNodeBase {
+  component: string;
+  type?: undefined;
+}
+
+/** UI DSL 树节点：组件节点（type）与引用节点（component）二选一 */
+export type DslNode = DslComponentNode | DslReferenceNode;

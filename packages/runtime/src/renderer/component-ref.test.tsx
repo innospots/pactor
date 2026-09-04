@@ -1,11 +1,14 @@
 // @vitest-environment jsdom
+/**
+ * 命名组件引用（PageDsl.components + DslNode.component）：
+ * 按 key 解析子树、继承引用处作用域、props 覆盖、循环守卫
+ */
 import type { DslNode } from '@pactor-app/core';
 import { cleanup, render, screen } from '@testing-library/react';
 import type { CSSProperties, ReactNode } from 'react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import { createRuntimeContext } from '../context/context.js';
-import { FragmentComponent } from './fragment.js';
 import { useRenderer } from './renderer-context.js';
 import { DslRenderer } from './renderer.js';
 
@@ -36,19 +39,18 @@ function setup(
   context.components.register('Item', Item);
   context.components.register('Box', Box);
   context.components.register('Rows', { component: Rows, withScope: true });
-  context.components.register('Fragment', FragmentComponent);
   render(<DslRenderer context={context} node={node} />);
   return context;
 }
 
-describe('Fragment 页面级命名组件引用', () => {
-  it('按 name 渲染页面级组件子树', () => {
+describe('命名组件引用（component 字段）', () => {
+  it('按 component key 渲染页面级命名子树', () => {
     setup(
       { pageHeader: { type: 'Item', props: { text: '页头' } } },
       {
         type: 'Box',
         children: [
-          { type: 'Fragment', props: { name: 'pageHeader' } },
+          { component: 'pageHeader' },
           { type: 'Item', props: { text: '正文' } },
         ],
       },
@@ -66,7 +68,7 @@ describe('Fragment 页面级命名组件引用', () => {
       {
         type: 'Rows',
         // withScope 组件经 dslChildren prop 接收原始子树（renderer 注入）
-        children: [{ type: 'Fragment', props: { name: 'rowTitle' } }],
+        children: [{ component: 'rowTitle' }],
       },
     );
 
@@ -74,22 +76,10 @@ describe('Fragment 页面级命名组件引用', () => {
     expect(texts).toEqual(['行1', '行2']);
   });
 
-  it('name 不存在时渲染 UnsupportedComponent 占位，不抛错', () => {
-    setup({}, { type: 'Fragment', props: { name: 'ghost' } });
-
-    expect(screen.getByText(/Unsupported component: Fragment\(ghost\)/)).toBeDefined();
-  });
-
-  it('缺少 name 时渲染占位', () => {
-    setup({}, { type: 'Fragment' });
-
-    expect(screen.getByText(/Fragment\(missing name\)/)).toBeDefined();
-  });
-
-  it('name 之外的 props 透传到子树根节点（引用处覆盖定义处）', () => {
+  it('引用处 props 覆盖子树根节点同名字段', () => {
     setup(
       { panel: { type: 'Item', props: { text: '默认' } } },
-      { type: 'Fragment', props: { name: 'panel', text: '覆盖' } },
+      { component: 'panel', props: { text: '覆盖' } },
     );
 
     expect(screen.getByText('覆盖')).toBeDefined();
@@ -97,11 +87,6 @@ describe('Fragment 页面级命名组件引用', () => {
   });
 
   it('透传 style 等布局 prop 到子树根组件', () => {
-    const context = createRuntimeContext({
-      pageComponents: {
-        panel: { type: 'Box' },
-      },
-    });
     const Styled = ({
       style,
       children,
@@ -113,16 +98,15 @@ describe('Fragment 页面级命名组件引用', () => {
         {children}
       </div>
     );
-    context.components.register('Box', Styled);
-    context.components.register('Fragment', FragmentComponent);
+    const context = createRuntimeContext({
+      pageComponents: { panel: { type: 'Styled' } },
+    });
+    context.components.register('Styled', Styled);
 
     render(
       <DslRenderer
         context={context}
-        node={{
-          type: 'Fragment',
-          props: { name: 'panel', style: { flex: 1 } },
-        }}
+        node={{ component: 'panel', props: { style: { flex: 1 } } }}
       />,
     );
 
@@ -130,18 +114,24 @@ describe('Fragment 页面级命名组件引用', () => {
     expect(screen.getByTestId('panel').style.flexGrow).toBe('1');
   });
 
+  it('component 未定义时渲染 UnsupportedComponent 占位，不抛错', () => {
+    setup({}, { component: 'ghost' });
+
+    expect(screen.getByText(/component\(ghost\)/)).toBeDefined();
+  });
+
   it('间接循环引用（a → b → a）受控：不渲染且不抛错', () => {
     const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
     setup(
       {
-        a: { type: 'Fragment', props: { name: 'b' } },
-        b: { type: 'Fragment', props: { name: 'a' } },
+        a: { component: 'b' },
+        b: { component: 'a' },
       },
-      { type: 'Fragment', props: { name: 'a' } },
+      { component: 'a' },
     );
 
     expect(warn).toHaveBeenCalledWith(
-      expect.stringContaining('循环引用'),
+      expect.stringContaining('循环'),
     );
     warn.mockRestore();
   });

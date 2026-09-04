@@ -89,7 +89,8 @@ export function runInspect(args: ParsedArgs, io: CliIo): number {
   const permissions: string[] = [];
 
   walkDslTree(data.body as DslNode | undefined, (node, path) => {
-    componentCounts.set(node.type, (componentCounts.get(node.type) ?? 0) + 1);
+    const nodeKey = node.type ?? `→${node.component ?? '?'}`;
+    componentCounts.set(nodeKey, (componentCounts.get(nodeKey) ?? 0) + 1);
     for (const [event, config] of Object.entries(node.events ?? {})) {
       for (const action of actionList(config)) {
         actions.push(`  - ${path} events.${event} → ${action.action}`);

@@ -4,9 +4,11 @@ V1 基础组件目录与 antd 适配约定（`pactor-ui-antd` components 层）�
 
 ### Requirement: 组件注册入口
 
-模块 SHALL 提供 `registerBuiltinComponents(registry)` 与 `createBuiltinComponentRegistry()`，按 DSL 类型名注册全部 V1 组件：Page、Grid、Flex、Card、Button、Alert、Statistic、Tabs、Table、Form、Input、Select。
+模块 SHALL 提供 `registerBuiltinComponents(registry)` 与 `createBuiltinComponentRegistry()`，按 DSL 类型名注册全部 V1 组件：Page、Grid、Flex、Card、Button、Alert、Statistic、Tabs、Table、Form、Input、Select、Layout、Header、Sider、Content、Footer、Menu、Link。
 
-#### Scenario: 注册后全部类型可解析
+#
+
+### Scenario: 注册后全部类型可解析
 
 - **WHEN** 调用 `createBuiltinComponentRegistry()` 后查询上述 12 个类型名
 - **THEN** 每个 `has(type)` 均为 `true`
@@ -104,3 +106,12 @@ Input SHALL 支持框架级 `type` prop，取值为 `'text' | 'password'`，缺�
 
 - **WHEN** 任意内置组件声明 `props: { className: 'x', style: { flex: 1 } }`
 - **THEN** 渲染结果的根节点 class 列表包含 `x` 且内联样式包含 `flex: 1`
+
+### Requirement: Link 组件
+
+内置组件目录 SHALL 新增 `Link`：`href`（可含表达式）/ `text` / `target` props，渲染原生 `<a>` 锚点；`_blank` 时 MUST 带 `rel="noreferrer"`；支持通用 props（`className` / `style`）。
+
+#### Scenario: 渲染原生锚点
+
+- **WHEN** DSL 声明 `{ type: 'Link', props: { text: '详情', href: '/items/1', target: '_blank' } }`
+- **THEN** 渲染 `<a href="/items/1" target="_blank" rel="noreferrer">详情</a>`

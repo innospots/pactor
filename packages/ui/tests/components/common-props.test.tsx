@@ -118,4 +118,19 @@ describe('通用 props 契约（className / style）', () => {
       expect((item as HTMLElement).style.flexGrow).toBe('1');
     }
   });
+
+  it('Layout / Header / Sider / Content / Footer / Menu', () => {
+    for (const [type, selector] of [
+      ['Layout', '[data-slot=layout]'],
+      ['Header', '[data-slot=layout-header]'],
+      ['Sider', '[data-slot=layout-sider]'],
+      ['Content', '[data-slot=layout-content]'],
+      ['Footer', '[data-slot=layout-footer]'],
+      ['Menu', '[data-slot=menu]'],
+      ['Link', '[data-slot=link]'],
+    ] as const) {
+      const { container } = renderDsl({ type, props: { ...COMMON_PROPS } });
+      expectCommonProps(container.querySelector(selector));
+    }
+  });
 });

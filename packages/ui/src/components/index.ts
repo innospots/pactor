@@ -27,6 +27,22 @@ export type { StatisticProps } from './components/Statistic/index.js';
 export { Tabs } from './components/Tabs/index.js';
 export type { TabItem, TabsProps } from './components/Tabs/index.js';
 
+// 布局组件（页面级自由组合，见 spec: layout-components）
+export { Layout } from './components/Layout/index.js';
+export type { LayoutProps } from './components/Layout/index.js';
+export { Header } from './components/Header/index.js';
+export type { HeaderProps } from './components/Header/index.js';
+export { Sider } from './components/Sider/index.js';
+export type { SiderProps } from './components/Sider/index.js';
+export { Content } from './components/Content/index.js';
+export type { ContentProps } from './components/Content/index.js';
+export { Footer } from './components/Footer/index.js';
+export type { FooterProps } from './components/Footer/index.js';
+export { Menu } from './components/Menu/index.js';
+export type { MenuItem, MenuProps } from './components/Menu/index.js';
+export { Link } from './components/Link/index.js';
+export type { LinkProps } from './components/Link/index.js';
+
 // 表单组件
 export { Form } from './components/Form/index.js';
 export type { FormProps } from './components/Form/index.js';

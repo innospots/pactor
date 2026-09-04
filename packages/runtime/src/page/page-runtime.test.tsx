@@ -351,8 +351,8 @@ describe('页面级命名动作（PageDsl.actions + call）', () => {
   });
 });
 
-describe('页面级命名组件（PageDsl.components + Fragment）', () => {
-  it('DSL 中的 components 挂入 context，Fragment 组件自动注册', async () => {
+describe('页面级命名组件（PageDsl.components）', () => {
+  it('DSL 中的 components 挂入 context.pageComponents', async () => {
     const runtime = createPageRuntime(
       minimalDsl({
         components: {
@@ -365,7 +365,6 @@ describe('页面级命名组件（PageDsl.components + Fragment）', () => {
     });
 
     expect(runtime.context.pageComponents['header']).toBeDefined();
-    expect(runtime.context.components.has('Fragment')).toBe(true);
 
     await runtime.destroy();
   });
