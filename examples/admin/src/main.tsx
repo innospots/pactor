@@ -28,6 +28,7 @@ import customerEditPage from "./pages/customer-edit.page.yaml";
 import customerListPage from "./pages/customer-list.page.yaml";
 import customerDetailPage from "./pages/customer-detail.page.yaml";
 import layoutDemoPage from "./pages/layout-demo.page.yaml";
+import extendedComponentsPage from "./pages/extended-components.page.yaml";
 import dashboardPage from "./pages/dashboard.page.yaml";
 import loginPage from "./pages/login.page.yaml";
 
@@ -50,6 +51,7 @@ const loader = new StaticDslLoader({
     "customer-list": customerListPage,
     "customer-detail": customerDetailPage,
     "layout-demo": layoutDemoPage,
+    "extended-components": extendedComponentsPage,
     "customer-edit": customerEditPage,
     "ai-workspace": aiWorkspacePage,
   },

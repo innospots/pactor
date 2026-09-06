@@ -91,6 +91,22 @@ export function createBootstrap(): Partial<BootstrapResource> &
         permission: 'customer:edit',
       },
       {
+        // 扩展组件演示页（shadcn 扩展组件四批集中演示）
+        id: 'components-demo',
+        type: 'group',
+        title: '组件演示',
+        children: [
+          {
+            id: 'extended-components',
+            type: 'page',
+            title: '扩展组件',
+            path: '/extended-components',
+            pageId: 'extended-components',
+            permission: 'customer:view',
+          },
+        ],
+      },
+      {
         // AI 工作区：Chat 一等组件页（产出物面板演示），无权限门控
         id: 'ai-workspace',
         type: 'page',
@@ -111,6 +127,6 @@ export function createBootstrap(): Partial<BootstrapResource> &
       },
     ],
     layout: { type: 'admin', tabs: true, fixedHeader: true, fixedSider: true, breadcrumb: true, collapsible: true, breakpoint: 'lg' },
-    pageVersions: { dashboard: 1, 'customer-list': 1, 'customer-detail': 1, 'layout-demo': 1, 'customer-edit': 1, 'ai-workspace': 1 },
+    pageVersions: { dashboard: 1, 'customer-list': 1, 'customer-detail': 1, 'layout-demo': 1, 'extended-components': 1, 'customer-edit': 1, 'ai-workspace': 1 },
   };
 }

@@ -180,6 +180,37 @@
   }
 }
 
+/* Toast 进退场：vendored toast 原语（Sonner 风格）经
+ * data-starting-style / data-ending-style 变体引用（右上角进，
+ * 上滑淡出）。Drawer 滑入由 vaul 内联 transform 过渡完成（无关键帧），
+ * Sheet 滑入用 tw-animate-css 的 slide-in-from-* 工具类。 */
+@theme inline {
+  --animate-toast-in: toast-in 200ms ease-out;
+  --animate-toast-out: toast-out 150ms ease-in;
+
+  @keyframes toast-in {
+    from {
+      opacity: 0;
+      transform: translateY(-8px) scale(0.98);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+    }
+  }
+
+  @keyframes toast-out {
+    from {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+    }
+    to {
+      opacity: 0;
+      transform: translateY(-8px) scale(0.98);
+    }
+  }
+}
+
 /* 官方同款自定义变体（shadcn/tailwind.css）：Base UI 组件以 data-open /
  * data-closed / data-active / data-disabled 属性表达状态 */
 @custom-variant data-open {

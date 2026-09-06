@@ -1,0 +1,213 @@
+---
+title: 展示组件
+description: 展示类 DSL 组件——Text / Typography / Badge / Avatar / Kbd / Skeleton / Spinner / Empty / Statistic / Progress / AspectRatio / Carousel / Item 的 props 契约与 DSL 示例
+---
+
+文本、排版、状态与媒体类展示组件：纯渲染、无表单语义，按声明的 props 与表达式求值结果呈现内容。
+
+### Text
+
+普通文本渲染，支持语义类型与修饰。
+
+| prop | 类型 | 说明 |
+| --- | --- | --- |
+| `text` | string | 文本内容（可含表达式）；也可用 children |
+| `type` | `default`（默认）\| `secondary` \| `success` \| `warning` \| `danger` | 语义类型（颜色） |
+| `strong` | boolean | 加粗 |
+| `delete` | boolean | 删除线 |
+| `underline` | boolean | 下划线 |
+| `italic` | boolean | 斜体 |
+
+```yaml
+- type: Text
+  props: { text: 共 ${state.count} 条记录, type: secondary }
+- type: Text
+  props: { text: 重要提示, type: danger, strong: true }
+```
+
+### Typography
+
+排版样式文本：按 `variant` 渲染对应语义标签与排版样式。
+
+| prop | 类型 | 缺省 | 说明 |
+| --- | --- | --- | --- |
+| `variant` | `h1` \| `h2` \| `h3` \| `h4` \| `p` \| `blockquote` \| `list` \| `inline-code` \| `lead` \| `muted` \| `small` | `p` | 排版变体 |
+| `text` | string | — | 文本内容（可含表达式） |
+
+```yaml
+- type: Typography
+  props: { variant: h2, text: 章节标题 }
+- type: Typography
+  props: { variant: muted, text: 辅助说明文字 }
+```
+
+### Badge
+
+徽标 / 状态标签。
+
+| prop | 类型 | 缺省 | 说明 |
+| --- | --- | --- | --- |
+| `text` | string | — | 徽标文本 |
+| `variant` | `default` \| `secondary` \| `destructive` \| `outline` | `default` | 变体 |
+
+```yaml
+- type: Badge
+  props: { text: 草稿, variant: secondary }
+```
+
+### Avatar
+
+头像：图片加载失败或未提供 `src` 时显示 `fallback` 占位（如首字母）。
+
+| prop | 类型 | 缺省 | 说明 |
+| --- | --- | --- | --- |
+| `src` | string | — | 图片地址 |
+| `alt` | string | — | 图片替代文本 |
+| `fallback` | string | — | 加载失败或缺省时的占位文本（如首字母） |
+
+```yaml
+- type: Avatar
+  props: { src: ${data.user.avatar}, fallback: 张 }
+```
+
+### Kbd
+
+键盘按键样式文本。
+
+| prop | 类型 | 缺省 | 说明 |
+| --- | --- | --- | --- |
+| `text` | string | — | 按键文本（如 `⌘K`） |
+
+```yaml
+- type: Kbd
+  props: { text: ⌘K }
+```
+
+### Skeleton
+
+加载占位骨架屏。
+
+| prop | 类型 | 缺省 | 说明 |
+| --- | --- | --- | --- |
+| `shape` | `line` \| `circle` \| `rect` | `line` | 形状（文本行 / 圆形 / 矩形）；各形状有内置默认尺寸 |
+| `width` | number \| string | — | 宽度（px 数字或 CSS 长度） |
+| `height` | number \| string | — | 高度（px 数字或 CSS 长度） |
+
+```yaml
+- type: Skeleton
+  props: { shape: rect, height: 120 }
+```
+
+### Spinner
+
+加载指示器（纯 CSS 旋转）。
+
+| prop | 类型 | 缺省 | 说明 |
+| --- | --- | --- | --- |
+| `size` | `sm` \| `default` \| `lg` | `default` | 尺寸 |
+
+```yaml
+- type: Spinner
+  props: { size: lg }
+```
+
+### Empty
+
+空状态：标题 + 说明，children 为可选操作区（DSL 子树）。
+
+| prop | 类型 | 缺省 | 说明 |
+| --- | --- | --- | --- |
+| `title` | string | — | 空状态标题 |
+| `description` | string | — | 辅助说明文案 |
+| children | DslNode[] | — | 操作区（DSL 子树，经 Renderer children 机制渲染） |
+
+```yaml
+- type: Empty
+  props: { title: 暂无数据, description: 创建第一条记录开始使用 }
+  children:
+    - type: Button
+      props: { text: 新建, variant: primary }
+```
+
+### Statistic
+
+| prop | 类型 | 说明 |
+| --- | --- | --- |
+| `title` | string | 指标标题 |
+| `value` | number \| string | 数值（通常为表达式结果） |
+| `precision` | number | 小数精度 |
+| `suffix` | string | 后缀（如单位） |
+
+### Progress
+
+进度条。
+
+| prop | 类型 | 缺省 | 说明 |
+| --- | --- | --- | --- |
+| `value` | number \| null | — | 百分比（0-100，可为表达式解析后的数字，越界自动收敛）；`undefined` / `null` 为不确定态 |
+
+```yaml
+- type: Progress
+  props: { value: ${data.progress} }
+```
+
+### AspectRatio
+
+固定宽高比容器，children 内容按比例约束。
+
+| prop | 类型 | 缺省 | 说明 |
+| --- | --- | --- | --- |
+| `ratio` | number \| string | `1` | 宽高比（如 `16/9`，数字或 `'16/9'` 字符串） |
+| children | DslNode[] | — | 内容（DSL 子树，按比例约束渲染） |
+
+```yaml
+- type: AspectRatio
+  props: { ratio: 16/9 }
+  children:
+    - type: Text
+      props: { text: 16:9 区域 }
+```
+
+### Carousel
+
+轮播（embla-carousel）：items 支持图片对象或 DSL 子树；`autoplay` 以定时器驱动 scrollNext（`loop` 时回绕，否则停在末页）。
+
+| prop | 类型 | 缺省 | 说明 |
+| --- | --- | --- | --- |
+| `items` | `Array<{ src: string, alt?: string } \| DslNode>` | `[]` | 轮播项：图片对象数组或 DSL 子树数组（经 renderChildren 渲染） |
+| `loop` | boolean | `false` | 循环滚动 |
+| `autoplay` | boolean \| number | — | 自动播放：`true` 用默认间隔（3000ms），数字为间隔毫秒数 |
+
+```yaml
+- type: Carousel
+  props:
+    loop: true
+    autoplay: 3000
+    items:
+      - { src: /banners/a.png, alt: 活动 A }
+      - { src: /banners/b.png, alt: 活动 B }
+```
+
+### Item
+
+三段式列表项：media / title+description / actions。
+
+| prop | 类型 | 缺省 | 说明 |
+| --- | --- | --- | --- |
+| `title` | string | — | 标题 |
+| `description` | string | — | 描述文本 |
+| `media` | DslNode \| DslNode[] | — | 媒体区（DSL 子树，经 renderChildren 渲染） |
+| `actions` | DslNode[] | — | 操作区（DSL 子树，经 renderChildren 渲染） |
+
+```yaml
+- type: Item
+  props:
+    title: 季度报告.pdf
+    description: 2.4 MB · 昨天更新
+    media:
+      type: Avatar
+      props: { fallback: 文 }
+    actions:
+      - type: Button
+        props: { text: 下载, variant: link }
+```

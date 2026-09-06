@@ -1,3 +1,4 @@
+import { useI18n } from '@pactor-app/runtime';
 import { useEffect, useMemo, useState, type ReactNode } from 'react';
 import { createPortal } from 'react-dom';
 
@@ -67,6 +68,7 @@ export function ShadcnInteractionProvider({
 }: InteractionProviderProps) {
   const [confirmState, setConfirmState] = useState<ConfirmState | null>(null);
   const [toasts, setToasts] = useState<ToastItem[]>([]);
+  const { t } = useI18n();
 
   // UiModal / UiMessage 自绘实现：引用稳定（setState 函数引用不变），
   // 仅在卸载时随 cleanup 从 bridge 清空
@@ -140,10 +142,10 @@ export function ShadcnInteractionProvider({
                 </DialogHeader>
                 <DialogFooter>
                   <Button type="button" variant="outline" onClick={handleCancel}>
-                    取消
+                    {t('pactor.alertDialog.cancel')}
                   </Button>
                   <Button type="button" onClick={handleOk}>
-                    确定
+                    {t('pactor.alertDialog.confirm')}
                   </Button>
                 </DialogFooter>
               </DialogContent>

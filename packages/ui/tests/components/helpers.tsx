@@ -11,7 +11,7 @@ import {
   type RuntimeContext,
 } from '@pactor-app/runtime';
 import { cleanup, render, type RenderResult } from '@testing-library/react';
-import { afterEach } from 'vitest';
+import { afterEach, expect, vi } from 'vitest';
 
 import { createShadcnComponentRegistry } from '../../src/components/index.js';
 
@@ -42,4 +42,29 @@ export function renderDslWith(
   options: CreateRuntimeContextOptions = {},
 ): RenderDslResult {
   return renderDsl(node, { ...options, components: registry });
+}
+
+/** 通用 props 契约探针值（className / style） */
+export const COMMON_PROPS_PROBE = {
+  className: 'biz-probe',
+  style: { flex: 1, opacity: 0.5 },
+} as const;
+
+/** 断言根节点带通用 props 探针（class 合并 + 内联样式） */
+export function expectCommonProps(root: Element | null) {
+  expect(root, '组件应渲染出根节点').not.toBeNull();
+  expect(root!.classList.contains(COMMON_PROPS_PROBE.className)).toBe(true);
+  expect((root as HTMLElement).style.flexGrow).toBe('1');
+  expect((root as HTMLElement).style.opacity).toBe('0.5');
+}
+
+/** 等待 setState 动作把 ${event} 写入指定 key 后断言其值（事件值规范化契约） */
+export async function expectEventState(
+  context: RuntimeContext,
+  key: string,
+  expected: unknown,
+) {
+  await vi.waitFor(() => {
+    expect(context.state.get(key)).toEqual(expected);
+  });
 }
