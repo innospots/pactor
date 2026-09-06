@@ -34,9 +34,9 @@ flex 容器；直接子节点含 `Sider` 时横向、否则纵向（`component` 
 | `logo` | string | — | 品牌区 logo 图片地址（可含表达式），与 `title` 可二选一或并存（并存时 logo 在前） |
 | `title` | string | — | 品牌区标题文本 |
 | `brandPosition` | `'left'` \| `'right'` | `'left'` | 品牌区位置 |
-| `dropdown` | `{ label, items: Array<{ label, value, disabled? }>, position?: 'left' \| 'right' }` | — | 通用下拉；`position` 缺省 `'left'` |
-| `menu` | `Array<{ key, label, icon?, children? }>` | — | 横向菜单（可含表达式），语义复用 horizontal Menu（`children` 为弹出式子菜单，可嵌套）；`icon` 为预留字段（当前版本不渲染，同 Menu/Command/Sidebar 约定） |
-| `user` | `{ name, avatar?, items?: Array<{ label, value }> }` | — | 用户区（右侧）；`avatar` 缺省时以用户名首字符占位；`items` 缺省或为空时纯展示（无下拉） |
+| `dropdown` | `{ label, items: Array<{ label, value, disabled?, icon? }>, position?: 'left' \| 'right' }` | — | 通用下拉；`position` 缺省 `'left'`；`icon` 为图标名（Icon 白名单），渲染于文字前 |
+| `menu` | `Array<{ key, label, icon?, children? }>` | — | 横向菜单（可含表达式），语义复用 horizontal Menu（`children` 为弹出式子菜单，可嵌套）；`icon` 为图标名（Icon 白名单），渲染于文字前（叶子项与子菜单触发器/子项均生效） |
+| `user` | `{ name, avatar?, items?: Array<{ label, value, icon? }> }` | — | 用户区（右侧）；`avatar` 缺省时以用户名首字符占位；`items` 缺省或为空时纯展示（无下拉）；`icon` 为图标名（Icon 白名单），渲染于文字前 |
 | `locales` | `Array<{ label, value }>` | — | 国际化切换（右侧下拉）；触发器显示当前 locale 对应的 label（未命中显示 value 本身） |
 | children | DslNode[] | — | 中部弹性区内容 |
 
@@ -165,7 +165,7 @@ flex 容器；直接子节点含 `Sider` 时横向、否则纵向（`component` 
 | prop | 类型 | 缺省 | 说明 |
 | --- | --- | --- | --- |
 | `brand` | `{ title: string, logo?: string }` | — | 品牌区（标题 + 可选 logo 图片地址） |
-| `items` | `Array<{ label: string, href?: string, icon?: string, children?: [...] }>` | `[]` | 导航项（可含嵌套 `children`，可含表达式）；`icon` 为预留字段（当前版本不渲染，同 Menu 约定） |
+| `items` | `Array<{ label: string, href?: string, icon?: string, children?: [...] }>` | `[]` | 导航项（可含嵌套 `children`，可含表达式）；`icon` 为图标名（Icon 白名单），渲染于文字前 |
 | `collapsible` | boolean | `false` | 渲染底部折叠触发器（折叠态内部维护，经 `onCollapse` 传出） |
 | children | DslNode[] | — | 主内容区 |
 | 事件 `onCollapse` | — | — | 折叠触发器点击时触发，`${event}` 为 boolean |

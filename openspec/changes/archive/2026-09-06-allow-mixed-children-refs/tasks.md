@@ -35,4 +35,4 @@
 
 ## 7. 归档前置
 
-- [ ] 7.1 先归档 `add-dynamic-dsl-loading`（其 delta 合入主线后，本变更的 MODIFIED 目标才存在），再归档本变更
+- [x] 7.1 先归档 `add-dynamic-dsl-loading`（其 delta 合入主线后，本变更的 MODIFIED 目标才存在），再归档本变更

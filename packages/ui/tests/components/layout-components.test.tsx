@@ -7,7 +7,7 @@ import { cleanup, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { afterEach, describe, expect, it } from 'vitest';
 
-import { renderDsl } from './helpers.js';
+import { expectIconBeforeLabel, renderDsl } from './helpers.js';
 
 afterEach(cleanup);
 
@@ -184,5 +184,30 @@ describe('Menu', () => {
 
     await user.click(screen.getByText('客户列表'));
     expect(context.state.get('selected')).toBe('customer-list');
+  });
+
+  it('声明 icon 的菜单项在文字前渲染图标', () => {
+    const { container } = renderDsl({
+      type: 'Menu',
+      props: {
+        items: [
+          { key: 'home', label: '首页', icon: 'home' },
+          {
+            key: 'customer',
+            label: '客户管理',
+            children: [{ key: 'customer-list', label: '客户列表', icon: 'users' }],
+          },
+        ],
+      },
+    });
+
+    expectIconBeforeLabel(
+      container.querySelector('[data-key=home] [data-slot=menu-item]')!,
+      '首页',
+    );
+    expectIconBeforeLabel(
+      container.querySelector('[data-key=customer-list] [data-slot=menu-item]')!,
+      '客户列表',
+    );
   });
 });

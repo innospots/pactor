@@ -68,3 +68,23 @@ export async function expectEventState(
     expect(context.state.get(key)).toEqual(expected);
   });
 }
+
+/** 断言选项元素内渲染图标（[data-slot=icon]）且位于 label 文本节点之前（DOM 顺序） */
+export function expectIconBeforeLabel(item: Element, label: string) {
+  const icon = item.querySelector('[data-slot=icon]');
+  expect(icon, '选项内应渲染图标（[data-slot=icon]）').not.toBeNull();
+
+  const walker = document.createTreeWalker(item, NodeFilter.SHOW_TEXT);
+  let labelNode: Node | null = null;
+  while (walker.nextNode()) {
+    if (walker.currentNode.textContent === label) {
+      labelNode = walker.currentNode;
+      break;
+    }
+  }
+  expect(labelNode, `选项内应存在 label 文本节点 "${label}"`).not.toBeNull();
+  expect(
+    icon!.compareDocumentPosition(labelNode!) & Node.DOCUMENT_POSITION_FOLLOWING,
+    '图标应位于 label 文本之前',
+  ).toBeTruthy();
+}

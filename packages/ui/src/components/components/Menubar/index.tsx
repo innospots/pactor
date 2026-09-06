@@ -7,12 +7,15 @@ import {
   MenubarMenu,
   MenubarTrigger,
 } from '../../../ui/menubar.js';
+import { Icon } from '../Icon/index.js';
 
 /** 菜单项（叶子）；value 为 onSelect 传出值 */
 export interface MenubarLeafItem {
   label: string;
   value: string;
   disabled?: boolean;
+  /** 图标名（Icon 白名单，kebab/Pascal 均可），渲染于文字前 */
+  icon?: string;
 }
 
 /** 一级菜单（嵌套叶子项） */
@@ -49,6 +52,7 @@ export function Menubar({ menus = [], onSelect, className, style }: MenubarProps
                 disabled={item.disabled}
                 onClick={() => onSelect?.(item.value)}
               >
+                {item.icon ? <Icon name={item.icon} size="sm" /> : null}
                 {item.label}
               </MenubarItem>
             ))}

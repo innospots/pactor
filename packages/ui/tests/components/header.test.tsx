@@ -20,6 +20,7 @@ import {
   COMMON_PROPS_PROBE,
   expectCommonProps,
   expectEventState,
+  expectIconBeforeLabel,
   renderDsl,
 } from './helpers.js';
 
@@ -198,6 +199,31 @@ describe('Header 横向菜单', () => {
     fireEvent.click(screen.getByText('管理'));
     fireEvent.click(await screen.findByText('用户列表'));
     await expectEventState(context, 'selected', 'user-list');
+  });
+
+  it('菜单项声明 icon：叶子项与子菜单项均在文字前渲染图标', async () => {
+    const { container } = renderDsl({
+      type: 'Header',
+      props: {
+        menu: [
+          { key: 'home', label: '首页', icon: 'home' },
+          {
+            key: 'mgmt',
+            label: '管理',
+            children: [{ key: 'user-list', label: '用户列表', icon: 'users' }],
+          },
+        ],
+      },
+    });
+
+    expectIconBeforeLabel(
+      container.querySelector('[data-slot=header-menu-item][data-key=home]')!,
+      '首页',
+    );
+
+    fireEvent.click(screen.getByText('管理'));
+    const child = await screen.findByText('用户列表');
+    expectIconBeforeLabel(child, '用户列表');
   });
 });
 

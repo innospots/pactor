@@ -6,6 +6,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '../../../ui/dropdown-menu.js';
+import { Icon } from '../Icon/index.js';
 import { triggerWrapper } from '../trigger-render.js';
 
 /** 菜单项；danger 项以 destructive 语义呈现 */
@@ -14,6 +15,8 @@ export interface DropdownMenuItemData {
   value: string;
   disabled?: boolean;
   danger?: boolean;
+  /** 图标名（Icon 白名单，kebab/Pascal 均可），渲染于文字前 */
+  icon?: string;
 }
 
 export interface DropdownMenuProps {
@@ -57,6 +60,7 @@ export function DropdownMenu({
             disabled={item.disabled}
             onClick={() => onSelect?.(item.value)}
           >
+            {item.icon ? <Icon name={item.icon} size="sm" /> : null}
             {item.label}
           </DropdownMenuItem>
         ))}

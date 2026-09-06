@@ -4,7 +4,7 @@ DSL 核心协议模块（`@pactor-app/core`），提供与 React 无关的 DSL �
 
 ### Requirement: DslNode 核心节点类型
 
-模块 SHALL 定义 `DslNode` 接口作为 UI DSL 树的基础节点，包含可选 `id`、必填 `type`、可选 `props`、可选 `children`（递归 `DslNode[]`）、可选 `events`（映射到单个或多个 Action 配置）、可选 `permission`、可选 `when` 条件配置。
+模块 SHALL 定义 `DslNode` 接口作为 UI DSL 树的基础节点，包含可选 `id`、必填 `type`、可选 `props`、可选 `children`、可选 `events`（映射到单个或多个 Action 配置）、可选 `permission`、可选 `when` 条件配置。`children` 为 `DslChildren`：内联节点数组（**元素可为 DslNode 或 DslSourceRef，允许混排**）或整体 `DslSourceRef`（远端加载 DslNode[] 子树）。
 
 #### Scenario: 构造合法 UI 树
 
@@ -16,13 +16,23 @@ DSL 核心协议模块（`@pactor-app/core`），提供与 React 无关的 DSL �
 - **WHEN** 开发者构造缺少 `type` 字段的节点对象并赋值给 `DslNode`
 - **THEN** TypeScript 编译报错
 
+#### Scenario: children 为动态引用形态
+
+- **WHEN** 节点的 `children` 赋值为 `{ source: { type: 'http', request: { url: '/api/dsl/list' } } }`
+- **THEN** TypeScript 编译通过
+
+#### Scenario: children 数组混排内联节点与动态引用
+
+- **WHEN** 节点的 `children` 为 `[{ type: 'Alert' }, { source: { type: 'service', service: 'dsl.x' } }, { type: 'Button' }]`
+- **THEN** TypeScript 编译通过
+
 ### Requirement: DSL 文档结构类型
 
-模块 SHALL 定义 Page DSL、Fragment DSL、Application DSL 的根结构类型。Page DSL MUST 包含 `dsl` 版本字段、`page` 元信息（`id`、`title`、`name`、`description`、`type`），并支持可选的 `requires`、`meta`（页面扩展元数据，自由键值）、`state`、`dataSources`、`actions`（页面级命名动作定义）、`components`（页面级命名组件子树，供 `component` 引用节点复用）、`lifecycle`、`body`、`children` 字段。
+模块 SHALL 定义 Page DSL、Fragment DSL、Application DSL 的根结构类型。Page DSL MUST 包含 `dsl` 版本字段、`page` 元信息（`id`、`title`、`name`、`description`、`type`），并支持可选的 `requires`、`meta`（页面扩展元数据，自由键值）、`state`、`dataSources`、`actions`（页面级命名动作定义）、`components`（页面级命名组件子树，供 `component` 引用节点复用；值可为 `DslNode` 或 `DslSourceRef`——远端惰性加载子树）、`lifecycle`、`body`、`children` 字段。
 
-`body`（单个 DslNode）与根级 `children`（DslNode 数组）为 UI 树的两种等价声明形态：`body` 存在时 MUST 优先使用 `body`；`body` 缺失且 `children` 存在时 MUST 以根级 `children` 作为 UI 树（隐式片段根，无需任何包装节点）；两者均缺失时按空树处理。
+`body`（单个 DslNode）与根级 `children`（`DslChildren`）为 UI 树的声明形态：`body` 存在时 MUST 优先使用 `body`；`body` 缺失且 `children` 存在时 MUST 以根级 `children` 作为 UI 树（隐式片段根，无需任何包装节点）；两者均缺失时按空树处理。根级 `children` 数组的元素与节点级 `children` 一致，可为 DslNode 或 DslSourceRef 混排。
 
-模块 SHALL 导出 `resolveRootNodes(pageDsl)` 工具函数作为读取 UI 树根节点列表的官方入口：返回 `[body]`（body 存在时）或 `children ?? []`。
+模块 SHALL 导出 `resolveRootNodes(pageDsl)` 工具函数作为读取 UI 树根元素列表的官方入口：返回 `[body]`（body 存在时）；根级 `children` 为数组时返回该数组（元素可为引用）；根级 `children` 为整体 `DslSourceRef` 或缺失时返回空数组（整体引用形态由渲染入口解析）。
 
 #### Scenario: 完整 Page DSL 类型检查
 
@@ -39,14 +49,24 @@ DSL 核心协议模块（`@pactor-app/core`），提供与 React 无关的 DSL �
 - **WHEN** 开发者声明不含 `body`、仅含根级 `children: DslNode[]` 的 Page DSL 对象
 - **THEN** TypeScript 编译通过
 
+#### Scenario: 根级 children 与 components 值的动态引用形态
+
+- **WHEN** 根级 `children` 为 `DslSourceRef`，或 `components.banner` 为 `DslSourceRef`
+- **THEN** TypeScript 编译通过
+
+#### Scenario: 根级 children 数组混排引用元素
+
+- **WHEN** 根级 `children` 为 `[{ type: 'Alert' }, { source: { type: 'http', request: { url: '/api/dsl/x' } } }]`
+- **THEN** TypeScript 编译通过，且 `resolveRootNodes` 原样返回该数组
+
 #### Scenario: resolveRootNodes 优先级
 
 - **WHEN** 文档同时含 `body` 与根级 `children`
 - **THEN** `resolveRootNodes` 返回 `[body]`，根级 `children` 被忽略
 
-#### Scenario: resolveRootNodes 空树
+#### Scenario: resolveRootNodes 空树与整体动态形态
 
-- **WHEN** 文档既无 `body` 也无根级 `children`
+- **WHEN** 文档既无 `body` 也无根级 `children`，或根级 `children` 为整体 `DslSourceRef`
 - **THEN** `resolveRootNodes` 返回空数组
 
 ### Requirement: Action 与 Event 配置类型
@@ -113,3 +133,17 @@ DSL 核心协议模块（`@pactor-app/core`），提供与 React 无关的 DSL �
 
 - **WHEN** 检查 `packages/core/package.json`
 - **THEN** `dependencies` 为空（或不存在），且不包含 `react`
+
+### Requirement: DslSourceRef 动态引用类型
+
+模块 SHALL 定义 `DslSourceRef` 类型：`{ source, placeholder? }`，其中 `source` 为二选一形态——`{ type: 'service', service: string, params?: Record<string, unknown> }`（经 ServiceRegistry 调用）或 `{ type: 'http', request: { method?, url, params?, headers? } }`（经 HttpAdapter 请求）；`placeholder` 为可选 DslNode，解析期间渲染。`params` 中值可含表达式字符串（按首次解析时作用域求值一次）。
+
+#### Scenario: service 形态类型检查
+
+- **WHEN** 声明 `{ source: { type: 'service', service: 'dsl.detailSection' } }`
+- **THEN** TypeScript 编译通过
+
+#### Scenario: http 形态类型检查
+
+- **WHEN** 声明 `{ source: { type: 'http', request: { url: '/api/dsl/banner' } }, placeholder: { type: 'Alert' } }`
+- **THEN** TypeScript 编译通过

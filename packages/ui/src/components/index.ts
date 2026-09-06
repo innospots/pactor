@@ -104,6 +104,8 @@ export { Tooltip } from './components/Tooltip/index.js';
 export type { TooltipProps } from './components/Tooltip/index.js';
 export { HoverCard } from './components/HoverCard/index.js';
 export type { HoverCardProps } from './components/HoverCard/index.js';
+export { Icon, ICONS, normalizeIconName } from './components/Icon/index.js';
+export type { IconProps, IconSize } from './components/Icon/index.js';
 
 // 复合类扩展组件（第三批）
 export { Calendar } from './components/Calendar/index.js';

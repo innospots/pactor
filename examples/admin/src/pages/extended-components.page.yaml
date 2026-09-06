@@ -51,7 +51,7 @@ body:
     # 展示类
     - type: Card
       props:
-        title: 展示类：Badge / Progress / Tooltip
+        title: 展示类：Badge / Icon / Progress / Tooltip
       children:
         - type: Flex
           props: { gap: 12 }
@@ -62,6 +62,10 @@ body:
               props: { text: 已发布 }
             - type: Badge
               props: { text: 停用, variant: destructive }
+            - type: Icon
+              props: { name: check-circle, color: green }
+            - type: Icon
+              props: { name: bell, size: lg }
             - type: Tooltip
               props: { content: 转化率较上周提升 }
               children:
@@ -247,11 +251,12 @@ body:
             collapsible: true
             brand: { title: 演示后台 }
             items:
-              - { label: 概览, href: '/' }
+              - { label: 概览, href: '/', icon: home }
               - label: 客户管理
+                icon: users
                 children:
-                  - { label: 客户列表, href: '/customers' }
-                  - { label: 客户 360, href: '/customers/360' }
+                  - { label: 客户列表, href: '/customers', icon: list }
+                  - { label: 客户 360, href: '/customers/360', icon: user }
           children:
             - type: Content
               props:

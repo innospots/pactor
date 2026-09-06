@@ -43,6 +43,7 @@ export function createBootstrap(): Partial<BootstrapResource> &
         id: 'dashboard',
         type: 'page',
         title: '工作台',
+        icon: 'home',
         path: '/',
         pageId: 'dashboard',
       },
@@ -50,6 +51,7 @@ export function createBootstrap(): Partial<BootstrapResource> &
         id: 'customer',
         type: 'group',
         title: '客户管理',
+        icon: 'users',
         children: [
           {
             id: 'customer-list',
@@ -111,7 +113,7 @@ export function createBootstrap(): Partial<BootstrapResource> &
         id: 'ai-workspace',
         type: 'page',
         title: 'AI 工作区',
-        icon: 'chat',
+        icon: 'message-square',
         path: '/ai',
         pageId: 'ai-workspace',
       },
@@ -121,6 +123,7 @@ export function createBootstrap(): Partial<BootstrapResource> &
         id: 'settings',
         type: 'page',
         title: '系统设置',
+        icon: 'settings',
         path: '/settings',
         pageId: 'settings',
         permission: 'system:admin',

@@ -12,6 +12,7 @@ import {
   COMMON_PROPS_PROBE,
   expectCommonProps,
   expectEventState,
+  expectIconBeforeLabel,
   renderDsl,
 } from './helpers.js';
 
@@ -118,6 +119,21 @@ describe('Menubar', () => {
     });
     expectCommonProps(container.querySelector('[data-slot=menubar]'));
   });
+
+  it('叶子项声明 icon 时在文字前渲染图标', async () => {
+    renderDsl({
+      type: 'Menubar',
+      props: {
+        menus: [
+          { label: '文件', items: [{ label: '新建', value: 'create', icon: 'plus' }] },
+        ],
+      },
+    });
+
+    fireEvent.click(screen.getByText('文件'));
+    const item = await screen.findByText('新建');
+    expectIconBeforeLabel(item, '新建');
+  });
 });
 
 describe('NavigationMenu', () => {
@@ -153,6 +169,27 @@ describe('NavigationMenu', () => {
       props: { items: [], ...COMMON_PROPS },
     });
     expectCommonProps(container.querySelector('[data-slot=navigation-menu]'));
+  });
+
+  it('顶级项与子链接声明 icon 时在文字前渲染图标', async () => {
+    renderDsl({
+      type: 'NavigationMenu',
+      props: {
+        items: [
+          { label: '概览', href: '/', icon: 'home' },
+          {
+            label: '产品',
+            children: [{ label: '分析', href: '/analytics', icon: 'chart' }],
+          },
+        ],
+      },
+    });
+
+    expectIconBeforeLabel(screen.getByText('概览'), '概览');
+
+    fireEvent.click(screen.getByText('产品'));
+    const child = await screen.findByText('分析');
+    expectIconBeforeLabel(child.closest('a')!, '分析');
   });
 });
 
@@ -201,6 +238,18 @@ describe('DropdownMenu', () => {
     await screen.findByText('编辑');
     expectCommonProps(document.querySelector('[data-slot=dropdown-menu-content]'));
   });
+
+  it('菜单项声明 icon 时在文字前渲染图标', async () => {
+    renderDsl({
+      type: 'DropdownMenu',
+      props: { items: [{ label: '编辑', value: 'edit', icon: 'pencil' }] },
+      children: [{ type: 'Button', props: { text: '操作' } }],
+    });
+
+    fireEvent.click(document.querySelector('[data-slot=dropdown-menu-trigger-wrap]') as HTMLElement);
+    const item = await screen.findByText('编辑');
+    expectIconBeforeLabel(item, '编辑');
+  });
 });
 
 describe('ContextMenu', () => {
@@ -236,5 +285,17 @@ describe('ContextMenu', () => {
     fireEvent.contextMenu(container.querySelector('[data-slot=context-menu-trigger]')!);
     await screen.findByText('重命名');
     expectCommonProps(document.querySelector('[data-slot=context-menu-content]'));
+  });
+
+  it('菜单项声明 icon 时在文字前渲染图标', async () => {
+    const { container } = renderDsl({
+      type: 'ContextMenu',
+      props: { items: [{ label: '重命名', value: 'rename', icon: 'edit' }] },
+      children: [{ type: 'Text', props: { text: '文件.txt' } }],
+    });
+
+    fireEvent.contextMenu(container.querySelector('[data-slot=context-menu-trigger]')!);
+    const item = await screen.findByText('重命名');
+    expectIconBeforeLabel(item, '重命名');
   });
 });

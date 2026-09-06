@@ -65,7 +65,7 @@ description: 复合与其他 DSL 组件——Button / Accordion / Collapsible / 
 
 | prop | 类型 | 缺省 | 说明 |
 | --- | --- | --- | --- |
-| `groups` | `Array<{ heading?: string, items: Array<{ label: string, value: string, icon?: string, disabled?: boolean }> }>` | `[]` | 分组列表；`icon` 为预留字段（当前版本不渲染，同 Menu 约定） |
+| `groups` | `Array<{ heading?: string, items: Array<{ label: string, value: string, icon?: string, disabled?: boolean }> }>` | `[]` | 分组列表；`icon` 为图标名（Icon 白名单），渲染于文字前 |
 | `placeholder` | string | — | 搜索框占位文本 |
 | `emptyText` | string | i18n `pactor.command.empty` | 空结果文案 |
 | 事件 `onSelect` | — | — | 选中命令项时触发，`${event}` 为选中项 `value`（string） |
