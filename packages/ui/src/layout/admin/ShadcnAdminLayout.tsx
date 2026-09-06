@@ -21,6 +21,7 @@ import {
   AccordionTrigger,
 } from '../../ui/accordion.js';
 import { Popover, PopoverContent, PopoverTrigger } from '../../ui/popover.js';
+import { Icon } from '../../components/components/Icon/index.js';
 import { useBreakpointBelow } from './use-media-query.js';
 
 /** 访问页签（与 antd 版 AdminLayout 同语义） */
@@ -64,7 +65,7 @@ function navigateMenuItem(
 
 /** 菜单项基础样式（shadcn 风格：hover/accent 高亮读语义令牌） */
 const menuItemClass =
-  'flex w-full cursor-pointer items-center rounded-md px-3 py-2 text-left text-sm text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground disabled:pointer-events-none disabled:opacity-50';
+  'flex w-full cursor-pointer items-center gap-2 rounded-md px-3 py-2 text-left text-sm text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground disabled:pointer-events-none disabled:opacity-50';
 
 interface MenuTreeProps {
   menus: readonly MenuItem[];
@@ -234,7 +235,10 @@ function MenuTree({
                 disabled={menu.disabled}
                 title={menu.title}
               >
-                {menu.title}
+                <span className="inline-flex items-center gap-2">
+                  {menu.icon ? <Icon name={menu.icon} size="sm" /> : null}
+                  {menu.title}
+                </span>
               </AccordionTrigger>
               <AccordionContent data-slot="menu-group-content" className="pb-1">
                 <div className="flex flex-col gap-0.5 pl-3">
@@ -265,6 +269,7 @@ function MenuTree({
             title={menu.title}
             onClick={() => navigateMenuItem(registry.findById(menu.id), bridge)}
           >
+            {menu.icon ? <Icon name={menu.icon} size="sm" /> : null}
             {menu.title}
           </button>
         );

@@ -65,6 +65,11 @@ describe("DashboardClient（工作台）", () => {
     // 品牌区：logo + 标题
     expect(await screen.findByText("Pactor 工作台")).toBeTruthy();
     expect(container.querySelector('img[src="/next.svg"]')).toBeTruthy();
+    // 菜单项图标渲染于文字前（icon: "home" → 按钮内首个子节点为 [data-slot=icon]）
+    const homeItem = screen.getByText("首页");
+    const icon = homeItem.querySelector('[data-slot="icon"]');
+    expect(icon).toBeTruthy();
+    expect(homeItem.firstChild).toBe(icon);
     // 横向菜单（含子菜单触发器）、右侧下拉、语言切换、用户区
     expect(screen.getByText("文档")).toBeTruthy();
     expect(screen.getByText("产品")).toBeTruthy();

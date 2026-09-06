@@ -9,11 +9,13 @@ import {
   CommandItem,
   CommandList,
 } from '../../../ui/command.js';
+import { Icon } from '../Icon/index.js';
 
-/** Command 命令项；`icon` 为图标名（预留，当前版本不渲染，同 Menu 约定） */
+/** Command 命令项 */
 export interface CommandItemData {
   label: string;
   value: string;
+  /** 图标名（Icon 白名单，kebab/Pascal 均可），渲染于文字前 */
   icon?: string;
   disabled?: boolean;
 }
@@ -68,6 +70,7 @@ export function Command({
                 disabled={item.disabled}
                 onSelect={(value) => onSelect?.(value)}
               >
+                {item.icon ? <Icon name={item.icon} size="sm" /> : null}
                 {item.label}
               </CommandItem>
             ))}

@@ -1,12 +1,13 @@
 import type { CSSProperties } from 'react';
 
 import { cn } from '../../../lib/utils.js';
+import { Icon } from '../Icon/index.js';
 
 /** 菜单项；`children` 为子菜单（inline 模式下缩进展示） */
 export interface MenuItem {
   key: string;
   label: string;
-  /** 图标名（预留，当前版本不渲染） */
+  /** 图标名（Icon 白名单，kebab/Pascal 均可），渲染于文字前 */
   icon?: string;
   children?: MenuItem[];
 }
@@ -84,7 +85,7 @@ function MenuEntry({
         data-slot="menu-item"
         aria-current={selected ? 'page' : undefined}
         className={cn(
-          'flex w-full items-center rounded-md text-sm transition-colors',
+          'flex w-full items-center gap-2 rounded-md text-sm transition-colors',
           mode === 'horizontal' ? 'px-3 py-2' : 'px-3 py-2 text-left',
           selected
             ? 'bg-accent font-medium text-accent-foreground'
@@ -93,6 +94,7 @@ function MenuEntry({
         style={mode === 'inline' && depth > 0 ? { paddingLeft: 12 + depth * 16 } : undefined}
         onClick={() => onSelect?.(item.key)}
       >
+        {item.icon ? <Icon name={item.icon} size="sm" /> : null}
         {item.label}
       </button>
       {item.children?.map((child) => (

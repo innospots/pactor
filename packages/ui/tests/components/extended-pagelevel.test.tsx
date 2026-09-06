@@ -11,6 +11,7 @@ import {
   COMMON_PROPS_PROBE,
   expectCommonProps,
   expectEventState,
+  expectIconBeforeLabel,
   renderDsl,
 } from './helpers.js';
 
@@ -87,6 +88,26 @@ describe('Sidebar', () => {
       children: [{ type: 'Text', props: { text: 'y' } }],
     });
     expectCommonProps(container.querySelector('[data-slot=sidebar-layout]'));
+  });
+
+  it('导航项声明 icon 时在文字前渲染图标（链接与纯文本两种形态）', () => {
+    const { container } = renderDsl({
+      type: 'Sidebar',
+      props: {
+        items: [
+          { label: '概览', href: '/', icon: 'home' },
+          { label: '配置', icon: 'settings' },
+        ],
+      },
+      children: [{ type: 'Text', props: { text: '主内容' } }],
+    });
+
+    expectIconBeforeLabel(screen.getByRole('link', { name: '概览' }), '概览');
+    const textItem = Array.from(
+      container.querySelectorAll('span[data-slot=sidebar-item]'),
+    ).find((el) => el.textContent === '配置');
+    expect(textItem).toBeDefined();
+    expectIconBeforeLabel(textItem!, '配置');
   });
 });
 

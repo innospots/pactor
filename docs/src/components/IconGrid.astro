@@ -1,0 +1,120 @@
+---
+/**
+ * Icon 白名单网格：瓦片展示真实图标（构建期静态渲染自 lucide），
+ * 点击瓦片复制 DSL key 到剪贴板。数据由 `docs/scripts/gen-icon-grid.mjs`
+ * 生成（@pactor-app/ui 的 Icon 白名单变更后重新生成）。
+ */
+import iconGrid from '../data/icon-grid.json';
+---
+
+<div class="icon-grid not-content" role="list" aria-label="可用图标">
+  {
+    iconGrid.map(({ key, name, svg }) => (
+      <button
+        type="button"
+        class="icon-tile"
+        data-key={key}
+        title={`${key}（${name}）——点击复制`}
+        role="listitem"
+      >
+        <span class="icon-glyph" set:html={svg} />
+        <span class="icon-key">{key}</span>
+        <span class="icon-copied" aria-hidden="true">
+          已复制
+        </span>
+      </button>
+    ))
+  }
+</div>
+<p class="icon-grid-hint">鼠标悬浮图标查看 key，点击复制（如 <code>check-circle</code>），填入 <code>Icon</code> 的 <code>name</code> 或菜单类组件选项的 <code>icon</code> 字段。</p>
+
+<style>
+  .icon-grid {
+    display: grid;
+    grid-template-columns: repeat(10, minmax(0, 1fr));
+    gap: 8px;
+    margin: 1rem 0;
+  }
+  @media (max-width: 720px) {
+    .icon-grid {
+      grid-template-columns: repeat(5, minmax(0, 1fr));
+    }
+  }
+  .icon-tile {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    aspect-ratio: 1;
+    border: 1px solid var(--sl-color-gray-5, #2e3238);
+    border-radius: 8px;
+    background: var(--sl-color-gray-7, #17191c);
+    color: var(--sl-color-text, #ececf1);
+    cursor: pointer;
+    font: inherit;
+    transition:
+      border-color 0.15s ease,
+      background 0.15s ease;
+  }
+  .icon-tile:hover,
+  .icon-tile:focus-visible {
+    border-color: var(--sl-color-text-accent, #8cb4ff);
+    background: var(--sl-color-gray-6, #23262b);
+  }
+  .icon-glyph {
+    display: inline-flex;
+    line-height: 0;
+  }
+  .icon-key {
+    position: absolute;
+    bottom: calc(100% + 6px);
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 1;
+    padding: 2px 6px;
+    border-radius: 4px;
+    background: var(--sl-color-black, #0b0c0e);
+    color: var(--sl-color-gray-2, #a7adb6);
+    font-size: 11px;
+    font-family: var(--sl-font-mono, ui-monospace, monospace);
+    white-space: nowrap;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.15s ease;
+  }
+  .icon-tile:hover .icon-key,
+  .icon-tile:focus-visible .icon-key {
+    opacity: 1;
+  }
+  .icon-copied {
+    position: absolute;
+    inset: 0;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    border-radius: 8px;
+    background: var(--sl-color-gray-6, #23262b);
+    color: var(--sl-color-green, #3fb68b);
+    font-size: 12px;
+    font-weight: 600;
+  }
+  .icon-tile.copied .icon-copied {
+    display: flex;
+  }
+</style>
+
+<script>
+  document.querySelectorAll('.icon-grid').forEach((grid) => {
+    grid.addEventListener('click', async (event) => {
+      const tile = (event.target as HTMLElement).closest('.icon-tile');
+      if (!(tile instanceof HTMLElement) || !tile.dataset.key) return;
+      try {
+        await navigator.clipboard.writeText(tile.dataset.key);
+      } catch {
+        // 剪贴板不可用（非安全上下文等）时退化为选中提示
+      }
+      tile.classList.add('copied');
+      setTimeout(() => tile.classList.remove('copied'), 1000);
+    });
+  });
+</script>

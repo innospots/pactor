@@ -244,3 +244,67 @@ describe('Progress', () => {
     expectCommonProps(container.querySelector('[data-slot=progress]'));
   });
 });
+
+describe('Icon', () => {
+  it('按 name 渲染 lucide 图标（kebab-case）', () => {
+    const { container } = renderDsl({ type: 'Icon', props: { name: 'check-circle' } });
+
+    const icon = container.querySelector('[data-slot=icon]');
+    expect(icon).not.toBeNull();
+    expect(icon!.tagName.toLowerCase()).toBe('svg');
+    expect(icon!.getAttribute('data-unknown')).toBeNull();
+  });
+
+  it('name 支持 PascalCase（ArrowRight → arrow-right）', () => {
+    const { container } = renderDsl({ type: 'Icon', props: { name: 'ArrowRight' } });
+
+    expect(container.querySelector('[data-slot=icon]')).not.toBeNull();
+    expect(
+      container.querySelector('[data-slot=icon]')!.getAttribute('data-unknown'),
+    ).toBeNull();
+  });
+
+  it('未知名渲染占位图标并标 data-unknown，不抛错', () => {
+    const { container } = renderDsl({ type: 'Icon', props: { name: 'no-such-icon' } });
+
+    const icon = container.querySelector('[data-slot=icon]');
+    expect(icon).not.toBeNull();
+    expect(icon!.getAttribute('data-unknown')).toBe('no-such-icon');
+  });
+
+  it.each([
+    ['sm', '16'],
+    ['default', '20'],
+    ['lg', '24'],
+  ] as const)('size: %s 映射为 %spx', (size, px) => {
+    const { container } = renderDsl({ type: 'Icon', props: { name: 'check', size } });
+
+    const icon = container.querySelector('[data-slot=icon]')!;
+    expect(icon.getAttribute('width')).toBe(px);
+    expect(icon.getAttribute('height')).toBe(px);
+  });
+
+  it('size 数字直接作 px；color / strokeWidth 透传', () => {
+    const { container } = renderDsl({
+      type: 'Icon',
+      props: { name: 'check', size: 32, color: 'red', strokeWidth: 3 },
+    });
+
+    const icon = container.querySelector('[data-slot=icon]')!;
+    expect(icon.getAttribute('width')).toBe('32');
+    expect(icon.getAttribute('stroke')).toBe('red');
+    expect(icon.getAttribute('stroke-width')).toBe('3');
+  });
+
+  it('通用 props 作用于根节点（svg 的 class 经 getAttribute 断言）', () => {
+    const { container } = renderDsl({
+      type: 'Icon',
+      props: { name: 'check', ...COMMON_PROPS },
+    });
+
+    const icon = container.querySelector('[data-slot=icon]')!;
+    expect(icon.getAttribute('class')).toContain('biz-probe');
+    expect((icon as HTMLElement).style.flexGrow).toBe('1');
+    expect((icon as HTMLElement).style.opacity).toBe('0.5');
+  });
+});

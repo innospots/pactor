@@ -32,6 +32,7 @@ import { Form } from './components/Form/index.js';
 import { Grid } from './components/Grid/index.js';
 import { Header } from './components/Header/index.js';
 import { HoverCard } from './components/HoverCard/index.js';
+import { Icon } from './components/Icon/index.js';
 import { Input } from './components/Input/index.js';
 import { InputGroup } from './components/InputGroup/index.js';
 import { InputOTP } from './components/InputOTP/index.js';
@@ -151,6 +152,8 @@ export const shadcnComponents = {
   Sidebar,
   DataTable,
   Chart,
+  // 图标（lucide 白名单）
+  Icon,
 } as const;
 
 /** 把全部 V1 内置组件（shadcn 实现）按 DSL 类型名注册到给定 ComponentRegistry */

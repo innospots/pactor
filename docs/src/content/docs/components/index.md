@@ -1,9 +1,9 @@
 ---
 title: 组件参考
-description: 全部 69 个 DSL 组件（@pactor-app/ui 注册的 68 个 registry 组件 + @pactor-app/markdown 注册的 Markdown）的逐组件 props 契约与 DSL 示例，按布局与页面 / 展示 / 表单 / 数据 / 导航 / 反馈与弹层 / 复合与其他七类分页
+description: 全部 70 个 DSL 组件（@pactor-app/ui 注册的 69 个 registry 组件 + @pactor-app/markdown 注册的 Markdown）的逐组件 props 契约与 DSL 示例，按布局与页面 / 展示 / 表单 / 数据 / 导航 / 反馈与弹层 / 复合与其他七类分页
 ---
 
-DSL 的 `type` 引用 Component Registry 注册名。`@pactor-app/ui`（shadcn kit）注册 68 个组件类型，`@pactor-app/markdown` 另行注册 `Markdown`；全部 69 个组件按功能分 7 个分类页逐组件展示（props 表 + 最小 YAML 示例）。业务组件注册见[自定义组件](/guides/custom-components/)。
+DSL 的 `type` 引用 Component Registry 注册名。`@pactor-app/ui`（shadcn kit）注册 69 个组件类型，`@pactor-app/markdown` 另行注册 `Markdown`；全部 70 个组件按功能分 7 个分类页逐组件展示（props 表 + 最小 YAML 示例）。业务组件注册见[自定义组件](/guides/custom-components/)。
 
 ## 通用约定
 
@@ -40,6 +40,7 @@ DSL 的 `type` 引用 Component Registry 注册名。`@pactor-app/ui`（shadcn k
 | [Empty](/components/display/#empty) | 展示 |
 | [Statistic](/components/display/#statistic) | 展示 |
 | [Progress](/components/display/#progress) | 展示 |
+| [Icon](/components/display/#icon) | 展示 |
 | [AspectRatio](/components/display/#aspectratio) | 展示 |
 | [Carousel](/components/display/#carousel) | 展示 |
 | [Item](/components/display/#item) | 展示 |

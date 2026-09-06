@@ -3,6 +3,7 @@ import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { useState, type CSSProperties, type ReactNode } from 'react';
 
 import { cn } from '../../../lib/utils.js';
+import { Icon } from '../Icon/index.js';
 
 /** 品牌区：标题 + 可选 logo（图片地址） */
 export interface SidebarBrand {
@@ -10,10 +11,11 @@ export interface SidebarBrand {
   logo?: string;
 }
 
-/** 导航项；`children` 为子菜单（缩进展示）；`icon` 预留（当前版本不渲染） */
+/** 导航项；`children` 为子菜单（缩进展示） */
 export interface SidebarNavItem {
   label: string;
   href?: string;
+  /** 图标名（Icon 白名单，kebab/Pascal 均可），渲染于文字前 */
   icon?: string;
   children?: SidebarNavItem[];
 }
@@ -128,7 +130,7 @@ export function Sidebar({
 
 function SidebarEntry({ item, depth }: { item: SidebarNavItem; depth: number }) {
   const entryClass = cn(
-    'flex w-full items-center rounded-md px-3 py-2 text-left text-sm transition-colors',
+    'flex w-full items-center gap-2 rounded-md px-3 py-2 text-left text-sm transition-colors',
     'text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground',
   );
   const indentStyle =
@@ -142,10 +144,12 @@ function SidebarEntry({ item, depth }: { item: SidebarNavItem; depth: number }) 
           className={entryClass}
           style={indentStyle}
         >
+          {item.icon ? <Icon name={item.icon} size="sm" /> : null}
           {item.label}
         </a>
       ) : (
         <span data-slot="sidebar-item" className={entryClass} style={indentStyle}>
+          {item.icon ? <Icon name={item.icon} size="sm" /> : null}
           {item.label}
         </span>
       )}

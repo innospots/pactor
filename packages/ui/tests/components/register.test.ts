@@ -86,6 +86,7 @@ const EXTENDED_TYPES = [
   'Sidebar',
   'DataTable',
   'Chart',
+  'Icon',
 ];
 
 describe('组件注册入口', () => {

@@ -13,6 +13,7 @@ import {
   DropdownMenuSubTrigger,
   DropdownMenuTrigger,
 } from '../../../ui/dropdown-menu.js';
+import { Icon } from '../Icon/index.js';
 
 /** 品牌区位置（缺省 'left'） */
 export type HeaderBrandPosition = 'left' | 'right';
@@ -22,6 +23,8 @@ export interface HeaderDropdownItem {
   label: string;
   value: string;
   disabled?: boolean;
+  /** 图标名（Icon 白名单，kebab/Pascal 均可），渲染于文字前 */
+  icon?: string;
 }
 
 /** 通用下拉区配置 */
@@ -32,10 +35,11 @@ export interface HeaderDropdown {
   position?: 'left' | 'right';
 }
 
-/** 菜单项；`children` 为弹出式子菜单，`icon` 预留（当前版本不渲染，同 Menu 约定） */
+/** 菜单项；`children` 为弹出式子菜单 */
 export interface HeaderMenuItem {
   key: string;
   label: string;
+  /** 图标名（Icon 白名单，kebab/Pascal 均可），渲染于文字前 */
   icon?: string;
   children?: HeaderMenuItem[];
 }
@@ -44,6 +48,8 @@ export interface HeaderMenuItem {
 export interface HeaderUserItem {
   label: string;
   value: string;
+  /** 图标名（Icon 白名单，kebab/Pascal 均可），渲染于文字前 */
+  icon?: string;
 }
 
 /** 用户区配置；`items` 缺省或为空时退化为纯展示（无下拉） */
@@ -216,6 +222,7 @@ function HeaderDropdownArea({
             disabled={item.disabled}
             onClick={() => onSelect?.(item.value)}
           >
+            {item.icon ? <Icon name={item.icon} size="sm" /> : null}
             {item.label}
           </DropdownMenuItem>
         ))}
@@ -242,6 +249,7 @@ function HeaderMenuArea({
               data-key={item.key}
               className={cn(menuItemClass, 'outline-hidden')}
             >
+              {item.icon ? <Icon name={item.icon} size="sm" /> : null}
               {item.label}
               <ChevronDownIcon className="size-3.5" aria-hidden="true" />
             </DropdownMenuTrigger>
@@ -260,6 +268,7 @@ function HeaderMenuArea({
             className={menuItemClass}
             onClick={() => onSelect?.(item.key)}
           >
+            {item.icon ? <Icon name={item.icon} size="sm" /> : null}
             {item.label}
           </button>
         ),
@@ -280,6 +289,7 @@ function HeaderMenuEntry({
     return (
       <DropdownMenuSub>
         <DropdownMenuSubTrigger data-key={item.key}>
+          {item.icon ? <Icon name={item.icon} size="sm" /> : null}
           {item.label}
         </DropdownMenuSubTrigger>
         <DropdownMenuSubContent>
@@ -292,6 +302,7 @@ function HeaderMenuEntry({
   }
   return (
     <DropdownMenuItem data-key={item.key} onClick={() => onSelect?.(item.key)}>
+      {item.icon ? <Icon name={item.icon} size="sm" /> : null}
       {item.label}
     </DropdownMenuItem>
   );
@@ -336,6 +347,7 @@ function HeaderUserArea({
       <DropdownMenuContent align="end">
         {user.items.map((item) => (
           <DropdownMenuItem key={item.value} onClick={() => onSelect?.(item.value)}>
+            {item.icon ? <Icon name={item.icon} size="sm" /> : null}
             {item.label}
           </DropdownMenuItem>
         ))}

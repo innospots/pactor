@@ -11,7 +11,7 @@ description: 导航类 DSL 组件——Menu / Link / Breadcrumb / Pagination / T
 
 | prop | 类型 | 说明 |
 | --- | --- | --- |
-| `items` | `{ key, label, icon?, children? }[]` | 菜单树（如 `${data.menus}`；`icon` 为预留字段，当前不渲染） |
+| `items` | `{ key, label, icon?, children? }[]` | 菜单树（如 `${data.menus}`；`icon` 为图标名（Icon 白名单，kebab/Pascal 均可），渲染于文字前） |
 | `mode` | `inline`（默认）\| `horizontal` | inline 用于 Sider，horizontal 用于 Header |
 | `selectedKey` | string | 受控选中项 |
 | 事件 `onSelect` | — | 点选传出 key（典型接 `navigate` 或 `setState`） |
@@ -113,7 +113,7 @@ body:
 
 | prop | 类型 | 缺省 | 说明 |
 | --- | --- | --- | --- |
-| `menus` | `Array<{ label: string, items: Array<{ label: string, value: string, disabled?: boolean }> }>` | `[]` | 菜单组（可含表达式解析后的数组）；叶子项 `value` 为 `onSelect` 传出值 |
+| `menus` | `Array<{ label: string, items: Array<{ label: string, value: string, disabled?: boolean, icon?: string }> }>` | `[]` | 菜单组（可含表达式解析后的数组）；叶子项 `value` 为 `onSelect` 传出值；`icon` 为图标名（Icon 白名单），渲染于文字前 |
 | 事件 `onSelect` | — | — | 叶子项点击触发，`${event}` 为选中项 `value`（string） |
 
 ```yaml
@@ -137,7 +137,7 @@ body:
 
 | prop | 类型 | 缺省 | 说明 |
 | --- | --- | --- | --- |
-| `items` | `Array<{ label: string, href?: string, children?: Array<{ label: string, href: string, description?: string }> }>` | `[]` | 导航项（可含表达式解析后的数组） |
+| `items` | `Array<{ label: string, href?: string, icon?: string, children?: Array<{ label: string, href: string, description?: string, icon?: string }> }>` | `[]` | 导航项（可含表达式解析后的数组）；`icon` 为图标名（Icon 白名单），渲染于文字前 |
 
 ```yaml
 - type: NavigationMenu
@@ -155,7 +155,7 @@ body:
 
 | prop | 类型 | 缺省 | 说明 |
 | --- | --- | --- | --- |
-| `items` | `Array<{ label: string, value: string, disabled?: boolean, danger?: boolean }>` | `[]` | 菜单项（可含表达式解析后的数组） |
+| `items` | `Array<{ label: string, value: string, disabled?: boolean, danger?: boolean, icon?: string }>` | `[]` | 菜单项（可含表达式解析后的数组）；`icon` 为图标名（Icon 白名单），渲染于文字前 |
 | children | DslNode[] | — | 触发元素（DSL 子树，经 Renderer children 机制渲染） |
 | 事件 `onSelect` | — | — | 菜单项点击触发，`${event}` 为选中项 `value`（string） |
 
@@ -183,7 +183,7 @@ body:
 
 | prop | 类型 | 缺省 | 说明 |
 | --- | --- | --- | --- |
-| `items` | `Array<{ label: string, value: string, disabled?: boolean, danger?: boolean }>` | `[]` | 菜单项（可含表达式解析后的数组）；`danger` 项以 destructive 语义呈现 |
+| `items` | `Array<{ label: string, value: string, disabled?: boolean, danger?: boolean, icon?: string }>` | `[]` | 菜单项（可含表达式解析后的数组）；`danger` 项以 destructive 语义呈现；`icon` 为图标名（Icon 白名单），渲染于文字前 |
 | children | DslNode[] | — | 右键作用区域（DSL 子树，经 Renderer children 机制渲染） |
 | 事件 `onSelect` | — | — | 菜单项点击触发，`${event}` 为选中项 `value`（string） |
 

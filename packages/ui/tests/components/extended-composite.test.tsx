@@ -13,6 +13,7 @@ import {
   COMMON_PROPS_PROBE,
   expectCommonProps,
   expectEventState,
+  expectIconBeforeLabel,
   renderDsl,
 } from './helpers.js';
 
@@ -245,6 +246,22 @@ describe('Command', () => {
       props: { groups, ...COMMON_PROPS },
     });
     expectCommonProps(container.querySelector('[data-slot=command]'));
+  });
+
+  it('命令项声明 icon 时在文字前渲染图标', () => {
+    renderDsl({
+      type: 'Command',
+      props: {
+        groups: [
+          {
+            heading: '操作',
+            items: [{ label: '创建记录', value: 'create', icon: 'plus' }],
+          },
+        ],
+      },
+    });
+
+    expectIconBeforeLabel(screen.getByText('创建记录'), '创建记录');
   });
 });
 

@@ -5,7 +5,7 @@ shadcn/ui 组件目录扩展：在既有 20 个 DSL 类型之外，将 shadcn/ui
 
 ### Requirement: 扩展组件注册入口
 
-`shadcnComponents` 注册表与 `createShadcnComponentRegistry()` SHALL 在既有 20 个类型之外注册全部扩展组件类型：展示类（Badge、Avatar、Skeleton、Separator、Kbd、Spinner、Empty、AspectRatio、Tooltip、HoverCard、Progress）、导航类（Breadcrumb、Pagination、Menubar、NavigationMenu、DropdownMenu、ContextMenu）、表单类（Textarea、Checkbox、RadioGroup、Switch、Slider、Label、Field、Calendar、InputOTP、Combobox）、反馈与弹层类（Dialog、AlertDialog、Drawer、Sheet、Popover、Sonner、Accordion、Collapsible）、复合类（Carousel、Command、Resizable、ScrollArea、Toggle、ToggleGroup、ButtonGroup、InputGroup、Item、Typography）、页面级组合类（Sidebar、DataTable、Chart）。扩展类型 MUST NOT 与既有 20 个类型重名冲突（重名者沿用既有实现，如 Alert/Card/Tabs）。
+`shadcnComponents` 注册表与 `createShadcnComponentRegistry()` SHALL 在既有 20 个类型之外注册全部扩展组件类型：展示类（Badge、Avatar、Skeleton、Separator、Kbd、Spinner、Empty、AspectRatio、Tooltip、HoverCard、Progress、Icon）、导航类（Breadcrumb、Pagination、Menubar、NavigationMenu、DropdownMenu、ContextMenu）、表单类（Textarea、Checkbox、RadioGroup、Switch、Slider、Label、Field、Calendar、InputOTP、Combobox）、反馈与弹层类（Dialog、AlertDialog、Drawer、Sheet、Popover、Sonner、Accordion、Collapsible）、复合类（Carousel、Command、Resizable、ScrollArea、Toggle、ToggleGroup、ButtonGroup、InputGroup、Item、Typography）、页面级组合类（Sidebar、DataTable、Chart）。扩展类型 MUST NOT 与既有 20 个类型重名冲突（重名者沿用既有实现，如 Alert/Card/Tabs）。
 
 #### Scenario: 注册后全部扩展类型可解析
 
@@ -46,6 +46,7 @@ SHALL 提供以下展示类 DSL 组件：
 - **Tooltip**：`content` + children（触发元素），悬浮显示提示。
 - **HoverCard**：`content` + children（触发元素），悬浮显示富内容卡片。
 - **Progress**：`value`（0-100，可为表达式解析后的数字）。
+- **Icon**：`name`（图标名，kebab-case 或 PascalCase，取自内置 lucide 常用图标白名单）/ `size`（sm/default/lg 或数字 px）/ `color` / `strokeWidth`；未知名 MUST 渲染占位图标（不抛错）。白名单为静态导入（可 tree-shake），新增图标需显式补充映射。
 
 #### Scenario: Badge 变体渲染
 
@@ -62,16 +63,28 @@ SHALL 提供以下展示类 DSL 组件：
 - **WHEN** DSL 为 `{ type: 'Tooltip', props: { content: '删除' }, children: [Button] }` 且用户悬浮按钮
 - **THEN** 显示内容为"删除"的提示浮层
 
+#### Scenario: Icon 渲染与命名归一
+
+- **WHEN** DSL 为 `{ type: 'Icon', props: { name: 'check-circle' } }` 或 `{ name: 'CheckCircle' }`
+- **THEN** 两种命名均渲染出对应 lucide 图标（svg 根节点）
+
+#### Scenario: Icon 未知名占位
+
+- **WHEN** DSL 为 `{ type: 'Icon', props: { name: 'no-such-icon' } }`
+- **THEN** 渲染占位图标（标记未知名），不抛错
+
 ### Requirement: 导航类组件
 
 SHALL 提供以下导航类 DSL 组件：
 
 - **Breadcrumb**：`items`（`Array<{ label, href? }>`），末项渲染为当前页纯文本。
 - **Pagination**：`total` / `pageSize` / `page`（受控当前页）/ `onChange`（传页码 number）。
-- **Menubar**：`menus`（嵌套 `{ label, items: [{ label, value, disabled? }] }`），`onSelect` 传选中项 value。
-- **NavigationMenu**：`items`（`{ label, href? , children?: [{ label, href, description? }] }`）。
-- **DropdownMenu**：`items`（`{ label, value, disabled?, danger? }`）+ children（触发元素），`onSelect` 传 value。
+- **Menubar**：`menus`（嵌套 `{ label, items: [{ label, value, disabled?, icon? }] }`），`onSelect` 传选中项 value。
+- **NavigationMenu**：`items`（`{ label, href?, icon?, children?: [{ label, href, description?, icon? }] }`）。
+- **DropdownMenu**：`items`（`{ label, value, disabled?, danger?, icon? }`）+ children（触发元素），`onSelect` 传 value。
 - **ContextMenu**：`items`（同 DropdownMenu）+ children（右键作用区域），`onSelect` 传 value。
+
+以上 items 的 `icon` 字段均为图标名（Icon 白名单），声明时渲染于文字前。
 
 #### Scenario: Breadcrumb 渲染路径
 
@@ -82,6 +95,11 @@ SHALL 提供以下导航类 DSL 组件：
 
 - **WHEN** 用户点击触发元素并选择 value 为 `edit` 的菜单项
 - **THEN** `onSelect` 动作执行时 `${event}` 为 `'edit'`
+
+#### Scenario: 菜单项图标
+
+- **WHEN** DropdownMenu（或 ContextMenu / Menubar / NavigationMenu）的菜单项声明 `icon: 'settings'`
+- **THEN** 该项文字前渲染图标 svg
 
 #### Scenario: Pagination 翻页
 
@@ -153,7 +171,7 @@ SHALL 提供以下反馈与弹层类 DSL 组件：
 SHALL 提供以下复合类 DSL 组件：
 
 - **Carousel**：`items`（DSL 子树数组或图片 `{ src, alt }` 数组）/ `loop` / `autoplay`。
-- **Command**：`groups`（`{ heading, items: [{ label, value, icon? }] }`）/ `placeholder` / `onSelect`，支持搜索过滤。
+- **Command**：`groups`（`{ heading, items: [{ label, value, icon? }] }`，`icon` 为图标名（Icon 白名单），渲染于 label 前）/ `placeholder` / `onSelect`，支持搜索过滤。
 - **Resizable**：`panels`（`Array<{ children: DslNode[], defaultSize? }>`）/ `direction`，面板间可拖拽调整。
 - **ScrollArea**：`maxHeight` 等尺寸约束 + children，自定义滚动条。
 - **Toggle**：`text` / `pressed` / `onChange`（传 boolean）。
@@ -182,7 +200,7 @@ SHALL 提供以下复合类 DSL 组件：
 
 SHALL 提供以下页面级组合 DSL 组件，MUST 以受限的框架级 props 暴露（MUST NOT 透传底层库自由组合 API）：
 
-- **Sidebar**：`brand`（`{ title, logo? }`）/ `items`（导航项 `{ label, href?, icon?, children? }`）/ `collapsible` / children（主内容区）；渲染完整的侧栏+内容布局。
+- **Sidebar**：`brand`（`{ title, logo? }`）/ `items`（导航项 `{ label, href?, icon?, children? }`，`icon` 为图标名（Icon 白名单），渲染于 label 前）/ `collapsible` / children（主内容区）；渲染完整的侧栏+内容布局。
 - **DataTable**：`columns`（`{ key, title, sortable?, filterable?, children? }`，cell 模板字段为 `children: DslNode[]`，`renderChildren` 保留为兼容别名）/ `rows` / `pagination` / `sort`（初始排序，点击表头后内部维护）/ `onSort` / `onPageChange`，提供排序/筛选/分页的一体化封装。
 - **Chart**：`chartType`（line/bar/area/pie）/ `data` / `xKey` / `yKeys` / `colors?`，渲染基于 chart 令牌（`chart-1..5`）配色的图表。
 

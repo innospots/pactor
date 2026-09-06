@@ -1,5 +1,6 @@
 import type { CSSProperties } from 'react';
 
+import { cn } from '../../../lib/utils.js';
 import {
   NavigationMenu as ShadcnNavigationMenu,
   NavigationMenuContent,
@@ -9,18 +10,23 @@ import {
   NavigationMenuTrigger,
   navigationMenuTriggerStyle,
 } from '../../../ui/navigation-menu.js';
+import { Icon } from '../Icon/index.js';
 
 /** 子链接项 */
 export interface NavigationMenuChildItem {
   label: string;
   href: string;
   description?: string;
+  /** 图标名（Icon 白名单，kebab/Pascal 均可），渲染于文字前 */
+  icon?: string;
 }
 
 /** 导航项：href 直链，或 children 下拉面板 */
 export interface NavigationMenuItemData {
   label: string;
   href?: string;
+  /** 图标名（Icon 白名单，kebab/Pascal 均可），渲染于文字前 */
+  icon?: string;
   children?: NavigationMenuChildItem[];
 }
 
@@ -46,13 +52,27 @@ export function NavigationMenu({ items = [], className, style }: NavigationMenuP
           <NavigationMenuItem key={`${item.label}-${index}`} value={`item-${index}`}>
             {item.children && item.children.length > 0 ? (
               <>
-                <NavigationMenuTrigger>{item.label}</NavigationMenuTrigger>
+                <NavigationMenuTrigger
+                  className={item.icon !== undefined ? 'gap-2' : undefined}
+                >
+                  {item.icon ? <Icon name={item.icon} size="sm" /> : null}
+                  {item.label}
+                </NavigationMenuTrigger>
                 <NavigationMenuContent>
                   <ul className="grid w-64 gap-1">
                     {item.children.map((child) => (
                       <li key={child.href}>
                         <NavigationMenuLink href={child.href}>
-                          <span className="font-medium">{child.label}</span>
+                          <span
+                            className={
+                              child.icon !== undefined
+                                ? 'flex items-center gap-2 font-medium'
+                                : 'font-medium'
+                            }
+                          >
+                            {child.icon ? <Icon name={child.icon} size="sm" /> : null}
+                            {child.label}
+                          </span>
                           {child.description ? (
                             <span className="text-muted-foreground">
                               {child.description}
@@ -67,8 +87,12 @@ export function NavigationMenu({ items = [], className, style }: NavigationMenuP
             ) : (
               <NavigationMenuLink
                 href={item.href}
-                className={navigationMenuTriggerStyle()}
+                className={cn(
+                  navigationMenuTriggerStyle(),
+                  item.icon !== undefined && 'gap-2',
+                )}
               >
+                {item.icon ? <Icon name={item.icon} size="sm" /> : null}
                 {item.label}
               </NavigationMenuLink>
             )}

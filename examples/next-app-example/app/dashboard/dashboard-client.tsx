@@ -102,23 +102,24 @@ const dashboardPage: PageDsl = {
           logo: "/next.svg",
           title: "Pactor 工作台",
           menu: [
-            { key: "home", label: "首页" },
+            { key: "home", label: "首页", icon: "home" },
             {
               key: "products",
               label: "产品",
+              icon: "package",
               children: [
-                { key: "product-a", label: "产品 A" },
-                { key: "product-b", label: "产品 B" },
+                { key: "product-a", label: "产品 A", icon: "tag" },
+                { key: "product-b", label: "产品 B", icon: "tag" },
               ],
             },
-            { key: "docs", label: "文档" },
+            { key: "docs", label: "文档", icon: "file" },
           ],
           dropdown: {
             label: "切换团队",
             position: "right",
             items: [
-              { label: "云栖团队", value: "yunqi" },
-              { label: "远山团队", value: "yuanshan" },
+              { label: "云栖团队", value: "yunqi", icon: "users" },
+              { label: "远山团队", value: "yuanshan", icon: "building" },
             ],
           },
           locales: [
@@ -128,8 +129,8 @@ const dashboardPage: PageDsl = {
           user: {
             name: "管理员",
             items: [
-              { label: "个人中心", value: "profile" },
-              { label: "退出登录", value: "logout" },
+              { label: "个人中心", value: "profile", icon: "user" },
+              { label: "退出登录", value: "logout", icon: "log-out" },
             ],
           },
         },

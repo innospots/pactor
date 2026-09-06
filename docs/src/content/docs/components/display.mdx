@@ -1,7 +1,9 @@
 ---
 title: 展示组件
-description: 展示类 DSL 组件——Text / Typography / Badge / Avatar / Kbd / Skeleton / Spinner / Empty / Statistic / Progress / AspectRatio / Carousel / Item 的 props 契约与 DSL 示例
+description: 展示类 DSL 组件——Text / Typography / Badge / Avatar / Kbd / Skeleton / Spinner / Empty / Statistic / Progress / Icon / AspectRatio / Carousel / Item 的 props 契约与 DSL 示例
 ---
+
+import IconGrid from '../../../components/IconGrid.astro';
 
 文本、排版、状态与媒体类展示组件：纯渲染、无表单语义，按声明的 props 与表达式求值结果呈现内容。
 
@@ -150,6 +152,31 @@ description: 展示类 DSL 组件——Text / Typography / Badge / Avatar / Kbd 
 - type: Progress
   props: { value: ${data.progress} }
 ```
+
+### Icon
+
+lucide 图标。`name` 取自内置常用图标白名单（`ICONS` 导出，kebab-case 键；同时接受 PascalCase / camelCase，自动归一）；未知名渲染占位图标并标 `data-unknown`，不抛错。白名单为静态导入（可 tree-shake），新增图标在 `packages/ui/src/components/components/Icon/index.tsx` 补充一行导入 + 一行映射。
+
+| prop | 类型 | 缺省 | 说明 |
+| --- | --- | --- | --- |
+| `name` | string | — | 图标名（如 `check-circle` / `CheckCircle`） |
+| `size` | `sm` \| `default` \| `lg` \| number | `default` | 尺寸（sm 16 / default 20 / lg 24，数字直接作 px） |
+| `color` | string | — | 颜色（CSS 颜色值，缺省 currentColor 跟随文本色） |
+| `strokeWidth` | number | `2` | 描边宽度 |
+
+```yaml
+- type: Flex
+  props: { gap: 8 }
+  children:
+    - type: Icon
+      props: { name: check-circle, color: green }
+    - type: Icon
+      props: { name: arrow-right, size: lg }
+```
+
+**可用图标（87 个）**：下图为内置白名单的全部图标（真实渲染自 lucide），鼠标悬浮可查看 key，点击图标复制；传入 PascalCase / camelCase 会自动归一为该 key。
+
+<IconGrid />
 
 ### AspectRatio
 
