@@ -10,9 +10,12 @@ const I18nReactContext = createContext<I18nContext | null>(null);
 
 export const I18nContextProvider = I18nReactContext.Provider;
 
-/** 缺省中文文案（无 Provider 时回退，保持向后兼容） */
-const defaultI18n = createI18nContext({
-  messages: {
+/**
+ * 内置默认文案（无 Provider 或 Provider 未覆盖内置 key 时回退，
+ * 保持向后兼容）；按 locale 分组，zh-CN 为缺省。
+ */
+const defaultMessages = {
+  'zh-CN': {
     'pactor.layout.expandSidebar': '展开侧边栏',
     'pactor.layout.collapseSidebar': '收起侧边栏',
     'pactor.layout.closeTab': '关闭 {{title}}',
@@ -21,8 +24,33 @@ const defaultI18n = createI18nContext({
     'pactor.table.empty': '暂无数据',
     'pactor.form.required': '必填',
     'pactor.select.clear': '清除',
+    'pactor.alertDialog.confirm': '确定',
+    'pactor.alertDialog.cancel': '取消',
+    'pactor.command.empty': '无匹配结果',
+    'pactor.overlay.close': '关闭',
   },
-});
+  'en-US': {
+    'pactor.layout.expandSidebar': 'Expand sidebar',
+    'pactor.layout.collapseSidebar': 'Collapse sidebar',
+    'pactor.layout.closeTab': 'Close {{title}}',
+    'pactor.layout.breadcrumb': 'Breadcrumb',
+    'pactor.table.loading': 'Loading…',
+    'pactor.table.empty': 'No data',
+    'pactor.form.required': 'Required',
+    'pactor.select.clear': 'Clear',
+    'pactor.alertDialog.confirm': 'Confirm',
+    'pactor.alertDialog.cancel': 'Cancel',
+    'pactor.command.empty': 'No results found',
+    'pactor.overlay.close': 'Close',
+  },
+};
+
+/** 按 locale 创建内置默认 i18n 上下文（缺省 zh-CN） */
+function createDefaultI18n(locale?: string): I18nContext {
+  return createI18nContext({ locale, messages: defaultMessages });
+}
+
+const defaultI18n = createDefaultI18n();
 
 /** 在 React 组件内获取 i18n 上下文；未包裹 I18nContextProvider 时返回缺省上下文 */
 export function useI18n(): I18nContext {
@@ -31,12 +59,14 @@ export function useI18n(): I18nContext {
     return defaultI18n;
   }
   // Provider 的 messages（options / bootstrap 下发）通常不含内置 pactor.* 文案：
-  // key 未命中（t 原样返回 key）时先回退内置默认文案，再回退 key 本身
+  // key 未命中（t 原样返回 key）时先回退内置默认文案（随 Provider locale
+  // 选择语言），再回退 key 本身
+  const fallback = createDefaultI18n(value.locale);
   return {
     ...value,
     t: (key, params) => {
       const translated = value.t(key, params);
-      return translated === key ? defaultI18n.t(key, params) : translated;
+      return translated === key ? fallback.t(key, params) : translated;
     },
   };
 }

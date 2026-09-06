@@ -8,8 +8,127 @@
  */
 export { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from './accordion.js';
 export { Alert, AlertDescription, AlertTitle } from './alert.js';
+export {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogOverlay,
+  AlertDialogPortal,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from './alert-dialog.js';
+export { AspectRatio } from './aspect-ratio.js';
+export { Avatar, AvatarFallback, AvatarImage } from './avatar.js';
 export { Badge, badgeVariants } from './badge.js';
+export {
+  Breadcrumb,
+  BreadcrumbEllipsis,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from './breadcrumb.js';
 export { Button, buttonVariants } from './button.js';
+export { ButtonGroup } from './button-group.js';
+export { Calendar } from './calendar.js';
+export { ChartContainer, chartColor, CHART_TOKEN_COLORS } from './chart.js';
+export {
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+  CarouselNext,
+  CarouselPrevious,
+  useCarousel,
+} from './carousel.js';
+export type { CarouselApi } from './carousel.js';
+export { Checkbox } from './checkbox.js';
+export { Collapsible, CollapsibleContent, CollapsibleTrigger } from './collapsible.js';
+export { Combobox, ComboboxContent, ComboboxTrigger } from './combobox.js';
+export {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from './command.js';
+export {
+  ContextMenu,
+  ContextMenuContent,
+  ContextMenuItem,
+  ContextMenuSeparator,
+  ContextMenuTrigger,
+} from './context-menu.js';
+export {
+  Drawer,
+  DrawerClose,
+  DrawerContent,
+  DrawerDescription,
+  DrawerFooter,
+  DrawerHeader,
+  DrawerOverlay,
+  DrawerPortal,
+  DrawerTitle,
+  DrawerTrigger,
+} from './drawer.js';
+export {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuSub,
+  DropdownMenuSubContent,
+  DropdownMenuSubTrigger,
+  DropdownMenuTrigger,
+} from './dropdown-menu.js';
+export { HoverCard, HoverCardContent, HoverCardTrigger } from './hover-card.js';
+export {
+  Menubar,
+  MenubarContent,
+  MenubarItem,
+  MenubarMenu,
+  MenubarSeparator,
+  MenubarTrigger,
+} from './menubar.js';
+export {
+  NavigationMenu,
+  NavigationMenuContent,
+  NavigationMenuItem,
+  NavigationMenuLink,
+  NavigationMenuList,
+  NavigationMenuTrigger,
+  NavigationMenuViewport,
+  navigationMenuTriggerStyle,
+} from './navigation-menu.js';
+export {
+  Pagination,
+  PaginationContent,
+  PaginationEllipsis,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+} from './pagination.js';
+export {
+  Sheet,
+  SheetClose,
+  SheetContent,
+  SheetDescription,
+  SheetFooter,
+  SheetHeader,
+  SheetOverlay,
+  SheetPortal,
+  SheetTitle,
+  SheetTrigger,
+} from './sheet.js';
+export { toast, toastManager, Toaster } from './toast.js';
+export type { ToastOptions, ToastVariant } from './toast.js';
+export { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from './tooltip.js';
 export {
   Card,
   CardAction,
@@ -31,9 +150,26 @@ export {
   DialogTitle,
   DialogTrigger,
 } from './dialog.js';
+export { Empty, EmptyContent, EmptyDescription, EmptyHeader, EmptyTitle } from './empty.js';
+export { Field, FieldDescription, FieldError, FieldLabel } from './field.js';
 export { Input } from './input.js';
+export { InputGroup, InputGroupAddon, InputGroupInput } from './input-group.js';
+export { InputOTP, InputOTPGroup, InputOTPSeparator, InputOTPSlot } from './input-otp.js';
+export {
+  Item,
+  ItemActions,
+  ItemContent,
+  ItemDescription,
+  ItemMedia,
+  ItemTitle,
+} from './item.js';
+export { Kbd } from './kbd.js';
 export { Label } from './label.js';
 export { Popover, PopoverContent, PopoverTrigger } from './popover.js';
+export { Progress, ProgressIndicator, ProgressTrack } from './progress.js';
+export { RadioGroup, RadioGroupItem } from './radio-group.js';
+export { Panel, PanelGroup, ResizableHandle } from './resizable.js';
+export { ScrollArea, ScrollBar } from './scroll-area.js';
 export {
   Select,
   SelectContent,
@@ -48,6 +184,9 @@ export {
 } from './select.js';
 export { Separator } from './separator.js';
 export { Skeleton } from './skeleton.js';
+export { Slider, SliderControl, SliderIndicator, SliderThumb, SliderTrack } from './slider.js';
+export { Spinner } from './spinner.js';
+export { Switch } from './switch.js';
 export {
   Table,
   TableBody,
@@ -60,3 +199,6 @@ export {
 } from './table.js';
 export { Tabs, TabsContent, TabsList, TabsTrigger } from './tabs.js';
 export { Textarea } from './textarea.js';
+export { Toggle, toggleVariants } from './toggle.js';
+export { ToggleGroup, ToggleGroupItem } from './toggle-group.js';
+export { Typography, typographyVariants } from './typography.js';

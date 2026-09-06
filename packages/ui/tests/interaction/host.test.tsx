@@ -2,6 +2,7 @@
 import './setup.js';
 
 import { cleanup, fireEvent, render, screen, act } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import type { PageDsl } from '@pactor-app/core';
 import {
   ActionEngine,
@@ -82,7 +83,7 @@ describe('Modal / Drawer 渲染（shadcn 实现）', () => {
     await screen.findByText('更新后');
   });
 
-  it('type 为 drawer 时渲染自绘侧边面板并应用 title', async () => {
+  it('type 为 drawer 时渲染 vendored drawer 原语面板并应用 title', async () => {
     const { manager } = setupHost();
 
     void manager.open({ type: 'drawer', title: '编辑面板' });
@@ -111,12 +112,16 @@ describe('Modal / Drawer 渲染（shadcn 实现）', () => {
   });
 
   it('Drawer 遮罩点击触发取消语义 close', async () => {
+    const user = userEvent.setup();
     const { manager } = setupHost();
 
     const opened = manager.open({ type: 'drawer', title: '编辑面板' });
     await screen.findByText('编辑面板');
 
-    fireEvent.click(screen.getByTestId('drawer-mask'));
+    // vaul 基于 Radix DismissableLayer：遮罩关闭需要真实 pointer 序列
+    await user.pointer([
+      { target: document.querySelector('[data-slot=drawer-overlay]')!, keys: '[MouseLeft]' },
+    ]);
 
     await expect(opened).resolves.toEqual({ success: false });
     expect(manager.stack()).toHaveLength(0);

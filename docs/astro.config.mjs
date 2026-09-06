@@ -26,6 +26,19 @@ export default defineConfig({
           ],
         },
         {
+          label: '组件',
+          items: [
+            { label: '组件参考', slug: 'components' },
+            { label: '布局与页面', slug: 'components/layout' },
+            { label: '展示', slug: 'components/display' },
+            { label: '表单', slug: 'components/form' },
+            { label: '数据', slug: 'components/data' },
+            { label: '导航', slug: 'components/navigation' },
+            { label: '反馈与弹层', slug: 'components/feedback' },
+            { label: '复合与其他', slug: 'components/composite' },
+          ],
+        },
+        {
           label: '参考',
           items: [{ label: 'DSL 参考', slug: 'reference/dsl' }],
         },

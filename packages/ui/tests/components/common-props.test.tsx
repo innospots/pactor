@@ -6,19 +6,9 @@
 import type { DslNode } from '@pactor-app/core';
 import { describe, expect, it } from 'vitest';
 
-import { renderDsl } from './helpers.js';
+import { COMMON_PROPS_PROBE, expectCommonProps, renderDsl } from './helpers.js';
 
-const COMMON_PROPS = {
-  className: 'biz-probe',
-  style: { flex: 1, opacity: 0.5 },
-} as const;
-
-function expectCommonProps(root: Element | null) {
-  expect(root, '组件应渲染出根节点').not.toBeNull();
-  expect(root!.classList.contains('biz-probe')).toBe(true);
-  expect((root as HTMLElement).style.flexGrow).toBe('1');
-  expect((root as HTMLElement).style.opacity).toBe('0.5');
-}
+const COMMON_PROPS = COMMON_PROPS_PROBE;
 
 describe('通用 props 契约（className / style）', () => {
   it('Page', () => {

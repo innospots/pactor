@@ -32,6 +32,62 @@ const BUILTIN_TYPES = [
   'Link',
 ];
 
+/** 扩展组件类型名清单（spec: shadcn-extended-components / 扩展组件注册入口，第一批：展示类 + 表单类；第二批：导航类 + 反馈弹层类；第三批：表单类 Calendar/InputOTP/Combobox + 复合类；第四批：页面级组合类 Sidebar/DataTable/Chart） */
+const EXTENDED_TYPES = [
+  'Badge',
+  'Avatar',
+  'Skeleton',
+  'Separator',
+  'Kbd',
+  'Spinner',
+  'Empty',
+  'AspectRatio',
+  'Progress',
+  'Textarea',
+  'Checkbox',
+  'RadioGroup',
+  'Switch',
+  'Slider',
+  'Label',
+  'Field',
+  // 第二批：导航类
+  'Breadcrumb',
+  'Pagination',
+  'Menubar',
+  'NavigationMenu',
+  'DropdownMenu',
+  'ContextMenu',
+  // 第二批：反馈与弹层类
+  'Dialog',
+  'AlertDialog',
+  'Drawer',
+  'Sheet',
+  'Popover',
+  'Sonner',
+  'Accordion',
+  'Collapsible',
+  'Tooltip',
+  'HoverCard',
+  // 第三批：表单类（Calendar/InputOTP/Combobox）+ 复合类
+  'Calendar',
+  'InputOTP',
+  'Combobox',
+  'Carousel',
+  'Command',
+  'Resizable',
+  'ScrollArea',
+  'Toggle',
+  'ToggleGroup',
+  'ButtonGroup',
+  'InputGroup',
+  'Item',
+  'Typography',
+  // 第四批：页面级组合类
+  'Sidebar',
+  'DataTable',
+  'Chart',
+];
+
 describe('组件注册入口', () => {
   it('createShadcnComponentRegistry 注册后 20 个类型名全部可解析', () => {
     const registry = createShadcnComponentRegistry();
@@ -40,15 +96,28 @@ describe('组件注册入口', () => {
     }
   });
 
-  it('createShadcnComponentRegistry 的类型名集合恰为 20 个内置类型（硬编码断言）', () => {
+  it('createShadcnComponentRegistry 的类型名集合包含全部 20 个内置类型（超集断言：另含扩展组件）', () => {
     const registry = createShadcnComponentRegistry();
-    expect(registry.list().sort()).toEqual([...BUILTIN_TYPES].sort());
+    const types = registry.list();
+    for (const type of BUILTIN_TYPES) {
+      expect(types, type).toContain(type);
+    }
   });
 
   it('registerShadcnComponents 注册到外部 Registry', () => {
     const registry = new Registry<unknown>('ComponentRegistry');
     registerShadcnComponents(registry);
-    expect(registry.list().sort()).toEqual([...BUILTIN_TYPES].sort());
+    const types = registry.list();
+    for (const type of BUILTIN_TYPES) {
+      expect(types, type).toContain(type);
+    }
+  });
+
+  it('扩展类型（展示类 + 表单类）注册后全部可解析', () => {
+    const registry = createShadcnComponentRegistry();
+    for (const type of EXTENDED_TYPES) {
+      expect(registry.has(type), type).toBe(true);
+    }
   });
 });
 

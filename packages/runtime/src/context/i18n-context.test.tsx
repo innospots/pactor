@@ -46,4 +46,16 @@ describe('useI18n', () => {
       '关闭 工作台',
     );
   });
+
+  it('Provider locale 为 en-US 且未覆盖内置 key 时回退英文内置文案', () => {
+    const i18n = createI18nContext({ locale: 'en-US', messages: {} });
+    const enWrapper = ({ children }: { children?: ReactNode }) =>
+      createElement(I18nContextProvider, { value: i18n }, children);
+    const { result } = renderHook(() => useI18n(), { wrapper: enWrapper });
+    expect(result.current.t('pactor.table.empty')).toBe('No data');
+    expect(result.current.t('pactor.alertDialog.confirm')).toBe('Confirm');
+    expect(result.current.t('pactor.alertDialog.cancel')).toBe('Cancel');
+    expect(result.current.t('pactor.command.empty')).toBe('No results found');
+    expect(result.current.t('pactor.overlay.close')).toBe('Close');
+  });
 });

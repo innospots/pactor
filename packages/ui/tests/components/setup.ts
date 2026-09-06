@@ -26,6 +26,18 @@ if (typeof window !== 'undefined') {
     } as unknown as typeof ResizeObserver;
   }
 
+  // embla-carousel（Carousel）依赖 IntersectionObserver，jsdom 未实现
+  if (!window.IntersectionObserver) {
+    window.IntersectionObserver = class {
+      observe() {}
+      unobserve() {}
+      disconnect() {}
+      takeRecords() {
+        return [];
+      }
+    } as unknown as typeof IntersectionObserver;
+  }
+
   if (!window.scrollTo) {
     window.scrollTo = () => {};
   }

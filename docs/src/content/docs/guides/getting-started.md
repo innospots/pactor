@@ -168,8 +168,6 @@ createPactorApplication({
 });
 ```
 
-从旧 `pactor-ui-antd` / `pactor-ui-radix` 包迁移的符号对照见 [@pactor-app/ui 迁移说明](/packages/ui/#从-pactor-ui-antd--pactor-ui-radix-迁移)。
-
 ## 两种使用形态
 
 **整应用模式**（上文）：`createPactorApplication` 接管整个应用——按 bootstrap 菜单生成路由、外壳布局、权限与页面装配全部由框架负责。

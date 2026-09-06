@@ -1,0 +1,261 @@
+dsl: '1.0'
+page:
+  id: extended-components
+  title: 扩展组件演示
+  name: extendedComponents
+  description: 'shadcn 扩展组件集中演示（spec: shadcn-extended-components）：展示 / 表单 / 反馈弹层 / 复合 / 页面级组合（Sidebar、DataTable、Chart）'
+  permission: customer:view
+
+meta:
+  version: '1.0'
+  author: platform-team
+
+state:
+  switchOn: true
+  sortInfo: ''
+  pageNo: 1
+  cmd: ''
+
+dataSources:
+  # Chart / DataTable 数据（静态数据源，表达式注入）
+  sales:
+    type: static
+    autoLoad: true
+    value:
+      - { month: 一月, amount: 120, profit: 30 }
+      - { month: 二月, amount: 200, profit: 80 }
+      - { month: 三月, amount: 150, profit: 45 }
+      - { month: 四月, amount: 260, profit: 110 }
+      - { month: 五月, amount: 220, profit: 95 }
+  members:
+    type: static
+    autoLoad: true
+    value:
+      - { id: 1, name: 张三, role: 管理员, age: 28 }
+      - { id: 2, name: 李四, role: 运营, age: 32 }
+      - { id: 3, name: 王五, role: 客服, age: 25 }
+      - { id: 4, name: 赵六, role: 运营, age: 30 }
+      - { id: 5, name: 钱七, role: 客服, age: 27 }
+
+body:
+  type: Page
+  props:
+    title: 扩展组件演示
+  children:
+    - type: Alert
+      props:
+        variant: info
+        message: shadcn 扩展组件（四批 48 个类型）集中演示
+        description: 展示类 Badge/Progress/Tooltip、表单类 Switch、弹层类 Dialog/AlertDialog/Accordion、复合类 Carousel/Command、页面级组合 DataTable/Chart/Sidebar
+
+    # 展示类
+    - type: Card
+      props:
+        title: 展示类：Badge / Progress / Tooltip
+      children:
+        - type: Flex
+          props: { gap: 12 }
+          children:
+            - type: Badge
+              props: { text: 草稿, variant: secondary }
+            - type: Badge
+              props: { text: 已发布 }
+            - type: Badge
+              props: { text: 停用, variant: destructive }
+            - type: Tooltip
+              props: { content: 转化率较上周提升 }
+              children:
+                - type: Button
+                  props: { text: 悬浮查看提示, variant: dashed }
+        - type: Progress
+          props: { value: 62 }
+
+    # 表单类（独立使用）
+    - type: Card
+      props:
+        title: 表单类：Switch（onChange 传 boolean）
+      children:
+        - type: Switch
+          props:
+            label: 启用通知
+            value: ${state.switchOn}
+          events:
+            onChange:
+              action: setState
+              params:
+                switchOn: ${event}
+        - type: Text
+          props:
+            text: 当前状态：${state.switchOn}
+            type: secondary
+
+    # 反馈与弹层类
+    - type: Card
+      props:
+        title: 反馈与弹层类：Dialog / AlertDialog / Accordion
+      children:
+        - type: Flex
+          props: { gap: 12 }
+          children:
+            - type: Dialog
+              props:
+                title: 编辑资料
+                description: Dialog 内容区支持任意 DSL 子树
+                trigger:
+                  type: Button
+                  props: { text: 打开 Dialog }
+              children:
+                - type: Input
+                  props: { placeholder: 昵称 }
+            - type: AlertDialog
+              props:
+                title: 确认删除？
+                description: 删除后不可恢复（确认/取消文案走 i18n 默认文案）
+                trigger:
+                  type: Button
+                  props: { text: 打开 AlertDialog, danger: true }
+              events:
+                onConfirm:
+                  action: message
+                  params: { type: success, text: 已确认 }
+        - type: Accordion
+          props:
+            collapsible: true
+            items:
+              - key: faq-1
+                title: 如何重置密码？
+                children:
+                  - type: Text
+                    props: { text: 在设置页点击「重置密码」，按邮件指引操作。 }
+              - key: faq-2
+                title: 支持哪些浏览器？
+                children:
+                  - type: Text
+                    props: { text: 最新版 Chrome / Edge / Safari / Firefox。 }
+
+    # 复合类
+    - type: Grid
+      props: { columns: 2, gap: 16 }
+      children:
+        - type: Card
+          props:
+            title: 复合类：Carousel（DSL 子树 items + loop）
+          children:
+            - type: Carousel
+              props:
+                loop: true
+                items:
+                  - type: Alert
+                    props: { variant: info, message: 第一屏：新功能上线 }
+                  - type: Alert
+                    props: { variant: success, message: 第二屏：季度目标达成 }
+                  - type: Alert
+                    props: { variant: warning, message: 第三屏：系统维护通知 }
+        - type: Card
+          props:
+            title: 复合类：Command（搜索过滤 + onSelect）
+          children:
+            - type: Command
+              props:
+                placeholder: 搜索命令
+                groups:
+                  - heading: 操作
+                    items:
+                      - { label: 创建记录, value: create }
+                      - { label: 删除记录, value: delete }
+                  - heading: 导航
+                    items:
+                      - { label: 返回工作台, value: home }
+              events:
+                onSelect:
+                  action: setState
+                  params:
+                    cmd: ${event}
+            - type: Text
+              props:
+                text: 已选命令：${state.cmd}
+                type: secondary
+
+    # 页面级组合：DataTable + Chart
+    - type: Card
+      props:
+        title: 页面级组合：DataTable（排序 / 筛选 / 分页）
+      children:
+        - type: DataTable
+          props:
+            rows: ${data.members}
+            pagination: { pageSize: 3 }
+            columns:
+              - { key: name, title: 姓名, filterable: true }
+              - { key: role, title: 角色, filterable: true }
+              - { key: age, title: 年龄, sortable: true }
+          events:
+            onSort:
+              action: setState
+              params:
+                sortInfo: ${event}
+            onPageChange:
+              action: setState
+              params:
+                pageNo: ${event}
+        - type: Flex
+          props: { gap: 16 }
+          children:
+            - type: Text
+              props:
+                text: 排序：${state.sortInfo}
+                type: secondary
+            - type: Text
+              props:
+                text: 页码：${state.pageNo}
+                type: secondary
+
+    - type: Card
+      props:
+        title: 页面级组合：Chart（bar / line / pie，chart-1..5 令牌配色）
+      children:
+        - type: Grid
+          props: { columns: 2, gap: 16 }
+          children:
+            - type: Chart
+              props:
+                chartType: bar
+                data: ${data.sales}
+                xKey: month
+                yKeys: [amount, profit]
+            - type: Chart
+              props:
+                chartType: pie
+                data: ${data.sales}
+                xKey: month
+                yKeys: [amount]
+        - type: Chart
+          props:
+            chartType: line
+            data: ${data.sales}
+            xKey: month
+            yKeys: [amount, profit]
+
+    # 页面级组合：Sidebar 整页布局（内联 minHeight 约束演示高度）
+    - type: Card
+      props:
+        title: 页面级组合：Sidebar（品牌区 + 嵌套导航 + collapsible）
+      children:
+        - type: Sidebar
+          props:
+            style: { minHeight: 360 }
+            collapsible: true
+            brand: { title: 演示后台 }
+            items:
+              - { label: 概览, href: '/' }
+              - label: 客户管理
+                children:
+                  - { label: 客户列表, href: '/customers' }
+                  - { label: 客户 360, href: '/customers/360' }
+          children:
+            - type: Content
+              props:
+                style: { padding: 16 }
+              children:
+                - type: Text
+                  props: { text: Sidebar 主内容区：点击左下角触发器折叠侧栏。 }

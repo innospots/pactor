@@ -91,6 +91,8 @@ import '@pactor-app/ui/styles.css';
 | Form 协同 | Context 下发；Form 内声明 `name` 的 Input/Select 自动成为表单项（label + `rules.required/message`）；校验失败阻止提交并展示错误；提交成功写 runtime state 的 `form` 路径（`${form.<field>}` 可用） |
 | Table 行模板 | `cell` 经 renderChildren 注入 `{ row, rowIndex }`；分页仅支持 `pageSize` |
 
+在上述 12 个内置组件之外，组件层还注册了 shadcn 组件目录的 48 个扩展组件（如 Badge / Dialog / DataTable / Chart），全部 68 个组件按布局 / 展示 / 表单 / 数据 / 导航 / 反馈弹层 / 复合七类分页展示，逐组件 props 契约与 DSL 示例见[组件参考](/components/)。
+
 ## interaction 层
 
 交互核心为零 React 的 `OverlayManager`（overlay 堆栈与 Promise 模型）+ `createUiBridge` / `registerInteractionActions`（`overlay.open` / `overlay.close` / `confirm` / `message` 动作注册）。
@@ -116,21 +118,3 @@ import {
   // ...以及三层其余全部导出
 } from '@pactor-app/ui';
 ```
-
-## 从 pactor-ui-antd / pactor-ui-radix 迁移
-
-`pactor-ui-antd` 与 `pactor-ui-radix` 两个包已删除（0.x 阶段 BREAKING，仅导入路径变化，符号名与语义不变）。等价符号对照：
-
-| 旧导入 | 新导入 |
-| --- | --- |
-| `pactor-ui-antd/components` 的 props 契约类型（`ButtonProps` / `TableProps` 等） | `@pactor-app/ui/components`（同名类型） |
-| `pactor-ui-antd/components` 的 `createBuiltinComponentRegistry` / `registerBuiltinComponents` / `builtinComponents` | `@pactor-app/ui/components` 的 `createShadcnComponentRegistry` / `registerShadcnComponents` / `shadcnComponents` |
-| `pactor-ui-antd/interaction` 的 `OverlayManager` / `createUiBridge` / `registerInteractionActions` / `UiBridge` / `UiModal` / `UiMessage` / `OVERLAY_CANCEL_PAYLOAD` | `@pactor-app/ui/interaction`（同名符号） |
-| `pactor-ui-antd/interaction` 的 `InteractionProvider` / `OverlayHost`（antd 实现） | `@pactor-app/ui/interaction` 的 `ShadcnInteractionProvider` / `ShadcnOverlayHost`（props 类型 `InteractionProviderProps` / `OverlayHostProps` 同名） |
-| `pactor-ui-antd/layout` 的 `resolveLayout` / `LayoutRegistry` / `LayoutComponent` / 布局 props 类型 | `@pactor-app/ui/layout`（同名符号） |
-| `pactor-ui-antd/layout` 的 `createLayoutRegistry` | `@pactor-app/ui/layout` 的 `createShadcnLayoutRegistry` |
-| `pactor-ui-antd` 的 `antdUiKit` 预设 | `@pactor-app/ui` 的 `shadcnUiKit` 预设 |
-| `pactor-ui-radix` 的 `radixUiKit` / `createRadixComponentRegistry` / `RadixInteractionProvider` 等 | `@pactor-app/ui` 对应 `shadcn*` 符号 |
-| `import 'antd/dist/reset.css'` / `import 'pactor-ui-radix/styles.css'` | `import '@pactor-app/ui/styles.css'` |
-
-自定义组件注册表 / 布局 / 交互层的覆盖方式不变（`componentRegistry` / `layoutRegistry` / `interactionKit` / `ui` 选项保留）。
