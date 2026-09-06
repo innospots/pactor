@@ -387,7 +387,7 @@ actions:
           - action: request
             params: { method: DELETE, url: /api/items/${row.id} }
           - action: message
-            params: { type: success, text: 删除成功 }
+            params: { messageType: success, text: 删除成功 }
           - action: reload
             params: { dataSource: list }
 
@@ -534,7 +534,7 @@ lifecycle:
       params: { ready: true }
   onLoad:                            # 首次数据加载完成后（自动）
     - action: message
-      params: { type: info, text: 数据已加载 }
+      params: { messageType: info, text: 数据已加载 }
   onShow: []                         # 宿主（路由）触发：页面进入可视
   onHide: []                         # 宿主触发：页面离开可视
   onDestroy: []                      # 宿主触发：页面销毁前
@@ -645,7 +645,7 @@ global → app → page → overlay → form → component → row → event
     condition: ${actions.saveResult != null && actions.saveResult.ok == false}
     then:
       - action: message
-        params: { type: error, text: 保存失败 }
+        params: { messageType: error, text: 保存失败 }
 ```
 
 注意 `actions` 键是页面级共享记录：同一页面所有事件分发读写同一份，后写入的立即可见。
@@ -753,7 +753,7 @@ props:
       - action: request
         params: { method: DELETE, url: /api/items/${row.id} }
       - action: message
-        params: { type: success, text: 已删除 }   # request 失败时不会执行
+        params: { messageType: success, text: 已删除 }   # request 失败时不会执行
 
 # 并行：两个独立请求同时发出，全部完成才返回
 - action: parallel
@@ -779,7 +779,7 @@ props:
         params: { method: POST, url: /api/submit }
     else:
       - action: message
-        params: { type: info, text: 已取消 }
+        params: { messageType: info, text: 已取消 }
 ```
 
 **form.setValues 示例**（表单字段值联动，如级联清空）：
@@ -807,7 +807,7 @@ props:
 | 动作 | params | 说明 |
 | --- | --- | --- |
 | `navigate` | `to`（必填） | 经路由桥接跳转（react-router push） |
-| `message` | `text`、`type?`（success / error / warning / info，缺省 info） | 全局提示 |
+| `message` | `text`、`messageType?`（success / error / warning / info，缺省 info；`type` 为兼容别名，但带 `type` 键的 params 会被引擎 isOpaque 约定跳过表达式求值，需插值时必须用 `messageType`） | 全局提示 |
 | `confirm` | `title?`、`content?` | 确认弹窗；结果 data：确认 `true` / 取消 `false`（取消**不是**失败，需命名后经 `if` 分支判断） |
 | `overlay.open` | `overlay`（见下） | 打开弹层并等待关闭；结果 data 为 close 的 payload |
 | `overlay.close` | `id?`、`payload?` | 关闭弹层（缺省栈顶）；payload 缺省为取消语义 |
@@ -833,13 +833,13 @@ events:
                 - action: request
                   params: { method: DELETE, url: /api/items/${row.id} }
                 - action: message
-                  params: { type: success, text: 删除成功 }
+                  params: { messageType: success, text: 删除成功 }
           - action: if
             params:
               condition: ${actions.del != null && actions.del.ok == false}
               then:
                 - action: message
-                  params: { type: error, text: 删除失败，请稍后重试 }
+                  params: { messageType: error, text: 删除失败，请稍后重试 }
 ```
 
 **navigate 示例**：
@@ -983,9 +983,9 @@ body:
     # 动作 id（内建动作为内建名），event.message 为对应消息数据；
     # 与 service 派发并行（自定义 quote 动作同时经 quoteMessage 服务处理）
     onMessageAction:
-      # 注意：params 勿带 type 键——带 type/action 键的对象会被动作引擎
-      # 视作内嵌 DslNode/ActionConfig 而跳过表达式求值（engine resolveDeep
-      # 的 isOpaque 约定）；message 动作缺省即 info
+      # 注意：需要类型时把 `type` 写成 `messageType`——带 type 键的 params
+      # 会被动作引擎视作内嵌 DslNode/ActionConfig 而跳过表达式求值
+      # （engine resolveDeep 的 isOpaque 约定）；本例缺省即 info
       - action: message
         params:
           text: 触发消息操作：${event.action}
@@ -997,4 +997,4 @@ body:
 - **`conversationId` 取路由 query**（`${route.query.id || 'conv-demo'}`）：智能体列表页与侧栏「最近」分组经 `navigate` 动作跳 `/chat?id=xxx` 进入独立会话，刷新后按 URL 还原——路由化多页装配由宿主 `App.tsx`（HashRouter + MenuRegistry + DynamicDslRoute）承担，DSL 只消费 `route.query`。
 - **service 引用是 DSL 与宿主函数的边界**：`contexts[].service`（`agents` / `contexts`）与 `messageActions[].service`（`quoteMessage`）都是字符串引用，运行时经 `ChatServices.callService(name, params)` 派发到宿主注册的服务——函数不进 DSL，符合"DSL 只承载可序列化数据"的约束。
 - **`messageActions` 数组即真相**：渲染顺序与内容严格按数组，未列出的内建动作不出现；内建项（字符串或 `{ builtin }`）保留包内默认行为，可覆盖 `label` / `icon` / `roles` / `visibleWhen`；自定义项（无 `builtin`）点击经 service 派发并并行触发 `onMessageAction` 事件（内建动作点击同样通知）。
-- **两个易踩的坑**：① DSL `message` 动作的 `params` 勿带 `type` 键（触发动作引擎 isOpaque 约定，跳过 `${...}` 求值，缺省即 info）；② `events.onMessageAction` 的 `event.message` 是完整消息对象（含 parts 数组），toast 类动作只取 `event.action` 即可。
+- **两个易踩的坑**：① DSL `message` 动作声明类型时用 `messageType`（params 带 `type` 键会触发动作引擎 isOpaque 约定，跳过 `${...}` 求值，缺省即 info）；② `events.onMessageAction` 的 `event.message` 是完整消息对象（含 parts 数组），toast 类动作只取 `event.action` 即可。

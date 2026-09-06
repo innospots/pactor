@@ -91,9 +91,9 @@ body:
     # 动作 id（内建动作为内建名），event.message 为对应消息数据；
     # 与 service 派发并行（自定义 quote 动作同时经 quoteMessage 服务处理）
     onMessageAction:
-      # 注意：params 勿带 type 键——带 type/action 键的对象会被动作引擎
-      # 视作内嵌 DslNode/ActionConfig 而跳过表达式求值（engine resolveDeep
-      # 的 isOpaque 约定）；message 动作缺省即 info
+      # 注意：需要类型时把 `type` 写成 `messageType`——带 type 键的 params
+      # 会被动作引擎视作内嵌 DslNode/ActionConfig 而跳过表达式求值
+      # （engine resolveDeep 的 isOpaque 约定）；本例缺省即 info
       - action: message
         params:
           text: 触发消息操作：${event.action}

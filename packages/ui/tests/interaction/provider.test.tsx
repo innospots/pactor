@@ -34,6 +34,44 @@ function setupProvider() {
 }
 
 describe('ShadcnInteractionProvider：message 动作经 toast', () => {
+  it('messageType 别名：映射类型且 params 表达式正常求值（不受 isOpaque 影响）', async () => {
+    const { ui, engine } = setupProvider();
+    await vi.waitFor(() => {
+      expect(ui.message).toBeDefined();
+    });
+
+    const result = await engine.execute(
+      {
+        action: 'message',
+        params: { messageType: 'success', text: '已保存：${event}' },
+      },
+      { event: '订单' },
+    );
+
+    expect(result.ok).toBe(true);
+    await screen.findByText('已保存：订单');
+    expect(
+      document.querySelector('[data-slot=toast][data-type=success]'),
+    ).toBeTruthy();
+  });
+
+  it('messageType 与 type 同时存在时 messageType 优先', async () => {
+    const { ui, engine } = setupProvider();
+    await vi.waitFor(() => {
+      expect(ui.message).toBeDefined();
+    });
+
+    await engine.execute({
+      action: 'message',
+      params: { messageType: 'warning', type: 'success', text: '优先级' },
+    });
+
+    await screen.findByText('优先级');
+    expect(
+      document.querySelector('[data-slot=toast][data-type=warning]'),
+    ).toBeTruthy();
+  });
+
   it('Provider 挂载后 message 动作展示 toast（含文本与类型钩子，无 ant 元素）', async () => {
     const { ui, engine } = setupProvider();
     // UiBridge 注入发生在 mount effect

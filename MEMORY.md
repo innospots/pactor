@@ -35,7 +35,7 @@
 
 - **UI kit 单一内置（shadcn）**：`ui` 预设对象（非字符串标识！）+ 三个细粒度槽位的覆盖机制保留；优先级：显式选项 > `ui` 预设 > 内置默认（**默认且唯一内置为 shadcn / @pactor-app/ui**）。必须 `import '@pactor-app/ui/styles.css'`。
 - **UiBridge/Adapter 均为结构化接口**（antd 无关）：permission/router/interaction 的核心零 React，可纯 Node 测。
-- **动作引擎**：condition 跳过 → permission 拦截 → registry 执行；命名动作（`id`）结果入 `actions.<id>` 作用域；编排动作（sequence 等）的子动作**执行时求值**而非快照；含 `action` 键或字符串 `type` 键的内嵌对象不求值（isOpaque 约定）。
+- **动作引擎**：condition 跳过 → permission 拦截 → registry 执行；命名动作（`id`）结果入 `actions.<id>` 作用域；编排动作（sequence 等）的子动作**执行时求值**而非快照；含 `action` 键或字符串 `type` 键的内嵌对象不求值（isOpaque 约定）——因此 `message` 动作的类型用别名 `messageType`（`type` 保留为兼容别名，messageType 优先）。
 - **表达式**：标识符仅从注入 scope 解析（window/fetch 不可达），`__proto__/constructor` 隔离；整体单 `${...}` 保留原始类型，混合模板拼接字符串。
 - **Form 初始值**：`initialValues` + 字段级 `value`（字段级优先）；shadcn kit 的 Form 上下文在字段首次注册时合并字段级初始值。
 - **表单联动**：`form.setValues` 内置动作（params.form 缺省 default + values），Form 经 `context.forms` 桥注册（Form `name` prop 缺省 default，同页多表单须显式命名否则重复注册抛错）；setValues 不触发校验/onValuesChange。`onValuesChange` 的 event 仅首参 `{ <field>: <newValue> }`。**OverlayHost 已订阅 state/data**——overlay 内容绑 store 的表达式随变化重渲染（曾是级联选项不更新的坑）。

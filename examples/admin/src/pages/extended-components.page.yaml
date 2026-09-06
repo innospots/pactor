@@ -117,7 +117,7 @@ body:
               events:
                 onConfirm:
                   action: message
-                  params: { type: success, text: 已确认 }
+                  params: { messageType: success, text: 已确认 }
         - type: Accordion
           props:
             collapsible: true

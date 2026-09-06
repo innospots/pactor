@@ -53,7 +53,7 @@ const loginPage: PageDsl = {
                     {
                       action: "message",
                       params: {
-                        type: "error",
+                        messageType: "error",
                         text: "用户名或密码错误（演示账号 admin / pactor123）",
                       },
                     },
@@ -68,7 +68,7 @@ const loginPage: PageDsl = {
                   then: [
                     {
                       action: "message",
-                      params: { type: "success", text: "登录成功，正在跳转…" },
+                      params: { messageType: "success", text: "登录成功，正在跳转…" },
                     },
                     { action: "navigate", params: { to: "/dashboard" } },
                   ],

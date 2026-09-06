@@ -175,7 +175,16 @@ export type { ChartProps, ChartType } from './components/Chart/index.js';
 export { Layout } from './components/Layout/index.js';
 export type { LayoutProps } from './components/Layout/index.js';
 export { Header } from './components/Header/index.js';
-export type { HeaderProps } from './components/Header/index.js';
+export type {
+  HeaderBrandPosition,
+  HeaderDropdown,
+  HeaderDropdownItem,
+  HeaderLocale,
+  HeaderMenuItem,
+  HeaderProps,
+  HeaderUser,
+  HeaderUserItem,
+} from './components/Header/index.js';
 export { Sider } from './components/Sider/index.js';
 export type { SiderProps } from './components/Sider/index.js';
 export { Content } from './components/Content/index.js';

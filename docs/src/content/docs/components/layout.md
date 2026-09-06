@@ -25,7 +25,93 @@ flex 容器；直接子节点含 `Sider` 时横向、否则纵向（`component` 
 
 ### Header
 
-顶部区域（横向 flex、垂直居中、下边框）。纯语义容器，无特有 props。
+顶部区域（横向 flex、垂直居中、下边框）。缺省为纯语义容器（仅渲染 children）；可选声明五个结构区域：品牌区、通用下拉、横向菜单、用户区、国际化切换，任意组合均可。
+
+区域排布固定：**左区** = 品牌区（`brandPosition: 'left'` 时）→ 通用下拉（`position: 'left'` 时）→ 横向菜单；**右区** = 通用下拉（`'right'` 时）→ 品牌区（`'right'` 时）→ 国际化切换 → 用户区；children 渲染于左右区之间的弹性区（`flex-1`）。
+
+| prop | 类型 | 缺省 | 说明 |
+| --- | --- | --- | --- |
+| `logo` | string | — | 品牌区 logo 图片地址（可含表达式），与 `title` 可二选一或并存（并存时 logo 在前） |
+| `title` | string | — | 品牌区标题文本 |
+| `brandPosition` | `'left'` \| `'right'` | `'left'` | 品牌区位置 |
+| `dropdown` | `{ label, items: Array<{ label, value, disabled? }>, position?: 'left' \| 'right' }` | — | 通用下拉；`position` 缺省 `'left'` |
+| `menu` | `Array<{ key, label, icon?, children? }>` | — | 横向菜单（可含表达式），语义复用 horizontal Menu（`children` 为弹出式子菜单，可嵌套）；`icon` 为预留字段（当前版本不渲染，同 Menu/Command/Sidebar 约定） |
+| `user` | `{ name, avatar?, items?: Array<{ label, value }> }` | — | 用户区（右侧）；`avatar` 缺省时以用户名首字符占位；`items` 缺省或为空时纯展示（无下拉） |
+| `locales` | `Array<{ label, value }>` | — | 国际化切换（右侧下拉）；触发器显示当前 locale 对应的 label（未命中显示 value 本身） |
+| children | DslNode[] | — | 中部弹性区内容 |
+
+| 事件 | `${event}` 载荷 | 说明 |
+| --- | --- | --- |
+| `onMenuSelect` | string（选中项 `key`） | 横向菜单选中 |
+| `onDropdownSelect` | string（选中项 `value`） | 通用下拉选中 |
+| `onUserSelect` | string（选中项 `value`） | 用户区菜单选中 |
+| `onLocaleChange` | string（选中的 locale 值） | 语言切换；Header 只发事件，不改写全局 locale（生效接线见下方示例） |
+
+全组合示例：
+
+```yaml
+- type: Header
+  props:
+    logo: /logo.svg
+    title: 控制台
+    menu:
+      - { key: home, label: 首页 }
+      - key: mgmt
+        label: 管理
+        children:
+          - { key: user-list, label: 用户列表 }
+    dropdown:
+      label: 切换团队
+      position: right
+      items:
+        - { label: 团队A, value: a }
+        - { label: 团队B, value: b }
+    locales:
+      - { label: 中文, value: zh-CN }
+      - { label: English, value: en-US }
+    user:
+      name: 张三
+      items:
+        - { label: 退出登录, value: logout }
+  events:
+    onMenuSelect:
+      action: navigate
+      params:
+        to: ${event}
+    onDropdownSelect:
+      action: setState
+      params:
+        team: ${event}
+    onUserSelect:
+      action: setState
+      params:
+        op: ${event}
+  children:
+    - type: Button
+      props: { text: 新建 }
+```
+
+国际化闭环接线（`onLocaleChange` → setState 回写 → 应用层切换 locale）：
+
+```yaml
+- type: Header
+  props:
+    locales:
+      - { label: 中文, value: zh-CN }
+      - { label: English, value: en-US }
+  events:
+    onLocaleChange:
+      - action: setState
+        params:
+          locale: ${event}
+      - action: service.call
+        params:
+          service: app.setLocale
+          params:
+            locale: ${event}
+```
+
+页面内其他组件可立即消费 `${state.locale}`；全局生效由应用层桥接（示例中的 `app.setLocale` 为应用层注册的 service，内部调用应用的 `setLocale`，当前版本为整页刷新策略，见[国际化指南](/guides/i18n/)）。i18n Provider 的 locale 由应用创建时（或 bootstrap）注入，Header 的 locales 触发器经 `useI18n` 读取的正是该上下文。
 
 ### Sider
 

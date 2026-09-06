@@ -55,8 +55,10 @@ export function createUiBridge(): UiBridge {
  * - `confirm`：`params.title` / `params.content` → UiBridge 注入的
  *   modal.confirm，确认返回 data `true`，取消返回 `false`；UiBridge
  *   未注入 modal 时返回 `{ ok: false }` 受控失败
- * - `message`：`params.type`（success / error / info / warning，缺省
- *   info）+ `params.text` → UiBridge 注入的 message；未注入时受控失败
+ * - `message`：`params.messageType`（success / error / info / warning，
+ *   缺省 info；推荐别名——params 带 `type` 键会被动作引擎 isOpaque
+ *   约定跳过表达式求值）+ `params.text` → UiBridge 注入的 message；
+ *   未注入时受控失败。`params.type` 保留为兼容别名（静态文案可用）
  *
  * 已注册的同名动作不会被覆盖（与 registerBuiltinActions 同约定）。
  */
@@ -134,7 +136,7 @@ export function registerInteractionActions(
       );
     }
     const params = action.params ?? {};
-    const type = params['type'];
+    const type = params['messageType'] ?? params['type'];
     const text = params['text'];
     if (type === 'success' || type === 'error' || type === 'warning') {
       message[type](text);

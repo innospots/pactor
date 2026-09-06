@@ -153,7 +153,7 @@ body:
                                           else:
                                             - action: message
                                               params:
-                                                type: error
+                                                messageType: error
                                                 text: 保存失败，请重试
                                   children:
                                     - type: Alert
@@ -229,7 +229,7 @@ body:
                                     dataSource: customers
                                 - action: message
                                   params:
-                                    type: success
+                                    messageType: success
                                     text: 客户已更新
                     # 权限演示：permissions 不含 customer:delete，按钮以禁用态呈现
                     - type: Button

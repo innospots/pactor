@@ -39,7 +39,7 @@ body:
           else:
             - action: message
               params:
-                type: error
+                messageType: error
                 text: 登录失败：用户名或密码错误
   children:
     - type: Alert
