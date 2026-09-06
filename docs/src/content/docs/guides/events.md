@@ -16,7 +16,7 @@ description: 在 YAML 中配置组件事件（events / ActionConfig / event 载�
     # 单个动作
     onClick:
       action: message
-      params: { type: info, text: 已点击 }
+      params: { messageType: info, text: 已点击 }
 ```
 
 ```yaml
@@ -52,8 +52,8 @@ description: 在 YAML 中配置组件事件（events / ActionConfig / event 载�
 - action: if                        # 读取命名动作结果
   params:
     condition: ${actions.saveResult.id}   # 成功时为结果数据
-    then: [{ action: message, params: { type: success, text: 已保存 } }]
-    else: [{ action: message, params: { type: error, text: 保存失败 } }]
+    then: [{ action: message, params: { messageType: success, text: 已保存 } }]
+    else: [{ action: message, params: { messageType: error, text: 保存失败 } }]
 ```
 
 命名动作结果的两种形态：**成功 → 结果数据本身；失败 → `{ ok: false, error }`**。因此用结果里的业务字段（如 `actions.saveResult.id`）做真假判断即可覆盖成败分支。
@@ -117,7 +117,7 @@ body:
         params:
           condition: ${actions.loginResult.token}
           then: [{ action: app.reload, params: { to: / } }]
-          else: [{ action: message, params: { type: error, text: 登录失败 } }]
+          else: [{ action: message, params: { messageType: error, text: 登录失败 } }]
   children:
     # ...字段略
     - type: Button
@@ -135,7 +135,7 @@ events:
     - action: if
       params:
         condition: ${actions.confirmed}    # 确认 true / 取消 false
-        then: [{ action: message, params: { type: success, text: 已删除 } }]
+        then: [{ action: message, params: { messageType: success, text: 已删除 } }]
 ```
 
 ### 抽屉编辑（overlay.open 命名动作 + close payload）
@@ -172,7 +172,7 @@ events:
                         params: { payload: { success: true } }
                     else:
                       - action: message
-                        params: { type: error, text: 保存失败，请重试 }
+                        params: { messageType: error, text: 保存失败，请重试 }
             children: [...]
     # 抽屉以成功语义关闭后才刷新列表；点 X / 遮罩 / Escape 关闭为取消语义，不进入 then
     - action: if
@@ -182,7 +182,7 @@ events:
           - action: reload
             params: { dataSource: customers }
           - action: message
-            params: { type: success, text: 客户已更新 }
+            params: { messageType: success, text: 客户已更新 }
 ```
 
 要点：overlay 内容的表达式在 **overlay 作用域**求值——`${params.x}` 取注入参数，`${parent.x}` 取父页面作用域快照，`${state.x}` / `${data.x}` 照常可用且**随 store 变化自动重渲染**（这是联动写法在抽屉里同样成立的前提）。

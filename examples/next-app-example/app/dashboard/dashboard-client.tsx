@@ -5,6 +5,8 @@ import { PactorPage } from "@pactor-app/app";
 
 /**
  * 工作台示例页：Layout（Header + Sider(Menu) + Content）完整布局，
+ * Header 演示结构区域 props（品牌区 logo+标题 / 横向菜单 / 通用下拉 /
+ * 国际化切换 / 用户区，各区域事件传出 ${event} 语义值）；
  * Content 中左右结构——左侧 Table 列表（service dataSource 数据 + service 引用下发表头区），
  * 右侧详情（http 引用下发，flex: 1 自适应宽度）。
  * 点击行内「查看」→ setState + reload 驱动右侧详情刷新。
@@ -92,10 +94,100 @@ const dashboardPage: PageDsl = {
   children: [{
     type: "Layout",
     children: [
-      // Header
+      // Header：结构区域示例（品牌区 logo+标题 / 横向菜单（含子菜单） /
+      // 右侧通用下拉 / 国际化切换 / 用户区），各区域事件见下方 events
       {
         type: "Header",
-        children: [{ type: "Text", props: { text: "Pactor 工作台" } }],
+        props: {
+          logo: "/next.svg",
+          title: "Pactor 工作台",
+          menu: [
+            { key: "home", label: "首页" },
+            {
+              key: "products",
+              label: "产品",
+              children: [
+                { key: "product-a", label: "产品 A" },
+                { key: "product-b", label: "产品 B" },
+              ],
+            },
+            { key: "docs", label: "文档" },
+          ],
+          dropdown: {
+            label: "切换团队",
+            position: "right",
+            items: [
+              { label: "云栖团队", value: "yunqi" },
+              { label: "远山团队", value: "yuanshan" },
+            ],
+          },
+          locales: [
+            { label: "中文", value: "zh-CN" },
+            { label: "English", value: "en-US" },
+          ],
+          user: {
+            name: "管理员",
+            items: [
+              { label: "个人中心", value: "profile" },
+              { label: "退出登录", value: "logout" },
+            ],
+          },
+        },
+        events: {
+          // 注意：message 动作的类型用 `messageType`（params 带 `type` 键会被
+          // 动作引擎 isOpaque 约定视作内嵌 DSL 节点，跳过 `${event}` 求值）
+          onMenuSelect: [
+            { action: "setState", params: { headerMenu: "${event}" } },
+            {
+              action: "message",
+              params: { messageType: "info", text: "菜单：${event}" },
+            },
+          ],
+          onDropdownSelect: [
+            { action: "setState", params: { team: "${event}" } },
+            {
+              action: "message",
+              params: { messageType: "info", text: "团队：${event}" },
+            },
+          ],
+          onUserSelect: [
+            {
+              action: "if",
+              params: {
+                condition: "${event == 'logout'}",
+                then: [
+                  {
+                    action: "message",
+                    params: { messageType: "success", text: "已退出登录，正在跳转…" },
+                  },
+                  { action: "navigate", params: { to: "/login" } },
+                ],
+              },
+            },
+            {
+              action: "if",
+              params: {
+                condition: "${event == 'profile'}",
+                then: [
+                  {
+                    action: "message",
+                    params: { messageType: "info", text: "打开个人中心（演示）" },
+                  },
+                ],
+              },
+            },
+          ],
+          onLocaleChange: [
+            { action: "setState", params: { locale: "${event}" } },
+            {
+              action: "message",
+              params: {
+                messageType: "info",
+                text: "语言切换为 ${event}（演示：应用层桥接后整页生效）",
+              },
+            },
+          ],
+        },
       },
       // 中间区域：Sider + Content（横向）
       {

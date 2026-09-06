@@ -41,12 +41,17 @@ SHALL 提供 `registerInteractionActions(actions, manager, ui)` 注册：`overla
 
 ### Requirement: message 动作
 
-`message` SHALL 以 params.type（success/error/info/warning）与 params.text 调用 antd message；UiBridge 未注入 UI 实例时 MUST 返回受控失败而非抛出。
+`message` SHALL 以 params.messageType（success/error/info/warning，缺省 info）与 params.text 调用 message 实现；params.type 保留为兼容别名（messageType 与 type 同时存在时 messageType 优先）。推荐 messageType：params 带 `type` 键会触发动作引擎 isOpaque 约定（视作内嵌 DslNode），导致 params 内的 `${...}` 表达式跳过求值。UiBridge 未注入 UI 实例时 MUST 返回受控失败而非抛出。
 
 #### Scenario: 显示成功消息
 
+- **WHEN** 执行 `{ action: 'message', params: { messageType: 'success', text: '保存成功' } }`
+- **THEN** message.success 被以"保存成功"调用
+
+#### Scenario: type 兼容别名
+
 - **WHEN** 执行 `{ action: 'message', params: { type: 'success', text: '保存成功' } }`
-- **THEN** antd message.success 被以"保存成功"调用
+- **THEN** message.success 被以"保存成功"调用（行为与 messageType 一致）
 
 #### Scenario: 未挂载 Provider
 

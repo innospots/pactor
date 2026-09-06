@@ -53,7 +53,7 @@ body:
                   then:
                     - action: message
                       params:
-                        type: success
+                        messageType: success
                         text: 保存成功
                     - action: navigate
                       params:
@@ -61,7 +61,7 @@ body:
                   else:
                     - action: message
                       params:
-                        type: error
+                        messageType: error
                         text: 保存失败，请重试
           children:
             - type: Input

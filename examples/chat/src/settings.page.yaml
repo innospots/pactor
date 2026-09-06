@@ -26,7 +26,7 @@ body:
                   saved: ${event}
               - action: message
                 params:
-                  type: success
+                  messageType: success
                   text: 设置已保存
           children:
             - type: Input
