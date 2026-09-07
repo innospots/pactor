@@ -1,176 +1,75 @@
 ---
 title: "@pactor-app/chat"
-description: Chat——AI Message Rendering Protocol（消息模型 / Streaming reducer / Safe Registry / capability 动作）与 Chat Runtime 视图（ChatView / MessageBubble / PartRenderer / Composer / chat 布局）
+description: AI 对话工作区——消息协议与流式渲染、Composer、模型选择、上下文弹层、产出物面板、菜单外壳，以及一等 DSL 组件 Chat
 ---
 
-`@pactor-app/chat` 的核心是"协议 + Runtime"而非单个组件：消息模型与 `ConversationStore`、Streaming 事件与纯 reducer、LLM DSL 的 Safe Registry 白名单、Capability → Permission → Confirmation → Execute 的 AI Action 链，以及独立的 React 视图族。model / store / events / reducer / safe-registry / capability 零 React，可纯 Node 测试。
+`@pactor-app/chat` 提供完整的 AI 对话能力：消息模型与流式协议、React 视图族（消息列表 / Composer / 产出物面板 / 菜单外壳），以及可在页面 DSL 中直接声明的一等组件 `Chat`。包内不发起网络请求——数据与服务端协议全部由调用方注入。
 
 ```bash
 pnpm add @pactor-app/chat @pactor-app/runtime @pactor-app/markdown react
 ```
 
-`react >= 18` 为 peer dependency。视图层零 antd 依赖：图标用 lucide-react，皮肤经 `@pactor-app/chat/styles.css` 提供（技术选型参考 [DeepTutor web](https://github.com/HKUDS/DeepTutor/tree/main/web)）。
+`react >= 18` 为 peer dependency；样式表 `@pactor-app/chat/styles.css` 使用前必须引入。
 
-## 组合结构
+## 快速开始
 
 ```tsx
 import { createShadcnComponentRegistry } from '@pactor-app/ui/components';
 import {
   ChatView,
   ConversationStore,
-  createManualDriver,
   createSafeRegistry,
 } from '@pactor-app/chat';
 
 const store = new ConversationStore();
-// Safe Registry：LLM 生成的 DSL 只渲染白名单内的组件
+// LLM 生成的 DSL 只渲染白名单内的组件
 const safeRegistry = createSafeRegistry(createShadcnComponentRegistry(), [
   'Statistic',
   'Card',
 ]);
 
-// transport 由业务按服务端协议实现（SSE / WebSocket）；这里用手动 driver 演示
-const driver = createManualDriver();
-
-<ChatView
-  store={store}
-  transport={driver.transport}
-  safeRegistry={safeRegistry}
-  conversationId="conv-1"
-/>;
+// transport 由业务按服务端协议实现（SSE / WebSocket）
+<ChatView store={store} transport={transport} safeRegistry={safeRegistry} />;
 ```
 
-## 消息模型与 ConversationStore（零 React）
+## 功能一览
 
-消息由有序 Part 数组组成，thinking 与正文分离：
+### 消息渲染
 
-- **Part 联合类型**：`text` / `markdown` / `dsl`（schema 为 DslNode）/ `thinking` / `tool-call`（waiting \| running \| success \| failed）/ `tool-result` / `error` / `status`。
-- **消息状态机**：`pending | streaming | completed | error | cancelled`；Part 状态：`pending | streaming | ready | error`。
+- **富内容 part**：文本 / markdown（安全渲染）/ DSL（LLM 下发的界面片段，Safe Registry 白名单渲染）/ 思考过程（折叠卡）/ 工具调用与结果（配对的活动轨迹）/ 错误 / 状态提示；
+- **活动轨迹**：assistant 消息顶部的流式状态头（呼吸文案 + 计时）+ 工具调用配对条目，进入答案阶段自动折叠；
+- **消息操作条**：hover 显现，内建复制 / 重新生成 / 编辑重发 / 重试；`messageActions` 声明式配置——数组即真相，可覆盖内建字段或追加自定义动作（经服务桥派发）；
+- **空态与建议**：空会话渲染问候语 + 副标题 + 起始建议（点击即发送），问候组与输入框垂直居中；首条消息进入后恢复消息列表 + 钉底输入框。
 
-| 方法 | 说明 |
-| --- | --- |
-| `appendMessage(message)` | 追加消息（id 重复告警并忽略） |
-| `updateMessage(id, patch)` | 更新消息级字段 |
-| `appendPart(messageId, part)` | 追加 part |
-| `updatePart(messageId, partRef, patch)` | 更新 part；partRef 为数组下标或 part id |
-| `setStatus(id, status)` | 设置消息状态 |
-| `removeMessagesFrom(id)` | 不可变截断该消息及之后全部消息（编辑重发 / 重新生成的基础） |
-| `clear()` | 清空会话 |
-| `subscribe(listener)` | 订阅变更，返回退订函数 |
+### 流式交互
 
-全部更新不可变（新数组引用），兼容 `useSyncExternalStore`；对未知 messageId 的更新宽容（告警不抛错）。`ChatMessage` 支持 `attachments?: ChatAttachment[]`（`id` / `name` / `mimeType` / `size?` / `url?`）——包内只持有引用，上传与存储由调用方负责。
+- 发送即驱动一轮对话：user 消息 + assistant 占位 + 流式增量渲染（打字机平滑揭示）；
+- 流式中发送按钮变为停止按钮，点击中断当前回复；
+- 消息区贴底自动跟随，上翻释放、回底恢复，释放期间显示"回到底部"浮动按钮。
 
-## Streaming：事件、reducer 与 Transport
+### Composer 输入框
 
-事件类型一览（`dsl.patch` 暂不实现）：`message.start` / `text.delta`（`format: 'markdown'` 建 markdown part）/ `thinking.delta` / `tool.start` / `tool.result` / `dsl.start` / `dsl.complete` / `message.end` / `message.error`。
+- 自适应高度（上限 200px）、Enter 发送 / Shift+Enter 换行 / IME 合成中不发送；
+- **附件**：粘贴 / 拖拽 / 文件选择交给调用方处理（包内不上传），附件卡片展示与移除；
+- **上下文**：`@` 提及与 `+` 入口弹层（静态列表或服务桥动态数据源），选中项成为输入区上方的 chips，发送时随消息结构化传递；
+- **模型选择**：`models` 配置即启用，chip 可放在工具栏右端或工作区头部（`modelPlacement`），选中值随发送进入 transport；
+- **槽位与开关**：`toolbarStart` / `toolbarEnd`（工具栏左右槽）、`composerFooter`（工具栏下方 footer 区）、`composerBottom`（输入框之外正下方，典型放免责声明）、`hideToolbar`（隐藏默认工具栏行，Enter 发送保留）。
 
-`applyChatEvent(store, event)` 为纯函数 reducer：delta 向目标 part 追加（无 part 则创建）、`dsl.start` 建立占位 part、`dsl.complete` 写入 schema 并置 ready、`message.end` 置 completed（收尾未 ready 的内容 part）、`message.error` 置 error 并附 error part。对乱序宽容——delta 先于 `message.start` 自动建 assistant 占位；未知事件忽略并 `console.warn`，不抛错。
+### 产出物面板（Inspector）
 
-```ts
-interface ChatTransport {
-  send(input: ChatInput): AsyncIterable<ChatEvent>;
-}
+右侧预览面板承载 LLM 的结果物（报告、代码、页面片段）：markdown / code / text / dsl 四种内建渲染；消息流内产出物卡片可"在面板中打开"；桌面固定宽右栏（左缘可拖拽调宽），窄屏退化为覆盖抽屉；`artifact` / `panelOpen` 支持受控配置。
 
-interface ChatInput {
-  text: string;
-  conversationId?: string;
-  model?: string; // 视图层注入的当前选中模型 value
-  contexts?: ChatContextItem[]; // 视图层注入的上下文 chips，不拼接进 text
-}
-```
+### 菜单外壳（ChatShell / AppShell）
 
-`ChatInput` 的 `model` / `contexts` 为可选字段，由视图层在发送时注入当前选中模型与上下文 chips，`contexts` 结构化传递、不拼接进 `text`；既有 transport 实现无需修改。
+侧栏 + 主区的应用外壳：菜单支持图标 / 角标 / 状态点 / 分组 / 禁用；桌面可折叠为 icon rail（hover 图标显示 Tooltip）；移动端侧栏变为覆盖抽屉（遮罩 / Escape / 路由变化关闭）；支持品牌区与侧栏底部固定区（如用户卡）。
 
-`runChatTurn(store, transport, input, options?)` 先 append user 消息（completed）与 assistant 占位（pending），再 for-await 逐事件 reduce；transport 抛错收敛为 `message.error`，流正常结束但未收到 `message.end` 时兜底 completed。`options.signal`（AbortSignal）abort 时停止消费事件流，assistant 消息以 `cancelled` 收尾并正常返回（不抛错）。真实 SSE / WebSocket 客户端由业务实现；`createManualDriver()`（`push` / `complete` / `fail`）供测试与手动驱动。
+### 皮肤
 
-`runRegenerateTurn(store, transport, options?)` 实现"重新生成"：定位末条 user 消息 → `removeMessagesFrom` 截断其后消息 → 以同文本重跑 turn（不重复追加 user 消息），支持 `signal` 取消，无 user 消息时告警返回。
-
-`tool.start` 事件可携带 `args`，供活动轨迹渲染参数摘要。活动轨迹的推导层为零 React 纯函数：`detectStreamingMode(message)` 返回 `reasoning | tool | responding | null`；`pairToolTraces(parts)` 把 tool-call 与 tool-result 按 name + 出现顺序配对为 `ToolTraceEntry`（名称 / 参数 / 状态 / part 下标）。
-
-## Safe Registry 与 capability 动作
-
-- **`createSafeRegistry(source, allowed)`**：白名单过滤的组件注册表——`get` / `has` / `list` 取 `allowed ∩ source` 并实时代理 source。LLM 生成的 DSL MUST 经 Safe Registry 渲染：白名单外节点经 `guardChatDsl` 替换为受控"不允许"占位（`ChatDenied`），其 children 不渲染；props 内嵌的 DSL 子树（Table columns 等）由 runtime 的 UnsupportedComponent 兜底。
-- **`registerCapabilityAction(actions, { capabilities, permission?, confirm? })`** 注册 `capability` 动作，执行链（每步失败均为受控返回）：
-  1. `params.name` 查 CapabilityRegistry，未注册 → `{ ok: false }`
-  2. capability 声明 `permission` 且 PermissionAdapter 拒绝 → `{ ok: false }`
-  3. capability 声明 `risk: 'high'`：注入 confirm 时先确认，取消 → `{ ok: true, skipped: true }`；未注入 confirm → `{ ok: false }`
-  4. `capability.execute(params.params, ctx)`，返回值作为动作 data
-
-```yaml
-type: Button
-props: { text: 应用建议 }
-events:
-  onClick:
-    action: capability
-    params:
-      name: strategy.applySuggestion
-      params: { id: 7 }
-```
-
-:::note
-Safe Registry 只挡组件；动作侧由 capability 白名单兜底——AI DSL 建议只配置 `capability` 动作。
-:::
-
-## Chat 作用域与 DSL part 渲染
-
-DSL part 经 runtime Renderer 渲染：ComponentRegistry 为 Safe Registry；作用域在 runtime 全局作用域之上注入 `conversation`（`{ id }`）、`message`（`{ id }`）、`params`（`user` 经 RuntimeContext 注入）——沿用表达式引擎约束，不暴露浏览器全局对象。`${message.id}` 求值为当前消息 id。
-
-`createChatRuntime({ safeRegistry, capabilities?, permission?, permissionStore?, confirm?, user? })` 一步组装渲染运行时（注册内置动作与 capability 动作；`permissionStore` 经 @pactor-app/permission 构造权限适配器）；`<ChatView>` 注入 props 后内部自动组装。
-
-## React 视图
-
-- **`<ChatView store transport? onSend? safeRegistry? capabilities? permission? confirm? conversationId? user? params? greeting? subtitle? suggestions? models? model? onModelChange? modelPlacement? contexts? onContextsChange? messageActions? onMessageAction? composerBottom?>`**：`useSyncExternalStore` 订阅消息列表 + Composer。发送时 `onSend` 回调先行，注入 `transport` 时同时驱动一轮 turn（通常二选一）。流式中 Composer 按钮变为停止按钮（点击 abort 当前 turn）；消息区贴底自动跟随，上翻释放、回底恢复，释放期间显示"回到底部"浮动按钮。空会话渲染空状态：问候语（`--pactor-chat-font-display` 衬线展示字体）+ 可选副标题 + `suggestions` 起始建议（字符串或 `{ label, prompt? }`，点击即发送；空数组 / 未传不渲染建议区）。空态布局：会话为空时问候组与 Composer 组成同一垂直居中列（`pactor-chat-view--empty` 变体，Composer 不钉底，列宽沿用 `--pactor-chat-content-width`，极矮视口溢出可滚动）；首条消息进入后恢复消息列表 + 钉底 Composer 的既有布局（钉底态 Composer 与页面底部留有空白）。`composerBottom` 槽渲染在 Composer 之外正下方的底部留白区内（空态 / 钉底两态一致，未提供不渲染）。Composer 扩展 props（`attachments` / `onAttachmentsChange` / `onAttachFiles` / `onAttachmentClick` / `toolbarStart` / `toolbarEnd` / `composerFooter` / `hideToolbar` / `onMentionTrigger` / `onPlusMenu`）原样透传给内建 Composer，语义见下方 `<Composer>`。
-- **`<MessageBubble>`**：user 右侧圆角气泡、assistant 左侧通栏排版、system 居中弱提示，parts 按序逐个渲染。
-- **`<ActivityTrace>`**：assistant 消息顶部的活动轨迹——流式状态头（动画图标 + 呼吸文案 + 秒级计时，结束定格）+ tool-call / tool-result 配对轨迹条目（单行：名称 + 参数摘要 + 状态图标，展开显示参数与结果/错误）。折叠状态机：流式展开 → 进入答案阶段自动折叠 → 用户手动操作后 pin（按消息记忆）。
-- **`<PartRenderer>`**：text → 文本段落；markdown → @pactor-app/markdown 安全渲染器（streaming 期间经 `useSmoothStreamText` 打字机揭示）；dsl → runtime 渲染（Safe Registry + chat 作用域）；tool-call / tool-result → 移交 ActivityTrace 配对渲染；thinking → 自绘折叠卡（markdown 正文，流式展开 + 进行中指示，答案阶段自动折叠，支持 pin）；error → 自绘警示条（附重试入口）；status → 弱提示。
-- **`<MessageActions>`**：hover 显现的消息操作条，经 `messageActions?: Array<BuiltinMessageAction | ChatMessageAction>` 声明式配置——**数组即真相**：传入数组时严格按数组顺序与内容渲染，未列出的内建动作不出现；未配置时等价于 `['copy', 'regenerate', 'retry', 'edit']`（与历史行为一致）。内建动作保留包内默认行为——复制（写入剪贴板并反馈已复制）、末条 completed assistant 重新生成（接入 `runRegenerateTurn`，仅末条且注入 transport，该约束不可覆盖）、user 消息内联编辑重发（确认 → 截断 + 重跑，取消不改 store）、error 消息重试；`label` / `icon` / `roles` / `visibleWhen`（`'completed'` 含 cancelled 终态 / `'error'` / `'always'` 含 streaming）按字段覆盖默认描述。自定义动作（`{ id, label?, icon?, roles?, visibleWhen?, service? }`，无 `builtin`）点击经 `ChatServices.callService(service, { actionId, message })` 派发（未注入 callService 时 console.warn 跳过、不抛错）；内建与自定义动作点击均并行触发 `onMessageAction?(actionId, message)` 通知，不影响内建默认行为。`icon` 为字符串名，走 `MESSAGE_ACTION_ICONS` 白名单（copy / check / rotate-ccw / pencil / quote / thumbs-up / thumbs-down / share / bookmark），未知名渲染占位图标。
-- **`<Composer>`**：自适应高度 textarea（上限 200px）；Enter 发送、Shift+Enter 换行；IME 合成进行中 Enter 不发送；空文本不发送；发送/停止按钮为深色实心圆钮（发送为 ArrowUp 上箭头、停止为 Square 方块，禁用态降透明度），状态机（disabled / ready / streaming 停止）同一按钮元素切换。扩展点：`attachments` + `onAttachmentsChange` 受控附件（图片缩略图 / 文档卡片 + 移除），粘贴 / 拖拽 / 文件选择产出 `File[]` 经 `onAttachFiles` 交给调用方（包内不上传），点击卡片经 `onAttachmentClick` 通知；`toolbarStart` / `toolbarEnd` 渲染槽；`composerFooter` footer 槽（渲染在工具栏下方、以分隔线相隔，未提供不渲染）；`hideToolbar`（缺省 false）为 true 时工具栏行整体不渲染——内建 + 钮 / 附件钮 / 模型 chip / 发送钮与 toolbar 槽一并抑制（footer 槽不受影响，Enter 发送保留）；词边界 `@` 触发 `onMentionTrigger(query, anchorRect)`，"+" 按钮触发 `onPlusMenu(anchorRect)`（未传回调不渲染入口，弹层由调用方渲染）。
-- **内建模型选择**：`models?: ChatModelOption[]`（`{ value, label }`）提供非空时，Composer 工具栏右端渲染内建模型 chip（显示当前模型 label，点击打开锚定弹层选择，渲染在 `toolbarEnd` 槽内容之前），未配置或为空数组不渲染。`model?` + `onModelChange?(value)` 同时提供为受控；仅提供 `models` 为非受控（组件自持选中态，缺省 `models[0]`）。选中值在发送时作为 `ChatInput.model` 进入 transport。`modelPlacement?: 'composer' | 'header'`（缺省 `'composer'`）控制 chip 渲染位置：`'header'` 时模型 chip 渲染在工作区头部左端（title 之前）、Composer 不再渲染；此时即使未配置 title / headerExtra / headerActions，仅配置 models 也渲染"顶栏仅模型选择"的极简头部。受控/非受控选中态与 `ChatInput.model` 语义不随位置变化。
-- **内建上下文弹层**：`contexts?: ChatContextSource[]`（`{ trigger: '@' | '+', label, items? 或 service? + params? }`）驱动内建 @ / + 锚定弹层：`items` 为静态候选；`service` 经注入的 `ChatServices.callService(name, params)` 解析为候选数组（按 source 键会话级缓存，未注入 callService 时弹层内联错误提示、不抛错）。"+" 入口仅在有 `trigger: '+'` 的 source 时渲染；注入的 `onMentionTrigger` / `onPlusMenu` 优先于内建弹层（对应内建入口/弹层不启用）。选中候选追加为 Composer 上方 chips（同 trigger 同 id 去重、可单独移除），变更触发 `onContextsChange?(chips)`；发送时 chips 作为 `ChatInput.contexts` 进入 transport（`ChatContextItem = { id, label, trigger?, data? }`，不拼接进 text），发送后清空。
-
-:::note
-数据由调用方经接口注入：包内不发起网络请求、不读取外部数据源。greeting / suggestions / attachments 等为受控 props，文件上传、提及列表、附件预览由调用方实现后经回调回写。`examples/chat` 提供内存级参考实现（data URL 伪上传、工具栏 chip）。
-:::
-
-### 流式交互 hooks
-
-- **`useSmoothStreamText(content, isStreaming, options?)`**：rAF 打字机平滑——streaming 期间按 backlog 自适应速率逐帧揭示文本（每帧 `max(2, backlog/5)`，封顶 120 字符），流停止立即对齐全文，内容回缩立即回退，`enabled: false` 直通。
-- **`useChatAutoScroll({ messageCount, lastContentLength, isStreaming })`**：返回 `{ containerRef, isFollowing, scrollToBottom }`；跟随期间钉底，上翻超 80px 释放、回底 40px 内恢复。滚动容器需 `overflow-anchor: none`（styles.css 已内置）。
-
-## 皮肤
-
-视图颜色全部经 `--pactor-chat-*` CSS 变量表达，样式表 `@pactor-app/chat/styles.css`（使用前必须引入）：
-
-```ts
-import '@pactor-app/chat/styles.css';
-```
-
-**嵌入契约**：组件样式自持——结构布局（高度、对话列居中、面板贴右）全部由包内样式承担，调用端无需任何覆盖。高度语义为"填满父容器"（`height: 100%`）：嵌入时宿主须给容器显式定高（flex 链或固定高度），standalone 顶层挂载同理（如容器 `height: 100vh`）；父级无定高时退化为内容高度。可调令牌：`--pactor-chat-content-width`（对话列限宽，缺省 768px，置 `none` 关闭）、`--pactor-chat-inspector-width`（产出物面板宽，缺省 320px）、`--pactor-chat-sidebar-width`（侧栏宽）。
-
-换肤契约与 @pactor-app/ui 一致：覆盖 CSS 变量 / `<html data-pactor-theme="dark">` 启用内置暗色 / 直接覆盖 `.pactor-chat-*` class。主要变量：`--pactor-chat-bg`（工作区底色，缺省暖白灰）`/fg/muted/muted-fg/card/border/primary/primary-fg/danger/success`、`--pactor-chat-sidebar-bg`（侧栏底色，较工作区深一档）、`--pactor-chat-user-bubble-bg/border`、`--pactor-chat-code-bg`、`--pactor-chat-radius`、`--pactor-chat-font-display`（衬线展示字体栈，用于空状态问候与布局标题）。动画（呼吸文案、发送按钮 streaming 光环、状态图标脉冲）为纯 CSS keyframes。
-
-## chat 布局注册
-
-`registerChatLayout(layoutRegistry)` 注册 `chat` 布局（header 标题区 + ChatView 区，当前版本无会话历史侧栏）；注册后 `resolveLayout(registry, 'chat')` 命中，可与其他布局一样经 DSL `layout` 字段使用。
+视图颜色全部经 `--pactor-chat-*` CSS 变量表达：覆盖变量即换肤，`<html data-pactor-theme="dark">` 启用内置暗色。结构布局（高度、对话列居中、面板贴右）由包内样式自持，嵌入时宿主只需给容器定高。
 
 ## Chat：一等 DSL 组件
 
-`Chat` 是与 Button / Input 同级的 DSL 组件：`registerChatComponent(registry)` 注册一次（已存在同名类型时不覆盖），页面 DSL 以 `{ type: 'Chat', props, events }` 声明完整聊天工作区（AppShell 侧栏 + header + ChatView）。服务注入与组件声明解耦：宿主在根部用 `ChatServicesProvider` 注入一次 `ChatServices`（与 `ChatWorkspaceServices` 同型，`transport` 必填；可选 `callService(name, params)` 服务桥供 contexts 的 service 引用解析），`Chat` 就近从 context 读取；未注入时渲染受控「未配置聊天服务」提示并 `console.warn`，不抛错。
-
-```tsx
-import { Registry } from '@pactor-app/core';
-import { createPageRuntime } from '@pactor-app/runtime';
-import { ChatServicesProvider, registerChatComponent } from '@pactor-app/chat';
-import chatPageDsl from './chat.page.yaml';
-
-const components = new Registry<unknown>('ComponentRegistry');
-registerChatComponent(components);
-const runtime = createPageRuntime(chatPageDsl, { components });
-
-<ChatServicesProvider value={{ transport, safeRegistry, ... }}>
-  {runtime.render()}
-</ChatServicesProvider>;
-```
+`Chat` 是与 Button / Input 同级的 DSL 组件：`registerChatComponent(registry)` 注册一次，页面 DSL 即可声明完整聊天工作区。运行时服务（`transport` 必填、Safe Registry、附件回调、服务桥等）由宿主在根部经 `ChatServicesProvider` 注入一次。
 
 ```yaml
 dsl: '1.0'
@@ -179,103 +78,56 @@ state: { activeMenu: new, model: demo }
 body:
   type: Chat
   props:
-    title: 助手工作区          # showHeader: false 可关闭 header
-    editableTitle: true        # 点击标题编辑，提交触发 onTitleChange
-    headerActions: [export, theme, clear]   # 内建操作组（导出/明暗/清空）
+    title: 助手工作区
+    headerActions: [export, theme, clear]   # 头部操作：导出 / 明暗 / 清空
     greeting: 你好
     activeMenuKey: ${state.activeMenu}
     menu:
       - { key: new, label: 新建对话, icon: plus }
       - { key: s1, label: 本月报表分析, icon: history, group: 历史会话 }
-    models:                    # 内建模型选择：受控闭环 model + onModelChange
+    models:
       - { value: demo, label: demo-mock }
       - { value: pro, label: demo-pro }
     model: ${state.model}
-    contexts:                  # 内建 @ / + 上下文弹层，service 经 callService 解析
+    contexts:
       - { trigger: '@', label: 智能体, service: agents }
       - { trigger: '+', label: 上下文, items: [{ id: c1, label: 本月报表 }] }
-    # hideToolbar: true        # 隐藏 Composer 默认工具栏行（Enter 发送保留）
-    composerFooter:            # Composer footer 槽（工具栏下方、带分隔线）
+    composerFooter:            # 输入框 footer 槽（工具栏下方）
       type: DropdownMenu
       props:
         items: [{ label: 默认工作空间, value: 默认工作空间, icon: folder }]
       children:
         - type: Button
           props: { text: 选择工作空间, variant: text, size: small }
-    messageActions:            # 消息操作条：数组即真相（未列内建不出现）
-      - copy
-      - regenerate
-      - { builtin: edit, label: 修改并重发 }                    # 内建字段覆盖
-      - { id: quote, label: 引用回复, icon: quote, service: quoteMessage }  # 自定义动作
+    messageActions: [copy, regenerate, edit]
   events:
-    onMenuSelect:              # event 作用域：event.key / event.item
+    onMenuSelect:              # event.key / event.item
       - action: setState
         params: { activeMenu: ${event.key} }
-    onSend:                    # event 作用域：event.text（与 transport turn 并行）
-      - action: setState
-        params: { lastSent: ${event.text} }
-    onModelChange:             # event 作用域：event.model
+    onModelChange:             # event.model
       - action: setState
         params: { model: ${event.model} }
-    onMessageAction:           # event 作用域：event.action / event.message（内建动作亦通知）
-      - action: message
-        params: { text: 触发消息操作：${event.action} }
-    onTitleChange:             # event 作用域：event.title
-      - action: setState
-        params: { title: ${event.title} }
 ```
 
-- **菜单**：`menu: ChatMenuItem[]`（`key / label / icon? / badge? / dot? / disabled? / group?`）驱动内建侧栏（AppShell 承载，移动端为抽屉）；`icon` 字符串名映射内置 lucide 子集（plus / chat / history / settings / star / search / user / folder），未知名渲染占位圆点；`group` 渲染分组标题行；`dot?: boolean` 在 label 右侧渲染状态圆点（danger 系令牌着色，与 badge 计数胶囊可共存）；`activeMenuKey` 为受控 prop，典型闭环是 `${state.x}` 绑定 + `onMenuSelect` 调 `setState`；disabled 项不触发 `onMenuSelect`。
-- **Header 三层**：`title` 标量 → `headerExtra?: DslNode | ReactNode`（标题右侧槽）→ `header?: DslNode | ReactNode`（整体替换）；`showHeader: false` 关闭。缺省按内容自动渲染——header 槽 / title / headerExtra / headerActions / header 位模型 chip 任一存在才渲染，均无内容时 `.pactor-chat-workspace__header` 节点不渲染。DslNode 槽仅页面运行时可渲染；纯 React 场景传 ReactNode，误传 DslNode 时告警并跳过。
-- **内建 header 操作组与可编辑标题**：`headerActions?: ('export' | 'theme' | 'clear')[]` 按数组顺序在内建 header 右侧（`headerExtra` 槽之前）渲染图标按钮——export 将当前会话消息序列化为 Markdown 并下载、theme 切换 `document.documentElement` 的 `data-pactor-theme`、clear 清空当前会话 store；缺省不渲染任何操作按钮。默认行为总在包内执行，事件 `onExport` / `onThemeChange`（event.theme）/ `onClear` 为并行通知。`editableTitle?: boolean` 开启后点击标题进入编辑，Enter / blur 提交并触发 `onTitleChange`（event.title）。
-- **内建模型选择**：props `models?: { value, label }[]` / `model?: string` / `modelPlacement?: 'composer' | 'header'`（`'header'` 时 chip 渲染在头部左端，仅配置 models 即呈现极简头部）+ 事件 `onModelChange`（event 作用域含 `model`）；交互细节见上文「React 视图」同名条目。
-- **内建上下文弹层**：props `contexts?: ChatContextSource[]` + 事件 `onContextsChange`（event 作用域含 `contexts`）；`source.service` 引用经注入的 `ChatServices.callService` 解析，交互细节见上文「React 视图」同名条目。
-- **消息操作条**：prop `messageActions?: Array<BuiltinMessageAction | ChatMessageAction>`（DSL 可序列化数据，语义见上文 `<MessageActions>` 条目）+ 事件 `onMessageAction`（event 作用域含 `action` 动作 id 与 `message` 消息数据；内建动作点击亦通知，默认行为总在包内执行）。自定义动作的 `service` 引用经注入的 `ChatServices.callService` 派发。注意：DSL `message` 动作的 `params` 不要带 `type` 键——带 `type` / `action` 键的对象会被动作引擎视作内嵌 DslNode / ActionConfig 而跳过表达式求值（`resolveDeep` 的 isOpaque 约定），`message` 动作缺省即 info。
-- **侧栏槽**：`sidebar?: DslNode | ReactNode` 提供时整体替代内建菜单侧栏。
-- **Composer 槽与工具栏开关**：`toolbarStart` / `toolbarEnd` / `composerFooter`（均 `DslNode | ReactNode`）分别渲染在 Composer 工具栏左端 / 右端（发送钮之前）/ 工具栏下方 footer 区（带分隔线，未提供不渲染）；`composerBottom`（同双型）渲染在 Composer 之外正下方（页面底部留白区，空态 / 钉底两态一致，未提供不渲染，典型用途为免责声明等弱提示行）。与服务注入的同名槽并存时服务槽在先。`hideToolbar?: boolean`（缺省 false）为 true 时工具栏行整体不渲染——toolbar 槽与内建 + 钮 / 附件钮 / 模型 chip / 发送钮一并抑制（`composerFooter` 不受影响，Enter 发送保留）。钉底态 Composer 与页面底部留有空白（`pactor-chat-view__composer-dock` 的 padding-bottom，`composerBottom` 槽即渲染在该留白区内）。
-- **React 直连**：`<ChatServicesProvider>` + `<Chat>` 可直接作为 React 组件使用（`onSend?(text)` / `onMenuSelect?(key, item)` 及 `onModelChange?(value)` / `onContextsChange?(chips)` / `onMessageAction?(actionId, message)` / `onExport?()` / `onThemeChange?(theme)` / `onClear?()` / `onTitleChange?(title)` 均为普通函数 props）。`createChatWorkspace` 保留为兼容路径，内部与 `Chat` 共用同一组合（`ChatComposition`），行为不变。包内导出类型 `ChatModelOption` / `ChatContextSource` / `ChatContextItem` / `ChatHeaderAction` / `BuiltinMessageAction` / `ChatMessageAction` 供业务侧复用。
+主要配置（全部为 DSL 可表达的数据）：
 
-完整装配参考 `examples/chat`。
+| 分组 | props / 事件 |
+| --- | --- |
+| 头部 | `title` / `headerExtra` / `header` / `showHeader` / `headerActions` / `editableTitle`（头部按内容自动渲染，无内容不渲染） |
+| 侧栏 | `menu` / `activeMenuKey` / `sidebar`（替代槽），事件 `onMenuSelect` |
+| 空态 | `greeting` / `subtitle` / `suggestions` |
+| 模型 | `models` / `model` / `modelPlacement`，事件 `onModelChange` |
+| 上下文 | `contexts`，事件 `onContextsChange` |
+| 消息操作 | `messageActions`，事件 `onMessageAction` |
+| Composer | `toolbarStart` / `toolbarEnd` / `composerFooter` / `composerBottom` / `hideToolbar` |
+| 产出物面板 | `artifact` / `panelOpen` / `inspector`，事件 `onArtifact` / `onPanelClose` / `onOpenArtifact` |
 
-### 产出物面板（Inspector）
+事件均为并行通知，内建默认行为总在包内执行。完整装配参考 `examples/chat`。
 
-`Chat` 支持右侧产出物预览面板，承载 LLM/Agent 的结果物（报告、代码、页面片段），可关闭/隐藏：
+## createChatWorkspace（兼容路径）
 
-- **模型**：`ChatArtifact { id, kind: 'markdown' | 'code' | 'text' | 'dsl', title, content, language?, meta? }`；`ArtifactStore`（`get/subscribe/open/update/close`，ConversationStore 同模式，可经 services `artifactStore` 注入）。
-- **受控配置**：`artifact` / `panelOpen` 可绑 `${state.x}`；`events.onPanelClose` 在关闭按钮/遮罩点击时触发（典型接法 setState panelOpen=false）；`inspector?: DslNode | ReactNode` 槽整体替代面板内建渲染。
-- **内建渲染器**按 kind 分发：`markdown` 走 @pactor-app/markdown 安全渲染、`code` 只读代码块（language 角标）、`text` 预格式文本、`dsl` 经 Safe Registry 守卫 + renderChildren 活预览（拦截/失败降级不抛错）。
-- **卡片重开**：消息流内产出物卡片的"在面板中打开"按钮无条件触发 `events.onOpenArtifact`（event 含 artifact），受控 DSL 场景借此重开面板；非受控场景直接 store.open。
-- **LLM → 面板联动**：`ChatPart` 新增 `artifact` part，消息流内联渲染"产出物卡片"（含"在面板中打开"按钮）；part 就绪时触发 `events.onArtifact`（event 作用域含 `artifact`），DSL 侧典型接法 `setState artifact=${event.artifact}, panelOpen=true`——框架不擅自开面板。
-- **布局**：桌面固定宽右栏（`--pactor-chat-inspector-width`，缺省 320px），左缘可拖拽实时调宽（夹取 240px ~ 容器宽 70%，内部状态无需受控接线）；窄屏（<768px）退化为右侧覆盖抽屉（遮罩点击关闭）。未配置面板时零渲染。
+`createChatWorkspace(services)` 以工厂闭包注入服务，返回可注册进页面运行时的 `ChatWorkspace` 组件——与 `Chat` 组件共用同一组合，行为一致，DSL props 与上表相同。
 
-```yaml
-state: { panelOpen: false }
-body:
-  type: Chat
-  props:
-    artifact: ${state.artifact}
-    panelOpen: ${state.panelOpen}
-  events:
-    onArtifact:    # artifact part 就绪 → 开面板
-      - action: setState
-        params: { artifact: ${event.artifact}, panelOpen: true }
-    onPanelClose:
-      - action: setState
-        params: { panelOpen: false }
-```
+## 零 React 核心
 
-### ChatShell：菜单外壳
-
-`ChatShell`（随 `registerChatComponent` 一并注册，React 同名组件亦可直接用）是**不含聊天与路由逻辑**的外壳：AppShell + 内建菜单侧栏（与 `Chat` 同款 `menu` / `activeMenuKey` / `onMenuSelect`，图标白名单一致）+ `content: DslNode | ReactNode` 主区槽 + `sidebar` 替代槽。侧栏增强：提供 `brand` 时桌面端在侧栏顶部渲染品牌行（brand 左、折叠钮右；移动端仍走顶栏品牌区）；`collapsible?: boolean`（缺省 false）开启折叠按钮——折叠后桌面侧栏收窄为 icon rail（菜单仅显图标，label / badge / 分组 / 底部区 / 品牌文案隐藏，hover 图标显示 Tooltip 提示），内部非受控状态，不影响移动端抽屉语义；`sidebarFooter?: DslNode | ReactNode` 在侧栏滚动区之后渲染固定底部区（设备卡 / 用户卡等，未提供不渲染容器）。用于"菜单切换到非对话页"的工作区应用：DSL 场景 content 槽内放 `when` 条件子树（onMenuSelect → setState 闭环）；路由场景 content 传路由出口（onMenuSelect → 导航）。嵌入的 `Chat` 不传 `menu` 即为无侧栏形态；会话状态经共享 `services.store` 跨页面切换存活。路由化多页装配参考 `examples/chat`（HashRouter + MenuRegistry + DynamicDslRoute，刷新按 URL 还原页面）。
-
-## AppShell 应用外壳
-
-`<AppShell sidebar brand? collapsible? sidebarFooter? locationKey? className?>` 是更外层的应用外壳（与 ChatLayout 组合而非替代）：侧栏插槽 + 主区。**实现为 `@pactor-app/ui` Sidebar 的薄封装**——折叠 / 移动端抽屉 / inert 等交互全部由 ui Sidebar 承担（DOM 为 ui Sidebar 的 `data-slot` 结构），chat 侧只在根挂 `pactor-chat-shell` 类做 `--sidebar*` → `--pactor-chat-*` 令牌映射（皮肤唯一入口仍为 `--pactor-chat-*`，暗色经覆盖链自动生效）。桌面（≥768px）侧栏与主区 flex 同行；移动端（<768px）侧栏变为覆盖抽屉（遮罩 + 顶栏菜单按钮 + `brand` 品牌区），断点由 CSS 媒体查询表达（`--pactor-chat-sidebar-width` 等令牌可覆盖），JS 只管开合。桌面端提供 `brand` 时侧栏顶部渲染品牌行（brand 左、折叠钮右）；`collapsible?: boolean`（缺省 false）为 true 时品牌行右端渲染折叠按钮（aria-label / aria-expanded 标注），点击切换内部非受控 collapsed 状态——折叠后桌面侧栏收窄为 icon rail（菜单仅显图标，label / badge / 分组标题 / 底部区 / 品牌文案隐藏，hover 图标显示 Tooltip 提示；DSL 路径的 ui Menu 经 context 自感知降级），再次点击恢复；移动端不渲染折叠按钮、抽屉语义不变。`sidebarFooter?: ReactNode` 渲染在侧栏滚动区之后的固定底部区（未提供不渲染容器）。关闭语义：Escape / 遮罩点击 / `locationKey` 变化（路由或会话切换时传入变化的 key，渲染期比较关闭）；移动端关闭时侧栏容器 `inert`。侧栏内容（如会话列表）在导航后调用 `useSidebarDrawer()?.close()` 关抽屉（壳外返回 null）。示例见 `examples/chat`。
-
-## DSL 页面：createChatWorkspace
-
-聊天页可以与其他 pactor 页面一样以 `*.page.yaml` 声明、经 `createPageRuntime` 渲染。函数 / 实例无法从 DSL 产生，故运行时服务（`transport` 必填；`store` / `storeFactory`、`safeRegistry`、`capabilities`、`permission`、`confirm`、`user`、`callService` 服务桥、附件回调、`onMentionTrigger` / `onPlusMenu`、`toolbarStart` / `toolbarEnd` / `composerFooter` / `composerBottom` ReactNode 槽、`headerExtra` 可选）一律由宿主经 `createChatWorkspace(services)` 工厂闭包注入，返回的 `ChatWorkspace` 组件注册进页面运行时组件注册表（`options.components`）。
-
-组件 props 全部为 DSL 可表达的标量 / 数组：`title?`（工作区头部标题；头部按内容自动渲染——header 槽 / title / headerExtra / headerActions / header 位模型 chip 任一存在才渲染，均无内容时不渲染头部节点）/ `greeting?` / `subtitle?` / `suggestions?` / `conversationId?` / `params?` / `models?` / `model?` / `modelPlacement?` / `contexts?` / `messageActions?` / `headerActions?` / `editableTitle?` / `hideToolbar?`；事件侧 `onModelChange`（event.model）/ `onContextsChange`（event.contexts）/ `onMessageAction`（event.action / event.message）/ `onExport` / `onThemeChange`（event.theme）/ `onClear` / `onTitleChange`（event.title）经 ChatDslAdapter 折算为 event 作用域对象。另支持 DslNode 槽——`sidebar?`（提供时以 AppShell 包裹工作区）、`toolbarStart?` / `toolbarEnd?` / `composerFooter?` / `composerBottom?`（Composer 槽，语义同 `Chat` 组件）与 `inspector?`（产出物面板内容槽）——renderer 对内嵌 DslNode prop 跳过提前求值，组件内经 `useRenderer().renderChildren` 渲染（Table `columns[].cell` 同款机制），仅页面运行时上下文内有效。
-
-组件自持 `ConversationStore`（外部 `store` > `storeFactory` > 默认构造，ref 保持——重渲染不重建）与附件受控状态（`onAttachFiles` 回传的附件追加、发送后清空）。完整装配参考 `examples/chat`（`chat.page.yaml` + `App.tsx` 宿主装配）。
+消息模型、`ConversationStore`、Streaming 事件与 reducer、Safe Registry、capability 动作链（权限 → 确认 → 执行）均可脱离 React 使用与测试，支撑视图层的全部行为；`createManualDriver()` 供测试与手动驱动 transport。
