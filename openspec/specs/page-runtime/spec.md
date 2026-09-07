@@ -1,6 +1,11 @@
 # Spec: page-runtime
 
+## Purpose
+
 PageRuntime：PageDsl 从校验到渲染的完整运行链路与生命周期编排（`@pactor-app/runtime`）。
+
+
+## Requirements
 
 ### Requirement: PageDsl 加载校验
 

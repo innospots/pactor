@@ -1,6 +1,11 @@
 # Spec: chat-dsl-page
 
+## Purpose
+
 聊天页的 DSL 构建（`@pactor-app/chat`）：`createChatWorkspace` 工厂与 ChatWorkspace 组件的 DSL 页面集成。
+
+
+## Requirements
 
 ### Requirement: createChatWorkspace 工厂
 

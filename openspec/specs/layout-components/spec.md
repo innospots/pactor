@@ -1,7 +1,9 @@
 # Spec: layout-components
 
-DSL 布局组件（`@pactor-app/ui` components 层）：`Layout` / `Header` / `Sider` / `Content`，页面可在 DSL 中自由组合布局结构。
+## Purpose
 
+DSL 布局组件（`@pactor-app/ui` components 层）：`Layout` / `Header` / `Sider` / `Content`，页面可在 DSL 中自由组合布局结构。
+## Requirements
 ### Requirement: Layout 容器
 
 `Layout` SHALL 渲染为 flex 容器：存在 `type: 'Sider'` 的直接子节点时主轴为 horizontal，否则为 vertical；`direction` prop 显式提供时 MUST 覆盖推导结果。children 经 Renderer children 机制渲染 DSL 子树。方向推导 MUST 跳过动态引用元素（DslSourceRef 无法静态判定是否为 Sider，混排数组中仅按内联元素推导；需要横向时显式声明 `direction`）。
@@ -135,7 +137,7 @@ Header 的结构区域 SHALL 按固定规则排布：左侧区域 = 品牌区（
 
 ### Requirement: Menu 导航菜单组件
 
-`Menu` SHALL 渲染导航菜单：prop `items` 为 `{ key, label, icon?, children? }[]`（可含表达式，如 `${data.menus}`；`icon` 为图标名（Icon 白名单），渲染于 label 前）；`mode` 为 `inline`（Sider 内，缺省）或 `horizontal`（Header 内）；`selectedKey` 为受控 prop；选中变化触发事件 `onSelect`（传出 key）。Menu MUST NOT 直接读取应用外壳层的 MenuRegistry——菜单数据经表达式注入。
+`Menu` SHALL 渲染导航菜单：prop `items` 为 `{ key, label, icon?, badge?, dot?, group?, disabled?, children? }[]`（可含表达式，如 `${data.menus}`；`icon` 为图标名（Icon 白名单），渲染于 label 前；`badge` 为 label 后的角标（string | number）；`dot` 为 label 右侧的 danger 系状态圆点（与 badge 可共存）；`group` 为分组标题（相邻同组项只渲染一次）；`disabled` 项置灰不可选，点击 MUST NOT 触发 onSelect）；`mode` 为 `inline`（Sider 内，缺省）或 `horizontal`（Header 内）；`selectedKey` 为受控 prop；选中变化触发事件 `onSelect`（传出 key）。Menu MUST NOT 直接读取应用外壳层的 MenuRegistry——菜单数据经表达式注入。
 
 #### Scenario: Sider 内 inline 菜单
 
@@ -157,6 +159,11 @@ Header 的结构区域 SHALL 按固定规则排布：左侧区域 = 品牌区（
 - **WHEN** 菜单项声明 `icon: 'settings'`
 - **THEN** 该项文字前渲染图标 svg
 
+#### Scenario: 展示扩展字段
+
+- **WHEN** 菜单项声明 `badge: 3`、`dot: true`、`group: '最近'` 或 `disabled: true`
+- **THEN** badge 项渲染角标、dot 项渲染状态圆点、同组相邻项共享一次分组标题、disabled 项置灰且点击不触发 onSelect
+
 ### Requirement: 布局组件与普通组件同权
 
 布局组件 SHALL 支持全部节点级能力与通用 props：`className` / `style` / `permission` / `when` / `events`，且 MUST 可被页面级 `components` 定义并经 `component` 引用节点复用。
@@ -170,3 +177,4 @@ Header 的结构区域 SHALL 按固定规则排布：左侧区域 = 品牌区（
 
 - **WHEN** 顶层 `components.sideNav` 定义为 Sider 子树，body 中 `{ component: 'sideNav' }` 引用
 - **THEN** 引用处渲染该 Sider 子树
+

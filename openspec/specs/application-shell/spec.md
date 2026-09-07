@@ -1,6 +1,11 @@
 # Spec: application-shell
 
+## Purpose
+
 Application React 组合（`@pactor-app/app`）：动态路由、布局包裹、页面加载态、ErrorBoundary、Overlay/Provider 集成。
+
+
+## Requirements
 
 ### Requirement: 动态路由集成
 

@@ -1,6 +1,11 @@
 # Spec: permission-guards
 
+## Purpose
+
 Menu / Page / Component 三层权限守卫（`@pactor-app/permission` 纯函数 + @pactor-app/runtime Renderer 集成）。
+
+
+## Requirements
 
 ### Requirement: 权限配置统一解析
 

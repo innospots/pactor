@@ -130,8 +130,9 @@ describe('Chat 菜单（spec: chat-dsl-component / 左侧菜单配置与选择�
       <Chat menu={[{ key: 'x', label: '未知图标项', icon: 'no-such-icon' }]} />,
     );
     expect(screen.getByText('未知图标项')).toBeTruthy();
+    // ui Icon 未知名渲染占位并标 data-unknown（spec: chat-icon-convergence）
     expect(
-      document.querySelector('.pactor-chat-menu__icon-placeholder'),
+      document.querySelector('[data-unknown="no-such-icon"]'),
     ).toBeTruthy();
   });
 

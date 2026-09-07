@@ -1,7 +1,11 @@
 # Spec: shell-ui-kit-selection
 
+## Purpose
+
 @pactor-app/app 的外壳层 UI 配置（layoutRegistry / interactionKit），与 componentRegistry 组合完成整站定制。内置实现唯一（shadcn，`@pactor-app/ui`）。
 
+
+## Requirements
 
 ### Requirement: layoutRegistry 选项
 

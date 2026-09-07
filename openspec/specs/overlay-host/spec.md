@@ -1,6 +1,11 @@
 # Spec: overlay-host
 
+## Purpose
+
 Overlay 的 React 渲染层（`pactor-ui-antd` interaction 层）：antd Modal/Drawer、DSL content 渲染、page overlay、InteractionProvider。
+
+
+## Requirements
 
 ### Requirement: Modal/Drawer 渲染
 

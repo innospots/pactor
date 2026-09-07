@@ -1,8 +1,11 @@
-import { Check, ChevronsUpDown } from 'lucide-react';
-import { useRef, useState, type ReactNode } from 'react';
+import { Icon } from '@pactor-app/ui/components';
+import { useEffect, useRef, useState, type ReactNode } from 'react';
 
 import type { ChatModelOption } from '../model.js';
 import { AnchoredPopover } from './AnchoredPopover.js';
+import { setChatChromeHandlers } from './chrome/actions.js';
+import { ChromeSlot } from './chrome/ChromeSlot.js';
+import { buildModelSelectFragment } from './chrome/model-select.js';
 
 /**
  * ModelChip（spec: chat-model-selector，决策 D2）：内建模型选择 chip。
@@ -42,7 +45,7 @@ export function ModelChip({
         <span className="pactor-chat-model-chip__label">
           {currentOption.label}
         </span>
-        <ChevronsUpDown size={12} />
+        <Icon name="chevrons-up-down" size={12} />
       </button>
       {anchor && (
         <AnchoredPopover
@@ -66,12 +69,41 @@ export function ModelChip({
                 {option.label}
               </span>
               {option.value === currentOption.value && (
-                <Check size={13} className="pactor-chat-popover__item-check" />
+                <Icon name="check" size={13} className="pactor-chat-popover__item-check" />
               )}
             </button>
           ))}
         </AnchoredPopover>
       )}
     </>
+  );
+}
+
+/**
+ * ModelSelect（spec: chat-on-ui-components / chat-model-selector）：
+ * 模型选择的统一入口——DSL 环境优先经宿主 Select 组件承载
+ * （chat.modelChange 接回同一 onModelChange），无 renderer / 类型
+ * 缺失时回退 ModelChip（chip + 锚定弹层原视觉）。
+ */
+export function ModelSelect({
+  models,
+  model,
+  onModelChange,
+}: ModelChipProps): ReactNode {
+  const changeRef = useRef(onModelChange);
+  changeRef.current = onModelChange;
+  useEffect(() => {
+    setChatChromeHandlers({
+      modelChange: (value) => changeRef.current?.(value),
+    });
+  }, []);
+
+  return (
+    <ChromeSlot
+      fragment={buildModelSelectFragment({ models, model })}
+      fallback={
+        <ModelChip models={models} model={model} onModelChange={onModelChange} />
+      }
+    />
   );
 }

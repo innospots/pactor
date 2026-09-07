@@ -1,7 +1,9 @@
 # Spec: chat-composer-extensions
 
-Composer 增强（`@pactor-app/chat`）：IME 守卫、发送按钮状态、附件引用、扩展槽。
+## Purpose
 
+Composer 增强（`@pactor-app/chat`）：IME 守卫、发送按钮状态、附件引用、扩展槽。
+## Requirements
 ### Requirement: IME 合成守卫
 
 Composer SHALL 跟踪输入法合成状态（compositionstart/compositionend，必要时以 keydown.isComposing 兜底）；合成进行中按 Enter MUST NOT 触发发送，仅结束合成。
@@ -69,3 +71,18 @@ Composer SHALL 提供 `toolbarStart` / `toolbarEnd` 渲染槽（ReactNode），�
 
 - **WHEN** 未注入 onMentionTrigger 但配置了 `trigger: '@'` 的 contexts，输入 "@abc"
 - **THEN** 打开内建提及弹层并按 "abc" 过滤候选
+
+### Requirement: Composer footer 槽
+
+Composer SHALL 支持 `composerFooter` 槽：渲染在工具栏下方的独立区域（带分隔线，结构与 ChatInput 的 footer 区一致）；未提供时 MUST NOT 渲染该区域（DOM 与既有行为一致）。fallback 与 DSL 双路径 SHALL 结构一致；DSL 路径经 ChatInput 的 `footer` 槽承载。
+
+#### Scenario: footer 渲染
+
+- **WHEN** 提供 composerFooter 内容
+- **THEN** 渲染在工具栏下方、以分隔线相隔
+
+#### Scenario: 未提供不渲染
+
+- **WHEN** 未提供 composerFooter
+- **THEN** 不渲染 footer 区域，DOM 与既有行为一致
+

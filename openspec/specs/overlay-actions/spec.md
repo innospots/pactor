@@ -1,6 +1,11 @@
 # Spec: overlay-actions
 
+## Purpose
+
 Overlay 相关动作注册与命名动作结果作用域（`pactor-ui-antd` interaction 层 + core/runtime 扩展）。
+
+
+## Requirements
 
 ### Requirement: ActionConfig.id 与 actions 作用域
 

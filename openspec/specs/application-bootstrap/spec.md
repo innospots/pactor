@@ -1,6 +1,11 @@
 # Spec: application-bootstrap
 
+## Purpose
+
 createPactorApplication 启动编排与扩展 API（`@pactor-app/app`，设计文档第 86–88 节）。
+
+
+## Requirements
 
 ### Requirement: 启动编排
 

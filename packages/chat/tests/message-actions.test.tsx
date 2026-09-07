@@ -440,7 +440,8 @@ describe('messageActions 声明式配置（spec: chat-message-actions / 消息�
     );
 
     const button = screen.getByRole('button', { name: '神秘动作' });
-    expect(button.querySelector('[data-icon-placeholder]')).not.toBeNull();
+    // ui Icon 未知名渲染占位并标 data-unknown（spec: chat-icon-convergence）
+    expect(button.querySelector('[data-unknown="no-such-icon"]')).not.toBeNull();
   });
 
   it("visibleWhen 'always'：流式中的自定义动作可见可点击", () => {

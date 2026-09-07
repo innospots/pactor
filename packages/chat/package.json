@@ -55,11 +55,11 @@
     "access": "public"
   },
   "dependencies": {
-    "lucide-react": "^1.31.0",
     "@pactor-app/core": "workspace:*",
     "@pactor-app/markdown": "workspace:*",
     "@pactor-app/permission": "workspace:*",
-    "@pactor-app/runtime": "workspace:*"
+    "@pactor-app/runtime": "workspace:*",
+    "@pactor-app/ui": "workspace:*"
   },
   "peerDependencies": {
     "react": ">=18"
@@ -70,7 +70,6 @@
     "@types/react": "^19.2.18",
     "@types/react-dom": "^19.2.4",
     "jsdom": "^30.0.1",
-    "@pactor-app/ui": "workspace:*",
     "react": "^19.2.8",
     "react-dom": "^19.2.8"
   }

@@ -91,7 +91,7 @@ import '@pactor-app/ui/styles.css';
 | Form 协同 | Context 下发；Form 内声明 `name` 的 Input/Select 自动成为表单项（label + `rules.required/message`）；校验失败阻止提交并展示错误；提交成功写 runtime state 的 `form` 路径（`${form.<field>}` 可用） |
 | Table 行模板 | `cell` 经 renderChildren 注入 `{ row, rowIndex }`；分页仅支持 `pageSize` |
 
-在上述 12 个内置组件之外，组件层还注册了 shadcn 组件目录的 49 个扩展组件（如 Badge / Dialog / DataTable / Chart / Icon），全部 69 个组件按布局 / 展示 / 表单 / 数据 / 导航 / 反馈弹层 / 复合七类分页展示，逐组件 props 契约与 DSL 示例见[组件参考](/components/)。
+在上述 12 个内置组件之外，组件层还注册了 shadcn 组件目录的 50 个扩展组件（如 Badge / Dialog / DataTable / Chart / Icon），全部 70 个组件按布局 / 展示 / 表单 / 数据 / 导航 / 反馈弹层 / 复合七类分页展示，逐组件 props 契约与 DSL 示例见[组件参考](/components/)。
 
 ## interaction 层
 

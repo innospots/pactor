@@ -99,7 +99,6 @@ export {
   CHAT_COMPONENT_TYPE,
   Chat,
   ChatSidebarMenu,
-  MENU_ICONS,
   registerChatComponent,
   type ChatMenuItem,
   type ChatProps,
@@ -136,7 +135,6 @@ export {
 export { MessageBubble, type MessageBubbleProps } from './view/MessageBubble.js';
 export {
   collectMessageText,
-  MESSAGE_ACTION_ICONS,
   MessageActions,
   type MessageActionsProps,
 } from './view/MessageActions.js';

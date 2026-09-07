@@ -1,6 +1,11 @@
 # Spec: embedded-page-view
 
+## Purpose
+
 嵌入式页面视图（`@pactor-app/app`）：在存量 React 项目中以组件形式嵌入 DSL 页面，不接管路由。
+
+
+## Requirements
 
 ### Requirement: PactorPage 组件
 

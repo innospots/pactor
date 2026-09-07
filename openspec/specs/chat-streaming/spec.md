@@ -1,6 +1,11 @@
 # Spec: chat-streaming
 
+## Purpose
+
 Chat Streaming 事件模型与 reducer（`@pactor-app/chat`，设计文档第 69 节）。
+
+
+## Requirements
 
 ### Requirement: SSE 事件模型
 
@@ -50,8 +55,6 @@ SHALL 定义 `ChatTransport`（`send(input) → AsyncIterable<ChatEvent>`）与 
 
 - **WHEN** 视图层以 `{ text, model: 'demo', contexts: [{ id: 'a1', label: '报表助手' }] }` 驱动 turn
 - **THEN** transport.send 收到的 input 含 model 与 contexts，input.text 仅为用户文本
-
-## ADDED Requirements
 
 ### Requirement: 重新生成轮次
 

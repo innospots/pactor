@@ -26,7 +26,7 @@ import { AppShell } from './view/AppShell.js';
 import { ArtifactPanel } from './view/ArtifactPanel.js';
 import { ChatView } from './view/ChatView.js';
 import type { ChatSuggestion } from './view/EmptyState.js';
-import { ModelChip } from './view/ModelChip.js';
+import { ModelSelect } from './view/ModelChip.js';
 import {
   WorkspaceHeader,
   type ChatHeaderAction,
@@ -161,8 +161,12 @@ export interface ChatCompositionProps {
   onMessageAction?: (actionId: string, message: ChatMessage) => void;
   /** 侧栏内容（提供时以 AppShell 包裹工作区，含移动端抽屉） */
   sidebar?: ReactNode;
+  /** Composer 工具栏左 / 右附加槽（与服务注入的同名槽先后渲染，服务槽在先） */
+  toolbarStart?: ReactNode;
   /** Composer 工具栏右端附加槽（与服务注入的 toolbarEnd 先后渲染） */
   toolbarEnd?: ReactNode;
+  /** Composer footer 槽（spec: chat-composer-slots；与服务注入的 composerFooter 先后渲染，服务槽在先） */
+  composerFooter?: ReactNode;
   className?: string;
   /** 发送回调：在 services.onSend 之后触发，均在 transport turn 之前 */
   onSend?: (text: string) => void;
@@ -221,7 +225,9 @@ export function ChatComposition({
   messageActions,
   onMessageAction,
   sidebar,
+  toolbarStart,
   toolbarEnd,
+  composerFooter,
   className,
   onSend,
   artifact,
@@ -309,7 +315,7 @@ export function ChatComposition({
   });
   const headerModelChip =
     modelPlacement === 'header' && modelsEnabled ? (
-      <ModelChip
+      <ModelSelect
         models={models!}
         model={currentModel}
         onModelChange={handleModelChange}
@@ -322,6 +328,22 @@ export function ChatComposition({
       <>
         {services.toolbarEnd}
         {toolbarEnd}
+      </>
+    ) : undefined;
+
+  // 工具栏左端 / footer（spec: chat-composer-slots）：服务槽在先、props 槽在后
+  const mergedToolbarStart =
+    services.toolbarStart !== undefined || toolbarStart !== undefined ? (
+      <>
+        {services.toolbarStart}
+        {toolbarStart}
+      </>
+    ) : undefined;
+  const mergedComposerFooter =
+    services.composerFooter !== undefined || composerFooter !== undefined ? (
+      <>
+        {services.composerFooter}
+        {composerFooter}
       </>
     ) : undefined;
 
@@ -363,8 +385,9 @@ export function ChatComposition({
         onAttachmentsChange={setAttachments}
         onAttachFiles={handleAttachFiles}
         onAttachmentClick={services.onAttachmentClick}
-        toolbarStart={services.toolbarStart}
+        toolbarStart={mergedToolbarStart}
         toolbarEnd={mergedToolbarEnd}
+        composerFooter={mergedComposerFooter}
         onMentionTrigger={services.onMentionTrigger}
         onPlusMenu={services.onPlusMenu}
         onArtifact={onArtifact}

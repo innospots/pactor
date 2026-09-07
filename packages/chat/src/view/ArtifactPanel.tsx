@@ -1,10 +1,11 @@
-import { X } from 'lucide-react';
+import { Icon } from '@pactor-app/ui/components';
 import { Registry } from '@pactor-app/core';
 import type { DslNode } from '@pactor-app/core';
 import { MarkdownRenderer } from '@pactor-app/markdown';
 import { DslRenderer, useRenderer } from '@pactor-app/runtime';
 import {
   Component,
+  useEffect,
   useMemo,
   useRef,
   useState,
@@ -15,6 +16,9 @@ import type { ChatArtifact } from '../artifact.js';
 import { CHAT_DENIED_TYPE, guardChatDsl } from '../dsl-guard.js';
 import { createChatRuntime, type ChatRuntime } from '../scope.js';
 import { ChatDenied } from './PartRenderer.js';
+import { setChatChromeHandlers } from './chrome/actions.js';
+import { ChromeSlot } from './chrome/ChromeSlot.js';
+import { buildPanelHeaderFragment } from './chrome/panel-header.js';
 
 /**
  * ArtifactPanel（spec: chat-artifact-panel，设计决策 D2/D3）：
@@ -179,6 +183,14 @@ export function ArtifactPanel({
 }: ArtifactPanelProps): ReactNode {
   const runtime = useArtifactRuntime(safeRegistry, user);
 
+  // DSL 路径的关闭桥接（spec: chat-on-ui-components）：chat.panelClose
+  // 内建动作 → onClose 回调
+  const closeRef = useRef(onClose);
+  closeRef.current = onClose;
+  useEffect(() => {
+    setChatChromeHandlers({ panelClose: () => closeRef.current?.() });
+  }, []);
+
   // 拖拽调宽（spec: chat-artifact-panel / 面板布局与响应式）：
   // 面板左缘手柄 pointer 拖拽实时改宽，结果存内部 state（inline width
   // 覆盖 --pactor-chat-inspector-width 缺省），不向外部受控；窄屏抽屉
@@ -233,20 +245,30 @@ export function ArtifactPanel({
         onPointerDown={handleResizeStart}
       />
       <div className="pactor-chat-inspector__header">
-        <span className="pactor-chat-inspector__title">
-          {artifact?.title ?? '产出物'}
-        </span>
-        {artifact ? (
-          <span className="pactor-chat-inspector__kind">{artifact.kind}</span>
-        ) : null}
-        <button
-          type="button"
-          className="pactor-chat-icon-button pactor-chat-inspector__close"
-          aria-label="关闭面板"
-          onClick={onClose}
-        >
-          <X size={16} strokeWidth={1.7} />
-        </button>
+        <ChromeSlot
+          fragment={buildPanelHeaderFragment({
+            title: artifact?.title ?? '产出物',
+            kind: artifact?.kind ?? 'text',
+          })}
+          fallback={
+            <>
+              <span className="pactor-chat-inspector__title">
+                {artifact?.title ?? '产出物'}
+              </span>
+              {artifact ? (
+                <span className="pactor-chat-inspector__kind">{artifact.kind}</span>
+              ) : null}
+              <button
+                type="button"
+                className="pactor-chat-icon-button pactor-chat-inspector__close"
+                aria-label="关闭面板"
+                onClick={onClose}
+              >
+                <Icon name="x" size={16} strokeWidth={1.7} />
+              </button>
+            </>
+          }
+        />
       </div>
       <div className="pactor-chat-inspector__body">
         {inspector !== undefined && inspector !== null ? (

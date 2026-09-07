@@ -75,6 +75,8 @@ export interface ChatWorkspaceServices {
   /** Composer 工具栏左 / 右槽（ReactNode 闭包槽，纯 React 与 DSL 场景均可用） */
   toolbarStart?: ReactNode;
   toolbarEnd?: ReactNode;
+  /** Composer footer 槽（spec: chat-composer-slots；ReactNode 闭包槽） */
+  composerFooter?: ReactNode;
   /** 工作区头部右侧扩展区（提供 title 或 headerExtra 时渲染头部） */
   headerExtra?: ReactNode;
 }
@@ -102,8 +104,12 @@ export interface ChatWorkspaceProps {
    * 包裹工作区（侧栏 + 移动端抽屉）。仅页面运行时上下文内有效。
    */
   sidebar?: DslNode;
+  /** Composer 工具栏左端 DslNode 槽（与服务注入的 toolbarStart 先后渲染，服务槽在先） */
+  toolbarStart?: DslNode;
   /** Composer 工具栏右端 DslNode 槽（与服务注入的 toolbarEnd 先后渲染） */
   toolbarEnd?: DslNode;
+  /** Composer footer DslNode 槽（spec: chat-composer-slots；与服务注入的 composerFooter 先后渲染，服务槽在先） */
+  composerFooter?: DslNode;
   /**
    * 产出物面板受控 props（spec: chat-artifact-panel，决策 D2）：
    * 任一提供即全受控；都未提供时由内部 / 注入的 ArtifactStore 驱动
@@ -168,7 +174,9 @@ export function createChatWorkspace(
     conversationId,
     params,
     sidebar,
+    toolbarStart,
     toolbarEnd,
+    composerFooter,
     artifact,
     panelOpen,
     onPanelClose,
@@ -212,7 +220,15 @@ export function createChatWorkspace(
           }
           headerExtra={services.headerExtra}
           sidebar={sidebar ? <DslNodeSlot node={sidebar} /> : undefined}
+          toolbarStart={
+            toolbarStart ? <DslNodeSlot node={toolbarStart} /> : undefined
+          }
           toolbarEnd={toolbarEnd ? <DslNodeSlot node={toolbarEnd} /> : undefined}
+          composerFooter={
+            composerFooter ? (
+              <DslNodeSlot node={composerFooter} />
+            ) : undefined
+          }
           artifact={artifact}
           panelOpen={panelOpen}
           onPanelClose={onPanelClose}

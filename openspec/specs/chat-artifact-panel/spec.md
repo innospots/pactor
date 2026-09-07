@@ -1,7 +1,9 @@
 # Spec: chat-artifact-panel
 
-产出物预览面板（`@pactor-app/chat`）：ChatArtifact 模型与 ArtifactStore、ArtifactPanel 视图与内建渲染器、artifact 消息 part、面板布局与响应式。
+## Purpose
 
+产出物预览面板（`@pactor-app/chat`）：ChatArtifact 模型与 ArtifactStore、ArtifactPanel 视图与内建渲染器、artifact 消息 part、面板布局与响应式。
+## Requirements
 ### Requirement: 产出物模型与 ArtifactStore
 
 `@pactor-app/chat` SHALL 定义 `ChatArtifact` 类型：`{ id: string; kind: 'markdown' | 'code' | 'text' | 'dsl'; title: string; content: string | DslNode; language?: string; meta?: Record<string, unknown> }`（`dsl` kind 的 content 为 DslNode 普通对象，其余为字符串）。SHALL 导出 `ArtifactStore`：`get()` / `subscribe()` / `open(artifact)` / `update(patch)` / `close()`，语义与 ConversationStore 同模式（可注入、可自持）。
@@ -19,6 +21,8 @@
 ### Requirement: ArtifactPanel 视图与内建渲染器
 
 SHALL 导出 `ArtifactPanel` 组件：标题栏（标题 + 可选角标 + 关闭按钮）+ 内容区；内容按 `artifact.kind` 分发内建渲染器——`markdown` 经 @pactor-app/markdown 安全渲染、`code` 渲染只读代码块（language 作角标）、`text` 渲染预格式文本、`dsl` 经 Safe Registry 守卫 + renderChildren 活预览。渲染被守卫拦截或失败时 SHALL 渲染受控降级块，MUST NOT 抛错。关闭按钮点击 SHALL 触发 `onClose` 回调。
+
+标题栏 SHALL 优先经 chat chrome DSL 渲染层以宿主组件（Text / Badge / Button / Icon 等）组合渲染（见 chat-chrome-dsl），关闭经 `chat.panelClose` 内建动作接回 `onClose` 回调；无 renderer 环境或类型缺失时回退手写标题栏。内容区内建渲染器、拖拽调宽与受控降级链 MUST 保持 chat 实现。
 
 #### Scenario: markdown 产出物渲染
 
@@ -94,3 +98,4 @@ SHALL 导出 `ArtifactPanel` 组件：标题栏（标题 + 可选角标 + 关闭
 
 - **WHEN** 未配置 artifact 且面板未打开
 - **THEN** DOM 中不存在面板节点
+

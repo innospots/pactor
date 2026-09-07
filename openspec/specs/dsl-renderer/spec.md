@@ -1,6 +1,11 @@
 # Spec: dsl-renderer
 
+## Purpose
+
 React Renderer：把 DslNode 树渲染为 React 元素——Registry 查找、表达式 props、when 条件、events 绑定、子作用域（`@pactor-app/runtime`）。
+
+
+## Requirements
 
 ### Requirement: 基于 Registry 的组件解析
 

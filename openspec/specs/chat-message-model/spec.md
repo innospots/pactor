@@ -1,6 +1,11 @@
 # Spec: chat-message-model
 
+## Purpose
+
 Chat 消息模型与 ConversationStore（`@pactor-app/chat`，设计文档第 58/59/70 节）。
+
+
+## Requirements
 
 ### Requirement: 消息与 Part 类型
 

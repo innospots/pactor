@@ -1,6 +1,11 @@
 # Spec: permission-store
 
+## Purpose
+
 权限码集合的存储、查询、订阅与表达式函数（`@pactor-app/permission`）。浏览器只持有 Permission Set，DSL 不出现 Role。
+
+
+## Requirements
 
 ### Requirement: PermissionStore
 

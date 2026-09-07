@@ -1,6 +1,11 @@
 # Spec: chat-message-actions
 
+## Purpose
+
 消息操作与轮次恢复（`@pactor-app/chat`）：复制、重新生成、编辑重发、错误重试。
+
+
+## Requirements
 
 ### Requirement: 重新生成
 
@@ -38,8 +43,6 @@ error 状态的 assistant 消息 SHALL 在错误警示区提供重试按钮，�
 
 - **WHEN** assistant 消息为 error 状态且点击重试
 - **THEN** 移除 error 消息并重跑该轮 turn
-
-## ADDED Requirements
 
 ### Requirement: 消息操作条声明式配置
 

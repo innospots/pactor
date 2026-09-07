@@ -1,6 +1,11 @@
 # Spec: dsl-core-protocol
 
+## Purpose
+
 DSL 核心协议模块（`@pactor-app/core`），提供与 React 无关的 DSL 类型定义与通用 Registry 实现，是框架所有上层包的契约基座。
+
+
+## Requirements
 
 ### Requirement: DslNode 核心节点类型
 

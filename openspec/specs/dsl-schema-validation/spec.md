@@ -1,6 +1,11 @@
 # Spec: dsl-schema-validation
 
+## Purpose
+
 DSL Schema 与校验模块（`@pactor-app/schema`），提供 DSL 版本常量、Page DSL 根结构及 DslNode 的 JSON Schema 定义，以及基于 Ajv 的结构化校验器。
+
+
+## Requirements
 
 ### Requirement: DSL 版本常量
 

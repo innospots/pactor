@@ -1,6 +1,11 @@
 # Spec: menu-registry
 
+## Purpose
+
 Menu Model 与 MenuRegistry（`@pactor-app/router`）：菜单树注册、按路径/ID 查找（设计文档第 30 节）。
+
+
+## Requirements
 
 ### Requirement: MenuItem 模型
 

@@ -60,6 +60,51 @@ Form 内声明 `name` 的 Input / Select 及本页其余录入组件（Textarea 
   props: { name: remark, label: 备注, rows: 4, placeholder: 请输入备注 }
 ```
 
+### ChatInput
+
+AI 对话输入框的通用结构构件：外层圆角容器（focus-within 高亮）内依次承载自适应高度 textarea、工具栏行与可选底部区（footer，带上分隔线）。工具栏与底部区内容完全由槽位 DSL 自定义；内建圆形发送钮（空白或 disabled 时禁用，`hideSend` 可隐藏）。定位为通用结构构件——transport / 附件 / 提及等对话领域能力请用 `@pactor-app/chat`。
+
+| prop | 类型 | 缺省 | 说明 |
+| --- | --- | --- | --- |
+| `value` | string | — | 受控值（提供即受控：变更只经 onChange 传出） |
+| `placeholder` | string | — | 占位文案 |
+| `disabled` | boolean | — | 禁用 |
+| `rows` | number | `3` | 最小行数（高度随内容自适应，rows 为下限） |
+| `hideSend` | boolean | — | 隐藏内建发送钮 |
+| `header` | DslNode | — | 顶部区槽（提供时渲染在 textarea 上方；附件卡片、上下文 chips 等输入上下文展示） |
+| `toolbarStart` | DslNode | — | 工具栏左端槽 |
+| `toolbarEnd` | DslNode | — | 工具栏右端槽（发送钮之前） |
+| `footer` | DslNode | — | 底部区槽（提供时渲染，与工具栏以分隔线相隔） |
+| 事件 `onChange` | — | — | 输入时触发，`${event}` 为 string 值 |
+| 事件 `onSubmit` | — | — | 发送时触发（点击发送钮或 Enter；Shift+Enter 换行；IME 合成中 Enter 不发送；空白不发送），`${event}` 为当前文本；非受控发送后自动清空 |
+
+```yaml
+- type: ChatInput
+  props:
+    placeholder: 今天帮你做些什么？@ 引用对话文件，/ 调用技能与指令
+    value: ${state.draft}
+    toolbarStart:
+      type: Button
+      props: { variant: text, size: small }
+      children: [{ type: Icon, props: { name: plus, size: sm } }]
+      events:
+        onClick: [{ action: message, params: { text: 打开附件面板 } }]
+    toolbarEnd:
+      type: Button
+      props: { text: Hy4 preview, variant: text, size: small }
+    footer:
+      type: Flex
+      props: { gap: small }
+      children:
+        - { type: Button, props: { text: 选择工作空间, variant: text, size: small } }
+        - { type: Button, props: { text: 默认权限, variant: text, size: small } }
+  events:
+    onChange: [{ action: setState, params: { draft: ${event} } }]
+    onSubmit:
+      - { action: setState, params: { lastSent: ${event}, draft: '' } }
+      - { action: message, params: { messageType: success, text: 已发送 } }
+```
+
 ### Checkbox
 
 勾选框，`label` 渲染在勾选框旁并与之关联。

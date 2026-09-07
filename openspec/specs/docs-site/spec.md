@@ -1,5 +1,10 @@
 # Spec: docs-site
 
+## Purpose
+
+本规格定义 docs-site 的行为契约。
+
+
 ## Requirements
 
 ### Requirement: 面向使用者的快速开始

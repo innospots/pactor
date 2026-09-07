@@ -109,6 +109,37 @@
     'Times New Roman', serif;
 }
 
+/* ------------------------------------------------------------
+ * chrome DSL 渲染层（spec: chat-chrome-dsl / chrome 令牌映射）：
+ * DSL 渲染的 chrome 子树（宿主 @pactor-app/ui 组件消费 shadcn
+ * 语义令牌）统一包在本容器内，把 --pactor-chat-* 映射为 shadcn
+ * 语义令牌——--pactor-chat-* 仍为皮肤唯一配置入口，暗色经上方
+ * [data-pactor-theme='dark'] 覆盖链自动生效。
+ * display:contents 使容器不参与布局；自定义属性沿 DOM 树继承，
+ * 不受 display:contents 影响。
+ * ------------------------------------------------------------ */
+.pactor-chat-chrome {
+  display: contents;
+  --background: var(--pactor-chat-bg);
+  --foreground: var(--pactor-chat-fg);
+  --card: var(--pactor-chat-card);
+  --card-foreground: var(--pactor-chat-fg);
+  --popover: var(--pactor-chat-card);
+  --popover-foreground: var(--pactor-chat-fg);
+  --primary: var(--pactor-chat-primary);
+  --primary-foreground: var(--pactor-chat-primary-fg);
+  --secondary: var(--pactor-chat-muted);
+  --secondary-foreground: var(--pactor-chat-fg);
+  --muted: var(--pactor-chat-muted);
+  --muted-foreground: var(--pactor-chat-muted-fg);
+  --accent: var(--pactor-chat-muted);
+  --accent-foreground: var(--pactor-chat-fg);
+  --destructive: var(--pactor-chat-danger);
+  --border: var(--pactor-chat-border);
+  --input: var(--pactor-chat-border);
+  --ring: var(--pactor-chat-primary);
+}
+
 /* ============================================================
  * 2. 布局（chat 布局 + 消息区）
  * ============================================================ */
@@ -431,15 +462,6 @@
   touch-action: none;
 }
 
-.pactor-chat-inspector__resize:hover,
-.pactor-chat-inspector__resize:active {
-  background: color-mix(
-    in oklab,
-    var(--pactor-chat-primary) 35%,
-    transparent
-  );
-}
-
 .pactor-chat-inspector__header {
   display: flex;
   align-items: center;
@@ -576,6 +598,10 @@
 
 .pactor-chat-artifact-card__open {
   flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  white-space: nowrap;
   padding: 4px 10px;
   border: 1px solid var(--pactor-chat-border);
   border-radius: var(--pactor-chat-radius-sm);
@@ -652,17 +678,6 @@
   display: inline-flex;
   flex-shrink: 0;
   align-items: center;
-}
-
-/* 未知图标名的占位圆点（不抛错的受控降级） */
-.pactor-chat-menu__icon-placeholder {
-  width: 6px;
-  height: 6px;
-  margin: 0 4px;
-  flex-shrink: 0;
-  border-radius: 50%;
-  background: var(--pactor-chat-muted-fg);
-  opacity: 0.5;
 }
 
 .pactor-chat-menu__label {
@@ -1105,7 +1120,7 @@ button.pactor-chat-trace__header:hover,
   display: flex;
   flex-direction: column;
   gap: 2px;
-  margin-left: 4px;
+  /* margin-left: 4px; */
 }
 
 .pactor-chat-trace__entry-title {
@@ -1460,6 +1475,53 @@ button.pactor-chat-trace__header:hover,
   flex: 1;
 }
 
+/* Composer footer 槽（spec: chat-composer-slots / Composer footer 槽）：
+   工具栏下方的自定义区域，结构与 ChatInput footer 一致（border-t 分隔） */
+.pactor-chat-composer__footer {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 0 -14px -12px;
+  padding: 8px 12px 0;
+  border-top: 1px solid var(--pactor-chat-border);
+}
+
+/* ------------------------------------------------------------
+ * Composer DSL 呈现路径（spec: chat-composer-on-chatinput）：
+ * 盒模型让位 ChatInput 容器（边框 / 圆角 / 阴影 / 内边距由
+ * ChatInput 承担，经 pactor-chat-chrome 令牌映射着色），本容器
+ * 只保留布局与拖放态；focus 高亮由 ChatInput 自身 focus-within
+ * ring 承担，避免双层描边。
+ * ------------------------------------------------------------ */
+.pactor-chat-composer--dsl {
+  padding: 0;
+  border-color: transparent;
+  background: transparent;
+  box-shadow: none;
+}
+
+.pactor-chat-composer--dsl:focus-within {
+  border-color: transparent;
+}
+
+.pactor-chat-composer--dsl.pactor-chat-composer--dragover {
+  border-color: var(--pactor-chat-primary);
+  border-radius: var(--pactor-chat-radius-xl);
+}
+
+/* 输入高度上限与单行起始形态（ChatInput 缺省 min-h-16 的收敛；
+   自适应由 field-sizing-content 承担，超上限内部滚动） */
+.pactor-chat-composer--dsl [data-slot='chat-input'] textarea {
+  min-height: 24px;
+  max-height: 200px;
+}
+
+/* header 槽空态（无附件无 chips）时收起包装，避免多余上间距 */
+.pactor-chat-composer--dsl [data-slot='chat-input'] > .px-3.pt-3:empty {
+  display: none;
+}
+
 /* ------------------------------------------------------------
  * 内建锚定弹层 AnchoredPopover（chat-builtin-features 设计决策 D3）：
  * position: fixed，top/bottom/left 由 JS 按锚点计算（上方优先、
@@ -1578,6 +1640,26 @@ button.pactor-chat-trace__header:hover,
 .pactor-chat-model-chip:hover {
   border-color: var(--pactor-chat-primary);
   color: var(--pactor-chat-fg);
+}
+
+/* ModelSelect DSL 路径（spec: chat-on-ui-components）：ui Select
+   收敛到工具栏节奏（触发器尺寸与 chip 相当，颜色经 chrome 令牌映射） */
+.pactor-chat-model-select {
+  width: auto;
+  min-width: 112px;
+  font-size: 12.5px;
+}
+
+/* 实心图标（spec: chat-icon-convergence）：停止钮方形等需 fill 的
+   图标（ui Icon 走描边体系，fill 经 CSS 覆盖 lucide svg 的 fill=none） */
+.pactor-chat-icon-fill {
+  fill: currentColor;
+}
+
+/* ArtifactPanel 标题栏 DSL 路径（spec: chat-on-ui-components）：
+   chrome 容器 display:contents，DSL Flex 占满标题行 */
+.pactor-chat-inspector__header-dsl {
+  width: 100%;
 }
 
 .pactor-chat-model-chip__label {

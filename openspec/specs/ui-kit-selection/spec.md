@@ -1,7 +1,11 @@
 # Spec: ui-kit-selection
 
+## Purpose
+
 UI 库配置机制（`@pactor-app/app` 扩展 + 独立使用方式）。内置实现唯一（shadcn，`@pactor-app/ui`），覆盖点保留供业务自定义。
 
+
+## Requirements
 
 ### Requirement: @pactor-app/app componentRegistry 选项
 

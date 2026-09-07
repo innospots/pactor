@@ -1,20 +1,6 @@
 import type { DslNode, Registry } from '@pactor-app/core';
-import {
-  Folder,
-  History,
-  MessageSquare,
-  Plus,
-  Search,
-  Settings,
-  Star,
-  User,
-} from 'lucide-react';
-import {
-  Fragment,
-  useEffect,
-  type ComponentType,
-  type ReactNode,
-} from 'react';
+import { Icon } from '@pactor-app/ui/components';
+import { Fragment, useEffect, useRef, type ReactNode } from 'react';
 
 import { ChatComposition, resolveSlot } from '../chat-composition.js';
 import { useChatServices } from '../chat-services.js';
@@ -28,6 +14,9 @@ import type {
   ChatModelOption,
 } from '../model.js';
 import { useSidebarDrawer } from './AppShell.js';
+import { setChatChromeHandlers } from './chrome/actions.js';
+import { ChromeSlot } from './chrome/ChromeSlot.js';
+import { buildSidebarMenuFragment } from './chrome/menu.js';
 import { registerChatShellComponent } from './ChatShell.js';
 import type { ChatSuggestion } from './EmptyState.js';
 import type { ChatHeaderAction } from './WorkspaceHeader.js';
@@ -77,6 +66,15 @@ export interface ChatProps {
   activeMenuKey?: string;
   /** 侧栏槽：提供时替代内建菜单侧栏 */
   sidebar?: DslNode | ReactNode;
+  /**
+   * Composer 槽（spec: chat-composer-slots / Composer 槽配置）：
+   * toolbarStart 工具栏左端 / toolbarEnd 工具栏右端（发送钮之前）/
+   * composerFooter footer 区域（工具栏下方、带分隔线）；
+   * 与服务注入的同名槽并存时服务槽在先
+   */
+  toolbarStart?: DslNode | ReactNode;
+  toolbarEnd?: DslNode | ReactNode;
+  composerFooter?: DslNode | ReactNode;
   /** 内建 header 标题右侧槽 */
   headerExtra?: DslNode | ReactNode;
   /** header 槽：整体替换内建 header */
@@ -137,22 +135,17 @@ export interface ChatProps {
   onMenuSelect?: (key: string, item: ChatMenuItem) => void;
 }
 
-/** 菜单图标名 → lucide 子集（白名单式，未知名渲染占位圆点，不抛错） */
-export const MENU_ICONS: Record<
-  string,
-  ComponentType<{ size?: number; strokeWidth?: number }>
-> = {
-  plus: Plus,
-  chat: MessageSquare,
-  history: History,
-  settings: Settings,
-  star: Star,
-  search: Search,
-  user: User,
-  folder: Folder,
-};
+/**
+ * 菜单图标名（spec: chat-icon-convergence）：契约取值（plus / chat /
+ * history / settings / star / search / user / folder）直接作为 ui Icon
+ * 白名单名渲染，未知名由 ui Icon 渲染占位图标，不抛错。
+ * 白名单曾映射 lucide 子集（MENU_ICONS），收敛后删除。
+ */
 
-/** 内建侧栏：menu 数据驱动的菜单（分组标题 + 图标 + badge + disabled）；ChatShell 同款复用 */
+/** 内建侧栏：menu 数据驱动的菜单（分组标题 + 图标 + badge + disabled）；ChatShell 同款复用。
+ * chrome DSL 渲染层（spec: chat-on-ui-components）：DSL 环境优先经宿主
+ * Menu 组件组合渲染（chat.menuSelect 接回同一传播与 drawer close），
+ * 无 renderer / 类型缺失时回退下方手写菜单 */
 export function ChatSidebarMenu({
   menu,
   activeMenuKey,
@@ -163,61 +156,84 @@ export function ChatSidebarMenu({
   onMenuSelect?: (key: string, item: ChatMenuItem) => void;
 }): ReactNode {
   const drawer = useSidebarDrawer();
-  let lastGroup: string | undefined;
-  return (
-    <nav className="pactor-chat-menu" aria-label="会话导航">
-      {menu.map((item) => {
-        const groupLabel =
-          item.group !== undefined && item.group !== lastGroup
-            ? item.group
-            : undefined;
-        lastGroup = item.group;
-        const Icon = item.icon !== undefined ? MENU_ICONS[item.icon] : undefined;
-        const active = item.key === activeMenuKey;
-        return (
-          <Fragment key={item.key}>
-            {groupLabel !== undefined ? (
-              <div className="pactor-chat-menu__group">{groupLabel}</div>
-            ) : null}
-            <button
-              type="button"
-              className={`pactor-chat-menu__item${active ? ' pactor-chat-menu__item--active' : ''}`}
-              disabled={item.disabled === true}
-              aria-current={active ? 'true' : undefined}
-              // icon rail（桌面折叠态，决策 D3）下 label 隐藏，title 兜底可访问名
-              title={drawer?.collapsed ? item.label : undefined}
-              onClick={() => {
-                if (item.disabled) {
-                  return;
-                }
-                onMenuSelect?.(item.key, item);
-                drawer?.close();
-              }}
-            >
-              {item.icon !== undefined ? (
-                Icon ? (
+
+  // DSL 路径的选择桥接：chat.menuSelect → 同一 onMenuSelect 传播 + drawer close
+  const menuRef = useRef(menu);
+  menuRef.current = menu;
+  const selectRef = useRef(onMenuSelect);
+  selectRef.current = onMenuSelect;
+  const drawerRef = useRef(drawer);
+  drawerRef.current = drawer;
+  useEffect(() => {
+    setChatChromeHandlers({
+      menuSelect: (key) => {
+        const item = menuRef.current.find((entry) => entry.key === key);
+        if (item === undefined || item.disabled === true) {
+          return;
+        }
+        selectRef.current?.(key, item);
+        drawerRef.current?.close();
+      },
+    });
+  }, []);
+
+  const fallback = (() => {
+    let lastGroup: string | undefined;
+    return (
+      <nav className="pactor-chat-menu" aria-label="会话导航">
+        {menu.map((item) => {
+          const groupLabel =
+            item.group !== undefined && item.group !== lastGroup
+              ? item.group
+              : undefined;
+          lastGroup = item.group;
+          const active = item.key === activeMenuKey;
+          return (
+            <Fragment key={item.key}>
+              {groupLabel !== undefined ? (
+                <div className="pactor-chat-menu__group">{groupLabel}</div>
+              ) : null}
+              <button
+                type="button"
+                className={`pactor-chat-menu__item${active ? ' pactor-chat-menu__item--active' : ''}`}
+                disabled={item.disabled === true}
+                aria-current={active ? 'true' : undefined}
+                // icon rail（桌面折叠态，决策 D3）下 label 隐藏，title 兜底可访问名
+                title={drawer?.collapsed ? item.label : undefined}
+                onClick={() => {
+                  if (item.disabled) {
+                    return;
+                  }
+                  onMenuSelect?.(item.key, item);
+                  drawer?.close();
+                }}
+              >
+                {item.icon !== undefined ? (
                   <span className="pactor-chat-menu__icon">
-                    <Icon size={15} strokeWidth={1.7} />
+                    {/* 未知名由 ui Icon 渲染占位（spec: chat-icon-convergence） */}
+                    <Icon name={item.icon} size={15} strokeWidth={1.7} />
                   </span>
-                ) : (
-                  <span
-                    className="pactor-chat-menu__icon-placeholder"
-                    aria-hidden
-                  />
-                )
-              ) : null}
-              <span className="pactor-chat-menu__label">{item.label}</span>
-              {item.dot === true ? (
-                <span className="pactor-chat-menu__dot" aria-hidden />
-              ) : null}
-              {item.badge !== undefined ? (
-                <span className="pactor-chat-menu__badge">{item.badge}</span>
-              ) : null}
-            </button>
-          </Fragment>
-        );
-      })}
-    </nav>
+                ) : null}
+                <span className="pactor-chat-menu__label">{item.label}</span>
+                {item.dot === true ? (
+                  <span className="pactor-chat-menu__dot" aria-hidden />
+                ) : null}
+                {item.badge !== undefined ? (
+                  <span className="pactor-chat-menu__badge">{item.badge}</span>
+                ) : null}
+              </button>
+            </Fragment>
+          );
+        })}
+      </nav>
+    );
+  })();
+
+  return (
+    <ChromeSlot
+      fragment={buildSidebarMenuFragment({ menu, activeMenuKey })}
+      fallback={fallback}
+    />
   );
 }
 
@@ -240,6 +256,9 @@ export function Chat({
   menu,
   activeMenuKey,
   sidebar,
+  toolbarStart,
+  toolbarEnd,
+  composerFooter,
   headerExtra,
   header,
   headerActions,
@@ -311,6 +330,9 @@ export function Chat({
       showHeader={showHeader !== false}
       header={resolveSlot(header)}
       headerExtra={resolveSlot(headerExtra) ?? services.headerExtra}
+      toolbarStart={resolveSlot(toolbarStart)}
+      toolbarEnd={resolveSlot(toolbarEnd)}
+      composerFooter={resolveSlot(composerFooter)}
       headerActions={headerActions}
       editableTitle={editableTitle}
       onExport={onExport}

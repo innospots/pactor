@@ -1,6 +1,11 @@
 # Spec: ui-kit-shadcn-preset
 
+## Purpose
+
 `@pactor-app/ui` 包（packages/ui）：shadcn 实现的 12 组件契约、布局、交互层、预设对象与预建样式。
+
+
+## Requirements
 
 ### Requirement: @pactor-app/ui 包结构
 

@@ -5,13 +5,72 @@ import '@pactor-app/chat/styles.css';
 // 聊天页交互 UI（模型 chip/上下文弹层/侧栏参考形态）为包内建特性，样式自持
 import './app.css';
 
-import { StrictMode } from 'react';
-import { createRoot } from 'react-dom/client';
+import { registerChatComponent } from '@pactor-app/chat';
+import { StaticDslLoader } from '@pactor-app/resource';
+import { createShadcnComponentRegistry } from '@pactor-app/ui/components';
+import { createShadcnLayoutRegistry } from '@pactor-app/ui/layout';
+import { createPactorApplication } from 'pactor-app';
 
-import App from './App';
+import agentsPageDsl from './agents.page.yaml';
+import { createBootstrap } from './bootstrap';
+import { ChatAppLayout } from './ChatAppLayout';
+import chatPageDsl from './chat.page.yaml';
+import { ChatProvider } from './ChatProvider';
+import settingsPageDsl from './settings.page.yaml';
 
-createRoot(document.getElementById('root')!).render(
-  <StrictMode>
-    <App />
-  </StrictMode>,
-);
+/**
+ * examples/chat 是"DSL 页面 + pactor-app 一站式装配"的参考实现
+ * （spec: example-chat / example-chat-on-pactor-app）：
+ *
+ * - 应用经 createPactorApplication 装配：菜单（功能菜单 + 「最近」分组
+ *   历史会话，含 group/dot/badge 扩展字段）与布局（type: 'chat'）由
+ *   模拟 bootstrap 资源下发（见 bootstrap.ts），框架内置 BrowserRouter +
+ *   DynamicDslRoute 承担路由出口，宿主无路由 / 菜单注册表 / 页面运行时
+ *   装配代码；
+ * - 外壳为 layoutRegistry 注册的 ChatAppLayout（ChatShell 参考形态：
+ *   品牌行 + collapsible 折叠 + 分组菜单 + sidebarFooter 用户卡），
+ *   菜单切换 = URL 变化，刷新按 URL 还原页面；
+ * - 聊天页结构（极简头部模型选择、@/+ 上下文弹层与 chips）全部经
+ *   chat.page.yaml 的 Chat props 声明（spec: chat-builtin-features /
+ *   chat-default-skin），宿主零槽位组件；
+ * - 聊天服务（transport / safeRegistry / capabilities / confirm /
+ *   附件伪上传 / callService 服务桥）与会话 store 缓存经 providers 槽
+ *   注入（见 ChatProvider.tsx）——跨页面切换对话消息不丢；
+ * - navigate / message 动作用框架内建（assembly 注册，message 经应用
+ *   uiBridge 出 toast），示例无需自定义动作。
+ */
+
+// 本地 DSL 开发：静态加载器直接喂入构建期 import 的页面与模拟 bootstrap
+const loader = new StaticDslLoader({
+  bootstrap: createBootstrap(),
+  pages: {
+    chat: chatPageDsl,
+    agents: agentsPageDsl,
+    settings: settingsPageDsl,
+  },
+});
+
+const app = createPactorApplication({
+  appId: 'example-chat',
+  loader,
+  locale: 'zh-CN',
+  // 组件注册表：shadcn 白名单组件全集 + Chat / ChatShell 一等组件
+  // （registerChatComponent 不覆盖已有同名类型）
+  componentRegistry: () => {
+    const registry = createShadcnComponentRegistry();
+    registerChatComponent(registry);
+    return registry;
+  },
+  // 布局注册表：shadcn 内建布局之上注册 chat 外壳（bootstrap
+  // layout.type: 'chat' 命中；见 ChatAppLayout.tsx）
+  layoutRegistry: () => {
+    const registry = createShadcnLayoutRegistry();
+    registry.register('chat', ChatAppLayout);
+    return registry;
+  },
+  // 聊天服务注入：DSL 页内 Chat 经 ChatServicesProvider 就近读取；
+  // 聊天服务侧 toast / confirm 由 ChatProvider 内挂的示例交互层承担
+  providers: ChatProvider,
+});
+
+app.mount('#root');

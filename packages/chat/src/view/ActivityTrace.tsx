@@ -1,11 +1,4 @@
-import {
-  Brain,
-  CheckCircle2,
-  ChevronRight,
-  Clock,
-  Loader2,
-  XCircle,
-} from 'lucide-react';
+import { Icon } from '@pactor-app/ui/components';
 import { MarkdownRenderer } from '@pactor-app/markdown';
 import { useEffect, useRef, useState, type ReactNode } from 'react';
 
@@ -97,15 +90,15 @@ function useElapsedSeconds(startedAt: number, active: boolean): number {
 /** 工具状态图标：waiting 时钟、running 旋转、success 对勾、failed 叉 */
 function TraceStatusIcon({ status }: { status: string }) {
   if (status === 'running') {
-    return <Loader2 size={13} className="pactor-chat-spin" />;
+    return <Icon name="loading" size={13} className="pactor-chat-spin" />;
   }
   if (status === 'success') {
-    return <CheckCircle2 size={13} />;
+    return <Icon name="check-circle" size={13} />;
   }
   if (status === 'failed') {
-    return <XCircle size={13} />;
+    return <Icon name="x-circle" size={13} />;
   }
-  return <Clock size={13} />;
+  return <Icon name="clock" size={13} />;
 }
 
 /** 参数摘要：单行压缩展示（CSS 负责超长省略） */
@@ -154,7 +147,7 @@ function TraceRow({ entry }: { entry: ToolTraceEntry }) {
         onClick={() => setOpen((value) => !value)}
       >
         <span className="pactor-chat-trace__chevron">
-          <ChevronRight size={12} />
+          <Icon name="chevron-right" size={12} />
         </span>
         <span className="pactor-chat-trace__entry-icon">
           <TraceStatusIcon status={entry.status} />
@@ -209,13 +202,13 @@ function ThinkingCard({
         onClick={toggle}
       >
         <span className="pactor-chat-trace__chevron">
-          <ChevronRight size={12} />
+          <Icon name="chevron-right" size={12} />
         </span>
         <span className="pactor-chat-thinking__icon">
           {partStreaming ? (
-            <Loader2 size={13} className="pactor-chat-spin" />
+            <Icon name="loading" size={13} className="pactor-chat-spin" />
           ) : (
-            <Brain size={13} />
+            <Icon name="brain" size={13} />
           )}
         </span>
         <span>思考过程</span>
@@ -255,9 +248,9 @@ export function ActivityTrace({ message }: ActivityTraceProps) {
     <>
       <span className="pactor-chat-trace__status-icon">
         {streaming ? (
-          <Loader2 size={13} className="pactor-chat-spin" />
+          <Icon name="loading" size={13} className="pactor-chat-spin" />
         ) : (
-          <CheckCircle2 size={13} />
+          <Icon name="check-circle" size={13} />
         )}
       </span>
       <span
@@ -270,7 +263,7 @@ export function ActivityTrace({ message }: ActivityTraceProps) {
       <span className="pactor-chat-trace__elapsed">{elapsed}s</span>
       {entries.length > 0 && (
         <span className="pactor-chat-trace__chevron">
-          <ChevronRight size={12} />
+          <Icon name="chevron-right" size={12} />
         </span>
       )}
     </>
