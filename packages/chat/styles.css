@@ -774,6 +774,21 @@
   background: var(--pactor-chat-muted-fg);
 }
 
+/* Composer 承载坞（空态居中组与钉底位共用）：padding-bottom 为钉底态
+ * 与页面底部留出空白；composerBottom 槽（未提供不渲染）居中弱提示 */
+.pactor-chat-view__composer-dock {
+  width: 100%;
+  padding-bottom: 12px;
+}
+
+.pactor-chat-view__composer-bottom {
+  margin-top: 8px;
+  text-align: center;
+  color: var(--pactor-chat-muted-fg);
+  font-size: 12px;
+  line-height: 1.5;
+}
+
 /* ============================================================
  * 3. 空状态（spec: chat-empty-state）
  * ============================================================ */
@@ -1510,10 +1525,10 @@ button.pactor-chat-trace__header:hover,
   border-radius: var(--pactor-chat-radius-xl);
 }
 
-/* 输入高度上限与单行起始形态（ChatInput 缺省 min-h-16 的收敛；
+/* 输入高度下限 / 上限（与 ChatInput textarea 的 min-h-[60px] 一致；
    自适应由 field-sizing-content 承担，超上限内部滚动） */
 .pactor-chat-composer--dsl [data-slot='chat-input'] textarea {
-  min-height: 24px;
+  min-height: 60px;
   max-height: 200px;
 }
 

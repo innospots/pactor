@@ -1,6 +1,6 @@
 import { Icon } from '@pactor-app/ui/components';
 import { Registry } from '@pactor-app/core';
-import { useEffect, useMemo, useRef, useState, useSyncExternalStore } from 'react';
+import { useEffect, useMemo, useRef, useState, useSyncExternalStore, type ReactNode } from 'react';
 
 import type { ChatArtifact } from '../artifact.js';
 import type { ChatConfirm, ChatPermissionChecker } from '../capability-action.js';
@@ -126,6 +126,12 @@ export interface ChatViewProps
   messageActions?: Array<BuiltinMessageAction | ChatMessageAction>;
   /** 全部消息动作（含内建）点击的并行通知（event 语义，不影响内建默认行为） */
   onMessageAction?: (actionId: string, message: ChatMessage) => void;
+  /**
+   * Composer 下方自定义内容槽（未提供不渲染）：渲染在 Composer 之外、
+   * 页面底部留白区内（空态 / 钉底两态一致），典型用途为免责声明、
+   * 备案信息等弱提示行
+   */
+  composerBottom?: ReactNode;
   className?: string;
 }
 
@@ -177,6 +183,7 @@ export function ChatView({
   callService,
   messageActions,
   onMessageAction,
+  composerBottom,
 }: ChatViewProps) {
   const messages = useSyncExternalStore(
     (listener) => store.subscribe(listener),
@@ -369,6 +376,19 @@ export function ChatView({
     />
   );
 
+  // Composer 承载坞：空态居中组与钉底位共用——composerBottom 槽渲染在
+  // Composer 之外正下方；padding-bottom 提供钉底态与页面底部的留白
+  const composerDock = (
+    <div className="pactor-chat-view__composer-dock">
+      {composerNode}
+      {composerBottom !== undefined && composerBottom !== null ? (
+        <div className="pactor-chat-view__composer-bottom">
+          {composerBottom}
+        </div>
+      ) : null}
+    </div>
+  );
+
   return (
     <div
       className={`pactor-chat-view${isEmpty ? ' pactor-chat-view--empty' : ''}${className ? ` ${className}` : ''}`}
@@ -382,7 +402,7 @@ export function ChatView({
               suggestions={suggestions}
               onSuggestionClick={handleSend}
             />
-            {composerNode}
+            {composerDock}
           </div>
         ) : (
           messages.map((message) => (
@@ -413,7 +433,7 @@ export function ChatView({
           </button>
         )}
       </div>
-      {!isEmpty && composerNode}
+      {!isEmpty && composerDock}
     </div>
   );
 }

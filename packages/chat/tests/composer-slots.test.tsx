@@ -159,6 +159,76 @@ describe('Composer 槽位（spec: chat-composer-slots）', () => {
     ).not.toBeNull();
   });
 
+  it('composerBottom：fallback 路径渲染在 Composer 之外正下方；未提供不渲染', () => {
+    const store = new ConversationStore();
+    store.appendMessage({
+      id: 'u1',
+      role: 'user',
+      status: 'completed',
+      parts: [{ type: 'text', content: '你好', status: 'ready' }],
+    });
+    const { unmount } = render(
+      <ChatView
+        store={store}
+        composerBottom={<span>内容由 AI 生成，仅供参考</span>}
+      />,
+    );
+    const bottom = document.querySelector('.pactor-chat-view__composer-bottom');
+    expect(bottom).not.toBeNull();
+    expect(bottom!.textContent).toContain('内容由 AI 生成，仅供参考');
+    // 位于 Composer（fallback 容器）之后
+    const composer = document.querySelector('.pactor-chat-composer')!;
+    expect(
+      composer.compareDocumentPosition(bottom!) &
+        Node.DOCUMENT_POSITION_FOLLOWING,
+    ).toBeTruthy();
+    unmount();
+
+    render(<ChatView store={new ConversationStore()} />);
+    expect(
+      document.querySelector('.pactor-chat-view__composer-bottom'),
+    ).toBeNull();
+  });
+
+  it('composerBottom：DSL 声明渲染（钉底 / 空态两态一致），服务槽与 props 槽并存时服务槽在先', () => {
+    renderChatPage(
+      {
+        page: { id: 'chat', title: '聊天页' },
+        body: {
+          type: 'Chat',
+          props: {
+            composerBottom: {
+              type: 'Text',
+              props: { text: 'props 槽' },
+            },
+          },
+        },
+      },
+      {
+        transport: createManualDriver().transport,
+        composerBottom: <span>服务槽</span>,
+      },
+    );
+
+    const bottom = document.querySelector(
+      '.pactor-chat-view__composer-bottom',
+    )!;
+    expect(bottom).not.toBeNull();
+    expect(bottom.textContent).toContain('服务槽');
+    expect(bottom.textContent).toContain('props 槽');
+    const service = screen.getByText('服务槽');
+    const prop = screen.getByText('props 槽');
+    expect(
+      service.compareDocumentPosition(prop) & Node.DOCUMENT_POSITION_FOLLOWING,
+    ).toBeTruthy();
+    // 空态（无消息）同样渲染；位于 ChatInput 容器之后
+    const chatInput = document.querySelector('[data-slot=chat-input]')!;
+    expect(
+      chatInput.compareDocumentPosition(bottom) &
+        Node.DOCUMENT_POSITION_FOLLOWING,
+    ).toBeTruthy();
+  });
+
   it('服务槽与 props 槽并存：服务槽在先', () => {
     renderChatPage(
       {

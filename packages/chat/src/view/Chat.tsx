@@ -58,7 +58,7 @@ export interface ChatProps {
   conversationId?: string;
   /** 注入 dsl part 作用域 params */
   params?: Record<string, unknown>;
-  /** 传 false 关闭 header；缺省渲染（header 槽整体替换 > title + headerExtra 内建 header） */
+  /** 传 false 关闭 header；缺省按内容自动渲染（header 槽整体替换 > title + headerExtra / headerActions / header 位模型 chip 内建 header，均无内容时 header 节点不渲染） */
   showHeader?: boolean;
   /** 左侧菜单数据；提供时以 AppShell 承载内建侧栏 */
   menu?: ChatMenuItem[];
@@ -75,6 +75,12 @@ export interface ChatProps {
   toolbarStart?: DslNode | ReactNode;
   toolbarEnd?: DslNode | ReactNode;
   composerFooter?: DslNode | ReactNode;
+  /**
+   * Composer 下方自定义内容槽（DslNode | ReactNode）：
+   * 渲染在 Composer 之外正下方（页面底部留白区内），
+   * 与服务注入的同名槽并存时服务槽在先；未提供不渲染
+   */
+  composerBottom?: DslNode | ReactNode;
   /**
    * 隐藏 Composer 工具栏行（缺省 false；DSL 可序列化标量）：
    * true 时工具栏行整体不渲染，toolbarStart / toolbarEnd 槽一并抑制
@@ -265,6 +271,7 @@ export function Chat({
   toolbarStart,
   toolbarEnd,
   composerFooter,
+  composerBottom,
   hideToolbar,
   headerExtra,
   header,
@@ -334,12 +341,13 @@ export function Chat({
       conversationId={conversationId}
       params={params}
       className={className}
-      showHeader={showHeader !== false}
+      showHeader={showHeader}
       header={resolveSlot(header)}
       headerExtra={resolveSlot(headerExtra) ?? services.headerExtra}
       toolbarStart={resolveSlot(toolbarStart)}
       toolbarEnd={resolveSlot(toolbarEnd)}
       composerFooter={resolveSlot(composerFooter)}
+      composerBottom={resolveSlot(composerBottom)}
       hideToolbar={hideToolbar}
       headerActions={headerActions}
       editableTitle={editableTitle}

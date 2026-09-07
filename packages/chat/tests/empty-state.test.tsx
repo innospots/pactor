@@ -101,9 +101,11 @@ describe('空态居中组（spec: chat-empty-state，决策 D1）', () => {
 
     const stack = document.querySelector('.pactor-chat-view__empty-stack')!;
     expect(stack).toBeTruthy();
-    // 问候组与 Composer 同为居中列子节点，Composer 在问候组正下方
+    // 问候组与 Composer 承载坞同为居中列子节点，Composer 在问候组正下方
     const empty = stack.querySelector(':scope > .pactor-chat-empty');
-    const composer = stack.querySelector(':scope > .pactor-chat-composer');
+    const composer = stack.querySelector(
+      ':scope > .pactor-chat-view__composer-dock > .pactor-chat-composer',
+    );
     expect(empty).toBeTruthy();
     expect(composer).toBeTruthy();
     // 居中列位于消息区内（溢出滚动兜底）
@@ -126,12 +128,14 @@ describe('空态居中组（spec: chat-empty-state，决策 D1）', () => {
     const view = document.querySelector('.pactor-chat-view')!;
     expect(view.classList.contains('pactor-chat-view--empty')).toBe(false);
     expect(document.querySelector('.pactor-chat-view__empty-stack')).toBeNull();
-    // Composer 回到消息区之外的钉底位置
+    // Composer 回到消息区之外的钉底位置（承载坞内，与页面底部留有空白）
     expect(
       document.querySelector('.pactor-chat-messages .pactor-chat-composer'),
     ).toBeNull();
     expect(
-      document.querySelector('.pactor-chat-view > .pactor-chat-composer'),
+      document.querySelector(
+        '.pactor-chat-view > .pactor-chat-view__composer-dock > .pactor-chat-composer',
+      ),
     ).toBeTruthy();
   });
 });

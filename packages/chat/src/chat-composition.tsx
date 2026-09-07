@@ -117,8 +117,12 @@ export interface ChatCompositionProps {
   suggestions?: ChatSuggestion[];
   conversationId?: string;
   params?: Record<string, unknown>;
-  /** 是否渲染头部（由调用方按自身默认规则计算后传入） */
-  showHeader: boolean;
+  /**
+   * 是否渲染头部：显式 false 关闭；未传（undefined）按内容自动判定——
+   * header 槽 / title / headerExtra / headerActions / header 位模型 chip
+   * 任一存在才渲染，无内容时 `.pactor-chat-workspace__header` 节点不渲染
+   */
+  showHeader?: boolean;
   /** 整体替换内建 header（提供且 showHeader 时渲染） */
   header?: ReactNode;
   /** 内建 header 标题右侧扩展区 */
@@ -167,6 +171,8 @@ export interface ChatCompositionProps {
   toolbarEnd?: ReactNode;
   /** Composer footer 槽（spec: chat-composer-slots；与服务注入的 composerFooter 先后渲染，服务槽在先） */
   composerFooter?: ReactNode;
+  /** Composer 下方自定义内容槽（与服务注入的 composerBottom 先后渲染，服务槽在先；未提供不渲染） */
+  composerBottom?: ReactNode;
   /** 隐藏 Composer 工具栏行（透传 ChatView；toolbar 槽一并抑制，Enter 发送保留） */
   hideToolbar?: boolean;
   className?: string;
@@ -230,6 +236,7 @@ export function ChatComposition({
   toolbarStart,
   toolbarEnd,
   composerFooter,
+  composerBottom,
   hideToolbar,
   className,
   onSend,
@@ -349,12 +356,31 @@ export function ChatComposition({
         {composerFooter}
       </>
     ) : undefined;
+  // Composer 下方自定义内容：服务槽在先、props 槽在后（同 footer 合并规则）
+  const mergedComposerBottom =
+    services.composerBottom !== undefined || composerBottom !== undefined ? (
+      <>
+        {services.composerBottom}
+        {composerBottom}
+      </>
+    ) : undefined;
+
+  // 头部内容判定：showHeader 显式 false 关闭；否则任一内容存在才渲染
+  // （无内容时 workspace__header 节点整体零渲染）
+  const hasHeaderContent =
+    header !== undefined && header !== null
+      ? true
+      : title !== undefined ||
+        (headerExtra !== undefined && headerExtra !== null) ||
+        (headerActions !== undefined && headerActions.length > 0) ||
+        headerModelChip !== undefined;
+  const renderHeader = showHeader !== false && hasHeaderContent;
 
   const workspace = (
     <div
       className={`pactor-chat-workspace${className ? ` ${className}` : ''}`}
     >
-      {showHeader ? (
+      {renderHeader ? (
         (header ?? (
           <WorkspaceHeader
             title={title}
@@ -391,6 +417,7 @@ export function ChatComposition({
         toolbarStart={mergedToolbarStart}
         toolbarEnd={mergedToolbarEnd}
         composerFooter={mergedComposerFooter}
+        composerBottom={mergedComposerBottom}
         hideToolbar={hideToolbar}
         onMentionTrigger={services.onMentionTrigger}
         onPlusMenu={services.onPlusMenu}

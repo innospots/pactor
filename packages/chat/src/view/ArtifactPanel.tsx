@@ -18,7 +18,10 @@ import { createChatRuntime, type ChatRuntime } from '../scope.js';
 import { ChatDenied } from './PartRenderer.js';
 import { setChatChromeHandlers } from './chrome/actions.js';
 import { ChromeSlot } from './chrome/ChromeSlot.js';
-import { buildPanelHeaderFragment } from './chrome/panel-header.js';
+import {
+  buildPanelHeaderFragment,
+  PANEL_HEADER_INTERNAL_COMPONENTS,
+} from './chrome/panel-header.js';
 
 /**
  * ArtifactPanel（spec: chat-artifact-panel，设计决策 D2/D3）：
@@ -250,6 +253,7 @@ export function ArtifactPanel({
             title: artifact?.title ?? '产出物',
             kind: artifact?.kind ?? 'text',
           })}
+          components={PANEL_HEADER_INTERNAL_COMPONENTS}
           fallback={
             <>
               <span className="pactor-chat-inspector__title">

@@ -63,7 +63,11 @@ function TooltipContent({
           {...props}
         >
           {children}
-          <TooltipPrimitive.Arrow className="z-50 size-2.5 translate-y-[calc(-50%_-_2px)] rotate-45 rounded-[2px] bg-primary fill-primary" />
+          {/* 尖角：Base UI 的 arrow 中间件只内联交叉轴坐标（top/bottom
+               placement 设 left，left/right placement 设 top），主轴须
+              按 data-side 显式贴边；官方片段的 translate-y 静态位移只在
+              side=top 时近似正确，翻转 placement 后尖角错位 */}
+          <TooltipPrimitive.Arrow className="z-50 size-2.5 rotate-45 rounded-[2px] bg-primary fill-primary data-[side=top]:-bottom-1 data-[side=bottom]:-top-1 data-[side=left]:-right-1 data-[side=right]:-left-1" />
         </TooltipPrimitive.Popup>
       </TooltipPrimitive.Positioner>
     </TooltipPrimitive.Portal>
