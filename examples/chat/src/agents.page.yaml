@@ -5,9 +5,9 @@ page:
 
 # 智能体列表页（spec: chat-dsl-component / examples-chat 路由化）：
 # 白名单组件（Page/Grid/Card/Alert/Button）静态声明 mock 列表；
-# 点击「开始对话」经 DSL navigate 动作跳 /chat?id=xxx —— 页内 runtime
-# 注入了 router adapter（见 App.tsx），chat 页以该 query 作 conversationId，
-# 每个智能体一个独立会话。
+# 点击「开始对话」经 DSL navigate 动作跳 /chat?id=xxx —— 路由由框架
+# 内建 BrowserRouter + DynamicDslRoute 承担（见 main.tsx），chat 页以
+# 该 query 作 conversationId，每个智能体一个独立会话。
 body:
   type: Page
   props:
@@ -30,6 +30,7 @@ body:
               props:
                 variant: info
                 message: 通用问答与总结
+                className: mb-4
             - type: Button
               props:
                 text: 开始对话
@@ -47,6 +48,7 @@ body:
               props:
                 variant: info
                 message: 代码生成与审查
+                className: mb-4
             - type: Button
               props:
                 text: 开始对话
@@ -64,6 +66,7 @@ body:
               props:
                 variant: info
                 message: 中英互译与润色
+                className: mb-4
             - type: Button
               props:
                 text: 开始对话
@@ -81,6 +84,7 @@ body:
               props:
                 variant: info
                 message: 报表解读与月报产出物
+                className: mb-4
             - type: Button
               props:
                 text: 开始对话

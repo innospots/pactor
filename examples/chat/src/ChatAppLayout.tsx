@@ -8,7 +8,7 @@ import {
   CardHeader,
   CardTitle,
 } from '@pactor-app/ui/ui';
-import { Bell } from 'lucide-react';
+import { Icon } from '@pactor-app/ui/components';
 import type { ReactNode } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 
@@ -91,7 +91,7 @@ export function ChatAppLayout({ brand, children }: ChatAppLayoutProps) {
                 <CardDescription>ariake@pactor.dev</CardDescription>
                 <CardAction>
                   <Button variant="ghost" size="icon" aria-label="通知">
-                    <Bell />
+                    <Icon name="bell" />
                   </Button>
                 </CardAction>
               </CardHeader>

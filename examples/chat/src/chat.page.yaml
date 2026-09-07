@@ -17,7 +17,7 @@ state:
   workspace: ''
 
 # 聊天页 body 为一等组件 Chat（spec: chat-dsl-component / example-chat）：
-# 无侧栏形态（菜单外壳由宿主 App.tsx 的 ChatShell + MenuRegistry 承担，
+# 无侧栏形态（菜单外壳由宿主 ChatAppLayout.tsx 的 ChatShell 承担，
 # 菜单切换 = URL 变化）；会话 id 取路由 query（智能体列表与侧栏「最近」
 # 分组 navigate /chat?id=xxx 进入独立会话），缺省 conv-demo。
 # 对齐参考默认形态（spec: chat-default-skin / example-chat）：无头部
@@ -26,7 +26,7 @@ state:
 # 空态问候组与 Composer 垂直居中成组为包内默认行为。
 # 模型选择、@/+ 上下文弹层均为包内建特性，由下方 props 声明开启；
 # transport / safeRegistry / capabilities / 附件伪上传 / callService
-# 服务桥由宿主经 ChatServicesProvider 注入（见 App.tsx）。
+# 服务桥由宿主经 ChatServicesProvider 注入（见 ChatProvider.tsx）。
 body:
   type: Chat
   props:
@@ -48,7 +48,7 @@ body:
       - { value: demo-pro, label: demo-pro }
     model: ${state.model}
     # 内建上下文数据源（spec: chat-context-sources）：@ 智能体 / + 上下文，
-    # service 引用经宿主 callService 服务桥解析（见 App.tsx）
+    # service 引用经宿主 callService 服务桥解析（见 ChatProvider.tsx）
     contexts:
       - { trigger: '@', label: 智能体, service: agents }
       - { trigger: '+', label: 上下文, service: contexts }
