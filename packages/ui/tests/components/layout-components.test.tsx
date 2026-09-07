@@ -210,4 +210,36 @@ describe('Menu', () => {
       '客户列表',
     );
   });
+
+  it('展示扩展字段：badge 角标 / dot 状态点 / group 分组标题 / disabled 不可选', async () => {
+    const user = userEvent.setup();
+    const { container, context } = renderDsl({
+      type: 'Menu',
+      props: {
+        items: [
+          { key: 'chat', label: '对话', badge: 3 },
+          { key: 'conv-1', label: '桌面框架调整', dot: true, group: '最近' },
+          { key: 'conv-2', label: '整理本周产品进展', group: '最近' },
+          { key: 'disabled-item', label: '禁用项', disabled: true },
+        ],
+      },
+      events: {
+        onSelect: { action: 'setState', params: { selected: '${event}' } },
+      },
+    });
+
+    // badge / dot / 分组标题（相邻同组只渲染一次）
+    expect(screen.getByText('3')).toBeDefined();
+    expect(
+      container.querySelector('[data-key=conv-1] [data-slot=menu-item-dot]'),
+    ).not.toBeNull();
+    expect(container.querySelectorAll('[data-slot=menu-group]')).toHaveLength(1);
+    expect(screen.getByText('最近')).toBeDefined();
+
+    // 普通项可选；disabled 项不触发 onSelect
+    await user.click(screen.getByText('对话'));
+    expect(context.state.get('selected')).toBe('chat');
+    await user.click(screen.getByText('禁用项'));
+    expect(context.state.get('selected')).toBe('chat');
+  });
 });

@@ -1,6 +1,11 @@
 # Spec: chat-activity-trace
 
+## Purpose
+
 助手消息的活动轨迹（`@pactor-app/chat`）：流式状态头与配对工具轨迹。
+
+
+## Requirements
 
 ### Requirement: 流式状态头
 

@@ -1,7 +1,11 @@
 # Spec: vite-plugin-dsl
 
+## Purpose
+
 YAML DSL 导入转换插件（`@pactor-app/vite-plugin`，设计文档第 34、85 节）。
 
+
+## Requirements
 
 ### Requirement: page DSL 导入转换
 

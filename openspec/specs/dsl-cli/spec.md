@@ -1,7 +1,11 @@
 # Spec: dsl-cli
 
+## Purpose
+
 pactor CLI（`@pactor-app/cli`）：本地 DSL 开发工具链，设计文档第 84 节。
 
+
+## Requirements
 
 ### Requirement: validate 命令
 

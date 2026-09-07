@@ -1,10 +1,14 @@
 # Spec: chat-view
 
-Chat React 视图与布局（`@pactor-app/chat`）：ChatView / MessageBubble / PartRenderer / Composer 与 chat 布局注册。
+## Purpose
 
+Chat React 视图与布局（`@pactor-app/chat`）：ChatView / MessageBubble / PartRenderer / Composer 与 chat 布局注册。
+## Requirements
 ### Requirement: 消息列表渲染
 
 `<ChatView store>` SHALL 订阅 ConversationStore 渲染消息列表：user 消息渲染为右侧圆角气泡（最大宽度约 75%），assistant 消息渲染为左侧通栏排版；parts 按序逐个渲染。会话为空时 SHALL 渲染空状态区（见 chat-empty-state）。消息滚动区 SHALL 带上下边缘渐隐 mask。视图 MUST NOT 依赖 antd，颜色、圆角、字体 MUST 经 `--pactor-chat-*` CSS 变量表达（`@pactor-app/chat/styles.css`），暗色主题经 `[data-pactor-theme='dark']` 覆盖。
+
+通用 chrome 区域（空态、操作条、error/status/占位、artifact 卡片等）优先经 chat chrome DSL 渲染层以宿主组件组合渲染（见 chat-chrome-dsl）时，其样式经 `pactor-chat-chrome` 容器的令牌映射承接 `--pactor-chat-*`（shadcn 语义令牌为映射目标），不放宽本条的令牌契约；chat-domain 核心呈现（气泡 / 流式 / 活动轨迹）保持 chat 自绘。
 
 #### Scenario: 渲染对话
 
@@ -23,7 +27,7 @@ Chat React 视图与布局（`@pactor-app/chat`）：ChatView / MessageBubble / 
 
 ### Requirement: PartRenderer
 
-按 part 类型渲染：text → 文本段落；markdown → @pactor-app/markdown；dsl → runtime Renderer（Safe Registry + chat 作用域）；tool-call / tool-result → 由活动轨迹配对渲染（见 chat-activity-trace），MUST NOT 再渲染为独立状态卡；thinking → 自绘折叠卡（流式期间展开并带进行中指示，进入答案阶段自动折叠，用户操作后固定，正文支持 markdown）；error → 自绘错误警示条（error 状态消息附重试入口，见 chat-message-actions）；status → 弱提示。折叠卡与警示条 MUST 为 chat 包自绘组件（不依赖 antd）。
+按 part 类型渲染：text → 文本段落；markdown → @pactor-app/markdown；dsl → runtime Renderer（Safe Registry + chat 作用域）；tool-call / tool-result → 由活动轨迹配对渲染（见 chat-activity-trace），MUST NOT 再渲染为独立状态卡；thinking → 自绘折叠卡（流式期间展开并带进行中指示，进入答案阶段自动折叠，用户操作后固定，正文支持 markdown）；error → 错误警示条（error 状态消息附重试入口，见 chat-message-actions）；status → 弱提示。thinking 折叠卡 MUST 为 chat 包自绘组件（不依赖 antd）；error 警示条 / status 弱提示 / dsl-pending 占位 / artifact 卡片（标题 + kind 角标 + 打开按钮）SHALL 优先经 chat chrome DSL 渲染层以宿主组件（Alert / Text / Card / Badge / Button 等）组合渲染（见 chat-chrome-dsl），无 renderer 环境或类型缺失时回退 chat 自绘实现；artifact 卡片的打开交互在 DSL 路径下经 `chat.openArtifact` 内建动作触发同一 `onOpenArtifact` 回调。
 
 #### Scenario: dsl part 渲染白名单组件
 
@@ -44,6 +48,8 @@ Chat React 视图与布局（`@pactor-app/chat`）：ChatView / MessageBubble / 
 
 SHALL 提供自适应高度输入框与发送：Enter 发送、Shift+Enter 换行；IME 合成进行中 Enter MUST NOT 发送；空文本 MUST NOT 发送；提供 onSend 回调或经 transport 驱动 turn。store 存在 pending/streaming 消息时，发送按钮 SHALL 变为停止按钮，点击 SHALL 取消当前 turn（assistant 消息以 cancelled 收尾）。附件、工具栏槽位与提及扩展点见 chat-composer-extensions。
 
+Composer 的呈现层 SHALL 优先经 chat chrome DSL 渲染层以宿主 `ChatInput` 组件组合渲染（见 chat-chrome-dsl）：ChatInput 以非受控渲染（草稿自持、发送后自清空，用户文本不进入 DSL params），发送经 `chat.composerSubmit` 内建动作桥接回包内发送路径，输入值同步（发送钮禁用态）与 mention 检测经包裹容器的事件冒泡同步承接；附件 / chips 区与工具栏内容经 ambient registry 注册的 chat 内部组件供给。无 renderer 环境或类型缺失时回退 chat 手写呈现，两条路径的交互语义 MUST 一致。
+
 #### Scenario: 发送消息
 
 - **WHEN** 输入文本并按 Enter
@@ -58,8 +64,6 @@ SHALL 提供自适应高度输入框与发送：Enter 发送、Shift+Enter 换�
 
 - **WHEN** assistant 消息流式进行中点击停止按钮
 - **THEN** 当前 turn 被取消，该消息状态变为 cancelled
-
-## ADDED Requirements
 
 ### Requirement: chat 布局注册
 
@@ -102,6 +106,8 @@ chat 包 SHALL 提供 `useChatAutoScroll` hook 并接入 ChatView 消息区：�
 
 assistant 消息 hover 时 SHALL 显示操作条，至少提供复制（将消息全部 text/markdown part 文本写入剪贴板并给出已复制反馈）；末条 completed assistant 消息 SHALL 额外出示重新生成入口；error 消息 SHALL 出示重试入口；user 消息 hover 时 SHALL 出示编辑入口（见 chat-message-actions 的行为语义）。
 
+操作条的按钮组 SHALL 优先经 chat chrome DSL 渲染层以宿主组件（Button / Tooltip / Icon 等）组合渲染（见 chat-chrome-dsl），内建动作经 `chat.*` 内建动作接回包内行为，自定义动作的 service 派发契约（chat-message-actions）不变；无 renderer 环境或类型缺失时回退 chat 自绘实现。hover 显现容器与可见性求值逻辑 MUST 保留在 chat 包内。
+
 #### Scenario: 复制消息
 
 - **WHEN** hover assistant 消息并点击复制按钮
@@ -111,3 +117,18 @@ assistant 消息 hover 时 SHALL 显示操作条，至少提供复制（将消�
 
 - **WHEN** hover 末条已完成的 assistant 消息
 - **THEN** 操作条含重新生成按钮，点击触发重新生成流程
+
+### Requirement: 图标统一经 ui Icon
+
+chat 视图（含 fallback 与 bespoke 路径）的图标 SHALL 一律经 `@pactor-app/ui` 的 `Icon` 组件渲染（白名单名称 + `normalizeIconName` 归一化），MUST NOT 直接依赖 lucide-react；ui Icon 白名单 SHALL 覆盖 chat 全部既有图标与契约图标名（含 menu.icon / messageActions[].icon 的既有取值，未知名由 ui Icon 渲染占位图标，不抛错）。
+
+#### Scenario: 直接引用替换
+
+- **WHEN** 查看 packages/chat 源码
+- **THEN** 无 `from 'lucide-react'` 引用，图标均经 ui Icon（名称形式）渲染
+
+#### Scenario: 契约图标名直通
+
+- **WHEN** menu 项 icon 为 `chat` / `history`、消息操作 icon 为 `share` / `quote` / `rotate-ccw`
+- **THEN** 均按既有语义渲染对应图标（未知名渲染占位，不抛错）
+

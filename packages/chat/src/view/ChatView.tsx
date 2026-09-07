@@ -1,4 +1,4 @@
-import { ArrowDown } from 'lucide-react';
+import { Icon } from '@pactor-app/ui/components';
 import { Registry } from '@pactor-app/core';
 import { useEffect, useMemo, useRef, useState, useSyncExternalStore } from 'react';
 
@@ -28,6 +28,7 @@ import {
   type ChatTransport,
 } from '../transport.js';
 import { Composer, type ComposerProps } from './Composer.js';
+import { setChatChromeHandlers } from './chrome/actions.js';
 import type { CallChatService } from './context-sources.js';
 import { EmptyState, type ChatSuggestion } from './EmptyState.js';
 import { MessageBubble } from './MessageBubble.js';
@@ -59,6 +60,7 @@ export interface ChatViewProps
     | 'onAttachmentClick'
     | 'toolbarStart'
     | 'toolbarEnd'
+    | 'composerFooter'
     | 'onMentionTrigger'
     | 'onPlusMenu'
   > {
@@ -161,6 +163,7 @@ export function ChatView({
   onAttachmentClick,
   toolbarStart,
   toolbarEnd,
+  composerFooter,
   onMentionTrigger,
   onPlusMenu,
   models,
@@ -291,6 +294,20 @@ export function ChatView({
     abortRef.current = null;
   };
 
+  // chrome DSL 渲染层（spec: chat-chrome-dsl）：包级行为注入——
+  // 空态建议点击 / artifact 卡片打开经 chat.* 内建动作桥接回这里
+  // （refs 保证回调始终最新；单活动 chat 语义）
+  const handleSendRef = useRef(handleSend);
+  handleSendRef.current = handleSend;
+  const onOpenArtifactRef = useRef(onOpenArtifact);
+  onOpenArtifactRef.current = onOpenArtifact;
+  useEffect(() => {
+    setChatChromeHandlers({
+      sendSuggestion: (text) => handleSendRef.current(text),
+      openArtifact: (artifact) => onOpenArtifactRef.current?.(artifact),
+    });
+  }, []);
+
   // 重新生成 / 错误重试（spec: chat-message-actions）：与发送共用
   // abortRef 生命周期——先取消当前 turn，再挂新控制器跑 regenerate。
   // 仅 transport 模式可用：onSend-only 模式下调用方完全自管 store，
@@ -336,6 +353,7 @@ export function ChatView({
       onAttachmentClick={onAttachmentClick}
       toolbarStart={toolbarStart}
       toolbarEnd={toolbarEnd}
+      composerFooter={composerFooter}
       onMentionTrigger={onMentionTrigger}
       onPlusMenu={onPlusMenu}
       models={modelPlacement === 'header' ? undefined : models}
@@ -387,7 +405,7 @@ export function ChatView({
             className="pactor-chat-scroll-bottom"
             onClick={scrollToBottom}
           >
-            <ArrowDown size={13} />
+            <Icon name="arrow-down" size={13} />
             回到底部
           </button>
         )}

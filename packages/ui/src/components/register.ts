@@ -18,6 +18,7 @@ import { Collapsible } from './components/Collapsible/index.js';
 import { Combobox } from './components/Combobox/index.js';
 import { Command } from './components/Command/index.js';
 import { Chart } from './components/Chart/index.js';
+import { ChatInput } from './components/ChatInput/index.js';
 import { Content } from './components/Content/index.js';
 import { ContextMenu } from './components/ContextMenu/index.js';
 import { DataTable } from './components/DataTable/index.js';
@@ -116,6 +117,7 @@ export const shadcnComponents = {
   Slider,
   Label,
   Field,
+  ChatInput,
   // 导航类扩展组件
   Breadcrumb,
   Pagination,

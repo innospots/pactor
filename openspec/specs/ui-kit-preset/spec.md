@@ -1,6 +1,11 @@
 # Spec: ui-kit-preset
 
+## Purpose
+
 `@pactor-app/ui` 聚合包与 @pactor-app/app `ui` 预设选项。
+
+
+## Requirements
 
 ### Requirement: 聚合包导出
 

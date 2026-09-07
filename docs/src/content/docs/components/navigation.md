@@ -11,7 +11,7 @@ description: 导航类 DSL 组件——Menu / Link / Breadcrumb / Pagination / T
 
 | prop | 类型 | 说明 |
 | --- | --- | --- |
-| `items` | `{ key, label, icon?, children? }[]` | 菜单树（如 `${data.menus}`；`icon` 为图标名（Icon 白名单，kebab/Pascal 均可），渲染于文字前） |
+| `items` | `{ key, label, icon?, badge?, dot?, group?, disabled?, children? }[]` | 菜单树（如 `${data.menus}`；`icon` 为图标名（Icon 白名单，kebab/Pascal 均可），渲染于文字前；`badge` 为角标、`dot` 为 danger 系状态圆点、`group` 为分组标题（相邻同组只渲染一次）、`disabled` 置灰不可选） |
 | `mode` | `inline`（默认）\| `horizontal` | inline 用于 Sider，horizontal 用于 Header |
 | `selectedKey` | string | 受控选中项 |
 | 事件 `onSelect` | — | 点选传出 key（典型接 `navigate` 或 `setState`） |

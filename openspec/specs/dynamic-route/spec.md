@@ -1,6 +1,11 @@
 # Spec: dynamic-route
 
+## Purpose
+
 导航桥接与动态路由（`@pactor-app/router`）：NavigationBridge 抽象、runtime RouterAdapter 桥接、React Router 绑定与路由守卫。
+
+
+## Requirements
 
 ### Requirement: NavigationBridge 抽象与 Memory 实现
 

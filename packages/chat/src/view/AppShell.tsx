@@ -1,4 +1,4 @@
-import { Menu, PanelLeft } from 'lucide-react';
+import { Icon } from '@pactor-app/ui/components';
 import {
   createContext,
   useCallback,
@@ -160,7 +160,7 @@ export function AppShell({ sidebar, brand, locationKey, sidebarFooter, collapsib
                       title={collapsedEffective ? '展开侧栏' : '折叠侧栏'}
                       onClick={() => setCollapsed((value) => !value)}
                     >
-                      <PanelLeft size={16} strokeWidth={1.7} />
+                      <Icon name="panel-left" size={16} strokeWidth={1.7} />
                     </button>
                   )}
                 </div>
@@ -186,7 +186,7 @@ export function AppShell({ sidebar, brand, locationKey, sidebarFooter, collapsib
               aria-expanded={drawerOpen}
               onClick={() => setDrawerOpen(true)}
             >
-              <Menu size={18} strokeWidth={1.7} />
+              <Icon name="menu" size={18} strokeWidth={1.7} />
             </button>
             {brand}
           </div>

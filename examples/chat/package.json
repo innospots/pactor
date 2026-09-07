@@ -12,10 +12,10 @@
   "dependencies": {
     "katex": "^0.18.4",
     "lucide-react": "^1.31.0",
+    "pactor-app": "workspace:*",
     "@pactor-app/chat": "workspace:*",
     "@pactor-app/core": "workspace:*",
-    "@pactor-app/router": "workspace:*",
-    "@pactor-app/runtime": "workspace:*",
+    "@pactor-app/resource": "workspace:*",
     "@pactor-app/ui": "workspace:*",
     "react": "^19.2.8",
     "react-dom": "^19.2.8",

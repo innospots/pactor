@@ -1,6 +1,11 @@
 # Spec: chat-safe-registry
 
+## Purpose
+
 Chat DSL 白名单与 capability 动作（`@pactor-app/chat`，设计文档第 63、64、73、81.4、81.5 节）。
+
+
+## Requirements
 
 ### Requirement: Safe Registry
 

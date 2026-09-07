@@ -1,5 +1,10 @@
 # Spec: example-vite-starter
 
+## Purpose
+
+本规格定义 example-vite-starter 的行为契约。
+
+
 ## Requirements
 
 ### Requirement: 可启动可构建

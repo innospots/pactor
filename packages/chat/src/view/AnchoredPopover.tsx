@@ -9,8 +9,10 @@ import {
 /**
  * AnchoredPopover（spec: chat-context-sources，设计决策 D3）：
  * 包内迷你锚定弹层，内部组件（不从 index.ts 导出）——模型 chip /
- * +菜单 / @提及弹层共用。不依赖 @pactor-app/ui（守零运行时依赖契约），
- * 样式进 styles.css 用语义令牌。
+ * +菜单 / @提及弹层共用。样式进 styles.css 用语义令牌。
+ * （历史注：本包曾守"不依赖 @pactor-app/ui"的零运行时依赖约定；
+ * chat-icon-convergence 起 chat 作为 pactor-app 实例正式依赖 ui kit，
+ * 本组件因 @ 文本锚点形态 ui Popover 表达不了而保留包内实现。）
  *
  * 定位：`position: fixed` 按 anchorRect 定位，上方优先、垂直空间
  * 不足翻转到下方；水平左对齐锚点且不溢出右缘。尺寸未知时首帧以

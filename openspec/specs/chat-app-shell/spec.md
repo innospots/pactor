@@ -1,6 +1,11 @@
 # Spec: chat-app-shell
 
+## Purpose
+
 应用外壳布局（`@pactor-app/chat`）：侧栏插槽、响应式抽屉、drawer context、移动端顶栏。
+
+
+## Requirements
 
 ### Requirement: 应用外壳布局
 
@@ -62,8 +67,6 @@ SHALL 导出 `useSidebarDrawer()` hook：在 AppShell 内返回 `{ close: () => 
 
 - **WHEN** shell content 区渲染对话工作区且无调用端 CSS
 - **THEN** 对话列以 --pactor-chat-content-width 限宽并在 content 区内水平居中
-
-## ADDED Requirements
 
 ### Requirement: 桌面侧栏头部与折叠
 

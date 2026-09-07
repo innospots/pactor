@@ -1,6 +1,11 @@
 # Spec: i18n
 
+## Purpose
+
 应用级国际化（i18n）：`createPactorApplication` / bootstrap 的 locale 与 messages 配置，RuntimeContext 的 i18n 上下文，表达式 `t()` 翻译函数，以及内置组件/布局默认文案的覆盖机制。
+
+
+## Requirements
 
 ### Requirement: 应用级 i18n 配置
 

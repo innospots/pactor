@@ -1,6 +1,11 @@
 # Spec: runtime-context
 
+## Purpose
+
 RuntimeContext 组装、StateStore、表达式作用域构建与 Service Registry（`@pactor-app/runtime` 的非 React 基础层）。
+
+
+## Requirements
 
 ### Requirement: RuntimeContext 组装
 

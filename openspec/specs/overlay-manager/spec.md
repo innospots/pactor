@@ -1,6 +1,11 @@
 # Spec: overlay-manager
 
+## Purpose
+
 Overlay 堆栈状态与 Promise 模型（`pactor-ui-antd` interaction 层，零 React）。
+
+
+## Requirements
 
 ### Requirement: Overlay 打开与堆栈
 

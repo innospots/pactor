@@ -1,8 +1,11 @@
-import { Download, Moon, Sun, Trash2 } from 'lucide-react';
-import { useRef, useState, type ReactNode } from 'react';
+import { Icon } from '@pactor-app/ui/components';
+import { useEffect, useRef, useState, type ReactNode } from 'react';
 
 import { downloadMessagesAsMarkdown } from '../export-markdown.js';
 import type { ConversationStore } from '../store.js';
+import { setChatChromeHandlers } from './chrome/actions.js';
+import { ChromeSlot } from './chrome/ChromeSlot.js';
+import { buildHeaderActionsFragment } from './chrome/header-actions.js';
 
 /**
  * 内建工作区 header（spec: chat-dsl-component / Header 配置，设计决策 D4）：
@@ -113,6 +116,25 @@ export function WorkspaceHeader({
     onClear?.();
   };
 
+  // DSL 路径的操作桥接（spec: chat-on-ui-components）：chat.headerAction
+  // 内建动作 → 同一份 handleExport / handleTheme / handleClear
+  const handlersRef = useRef({ handleExport, handleTheme, handleClear });
+  handlersRef.current = { handleExport, handleTheme, handleClear };
+  useEffect(() => {
+    setChatChromeHandlers({
+      headerAction: (name) => {
+        const handlers = handlersRef.current;
+        if (name === 'export') {
+          handlers.handleExport();
+        } else if (name === 'theme') {
+          handlers.handleTheme();
+        } else if (name === 'clear') {
+          handlers.handleClear();
+        }
+      },
+    });
+  }, []);
+
   const actionButtons: Record<ChatHeaderAction, ReactNode> = {
     export: (
       <button
@@ -123,7 +145,7 @@ export function WorkspaceHeader({
         aria-label="导出 Markdown"
         onClick={handleExport}
       >
-        <Download size={15} />
+        <Icon name="download" size={15} />
       </button>
     ),
     theme: (
@@ -135,7 +157,7 @@ export function WorkspaceHeader({
         aria-label="切换明暗主题"
         onClick={handleTheme}
       >
-        {theme === 'dark' ? <Sun size={15} /> : <Moon size={15} />}
+        {theme === 'dark' ? <Icon name="sun" size={15} /> : <Icon name="moon" size={15} />}
       </button>
     ),
     clear: (
@@ -147,7 +169,7 @@ export function WorkspaceHeader({
         aria-label="清空会话"
         onClick={handleClear}
       >
-        <Trash2 size={15} />
+        <Icon name="trash" size={15} />
       </button>
     ),
   };
@@ -200,7 +222,13 @@ export function WorkspaceHeader({
       {hasActions ? (
         <div className="pactor-chat-workspace__header-right">
           <div className="pactor-chat-workspace__header-actions">
-            {headerActions.map((action) => actionButtons[action])}
+            <ChromeSlot
+              fragment={buildHeaderActionsFragment({
+                actions: headerActions,
+                theme,
+              })}
+              fallback={headerActions.map((action) => actionButtons[action])}
+            />
           </div>
           {headerExtra !== undefined ? (
             <div className="pactor-chat-workspace__header-extra">

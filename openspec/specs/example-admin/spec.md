@@ -1,6 +1,11 @@
 # Spec: example-admin
 
+## Purpose
+
 可运行的管理后台示例工程（`examples/admin`）。
+
+
+## Requirements
 
 ### Requirement: 可启动可构建
 

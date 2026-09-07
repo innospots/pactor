@@ -273,6 +273,25 @@ describe('Icon', () => {
   });
 
   it.each([
+    'chevrons-up-down',
+    'file-text',
+    'panel-left',
+    'panel-right-open',
+    'square',
+    'history',
+    'rotate-ccw',
+    'quote',
+    'chat',
+    'share',
+  ] as const)('chat 收敛图标名 %s 直通命中（spec: chat-icon-convergence）', (name) => {
+    const { container } = renderDsl({ type: 'Icon', props: { name } });
+
+    const icon = container.querySelector('[data-slot=icon]');
+    expect(icon).not.toBeNull();
+    expect(icon!.getAttribute('data-unknown')).toBeNull();
+  });
+
+  it.each([
     ['sm', '16'],
     ['default', '20'],
     ['lg', '24'],

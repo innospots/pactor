@@ -1,6 +1,11 @@
 # Spec: admin-layout
 
+## Purpose
+
 AdminLayout：标准管理后台外壳（`pactor-ui-antd` layout 层，设计文档第 24 节）。
+
+
+## Requirements
 
 ### Requirement: 布局结构与开关
 
@@ -30,8 +35,6 @@ AdminLayout SHALL 渲染 Header / Sidebar / 内容区，并按 config 开关 `he
 
 - **WHEN** config.mode 为 'two-column' 且菜单树含 group
 - **THEN** 第一列渲染一级菜单，选中 group 时第二列渲染其子菜单
-
-## ADDED Requirements
 
 ### Requirement: Sidebar 菜单渲染
 

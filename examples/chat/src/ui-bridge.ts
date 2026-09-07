@@ -1,9 +1,11 @@
 import { createUiBridge } from '@pactor-app/ui/interaction';
 
 /**
- * 示例级 UiBridge（examples/chat）：宿主根部挂载
+ * 示例级 UiBridge（examples/chat）：ChatProvider 挂载
  * `ShadcnInteractionProvider` 后注入 modal / message 实现，
- * toast / confirm 等反馈统一走 @pactor-app/ui 交互层（无 antd 依赖）。
+ * 聊天服务侧的 toast / confirm（capability 确认、引用回复、附件提示）
+ * 统一走 @pactor-app/ui 交互层（无 antd 依赖）。
+ * DSL 页内 message 动作走框架内建动作与应用级 uiBridge，与本桥并行。
  */
 export const uiBridge = createUiBridge();
 

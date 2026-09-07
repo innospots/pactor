@@ -1,22 +1,17 @@
-import {
-  Bookmark,
-  Check,
-  Copy,
-  HelpCircle,
-  Pencil,
-  Quote,
-  RotateCcw,
-  Share2,
-  ThumbsDown,
-  ThumbsUp,
-} from 'lucide-react';
-import { useState, type ComponentType } from 'react';
+import { Icon } from '@pactor-app/ui/components';
+import { useEffect, useRef, useState } from 'react';
 
 import type {
   BuiltinMessageAction,
   ChatMessage,
   ChatMessageAction,
 } from '../model.js';
+import {
+  clearMessageActionDispatcher,
+  setMessageActionDispatcher,
+} from './chrome/actions.js';
+import { ChromeSlot } from './chrome/ChromeSlot.js';
+import { buildMessageActionsFragment } from './chrome/message-actions.js';
 import type { CallChatService } from './context-sources.js';
 
 /**
@@ -58,21 +53,12 @@ export interface MessageActionsProps {
   onMessageAction?: (actionId: string, message: ChatMessage) => void;
 }
 
-/** 动作图标名 → lucide 子集（白名单式，同菜单 MENU_ICONS 口径；未知名渲染占位图标，不抛错） */
-export const MESSAGE_ACTION_ICONS: Record<
-  string,
-  ComponentType<{ size?: number }>
-> = {
-  copy: Copy,
-  check: Check,
-  'rotate-ccw': RotateCcw,
-  pencil: Pencil,
-  quote: Quote,
-  'thumbs-up': ThumbsUp,
-  'thumbs-down': ThumbsDown,
-  share: Share2,
-  bookmark: Bookmark,
-};
+/**
+ * 动作图标名（spec: chat-icon-convergence）：契约取值直接作为 ui Icon
+ * 白名单名渲染（copy / check / rotate-ccw / pencil / quote / thumbs-up /
+ * thumbs-down / share / bookmark；未知名由 ui Icon 渲染占位，不抛错）。
+ * 白名单曾映射 lucide 子集（MESSAGE_ACTION_ICONS），收敛后删除。
+ */
 
 /** 内建动作默认描述（spec: chat-message-actions，决策 D2）：配置按字段覆盖，未给字段沿用 */
 const BUILTIN_ACTION_DEFAULTS: Record<
@@ -111,7 +97,7 @@ const BUILTIN_ACTION_DEFAULTS: Record<
 };
 
 /** 解析后的动作描述：defaults 合并完成，可直接渲染 */
-interface ResolvedMessageAction {
+export interface ResolvedMessageAction {
   id: string;
   builtin?: BuiltinMessageAction;
   label: string;
@@ -192,6 +178,25 @@ export function MessageActions({
 }: MessageActionsProps) {
   const [copied, setCopied] = useState(false);
 
+  // chrome DSL 路径的 per-instance dispatcher（spec: chat-chrome-dsl）：
+  // chat.messageAction 内建动作按 token（message.id）寻址到本实例，
+  // 与回退路径共用同一份 dispatch（行为实现零分叉）。
+  // hooks 必须先于下方 visibleActions.length === 0 的提前返回
+  // （hooks 数量跨渲染恒定）；refs 的最新值在返回 JSX 前赋值
+  const dispatchRef = useRef<(action: ResolvedMessageAction) => void>(
+    () => {},
+  );
+  const visibleActionsRef = useRef<ResolvedMessageAction[]>([]);
+  useEffect(() => {
+    setMessageActionDispatcher(message.id, (actionId) => {
+      const action = visibleActionsRef.current.find((a) => a.id === actionId);
+      if (action) {
+        dispatchRef.current(action);
+      }
+    });
+    return () => clearMessageActionDispatcher(message.id);
+  }, [message.id]);
+
   const copy = async (): Promise<void> => {
     try {
       await navigator.clipboard.writeText(collectMessageText(message));
@@ -259,36 +264,46 @@ export function MessageActions({
     onMessageAction?.(action.id, message);
   };
 
+  dispatchRef.current = dispatch;
+  visibleActionsRef.current = visibleActions;
+
+  const buttons = visibleActions.map((action) => {
+    const copiedFeedback = action.builtin === 'copy' && copied;
+    const label = copiedFeedback ? '已复制' : action.label;
+    const iconName = copiedFeedback ? 'check' : action.icon;
+    return (
+      <button
+        key={action.id}
+        type="button"
+        className="pactor-chat-icon-button"
+        title={label}
+        aria-label={label}
+        data-message-action={action.id}
+        onClick={() => dispatch(action)}
+      >
+        {iconName !== undefined ? (
+          <Icon name={iconName} size={14} />
+        ) : (
+          <Icon name="help-circle" size={14} />
+        )}
+      </button>
+    );
+  });
+
   return (
     <div
       className={`pactor-chat-message__actions${
         forceVisible ? ' pactor-chat-message__actions--visible' : ''
       }`}
     >
-      {visibleActions.map((action) => {
-        const copiedFeedback = action.builtin === 'copy' && copied;
-        const label = copiedFeedback ? '已复制' : action.label;
-        const iconName = copiedFeedback ? 'check' : action.icon;
-        const Icon =
-          iconName !== undefined ? MESSAGE_ACTION_ICONS[iconName] : undefined;
-        return (
-          <button
-            key={action.id}
-            type="button"
-            className="pactor-chat-icon-button"
-            title={label}
-            aria-label={label}
-            data-message-action={action.id}
-            onClick={() => dispatch(action)}
-          >
-            {Icon ? (
-              <Icon size={14} />
-            ) : (
-              <HelpCircle size={14} data-icon-placeholder="true" />
-            )}
-          </button>
-        );
-      })}
+      <ChromeSlot
+        fragment={buildMessageActionsFragment({
+          actions: visibleActions,
+          copied,
+          token: message.id,
+        })}
+        fallback={buttons}
+      />
     </div>
   );
 }

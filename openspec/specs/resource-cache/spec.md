@@ -1,6 +1,11 @@
 # Spec: resource-cache
 
+## Purpose
+
 资源缓存与版本控制（`@pactor-app/resource`）：内存缓存、`id@version` 缓存键、版本失效、ETag 条件请求、并发去重。
+
+
+## Requirements
 
 ### Requirement: 内存缓存
 

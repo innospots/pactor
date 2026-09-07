@@ -1,4 +1,4 @@
-import { CircleAlert, PanelRightOpen } from 'lucide-react';
+import { Icon } from '@pactor-app/ui/components';
 import { MarkdownRenderer } from '@pactor-app/markdown';
 import { DslRenderer, useRenderer } from '@pactor-app/runtime';
 
@@ -7,6 +7,9 @@ import { guardChatDsl } from '../dsl-guard.js';
 import { useSmoothStreamText } from '../hooks/use-smooth-stream-text.js';
 import type { ChatPart } from '../model.js';
 import { buildChatScope, type ChatRuntime, type ChatScope } from '../scope.js';
+import { buildArtifactCardFragment } from './chrome/artifact-card.js';
+import { ChromeSlot } from './chrome/ChromeSlot.js';
+import { buildErrorFragment, buildStatusFragment } from './chrome/feedback.js';
 
 /**
  * PartRenderer：按 part 类型渲染。
@@ -90,9 +93,20 @@ export function PartRenderer({ part, runtime, scope, streaming = false, onOpenAr
       if (!part.schema || !runtime) {
         // dsl.start 占位阶段 / 未注入 Safe Registry 运行时
         return (
-          <div className="pactor-chat-dsl-pending">
-            {part.schema ? 'DSL 渲染不可用（未注入 Safe Registry）' : '内容生成中…'}
-          </div>
+          <ChromeSlot
+            fragment={buildStatusFragment(
+              part.schema
+                ? 'DSL 渲染不可用（未注入 Safe Registry）'
+                : '内容生成中…',
+            )}
+            fallback={
+              <div className="pactor-chat-dsl-pending">
+                {part.schema
+                  ? 'DSL 渲染不可用（未注入 Safe Registry）'
+                  : '内容生成中…'}
+              </div>
+            }
+          />
         );
       }
       const guarded = guardChatDsl(part.schema, runtime.context.components);
@@ -107,38 +121,54 @@ export function PartRenderer({ part, runtime, scope, streaming = false, onOpenAr
 
     case 'error':
       return (
-        <div className="pactor-chat-error" role="alert">
-          <CircleAlert size={14} />
-          <span>{part.message}</span>
-        </div>
+        <ChromeSlot
+          fragment={buildErrorFragment(part.message)}
+          fallback={
+            <div className="pactor-chat-error" role="alert">
+              <Icon name="error" size={14} />
+              <span>{part.message}</span>
+            </div>
+          }
+        />
       );
 
     case 'status':
-      return <div className="pactor-chat-status">{part.text}</div>;
+      return (
+        <ChromeSlot
+          fragment={buildStatusFragment(part.text)}
+          fallback={<div className="pactor-chat-status">{part.text}</div>}
+        />
+      );
 
     case 'artifact':
       // 产出物卡片（spec: chat-artifact-panel）：标题 + kind 角标 +
-      // "在面板中打开"按钮；点击经回调走面板打开路径，组件自身不持状态
+      // "在面板中打开"按钮；DSL 路径经 chat.openArtifact 内建动作、
+      // 回退路径经 onOpenArtifact prop，均走同一面板打开路径
       return (
-        <div
-          className="pactor-chat-artifact-card"
-          data-artifact-kind={part.artifact.kind}
-        >
-          <span className="pactor-chat-artifact-card__title">
-            {part.artifact.title}
-          </span>
-          <span className="pactor-chat-artifact-card__kind">
-            {part.artifact.kind}
-          </span>
-          <button
-            type="button"
-            className="pactor-chat-artifact-card__open"
-            onClick={() => onOpenArtifact?.(part.artifact)}
-          >
-            <PanelRightOpen size={13} strokeWidth={1.7} />
-            在面板中打开
-          </button>
-        </div>
+        <ChromeSlot
+          fragment={buildArtifactCardFragment(part.artifact)}
+          fallback={
+            <div
+              className="pactor-chat-artifact-card"
+              data-artifact-kind={part.artifact.kind}
+            >
+              <span className="pactor-chat-artifact-card__title">
+                {part.artifact.title}
+              </span>
+              <span className="pactor-chat-artifact-card__kind">
+                {part.artifact.kind}
+              </span>
+              <button
+                type="button"
+                className="pactor-chat-artifact-card__open"
+                onClick={() => onOpenArtifact?.(part.artifact)}
+              >
+                <Icon name="panel-right-open" size={13} strokeWidth={1.7} />
+                在面板中打开
+              </button>
+            </div>
+          }
+        />
       );
 
     default:

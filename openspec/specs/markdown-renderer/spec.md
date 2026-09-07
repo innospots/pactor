@@ -1,6 +1,11 @@
 # Spec: markdown-renderer
 
+## Purpose
+
 Markdown 渲染组件与 DSL 注册（`@pactor-app/markdown`，设计文档第 60、81.3 节）。
+
+
+## Requirements
 
 ### Requirement: Markdown 元素渲染
 

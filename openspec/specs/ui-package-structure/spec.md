@@ -1,6 +1,11 @@
 # Spec: ui-package-structure
 
+## Purpose
+
 UI 包结构（唯一单元 `@pactor-app/ui`）。
+
+
+## Requirements
 
 ### Requirement: ui-* 单元整合
 

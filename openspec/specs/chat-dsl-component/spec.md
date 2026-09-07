@@ -1,7 +1,9 @@
 # Spec: chat-dsl-component
 
-Chat 作为一等 DSL 组件（`@pactor-app/chat`）：context 服务注入、菜单/header/侧栏区域配置、DSL 事件。
+## Purpose
 
+Chat 作为一等 DSL 组件（`@pactor-app/chat`）：context 服务注入、菜单/header/侧栏区域配置、DSL 事件。
+## Requirements
 ### Requirement: Chat 组件注册
 
 `@pactor-app/chat` SHALL 导出 `registerChatComponent(registry)`：向 DSL 组件注册表注册 `Chat` 类型（已存在同名类型时 MUST NOT 覆盖）。注册后页面 DSL 可以 `{ type: 'Chat', props, events }` 声明完整聊天工作区，与内置组件用法一致。
@@ -32,7 +34,9 @@ SHALL 导出 `ChatServicesProvider` 与 `useChatServices()`：宿主在应用根
 
 ### Requirement: 左侧菜单配置
 
-`Chat` SHALL 接受 `menu?: ChatMenuItem[]`（`key` / `label` / `icon?` 字符串图标名 / `badge?` / `disabled?` / `group?`）与 `activeMenuKey?: string`：提供 menu 时以 AppShell 承载并渲染内建侧栏（图标名映射内置 lucide 子集，未知名渲染占位；`group` 渲染分组标题）；`activeMenuKey` 控制高亮，可经 `${state.x}` 绑定 DSL state。`sidebar?: DslNode`（或 ReactNode）槽提供时 SHALL 替代内建侧栏。
+`Chat` SHALL 接受 `menu?: ChatMenuItem[]`（`key` / `label` / `icon?` 字符串图标名 / `badge?` / `disabled?` / `group?`）与 `activeMenuKey?: string`：提供 menu 时以 AppShell 承载并渲染内建侧栏（图标名映射图标白名单，未知名渲染占位；`group` 渲染分组标题）；`activeMenuKey` 控制高亮，可经 `${state.x}` 绑定 DSL state。`sidebar?: DslNode`（或 ReactNode）槽提供时 SHALL 替代内建侧栏。
+
+内建侧栏菜单 SHALL 优先经 chat chrome DSL 渲染层以宿主 `Menu` 组件组合渲染（见 chat-chrome-dsl；badge / dot / group / disabled 由 Menu items 扩展字段表达，图标经 ui Icon 白名单映射），选择经 `chat.menuSelect` 内建动作接回包内传播（含移动端 drawer 关闭语义）；无 renderer 环境或类型缺失时回退 chat 手写菜单，两条路径的渲染字段与交互语义 MUST 一致。
 
 #### Scenario: 菜单渲染与高亮
 
@@ -63,6 +67,8 @@ SHALL 导出 `ChatServicesProvider` 与 `useChatServices()`：宿主在应用根
 `Chat` SHALL 支持 header 三层配置：`title?` 标量（内建 header 标题）；`headerExtra?: DslNode`（标题右侧槽，经 renderChildren 渲染）；`header?: DslNode`（整体替换内建 header）；`showHeader?: false` 关闭 header。DslNode 槽仅在页面运行时可渲染；纯 React 使用时对应 props SHALL 接受 ReactNode。
 
 内建 header SHALL 支持操作组配置 `headerActions?: ('export' | 'theme' | 'clear')[]`：按数组顺序在内建 header 右侧（headerExtra 槽之前）渲染对应图标按钮——export 将当前会话消息序列化为 Markdown 并触发下载；theme 切换 `document.documentElement` 的 `data-pactor-theme`；clear 清空当前会话 store。各操作 SHALL 同时触发并行事件（`events.onExport` / `onThemeChange`（event.theme）/ `onClear`），事件为通知语义，默认行为总在包内执行。`Chat` SHALL 支持 `editableTitle?: boolean`：开启后点击标题进入编辑，Enter / blur 提交并触发 `events.onTitleChange`（event.title）。`headerActions` 缺省时不渲染任何操作按钮。
+
+内建 header 的操作组与 headerExtra 槽 SHALL 优先经 chat chrome DSL 渲染层以宿主组件（Button / Tooltip / Icon 等）组合渲染（见 chat-chrome-dsl），操作点击经 `chat.headerAction` 内建动作接回包内行为与并行事件；可编辑标题的编辑交互保持 chat 内部组件。无 renderer 环境或类型缺失时回退手写实现，行为契约不变。
 
 #### Scenario: 标题与右侧槽
 
@@ -156,8 +162,6 @@ ChatShell SHALL 支持侧栏增强（设计决策 D3/D4）：`brand` 提供时�
 - **WHEN** DSL 配置 onOpenArtifact 为 setState 动作链，点击产出物卡片打开按钮
 - **THEN** 动作以 event.artifact 为产出物数据执行
 
-## ADDED Requirements
-
 ### Requirement: 模型选择配置
 
 `Chat` SHALL 支持模型选择 props：`models?: { value: string; label: string }[]`、`model?: string` 与事件 `events.onModelChange`（event 作用域含 `model`）。全部为 DSL 可表达数据；行为细节见 chat-model-selector capability。
@@ -208,3 +212,18 @@ ChatShell SHALL 支持侧栏增强（设计决策 D3/D4）：`brand` 提供时�
 
 - **WHEN** 配置 events.onMessageAction，点击内建复制按钮
 - **THEN** 事件以 event.action='copy' 触发，且复制默认行为照常执行
+
+### Requirement: Composer 槽配置
+
+`Chat` SHALL 支持 `toolbarStart` / `toolbarEnd` / `composerFooter` props（`DslNode | ReactNode` 双型槽，与 sidebar / headerExtra 同款解析）：分别渲染在聊天输入框的工具栏左端、工具栏右端（发送钮之前）与 footer 区域；DslNode 槽经 renderChildren 渲染（仅页面运行时内），纯 React 使用时对应 props SHALL 接受 ReactNode。`ChatServices` 可经同名服务注入（ReactNode）；服务槽与 props 槽并存时服务槽在先。
+
+#### Scenario: DSL 声明槽位
+
+- **WHEN** 页面 DSL 的 Chat 节点配置 toolbarStart / toolbarEnd / composerFooter（DslNode）
+- **THEN** 对应内容渲染在输入框的工具栏左端、右端与 footer 区域
+
+#### Scenario: 服务槽与 props 槽合并
+
+- **WHEN** ChatServices 与 props 同时提供同名槽
+- **THEN** 服务槽内容在前、props 槽内容在后，共同渲染
+
