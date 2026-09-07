@@ -1,7 +1,7 @@
 /**
  * examples/chat 的 mock 数据层：`@` 提及的智能体与 "+" 菜单的上下文
- * 候选。全部为演示用静态数据，经 App.tsx 的 callService 服务桥解析给
- * 包内建上下文弹层（spec: chat-context-sources，无网络）。
+ * 候选。全部为演示用静态数据，经 ChatProvider.tsx 的 callService
+ * 服务桥解析给包内建上下文弹层（spec: chat-context-sources，无网络）。
  */
 
 /** `@` 提及的 mock 智能体 */

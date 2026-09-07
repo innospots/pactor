@@ -897,7 +897,7 @@ overlay 内容的表达式以 overlay 作用域求值（`${params.x}` 取注入�
 
 ## 聊天页完整示例（@pactor-app/chat）
 
-以下为 `examples/chat/src/chat.page.yaml` 的完整内容（注释中的内部 spec 引用已略去）——一个完整 AI 对话页的 DSL 声明。`Chat` 不是内置组件，需由 `registerChatComponent(registry)` 注册（见 [@pactor-app/chat](../packages/chat.md)）；`transport` / `safeRegistry` / `callService` 服务桥等函数与实例无法从 DSL 产生，由宿主经 `ChatServicesProvider` 注入（见 `examples/chat/src/App.tsx`）。
+以下为 `examples/chat/src/chat.page.yaml` 的完整内容（注释中的内部 spec 引用已略去）——一个完整 AI 对话页的 DSL 声明。`Chat` 不是内置组件，需由 `registerChatComponent(registry)` 注册（见 [@pactor-app/chat](../packages/chat.md)）；`transport` / `safeRegistry` / `callService` 服务桥等函数与实例无法从 DSL 产生，由宿主经 `ChatServicesProvider` 注入（见 `examples/chat/src/ChatProvider.tsx`）。
 
 ```yaml
 dsl: '1.0'
@@ -914,13 +914,19 @@ state:
   panelOpen: false
   artifact: null
   model: demo-mock
+  # Composer footer「选择工作空间」受控闭环（下拉 onSelect → setState，
+  # 触发按钮文案回显当前工作空间；空串时显示占位文案）
+  workspace: ''
 
+# 聊天页 body 为一等组件 Chat：无侧栏形态（菜单外壳由宿主
+# ChatAppLayout.tsx 的 ChatShell 承担，菜单切换 = URL 变化）；
+# 会话 id 取路由 query（智能体列表与侧栏「最近」分组 navigate /chat?id=xxx
+# 进入独立会话），缺省 conv-demo。
 body:
   type: Chat
   props:
-    # 模型 chip 渲染在工作区头部左端：
-    # 仅配置 models 也渲染极简头部
-    modelPlacement: header
+    # 模型 chip 渲染在 Composer 工具栏右端（缺省 'composer' 位，发送钮之前）
+    modelPlacement: composer
     greeting: 你好，我是 Pactor Chat 示例
     subtitle: 数据全部由调用方经接口注入；点击下方建议立即开始
     conversationId: ${route.query.id || 'conv-demo'}
@@ -940,6 +946,44 @@ body:
     contexts:
       - { trigger: '@', label: 智能体, service: agents }
       - { trigger: '+', label: 上下文, service: contexts }
+    # Composer footer 槽：「选择工作空间」下拉，
+    # 触发按钮为 text 变体 Button（图标 + 当前工作空间文案 + 下拉箭头）；
+    # 选中经 events.onSelect → setState 回写 state.workspace 闭环。
+    # hideToolbar：不渲染默认工具栏行（+ / 附件 / 发送钮一并隐藏，
+    # Enter 发送保留；@ 词边界提及在输入区仍可用）
+    # hideToolbar: true
+    composerFooter:
+      type: DropdownMenu
+      props:
+        items:
+          - { label: 默认工作空间, value: 默认工作空间, icon: folder }
+          - { label: 设计团队空间, value: 设计团队空间, icon: folder }
+          - { label: 前端研发空间, value: 前端研发空间, icon: folder }
+      events:
+        onSelect:
+          - action: setState
+            params:
+              workspace: ${event}
+      children:
+        - type: Button
+          props:
+            variant: text
+            size: small
+          children:
+            - type: Icon
+              props: { name: folder }
+            - type: Text
+              props:
+                text: ${state.workspace || '选择工作空间'}
+            - type: Icon
+              props: { name: chevron-down }
+    # Composer 下方自定义内容槽：渲染在输入框之外正下方（页面底部留白区），
+    # 空态 / 钉底两态一致；典型用途为免责声明等弱提示行
+    composerBottom:
+      type: Text
+      props:
+        type: secondary
+        text: 内容由 AI 生成，仅供参考
     # 消息操作条：数组即真相——
     # 内建 copy / retry / regenerate + edit 覆盖 label（内建行为不变）
     # + 自定义 quote 动作（service 派发，宿主 callService 注册 quoteMessage）
@@ -993,8 +1037,9 @@ body:
 
 要点说明：
 
-- **受控闭环是本页的主线**：模型选择（`model: ${state.model}` ↔ `onModelChange` → setState）、产出物面板（`artifact` / `panelOpen` ↔ `onArtifact` / `onPanelClose` / `onOpenArtifact` → setState）都是"props 绑 state、事件回写 state"的标准闭环；`Chat` 本身不擅自开面板、不擅自改模型。
-- **`conversationId` 取路由 query**（`${route.query.id || 'conv-demo'}`）：智能体列表页与侧栏「最近」分组经 `navigate` 动作跳 `/chat?id=xxx` 进入独立会话，刷新后按 URL 还原——路由化多页装配由宿主 `App.tsx`（HashRouter + MenuRegistry + DynamicDslRoute）承担，DSL 只消费 `route.query`。
+- **受控闭环是本页的主线**：模型选择（`model: ${state.model}` ↔ `onModelChange` → setState）、产出物面板（`artifact` / `panelOpen` ↔ `onArtifact` / `onPanelClose` / `onOpenArtifact` → setState）、工作空间下拉（`onSelect` → setState 回写 `state.workspace`，触发按钮文案 `${state.workspace || '选择工作空间'}` 回显）都是"props 绑 state、事件回写 state"的标准闭环；`Chat` 本身不擅自开面板、不擅自改模型。
+- **Composer 槽位即扩展点**：`composerFooter`（工具栏下方 footer 区，本例为「选择工作空间」DropdownMenu）与 `composerBottom`（输入框之外正下方的弱提示行，本例为免责声明）都是 DslNode 槽，内容完全由页面 DSL 声明；`hideToolbar` 可整体关闭默认工具栏行（Enter 发送保留）。
+- **`conversationId` 取路由 query**（`${route.query.id || 'conv-demo'}`）：智能体列表页与侧栏「最近」分组经 `navigate` 动作跳 `/chat?id=xxx` 进入独立会话，刷新后按 URL 还原——路由由框架内建 BrowserRouter + DynamicDslRoute 承担（见 `examples/chat/src/main.tsx`），DSL 只消费 `route.query`。
 - **service 引用是 DSL 与宿主函数的边界**：`contexts[].service`（`agents` / `contexts`）与 `messageActions[].service`（`quoteMessage`）都是字符串引用，运行时经 `ChatServices.callService(name, params)` 派发到宿主注册的服务——函数不进 DSL，符合"DSL 只承载可序列化数据"的约束。
 - **`messageActions` 数组即真相**：渲染顺序与内容严格按数组，未列出的内建动作不出现；内建项（字符串或 `{ builtin }`）保留包内默认行为，可覆盖 `label` / `icon` / `roles` / `visibleWhen`；自定义项（无 `builtin`）点击经 service 派发并并行触发 `onMessageAction` 事件（内建动作点击同样通知）。
 - **两个易踩的坑**：① DSL `message` 动作声明类型时用 `messageType`（params 带 `type` 键会触发动作引擎 isOpaque 约定，跳过 `${...}` 求值，缺省即 info）；② `events.onMessageAction` 的 `event.message` 是完整消息对象（含 parts 数组），toast 类动作只取 `event.action` 即可。
