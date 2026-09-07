@@ -18,6 +18,7 @@ const defaultMessages = {
   'zh-CN': {
     'pactor.layout.expandSidebar': '展开侧边栏',
     'pactor.layout.collapseSidebar': '收起侧边栏',
+    'pactor.layout.openNavigation': '打开导航',
     'pactor.layout.closeTab': '关闭 {{title}}',
     'pactor.layout.breadcrumb': '面包屑',
     'pactor.table.loading': '加载中…',
@@ -32,6 +33,7 @@ const defaultMessages = {
   'en-US': {
     'pactor.layout.expandSidebar': 'Expand sidebar',
     'pactor.layout.collapseSidebar': 'Collapse sidebar',
+    'pactor.layout.openNavigation': 'Open navigation',
     'pactor.layout.closeTab': 'Close {{title}}',
     'pactor.layout.breadcrumb': 'Breadcrumb',
     'pactor.table.loading': 'Loading…',

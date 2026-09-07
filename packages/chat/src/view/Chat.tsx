@@ -1,5 +1,5 @@
 import type { DslNode, Registry } from '@pactor-app/core';
-import { Icon } from '@pactor-app/ui/components';
+import { Icon, RailTooltip } from '@pactor-app/ui/components';
 import { Fragment, useEffect, useRef, type ReactNode } from 'react';
 
 import { ChatComposition, resolveSlot } from '../chat-composition.js';
@@ -200,40 +200,48 @@ export function ChatSidebarMenu({
               : undefined;
           lastGroup = item.group;
           const active = item.key === activeMenuKey;
+          const collapsed = drawer?.collapsed === true;
+          const button = (
+            <button
+              type="button"
+              className={`pactor-chat-menu__item${active ? ' pactor-chat-menu__item--active' : ''}`}
+              disabled={item.disabled === true}
+              aria-current={active ? 'true' : undefined}
+              onClick={() => {
+                if (item.disabled) {
+                  return;
+                }
+                onMenuSelect?.(item.key, item);
+                drawer?.close();
+              }}
+            >
+              {item.icon !== undefined ? (
+                <span className="pactor-chat-menu__icon">
+                  {/* 未知名由 ui Icon 渲染占位（spec: chat-icon-convergence） */}
+                  <Icon name={item.icon} size={15} strokeWidth={1.7} />
+                </span>
+              ) : null}
+              <span className="pactor-chat-menu__label">{item.label}</span>
+              {item.dot === true ? (
+                <span className="pactor-chat-menu__dot" aria-hidden />
+              ) : null}
+              {item.badge !== undefined ? (
+                <span className="pactor-chat-menu__badge">{item.badge}</span>
+              ) : null}
+            </button>
+          );
           return (
             <Fragment key={item.key}>
               {groupLabel !== undefined ? (
                 <div className="pactor-chat-menu__group">{groupLabel}</div>
               ) : null}
-              <button
-                type="button"
-                className={`pactor-chat-menu__item${active ? ' pactor-chat-menu__item--active' : ''}`}
-                disabled={item.disabled === true}
-                aria-current={active ? 'true' : undefined}
-                // icon rail（桌面折叠态，决策 D3）下 label 隐藏，title 兜底可访问名
-                title={drawer?.collapsed ? item.label : undefined}
-                onClick={() => {
-                  if (item.disabled) {
-                    return;
-                  }
-                  onMenuSelect?.(item.key, item);
-                  drawer?.close();
-                }}
-              >
-                {item.icon !== undefined ? (
-                  <span className="pactor-chat-menu__icon">
-                    {/* 未知名由 ui Icon 渲染占位（spec: chat-icon-convergence） */}
-                    <Icon name={item.icon} size={15} strokeWidth={1.7} />
-                  </span>
-                ) : null}
-                <span className="pactor-chat-menu__label">{item.label}</span>
-                {item.dot === true ? (
-                  <span className="pactor-chat-menu__dot" aria-hidden />
-                ) : null}
-                {item.badge !== undefined ? (
-                  <span className="pactor-chat-menu__badge">{item.badge}</span>
-                ) : null}
-              </button>
+              {/* icon rail（桌面折叠态，决策 D3）：label 经 CSS 隐藏，
+                  hover 经 RailTooltip 展示（可访问名同源） */}
+              {collapsed ? (
+                <RailTooltip label={item.label}>{button}</RailTooltip>
+              ) : (
+                button
+              )}
             </Fragment>
           );
         })}

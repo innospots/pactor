@@ -7,7 +7,7 @@ description: 导航类 DSL 组件——Menu / Link / Breadcrumb / Pagination / T
 
 ### Menu
 
-导航菜单（哑渲染：items 经表达式注入，不读外壳层 MenuRegistry）。
+导航菜单（哑渲染：items 经表达式注入，不读外壳层 MenuRegistry）。在 Sidebar 内且侧栏折叠（icon rail）时自动降级为仅图标（label / badge / dot / 分组隐藏），hover 图标显示 Tooltip 提示。
 
 | prop | 类型 | 说明 |
 | --- | --- | --- |

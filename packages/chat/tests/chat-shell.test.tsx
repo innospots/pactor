@@ -161,16 +161,18 @@ describe('ChatShell 侧栏增强（spec: chat-dsl-component，决策 D3/D4）', 
         content={<div>内容</div>}
       />,
     );
-    const button = screen.getByRole('button', { name: '折叠侧栏' });
-    fireEvent.click(button);
-    expect(
-      document.querySelector('.pactor-chat-shell__sidebar--collapsed'),
-    ).toBeTruthy();
+    // 底部槽固定渲染（折叠前先断言：collapsed 时 footer 整体隐藏）
     expect(
       document.querySelector(
-        '.pactor-chat-shell__sidebar-footer [data-testid="footer"]',
+        '[data-slot=sidebar-footer] [data-testid="footer"]',
       ),
     ).toBeTruthy();
+    const button = screen.getByRole('button', { name: '收起侧边栏' });
+    fireEvent.click(button);
+    expect(
+      document.querySelector('[data-slot=sidebar][data-collapsed]'),
+    ).toBeTruthy();
+    expect(document.querySelector('[data-slot=sidebar-footer]')).toBeNull();
   });
 });
 
