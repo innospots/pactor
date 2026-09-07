@@ -13,6 +13,6 @@ pnpm dev
 
 ## 说明
 
-- 依赖版本为语义化占位（`^0.1.0` 等），请在 Pactor 发布后按实际版本对齐。
+- 依赖版本为语义化占位（`^1.0.0` 等），请在 Pactor 发布后按实际版本对齐。
 - 如需 `*.page.yaml` 的 TypeScript 类型声明，按 @pactor-app/vite-plugin 文档添加 `src/dsl-modules.d.ts`。
 - 常用命令：`pactor validate src/pages/*.page.yaml`、`pactor lint src`、`pactor build src/pages -o dist/runtime`。

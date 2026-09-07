@@ -201,7 +201,7 @@ function ShadcnDrawerView({
     <Drawer
       direction="right"
       open
-      onOpenChange={(open) => {
+      onOpenChange={(open: boolean) => {
         if (!open) {
           onCancel();
         }
