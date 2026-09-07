@@ -122,9 +122,8 @@ body,
 
 /* agents / settings 等非对话页（宿主 DSL 页面布局属宿主职责）：
    Page 容器限宽居中，内容超出自滚动 */
-.demo-main .pactor-chat-shell__content > [data-slot='page'] {
+.demo-main [data-slot='sidebar-content'] > [data-slot='page'] {
   width: 100%;
-  max-width: 960px;
   margin-inline: auto;
   overflow-y: auto;
 }

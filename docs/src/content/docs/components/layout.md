@@ -160,13 +160,21 @@ flex 容器；直接子节点含 `Sider` 时横向、否则纵向（`component` 
 
 ### Sidebar
 
-整页侧栏布局：品牌区 + 嵌套导航（`href` 渲染为锚点、子菜单缩进展示）的侧栏与 children 主内容区；样式取 sidebar 系列语义令牌。
+页面外壳：品牌区 + 侧栏（`items` 嵌套导航或 `content` 自由内容槽）+ children 主内容区；样式取 sidebar 系列语义令牌。
+
+- **桌面（≥768px）**：侧栏与主区 flex 同行；`collapsible` 时品牌行右端渲染折叠按钮，折叠后侧栏收窄为 icon rail（64px）——导航仅图标（label / badge / 分组 / 品牌内容 / 底部区隐藏），hover 图标显示 Tooltip 提示；
+- **移动端（<768px，`drawer` 缺省开启）**：侧栏退出文档流变为左侧覆盖抽屉——顶栏菜单按钮开启，遮罩点击 / Escape / `locationKey` 变化关闭，关闭时容器 `inert`；移动端不渲染折叠按钮、品牌维持顶栏；
+- 侧栏内容（如 Menu）可经 `useSidebarDrawer()` 取 `close()`（导航后关抽屉）与 `collapsed`（降级为纯图标展示）；Menu 在 collapsed 侧栏内自动降级为仅图标。
 
 | prop | 类型 | 缺省 | 说明 |
 | --- | --- | --- | --- |
-| `brand` | `{ title: string, logo?: string }` | — | 品牌区（标题 + 可选 logo 图片地址） |
-| `items` | `Array<{ label: string, href?: string, icon?: string, children?: [...] }>` | `[]` | 导航项（可含嵌套 `children`，可含表达式）；`icon` 为图标名（Icon 白名单），渲染于文字前 |
-| `collapsible` | boolean | `false` | 渲染底部折叠触发器（折叠态内部维护，经 `onCollapse` 传出） |
+| `brand` | `{ title: string, logo?: string }` \| ReactNode | — | 品牌区（对象形态渲染标题 + 可选 logo；ReactNode 直渲） |
+| `items` | `Array<{ label: string, href?: string, icon?: string, children?: [...] }>` | `[]` | 导航项（可含嵌套 `children`，可含表达式）；`icon` 为图标名（Icon 白名单），渲染于文字前；`content` 提供时不渲染 |
+| `content` | DslNode \| ReactNode | — | 侧栏自由内容槽（提供时替代 `items` 导航渲染） |
+| `sidebarFooter` | DslNode \| ReactNode | — | 侧栏底部固定区（渲染在滚动区之后，不随内容滚动；未提供不渲染容器；icon rail 时隐藏） |
+| `collapsible` | boolean | `false` | 渲染折叠触发器（折叠态内部维护，经 `onCollapse` 传出） |
+| `locationKey` | string | — | 路由 / 会话切换标识：值变化时移动端抽屉在渲染期关闭 |
+| `drawer` | boolean | `true` | 移动端侧栏变为覆盖抽屉；false 时各端均为 flex 行布局 |
 | children | DslNode[] | — | 主内容区 |
 | 事件 `onCollapse` | — | — | 折叠触发器点击时触发，`${event}` 为 boolean |
 

@@ -2,6 +2,8 @@ import type { CSSProperties } from 'react';
 
 import { cn } from '../../../lib/utils.js';
 import { Icon } from '../Icon/index.js';
+import { RailTooltip } from '../Sidebar/rail-tooltip.js';
+import { useSidebarDrawer } from '../Sidebar/index.js';
 
 /** 菜单项；`children` 为子菜单（inline 模式下缩进展示） */
 export interface MenuItem {
@@ -38,7 +40,8 @@ export interface MenuProps {
 /**
  * Menu 导航菜单（shadcn kit）：哑渲染组件——items 经表达式注入，
  * 不直接读取外壳层 MenuRegistry；选中态受控（selectedKey + onSelect
- * 闭环，典型接 navigate 动作）。
+ * 闭环，典型接 navigate 动作）。在 Sidebar 内且侧栏折叠（icon rail）
+ * 时自动降级为仅图标（label / badge / dot / 分组隐藏，hover 经 RailTooltip 展示）。
  */
 export function Menu({
   items = [],
@@ -48,11 +51,14 @@ export function Menu({
   className,
   style,
 }: MenuProps) {
+  const drawer = useSidebarDrawer();
+  const collapsed = mode === 'inline' && drawer?.collapsed === true;
   let previousGroup: string | undefined;
   return (
     <nav
       data-slot="menu"
       data-mode={mode}
+      data-collapsed={collapsed || undefined}
       className={cn(
         mode === 'horizontal' ? 'flex items-center gap-1' : 'flex flex-col gap-0.5 p-2',
         className,
@@ -60,9 +66,14 @@ export function Menu({
       style={style}
     >
       {items.map((item) => {
-        // 分组标题（inline 顶层）：相邻同组只渲染一次
+        // 分组标题（inline 顶层）：相邻同组只渲染一次；icon rail 不渲染
         let groupLabel: string | undefined;
-        if (mode === 'inline' && item.group !== undefined && item.group !== previousGroup) {
+        if (
+          !collapsed &&
+          mode === 'inline' &&
+          item.group !== undefined &&
+          item.group !== previousGroup
+        ) {
           groupLabel = item.group;
         }
         previousGroup = item.group;
@@ -82,6 +93,7 @@ export function Menu({
               depth={0}
               selectedKey={selectedKey}
               onSelect={onSelect}
+              collapsed={collapsed}
             />
           </div>
         );
@@ -96,50 +108,59 @@ function MenuEntry({
   depth,
   selectedKey,
   onSelect,
+  collapsed = false,
 }: {
   item: MenuItem;
   mode: 'inline' | 'horizontal';
   depth: number;
   selectedKey?: string;
   onSelect?: (key: string) => void;
+  collapsed?: boolean;
 }) {
   const selected = item.key === selectedKey;
+  const button = (
+    <button
+      type="button"
+      data-slot="menu-item"
+      aria-current={selected ? 'page' : undefined}
+      disabled={item.disabled}
+      className={cn(
+        'flex w-full items-center gap-2 rounded-md text-sm transition-colors',
+        mode === 'horizontal' ? 'px-3 py-2' : 'px-3 py-2 text-left',
+        collapsed && 'justify-center px-0',
+        selected
+          ? 'bg-accent font-medium text-accent-foreground'
+          : 'text-muted-foreground hover:bg-accent/50 hover:text-foreground',
+        item.disabled && 'cursor-not-allowed opacity-50 hover:bg-transparent hover:text-muted-foreground',
+      )}
+      style={mode === 'inline' && depth > 0 && !collapsed ? { paddingLeft: 12 + depth * 16 } : undefined}
+      onClick={() => {
+        if (!item.disabled) {
+          onSelect?.(item.key);
+        }
+      }}
+    >
+      {item.icon ? <Icon name={item.icon} size="sm" /> : null}
+      {collapsed ? null : (
+        <span className="min-w-0 flex-1 truncate text-left">{item.label}</span>
+      )}
+      {item.dot && !collapsed ? (
+        <span data-slot="menu-item-dot" className="size-1.5 shrink-0 rounded-full bg-destructive" />
+      ) : null}
+      {item.badge !== undefined && !collapsed ? (
+        <span
+          data-slot="menu-item-badge"
+          className="shrink-0 rounded-full bg-muted px-1.5 py-0.5 text-xs text-muted-foreground"
+        >
+          {item.badge}
+        </span>
+      ) : null}
+    </button>
+  );
   return (
     <div data-slot="menu-entry" data-key={item.key}>
-      <button
-        type="button"
-        data-slot="menu-item"
-        aria-current={selected ? 'page' : undefined}
-        disabled={item.disabled}
-        className={cn(
-          'flex w-full items-center gap-2 rounded-md text-sm transition-colors',
-          mode === 'horizontal' ? 'px-3 py-2' : 'px-3 py-2 text-left',
-          selected
-            ? 'bg-accent font-medium text-accent-foreground'
-            : 'text-muted-foreground hover:bg-accent/50 hover:text-foreground',
-          item.disabled && 'cursor-not-allowed opacity-50 hover:bg-transparent hover:text-muted-foreground',
-        )}
-        style={mode === 'inline' && depth > 0 ? { paddingLeft: 12 + depth * 16 } : undefined}
-        onClick={() => {
-          if (!item.disabled) {
-            onSelect?.(item.key);
-          }
-        }}
-      >
-        {item.icon ? <Icon name={item.icon} size="sm" /> : null}
-        <span className="min-w-0 flex-1 truncate text-left">{item.label}</span>
-        {item.dot ? (
-          <span data-slot="menu-item-dot" className="size-1.5 shrink-0 rounded-full bg-destructive" />
-        ) : null}
-        {item.badge !== undefined ? (
-          <span
-            data-slot="menu-item-badge"
-            className="shrink-0 rounded-full bg-muted px-1.5 py-0.5 text-xs text-muted-foreground"
-          >
-            {item.badge}
-          </span>
-        ) : null}
-      </button>
+      {/* icon rail：label 隐藏，hover 经 RailTooltip 展示（可访问名同源） */}
+      {collapsed ? <RailTooltip label={item.label}>{button}</RailTooltip> : button}
       {item.children?.map((child) => (
         <MenuEntry
           key={child.key}
@@ -148,6 +169,7 @@ function MenuEntry({
           depth={depth + 1}
           selectedKey={selectedKey}
           onSelect={onSelect}
+          collapsed={collapsed}
         />
       ))}
     </div>

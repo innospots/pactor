@@ -156,7 +156,8 @@ export type {
 } from './components/Typography/index.js';
 
 // 页面级组合类扩展组件（第四批）
-export { Sidebar } from './components/Sidebar/index.js';
+export { Sidebar, useSidebarDrawer } from './components/Sidebar/index.js';
+export { RailTooltip } from './components/Sidebar/rail-tooltip.js';
 export type {
   SidebarBrand,
   SidebarNavItem,

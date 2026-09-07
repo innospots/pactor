@@ -306,6 +306,9 @@
   .z-20 {
     z-index: 20;
   }
+  .z-40 {
+    z-index: 40;
+  }
   .z-50 {
     z-index: 50;
   }
@@ -593,9 +596,6 @@
   }
   .w-12 {
     width: calc(var(--spacing) * 12);
-  }
-  .w-14 {
-    width: calc(var(--spacing) * 14);
   }
   .w-16 {
     width: calc(var(--spacing) * 16);
@@ -1026,6 +1026,12 @@
       background-color: color-mix(in oklab, var(--background) 60%, transparent);
     }
   }
+  .bg-black\/40 {
+    background-color: color-mix(in srgb, #000 40%, transparent);
+    @supports (color: color-mix(in lab, red, red)) {
+      background-color: color-mix(in oklab, var(--color-black) 40%, transparent);
+    }
+  }
   .bg-black\/50 {
     background-color: color-mix(in srgb, #000 50%, transparent);
     @supports (color: color-mix(in lab, red, red)) {
@@ -1429,6 +1435,11 @@
   }
   .transition-\[opacity\,transform\] {
     transition-property: opacity,transform;
+    transition-timing-function: var(--tw-ease, var(--default-transition-timing-function));
+    transition-duration: var(--tw-duration, var(--default-transition-duration));
+  }
+  .transition-\[width\,transform\] {
+    transition-property: width,transform;
     transition-timing-function: var(--tw-ease, var(--default-transition-timing-function));
     transition-duration: var(--tw-duration, var(--default-transition-duration));
   }
@@ -1951,6 +1962,34 @@
     border-bottom-style: var(--tw-border-style);
     border-bottom-width: 1px;
   }
+  @media (width < 48rem) {
+    .max-md\:fixed {
+      position: fixed;
+    }
+    .max-md\:inset-y-0 {
+      inset-block: 0px;
+    }
+    .max-md\:left-0 {
+      left: 0px;
+    }
+    .max-md\:z-50 {
+      z-index: 50;
+    }
+    .max-md\:hidden {
+      display: none;
+    }
+    .max-md\:w-60 {
+      width: calc(var(--spacing) * 60);
+    }
+    .max-md\:-translate-x-full {
+      --tw-translate-x: -100%;
+      translate: var(--tw-translate-x) var(--tw-translate-y);
+    }
+    .max-md\:data-\[open\=true\]\:translate-x-0[data-open="true"] {
+      --tw-translate-x: 0px;
+      translate: var(--tw-translate-x) var(--tw-translate-y);
+    }
+  }
   @media (width >= 40rem) {
     .sm\:block {
       display: block;
@@ -1990,6 +2029,9 @@
     }
   }
   @media (width >= 48rem) {
+    .md\:hidden {
+      display: none;
+    }
     .md\:flex-row {
       flex-direction: row;
     }

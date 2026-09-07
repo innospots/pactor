@@ -36,7 +36,8 @@ describe('Sidebar', () => {
   it('渲染品牌区、导航项（含嵌套子菜单）与主内容区', () => {
     const { container } = renderDsl(sidebarDsl as never);
 
-    expect(screen.getByText('后台')).toBeTruthy();
+    // 品牌文案在侧栏品牌行与移动端顶栏各渲染一份（顶栏桌面经 CSS 隐藏）
+    expect(screen.getAllByText('后台').length).toBeGreaterThan(0);
     const logo = container.querySelector(
       '[data-slot=sidebar-brand-logo]',
     ) as HTMLImageElement;
@@ -70,8 +71,15 @@ describe('Sidebar', () => {
     );
     await expectEventState(context, 'collapsed', true);
     expect(aside.getAttribute('data-collapsed')).toBe('true');
-    // 折叠后导航区隐藏
-    expect(container.querySelector('[data-slot=sidebar-nav]')).toBeNull();
+    // 折叠后收窄为 icon rail：导航区保留，label 隐藏（hover 经 RailTooltip 展示）
+    expect(container.querySelector('[data-slot=sidebar-nav]')).not.toBeNull();
+    expect(screen.queryByText('概览')).toBeNull();
+    fireEvent.focus(container.querySelector('[data-slot=sidebar-item]')!);
+    await vi.waitFor(() => {
+      expect(
+        document.querySelector('[data-slot=tooltip-content]')?.textContent,
+      ).toBe('概览');
+    });
 
     fireEvent.click(
       container.querySelector('[data-slot=sidebar-collapse-trigger]')!,

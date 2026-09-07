@@ -217,192 +217,85 @@
 }
 
 /* ------------------------------------------------------------
- * AppShell（spec: chat-app-shell）：侧栏 + 主区外壳。
- * 桌面（≥768px）flex 同行；移动端（<768px）侧栏退出文档流
- * 变为覆盖抽屉，布局切换全部由媒体查询表达，JS 只管开合。
-/* AppShell（spec: chat-app-shell）：侧栏 + 主区外壳。
- * 桌面（≥768px）flex 同行；移动端（<768px）侧栏退出文档流
- * 变为覆盖抽屉，布局切换全部由媒体查询表达，JS 只管开合。
- * 高度填满父容器（height: 100%）：嵌入任意定高容器即正确；
- * 父级无定高时退化为内容高度。standalone 顶层挂载时宿主
- * 容器定高（如 100dvh）属宿主职责（嵌入契约）。
+ * AppShell（spec: chat-app-shell / chat-on-ui-sidebar）：外壳结构与
+ * 交互由 ui Sidebar 承担（data-slot 结构），chat 侧仅做令牌映射与
+ * 尺寸对齐——--pactor-chat-* 仍为皮肤唯一配置入口，暗色经覆盖链
+ * 自动生效。高度填满父容器（AppShell 传入 h-full min-h-0）。
  * ------------------------------------------------------------ */
 
 .pactor-chat-shell {
-  display: flex;
-  height: 100%;
   overflow: hidden;
   background: var(--pactor-chat-bg);
   color: var(--pactor-chat-fg);
   font-size: 14px;
   line-height: 1.6;
+  /* ui Sidebar 消费的 sidebar 系列语义令牌 → chat 令牌（映射手法与
+     .pactor-chat-chrome 一致） */
+  --sidebar: var(--pactor-chat-sidebar-bg);
+  --sidebar-foreground: var(--pactor-chat-fg);
+  --sidebar-border: var(--pactor-chat-border);
+  --sidebar-accent: var(--pactor-chat-muted);
+  --sidebar-accent-foreground: var(--pactor-chat-fg);
+  --sidebar-primary: var(--pactor-chat-primary);
+  --sidebar-primary-foreground: var(--pactor-chat-primary-fg);
+  --sidebar-ring: var(--pactor-chat-primary);
 }
 
-/* 桌面：侧栏为固定宽度 flex 列；背景独立令牌（决策 D5：比工作区
- * 暖白灰深一档），暗色经令牌覆盖自动生效 */
-.pactor-chat-shell__sidebar {
+/* 侧栏宽度对齐令牌（覆盖 ui 的 w-60；icon rail 64px 与历史一致） */
+.pactor-chat-shell [data-slot='sidebar'] {
   width: var(--pactor-chat-sidebar-width);
-  flex-shrink: 0;
-  border-right: 1px solid var(--pactor-chat-border);
-  background: var(--pactor-chat-sidebar-bg);
 }
 
-/* 框架模式（提供 brand / sidebarFooter 时）：品牌行 + 滚动区 + 底部区
- * 的 flex 列；未提供时侧栏直挂调用方内容（零渲染承诺） */
-.pactor-chat-shell__sidebar--framed {
-  display: flex;
-  flex-direction: column;
+.pactor-chat-shell [data-slot='sidebar'][data-collapsed] {
+  width: 64px;
 }
 
-/* 桌面品牌行（决策 D3）：brand 左对齐，折叠钮在右 */
-.pactor-chat-shell__sidebar-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 8px;
-  flex-shrink: 0;
-  padding: 12px 12px 4px;
-}
-
-.pactor-chat-shell__brand {
-  flex: 1;
-  min-width: 0;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-/* 侧栏滚动区：菜单（height:100% + 自有 overflow）之外的任意内容
- * 也可滚动；底部区固定不随滚动 */
-.pactor-chat-shell__sidebar-body {
-  flex: 1;
-  min-height: 0;
-  overflow-y: auto;
-}
-
-.pactor-chat-shell__sidebar-footer {
-  flex-shrink: 0;
-  padding: 12px;
-  border-top: 1px solid var(--pactor-chat-border);
-}
-
-/* 桌面折叠（icon rail，决策 D3）：收窄为图标栏——菜单只显图标，
- * label / badge / dot / 分组标题 / 底部区 / 品牌文案隐藏（图标以
- * title 属性兜底可访问名，见 ChatSidebarMenu）。仅桌面生效：移动端
- * 抽屉语义不受影响 */
-@media (min-width: 768px) {
-  .pactor-chat-shell__sidebar--collapsed {
-    width: 64px;
-  }
-
-  .pactor-chat-shell__sidebar--collapsed .pactor-chat-shell__sidebar-header {
-    justify-content: center;
-    padding-inline: 8px;
-  }
-
-  .pactor-chat-shell__sidebar--collapsed .pactor-chat-shell__brand {
-    display: none;
-  }
-
-  .pactor-chat-shell__sidebar--collapsed .pactor-chat-menu {
-    padding-inline: 8px;
-  }
-
-  .pactor-chat-shell__sidebar--collapsed .pactor-chat-menu__item {
-    justify-content: center;
-    padding-inline: 0;
-  }
-
-  .pactor-chat-shell__sidebar--collapsed .pactor-chat-menu__label,
-  .pactor-chat-shell__sidebar--collapsed .pactor-chat-menu__badge,
-  .pactor-chat-shell__sidebar--collapsed .pactor-chat-menu__dot,
-  .pactor-chat-shell__sidebar--collapsed .pactor-chat-menu__group,
-  .pactor-chat-shell__sidebar--collapsed .pactor-chat-shell__sidebar-footer {
-    display: none;
-  }
-}
-
-.pactor-chat-shell__main {
-  flex: 1;
-  min-width: 0;
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
-}
-
-/* 移动端顶栏：菜单按钮 + brand 插槽；桌面隐藏 */
-.pactor-chat-shell__topbar {
-  display: none;
-  align-items: center;
-  gap: 4px;
+/* 移动端顶栏高度与遮罩色对齐令牌 */
+.pactor-chat-shell [data-slot='sidebar-topbar'] {
   height: var(--pactor-chat-shell-topbar-height);
-  flex-shrink: 0;
-  padding: 0 8px;
-  border-bottom: 1px solid var(--pactor-chat-border);
 }
 
-.pactor-chat-shell__menu svg {
-  width: 18px;
-  height: 18px;
+.pactor-chat-shell [data-slot='sidebar-scrim'] {
+  background: var(--pactor-chat-shell-scrim);
 }
 
-.pactor-chat-shell__content {
-  flex: 1;
-  min-height: 0;
+/* 桌面折叠（icon rail，决策 D3）：fallback 手写菜单降级为仅图标
+ * （DSL 路径的 ui Menu 经 useSidebarDrawer().collapsed 自感知，
+ * data-collapsed 仅在桌面折叠时出现，无需媒体查询） */
+.pactor-chat-shell [data-slot='sidebar'][data-collapsed] .pactor-chat-menu {
+  padding-inline: 8px;
+}
+
+.pactor-chat-shell [data-slot='sidebar'][data-collapsed] .pactor-chat-menu__item {
+  justify-content: center;
+  padding-inline: 0;
+}
+
+.pactor-chat-shell [data-slot='sidebar'][data-collapsed] .pactor-chat-menu__label,
+.pactor-chat-shell [data-slot='sidebar'][data-collapsed] .pactor-chat-menu__badge,
+.pactor-chat-shell [data-slot='sidebar'][data-collapsed] .pactor-chat-menu__dot,
+.pactor-chat-shell [data-slot='sidebar'][data-collapsed] .pactor-chat-menu__group {
+  display: none;
+}
+
+/* 对话列在 shell content 内的间距（content 区 padding 承担）与
+ * 面板打开时的贴右处理见下方 :has 规则 */
+
+/* shell 主内容区：列布局 + 内边距（ui Sidebar 的 sidebar-content 仅
+   min-w-0 flex-1，对话列间距由这里承担） */
+.pactor-chat-shell [data-slot='sidebar-content'] {
   display: flex;
   flex-direction: column;
   overflow: hidden;
   padding: 12px 16px 16px;
 }
 
-/* 对话列在 shell content 内的间距（content 区 padding 承担）与
- * 面板打开时的贴右处理见下方 :has 规则 */
-
 /* 产出物面板打开（spec: chat-artifact-panel）：面板贴容器右缘——
  * 内容区右/上/下 padding 归零，面板 border-left 作分隔线 */
-.pactor-chat-shell__content:has(> .pactor-chat-inspector-host) {
+.pactor-chat-shell [data-slot='sidebar-content']:has(> .pactor-chat-inspector-host) {
   padding-top: 0;
   padding-right: 0;
   padding-bottom: 0;
-}
-
-/* 抽屉遮罩：仅打开时渲染；桌面隐藏 */
-.pactor-chat-shell__scrim {
-  display: none;
-  position: fixed;
-  inset: 0;
-  z-index: 40;
-  background: var(--pactor-chat-shell-scrim);
-}
-
-@media (max-width: 767px) {
-  .pactor-chat-shell__sidebar {
-    position: fixed;
-    top: 0;
-    bottom: 0;
-    left: 0;
-    z-index: 50;
-    box-shadow: var(--pactor-chat-shadow-composer);
-    transform: translateX(-100%);
-    transition: transform 0.2s ease-out;
-  }
-
-  /* 移动端品牌维持顶栏现状（决策 D3）：抽屉内不重复渲染品牌行 */
-  .pactor-chat-shell__sidebar-header {
-    display: none;
-  }
-
-  .pactor-chat-shell__sidebar[data-open='true'] {
-    transform: translateX(0);
-  }
-
-  .pactor-chat-shell__scrim {
-    display: block;
-  }
-
-  .pactor-chat-shell__topbar {
-    display: flex;
-  }
 }
 
 /* ------------------------------------------------------------
