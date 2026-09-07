@@ -1620,34 +1620,56 @@ button.pactor-chat-trace__header:hover,
   font-size: 12.5px;
 }
 
-/* 内建模型 chip（Composer 工具栏右端，toolbarEnd 槽内容之前） */
+/* 内建模型 chip（Composer 工具栏右端，toolbarEnd 槽内容之前）：
+   无边框 ghost 形态（边框在工具栏里显脏），hover 以浅底反馈 */
 .pactor-chat-model-chip {
   display: inline-flex;
   align-items: center;
   gap: 4px;
   padding: 4px 10px;
-  border: 1px solid var(--pactor-chat-border);
+  border: 1px solid transparent;
   border-radius: 999px;
-  background: var(--pactor-chat-card);
+  background: transparent;
   color: var(--pactor-chat-muted-fg);
   font-size: 12.5px;
   cursor: pointer;
   transition:
-    border-color 0.15s ease,
+    background-color 0.15s ease,
     color 0.15s ease;
 }
 
 .pactor-chat-model-chip:hover {
-  border-color: var(--pactor-chat-primary);
+  background: var(--pactor-chat-muted);
   color: var(--pactor-chat-fg);
 }
 
 /* ModelSelect DSL 路径（spec: chat-on-ui-components）：ui Select
-   收敛到工具栏节奏（触发器尺寸与 chip 相当，颜色经 chrome 令牌映射） */
+   收敛到工具栏节奏（触发器尺寸与 chip 相当，颜色经 chrome 令牌映射）；
+   触发器同为无边框 ghost 形态（覆盖 shadcn Select 的表单边框/阴影），
+   与 fallback chip 视觉一致 */
 .pactor-chat-model-select {
   width: auto;
   min-width: 112px;
   font-size: 12.5px;
+}
+
+.pactor-chat-model-select [data-slot='select-trigger'] {
+  height: auto;
+  gap: 4px;
+  padding: 4px 10px;
+  border-color: transparent;
+  border-radius: 999px;
+  box-shadow: none;
+  color: var(--pactor-chat-muted-fg);
+  font-size: 12.5px;
+  transition:
+    background-color 0.15s ease,
+    color 0.15s ease;
+}
+
+.pactor-chat-model-select [data-slot='select-trigger']:hover {
+  background: var(--pactor-chat-muted);
+  color: var(--pactor-chat-fg);
 }
 
 /* 实心图标（spec: chat-icon-convergence）：停止钮方形等需 fill 的

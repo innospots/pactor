@@ -61,6 +61,7 @@ export interface ChatViewProps
     | 'toolbarStart'
     | 'toolbarEnd'
     | 'composerFooter'
+    | 'hideToolbar'
     | 'onMentionTrigger'
     | 'onPlusMenu'
   > {
@@ -164,6 +165,7 @@ export function ChatView({
   toolbarStart,
   toolbarEnd,
   composerFooter,
+  hideToolbar,
   onMentionTrigger,
   onPlusMenu,
   models,
@@ -354,6 +356,7 @@ export function ChatView({
       toolbarStart={toolbarStart}
       toolbarEnd={toolbarEnd}
       composerFooter={composerFooter}
+      hideToolbar={hideToolbar}
       onMentionTrigger={onMentionTrigger}
       onPlusMenu={onPlusMenu}
       models={modelPlacement === 'header' ? undefined : models}

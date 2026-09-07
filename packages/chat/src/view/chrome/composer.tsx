@@ -274,19 +274,23 @@ export const COMPOSER_INTERNAL_COMPONENTS = {
  * params，避免 ${} 被表达式求值；草稿自持、发送后自清空）+
  * hideSend（发送/停止钮由 toolbarEnd 内部组件承担，状态机语义保留）。
  * footer 槽仅在 composerFooter 提供时携带（零渲染承诺，
- * spec: chat-composer-slots）。
+ * spec: chat-composer-slots）；hideToolbar 时不携带工具栏槽，
+ * ChatInput 工具栏行整体零渲染（发送钮随之隐藏，Enter 发送保留）。
  */
 export function buildComposerFragment(props: {
   placeholder: string;
   disabled: boolean;
   hasFooter?: boolean;
+  hideToolbar?: boolean;
 }): ChromeFragment {
+  const hideToolbar = props.hideToolbar === true;
   return {
     requires: [
       'ChatInput',
       'ChatComposerHeader',
-      'ChatComposerToolbarStart',
-      'ChatComposerToolbarEnd',
+      ...(hideToolbar
+        ? []
+        : ['ChatComposerToolbarStart', 'ChatComposerToolbarEnd']),
       'ChatComposerFooter',
     ],
     node: {
@@ -297,8 +301,12 @@ export function buildComposerFragment(props: {
         rows: 1,
         hideSend: true,
         header: { type: 'ChatComposerHeader' },
-        toolbarStart: { type: 'ChatComposerToolbarStart' },
-        toolbarEnd: { type: 'ChatComposerToolbarEnd' },
+        ...(hideToolbar
+          ? {}
+          : {
+              toolbarStart: { type: 'ChatComposerToolbarStart' },
+              toolbarEnd: { type: 'ChatComposerToolbarEnd' },
+            }),
         ...(props.hasFooter === true
           ? { footer: { type: 'ChatComposerFooter' } }
           : {}),

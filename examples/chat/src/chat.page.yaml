@@ -12,23 +12,27 @@ state:
   panelOpen: false
   artifact: null
   model: demo-mock
+  # Composer footer「选择工作空间」受控闭环（下拉 onSelect → setState，
+  # 触发按钮文案回显当前工作空间；空串时显示占位文案）
+  workspace: ''
 
 # 聊天页 body 为一等组件 Chat（spec: chat-dsl-component / example-chat）：
 # 无侧栏形态（菜单外壳由宿主 App.tsx 的 ChatShell + MenuRegistry 承担，
 # 菜单切换 = URL 变化）；会话 id 取路由 query（智能体列表与侧栏「最近」
 # 分组 navigate /chat?id=xxx 进入独立会话），缺省 conv-demo。
-# 对齐参考默认形态（spec: chat-default-skin / example-chat）：极简头部
-# 仅模型选择（modelPlacement: header，无 title / headerActions /
-# editableTitle）；空态问候组与 Composer 垂直居中成组为包内默认行为。
+# 对齐参考默认形态（spec: chat-default-skin / example-chat）：无头部
+# （无 title / headerActions / editableTitle），模型选择下拉渲染在
+# Composer 工具栏右端（modelPlacement: composer，发送钮之前）；
+# 空态问候组与 Composer 垂直居中成组为包内默认行为。
 # 模型选择、@/+ 上下文弹层均为包内建特性，由下方 props 声明开启；
 # transport / safeRegistry / capabilities / 附件伪上传 / callService
 # 服务桥由宿主经 ChatServicesProvider 注入（见 App.tsx）。
 body:
   type: Chat
   props:
-    # 模型 chip 渲染在工作区头部左端（spec: chat-model-selector，
-    # 决策 D2）：仅配置 models 也渲染极简头部
-    modelPlacement: header
+    # 模型 chip 渲染在 Composer 工具栏右端（spec: chat-model-selector，
+    # 决策 D2；缺省 'composer' 位，发送钮之前）
+    modelPlacement: composer
     greeting: 你好，我是 Pactor Chat 示例
     subtitle: 数据全部由调用方经接口注入；点击下方建议立即开始
     conversationId: ${route.query.id || 'conv-demo'}
@@ -48,6 +52,37 @@ body:
     contexts:
       - { trigger: '@', label: 智能体, service: agents }
       - { trigger: '+', label: 上下文, service: contexts }
+    # Composer footer 槽（spec: chat-composer-slots）：「选择工作空间」下拉，
+    # 触发按钮为 text 变体 Button（图标 + 当前工作空间文案 + 下拉箭头）；
+    # 选中经 events.onSelect → setState 回写 state.workspace 闭环。
+    # hideToolbar：不渲染默认工具栏行（+ / 附件 / 发送钮一并隐藏，
+    # Enter 发送保留；@ 词边界提及在输入区仍可用）
+    # hideToolbar: true
+    composerFooter:
+      type: DropdownMenu
+      props:
+        items:
+          - { label: 默认工作空间, value: 默认工作空间, icon: folder }
+          - { label: 设计团队空间, value: 设计团队空间, icon: folder }
+          - { label: 前端研发空间, value: 前端研发空间, icon: folder }
+      events:
+        onSelect:
+          - action: setState
+            params:
+              workspace: ${event}
+      children:
+        - type: Button
+          props:
+            variant: text
+            size: small
+          children:
+            - type: Icon
+              props: { name: folder }
+            - type: Text
+              props:
+                text: ${state.workspace || '选择工作空间'}
+            - type: Icon
+              props: { name: chevron-down }
     # 消息操作条（spec: chat-message-actions，决策 D1）：数组即真相——
     # 内建 copy / retry / regenerate + edit 覆盖 label（内建行为不变）
     # + 自定义 quote 动作（service 派发，宿主 callService 注册 quoteMessage）

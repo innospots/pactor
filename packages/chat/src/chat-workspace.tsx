@@ -111,6 +111,12 @@ export interface ChatWorkspaceProps {
   /** Composer footer DslNode 槽（spec: chat-composer-slots；与服务注入的 composerFooter 先后渲染，服务槽在先） */
   composerFooter?: DslNode;
   /**
+   * 隐藏 Composer 工具栏行（缺省 false）：true 时工具栏行整体不渲染，
+   * toolbarStart / toolbarEnd 槽一并抑制（composerFooter 槽不受影响），
+   * Enter 发送保留
+   */
+  hideToolbar?: boolean;
+  /**
    * 产出物面板受控 props（spec: chat-artifact-panel，决策 D2）：
    * 任一提供即全受控；都未提供时由内部 / 注入的 ArtifactStore 驱动
    */
@@ -177,6 +183,7 @@ export function createChatWorkspace(
     toolbarStart,
     toolbarEnd,
     composerFooter,
+    hideToolbar,
     artifact,
     panelOpen,
     onPanelClose,
@@ -229,6 +236,7 @@ export function createChatWorkspace(
               <DslNodeSlot node={composerFooter} />
             ) : undefined
           }
+          hideToolbar={hideToolbar}
           artifact={artifact}
           panelOpen={panelOpen}
           onPanelClose={onPanelClose}

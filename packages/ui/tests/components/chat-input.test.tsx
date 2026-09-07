@@ -141,6 +141,27 @@ describe('ChatInput（spec: shadcn-extended-components / ChatInput 聊天输入�
     expect(screen.queryByRole('button', { name: '发送' })).toBeNull();
   });
 
+  it('hideSend 且无工具栏槽时工具栏行整体零渲染；有槽时仍渲染', () => {
+    const { container } = renderDsl({
+      type: 'ChatInput',
+      props: { hideSend: true },
+    });
+    expect(
+      container.querySelector('[data-slot=chat-input] > .flex.items-center'),
+    ).toBeNull();
+
+    const { container: slotted } = renderDsl({
+      type: 'ChatInput',
+      props: {
+        hideSend: true,
+        toolbarEnd: { type: 'Button', props: { text: '右槽', variant: 'text' } },
+      },
+    });
+    expect(
+      slotted.querySelector('[data-slot=chat-input] > .flex.items-center'),
+    ).not.toBeNull();
+  });
+
   it('header 槽渲染在 textarea 上方；未提供不渲染', () => {
     const { container } = renderDsl({
       type: 'ChatInput',

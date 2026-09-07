@@ -20,7 +20,10 @@ export interface ChatInputProps {
   disabled?: boolean;
   /** 最小行数（高度随内容自适应，rows 为下限；缺省 3） */
   rows?: number;
-  /** 隐藏内建发送钮（工具栏右端完全自定义的场景） */
+  /**
+   * 隐藏内建发送钮（工具栏右端完全自定义的场景）；
+   * hideSend 且左右槽均未提供时工具栏行整体零渲染
+   */
   hideSend?: boolean;
   /** 工具栏左端槽（DslNode 子树，经 Renderer children 机制渲染） */
   toolbarStart?: DslNode;
@@ -44,7 +47,8 @@ export interface ChatInputProps {
  * ChatInput 适配器（shadcn kit）：AI 对话输入框的通用结构构件
  * （spec: shadcn-extended-components / ChatInput）——外层圆角容器
  * （focus-within 高亮）内依次承载自适应高度 textarea、工具栏行与
- * 可选底部区；工具栏与底部区内容完全由 DSL 槽位自定义。
+ * 可选底部区；工具栏与底部区内容完全由 DSL 槽位自定义；
+ * 工具栏行在左右槽均未提供且 hideSend 时整体零渲染。
  *
  * 发送语义：点击发送钮或 Enter（Shift+Enter 换行；IME 合成中 Enter
  * 不发送；trim 后空白禁发且发送钮禁用）；非受控发送后自动清空，
@@ -133,23 +137,25 @@ export function ChatInput({
         onCompositionEnd={handleComposition}
         className="resize-none border-0 px-4 pt-3 pb-1 shadow-none focus-visible:border-transparent focus-visible:ring-0"
       />
-      <div className="flex items-center gap-1 px-2 pb-2">
-        {toolbarStart ? renderChildren([toolbarStart]) : null}
-        <span className="flex-1" />
-        {toolbarEnd ? renderChildren([toolbarEnd]) : null}
-        {hideSend ? null : (
-          <ShadcnButton
-            type="button"
-            size="icon"
-            aria-label="发送"
-            disabled={!canSubmit}
-            onClick={submit}
-            className="size-8 rounded-full"
-          >
-            <ArrowUp />
-          </ShadcnButton>
-        )}
-      </div>
+      {toolbarStart || toolbarEnd || !hideSend ? (
+        <div className="flex items-center gap-1 px-2 pb-2">
+          {toolbarStart ? renderChildren([toolbarStart]) : null}
+          <span className="flex-1" />
+          {toolbarEnd ? renderChildren([toolbarEnd]) : null}
+          {hideSend ? null : (
+            <ShadcnButton
+              type="button"
+              size="icon"
+              aria-label="发送"
+              disabled={!canSubmit}
+              onClick={submit}
+              className="size-8 rounded-full"
+            >
+              <ArrowUp />
+            </ShadcnButton>
+          )}
+        </div>
+      ) : null}
       {footer ? (
         <div className="border-t border-border px-3 py-2">
           {renderChildren([footer])}

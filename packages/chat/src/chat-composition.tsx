@@ -167,6 +167,8 @@ export interface ChatCompositionProps {
   toolbarEnd?: ReactNode;
   /** Composer footer 槽（spec: chat-composer-slots；与服务注入的 composerFooter 先后渲染，服务槽在先） */
   composerFooter?: ReactNode;
+  /** 隐藏 Composer 工具栏行（透传 ChatView；toolbar 槽一并抑制，Enter 发送保留） */
+  hideToolbar?: boolean;
   className?: string;
   /** 发送回调：在 services.onSend 之后触发，均在 transport turn 之前 */
   onSend?: (text: string) => void;
@@ -228,6 +230,7 @@ export function ChatComposition({
   toolbarStart,
   toolbarEnd,
   composerFooter,
+  hideToolbar,
   className,
   onSend,
   artifact,
@@ -388,6 +391,7 @@ export function ChatComposition({
         toolbarStart={mergedToolbarStart}
         toolbarEnd={mergedToolbarEnd}
         composerFooter={mergedComposerFooter}
+        hideToolbar={hideToolbar}
         onMentionTrigger={services.onMentionTrigger}
         onPlusMenu={services.onPlusMenu}
         onArtifact={onArtifact}

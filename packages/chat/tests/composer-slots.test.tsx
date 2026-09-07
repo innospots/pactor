@@ -119,6 +119,46 @@ describe('Composer 槽位（spec: chat-composer-slots）', () => {
     ).toBeNull();
   });
 
+  it('hideToolbar：fallback 路径工具栏行与发送钮不渲染，footer 槽保留', () => {
+    render(
+      <ChatView
+        store={new ConversationStore()}
+        onAttachFiles={() => {}}
+        hideToolbar
+        composerFooter={<span>footer 区</span>}
+      />,
+    );
+    // 配置了 onAttachFiles 本会出现工具栏行；hideToolbar 整体抑制
+    expect(document.querySelector('.pactor-chat-composer__toolbar')).toBeNull();
+    expect(screen.queryByRole('button', { name: '发送' })).toBeNull();
+    expect(
+      document.querySelector('.pactor-chat-composer__footer'),
+    ).not.toBeNull();
+  });
+
+  it('hideToolbar：DSL 路径工具栏行零渲染（发送钮隐藏），footer 槽保留', () => {
+    renderChatPage({
+      page: { id: 'chat', title: '聊天页' },
+      body: {
+        type: 'Chat',
+        props: {
+          hideToolbar: true,
+          composerFooter: {
+            type: 'Text',
+            props: { text: 'footer 区' },
+          },
+        },
+      },
+    });
+    expect(
+      document.querySelector('[data-slot=chat-input] > .flex.items-center'),
+    ).toBeNull();
+    expect(screen.queryByRole('button', { name: '发送' })).toBeNull();
+    expect(
+      document.querySelector('[data-slot=chat-input] > .border-t'),
+    ).not.toBeNull();
+  });
+
   it('服务槽与 props 槽并存：服务槽在先', () => {
     renderChatPage(
       {
