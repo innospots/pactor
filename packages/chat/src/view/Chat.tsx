@@ -75,6 +75,12 @@ export interface ChatProps {
   toolbarStart?: DslNode | ReactNode;
   toolbarEnd?: DslNode | ReactNode;
   composerFooter?: DslNode | ReactNode;
+  /**
+   * 隐藏 Composer 工具栏行（缺省 false；DSL 可序列化标量）：
+   * true 时工具栏行整体不渲染，toolbarStart / toolbarEnd 槽一并抑制
+   * （composerFooter 槽不受影响），Enter 发送保留
+   */
+  hideToolbar?: boolean;
   /** 内建 header 标题右侧槽 */
   headerExtra?: DslNode | ReactNode;
   /** header 槽：整体替换内建 header */
@@ -259,6 +265,7 @@ export function Chat({
   toolbarStart,
   toolbarEnd,
   composerFooter,
+  hideToolbar,
   headerExtra,
   header,
   headerActions,
@@ -333,6 +340,7 @@ export function Chat({
       toolbarStart={resolveSlot(toolbarStart)}
       toolbarEnd={resolveSlot(toolbarEnd)}
       composerFooter={resolveSlot(composerFooter)}
+      hideToolbar={hideToolbar}
       headerActions={headerActions}
       editableTitle={editableTitle}
       onExport={onExport}

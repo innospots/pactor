@@ -69,6 +69,13 @@ export interface ComposerProps {
   toolbarEnd?: ReactNode;
   /** footer 槽（spec: chat-composer-slots / Composer footer 槽）：渲染在工具栏下方、以分隔线相隔；未提供不渲染 */
   composerFooter?: ReactNode;
+  /**
+   * 隐藏工具栏行（缺省 false）：true 时工具栏行整体不渲染——
+   * 内建 + 钮 / 附件钮 / 模型 chip / 发送钮与 toolbarStart / toolbarEnd
+   * 槽一并抑制（footer 槽不受影响）；Enter 发送保留，DSL 路径由
+   * ChatInput 工具栏行零渲染承担
+   */
+  hideToolbar?: boolean;
   /** 词边界 `@` 输入触发：query 为 `@` 后文本，anchorRect 为弹层锚点 */
   onMentionTrigger?: (query: string, anchorRect: DOMRect) => void;
   /** "+" 按钮触发弹层入口 */
@@ -132,6 +139,7 @@ export function Composer({
   onContextChipsChange,
   callService,
   composerFooter,
+  hideToolbar = false,
 }: ComposerProps) {
   const [text, setText] = useState('');
   const [dragOver, setDragOver] = useState(false);
@@ -284,12 +292,13 @@ export function Composer({
   };
 
   const showToolbar =
-    toolbarStart !== undefined ||
-    toolbarEnd !== undefined ||
-    onPlusMenu !== undefined ||
-    builtinPlusEnabled ||
-    onAttachFiles !== undefined ||
-    modelChipEnabled;
+    !hideToolbar &&
+    (toolbarStart !== undefined ||
+      toolbarEnd !== undefined ||
+      onPlusMenu !== undefined ||
+      builtinPlusEnabled ||
+      onAttachFiles !== undefined ||
+      modelChipEnabled);
 
   const fileInputNode = onAttachFiles ? (
     <input
@@ -405,17 +414,20 @@ export function Composer({
             }
           }}
         />
-        {/* 发送 / 停止：同一按钮元素的状态切换 */}
-        <button
-          type="button"
-          className={`pactor-chat-composer__button${streaming ? ' pactor-chat-composer__button--stop' : ''}`}
-          title={streaming ? '停止生成' : '发送'}
-          aria-label={streaming ? '停止生成' : '发送'}
-          disabled={streaming ? false : disabled || !text.trim()}
-          onClick={streaming ? onStop : send}
-        >
-          {streaming ? <Icon name="square" size={14} className="pactor-chat-icon-fill" /> : <Icon name="arrow-up" size={16} />}
-        </button>
+        {/* 发送 / 停止：同一按钮元素的状态切换；hideToolbar 时一并抑制
+            （与 DSL 路径语义一致，Enter 发送保留） */}
+        {hideToolbar ? null : (
+          <button
+            type="button"
+            className={`pactor-chat-composer__button${streaming ? ' pactor-chat-composer__button--stop' : ''}`}
+            title={streaming ? '停止生成' : '发送'}
+            aria-label={streaming ? '停止生成' : '发送'}
+            disabled={streaming ? false : disabled || !text.trim()}
+            onClick={streaming ? onStop : send}
+          >
+            {streaming ? <Icon name="square" size={14} className="pactor-chat-icon-fill" /> : <Icon name="arrow-up" size={16} />}
+          </button>
+        )}
       </div>
       {showToolbar && (
         <div className="pactor-chat-composer__toolbar">
@@ -516,6 +528,7 @@ export function Composer({
         placeholder,
         disabled,
         hasFooter: composerFooter !== undefined && composerFooter !== null,
+        hideToolbar,
       })}
       components={COMPOSER_INTERNAL_COMPONENTS}
       fallback={fallback}
