@@ -93,7 +93,7 @@ pactor create my-app        # 模板参数 -t app（当前唯一模板，可省�
 
 生成的工程包含：
 
-- `package.json`（vite / react / @pactor-app/app / @pactor-app/ui / @pactor-app/vite-plugin 依赖；版本为 `^0.1.0` 等语义化占位，发布后按实际版本对齐）
+- `package.json`（vite / react / @pactor-app/app / @pactor-app/ui / @pactor-app/vite-plugin 依赖；版本为 `^1.0.0` 等语义化占位，发布后按实际版本对齐）
 - `vite.config.ts`（react + `pactor()` 插件）
 - `index.html`、`tsconfig.json`、`README.md`
 - `src/main.tsx`（`createPactorApplication` + `StaticDslLoader` + `import '@pactor-app/ui/styles.css'`，默认 UI kit 为 shadcn）

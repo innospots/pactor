@@ -68,7 +68,7 @@ export function Command({
                 value={item.value}
                 keywords={[item.label]}
                 disabled={item.disabled}
-                onSelect={(value) => onSelect?.(value)}
+                onSelect={(value: string) => onSelect?.(value)}
               >
                 {item.icon ? <Icon name={item.icon} size="sm" /> : null}
                 {item.label}

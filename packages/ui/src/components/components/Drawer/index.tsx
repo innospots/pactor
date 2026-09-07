@@ -44,7 +44,7 @@ export function Drawer({
     <ShadcnDrawer
       direction={placement}
       open={open ?? false}
-      onOpenChange={(next) => {
+      onOpenChange={(next: boolean) => {
         if (!next) {
           onClose?.();
         }
