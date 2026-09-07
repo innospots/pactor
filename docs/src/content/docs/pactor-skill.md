@@ -43,11 +43,12 @@ skill 在以下场景激活：
 4. **Package map** — 各包职责一览
 5. **Dependency rules** — 依赖方向与禁区
 6. **Quick start** — 最小启动示例
-7. **Workflows** — 自定义组件、主题、事件与数据流、路由/资源/权限
-8. **Common commands** — 常用命令
-9. **Design principles** — 设计原则速查
-10. **Common pitfalls** — 常见坑与禁止事项
-11. **References** — 参考文档与示例工程
+7. **UI kit at a glance** — shadcn 组件目录与注意事项
+8. **Workflows** — 自定义组件、事件与数据流、主题、路由/资源/权限、AI 对话工作区
+9. **Common commands** — 常用命令
+10. **Design principles** — 设计原则速查
+11. **Common pitfalls** — 常见坑与禁止事项
+12. **References** — 参考文档与示例工程
 
 ## 在项目中使用
 

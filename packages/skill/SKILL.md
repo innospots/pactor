@@ -1,8 +1,8 @@
 ---
 name: pactor
 description: |
-  Agent skill for rapidly building Pactor Server-Driven UI applications. Covers app bootstrapping, DSL authoring, custom components, theming, events, routing, resources, permissions, and project commands.
-version: 0.1.1
+  Agent skill for rapidly building Pactor Server-Driven UI applications. Covers app bootstrapping, DSL authoring, custom components, theming, events, routing, resources, permissions, AI chat workspaces, and project commands.
+version: 1.1.0
 ---
 
 # pactor-app
@@ -15,8 +15,8 @@ Activate this skill when the user works with **Pactor** — any `@pactor-app/*` 
 - Using `createPactorApplication`, `@pactor-app/app`, or `StaticDslLoader`
 - Writing YAML/JSON DSL pages, components, events, or actions
 - Creating or registering custom components / actions / services
-- Switching or customizing UI kits (shadcn / custom registries)
-- Configuring themes, skins, layouts, or menus
+- Building AI chat pages (`Chat`, `ChatShell`, `ChatServicesProvider`)
+- Configuring themes, skins, layouts, menus, or sidebars
 - Integrating data sources, routers, resources, or permissions
 - Handling form linkage, event linkage, or action orchestration
 - Using `@pactor-app/vite-plugin` or `@pactor-app/cli`
@@ -29,6 +29,7 @@ Activate this skill when the user works with **Pactor** — any `@pactor-app/*` 
 - Register custom components, actions, services, and capabilities
 - Design data flow, expressions, events, and action orchestration
 - Configure themes/skins, layouts, routing, resources, and permissions
+- Assemble AI chat workspaces with the `Chat` DSL component
 - Provide exact commands and example project pointers
 
 ## Framework in one sentence
@@ -46,13 +47,14 @@ Activate this skill when the user works with **Pactor** — any `@pactor-app/*` 
 | `packages/resource` | `@pactor-app/resource` | DSL loaders (HTTP / static), cache, versioning |
 | `packages/router` | `@pactor-app/router` | Dynamic routing, Path Matcher, menu registry |
 | `packages/permission` | `@pactor-app/permission` | Page/menu/component/action guards |
-| `packages/ui` | `@pactor-app/ui` | shadcn UI kit — the single built-in kit (`shadcnUiKit` + prebuilt stylesheet + contracts/interaction core) |
+| `packages/ui` | `@pactor-app/ui` | shadcn UI kit — the single built-in kit (components + prebuilt stylesheet + interaction core) |
 | `packages/markdown` | `@pactor-app/markdown` | Markdown + DSL Part rendering |
-| `packages/chat` | `@pactor-app/chat` | AI conversation, streaming, capabilities |
+| `packages/chat` | `@pactor-app/chat` | AI conversation: message protocol, streaming, ChatView, `Chat`/`ChatShell` DSL components, artifact panel |
 | `packages/vite-plugin` | `@pactor-app/vite-plugin` | Vite YAML modules, build-time validation, HMR |
 | `packages/cli` | `@pactor-app/cli` | DSL validation, inspection, scaffolding |
 | `packages/app` | `@pactor-app/app` | One-stop composition (`createPactorApplication`) |
 | `packages/pactor` | `pactor-app` | Meta package — depends on all modules, re-exports `@pactor-app/app` |
+| `packages/skill` | `@pactor-app/skill` | This agent skill |
 
 ## Dependency rules
 
@@ -64,7 +66,7 @@ core ← schema ← expression ← runtime
         {permission, resource, router, ui} ← app
 ```
 
-- Business apps depend only on `@pactor-app/app` + `@pactor-app/ui` (the single built-in shadcn UI kit), or install the `pactor-app` meta package to get every module at once.
+- Business apps depend only on `@pactor-app/app` + `@pactor-app/ui`, or install the `pactor-app` meta package to get every module at once.
 - Never import implementation details from sibling packages.
 - Renderer logic must resolve components via Registry, not `if (type === 'X')` branches.
 
@@ -119,6 +121,28 @@ createPactorApplication({ appId: 'my-app', loader }).mount('#root');
 
 For YAML imports add `@pactor-app/vite-plugin` to `vite.config.ts` and declare `*.page.yaml` modules.
 
+## UI kit at a glance
+
+The built-in shadcn kit (`@pactor-app/ui`) registers these DSL component types — reference them by `type` in pages:
+
+- **Page & layout**: `Page`, `Layout` / `Header` / `Sider` / `Content` / `Footer`, `Grid`, `Flex`, `Card`, `Sidebar`
+- **Basic**: `Button`, `Alert`, `Statistic`, `Menu`, `Link`, `Text`, `Typography`, `Icon`
+- **Data**: `Table`, `Tabs`, `DataTable`, `Chart`
+- **Form**: `Form`, `Input`, `Select`, `Textarea`, `Checkbox`, `RadioGroup`, `Switch`, `Slider`, `Label`, `Field`, `ChatInput`
+- **Display**: `Badge`, `Avatar`, `Skeleton`, `Separator`, `Kbd`, `Spinner`, `Empty`, `AspectRatio`, `Progress`, `Calendar`, `Carousel`, `Item`
+- **Navigation**: `Breadcrumb`, `Pagination`, `Menubar`, `NavigationMenu`, `DropdownMenu`, `ContextMenu`
+- **Overlay & feedback**: `Dialog`, `AlertDialog`, `Drawer`, `Sheet`, `Popover`, `Tooltip`, `HoverCard`, `Sonner`, `Accordion`, `Collapsible`
+- **Composite input**: `InputOTP`, `Combobox`, `Command`, `InputGroup`, `ButtonGroup`, `Toggle`, `ToggleGroup`, `Resizable`, `ScrollArea`
+
+Notable behaviors:
+
+- `Icon` renders from a lucide whitelist (~100 names, kebab-case keys; PascalCase/camelCase auto-normalized); unknown names render a placeholder.
+- `Sidebar` is a full app shell: brand area, `items` nav or `content` free slot, `sidebarFooter`, desktop icon-rail collapse (hover shows tooltip), mobile overlay drawer.
+- `ChatInput` is the generic AI input structure (textarea + toolbar slots + header/footer slots).
+- Registered layouts: `admin`, `blank`, `login`, `landing` (resolve via the `layout` field).
+
+Component contracts and per-component props: see the docs site (`docs/src/content/docs/components/`).
+
 ## Workflow: custom component
 
 1. Write a React component in the business project
@@ -144,13 +168,6 @@ body:
 ```
 
 Custom components receive RuntimeContext (state, data, permissions, routing, services, actions).
-
-## Workflow: theming and skins
-
-- The built-in UI kit is shadcn (`@pactor-app/ui`); theming = overriding its CSS variable tokens (`--primary` / `--muted` / ...), dark via `data-pactor-theme="dark"`
-- Layout and theme config usually come from bootstrap
-- For business skin settings, see `examples/admin` (`skin.ts` / `SkinSettings`)
-- Use `providers` and `headerExtra` slots in `@pactor-app/app` to inject global providers and settings entry
 
 ## Workflow: events and data flow
 
@@ -181,6 +198,17 @@ events:
 
 Standard actions: `request`, `reload`, `setState`, `resetState`, `navigate`, `message`, `confirm`, `validate`, `submit`, `open`, `close`, `download`, `upload`, `sequence`, `parallel`, `if`, etc. Business can register custom actions.
 
+Pitfall: action `params` objects with a `type` (or `action`) key are treated as nested DSL/action configs and skip expression evaluation — rename the key (e.g. use `messageType` instead of `type`).
+
+## Workflow: theming and skins
+
+- The built-in kit is shadcn (`@pactor-app/ui`); theming = overriding its CSS variable tokens at `:root` (`--primary` / `--muted` / `--radius` / ...), dark via `data-pactor-theme="dark"`
+- Portaled overlays (Tooltip / Select / DropdownMenu popups) mount at `document.body` — token overrides must live at `:root`, not on an inner container
+- Chat surfaces use a separate `--pactor-chat-*` token set (same override + dark mechanism)
+- Layout and theme config usually come from bootstrap
+- For business skin settings, see `examples/admin` (`skin.ts` / `SkinSettings`)
+- Use `providers` and `headerExtra` slots in `@pactor-app/app` to inject global providers and settings entry
+
 ## Workflow: routing, resources, permissions
 
 - **Routing** (`@pactor-app/router`): dynamic routes from bootstrap `menus`, supports Path Matcher, params, hidden routes
@@ -192,6 +220,48 @@ Bootstrap orchestration:
 ```text
 load bootstrap → write PermissionStore → build MenuRegistry → resolve layout → assemble shared registries → render page
 ```
+
+## Workflow: AI chat workspace
+
+`@pactor-app/chat` provides a complete conversation workspace, and `Chat` is a first-class DSL component (registered alongside `ChatShell` by `registerChatComponent(registry)`). Runtime services are injected once by the host via `ChatServicesProvider` (`transport` required; `callService(name, params)` service bridge resolves dynamic data sources).
+
+```yaml
+body:
+  type: Chat
+  props:
+    greeting: 你好
+    menu:
+      - { key: new, label: 新建对话, icon: plus }
+    models:                    # built-in model selector (controlled: model + onModelChange)
+      - { value: demo, label: demo-mock }
+    model: ${state.model}
+    contexts:                  # @ mention / + context popovers; service refs resolve via callService
+      - { trigger: '@', label: 智能体, service: agents }
+    composerFooter:            # composer footer slot (below the toolbar, with divider)
+      type: DropdownMenu
+      props:
+        items: [{ label: 默认工作空间, value: 默认工作空间, icon: folder }]
+      children:
+        - type: Button
+          props: { text: 选择工作空间, variant: text, size: small }
+    messageActions: [copy, regenerate, edit]
+  events:
+    onModelChange:
+      - action: setState
+        params: { model: ${event.model} }
+```
+
+Feature checklist (all DSL-declarable props):
+
+- **Composer**: attachments (paste / drag / file pick handled by the host), `toolbarStart` / `toolbarEnd` / `composerFooter` / `composerBottom` slots, `hideToolbar` (hide the default toolbar row, Enter still sends)
+- **Model selector**: `models` + `modelPlacement: composer | header`
+- **Contexts**: `@` / `+` anchored popovers, selected items become chips and travel with the message (structured, never concatenated into text)
+- **Message actions**: `messageActions` — the array is the truth (built-ins not listed do not appear); custom actions dispatch via the service bridge
+- **Artifact panel**: `artifact` / `panelOpen` controlled props, `inspector` slot, `onArtifact` / `onPanelClose` / `onOpenArtifact` events; markdown / code / text / dsl built-in renderers
+- **Header**: auto-rendered only when it has content; `title` / `headerActions: [export, theme, clear]` / `editableTitle`
+- **Shell**: `menu` sidebar (icons / badge / dot / group / disabled), `sidebar` replacement slot; `ChatShell` for menu-driven multi-page shells (brand, collapsible icon rail, sidebarFooter)
+
+Pure-React hosts can use `<ChatServicesProvider>` + `<Chat>` directly; `createChatWorkspace(services)` remains as a compatibility path (same composition, same DSL props). Full assembly: `examples/chat`.
 
 ## Common commands
 
@@ -209,12 +279,12 @@ pnpm test
 pnpm typecheck
 
 # start docs site
-pnpm docs:dev
+pnpm --filter pactor-docs dev
 
 # examples
 pnpm --filter example-vite-starter dev   # minimal starter
 pnpm --filter example-admin dev          # shadcn admin dashboard (skin settings)
-pnpm --filter example-chat dev           # AI chat example
+pnpm --filter example-chat dev           # AI chat (built on createPactorApplication)
 
 # @pactor-app/cli
 pnpm pactor validate src/pages/**/*.page.yaml
@@ -239,17 +309,21 @@ pnpm pactor create my-app
 - **Do not** write `if (type === 'Button')` branches in a Renderer; use `ComponentRegistry`.
 - **Do not** inject JavaScript from the server into DSL; register actions/services/capabilities in the frontend.
 - **Do not** rely on frontend permission checks for security; enforce authorization on backend APIs.
-- **Do not** forget to import `@pactor-app/ui/styles.css` when using the default shadcn kit.
+- **Do not** forget to import `@pactor-app/ui/styles.css` when using the default shadcn kit (`@pactor-app/chat/styles.css` additionally for chat surfaces).
+- **Do not** put a `type` key in action `params` (see the events workflow pitfall).
+- **Do not** expect DslNode slots (sidebar / toolbar / inspector / …) to render outside a page runtime; in pure React hosts pass ReactNode instead.
 
 ## References
 
 - Framework design specification: `docs/src/content/docs/framework-design.md`
 - Quick start: `docs/src/content/docs/guides/getting-started.md`
 - @pactor-app/app docs: `docs/src/content/docs/packages/app.md`
+- @pactor-app/chat docs: `docs/src/content/docs/packages/chat.md`
+- Component reference: `docs/src/content/docs/components/`
 - Example projects:
   - `examples/vite-starter` — minimal starter
   - `examples/admin` — shadcn admin dashboard with skin settings
-  - `examples/chat` — AI chat
+  - `examples/chat` — AI chat workspace (pactor-app assembly)
 
 ## How to use this skill
 
