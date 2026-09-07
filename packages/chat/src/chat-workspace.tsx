@@ -77,6 +77,8 @@ export interface ChatWorkspaceServices {
   toolbarEnd?: ReactNode;
   /** Composer footer 槽（spec: chat-composer-slots；ReactNode 闭包槽） */
   composerFooter?: ReactNode;
+  /** Composer 下方自定义内容槽（ReactNode 闭包槽；渲染在 Composer 之外正下方，未提供不渲染） */
+  composerBottom?: ReactNode;
   /** 工作区头部右侧扩展区（提供 title 或 headerExtra 时渲染头部） */
   headerExtra?: ReactNode;
 }
@@ -110,6 +112,8 @@ export interface ChatWorkspaceProps {
   toolbarEnd?: DslNode;
   /** Composer footer DslNode 槽（spec: chat-composer-slots；与服务注入的 composerFooter 先后渲染，服务槽在先） */
   composerFooter?: DslNode;
+  /** Composer 下方自定义内容 DslNode 槽（与服务注入的 composerBottom 先后渲染，服务槽在先；未提供不渲染） */
+  composerBottom?: DslNode;
   /**
    * 隐藏 Composer 工具栏行（缺省 false）：true 时工具栏行整体不渲染，
    * toolbarStart / toolbarEnd 槽一并抑制（composerFooter 槽不受影响），
@@ -183,6 +187,7 @@ export function createChatWorkspace(
     toolbarStart,
     toolbarEnd,
     composerFooter,
+    composerBottom,
     hideToolbar,
     artifact,
     panelOpen,
@@ -217,14 +222,6 @@ export function createChatWorkspace(
           conversationId={conversationId}
           params={params}
           className={className}
-          showHeader={
-            title !== undefined ||
-            services.headerExtra !== undefined ||
-            // header 位模型 chip（决策 D2）：仅配置 models 也渲染极简头部
-            (modelPlacement === 'header' &&
-              models !== undefined &&
-              models.length > 0)
-          }
           headerExtra={services.headerExtra}
           sidebar={sidebar ? <DslNodeSlot node={sidebar} /> : undefined}
           toolbarStart={
@@ -234,6 +231,11 @@ export function createChatWorkspace(
           composerFooter={
             composerFooter ? (
               <DslNodeSlot node={composerFooter} />
+            ) : undefined
+          }
+          composerBottom={
+            composerBottom ? (
+              <DslNodeSlot node={composerBottom} />
             ) : undefined
           }
           hideToolbar={hideToolbar}

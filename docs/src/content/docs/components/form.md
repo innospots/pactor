@@ -62,7 +62,7 @@ Form 内声明 `name` 的 Input / Select 及本页其余录入组件（Textarea 
 
 ### ChatInput
 
-AI 对话输入框的通用结构构件：外层圆角容器（focus-within 高亮）内依次承载自适应高度 textarea、工具栏行与可选底部区（footer，带上分隔线）。工具栏与底部区内容完全由槽位 DSL 自定义；内建圆形发送钮（空白或 disabled 时禁用，`hideSend` 可隐藏）。定位为通用结构构件——transport / 附件 / 提及等对话领域能力请用 `@pactor-app/chat`。
+AI 对话输入框的通用结构构件：外层圆角容器（focus-within 高亮）内依次承载自适应高度 textarea（输入区最小高度 60px）、工具栏行与可选底部区（footer，带上分隔线）。工具栏与底部区内容完全由槽位 DSL 自定义；内建圆形发送钮（空白或 disabled 时禁用，`hideSend` 可隐藏）；`hideSend` 且左右工具栏槽均未提供时工具栏行整体零渲染。定位为通用结构构件——transport / 附件 / 提及等对话领域能力请用 `@pactor-app/chat`。
 
 | prop | 类型 | 缺省 | 说明 |
 | --- | --- | --- | --- |
@@ -70,7 +70,7 @@ AI 对话输入框的通用结构构件：外层圆角容器（focus-within 高�
 | `placeholder` | string | — | 占位文案 |
 | `disabled` | boolean | — | 禁用 |
 | `rows` | number | `3` | 最小行数（高度随内容自适应，rows 为下限） |
-| `hideSend` | boolean | — | 隐藏内建发送钮 |
+| `hideSend` | boolean | — | 隐藏内建发送钮；hideSend 且左右槽均未提供时工具栏行整体零渲染 |
 | `header` | DslNode | — | 顶部区槽（提供时渲染在 textarea 上方；附件卡片、上下文 chips 等输入上下文展示） |
 | `toolbarStart` | DslNode | — | 工具栏左端槽 |
 | `toolbarEnd` | DslNode | — | 工具栏右端槽（发送钮之前） |

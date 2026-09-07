@@ -125,3 +125,11 @@ export function ensureChatChromeActions(
     }
   }
 }
+
+/**
+ * chrome 内部组件的直调入口（与 chat.panelClose 动作同一 handlers
+ * 注册表）：面板关闭钮等内部组件不经 DSL 动作层，行为零分叉
+ */
+export function invokeChatPanelClose(): void {
+  handlers.panelClose?.();
+}

@@ -187,6 +187,19 @@ describe('Chat header（spec: chat-dsl-component / Header 配置）', () => {
     ).toBeNull();
   });
 
+  it('无头部内容时 workspace__header 节点不渲染；提供 headerActions 即渲染', () => {
+    const { unmount } = renderChat(<Chat greeting="你好" />);
+    expect(
+      document.querySelector('.pactor-chat-workspace__header'),
+    ).toBeNull();
+    unmount();
+
+    renderChat(<Chat headerActions={['export']} />);
+    expect(
+      document.querySelector('.pactor-chat-workspace__header'),
+    ).not.toBeNull();
+  });
+
   it('DslNode 槽在纯 React（无页面运行时）下降级：warn + 跳过，不抛错', () => {
     const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
     const headerExtra: DslNode = { type: 'Whatever', props: {} };

@@ -83,6 +83,13 @@ body:
                 text: ${state.workspace || '选择工作空间'}
             - type: Icon
               props: { name: chevron-down }
+    # Composer 下方自定义内容槽：渲染在输入框之外正下方（页面底部留白区），
+    # 空态 / 钉底两态一致；典型用途为免责声明等弱提示行
+    composerBottom:
+      type: Text
+      props:
+        type: secondary
+        text: 内容由 AI 生成，仅供参考
     # 消息操作条（spec: chat-message-actions，决策 D1）：数组即真相——
     # 内建 copy / retry / regenerate + edit 覆盖 label（内建行为不变）
     # + 自定义 quote 动作（service 派发，宿主 callService 注册 quoteMessage）

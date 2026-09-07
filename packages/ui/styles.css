@@ -570,6 +570,9 @@
   .min-h-16 {
     min-height: calc(var(--spacing) * 16);
   }
+  .min-h-\[60px\] {
+    min-height: 60px;
+  }
   .min-h-screen {
     min-height: 100vh;
   }
@@ -708,10 +711,6 @@
   }
   .translate-y-\[-50\%\] {
     --tw-translate-y: -50%;
-    translate: var(--tw-translate-x) var(--tw-translate-y);
-  }
-  .translate-y-\[calc\(-50\%_-_2px\)\] {
-    --tw-translate-y: calc(-50% - 2px);
     translate: var(--tw-translate-x) var(--tw-translate-y);
   }
   .rotate-45 {
@@ -1844,6 +1843,18 @@
   }
   .data-\[selected\=true\]\:text-accent-foreground[data-selected="true"] {
     color: var(--accent-foreground);
+  }
+  .data-\[side\=bottom\]\:-top-1[data-side="bottom"] {
+    top: calc(var(--spacing) * -1);
+  }
+  .data-\[side\=left\]\:-right-1[data-side="left"] {
+    right: calc(var(--spacing) * -1);
+  }
+  .data-\[side\=right\]\:-left-1[data-side="right"] {
+    left: calc(var(--spacing) * -1);
+  }
+  .data-\[side\=top\]\:-bottom-1[data-side="top"] {
+    bottom: calc(var(--spacing) * -1);
   }
   .data-\[size\=default\]\:h-9[data-size="default"] {
     height: calc(var(--spacing) * 9);

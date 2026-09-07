@@ -46,9 +46,9 @@ export interface ChatInputProps {
 /**
  * ChatInput 适配器（shadcn kit）：AI 对话输入框的通用结构构件
  * （spec: shadcn-extended-components / ChatInput）——外层圆角容器
- * （focus-within 高亮）内依次承载自适应高度 textarea、工具栏行与
- * 可选底部区；工具栏与底部区内容完全由 DSL 槽位自定义；
- * 工具栏行在左右槽均未提供且 hideSend 时整体零渲染。
+ * （focus-within 高亮）内依次承载自适应高度 textarea（输入区最小
+ * 高度 60px）、工具栏行与可选底部区；工具栏与底部区内容完全由
+ * DSL 槽位自定义；工具栏行在左右槽均未提供且 hideSend 时整体零渲染。
  *
  * 发送语义：点击发送钮或 Enter（Shift+Enter 换行；IME 合成中 Enter
  * 不发送；trim 后空白禁发且发送钮禁用）；非受控发送后自动清空，
@@ -135,7 +135,7 @@ export function ChatInput({
         onKeyDown={handleKeyDown}
         onCompositionStart={handleComposition}
         onCompositionEnd={handleComposition}
-        className="resize-none border-0 px-4 pt-3 pb-1 shadow-none focus-visible:border-transparent focus-visible:ring-0"
+        className="min-h-[60px] resize-none border-0 px-4 pt-3 pb-1 shadow-none focus-visible:border-transparent focus-visible:ring-0"
       />
       {toolbarStart || toolbarEnd || !hideSend ? (
         <div className="flex items-center gap-1 px-2 pb-2">

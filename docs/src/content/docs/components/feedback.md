@@ -184,7 +184,7 @@ description: 反馈与弹层类 DSL 组件——Alert / Dialog / AlertDialog / D
 
 ### Tooltip
 
-悬浮提示：children 为触发元素，悬浮显示 `content` 纯文本提示浮层。
+悬浮提示：children 为触发元素，悬浮显示 `content` 纯文本提示浮层。浮层缺省位于触发元素上方，空间不足时自动翻转朝向，尖角始终贴边指向触发元素。
 
 | prop | 类型 | 缺省 | 说明 |
 | --- | --- | --- | --- |
@@ -192,6 +192,10 @@ description: 反馈与弹层类 DSL 组件——Alert / Dialog / AlertDialog / D
 | children | DslNode[] | — | 触发元素（DSL 子树，经 Renderer children 机制渲染） |
 
 `className` / `style` 挂在提示浮层根节点（非触发元素）。
+
+:::note
+浮层经 Portal 挂载到 `document.body`，气泡配色（`--primary` / `--primary-foreground`）在挂载点解析——换肤令牌需覆盖在 `:root`（见[主题与换肤](../../guides/theming/)），只覆盖在某个内层容器上浮层读不到。
+:::
 
 ```yaml
 - type: Tooltip
