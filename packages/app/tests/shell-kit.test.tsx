@@ -4,7 +4,7 @@ import './setup.js';
 import { cleanup, fireEvent, screen } from '@testing-library/react';
 import type { PageDsl } from '@pactor-app/core';
 import { StaticDslLoader } from '@pactor-app/resource';
-import { createShadcnLayoutRegistry } from '@pactor-app/ui/layout';
+import { createLayoutRegistry } from '@pactor-app/ui/layout';
 import type {
   InteractionProviderProps,
   OverlayHostProps,
@@ -138,30 +138,30 @@ function CustomAdminLayout({ children }: { children?: ReactNode }) {
 }
 
 const customLayoutRegistry = () => {
-  const registry = createShadcnLayoutRegistry();
+  const registry = createLayoutRegistry();
   registry.unregister('admin');
   registry.register('admin', CustomAdminLayout);
   return registry;
 };
 
-describe('shell-ui-kit-selection：缺省为 shadcn（唯一内置实现）', () => {
-  it('不传 layoutRegistry / interactionKit：外壳为 shadcn AdminLayout，overlay.open 渲染 shadcn Modal', async () => {
+describe('shell-ui-kit-selection：缺省为内置实现', () => {
+  it('不传 layoutRegistry / interactionKit：外壳为 AdminLayout，overlay.open 渲染内置 Modal', async () => {
     app = createShellApp();
     const target = await mountApp(app);
 
     await screen.findByRole('button', { name: '打开弹层' });
-    // 外壳为 shadcn 布局（data-slot 钩子）
+    // 外壳为内置布局（data-slot 钩子）
     expect(target.querySelector('[data-slot=admin-layout]')).not.toBeNull();
     expect(target.querySelector('[data-slot=menu]')).not.toBeNull();
 
-    // 交互层为 shadcn：overlay.open 渲染 shadcn Modal
+    // 交互层为内置实现：overlay.open 渲染内置 Modal
     fireEvent.click(screen.getByRole('button', { name: '打开弹层' }));
     await screen.findByText('用户详情');
     expect(document.querySelector('[data-slot=overlay-modal]')).not.toBeNull();
   });
 });
 
-describe('shell-ui-kit-selection：自定义 kit 覆盖点保留', () => {
+describe('shell-ui-kit-selection：自定义覆盖点保留', () => {
   it('layoutRegistry 切换：外壳渲染自定义布局', async () => {
     app = createShellApp({ layoutRegistry: customLayoutRegistry });
     const target = await mountApp(app);
@@ -176,7 +176,7 @@ describe('shell-ui-kit-selection：自定义 kit 覆盖点保留', () => {
     const target = await mountApp(app);
 
     await screen.findByRole('button', { name: '打开弹层' });
-    // 外壳仍为 shadcn 默认布局
+    // 外壳仍为内置默认布局
     expect(target.querySelector('[data-slot=admin-layout]')).not.toBeNull();
 
     // message → 自定义 toast

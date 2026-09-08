@@ -8,9 +8,9 @@ import {
 // Chat 一等组件（AI 工作区页）的皮肤样式表
 import "@pactor-app/chat/styles.css";
 import { StaticDslLoader } from "@pactor-app/resource";
-// 默认 UI kit 为 shadcn（@pactor-app/ui），样式表导入为必需步骤
+// 默认 UI 为 @pactor-app/ui 内置实现，样式表导入为必需步骤
 import "@pactor-app/ui/styles.css";
-import { createShadcnComponentRegistry } from "@pactor-app/ui/components";
+import { createComponentRegistry } from "@pactor-app/ui/components";
 import type { ReactNode } from "react";
 // 示例皮肤：换肤契约参考实现（须在 @pactor-app/ui/styles.css 之后导入）
 import "./theme.css";
@@ -62,7 +62,7 @@ const loader = new StaticDslLoader({
 // 活预览的白名单组件
 const chatServices: ChatServices = {
   transport: createMockAiTransport(),
-  safeRegistry: createSafeRegistry(createShadcnComponentRegistry(), [
+  safeRegistry: createSafeRegistry(createComponentRegistry(), [
     "Flex",
     "Card",
     "Statistic",
@@ -96,10 +96,10 @@ createPactorApplication({
   // 皮肤设置：头部右侧入口（主色预设 / 暗黑 / 圆角），
   // 皮肤应用走 DOM 属性与 CSS 变量（见 skin.ts），即时生效无需刷新
   headerExtra: <SkinSettings />,
-  // Chat 一等组件注册（AI 工作区页）：shadcn 注册表之上叠加 Chat / ChatShell
+  // Chat 一等组件注册（AI 工作区页）：内置注册表之上叠加 Chat / ChatShell
   // （registerChatComponent 不覆盖已有同名类型）
   componentRegistry: () => {
-    const registry = createShadcnComponentRegistry();
+    const registry = createComponentRegistry();
     registerChatComponent(registry);
     return registry;
   },

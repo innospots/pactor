@@ -1,6 +1,6 @@
 import { createPactorApplication } from '@pactor-app/app';
 import { StaticDslLoader } from '@pactor-app/resource';
-// 默认 UI kit 为 shadcn（@pactor-app/ui），样式表导入为必需步骤
+// 默认 UI 为 @pactor-app/ui 内置实现，样式表导入为必需步骤
 import '@pactor-app/ui/styles.css';
 
 import homePage from './pages/home.page.yaml';

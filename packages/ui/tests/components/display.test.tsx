@@ -151,7 +151,7 @@ describe('Statistic', () => {
 });
 
 describe('Renderer 组合渲染', () => {
-  it('Renderer 渲染 Card + Button 组合为对应 shadcn kit 组件', () => {
+  it('Renderer 渲染 Card + Button 组合为对应内置组件', () => {
     renderDsl({
       type: 'Card',
       props: { title: '面板' },

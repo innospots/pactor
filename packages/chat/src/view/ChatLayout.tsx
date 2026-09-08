@@ -26,7 +26,7 @@ export const CHAT_LAYOUT_TYPE = 'chat';
  * 结构化 LayoutRegistry（兼容 @pactor-app/ui layout 层的 LayoutRegistry =
  * Registry<LayoutComponent>）：结构化类型声明，调用方传入 ui layout 层
  * 的注册表即天然兼容（历史为零依赖约定而设；chat-icon-convergence 起
- * chat 正式依赖 ui kit，本结构化声明保留以收窄本文件的 API 面）。
+ * chat 正式依赖 @pactor-app/ui，本结构化声明保留以收窄本文件的 API 面）。
  */
 export interface ChatLayoutRegistry {
   has(name: string): boolean;

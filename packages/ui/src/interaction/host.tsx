@@ -49,18 +49,18 @@ function toCssWidth(width: number | string | undefined): string | undefined {
 }
 
 /**
- * ShadcnOverlayHost：与 pactor-interaction 的 OverlayHost（antd 版）契约一致——
- * 订阅同一 OverlayManager 堆栈逐条渲染；type 为 modal 用 vendored shadcn
- * Dialog、drawer 用 vendored drawer 原语（vaul，与 DSL 弹层适配器同一套
- * src/ui 原语，design D4）；title/width 原样应用；UI 取消（X / 遮罩 /
- * Escape）触发取消语义 close（resolve `{ success: false }`）。
+ * OverlayHost：订阅 OverlayManager 堆栈逐条渲染；type 为 modal 用
+ * vendored shadcn Dialog、drawer 用 vendored drawer 原语（vaul，与 DSL
+ * 弹层适配器同一套 src/ui 原语，design D4）；title/width 原样应用；
+ * UI 取消（X / 遮罩 / Escape）触发取消语义 close（resolve
+ * `{ success: false }`）。
  *
- * 与 antd 版相同：必须位于 PageRuntime 的 React Context 之内；DSL content
+ * 必须位于 PageRuntime 的 React Context 之内；DSL content
  * 经当前 Renderer 的 `renderChildren` 渲染，作用域注入
  * `{ params: entry.params, parent: 父作用域快照 }`；page overlay 经注入的
  * resolvePage 加载并创建共享宿主 registries 的子 PageRuntime。
  */
-export function ShadcnOverlayHost({ manager, resolvePage }: OverlayHostProps) {
+export function OverlayHost({ manager, resolvePage }: OverlayHostProps) {
   const renderer = useRenderer();
   const stack = useSyncExternalStore(
     (onChange) => manager.subscribe(onChange),
@@ -260,7 +260,7 @@ function PageOverlayBody({
     if (!resolvePage) {
       setError(
         new Error(
-          `[@pactor-app/ui] page overlay（pageId: "${entry.page?.pageId}"）需要 ShadcnOverlayHost 注入 resolvePage`,
+          `[@pactor-app/ui] page overlay（pageId: "${entry.page?.pageId}"）需要 OverlayHost 注入 resolvePage`,
         ),
       );
       return;

@@ -620,7 +620,8 @@
 
 
 /* 消息滚动区：overflow-anchor none 配合 useChatAutoScroll（防浏览器
-   滚动锚定与贴底跟随互相拉扯）；上下 mask 渐隐 + 6px 细滚动条 */
+   滚动锚定与贴底跟随互相拉扯）；上下 mask 渐隐 + 6px 细滚动条；
+   顶部留 24px 内边距（与 mask 渐隐带同宽，首条消息不贴顶） */
 .pactor-chat-messages {
   position: relative;
   flex: 1;
@@ -630,7 +631,7 @@
   display: flex;
   flex-direction: column;
   gap: 16px;
-  padding: 4px 2px;
+  padding: 24px 2px 4px;
   scrollbar-width: thin;
   scrollbar-color: var(--pactor-chat-border) transparent;
   -webkit-mask-image: linear-gradient(

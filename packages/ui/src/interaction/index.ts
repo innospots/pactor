@@ -10,8 +10,8 @@ export type {
 export { createUiBridge, registerInteractionActions } from './actions.js';
 export type { UiBridge, UiMessage, UiModal } from './actions.js';
 
-// React 渲染层（shadcn kit）：InteractionProvider / OverlayHost
-export { ShadcnInteractionProvider } from './provider.js';
+// React 渲染层：InteractionProvider / OverlayHost
+export { InteractionProvider } from './provider.js';
 export type { InteractionProviderProps } from './provider.js';
-export { ShadcnOverlayHost } from './host.js';
+export { OverlayHost } from './host.js';
 export type { OverlayHostProps, ResolvePageFn } from './host.js';

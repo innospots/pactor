@@ -51,13 +51,13 @@ pnpm --filter example-chat dev   # http://localhost:5399
 - `src/main.tsx` — 入口：引入 `@pactor-app/ui/styles.css`（shadcn 交互层样式）、`@pactor-app/chat/styles.css` 皮肤、`katex/dist/katex.min.css`（公式渲染）与 `app.css`；`createPactorApplication`（from `pactor-app`）装配——`StaticDslLoader`（bootstrap + 三页 DSL）、`componentRegistry`（shadcn 全集 + `registerChatComponent`）、`layoutRegistry`（注册 chat 布局）、`providers`（ChatProvider）；`navigate` / `message` 动作用框架内建
 - `src/bootstrap.ts` — 模拟 bootstrap 资源：菜单（功能菜单 + 「最近」分组历史会话，含 group / dot / badge 扩展字段）+ `layout: { type: 'chat' }` + pageVersions，对齐 examples/admin 的 bootstrap 模式
 - `src/ChatAppLayout.tsx` — chat 外壳布局：ChatShell 参考形态（品牌行 + collapsible 折叠 + 分组菜单 + sidebarFooter 用户卡），高亮由 URL 推导（含 `?id=` 修正），`onMenuSelect` → navigate
-- `src/ChatProvider.tsx` — providers 槽：模块级稳定聊天服务（transport / safeRegistry / capabilities / `callService` 服务桥 / confirm / 附件伪上传）+ `ConversationStore` 按会话 id 缓存就近注入；内挂示例交互层（`ShadcnInteractionProvider` + 示例 uiBridge）承载聊天服务侧 toast / confirm
+- `src/ChatProvider.tsx` — providers 槽：模块级稳定聊天服务（transport / safeRegistry / capabilities / `callService` 服务桥 / confirm / 附件伪上传）+ `ConversationStore` 按会话 id 缓存就近注入；内挂示例交互层（`InteractionProvider` + 示例 uiBridge）承载聊天服务侧 toast / confirm
 - `vite.config.ts` — 接入 `pactor()` 插件（`*.page.yaml` 编译为 JS 模块）
 - `src/dsl-modules.d.ts` — `*.page.yaml` 模块类型声明
 - `src/mock-data.ts` — mock 数据：`@` 智能体与 `+` 上下文候选（纯静态，经 `callService` 服务桥提供给包内建弹层）
 - `src/attachments.ts` — `readAsAttachment`：File 读为 data URL 伪上传
 - `src/mock-ai.ts` — mock `ChatTransport`：async generator 按意图分片产出 `ChatEvent`（`tool.start` 携带 `args`；artifact 事件产出 markdown / code / dsl 三种 kind 产出物），模拟 SSE 节奏；回复开头注明 `input.model` / `input.contexts`（演示内建模型选择与上下文 chips 的输入载荷）；真实接入时替换为对接服务端的实现
-- `src/safe-registry.ts` — Safe Registry 白名单（`createSafeRegistry` 包装 @pactor-app/ui 的 `createShadcnComponentRegistry`）
+- `src/safe-registry.ts` — Safe Registry 白名单（`createSafeRegistry` 包装 @pactor-app/ui 的 `createComponentRegistry`）
 - `src/capabilities.ts` — capability 白名单：`weather.query`（低风险直执行）、`data.export`（高风险，confirm 确认链）
 
 协议细节见文档站 `packages/chat` 页面（`pnpm docs:dev`）。

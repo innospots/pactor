@@ -8,12 +8,12 @@ import {
 } from '../../ui/card.js';
 
 /**
- * ShadcnLoginLayout：与 pactor-layout 的 LoginLayout（antd 版）契约一致——
- * 登录页外壳，只负责品牌区与表单出口的布局，不含任何认证逻辑。
+ * LoginLayout：内置默认 UI 实现的登录页外壳——
+ * 只负责品牌区与表单出口的布局，不含任何认证逻辑。
  * variant center：居中卡片（vendored shadcn Card）；split：左品牌右表单
  * （缺省 center）。
  */
-export function ShadcnLoginLayout({
+export function LoginLayout({
   variant = 'center',
   brand,
   children,

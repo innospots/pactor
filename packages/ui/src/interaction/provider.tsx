@@ -51,18 +51,16 @@ const toastTypeClass: Record<ToastType, string> = {
 };
 
 /**
- * ShadcnInteractionProvider：与 pactor-interaction 的 InteractionProvider
- * （antd 版）契约一致——mount 时向 UiBridge 注入自绘实现：
+ * InteractionProvider：mount 时向 UiBridge 注入自绘实现：
  *
  * - `modal.confirm({ title, content, onOk, onCancel })`：vendored shadcn
- *   Dialog 渲染确认框，确定/取消回调后关闭（先关闭再回调，时序对齐 antd
- *   Modal.confirm）；
+ *   Dialog 渲染确认框，确定/取消回调后关闭（先关闭再回调）；
  * - `message.{success,error,info,warning}`：toast 栈（容器固定右上角，
  *   自动约 3s 消失，类型色条读语义令牌）。
  *
- * unmount 时清空 bridge，动作退化为受控失败（与 antd 版相同）。
+ * unmount 时清空 bridge，动作退化为受控失败。
  */
-export function ShadcnInteractionProvider({
+export function InteractionProvider({
   bridge,
   children,
 }: InteractionProviderProps) {

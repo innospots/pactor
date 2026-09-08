@@ -1,11 +1,11 @@
 import { Registry } from '@pactor-app/core';
-import { createShadcnComponentRegistry } from '@pactor-app/ui/components';
+import { createComponentRegistry } from '@pactor-app/ui/components';
 import {
   createUiBridge,
   OverlayManager,
   registerInteractionActions,
-  ShadcnInteractionProvider,
-  ShadcnOverlayHost,
+  InteractionProvider,
+  OverlayHost,
   type InteractionProviderProps,
   type OverlayHostProps,
   type UiBridge,
@@ -22,7 +22,7 @@ import {
 } from '@pactor-app/runtime';
 import type { ComponentType } from 'react';
 
-import type { AuthTokenProvider, UiKit } from './application.js';
+import type { AuthTokenProvider } from './application.js';
 
 /** 同名覆盖式注册（Registry.register 对重名抛错，这里先注销再注册） */
 export function upsert<T>(registry: Registry<T>, name: string, item: T): void {
@@ -99,11 +99,9 @@ export function wrapHttpAdapter(
  * 整应用模式与嵌入模式共享的装配输入。
  */
 export interface PactorAssemblyOptions {
-  /** 组件注册表工厂（槽位合并：显式选项 > ui 预设 > shadcn 默认） */
+  /** 组件注册表工厂（自定义覆盖点，缺省内置实现） */
   componentRegistry?: () => Registry<unknown>;
-  /** UI kit 预设（三槽位） */
-  ui?: UiKit;
-  /** 交互层组件对（缺省 shadcn 版） */
+  /** 交互层组件对（自定义覆盖点，缺省内置实现） */
   interactionKit?: {
     Provider: ComponentType<InteractionProviderProps>;
     OverlayHost: ComponentType<OverlayHostProps>;
@@ -154,15 +152,13 @@ export function createPactorAssembly(
 ): PactorAssembly {
   const overlayManager = new OverlayManager();
   const uiBridge = createUiBridge();
-  const interactionKit = options.interactionKit ??
-    options.ui?.interactionKit ?? {
-      Provider: ShadcnInteractionProvider,
-      OverlayHost: ShadcnOverlayHost,
-    };
+  const interactionKit = options.interactionKit ?? {
+    Provider: InteractionProvider,
+    OverlayHost: OverlayHost,
+  };
 
   const components =
-    (options.componentRegistry ?? options.ui?.componentRegistry)?.() ??
-    createShadcnComponentRegistry();
+    options.componentRegistry?.() ?? createComponentRegistry();
   upsertAll(components, options.components);
 
   const actions: ActionRegistry = new Registry('ActionRegistry');

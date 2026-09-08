@@ -11,7 +11,7 @@ import {
  * 包内迷你锚定弹层，内部组件（不从 index.ts 导出）——模型 chip /
  * +菜单 / @提及弹层共用。样式进 styles.css 用语义令牌。
  * （历史注：本包曾守"不依赖 @pactor-app/ui"的零运行时依赖约定；
- * chat-icon-convergence 起 chat 作为 pactor-app 实例正式依赖 ui kit，
+ * chat-icon-convergence 起 chat 作为 pactor-app 实例正式依赖 @pactor-app/ui，
  * 本组件因 @ 文本锚点形态 ui Popover 表达不了而保留包内实现。）
  *
  * 定位：`position: fixed` 按 anchorRect 定位，上方优先、垂直空间

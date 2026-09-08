@@ -279,7 +279,7 @@ function MenuTree({
 }
 
 /**
- * ShadcnAdminLayout：与 pactor-layout 的 AdminLayout（antd 版）契约一致——
+ * AdminLayout：内置默认 UI 实现的管理后台布局——
  * 复用 `AdminLayoutProps`；Header（brand + headerExtra）/ Sidebar / 内容出口；
  * config 开关（header/sidebar 缺省开，tabs/breadcrumb/footer 缺省关）一致；
  * mode（top-side/top-bottom/side-full/two-column）、fixedHeader/fixedSider、
@@ -293,7 +293,7 @@ function MenuTree({
  * 样式：Tailwind 工具类读取 shadcn 语义令牌（bg-background / border-border /
  * text-muted-foreground …），结构钩子用 data-slot 属性。
  */
-export function ShadcnAdminLayout({
+export function AdminLayout({
   config = {},
   brand,
   registry,

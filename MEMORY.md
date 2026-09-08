@@ -18,13 +18,13 @@
 | | `@pactor-app/schema` | JSON Schema + Ajv 校验（`validatePageDsl` 结构化错误） |
 | | `@pactor-app/expression` | 受控表达式引擎（自研 AST parser，禁 eval，`${...}` 模板） |
 | 运行时 | `@pactor-app/runtime` | RuntimeContext/StateStore/DataStore/ActionEngine（8 内置动作）/React Renderer/PageRuntime；react>=18 peer |
-| UI kit | `@pactor-app/ui` | **唯一内置 UI kit**（shadcn，@pactor-app/app 默认）：vendored shadcn/ui（Base UI 原语 + cva + tailwind-merge + lucide-react；2026-08-26 migrate-ui-base-ui 起 radix 全移除）；components/interaction/layout 三层自持（12 组件 props 契约、`OverlayManager`/`createUiBridge`/`registerInteractionActions` 交互核心、布局类型与 `resolveLayout` 均在本包）+ `shadcnUiKit` 预设 + 预建 `styles.css`（shadcn 语义令牌，light/dark） |
+| UI | `@pactor-app/ui` | **内置默认 UI 实现**（shadcn 风格，@pactor-app/app 默认）：vendored shadcn/ui（Base UI 原语 + cva + tailwind-merge + lucide-react；2026-08-26 migrate-ui-base-ui 起 radix 全移除）；components/interaction/layout 三层自持（12 组件 props 契约、`OverlayManager`/`createUiBridge`/`registerInteractionActions` 交互核心、布局类型与 `resolveLayout` 均在本包）+ 预建 `styles.css`（shadcn 语义令牌，light/dark） |
 | 能力 | `@pactor-app/permission` | PermissionStore + 四层守卫（零 React，结构化兼容 runtime） |
 | | `@pactor-app/resource` | DSL 资源加载（Http/Static Loader、`id@version` 缓存、ETag、inflight 去重） |
 | | `@pactor-app/router` | MenuRegistry/PathMatcher/NavigationBridge + `@pactor-app/router/react` 子入口（DynamicDslRoute） |
 | | `@pactor-app/markdown` | react-markdown 安全渲染（禁 raw HTML、协议白名单）+ 代码高亮（react-syntax-highlighter Light）+ KaTeX 数学 + DSL Markdown 组件 |
 | | `@pactor-app/chat` | Chat 消息模型/SSE reducer/Safe Registry/capability 动作/ChatView（视图零 antd：lucide 图标 + `styles.css` 皮肤 + smooth-stream/auto-scroll hooks） |
-| 集成 | `@pactor-app/app` | `createPactorApplication({ appId, api|loader, ui?, componentRegistry?, layoutRegistry?, interactionKit?, ... }).mount()` |
+| 集成 | `@pactor-app/app` | `createPactorApplication({ appId, api|loader, componentRegistry?, layoutRegistry?, interactionKit?, ... }).mount()` |
 | 工具链 | `@pactor-app/vite-plugin` | `import x from '*.page.yaml'`：YAML→校验→JS 模块 |
 | | `@pactor-app/cli` | bin `pactor-app`：validate/inspect/lint/schema/build/create 六命令 |
 | Meta | `pactor-app` | 聚合安装包：依赖全部 `@pactor-app/*`（skill 除外），入口转发 `@pactor-app/app`；`npm install pactor-app` 装全栈，按需则装单个 `@pactor-app/*` 模块 |
@@ -33,13 +33,13 @@
 
 ## 关键架构决策（易忘）
 
-- **UI kit 单一内置（shadcn）**：`ui` 预设对象（非字符串标识！）+ 三个细粒度槽位的覆盖机制保留；优先级：显式选项 > `ui` 预设 > 内置默认（**默认且唯一内置为 shadcn / @pactor-app/ui**）。必须 `import '@pactor-app/ui/styles.css'`。
+- **UI 单一内置实现（shadcn 风格，@pactor-app/ui）**：`componentRegistry` / `layoutRegistry` / `interactionKit` 三个细粒度槽位是保留的自定义覆盖点，显式选项优先于内置默认。必须 `import '@pactor-app/ui/styles.css'`。
 - **UiBridge/Adapter 均为结构化接口**（antd 无关）：permission/router/interaction 的核心零 React，可纯 Node 测。
 - **动作引擎**：condition 跳过 → permission 拦截 → registry 执行；命名动作（`id`）结果入 `actions.<id>` 作用域；编排动作（sequence 等）的子动作**执行时求值**而非快照；含 `action` 键或字符串 `type` 键的内嵌对象不求值（isOpaque 约定）——因此 `message` 动作的类型用别名 `messageType`（`type` 保留为兼容别名，messageType 优先）。
 - **表达式**：标识符仅从注入 scope 解析（window/fetch 不可达），`__proto__/constructor` 隔离；整体单 `${...}` 保留原始类型，混合模板拼接字符串。
-- **Form 初始值**：`initialValues` + 字段级 `value`（字段级优先）；shadcn kit 的 Form 上下文在字段首次注册时合并字段级初始值。
+- **Form 初始值**：`initialValues` + 字段级 `value`（字段级优先）；内置 Form 的上下文在字段首次注册时合并字段级初始值。
 - **表单联动**：`form.setValues` 内置动作（params.form 缺省 default + values），Form 经 `context.forms` 桥注册（Form `name` prop 缺省 default，同页多表单须显式命名否则重复注册抛错）；setValues 不触发校验/onValuesChange。`onValuesChange` 的 event 仅首参 `{ <field>: <newValue> }`。**OverlayHost 已订阅 state/data**——overlay 内容绑 store 的表达式随变化重渲染（曾是级联选项不更新的坑）。
-- **Input type**：`InputProps.type: 'text' | 'password'`（缺省 text）；shadcn kit 透传 `<input type>`（2026-08-12 add-input-type-prop，第 24 个归档变更）。
+- **Input type**：`InputProps.type: 'text' | 'password'`（缺省 text）；内置 Input 透传 `<input type>`（2026-08-12 add-input-type-prop，第 24 个归档变更）。
 - **示例登录模式**：会话存 localStorage（`src/auth.ts`），`createBootstrap()` 按会话返回 `login`/`admin` 布局形态（布局类型由 bootstrap 决定，全应用单布局）；登录/登出后须整页重载重取 bootstrap——示例用自定义 `app.reload` 动作（`window.location.assign`），路由守卫（未登录→/login）在 main.tsx DSL 之外。
 - **Select（Base UI）**：DSL `options` 直接作 Root `items`（value→label 映射），value 原生支持 string/number/boolean，空值映射 `null` 显示 placeholder；`alignItemWithTrigger` 缺省 false。原 Radix Select 两个坑（空串回调清值 / 未渲染 item 解析不到 label）随原语消失，已有对应回归测试。
 - **主题换肤**：覆盖 shadcn 语义令牌（`--primary` / `--muted` 等 CSS 变量）/ `<html data-pactor-theme="dark">` / `data-slot` 结构覆盖；参考 `examples/admin/src/theme.css`；文档 `guides/theming`。**preflight 已开启**（2026-08-26 align-ui-shadcn-theme，第 37 个归档变更）：styles.css = 完整 tailwindcss + tw-animate-css + 官方 base layer，对齐 shadcn 官方主题脚手架（radius 乘法派生、chart/sidebar 令牌、accordion keyframes）；导入即接受基线全局样式，宿主皮肤 CSS 须在其后导入。
@@ -65,7 +65,7 @@
 - **文档站已部署 Cloudflare**（Workers 静态资产，assets-only 无脚本）：`docs/wrangler.jsonc`（account `43cad862…727e`，即 Xp.java 账号），`pnpm --filter pactor-docs deploy`（build + wrangler deploy），线上 https://pactor-docs.xp-java.workers.dev 。
 - 文档站结构：guides/（getting-started、**data-flow 数据流**、events 事件与表单联动、**custom-components 自定义组件**、theming） + **reference/dsl（DSL 完整参考：结构/作用域/数据源/动作/组件 props，含 Markdown 组件与聊天页完整示例）** + packages/<包名>；新增页面要同步 `docs/astro.config.mjs` sidebar 并重启 dev server。**docs 面向外部使用者**：不得含「框架设计规范」页、「设计文档第 N 节」、spec:/决策 D/openspec 引用与 V1 代号（框架设计规范原文移至仓库 `design/framework-design.md`，仅供内部）。
 - 全量基线：**613 包内测试 + 346 根级测试**，typecheck 0 错误。
-- 示例：`pnpm --filter example-admin dev`（shadcn kit，端口 **5199**）；`pnpm --filter example-chat dev`（@pactor-app/chat 对话示例，端口 **5399**）；`pnpm --filter example-vite-starter dev`（最小 vite-plugin 上手示例，端口 **5499**，blank 布局 + 单页 todo 清单）。
+- 示例：`pnpm --filter example-admin dev`（端口 **5199**）；`pnpm --filter example-chat dev`（@pactor-app/chat 对话示例，端口 **5399**）；`pnpm --filter example-vite-starter dev`（最小 vite-plugin 上手示例，端口 **5499**，blank 布局 + 单页 todo 清单）。
 - **example-chat**（2026-08-12 add-example-chat）：不经 @pactor-app/app，直接组合 `ConversationStore` + mock `ChatTransport`（async generator 分片延迟，`src/mock-ai.ts`）+ `ChatView`/`ChatLayout`；Safe Registry 白名单 Flex/Card/Statistic/Alert/Button（shadcn 注册表；dsl 里塞一个 Table 演示 ChatDenied）；capability `weather.query`（低风险）/ `data.export`（high risk → @pactor-app/ui 交互层 confirm 确认链，执行后经 UiBridge message.success toast 反馈）。演示口令：天气 / 报表 / 导出 / 任意提问。
 - **examples 引用 workspace 包的 dist 产物**——改包代码后必须重建该包，示例才能看到效果。
 - 视觉验证用 `playwright-cli`（截图 → ReadMediaFile 读图评审）。

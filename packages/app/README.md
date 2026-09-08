@@ -10,7 +10,7 @@ npm install @pactor-app/app @pactor-app/ui react react-dom react-router-dom
 pnpm add @pactor-app/app @pactor-app/ui react react-dom react-router-dom
 ```
 
-`react >= 18`、`react-dom >= 18`、`react-router-dom >= 6` 为 peer dependency（开发基准为 react-router-dom v7）。内置 UI kit 为 `@pactor-app/ui`（shadcn，传递依赖），需导入其预建样式表 `import '@pactor-app/ui/styles.css'`。
+`react >= 18`、`react-dom >= 18`、`react-router-dom >= 6` 为 peer dependency（开发基准为 react-router-dom v7）。内置默认 UI 为 `@pactor-app/ui`（shadcn 风格，传递依赖），需导入其预建样式表 `import '@pactor-app/ui/styles.css'`。
 
 ## 一站式用法
 

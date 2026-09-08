@@ -47,7 +47,7 @@ Activate this skill when the user works with **Pactor** — any `@pactor-app/*` 
 | `packages/resource` | `@pactor-app/resource` | DSL loaders (HTTP / static), cache, versioning |
 | `packages/router` | `@pactor-app/router` | Dynamic routing, Path Matcher, menu registry |
 | `packages/permission` | `@pactor-app/permission` | Page/menu/component/action guards |
-| `packages/ui` | `@pactor-app/ui` | shadcn UI kit — the single built-in kit (components + prebuilt stylesheet + interaction core) |
+| `packages/ui` | `@pactor-app/ui` | Built-in default UI implementation, shadcn style (components + prebuilt stylesheet + interaction core) |
 | `packages/markdown` | `@pactor-app/markdown` | Markdown + DSL Part rendering |
 | `packages/chat` | `@pactor-app/chat` | AI conversation: message protocol, streaming, ChatView, `Chat`/`ChatShell` DSL components, artifact panel |
 | `packages/vite-plugin` | `@pactor-app/vite-plugin` | Vite YAML modules, build-time validation, HMR |
@@ -78,7 +78,7 @@ core ← schema ← expression ← runtime
 # meta package: installs every module at once
 pnpm add pactor-app
 
-# or install only what you need (shadcn is the single built-in UI kit)
+# or install only what you need (shadcn-style built-in UI)
 pnpm add @pactor-app/app @pactor-app/ui
 ```
 
@@ -121,9 +121,9 @@ createPactorApplication({ appId: 'my-app', loader }).mount('#root');
 
 For YAML imports add `@pactor-app/vite-plugin` to `vite.config.ts` and declare `*.page.yaml` modules.
 
-## UI kit at a glance
+## UI at a glance
 
-The built-in shadcn kit (`@pactor-app/ui`) registers these DSL component types — reference them by `type` in pages:
+The built-in shadcn-style UI (`@pactor-app/ui`) registers these DSL component types — reference them by `type` in pages:
 
 - **Page & layout**: `Page`, `Layout` / `Header` / `Sider` / `Content` / `Footer`, `Grid`, `Flex`, `Card`, `Sidebar`
 - **Basic**: `Button`, `Alert`, `Statistic`, `Menu`, `Link`, `Text`, `Typography`, `Icon`
@@ -305,7 +305,7 @@ pnpm pactor create my-app
 
 ## Common pitfalls
 
-- **Do not** import UI kit internals directly into business DSL pages; use registered component names.
+- **Do not** import UI package internals directly into business DSL pages; use registered component names.
 - **Do not** write `if (type === 'Button')` branches in a Renderer; use `ComponentRegistry`.
 - **Do not** inject JavaScript from the server into DSL; register actions/services/capabilities in the frontend.
 - **Do not** rely on frontend permission checks for security; enforce authorization on backend APIs.

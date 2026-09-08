@@ -3,10 +3,10 @@ import { screen } from '@testing-library/react';
 import type { DslNode } from '@pactor-app/core';
 import { describe, expect, it, vi } from 'vitest';
 
-import { createShadcnComponentRegistry } from '../../src/components/index.js';
+import { createComponentRegistry } from '../../src/components/index.js';
 import { renderDslWith } from './helpers.js';
 
-/** 含 Button / Statistic 的 DSL，以 shadcn 注册表渲染 */
+/** 含 Button / Statistic 的 DSL，以内置注册表渲染 */
 const dsl: DslNode = {
   type: 'Page',
   props: { title: '契约页' },
@@ -20,9 +20,9 @@ const dsl: DslNode = {
   ],
 };
 
-describe('DSL 渲染契约（shadcn kit）', () => {
-  it('shadcn 注册表：正常渲染（shadcn 工具类）且 Button onClick 生效', async () => {
-    const { context } = renderDslWith(createShadcnComponentRegistry(), dsl);
+describe('DSL 渲染契约（内置组件）', () => {
+  it('内置注册表：正常渲染（shadcn 工具类）且 Button onClick 生效', async () => {
+    const { context } = renderDslWith(createComponentRegistry(), dsl);
 
     expect(screen.getByText('契约页')).toBeTruthy();
     expect(screen.getByText('128')).toBeTruthy();

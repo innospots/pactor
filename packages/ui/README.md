@@ -1,6 +1,6 @@
 # @pactor-app/ui
 
-[Pactor](https://github.com/426-330/pactor) 的**唯一内置 UI kit**（shadcn 风格）：内含 components / interaction / layout 三层（vendored shadcn/ui 组件源码——Base UI 原语（`@base-ui/react`，shadcn 官方默认原语层）+ cva + tailwind-merge + lucide-react；12 组件 props 契约类型、交互核心 `OverlayManager` / `createUiBridge` / `registerInteractionActions` / `UiBridge`、布局类型与 `resolveLayout` 均为本包自有），并提供 `shadcnUiKit` 预设对象与预建样式表。**这是 @pactor-app/app 的内置默认（也是唯一内置）UI kit**。主入口导出三层全部公开 API 与预设，另提供子路径入口：`@pactor-app/ui/components`（DSL 组件适配层）/ `/interaction` / `/layout` / `/ui`（vendored shadcn 原语组件——宿主自写 React UI 用，如槽位内容与自定义组件）。
+[Pactor](https://github.com/426-330/pactor) 的**内置默认 UI 实现**（shadcn 风格）：内含 components / interaction / layout 三层（vendored shadcn/ui 组件源码——Base UI 原语（`@base-ui/react`，shadcn 官方默认原语层）+ cva + tailwind-merge + lucide-react；12 组件 props 契约类型、交互核心 `OverlayManager` / `createUiBridge` / `registerInteractionActions` / `UiBridge`、布局类型与 `resolveLayout` 均为本包自有），并提供预建样式表。**这是 @pactor-app/app 的内置默认 UI 实现**。主入口导出三层全部公开 API，另提供子路径入口：`@pactor-app/ui/components`（DSL 组件适配层）/ `/interaction` / `/layout` / `/ui`（vendored shadcn 原语组件——宿主自写 React UI 用，如槽位内容与自定义组件）。
 
 ## 安装
 
@@ -26,33 +26,28 @@ createPactorApplication({
 }).mount('#root');
 ```
 
-## 预设对象 shadcnUiKit
+## 自定义覆盖点
 
-显式表达或局部覆盖场景使用 `shadcnUiKit`，一次提供三个槽位：
+业务可用 `createPactorApplication` 的细粒度选项逐槽位覆盖默认实现：
 
-| 槽位 | 值 |
+| 槽位 | 默认值 |
 | --- | --- |
-| `componentRegistry` | `createShadcnComponentRegistry`（components 层） |
-| `layoutRegistry` | `createShadcnLayoutRegistry`（layout 层） |
-| `interactionKit` | `{ Provider: ShadcnInteractionProvider, OverlayHost: ShadcnOverlayHost }`（interaction 层） |
+| `componentRegistry` | `createComponentRegistry`（components 层） |
+| `layoutRegistry` | `createLayoutRegistry`（layout 层） |
+| `interactionKit` | `{ Provider: InteractionProvider, OverlayHost: OverlayHost }`（interaction 层） |
+
+各槽位独立合并，显式传入的选项优先于内置默认。例如只覆盖布局层、其余槽位保持内置默认：
 
 ```ts
-import { shadcnUiKit } from '@pactor-app/ui';
+import { createLayoutRegistry } from '@pactor-app/ui/layout';
 
 createPactorApplication({
   appId: 'risk-admin',
-  api: { baseURL: '/api/runtime' },
-  ui: shadcnUiKit, // 与不传 ui 的默认行为一致
-});
-```
-
-每个槽位的取值优先级为：**显式细粒度选项 > `ui` 预设 > 内置 shadcn 默认**。例如只覆盖布局层、其余槽位保持 shadcn 预设：
-
-```ts
-createPactorApplication({
-  appId: 'risk-admin',
-  ui: shadcnUiKit,
-  layoutRegistry: createMyLayoutRegistry, // 覆盖预设的布局槽位
+  layoutRegistry: () => {
+    const registry = createLayoutRegistry();
+    registry.register('my-layout', MyLayout);
+    return registry;
+  },
 });
 ```
 
@@ -70,39 +65,38 @@ import '@pactor-app/ui/styles.css';
 
 ## 独立使用（不经 @pactor-app/app）
 
-以 `createShadcnComponentRegistry()` 创建组件注册表，与 @pactor-app/runtime 直接组合：
+以 `createComponentRegistry()` 创建组件注册表，与 @pactor-app/runtime 直接组合：
 
 ```tsx
 import { createPageRuntime, PageRuntimeView } from '@pactor-app/runtime';
-import { createShadcnComponentRegistry } from '@pactor-app/ui/components';
+import { createComponentRegistry } from '@pactor-app/ui/components';
 import '@pactor-app/ui/styles.css';
 
 const runtime = createPageRuntime(pageDsl, {
-  components: createShadcnComponentRegistry(),
+  components: createComponentRegistry(),
 });
 
 await runtime.initialized;
 <PageRuntimeView runtime={runtime} />;
 ```
 
-布局层（`createShadcnLayoutRegistry` / `registerShadcnLayouts`）与交互层（`ShadcnInteractionProvider` / `ShadcnOverlayHost`）同样可独立组合；交互核心（`OverlayManager` / `createUiBridge` / `registerInteractionActions`）由本包 `@pactor-app/ui/interaction` 导出。
+布局层（`createLayoutRegistry` / `registerBuiltinLayouts`）与交互层（`InteractionProvider` / `OverlayHost`）同样可独立组合；交互核心（`OverlayManager` / `createUiBridge` / `registerInteractionActions`）由本包 `@pactor-app/ui/interaction` 导出。
 
 ## 聚合 re-export
 
-三层的公开 API 与预设均可直接从本包导入：
+三层的公开 API 均可直接从本包导入：
 
 ```ts
 import {
-  createShadcnComponentRegistry,
-  createShadcnLayoutRegistry,
-  ShadcnInteractionProvider,
-  ShadcnOverlayHost,
-  shadcnUiKit,
+  createComponentRegistry,
+  createLayoutRegistry,
+  InteractionProvider,
+  OverlayHost,
   // ...以及三层其余全部导出
 } from '@pactor-app/ui';
 ```
 
-契约类型（props / layout / interaction）与交互核心均为本包自有定义（自 0.x 的 `unify-ui-shadcn` 变更起；旧 `pactor-ui-antd` / `pactor-ui-radix` 包已删除，等价符号的迁移对照见 docs 的 @pactor-app/ui 章节）。
+契约类型（props / layout / interaction）与交互核心均为本包自有定义。
 
 ## 文档
 

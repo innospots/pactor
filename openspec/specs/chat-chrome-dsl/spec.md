@@ -40,7 +40,7 @@ chrome DSL 片段的交互事件 SHALL 经 `chat.` 前缀的内建动作（如 `
 
 ### Requirement: chrome 令牌映射
 
-DSL 渲染的 chrome 子树 SHALL 包裹在 `pactor-chat-chrome` 容器内，容器样式 SHALL 把 `--pactor-chat-*` 皮肤令牌映射为宿主 UI kit 语义令牌（shadcn 的 `--primary` 等），`--pactor-chat-*` 保持为 chat 皮肤的唯一配置入口；暗色主题经 `[data-pactor-theme='dark']` 覆盖链生效。
+DSL 渲染的 chrome 子树 SHALL 包裹在 `pactor-chat-chrome` 容器内，容器样式 SHALL 把 `--pactor-chat-*` 皮肤令牌映射为宿主 UI 语义令牌（shadcn 的 `--primary` 等），`--pactor-chat-*` 保持为 chat 皮肤的唯一配置入口；暗色主题经 `[data-pactor-theme='dark']` 覆盖链生效。
 
 #### Scenario: 皮肤令牌传导
 

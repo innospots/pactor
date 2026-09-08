@@ -8,8 +8,7 @@ import { OverlayManager, type OverlayConfig } from './manager.js';
 
 /**
  * modal 实例（结构化类型，仅声明本包用到的 API）：
- * 由 InteractionProvider（shadcn 实现为 ShadcnInteractionProvider）
- * 在 mount 时注入 UiBridge。
+ * 由 InteractionProvider 在 mount 时注入 UiBridge。
  */
 export interface UiModal {
   confirm(config: {

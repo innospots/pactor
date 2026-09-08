@@ -3,7 +3,7 @@ import {
   ConversationStore,
   type ChatServices,
 } from '@pactor-app/chat';
-import { ShadcnInteractionProvider } from '@pactor-app/ui/interaction';
+import { InteractionProvider } from '@pactor-app/ui/interaction';
 import { useMemo, type ReactNode } from 'react';
 import { useLocation } from 'react-router-dom';
 
@@ -131,8 +131,8 @@ export function ChatProvider({ children }: { children?: ReactNode }) {
   return (
     // 示例级交互层：聊天服务侧 toast / confirm 经示例 uiBridge 注入
     // （DSL 页内 message 动作走框架内建动作，两套桥并行互不干扰）
-    <ShadcnInteractionProvider bridge={uiBridge}>
+    <InteractionProvider bridge={uiBridge}>
       <ChatServicesProvider value={value}>{children}</ChatServicesProvider>
-    </ShadcnInteractionProvider>
+    </InteractionProvider>
   );
 }

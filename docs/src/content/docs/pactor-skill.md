@@ -28,7 +28,7 @@ skill 在以下场景激活：
 - 构建、启动或扩展 Pactor 应用
 - 使用 `createPactorApplication` 或 `@pactor-app/app`
 - 编写 Pactor YAML/JSON DSL
-- 创建自定义组件或切换 UI kit
+- 创建自定义组件或自定义 UI 覆盖点
 - 配置主题、布局、菜单、路由、资源、权限
 - 处理事件联动、表单联动、动作编排
 - 提到 `@pactor-app/core`、`@pactor-app/runtime`、`@pactor-app/app` 等包名
@@ -43,7 +43,7 @@ skill 在以下场景激活：
 4. **Package map** — 各包职责一览
 5. **Dependency rules** — 依赖方向与禁区
 6. **Quick start** — 最小启动示例
-7. **UI kit at a glance** — shadcn 组件目录与注意事项
+7. **UI at a glance** — shadcn 组件目录与注意事项
 8. **Workflows** — 自定义组件、事件与数据流、主题、路由/资源/权限、AI 对话工作区
 9. **Common commands** — 常用命令
 10. **Design principles** — 设计原则速查

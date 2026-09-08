@@ -7,7 +7,6 @@ export type {
   PactorApplicationHandle,
   PactorAppSession,
   PactorRouterOptions,
-  UiKit,
 } from './application.js';
 export { ReactRouterBinding } from './application.js';
 

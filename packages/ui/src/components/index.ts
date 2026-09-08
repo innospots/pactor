@@ -1,8 +1,8 @@
 // 注册入口
 export {
-  createShadcnComponentRegistry,
-  registerShadcnComponents,
-  shadcnComponents,
+  createComponentRegistry,
+  registerBuiltinComponents,
+  builtinComponents,
 } from './register.js';
 
 // 展示与布局组件

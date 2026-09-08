@@ -29,7 +29,7 @@
 
 ### Requirement: AI DSL 安全渲染
 
-示例 SHALL 以 Safe Registry 白名单渲染 LLM 下发的 dsl part，白名单组件来自 `@pactor-app/ui`（shadcn）；白名单外组件类型 SHALL 渲染为 ChatDenied 受控占位，不抛错、不执行。示例 MUST NOT 依赖 antd——toast/confirm 等反馈经 `@pactor-app/ui` 交互层（createUiBridge + ShadcnInteractionProvider）或等价手段实现。
+示例 SHALL 以 Safe Registry 白名单渲染 LLM 下发的 dsl part，白名单组件来自 `@pactor-app/ui` 内置组件；白名单外组件类型 SHALL 渲染为 ChatDenied 受控占位，不抛错、不执行。示例 MUST NOT 依赖 antd——toast/confirm 等反馈经 `@pactor-app/ui` 交互层（createUiBridge + InteractionProvider）或等价手段实现。
 
 #### Scenario: 白名单内 DSL 卡片
 

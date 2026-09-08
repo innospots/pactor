@@ -1,6 +1,6 @@
 ---
 title: 快速开始
-description: 面向框架使用者——安装、最小接入、createPactorApplication 参数与 UI kit 自定义
+description: 面向框架使用者——安装、最小接入、createPactorApplication 参数与 UI 自定义覆盖点
 ---
 
 Pactor 是一套基于 YAML/JSON DSL 的 Server-Driven UI 前端运行时框架：页面用 YAML 描述，浏览器里的公共 Runtime 负责渲染，业务页面无需随前端代码一起打包。本页带你 5 分钟跑起一个应用。
@@ -23,7 +23,7 @@ pnpm add pactor-app
 
 | 场景 | 安装 |
 | --- | --- |
-| 完整应用 | `pnpm add @pactor-app/app @pactor-app/ui`（shadcn kit，唯一内置实现） |
+| 完整应用 | `pnpm add @pactor-app/app @pactor-app/ui`（内置默认 UI 实现） |
 | 只要 DSL 渲染器（自己组合） | `pnpm add @pactor-app/runtime` |
 | AI 对话视图 | `pnpm add @pactor-app/chat @pactor-app/markdown` |
 | YAML 即模块（构建期校验 + HMR） | `pnpm add -D @pactor-app/vite-plugin` |
@@ -104,7 +104,7 @@ body:
 ```tsx
 import { createPactorApplication } from 'pactor-app'; // meta 包入口，转发 @pactor-app/app
 import { StaticDslLoader } from '@pactor-app/resource'; // 已由 meta 包带入，直接导入即可
-import '@pactor-app/ui/styles.css'; // shadcn kit 预建样式（必需）
+import '@pactor-app/ui/styles.css'; // 预建样式（必需）
 
 import homePage from './pages/home.page.yaml';
 
@@ -138,10 +138,9 @@ createPactorApplication({
 | `appId` | string（必填） | 应用 id；brand 缺省标题回退 |
 | `api` | `{ baseURL? }` | DSL 资源 API（未注入 loader 时创建 HttpDslResourceLoader） |
 | `loader` | DslResourceLoader | 资源加载器，优先于 `api`（本地/测试用 StaticDslLoader） |
-| `ui` | UiKit | UI kit 预设（内置为 `shadcnUiKit`），一次提供三个槽位 |
-| `componentRegistry` | `() => Registry` | 组件注册表工厂（槽位之一，优先级高于 `ui` 预设） |
-| `layoutRegistry` | `() => LayoutRegistry` | 布局注册表工厂（槽位之一） |
-| `interactionKit` | `{ Provider, OverlayHost }` | 交互层组件对（overlay / message / confirm，槽位之一） |
+| `componentRegistry` | `() => Registry` | 组件注册表工厂（自定义覆盖点） |
+| `layoutRegistry` | `() => LayoutRegistry` | 布局注册表工厂（自定义覆盖点） |
+| `interactionKit` | `{ Provider, OverlayHost }` | 交互层组件对（overlay / message / confirm，自定义覆盖点） |
 | `components` | `Record<string, unknown>` | 业务组件扩展，叠加在所选注册表之上，可覆盖同名内置组件 |
 | `actions` | `Record<string, ActionHandler>` | 业务动作扩展（如 `service.call`） |
 | `services` | `Record<string, ServiceHandler>` | 业务服务（`type: service` 数据源按名引用） |
@@ -151,19 +150,23 @@ createPactorApplication({
 | `router` | `{ type?: 'browser'\|'hash', basename? }` | 路由配置 |
 | `authTokenProvider` | AuthTokenProvider | 认证令牌，注入 DSL 资源请求与页面 HTTP 出口 |
 
-槽位合并优先级：**显式细粒度选项（componentRegistry 等）> `ui` 预设 > 内置 shadcn 默认**。
+各覆盖点独立合并，显式传入的选项优先于内置默认。
 
-## 自定义 UI kit
+## 自定义 UI 覆盖点
 
-内置 UI 实现只有 shadcn 一套（`@pactor-app/ui`）。业务需要自定义组件 / 布局 / 交互层时，通过保留的覆盖点逐槽位替换（详见 [@pactor-app/ui](/packages/ui/) 的「自定义 UI kit」与迁移对照表）：
+内置 UI 实现为 `@pactor-app/ui`。业务需要自定义组件 / 布局 / 交互层时，通过上述覆盖点逐槽位替换（详见 [@pactor-app/ui](/packages/ui/) 的「自定义覆盖点」）：
 
 ```tsx
-import { shadcnUiKit } from '@pactor-app/ui';
+import { createComponentRegistry } from '@pactor-app/ui/components';
 
 createPactorApplication({
   appId: 'my-app',
   loader,
-  ui: shadcnUiKit, // 显式预设（与缺省一致）；配合 componentRegistry 等细粒度选项逐槽位覆盖
+  componentRegistry: () => {
+    const registry = createComponentRegistry();
+    // 在内置注册表之上叠加 / 覆盖业务组件……
+    return registry;
+  },
   // ...
 });
 ```

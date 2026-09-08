@@ -1,10 +1,10 @@
 import type { LandingLayoutProps } from '../types.js';
 
 /**
- * ShadcnLandingLayout：与 pactor-layout 的 LandingLayout（antd 版）契约一致——
- * 落地页外壳，可选 navbar / footer 插槽，children 为主内容区。
+ * LandingLayout：内置默认 UI 实现的落地页外壳——
+ * 可选 navbar / footer 插槽，children 为主内容区。
  */
-export function ShadcnLandingLayout({
+export function LandingLayout({
   navbar,
   footer,
   children,

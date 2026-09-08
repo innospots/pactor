@@ -100,7 +100,7 @@ components: {
 | 路径 | 适用 |
 | --- | --- |
 | `createPactorApplication({ components })` | 最常用：应用级业务组件，叠加在内置注册表之上，可覆盖同名内置组件 |
-| `componentRegistry` 工厂 / `ui` 预设 | 整体替换组件集（自研 UI kit） |
+| `componentRegistry` 工厂 | 整体替换组件集（自研组件库） |
 | `registerMarkdownComponents(registry)` 模式 | 包级扩展组件（参考 @pactor-app/markdown 的注册函数约定） |
 | chat 的 Safe Registry | AI 下发 DSL 场景：`createSafeRegistry(source, ['BizTag'])` 白名单放行后才可被 LLM DSL 使用 |
 

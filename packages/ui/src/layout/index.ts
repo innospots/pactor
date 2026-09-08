@@ -15,16 +15,16 @@ export type {
 export { findMenuChain } from './admin/menu-chain.js';
 export { collectDefaultOpenKeys } from './admin/menu-items.js';
 
-// shadcn 布局组件
-export { ShadcnAdminLayout } from './admin/ShadcnAdminLayout.js';
-export { ShadcnBlankLayout } from './basic/ShadcnBlankLayout.js';
-export { ShadcnLoginLayout } from './basic/ShadcnLoginLayout.js';
-export { ShadcnLandingLayout } from './basic/ShadcnLandingLayout.js';
+// 布局组件
+export { AdminLayout } from './admin/AdminLayout.js';
+export { BlankLayout } from './basic/BlankLayout.js';
+export { LoginLayout } from './basic/LoginLayout.js';
+export { LandingLayout } from './basic/LandingLayout.js';
 
-// 布局注册表与解析（未命中回退 ShadcnBlankLayout 并告警）
+// 布局注册表与解析（未命中回退 BlankLayout 并告警）
 export {
-  createShadcnLayoutRegistry,
-  registerShadcnLayouts,
+  createLayoutRegistry,
+  registerBuiltinLayouts,
   resolveLayout,
 } from './registry.js';
 export type { LayoutComponent, LayoutRegistry } from './registry.js';

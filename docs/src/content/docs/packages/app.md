@@ -11,19 +11,19 @@ pnpm add @pactor-app/app react react-dom react-router-dom
 
 `react >= 18`、`react-dom >= 18`、`react-router-dom >= 6` 为 peer dependency（开发基准为 react-router-dom v7）。
 
-**默认 UI kit 为 shadcn**（@pactor-app/ui，随 @pactor-app/app 传递依赖）。组件样式为构建期预编译的 Tailwind 工具类，**必须导入预建样式表**（消费方无需 Tailwind 配置）：
+**默认 UI 为 @pactor-app/ui 内置实现**（随 @pactor-app/app 传递依赖）。组件样式为构建期预编译的 Tailwind 工具类，**必须导入预建样式表**（消费方无需 Tailwind 配置）：
 
 ```ts
 import '@pactor-app/ui/styles.css';
 ```
 
-如需自定义组件 / 布局 / 交互层实现，使用 `componentRegistry` / `layoutRegistry` / `interactionKit` / `ui` 覆盖点（见 [@pactor-app/ui](/packages/ui/)）。
+如需自定义组件 / 布局 / 交互层实现，使用 `componentRegistry` / `layoutRegistry` / `interactionKit` 覆盖点（见 [@pactor-app/ui](/packages/ui/)）。
 
 ## 一站式用法
 
 ```tsx
 import { createPactorApplication } from '@pactor-app/app';
-import '@pactor-app/ui/styles.css'; // 默认 shadcn UI kit 的预建样式（必需）
+import '@pactor-app/ui/styles.css'; // 内置 UI 的预建样式（必需）
 
 createPactorApplication({
   appId: 'risk-admin',
@@ -91,7 +91,7 @@ mount 后依次：加载 bootstrap（全屏 loading）→ `PermissionStore` 写�
 
 应用级共享 registries 被所有页面 PageRuntime 共享：
 
-- **components**：所选 UI kit 的全部内置组件（缺省 @pactor-app/ui，shadcn——唯一内置实现）+ `options.components` + 运行期注册；
+- **components**：全部内置组件（缺省 @pactor-app/ui 内置实现）+ `options.components` + 运行期注册；
 - **actions**：runtime 内置动作（setState / request / if 等，页面运行时创建时注册）+ 交互动作（`overlay.open` / `overlay.close` / `confirm` / `message`，应用级 OverlayManager / UiBridge 单例）+ `navigate` 动作（经 react-router 导航）+ `options.actions`；
 - **services / capabilities**：`options` 扩展 + 运行期注册。
 

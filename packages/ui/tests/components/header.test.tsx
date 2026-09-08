@@ -15,7 +15,7 @@ import {
 import { fireEvent, render, screen, type RenderResult } from '@testing-library/react';
 import { describe, expect, it } from 'vitest';
 
-import { createShadcnComponentRegistry } from '../../src/components/index.js';
+import { createComponentRegistry } from '../../src/components/index.js';
 import {
   COMMON_PROPS_PROBE,
   expectCommonProps,
@@ -36,7 +36,7 @@ function renderDslWithLocale(
 ): RenderResult & { context: RuntimeContext } {
   const context = createRuntimeContext({
     locale,
-    components: createShadcnComponentRegistry(),
+    components: createComponentRegistry(),
   });
   registerBuiltinActions(context.actions);
   const result = render(

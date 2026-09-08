@@ -17,7 +17,7 @@ import {
   createUiBridge,
   OverlayManager,
   registerInteractionActions,
-  ShadcnOverlayHost,
+  OverlayHost,
   type ResolvePageFn,
 } from '../../src/interaction/index.js';
 
@@ -29,7 +29,7 @@ interface HostSetup {
   engine: ActionEngine;
 }
 
-/** 在 Renderer 上下文内挂载 ShadcnOverlayHost（依赖 useRenderer） */
+/** 在 Renderer 上下文内挂载 OverlayHost（依赖 useRenderer） */
 function setupHost(resolvePage?: ResolvePageFn): HostSetup {
   const context = createRuntimeContext();
   registerBuiltinActions(context.actions);
@@ -38,7 +38,7 @@ function setupHost(resolvePage?: ResolvePageFn): HostSetup {
   const engine = new ActionEngine(context);
   render(
     <DslRenderer context={context}>
-      <ShadcnOverlayHost manager={manager} resolvePage={resolvePage} />
+      <OverlayHost manager={manager} resolvePage={resolvePage} />
     </DslRenderer>,
   );
   return { context, manager, engine };

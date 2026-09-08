@@ -21,7 +21,7 @@ import '@pactor-app/chat/styles.css';
 ## 示例
 
 ```tsx
-import { createShadcnComponentRegistry } from '@pactor-app/ui/components';
+import { createComponentRegistry } from '@pactor-app/ui/components';
 import {
   ChatView,
   ConversationStore,
@@ -31,7 +31,7 @@ import {
 
 const store = new ConversationStore();
 // Safe Registry：LLM 生成的 DSL 只渲染白名单内的组件
-const safeRegistry = createSafeRegistry(createShadcnComponentRegistry(), [
+const safeRegistry = createSafeRegistry(createComponentRegistry(), [
   'Statistic',
   'Card',
 ]);

@@ -38,7 +38,7 @@
 
 ### Requirement: createPactorPage 工厂
 
-模块 SHALL 导出 `createPactorPage(options)` 工厂，返回 PactorPage 组件。options 支持：`loader`、`services`、`actions`、`components`、`capabilities`、`ui`（UI kit 预设）、`permissions` / `permission` 适配、`locale` / `messages`。工厂 MUST NOT 要求宿主注入路由对象。返回的组件 MUST 组装与整应用一致的 registries / 交互层 / i18n。
+模块 SHALL 导出 `createPactorPage(options)` 工厂，返回 PactorPage 组件。options 支持：`loader`、`services`、`actions`、`components`、`capabilities`、`componentRegistry` / `interactionKit`（自定义覆盖点）、`permissions` / `permission` 适配、`locale` / `messages`。工厂 MUST NOT 要求宿主注入路由对象。返回的组件 MUST 组装与整应用一致的 registries / 交互层 / i18n。
 
 #### Scenario: 不注入路由对象即可使用
 
