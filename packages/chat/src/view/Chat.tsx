@@ -1,5 +1,5 @@
 import type { DslNode, Registry } from '@pactor-app/core';
-import { Icon, RailTooltip } from '@pactor-app/ui/components';
+import { createComponentRegistry, Icon, RailTooltip } from '@pactor-app/ui/components';
 import { Fragment, useEffect, useRef, type ReactNode } from 'react';
 
 import { ChatComposition, resolveSlot } from '../chat-composition.js';
@@ -500,4 +500,23 @@ export function registerChatComponent(registry: Registry<unknown>): void {
     registry.register(CHAT_COMPONENT_TYPE, ChatDslAdapter);
   }
   registerChatShellComponent(registry);
+}
+
+/**
+ * 便捷工厂：创建含全部内置组件 + Chat / ChatShell 的组件注册表，
+ * 直接作为 createPactorApplication 的 componentRegistry 选项：
+ *
+ * ```ts
+ * import { createChatComponentRegistry } from '@pactor-app/chat';
+ *
+ * createPactorApplication({
+ *   appId: 'my-chat',
+ *   componentRegistry: createChatComponentRegistry,
+ * });
+ * ```
+ */
+export function createChatComponentRegistry(): Registry<unknown> {
+  const registry = createComponentRegistry();
+  registerChatComponent(registry);
+  return registry;
 }

@@ -89,3 +89,59 @@ export interface LandingLayoutProps {
   footer?: ReactNode;
   children?: ReactNode;
 }
+
+/** ChatLayout 菜单项（显式 menu 数据驱动；registry 推导时由 router MenuItem 映射） */
+export interface ChatLayoutMenuItem {
+  key: string;
+  label: string;
+  /** 图标名（Icon 白名单，kebab/Pascal 均可） */
+  icon?: string;
+  /** label 后的角标 */
+  badge?: string | number;
+  /** label 右侧的状态圆点 */
+  dot?: boolean;
+  /** 分组标题（相邻同组只渲染一次） */
+  group?: string;
+  /** 置灰不可选 */
+  disabled?: boolean;
+  /** 路由路径（registry 推导时来自 MenuItem.path；bridge 导航与 active 推导用） */
+  path?: string;
+}
+
+/** ChatLayout 品牌区（与 Sidebar 品牌区同构：{ title, logo? } 对象或任意 ReactNode） */
+export type ChatLayoutBrand = { title: string; logo?: string } | ReactNode;
+
+/**
+ * ChatLayout props（设计决策 D7）：聊天场景外壳布局——
+ * 品牌区 + 菜单侧栏 + 主内容区。
+ *
+ * 菜单来源优先级：`sidebar` 槽 > `menu` 显式数据 > `registry` 推导 > 空侧栏。
+ * 导航行为：`onMenuSelect` 提供时调用之；否则有 `bridge` 且项有 `path` 时
+ * `bridge.push(path)`。高亮推导：`activeMenuKey` > `route` > `bridge` 订阅。
+ */
+export interface ChatLayoutProps {
+  /** 品牌区（{ title, logo } 对象或任意 ReactNode） */
+  brand?: ChatLayoutBrand;
+  /** 显式菜单数据；提供时优先于 registry 推导 */
+  menu?: ChatLayoutMenuItem[];
+  /** 菜单注册表（app-shell 注入）；无 menu 时据此推导菜单 */
+  registry?: MenuRegistry;
+  /** 导航桥（app-shell 注入）；默认导航与 active 推导用 */
+  bridge?: NavigationBridge;
+  /** 路由上下文（测试友好，优先于 bridge 订阅） */
+  route?: RouteContext;
+  /** 权限检查器（registry 推导时过滤菜单） */
+  permissionChecker?: PermissionChecker;
+  /** 受控高亮项 key（优先于 route/bridge 推导） */
+  activeMenuKey?: string;
+  /** 菜单项点击回调（disabled 项不触发）；提供时替代默认导航 */
+  onMenuSelect?: (key: string, item: ChatLayoutMenuItem) => void;
+  /** 桌面端可折叠为 icon rail（透传 Sidebar；缺省 false） */
+  collapsible?: boolean;
+  /** 自由侧栏槽（提供时替代内建菜单） */
+  sidebar?: ReactNode;
+  /** 侧栏底部固定槽（渲染在滚动区之后，不随内容滚动） */
+  sidebarFooter?: ReactNode;
+  /** 主内容区 */
+  children?: ReactNode;
+}

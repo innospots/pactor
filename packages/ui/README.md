@@ -80,7 +80,7 @@ await runtime.initialized;
 <PageRuntimeView runtime={runtime} />;
 ```
 
-布局层（`createLayoutRegistry` / `registerBuiltinLayouts`）与交互层（`InteractionProvider` / `OverlayHost`）同样可独立组合；交互核心（`OverlayManager` / `createUiBridge` / `registerInteractionActions`）由本包 `@pactor-app/ui/interaction` 导出。
+布局层（`createLayoutRegistry` / `registerBuiltinLayouts`）预注册五种内置布局：admin / blank / login / landing / chat；与交互层（`InteractionProvider` / `OverlayHost`）同样可独立组合。交互核心（`OverlayManager` / `createUiBridge` / `registerInteractionActions`）由本包 `@pactor-app/ui/interaction` 导出。
 
 ## 聚合 re-export
 

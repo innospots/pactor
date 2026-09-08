@@ -3,6 +3,7 @@ import type { ComponentType } from 'react';
 
 import { AdminLayout } from './admin/AdminLayout.js';
 import { BlankLayout } from './basic/BlankLayout.js';
+import { ChatLayout } from './chat/ChatLayout.js';
 import { LandingLayout } from './basic/LandingLayout.js';
 import { LoginLayout } from './basic/LoginLayout.js';
 
@@ -14,19 +15,20 @@ export type LayoutComponent = ComponentType<any>;
 export type LayoutRegistry = Registry<LayoutComponent>;
 
 /**
- * registerBuiltinLayouts：向 LayoutRegistry 注册内置实现的四种布局
- * （类型名：admin / blank / login / landing）。
+ * registerBuiltinLayouts：向 LayoutRegistry 注册内置实现的五种布局
+ * （类型名：admin / blank / login / landing / chat）。
  */
 export function registerBuiltinLayouts(registry: LayoutRegistry): void {
   registry.register('admin', AdminLayout);
   registry.register('blank', BlankLayout);
   registry.register('login', LoginLayout);
   registry.register('landing', LandingLayout);
+  registry.register('chat', ChatLayout);
 }
 
 /**
  * createLayoutRegistry（设计决策 D5）：预注册内置版
- * admin / blank / login / landing 四种布局组件。
+ * admin / blank / login / landing / chat 五种布局组件。
  * 业务可继续 register 自定义布局类型。
  */
 export function createLayoutRegistry(): LayoutRegistry {

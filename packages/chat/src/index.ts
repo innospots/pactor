@@ -99,6 +99,7 @@ export {
   CHAT_COMPONENT_TYPE,
   Chat,
   ChatSidebarMenu,
+  createChatComponentRegistry,
   registerChatComponent,
   type ChatMenuItem,
   type ChatProps,

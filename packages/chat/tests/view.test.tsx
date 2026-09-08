@@ -355,8 +355,9 @@ describe('ChatView 透传 Composer 扩展 props（spec: chat-composer-extensions
 
 describe('registerChatLayout（spec: chat-view / chat 布局注册）', () => {
   it('注册并解析：resolveLayout 命中 chat 布局（spec: 注册并解析）', () => {
-    const registry = createLayoutRegistry();
-    expect(() => resolveLayout(registry, 'chat')).not.toThrow();
+    // 空注册表：createLayoutRegistry 已预注册 ui ChatLayout（type 'chat'），
+    // registerChatLayout 的不覆盖语义决定此处须以空注册表验证 chat 包自身布局
+    const registry = new Registry('LayoutRegistry');
     registerChatLayout(registry);
     const layout = resolveLayout(registry, 'chat');
     expect(layout).toBeTruthy();
@@ -365,7 +366,7 @@ describe('registerChatLayout（spec: chat-view / chat 布局注册）', () => {
   });
 
   it('chat 布局渲染 header 标题区 + ChatView 区', () => {
-    const registry = createLayoutRegistry();
+    const registry = new Registry('LayoutRegistry');
     registerChatLayout(registry);
     const Layout = resolveLayout(registry, 'chat');
     const store = createStore();

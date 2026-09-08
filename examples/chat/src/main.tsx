@@ -1,22 +1,22 @@
-import 'katex/dist/katex.min.css';
-import '@pactor-app/ui/styles.css';
-import '@pactor-app/chat/styles.css';
+import "katex/dist/katex.min.css";
+import "@pactor-app/ui/styles.css";
+import "@pactor-app/chat/styles.css";
 // 示例自有样式：仅页面壳高度链/外壳皮肤令牌/DSL 页面限宽（见 app.css 头注释）——
 // 聊天页交互 UI（模型 chip/上下文弹层/侧栏参考形态）为包内建特性，样式自持
-import './app.css';
+import "./app.css";
 
-import { registerChatComponent } from '@pactor-app/chat';
-import { StaticDslLoader } from '@pactor-app/resource';
-import { createComponentRegistry } from '@pactor-app/ui/components';
-import { createLayoutRegistry } from '@pactor-app/ui/layout';
-import { createPactorApplication } from 'pactor-app';
+import { createChatComponentRegistry } from "@pactor-app/chat";
+import { StaticDslLoader } from "@pactor-app/resource";
+import { createPactorApplication } from "pactor-app";
+import { createLayoutRegistry } from "@pactor-app/ui/layout";
 
-import agentsPageDsl from './agents.page.yaml';
-import { createBootstrap } from './bootstrap';
-import { ChatAppLayout } from './ChatAppLayout';
-import chatPageDsl from './chat.page.yaml';
-import { ChatProvider } from './ChatProvider';
-import settingsPageDsl from './settings.page.yaml';
+import { ChatAppLayout } from "./ChatAppLayout";
+
+import agentsPageDsl from "./agents.page.yaml";
+import { createBootstrap } from "./bootstrap";
+import chatPageDsl from "./chat.page.yaml";
+import { ChatProvider } from "./ChatProvider";
+import settingsPageDsl from "./settings.page.yaml";
 
 /**
  * examples/chat 是"DSL 页面 + pactor-app 一站式装配"的参考实现
@@ -27,9 +27,10 @@ import settingsPageDsl from './settings.page.yaml';
  *   模拟 bootstrap 资源下发（见 bootstrap.ts），框架内置 BrowserRouter +
  *   DynamicDslRoute 承担路由出口，宿主无路由 / 菜单注册表 / 页面运行时
  *   装配代码；
- * - 外壳为 layoutRegistry 注册的 ChatAppLayout（ChatShell 参考形态：
- *   品牌行 + collapsible 折叠 + 分组菜单 + sidebarFooter 用户卡），
- *   菜单切换 = URL 变化，刷新按 URL 还原页面；
+ * - 外壳为内置 ChatLayout（ui 布局层 type: 'chat'）：品牌行 + 分组菜单
+ *   由 registry/bridge 自动推导，菜单切换 = URL 变化，刷新按 URL 还原；
+ *   如需自定义菜单事件（如 ?id= 会话映射），可注册薄封装覆盖
+ *   （见 ChatAppLayout.tsx 备用实现）；
  * - 聊天页结构（极简头部模型选择、@/+ 上下文弹层与 chips）全部经
  *   chat.page.yaml 的 Chat props 声明（spec: chat-builtin-features /
  *   chat-default-skin），宿主零槽位组件；
@@ -51,21 +52,17 @@ const loader = new StaticDslLoader({
 });
 
 const app = createPactorApplication({
-  appId: 'example-chat',
+  appId: "example-chat",
   loader,
-  locale: 'zh-CN',
-  // 组件注册表：内置组件全集 + Chat / ChatShell 一等组件
-  // （registerChatComponent 不覆盖已有同名类型）
-  componentRegistry: () => {
-    const registry = createComponentRegistry();
-    registerChatComponent(registry);
-    return registry;
-  },
-  // 布局注册表：内置布局之上注册 chat 外壳（bootstrap
-  // layout.type: 'chat' 命中；见 ChatAppLayout.tsx）
+  locale: "zh-CN",
+  // 组件注册表：内置组件全集 + Chat / ChatShell 一等组件（便捷工厂）
+  componentRegistry: createChatComponentRegistry,
+  // 布局注册表：'chat' 已是内置类型（ui ChatLayout），无需自定义注册。
+  // 如需自定义菜单事件（?id= 会话映射等），先注销内置再注册薄封装覆盖：
   layoutRegistry: () => {
     const registry = createLayoutRegistry();
-    registry.register('chat', ChatAppLayout);
+    registry.unregister('chat');
+    registry.register("chat", ChatAppLayout);
     return registry;
   },
   // 聊天服务注入：DSL 页内 Chat 经 ChatServicesProvider 就近读取；
@@ -73,4 +70,4 @@ const app = createPactorApplication({
   providers: ChatProvider,
 });
 
-app.mount('#root');
+app.mount("#root");

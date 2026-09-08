@@ -198,6 +198,22 @@ function ShellLayout({
       </LayoutComponent>
     );
   }
+  // chat 布局：传递 registry/bridge/route/permissionChecker（菜单推导与导航用）
+  // + layoutConfig.collapsible（bootstrap layout 配置透传）
+  if (session.layoutType === 'chat') {
+    return (
+      <LayoutComponent
+        brand={session.brand}
+        registry={session.menuRegistry}
+        bridge={app.navigation}
+        route={route ?? undefined}
+        permissionChecker={app.permissionStore}
+        collapsible={session.layoutConfig.collapsible}
+      >
+        {outlet}
+      </LayoutComponent>
+    );
+  }
   // 其他布局（blank / login / landing 及业务自定义）：传递 brand 与内容出口
   return <LayoutComponent brand={session.brand}>{outlet}</LayoutComponent>;
 }

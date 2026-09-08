@@ -130,7 +130,7 @@ function MenuEntry({
         collapsed && 'justify-center px-0',
         selected
           ? 'bg-accent font-medium text-accent-foreground'
-          : 'text-muted-foreground hover:bg-accent/50 hover:text-foreground',
+          : 'cursor-pointer text-muted-foreground hover:bg-accent/50 hover:text-foreground',
         item.disabled && 'cursor-not-allowed opacity-50 hover:bg-transparent hover:text-muted-foreground',
       )}
       style={mode === 'inline' && depth > 0 && !collapsed ? { paddingLeft: 12 + depth * 16 } : undefined}

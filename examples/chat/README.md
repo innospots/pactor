@@ -1,6 +1,6 @@
 # example-chat
 
-`@pactor-app/chat` 对话示例：以 `pactor-app` 一站式 API（`createPactorApplication`）装配的多页面工作台（spec: example-chat-on-pactor-app）——菜单（对话 `/chat`、我的智能体 `/agents`、系统设置 `/settings` + 「最近」分组历史会话）与布局（`layout.type: 'chat'`）由模拟 bootstrap 资源下发（`StaticDslLoader`），框架内置 BrowserRouter + `DynamicDslRoute` 承担路由出口；外壳为 `layoutRegistry` 注册的 `ChatAppLayout`（ChatShell 参考形态），三个页面各自以 `.page.yaml` 声明（@pactor-app/vite-plugin 编译），菜单切换 = URL 变化，刷新按 URL 还原页面。
+`@pactor-app/chat` 对话示例：以 `pactor-app` 一站式 API（`createPactorApplication`）装配的多页面工作台（spec: example-chat-on-pactor-app）——菜单（对话 `/chat`、我的智能体 `/agents`、系统设置 `/settings` + 「最近」分组历史会话）与布局（`layout.type: 'chat'`）由模拟 bootstrap 资源下发（`StaticDslLoader`），框架内置 BrowserRouter + `DynamicDslRoute` 承担路由出口；外壳为内置 `ChatLayout`（ui 布局层 type `'chat'`：Sidebar + Menu 组合，菜单从 bootstrap 自动推导），三个页面各自以 `.page.yaml` 声明（@pactor-app/vite-plugin 编译），菜单切换 = URL 变化，刷新按 URL 还原页面。
 
 对话页演示产出物面板（spec: chat-artifact-panel）完整链路：建议词 / 口令触发 → mock transport 产出 artifact part（markdown / code / dsl 三种 kind）→ `events.onArtifact` → `setState` 打开右侧面板（dsl kind 经 Safe Registry 白名单活预览）→ `onPanelClose` 关闭。运行时服务（transport / safeRegistry / capabilities / confirm / 附件伪上传 / callService 服务桥）由 `ChatProvider`（createPactorApplication 的 providers 槽）经 `ChatServicesProvider` 注入；`ConversationStore` 按会话 id 缓存于模块级 Map 并按当前 `?id=` 就近注入——跨页面切换 / 切换智能体会话消息不丢。
 
@@ -27,7 +27,7 @@ pnpm --filter example-chat dev   # http://localhost:5399
 
 ## 页面与交互
 
-- **菜单外壳**（ChatAppLayout，layoutRegistry 注册的自定义布局）：对话 / 我的智能体 / 系统设置 + 「最近」分组历史会话来自 bootstrap 菜单（group / dot / badge 扩展字段透传），高亮由 `useLocation` 推导（含 `?id=` 历史会话修正，刷新即还原），点击 → navigate（历史会话 `/chat?id=<key>`）。移动端点击项后抽屉自动关闭
+- **菜单外壳**（内置 ChatLayout，ui 布局层 type `'chat'`）：对话 / 我的智能体 / 系统设置 + 「最近」分组历史会话来自 bootstrap 菜单（group / dot / badge 扩展字段透传），菜单与高亮由 registry/bridge 自动推导，点击 → bridge.push。移动端侧栏变覆盖抽屉。如需自定义菜单事件（如 `?id=` 历史会话高亮），可注册薄封装覆盖（见 `ChatAppLayout.tsx` 备用实现）
 - **对话页**（`/chat`）：body 为无侧栏形态的 `Chat`；`conversationId` 取 `${route.query.id || 'conv-demo'}`——从智能体列表进入时每个智能体一个独立会话（store 按会话 id 缓存）。产出物面板为受控闭环：`artifact` / `panelOpen` 绑页面 state，`onArtifact` → `setState` 开面板，`onPanelClose` → `setState` 关面板
 - **我的智能体**（`/agents`）：白名单组件（Page/Grid/Card/Alert/Button）声明的 mock 列表，「开始对话」→ DSL `navigate` 动作跳 `/chat?id=agent-xxx`
 - **系统设置**（`/settings`）：Form/Input/Select 表单，`onSubmit` → `setState` 保存 + `message` 成功提示 + 下方卡片回显
@@ -48,9 +48,9 @@ pnpm --filter example-chat dev   # http://localhost:5399
 - `src/chat.page.yaml` — 对话页 DSL：无侧栏形态 `Chat` 节点（greeting / suggestions / conversationId 取路由 query）+ 内建 header（`title` / `editableTitle` / `headerActions: [export, theme, clear]`）+ 内建模型选择（`models` + 受控 `model` ↔ `onModelChange`）+ 内建上下文源（`contexts`：`@` 智能体 / `+` 上下文，service 引用）+ 消息操作条（`messageActions`：内建 edit 覆盖 label + 自定义 quote 动作 service 派发，`events.onMessageAction` 接 toast）+ 产出物面板受控闭环（`onArtifact` / `onPanelClose` → setState）
 - `src/agents.page.yaml` — 智能体列表页 DSL：mock 卡片列表，点击经 `navigate` 动作跳 `/chat?id=xxx`
 - `src/settings.page.yaml` — 设置表单页 DSL：Form 提交 → setState 保存回显 + message 提示
-- `src/main.tsx` — 入口：引入 `@pactor-app/ui/styles.css`（shadcn 交互层样式）、`@pactor-app/chat/styles.css` 皮肤、`katex/dist/katex.min.css`（公式渲染）与 `app.css`；`createPactorApplication`（from `pactor-app`）装配——`StaticDslLoader`（bootstrap + 三页 DSL）、`componentRegistry`（shadcn 全集 + `registerChatComponent`）、`layoutRegistry`（注册 chat 布局）、`providers`（ChatProvider）；`navigate` / `message` 动作用框架内建
+- `src/main.tsx` — 入口：引入 `@pactor-app/ui/styles.css`（shadcn 交互层样式）、`@pactor-app/chat/styles.css` 皮肤、`katex/dist/katex.min.css`（公式渲染）与 `app.css`；`createPactorApplication`（from `pactor-app`）装配——`StaticDslLoader`（bootstrap + 三页 DSL）、`componentRegistry`（`createChatComponentRegistry` 便捷工厂：内置全集 + Chat/ChatShell）、`providers`（ChatProvider）；`navigate` / `message` 动作用框架内建。布局无需自定义注册（`'chat'` 已是内置类型）
 - `src/bootstrap.ts` — 模拟 bootstrap 资源：菜单（功能菜单 + 「最近」分组历史会话，含 group / dot / badge 扩展字段）+ `layout: { type: 'chat' }` + pageVersions，对齐 examples/admin 的 bootstrap 模式
-- `src/ChatAppLayout.tsx` — chat 外壳布局：ChatShell 参考形态（品牌行 + collapsible 折叠 + 分组菜单 + sidebarFooter 用户卡），高亮由 URL 推导（含 `?id=` 修正），`onMenuSelect` → navigate
+- `src/ChatAppLayout.tsx` — 备用薄封装（演示自定义菜单事件场景：`?id=` 历史会话高亮与导航映射），当前未启用——内置 ChatLayout 已满足开箱即用
 - `src/ChatProvider.tsx` — providers 槽：模块级稳定聊天服务（transport / safeRegistry / capabilities / `callService` 服务桥 / confirm / 附件伪上传）+ `ConversationStore` 按会话 id 缓存就近注入；内挂示例交互层（`InteractionProvider` + 示例 uiBridge）承载聊天服务侧 toast / confirm
 - `vite.config.ts` — 接入 `pactor()` 插件（`*.page.yaml` 编译为 JS 模块）
 - `src/dsl-modules.d.ts` — `*.page.yaml` 模块类型声明

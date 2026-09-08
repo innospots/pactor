@@ -11,6 +11,7 @@ import {
   resolveLayout,
   AdminLayout,
   BlankLayout,
+  ChatLayout,
   LandingLayout,
   LoginLayout,
   type LayoutComponent,
@@ -115,21 +116,22 @@ describe('LandingLayout', () => {
 });
 
 describe('LayoutRegistry', () => {
-  it('预注册类型名恰为 admin/blank/login/landing（硬编码断言）', () => {
+  it('预注册类型名恰为 admin/blank/login/landing/chat（硬编码断言）', () => {
     const registry = createLayoutRegistry();
 
     expect(registry.list().sort()).toEqual(
-      ['admin', 'blank', 'landing', 'login'].sort(),
+      ['admin', 'blank', 'chat', 'landing', 'login'].sort(),
     );
   });
 
-  it('四种预注册类型均可解析为内置实现', () => {
+  it('五种预注册类型均可解析为内置实现', () => {
     const registry = createLayoutRegistry();
 
     expect(resolveLayout(registry, 'admin')).toBe(AdminLayout);
     expect(resolveLayout(registry, 'blank')).toBe(BlankLayout);
     expect(resolveLayout(registry, 'login')).toBe(LoginLayout);
     expect(resolveLayout(registry, 'landing')).toBe(LandingLayout);
+    expect(resolveLayout(registry, 'chat')).toBe(ChatLayout);
   });
 
   it('未知类型回退 BlankLayout 并告警，不抛错（resolveLayout 回退语义）', () => {
