@@ -210,7 +210,7 @@ function HeaderDropdownArea({
     <DropdownMenuRoot>
       <DropdownMenuTrigger
         data-slot="header-dropdown"
-        className={cn(menuItemClass, 'outline-hidden')}
+        className={cn(menuItemClass, 'outline-hidden cursor-pointer')}
       >
         {dropdown.label}
         <ChevronDownIcon className="size-3.5" aria-hidden="true" />
@@ -247,7 +247,7 @@ function HeaderMenuArea({
             <DropdownMenuTrigger
               data-slot="header-menu-item"
               data-key={item.key}
-              className={cn(menuItemClass, 'outline-hidden')}
+              className={cn(menuItemClass, 'outline-hidden cursor-pointer')}
             >
               {item.icon ? <Icon name={item.icon} size="sm" /> : null}
               {item.label}
@@ -288,7 +288,7 @@ function HeaderMenuEntry({
   if (item.children !== undefined && item.children.length > 0) {
     return (
       <DropdownMenuSub>
-        <DropdownMenuSubTrigger data-key={item.key}>
+        <DropdownMenuSubTrigger data-key={item.key} className="cursor-pointer">
           {item.icon ? <Icon name={item.icon} size="sm" /> : null}
           {item.label}
         </DropdownMenuSubTrigger>
@@ -340,7 +340,7 @@ function HeaderUserArea({
     <DropdownMenuRoot>
       <DropdownMenuTrigger
         data-slot="header-user"
-        className="flex items-center gap-2 rounded-md px-2 py-1.5 transition-colors outline-hidden hover:bg-accent/50"
+        className="flex items-center gap-2 rounded-md px-2 py-1.5 transition-colors outline-hidden hover:bg-accent/50 cursor-pointer"
       >
         {identity}
       </DropdownMenuTrigger>
@@ -370,7 +370,7 @@ function HeaderLocalesArea({
     <DropdownMenuRoot>
       <DropdownMenuTrigger
         data-slot="header-locales"
-        className={cn(menuItemClass, 'outline-hidden')}
+        className={cn(menuItemClass, 'outline-hidden cursor-pointer')}
       >
         {current?.label ?? locale}
         <ChevronDownIcon className="size-3.5" aria-hidden="true" />

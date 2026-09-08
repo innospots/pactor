@@ -10,9 +10,11 @@
  *   shadcn 应用的前提相同。示例自有皮肤（theme.css/app.css）须在本样式表之后导入。
  * - **主题令牌**：shadcn 语义变量（--background/--foreground/--primary/…，含
  *   chart-1..5 与 sidebar 系列）定义在 `:root`，暗色经 `[data-pactor-theme='dark']`
- *   属性覆盖（全仓既有约定，不用官方 .dark class）；radius 派生为乘法比例
+ *   属性覆盖（三态：'light' 强制亮色 / 'dark' 强制暗色 / 不设置=跟随系统
+ *   prefers-color-scheme）；radius 派生为乘法比例
  *   （sm 0.6 / md 0.8 / lg 基准 / xl 1.4 / 2xl 1.8 / 3xl 2.2 / 4xl 2.6）；
  *   成功/警告/信息色补充 --success/--warning/--info 供 Alert 四态使用。
+ *   color-scheme 随主题切换（light/dark），浏览器原生控件自动适配。
  * - **动画层**：`tw-animate-css` 提供 animate-in/out、fade/zoom 工具类
  *   （2026-08 migrate-ui-base-ui 评估结论：官方 Base UI 版组件源码仍使用这些
  *   类——见 base-nova 版 dialog/popover/select 与 registry style `index.json`
@@ -76,6 +78,7 @@
 
 /* shadcn 默认 neutral 主题（light） */
 :root {
+  color-scheme: light;
   --radius: 0.625rem;
   --background: oklch(1 0 0);
   --foreground: oklch(0.145 0 0);
@@ -117,6 +120,7 @@
 
 /* 暗色皮肤：全仓约定的属性开关（挂在根或任意容器上） */
 [data-pactor-theme='dark'] {
+  color-scheme: dark;
   --background: oklch(0.145 0 0);
   --foreground: oklch(0.985 0 0);
   --card: oklch(0.205 0 0);
@@ -152,6 +156,49 @@
   --sidebar-accent-foreground: oklch(0.985 0 0);
   --sidebar-border: oklch(1 0 0 / 10%);
   --sidebar-ring: oklch(0.556 0 0);
+}
+
+/* 系统偏好暗色兜底：未显式设置 data-pactor-theme（三态：light / dark / 不设置=跟随系统）时，
+   系统偏好暗色即应用暗色令牌——与上方 [data-pactor-theme='dark'] 块内容保持一致 */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-pactor-theme='light']):not([data-pactor-theme='dark']) {
+    color-scheme: dark;
+    --background: oklch(0.145 0 0);
+    --foreground: oklch(0.985 0 0);
+    --card: oklch(0.205 0 0);
+    --card-foreground: oklch(0.985 0 0);
+    --popover: oklch(0.205 0 0);
+    --popover-foreground: oklch(0.985 0 0);
+    --primary: oklch(0.922 0 0);
+    --primary-foreground: oklch(0.205 0 0);
+    --secondary: oklch(0.269 0 0);
+    --secondary-foreground: oklch(0.985 0 0);
+    --muted: oklch(0.269 0 0);
+    --muted-foreground: oklch(0.708 0 0);
+    --accent: oklch(0.269 0 0);
+    --accent-foreground: oklch(0.985 0 0);
+    --destructive: oklch(0.704 0.191 22.216);
+    --destructive-foreground: oklch(0.985 0 0);
+    --success: oklch(0.696 0.17 162.48);
+    --warning: oklch(0.769 0.188 70.08);
+    --info: oklch(0.623 0.214 259.815);
+    --border: oklch(1 0 0 / 10%);
+    --input: oklch(1 0 0 / 15%);
+    --ring: oklch(0.556 0 0);
+    --chart-1: oklch(0.488 0.243 264.376);
+    --chart-2: oklch(0.696 0.17 162.48);
+    --chart-3: oklch(0.769 0.188 70.08);
+    --chart-4: oklch(0.627 0.265 303.9);
+    --chart-5: oklch(0.645 0.246 16.439);
+    --sidebar: oklch(0.205 0 0);
+    --sidebar-foreground: oklch(0.985 0 0);
+    --sidebar-primary: oklch(0.488 0.243 264.376);
+    --sidebar-primary-foreground: oklch(0.985 0 0);
+    --sidebar-accent: oklch(0.269 0 0);
+    --sidebar-accent-foreground: oklch(0.985 0 0);
+    --sidebar-border: oklch(1 0 0 / 10%);
+    --sidebar-ring: oklch(0.556 0 0);
+  }
 }
 
 /* Accordion 展开/收起：Base UI 面板机制（Panel 组件在面板元素上设置

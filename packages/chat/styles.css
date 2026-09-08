@@ -6,6 +6,7 @@
  * 换肤契约（与 pactor-ui-radix 一致）：
  * 1. 覆盖 CSS 变量（在本样式表之后注入 `--pactor-chat-primary: …;` 等）；
  * 2. 内置暗色：`<html data-pactor-theme="dark">`（或挂在任意祖先容器上）；
+ *    不设置时跟随系统 prefers-color-scheme（三态：light / dark / 跟随系统）；
  * 3. 直接覆盖 `.pactor-chat-*` class。
  *
  * 使用：import 'pactor-chat/styles.css';
@@ -106,6 +107,39 @@
   --pactor-chat-shell-scrim: rgb(0 0 0 / 55%);
   --pactor-chat-font-display: 'Songti SC', 'Noto Serif SC', Georgia,
     'Times New Roman', serif;
+}
+
+/* 系统偏好暗色兜底：未显式设置 data-pactor-theme 时跟随系统
+   （与上方 [data-pactor-theme='dark'] 块内容保持一致） */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-pactor-theme='light']):not([data-pactor-theme='dark']) .pactor-chat-view,
+  :root:not([data-pactor-theme='light']):not([data-pactor-theme='dark']) .pactor-chat-layout,
+  :root:not([data-pactor-theme='light']):not([data-pactor-theme='dark']) .pactor-chat-shell,
+  :root:not([data-pactor-theme='light']):not([data-pactor-theme='dark']) .pactor-chat-workspace,
+  :root:not([data-pactor-theme='light']):not([data-pactor-theme='dark']) .pactor-chat-notice {
+    --pactor-chat-bg: #14161c;
+    --pactor-chat-sidebar-bg: #1b1e26;
+    --pactor-chat-fg: #e4e6ee;
+    --pactor-chat-muted: #1e2129;
+    --pactor-chat-muted-fg: #8b90a0;
+    --pactor-chat-card: #1a1d24;
+    --pactor-chat-border: #2c3038;
+    --pactor-chat-primary: #5b66f0;
+    --pactor-chat-primary-fg: #ffffff;
+    --pactor-chat-danger: #e8690c;
+    --pactor-chat-danger-bg: #2b1d16;
+    --pactor-chat-success: #49aa19;
+    --pactor-chat-user-bubble-bg: #262a45;
+    --pactor-chat-user-bubble-border: rgb(91 102 240 / 45%);
+    --pactor-chat-code-bg: #1e2129;
+    --pactor-chat-shadow-sm: 0 1px 2px rgb(0 0 0 / 35%);
+    --pactor-chat-shadow-composer:
+      0 1px 2px rgb(0 0 0 / 4%),
+      0 12px 32px -10px rgb(0 0 0 / 55%);
+    --pactor-chat-shell-scrim: rgb(0 0 0 / 55%);
+    --pactor-chat-font-display: 'Songti SC', 'Noto Serif SC', Georgia,
+      'Times New Roman', serif;
+  }
 }
 
 /* ------------------------------------------------------------
