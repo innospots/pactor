@@ -66,7 +66,8 @@ body,
   --ring: #0d9488;
 }
 
-/* 暗色覆盖：内建 theme 操作把 data-pactor-theme 写在 documentElement 上 */
+/* 暗色覆盖：内建 theme 操作把 data-pactor-theme 写在 documentElement 上；
+   未设置时跟随系统 prefers-color-scheme（与包内样式表的三态语义一致） */
 [data-pactor-theme='dark'] .demo-app {
   --demo-bg: #0f1513;
   --demo-fg: #e4e6ee;
@@ -96,6 +97,38 @@ body,
   --pactor-chat-user-bubble-bg: #143b36;
   --pactor-chat-user-bubble-border: rgb(45 212 191 / 40%);
   --pactor-chat-code-bg: #1a2624;
+}
+
+/* 系统偏好暗色兜底：未显式设置 data-pactor-theme 时跟随系统 */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-pactor-theme='light']):not([data-pactor-theme='dark']) .demo-app {
+    --demo-bg: #0f1513;
+    --demo-fg: #e4e6ee;
+    --primary: #2dd4bf;
+    --primary-foreground: #06302b;
+    --accent: #1c2e2a;
+    --accent-foreground: #d7ece7;
+    --ring: #2dd4bf;
+  }
+
+  :root:not([data-pactor-theme='light']):not([data-pactor-theme='dark']) .demo-app .pactor-chat-view,
+  :root:not([data-pactor-theme='light']):not([data-pactor-theme='dark']) .demo-app .pactor-chat-layout,
+  :root:not([data-pactor-theme='light']):not([data-pactor-theme='dark']) .demo-app .pactor-chat-shell,
+  :root:not([data-pactor-theme='light']):not([data-pactor-theme='dark']) .demo-app .pactor-chat-workspace,
+  :root:not([data-pactor-theme='light']):not([data-pactor-theme='dark']) .demo-app .pactor-chat-inspector,
+  :root:not([data-pactor-theme='light']):not([data-pactor-theme='dark']) .demo-app .pactor-chat-notice {
+    --pactor-chat-bg: #101716;
+    --pactor-chat-sidebar-bg: #16211f;
+    --pactor-chat-fg: #e2ede9;
+    --pactor-chat-muted: #1a2624;
+    --pactor-chat-muted-fg: #7d938d;
+    --pactor-chat-border: #26332f;
+    --pactor-chat-primary: #2dd4bf;
+    --pactor-chat-primary-fg: #06302b;
+    --pactor-chat-user-bubble-bg: #143b36;
+    --pactor-chat-user-bubble-border: rgb(45 212 191 / 40%);
+    --pactor-chat-code-bg: #1a2624;
+  }
 }
 
 /* 页壳：全高列布局（主区承载菜单外壳；聊天页 header 为包内建） */
