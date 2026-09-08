@@ -2,7 +2,7 @@
 name: pactor
 description: |
   Agent skill for rapidly building Pactor Server-Driven UI applications. Covers app bootstrapping, DSL authoring, custom components, theming, events, routing, resources, permissions, AI chat workspaces, and project commands.
-version: 1.1.0
+version: 1.2.0
 ---
 
 # pactor-app
@@ -139,7 +139,7 @@ Notable behaviors:
 - `Icon` renders from a lucide whitelist (~100 names, kebab-case keys; PascalCase/camelCase auto-normalized); unknown names render a placeholder.
 - `Sidebar` is a full app shell: brand area, `items` nav or `content` free slot, `sidebarFooter`, desktop icon-rail collapse (hover shows tooltip), mobile overlay drawer.
 - `ChatInput` is the generic AI input structure (textarea + toolbar slots + header/footer slots).
-- Registered layouts: `admin`, `blank`, `login`, `landing` (resolve via the `layout` field).
+- Registered layouts: `admin`, `blank`, `login`, `landing`, `chat` (resolve via the `layout` field).
 
 Component contracts and per-component props: see the docs site (`docs/src/content/docs/components/`).
 
@@ -224,6 +224,8 @@ load bootstrap → write PermissionStore → build MenuRegistry → resolve layo
 ## Workflow: AI chat workspace
 
 `@pactor-app/chat` provides a complete conversation workspace, and `Chat` is a first-class DSL component (registered alongside `ChatShell` by `registerChatComponent(registry)`). Runtime services are injected once by the host via `ChatServicesProvider` (`transport` required; `callService(name, params)` service bridge resolves dynamic data sources).
+
+With pactor-app, use the convenience factory `createChatComponentRegistry()` (built-in components + Chat/ChatShell) as the `componentRegistry` option; bootstrap `layout.type: 'chat'` resolves to the built-in ChatLayout (sidebar + menu shell) without custom registration.
 
 ```yaml
 body:

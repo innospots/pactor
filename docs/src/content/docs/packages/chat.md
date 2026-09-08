@@ -71,6 +71,18 @@ const safeRegistry = createSafeRegistry(createComponentRegistry(), [
 
 `Chat` 是与 Button / Input 同级的 DSL 组件：`registerChatComponent(registry)` 注册一次，页面 DSL 即可声明完整聊天工作区。运行时服务（`transport` 必填、Safe Registry、附件回调、服务桥等）由宿主在根部经 `ChatServicesProvider` 注入一次。
 
+与 pactor-app 集成时可用便捷工厂 `createChatComponentRegistry()`（含全部内置组件 + Chat / ChatShell），直接作为 `createPactorApplication` 的 `componentRegistry` 选项：
+
+```tsx
+import { createChatComponentRegistry } from '@pactor-app/chat';
+
+createPactorApplication({
+  appId: 'my-chat',
+  componentRegistry: createChatComponentRegistry,
+  // bootstrap layout.type: 'chat' 命中内置 ChatLayout（ui 布局层）
+});
+```
+
 ```yaml
 dsl: '1.0'
 page: { id: chat, title: 聊天页 }

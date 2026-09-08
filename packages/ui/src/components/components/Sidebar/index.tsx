@@ -325,7 +325,10 @@ export function Sidebar({
           ) : null}
         </aside>
 
-        <main data-slot="sidebar-content" className="min-w-0 flex-1">
+        <main
+          data-slot="sidebar-content"
+          className="flex min-w-0 flex-1 flex-col"
+        >
           {drawer ? (
             <div
               data-slot="sidebar-topbar"

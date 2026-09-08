@@ -91,7 +91,9 @@ React 渲染层为 `OverlayHost` 与 `InteractionProvider`：modal / confirm 基
 
 ## layout 层
 
-`AdminLayout` 与内置版 Blank / Login / Landing 外壳：区域开关（`header` / `sidebar` 缺省开，`tabs` / `breadcrumb` / `footer` 缺省关）、`mode`（top-side / top-bottom / side-full / two-column）、`fixedHeader` / `fixedSider`（缺省 true）、`collapsible` / `collapsed` / `breakpoint` 响应式收起、访问页签（去重 / 点击导航 / 关闭当前回退最后一个 / 首页不可关）、breadcrumb 菜单链、权限过滤与 `activeMenu` 高亮。注册表类型名为 admin / blank / login / landing，未知类型经 `resolveLayout` 回退 BlankLayout 并告警。
+`AdminLayout` 与内置版 Blank / Login / Landing 外壳：区域开关（`header` / `sidebar` 缺省开，`tabs` / `breadcrumb` / `footer` 缺省关）、`mode`（top-side / top-bottom / side-full / two-column）、`fixedHeader` / `fixedSider`（缺省 true）、`collapsible` / `collapsed` / `breakpoint` 响应式收起、访问页签（去重 / 点击导航 / 关闭当前回退最后一个 / 首页不可关）、breadcrumb 菜单链、权限过滤与 `activeMenu` 高亮。注册表类型名为 admin / blank / login / landing / chat，未知类型经 `resolveLayout` 回退 BlankLayout 并告警。
+
+**ChatLayout**（聊天场景外壳）：品牌区 + 菜单侧栏 + 主内容区，基于 ui `Sidebar` + `Menu` 组合。菜单来源优先级：`sidebar` 槽 > `menu` 显式数据 > `registry` 推导（app-shell 注入 MenuRegistry，group 类型项 → 分组标签，permissionChecker 过滤）。导航行为：`onMenuSelect` 提供时调用之；否则 `bridge.push(path)`。高亮推导：`activeMenuKey` > `route` > `bridge` 订阅。支持 `collapsible`（icon rail）与 `sidebarFooter` 固定槽。
 
 ## 聚合 re-export
 

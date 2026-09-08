@@ -78,6 +78,7 @@ driver.complete();
 - **`<AppShell sidebar brand? locationKey? className?>`**：应用外壳——侧栏插槽 + 主区。桌面（≥768px）侧栏与主区 flex 同行；移动端（<768px）侧栏退出文档流变为覆盖抽屉（遮罩 + 顶栏菜单按钮 + `brand` 品牌区），断点由 CSS 媒体查询表达，JS 只管开合。抽屉打开时 Escape / 遮罩点击关闭；`locationKey` 变化（路由 / 会话切换）渲染期自动关闭；移动端关闭时侧栏容器 `inert`。侧栏内容经 `useSidebarDrawer()` 取 `{ close }`（壳外返回 null），导航后可关闭抽屉。
 - **`registerChatLayout(layoutRegistry)`**：注册 `chat` 布局（header 标题区 + ChatView 区，V1 无会话历史侧栏），`resolveLayout(registry, 'chat')` 命中。
 - **`Chat` / `registerChatComponent(registry)`**：一等 DSL 聊天工作区组件，见下节。
+- **`createChatComponentRegistry()`**：便捷工厂——创建含全部内置组件 + Chat / ChatShell 的组件注册表，直接作为 `createPactorApplication` 的 `componentRegistry` 选项。
 - **`createChatWorkspace(services)`**：React 直连路径的工作区工厂（内部与 Chat 共用同一组合），见下文「DSL 页面：createChatWorkspace」。
 
 ## Chat：一等 DSL 组件

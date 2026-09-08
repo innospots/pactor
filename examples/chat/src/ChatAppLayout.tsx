@@ -1,4 +1,5 @@
-import { ChatShell, type ChatMenuItem } from '@pactor-app/chat';
+import type { ChatLayoutMenuItem } from '@pactor-app/ui/layout';
+import { ChatLayout } from '@pactor-app/ui/layout';
 import {
   Badge,
   Button,
@@ -17,10 +18,11 @@ import { DEMO_MENUS, type DemoMenuItem } from './bootstrap';
 /**
  * chat 外壳布局（spec: example-chat-on-pactor-app，设计决策 D3）：
  * 经入口 layoutRegistry 注册为 type: 'chat'，由 bootstrap
- * layout.type 命中。框架对非 admin 布局只传 { brand, children }
- * （app-shell ShellLayout），故布局自给自足：
+ * layout.type 命中。框架对 chat 布局传递 registry/bridge/route/
+ * permissionChecker（app-shell ShellLayout），但本示例保留薄封装
+ * 以演示「自定义菜单事件」场景：
  *
- * - 菜单：与 bootstrap 同源的 DEMO_MENUS 映射为 ChatMenuItem
+ * - 菜单：与 bootstrap 同源的 DEMO_MENUS 映射为 ChatLayoutMenuItem
  *   （group / dot / badge 展示扩展透传）；本示例无 hidden 可见项与
  *   权限过滤，直接映射声明数组即可；
  * - 高亮：由 URL 推导（刷新即还原），含「最近」会话 ?id= 命中
@@ -29,8 +31,8 @@ import { DEMO_MENUS, type DemoMenuItem } from './bootstrap';
  *   （历史会话 /chat?id=<key> 约定不变）。
  */
 
-/** MenuItem（bootstrap 声明）→ ChatMenuItem（图标名透传白名单映射） */
-function toChatMenu(items: DemoMenuItem[]): ChatMenuItem[] {
+/** DemoMenuItem（bootstrap 声明）→ ChatLayoutMenuItem（图标名透传白名单映射） */
+function toChatMenu(items: DemoMenuItem[]): ChatLayoutMenuItem[] {
   return items
     .filter((item) => !item.hidden)
     .map((item) => ({
@@ -40,6 +42,7 @@ function toChatMenu(items: DemoMenuItem[]): ChatMenuItem[] {
       badge: item.badge,
       group: item.group,
       dot: item.dot,
+      path: item.path,
     }));
 }
 
@@ -73,7 +76,7 @@ export function ChatAppLayout({ brand, children }: ChatAppLayoutProps) {
   return (
     <div className="demo-app">
       <main className="demo-main">
-        <ChatShell
+        <ChatLayout
           menu={toChatMenu(DEMO_MENUS)}
           activeMenuKey={activeMenuKey}
           brand={
@@ -110,8 +113,9 @@ export function ChatAppLayout({ brand, children }: ChatAppLayoutProps) {
                 : menu.path,
             );
           }}
-          content={children}
-        />
+        >
+          {children}
+        </ChatLayout>
       </main>
     </div>
   );

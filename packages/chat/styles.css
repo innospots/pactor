@@ -68,7 +68,6 @@
   height: 100%;
   gap: 12px;
   color: var(--pactor-chat-fg);
-  background: var(--pactor-chat-bg);
   font-size: 14px;
   line-height: 1.6;
 }
@@ -183,7 +182,6 @@
   width: 100%;
   max-width: var(--pactor-chat-content-width);
   margin-inline: auto;
-  background: var(--pactor-chat-bg);
   color: var(--pactor-chat-fg);
   font-size: 14px;
   line-height: 1.6;
@@ -314,6 +312,7 @@
   width: 100%;
   min-height: 0;
   overflow: hidden;
+  background: var(--pactor-chat-bg);
 }
 
 /* 面板打开时 host 内的直子：AppShell 填满剩余空间；workspace 只缩不伸，

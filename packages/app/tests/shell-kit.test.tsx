@@ -192,3 +192,38 @@ describe('shell-ui-kit-selection：自定义覆盖点保留', () => {
     expect(document.querySelector('[data-slot=overlay-modal]')).toBeNull();
   });
 });
+
+describe('shell-ui-kit-selection：chat 布局接线', () => {
+  it("bootstrap layout.type: 'chat' 时布局收到 registry/bridge 并渲染菜单", async () => {
+    setUrl('/');
+    app = createPactorApplication({
+      appId: 'shell-app',
+      loader: new StaticDslLoader({
+        bootstrap: createBootstrap({
+          menus: [
+            { id: 'home', type: 'page', title: '对话', path: '/', pageId: 'home' },
+            { id: 'agents', type: 'page', title: '智能体', path: '/agents', pageId: 'agents' },
+          ],
+          layout: { type: 'chat' },
+        }),
+        pages: {
+          home: shellPage,
+          agents: {
+            dsl: '1.0',
+            page: { id: 'agents', title: '智能体' },
+            body: { type: 'Page', props: { title: '智能体' }, children: [] },
+          },
+        },
+      }),
+    });
+    const target = await mountApp(app);
+
+    // chat 布局渲染：Sidebar 外壳 + 菜单项
+    await screen.findByText('对话');
+    expect(target.querySelector('[data-slot=sidebar-layout]')).not.toBeNull();
+    expect(screen.getByText('智能体')).toBeTruthy();
+    // 当前路径 / 命中「对话」菜单项高亮
+    const homeItem = screen.getByText('对话').closest('button');
+    expect(homeItem?.getAttribute('aria-current')).toBe('page');
+  });
+});

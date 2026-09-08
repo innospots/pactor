@@ -6,6 +6,9 @@ export type {
   AdminLayoutMode,
   AdminLayoutProps,
   BlankLayoutProps,
+  ChatLayoutBrand,
+  ChatLayoutMenuItem,
+  ChatLayoutProps,
   LandingLayoutProps,
   LoginBrand,
   LoginLayoutProps,
@@ -18,6 +21,7 @@ export { collectDefaultOpenKeys } from './admin/menu-items.js';
 // 布局组件
 export { AdminLayout } from './admin/AdminLayout.js';
 export { BlankLayout } from './basic/BlankLayout.js';
+export { ChatLayout } from './chat/ChatLayout.js';
 export { LoginLayout } from './basic/LoginLayout.js';
 export { LandingLayout } from './basic/LandingLayout.js';
 
