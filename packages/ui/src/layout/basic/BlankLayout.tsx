@@ -1,10 +1,10 @@
 import type { BlankLayoutProps } from '../types.js';
 
 /**
- * ShadcnBlankLayout：与 pactor-layout 的 BlankLayout（antd 版）契约一致——
- * 无壳布局，直接渲染 children（带最小页面容器样式）。
+ * BlankLayout：内置默认 UI 实现的无壳布局——
+ * 直接渲染 children（带最小页面容器样式）。
  */
-export function ShadcnBlankLayout({ children }: BlankLayoutProps) {
+export function BlankLayout({ children }: BlankLayoutProps) {
   return (
     <div
       data-slot="blank-layout"

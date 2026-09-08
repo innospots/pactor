@@ -79,7 +79,7 @@ function createCustomComponentRegistry(): Registry<unknown> {
 }
 
 describe('ui-kit-selection：componentRegistry 选项', () => {
-  it('缺省为 shadcn：不传 componentRegistry 渲染 shadcn 实现（@pactor-app/ui，唯一内置实现）', async () => {
+  it('缺省为内置实现：不传 componentRegistry 渲染 @pactor-app/ui 内置组件', async () => {
     app = createAppWithKit();
     const target = await mountApp(app);
 
@@ -89,18 +89,18 @@ describe('ui-kit-selection：componentRegistry 选项', () => {
     expect(target.querySelector('[data-slot=statistic]')).not.toBeNull();
   });
 
-  it('传入自定义注册表：整体替换内置 shadcn 实现', async () => {
+  it('传入自定义注册表：整体替换内置实现', async () => {
     app = createAppWithKit({ componentRegistry: createCustomComponentRegistry });
     const target = await mountApp(app);
 
     await screen.findByRole('button', { name: '保存' });
     expect(target.querySelector('.custom-btn')).not.toBeNull();
     expect(target.querySelector('.custom-statistic')).not.toBeNull();
-    // 内置 shadcn 实现未渲染
+    // 内置实现未渲染
     expect(target.querySelector('[data-slot=statistic]')).toBeNull();
   });
 
-  it('业务组件叠加：options.components 自定义组件与内置 shadcn 组件同页可用', async () => {
+  it('业务组件叠加：options.components 自定义组件与内置组件同页可用', async () => {
     function RiskScore(props: { score?: number }) {
       return <span data-testid="risk-score">风险分:{props.score}</span>;
     }
@@ -131,7 +131,7 @@ describe('ui-kit-selection：componentRegistry 选项', () => {
     const target = await mountApp(app);
 
     await screen.findByText('风险分:86');
-    // 内置组件仍为 shadcn 实现
+    // 内置组件仍为内置实现
     const button = screen.getByRole('button', { name: '保存' });
     expect(button.className).toContain('bg-primary');
     expect(target.querySelector('[data-testid=risk-score]')).not.toBeNull();

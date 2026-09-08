@@ -27,7 +27,7 @@
 
 ### Requirement: 自定义组件指南
 
-文档站 SHALL 提供自定义组件开发指南：Renderer 契约（props 已求值、events 绑定、children 与 withScope/dslChildren、permission 注入）、注册路径（componentRegistry / ui kit 槽位 / chat Safe Registry）与完整可运行示例。
+文档站 SHALL 提供自定义组件开发指南：Renderer 契约（props 已求值、events 绑定、children 与 withScope/dslChildren、permission 注入）、注册路径（componentRegistry 覆盖点 / chat Safe Registry）与完整可运行示例。
 
 #### Scenario: 开发者注册业务组件
 

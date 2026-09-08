@@ -10,7 +10,7 @@ import {
 } from '@pactor-app/router';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
-import { ShadcnAdminLayout } from '../../src/layout/index.js';
+import { AdminLayout } from '../../src/layout/index.js';
 
 afterEach(cleanup);
 
@@ -47,7 +47,7 @@ function createRegistry(extra?: MenuItem[]) {
 
 function renderAdmin(
   options: {
-    config?: Parameters<typeof ShadcnAdminLayout>[0]['config'];
+    config?: Parameters<typeof AdminLayout>[0]['config'];
     route?: RouteContext;
     bridge?: MemoryNavigation;
     registry?: MenuRegistry;
@@ -57,7 +57,7 @@ function renderAdmin(
   const bridge = options.bridge ?? new MemoryNavigation('/');
   const registry = options.registry ?? createRegistry();
   const result = render(
-    <ShadcnAdminLayout
+    <AdminLayout
       config={options.config}
       brand={{ title: '运营平台' }}
       registry={registry}
@@ -66,12 +66,12 @@ function renderAdmin(
       permissionChecker={options.permissionChecker}
     >
       <div>页面内容</div>
-    </ShadcnAdminLayout>,
+    </AdminLayout>,
   );
   return { ...result, bridge, registry };
 }
 
-describe('ShadcnAdminLayout 布局结构与开关', () => {
+describe('AdminLayout 布局结构与开关', () => {
   it('默认渲染：Header（品牌标题）、Sidebar、内容区含 children（data-slot 钩子，无 ant 元素）', () => {
     const { container } = renderAdmin();
 
@@ -99,7 +99,7 @@ describe('ShadcnAdminLayout 布局结构与开关', () => {
   });
 });
 
-describe('ShadcnAdminLayout Sidebar 菜单渲染', () => {
+describe('AdminLayout Sidebar 菜单渲染', () => {
   it('group 渲染为可折叠组（Accordion），defaultOpen 组内 page 项渲染', () => {
     const { container } = renderAdmin();
 
@@ -143,7 +143,7 @@ describe('ShadcnAdminLayout Sidebar 菜单渲染', () => {
   });
 });
 
-describe('ShadcnAdminLayout 菜单选中与导航', () => {
+describe('AdminLayout 菜单选中与导航', () => {
   it('选中态取 route.activeMenu（隐藏详情页高亮其指向的项）', () => {
     const route: RouteContext = {
       path: '/customers/1',
@@ -181,7 +181,7 @@ describe('ShadcnAdminLayout 菜单选中与导航', () => {
   });
 });
 
-describe('ShadcnAdminLayout Breadcrumb', () => {
+describe('AdminLayout Breadcrumb', () => {
   it('breadcrumb 开启时按 activeMenu 菜单链渲染', () => {
     const route: RouteContext = {
       path: '/customers',
@@ -217,7 +217,7 @@ describe('ShadcnAdminLayout Breadcrumb', () => {
   });
 });
 
-describe('ShadcnAdminLayout Tabs', () => {
+describe('AdminLayout Tabs', () => {
   it('依次导航到两个页面出现两个页签，点击第一个页签导航回第一个页面', () => {
     const bridge = new MemoryNavigation('/dashboard');
     const { container } = renderAdmin({ config: { tabs: true }, bridge });
@@ -271,7 +271,7 @@ describe('ShadcnAdminLayout Tabs', () => {
   });
 });
 
-describe('ShadcnAdminLayout 结构模式（spec: 模式与收起）', () => {
+describe('AdminLayout 结构模式（spec: 模式与收起）', () => {
   it('top-bottom：无 Sidebar，footer 开关生效', () => {
     const { container } = renderAdmin({
       config: { mode: 'top-bottom', footer: true },

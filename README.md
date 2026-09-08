@@ -19,12 +19,12 @@ packages/
   permission/  @pactor-app/permission  权限 Store + 四层守卫
   resource/    @pactor-app/resource    DSL 资源加载 + 缓存 + 版本控制
   router/      @pactor-app/router      菜单注册 + 动态路由 + 导航桥接
-  ui/          @pactor-app/ui          唯一内置 UI kit（shadcn：vendored shadcn/ui + 契约/交互核心/布局三层 + shadcnUiKit + 预建样式表）
+  ui/          @pactor-app/ui          内置默认 UI 实现（shadcn 风格：vendored shadcn/ui + 契约/交互核心/布局三层 + 预建样式表）
   app/         @pactor-app/app         一站式集成（createPactorApplication）
   pactor/      pactor-app          聚合安装包（meta）：依赖全部模块，入口转发 @pactor-app/app
 examples/
   vite-starter/ example-vite-starter 最小上手示例（vite-plugin 工作流，端口 5499）
-  admin/       example-admin      管理后台示例（shadcn kit，StaticDslLoader + 内存 mock，端口 5199）
+  admin/       example-admin      管理后台示例（StaticDslLoader + 内存 mock，端口 5199）
   chat/        example-chat       @pactor-app/chat 对话示例（mock AI 流式 transport，端口 5399）
 docs/          pactor-docs        Astro Starlight 文档站
 ```
@@ -46,7 +46,7 @@ pnpm docs:build     # 构建文档站
 
 ```bash
 pnpm --filter example-vite-starter dev   # 最小上手示例（vite-plugin 工作流），http://localhost:5499
-pnpm --filter example-admin dev          # 管理后台示例（shadcn kit，含皮肤设置），http://localhost:5199
+pnpm --filter example-admin dev          # 管理后台示例（含皮肤设置），http://localhost:5199
 pnpm --filter example-chat dev           # @pactor-app/chat 对话示例，http://localhost:5399
 ```
 
@@ -63,7 +63,7 @@ pnpm --filter example-chat dev           # @pactor-app/chat 对话示例，http:
 - **AI-Native**：支持 Markdown + DSL 的 AI Chat 交互
 - **国际化**：内置轻量 i18n 支持，DSL 可使用 `${t('key')}` 表达式
 - **权限控制**：页面/菜单/组件/动作四层守卫
-- **主题换肤**：CSS 变量令牌覆盖 + 内置暗色皮肤（shadcn kit，`data-pactor-theme`）
+- **主题换肤**：CSS 变量令牌覆盖 + 内置暗色皮肤（`data-pactor-theme`）
 
 ## 环境要求
 

@@ -13,12 +13,12 @@ import {
   createUiBridge,
   OverlayManager,
   registerInteractionActions,
-  ShadcnInteractionProvider,
+  InteractionProvider,
 } from '../../src/interaction/index.js';
 
 afterEach(cleanup);
 
-/** 注册好交互动作与 ShadcnInteractionProvider 的测试环境 */
+/** 注册好交互动作与 InteractionProvider 的测试环境 */
 function setupProvider() {
   const context = createRuntimeContext();
   registerBuiltinActions(context.actions);
@@ -26,14 +26,14 @@ function setupProvider() {
   registerInteractionActions(context.actions, new OverlayManager(), ui);
   const engine = new ActionEngine(context);
   const result = render(
-    <ShadcnInteractionProvider bridge={ui}>
+    <InteractionProvider bridge={ui}>
       <div>宿主</div>
-    </ShadcnInteractionProvider>,
+    </InteractionProvider>,
   );
   return { context, ui, engine, ...result };
 }
 
-describe('ShadcnInteractionProvider：message 动作经 toast', () => {
+describe('InteractionProvider：message 动作经 toast', () => {
   it('messageType 别名：映射类型且 params 表达式正常求值（不受 isOpaque 影响）', async () => {
     const { ui, engine } = setupProvider();
     await vi.waitFor(() => {
@@ -123,7 +123,7 @@ describe('ShadcnInteractionProvider：message 动作经 toast', () => {
     registerInteractionActions(context.actions, new OverlayManager(), ui);
     const engine = new ActionEngine(context);
 
-    const { unmount } = render(<ShadcnInteractionProvider bridge={ui} />);
+    const { unmount } = render(<InteractionProvider bridge={ui} />);
     await vi.waitFor(() => {
       expect(ui.message).toBeDefined();
     });
@@ -138,7 +138,7 @@ describe('ShadcnInteractionProvider：message 动作经 toast', () => {
   });
 });
 
-describe('ShadcnInteractionProvider：confirm 动作经 shadcn Dialog 确认框', () => {
+describe('InteractionProvider：confirm 动作经 shadcn Dialog 确认框', () => {
   it('点击确定：确认框出现并关闭，动作返回 { ok: true, data: true }', async () => {
     const { ui, engine } = setupProvider();
     await vi.waitFor(() => {

@@ -10,13 +10,13 @@ import {
 } from '@pactor-app/runtime';
 import { afterEach, describe, expect, it } from 'vitest';
 
-import { createShadcnComponentRegistry } from '../../src/components/index.js';
+import { createComponentRegistry } from '../../src/components/index.js';
 import {
   createUiBridge,
   OverlayManager,
   registerInteractionActions,
-  ShadcnInteractionProvider,
-  ShadcnOverlayHost,
+  InteractionProvider,
+  OverlayHost,
   type InteractionProviderProps,
   type OverlayHostProps,
 } from '../../src/interaction/index.js';
@@ -24,25 +24,25 @@ import {
 afterEach(cleanup);
 
 describe('交互契约：props 类型与核心均来自 @pactor-app/ui 本地导出', () => {
-  it('ShadcnOverlayHost / ShadcnInteractionProvider 满足 props 契约（编译期断言）', () => {
-    const host: ComponentType<OverlayHostProps> = ShadcnOverlayHost;
+  it('OverlayHost / InteractionProvider 满足 props 契约（编译期断言）', () => {
+    const host: ComponentType<OverlayHostProps> = OverlayHost;
     const provider: ComponentType<InteractionProviderProps> =
-      ShadcnInteractionProvider;
+      InteractionProvider;
 
-    expect(host).toBe(ShadcnOverlayHost);
-    expect(provider).toBe(ShadcnInteractionProvider);
+    expect(host).toBe(OverlayHost);
+    expect(provider).toBe(InteractionProvider);
   });
 
-  it('content DSL 经 shadcn 组件注册表渲染（shadcn Button 事件触发 overlay.close）', async () => {
+  it('content DSL 经内置组件注册表渲染（shadcn Button 事件触发 overlay.close）', async () => {
     const context = createRuntimeContext({
-      components: createShadcnComponentRegistry(),
+      components: createComponentRegistry(),
     });
     registerBuiltinActions(context.actions);
     const manager = new OverlayManager();
     registerInteractionActions(context.actions, manager, createUiBridge());
     render(
       <DslRenderer context={context}>
-        <ShadcnOverlayHost manager={manager} />
+        <OverlayHost manager={manager} />
       </DslRenderer>,
     );
 

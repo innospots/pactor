@@ -1,10 +1,10 @@
 import { Registry } from '@pactor-app/core';
 import type { ComponentType } from 'react';
 
-import { ShadcnAdminLayout } from './admin/ShadcnAdminLayout.js';
-import { ShadcnBlankLayout } from './basic/ShadcnBlankLayout.js';
-import { ShadcnLandingLayout } from './basic/ShadcnLandingLayout.js';
-import { ShadcnLoginLayout } from './basic/ShadcnLoginLayout.js';
+import { AdminLayout } from './admin/AdminLayout.js';
+import { BlankLayout } from './basic/BlankLayout.js';
+import { LandingLayout } from './basic/LandingLayout.js';
+import { LoginLayout } from './basic/LoginLayout.js';
 
 /** 布局组件类型（各布局 props 不同，注册表按通用组件存储） */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -14,30 +14,30 @@ export type LayoutComponent = ComponentType<any>;
 export type LayoutRegistry = Registry<LayoutComponent>;
 
 /**
- * registerShadcnLayouts：向 LayoutRegistry 注册 shadcn 实现的四种布局
+ * registerBuiltinLayouts：向 LayoutRegistry 注册内置实现的四种布局
  * （类型名：admin / blank / login / landing）。
  */
-export function registerShadcnLayouts(registry: LayoutRegistry): void {
-  registry.register('admin', ShadcnAdminLayout);
-  registry.register('blank', ShadcnBlankLayout);
-  registry.register('login', ShadcnLoginLayout);
-  registry.register('landing', ShadcnLandingLayout);
+export function registerBuiltinLayouts(registry: LayoutRegistry): void {
+  registry.register('admin', AdminLayout);
+  registry.register('blank', BlankLayout);
+  registry.register('login', LoginLayout);
+  registry.register('landing', LandingLayout);
 }
 
 /**
- * createShadcnLayoutRegistry（设计决策 D5）：预注册 shadcn 版
+ * createLayoutRegistry（设计决策 D5）：预注册内置版
  * admin / blank / login / landing 四种布局组件。
  * 业务可继续 register 自定义布局类型。
  */
-export function createShadcnLayoutRegistry(): LayoutRegistry {
+export function createLayoutRegistry(): LayoutRegistry {
   const registry = new Registry<LayoutComponent>('LayoutRegistry');
-  registerShadcnLayouts(registry);
+  registerBuiltinLayouts(registry);
   return registry;
 }
 
 /**
  * resolveLayout（设计决策 D5）：按类型名解析布局组件；
- * 未命中返回 ShadcnBlankLayout 并 console.warn（不抛错，不崩页面）。
+ * 未命中返回 BlankLayout 并 console.warn（不抛错，不崩页面）。
  */
 export function resolveLayout(
   registry: LayoutRegistry,
@@ -48,7 +48,7 @@ export function resolveLayout(
     console.warn(
       `[pactor-layout] unknown layout type "${type}", fallback to BlankLayout`,
     );
-    return ShadcnBlankLayout;
+    return BlankLayout;
   }
   return component;
 }

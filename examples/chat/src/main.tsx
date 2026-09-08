@@ -7,8 +7,8 @@ import './app.css';
 
 import { registerChatComponent } from '@pactor-app/chat';
 import { StaticDslLoader } from '@pactor-app/resource';
-import { createShadcnComponentRegistry } from '@pactor-app/ui/components';
-import { createShadcnLayoutRegistry } from '@pactor-app/ui/layout';
+import { createComponentRegistry } from '@pactor-app/ui/components';
+import { createLayoutRegistry } from '@pactor-app/ui/layout';
 import { createPactorApplication } from 'pactor-app';
 
 import agentsPageDsl from './agents.page.yaml';
@@ -54,17 +54,17 @@ const app = createPactorApplication({
   appId: 'example-chat',
   loader,
   locale: 'zh-CN',
-  // 组件注册表：shadcn 白名单组件全集 + Chat / ChatShell 一等组件
+  // 组件注册表：内置组件全集 + Chat / ChatShell 一等组件
   // （registerChatComponent 不覆盖已有同名类型）
   componentRegistry: () => {
-    const registry = createShadcnComponentRegistry();
+    const registry = createComponentRegistry();
     registerChatComponent(registry);
     return registry;
   },
-  // 布局注册表：shadcn 内建布局之上注册 chat 外壳（bootstrap
+  // 布局注册表：内置布局之上注册 chat 外壳（bootstrap
   // layout.type: 'chat' 命中；见 ChatAppLayout.tsx）
   layoutRegistry: () => {
-    const registry = createShadcnLayoutRegistry();
+    const registry = createLayoutRegistry();
     registry.register('chat', ChatAppLayout);
     return registry;
   },

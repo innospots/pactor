@@ -23,4 +23,4 @@ pnpm --filter example-vite-starter dev   # http://localhost:5499
 
 ## 下一步
 
-需要登录、路由、权限、抽屉编辑、双 UI kit 的完整形态，看 `examples/admin`（Radix）与 `examples/admin-antd`（antd）；AI 对话场景看 `examples/chat`。
+需要登录、路由、权限、抽屉编辑的完整形态，看 `examples/admin`；AI 对话场景看 `examples/chat`。

@@ -33,7 +33,7 @@ import type { DslNode } from '@pactor-app/core';
 | 方式 | 适用 |
 | --- | --- |
 | `pnpm add pactor-app` | 完整应用，一次装齐（含 CLI 与 Vite 插件） |
-| `pnpm add @pactor-app/app @pactor-app/ui` | 只装应用运行时与 UI kit |
+| `pnpm add @pactor-app/app @pactor-app/ui` | 只装应用运行时与 UI 包 |
 | `pnpm add @pactor-app/core` 等单模块 | 只要某一个能力（如校验、表达式、Vite 插件） |
 
 两种方式可混用：meta 包只是依赖聚合，与各模块版本统一发布，不存在功能差异。

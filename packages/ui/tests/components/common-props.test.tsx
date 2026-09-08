@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 /**
- * 通用 props 契约：所有内置组件（shadcn kit）支持 className / style，
+ * 通用 props 契约：所有内置组件支持 className / style，
  * 作用于各自根节点（className 与内置样式合并，style 直接内联）。
  */
 import type { DslNode } from '@pactor-app/core';

@@ -3,7 +3,7 @@ import './setup.js';
 
 import { Registry, type PageDsl } from '@pactor-app/core';
 import { createPageRuntime } from '@pactor-app/runtime';
-import { createShadcnComponentRegistry } from '@pactor-app/ui/components';
+import { createComponentRegistry } from '@pactor-app/ui/components';
 import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
@@ -33,7 +33,7 @@ const MARKDOWN_ARTIFACT: ChatArtifact = {
 function createPanelSafeRegistry(
   extra?: (registry: Registry<unknown>) => void,
 ): Registry<unknown> {
-  const source = createShadcnComponentRegistry();
+  const source = createComponentRegistry();
   extra?.(source);
   return createSafeRegistry(source, ['Statistic', 'Card', 'Boom']);
 }

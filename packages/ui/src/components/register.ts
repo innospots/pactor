@@ -73,11 +73,11 @@ import { Tooltip } from './components/Tooltip/index.js';
 import { Typography } from './components/Typography/index.js';
 
 /**
- * shadcn kit 组件表：DSL 类型名 → 组件适配器。
- * 类型名集合与 pactor-components 的 builtinComponents 完全一致；
+ * 内置组件表：DSL 类型名 → 组件适配器。
+ * 类型名集合即 spec: builtin-components 的内置组件清单；
  * 容器组件（Tabs / Table）经 `useRenderer().renderChildren` 渲染 DSL 子树。
  */
-export const shadcnComponents = {
+export const builtinComponents = {
   Page,
   Grid,
   Flex,
@@ -158,16 +158,16 @@ export const shadcnComponents = {
   Icon,
 } as const;
 
-/** 把全部 V1 内置组件（shadcn 实现）按 DSL 类型名注册到给定 ComponentRegistry */
-export function registerShadcnComponents(registry: ComponentRegistry): void {
-  for (const [type, component] of Object.entries(shadcnComponents)) {
+/** 把全部 V1 内置组件按 DSL 类型名注册到给定 ComponentRegistry */
+export function registerBuiltinComponents(registry: ComponentRegistry): void {
+  for (const [type, component] of Object.entries(builtinComponents)) {
     registry.register(type, component);
   }
 }
 
-/** 创建并返回注册了全部 V1 内置组件（shadcn 实现）的新 ComponentRegistry */
-export function createShadcnComponentRegistry(): ComponentRegistry {
+/** 创建并返回注册了全部 V1 内置组件的新 ComponentRegistry */
+export function createComponentRegistry(): ComponentRegistry {
   const registry = new Registry<unknown>('ComponentRegistry');
-  registerShadcnComponents(registry);
+  registerBuiltinComponents(registry);
   return registry;
 }

@@ -4,8 +4,8 @@ import { Registry } from '@pactor-app/core';
 import { describe, expect, it } from 'vitest';
 
 import {
-  createShadcnComponentRegistry,
-  registerShadcnComponents,
+  createComponentRegistry,
+  registerBuiltinComponents,
 } from '../../src/components/index.js';
 
 /** 内置组件类型名硬编码清单（契约断言，替代原跨 kit 注册表同构断言） */
@@ -90,24 +90,24 @@ const EXTENDED_TYPES = [
 ];
 
 describe('组件注册入口', () => {
-  it('createShadcnComponentRegistry 注册后 20 个类型名全部可解析', () => {
-    const registry = createShadcnComponentRegistry();
+  it('createComponentRegistry 注册后 20 个类型名全部可解析', () => {
+    const registry = createComponentRegistry();
     for (const type of BUILTIN_TYPES) {
       expect(registry.has(type), type).toBe(true);
     }
   });
 
-  it('createShadcnComponentRegistry 的类型名集合包含全部 20 个内置类型（超集断言：另含扩展组件）', () => {
-    const registry = createShadcnComponentRegistry();
+  it('createComponentRegistry 的类型名集合包含全部 20 个内置类型（超集断言：另含扩展组件）', () => {
+    const registry = createComponentRegistry();
     const types = registry.list();
     for (const type of BUILTIN_TYPES) {
       expect(types, type).toContain(type);
     }
   });
 
-  it('registerShadcnComponents 注册到外部 Registry', () => {
+  it('registerBuiltinComponents 注册到外部 Registry', () => {
     const registry = new Registry<unknown>('ComponentRegistry');
-    registerShadcnComponents(registry);
+    registerBuiltinComponents(registry);
     const types = registry.list();
     for (const type of BUILTIN_TYPES) {
       expect(types, type).toContain(type);
@@ -115,7 +115,7 @@ describe('组件注册入口', () => {
   });
 
   it('扩展类型（展示类 + 表单类）注册后全部可解析', () => {
-    const registry = createShadcnComponentRegistry();
+    const registry = createComponentRegistry();
     for (const type of EXTENDED_TYPES) {
       expect(registry.has(type), type).toBe(true);
     }

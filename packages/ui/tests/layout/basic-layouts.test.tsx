@@ -6,35 +6,35 @@ import { Registry } from '@pactor-app/core';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import {
-  createShadcnLayoutRegistry,
-  registerShadcnLayouts,
+  createLayoutRegistry,
+  registerBuiltinLayouts,
   resolveLayout,
-  ShadcnAdminLayout,
-  ShadcnBlankLayout,
-  ShadcnLandingLayout,
-  ShadcnLoginLayout,
+  AdminLayout,
+  BlankLayout,
+  LandingLayout,
+  LoginLayout,
   type LayoutComponent,
 } from '../../src/layout/index.js';
 
 afterEach(cleanup);
 
-describe('ShadcnBlankLayout', () => {
+describe('BlankLayout', () => {
   it('直接渲染 children（无外壳元素）', () => {
-    render(<ShadcnBlankLayout>裸内容</ShadcnBlankLayout>);
+    render(<BlankLayout>裸内容</BlankLayout>);
 
     expect(screen.getByText('裸内容')).toBeTruthy();
   });
 });
 
-describe('ShadcnLoginLayout', () => {
+describe('LoginLayout', () => {
   it('center 变体：出现品牌标题与 children', () => {
     const { container } = render(
-      <ShadcnLoginLayout
+      <LoginLayout
         variant="center"
         brand={{ title: '智能决策运营平台', description: '描述文案' }}
       >
         <form>登录表单</form>
-      </ShadcnLoginLayout>,
+      </LoginLayout>,
     );
 
     expect(screen.getAllByText('智能决策运营平台').length).toBeGreaterThan(0);
@@ -47,9 +47,9 @@ describe('ShadcnLoginLayout', () => {
 
   it('split 变体：品牌区与表单区并列呈现', () => {
     const { container } = render(
-      <ShadcnLoginLayout variant="split" brand={{ title: '智能决策运营平台' }}>
+      <LoginLayout variant="split" brand={{ title: '智能决策运营平台' }}>
         <form>登录表单</form>
-      </ShadcnLoginLayout>,
+      </LoginLayout>,
     );
 
     expect(
@@ -65,9 +65,9 @@ describe('ShadcnLoginLayout', () => {
 
   it('缺省 variant 为 center', () => {
     const { container } = render(
-      <ShadcnLoginLayout brand={{ title: '平台' }}>
+      <LoginLayout brand={{ title: '平台' }}>
         <span>表单</span>
-      </ShadcnLoginLayout>,
+      </LoginLayout>,
     );
 
     expect(
@@ -76,12 +76,12 @@ describe('ShadcnLoginLayout', () => {
   });
 });
 
-describe('ShadcnLandingLayout', () => {
+describe('LandingLayout', () => {
   it('navbar 与 footer 分别出现在内容区上下方', () => {
     const { container } = render(
-      <ShadcnLandingLayout navbar={<nav>顶部导航</nav>} footer={<div>底部信息</div>}>
+      <LandingLayout navbar={<nav>顶部导航</nav>} footer={<div>底部信息</div>}>
         <section>主内容</section>
-      </ShadcnLandingLayout>,
+      </LandingLayout>,
     );
 
     const navbar = container.querySelector('[data-slot=landing-navbar]');
@@ -103,9 +103,9 @@ describe('ShadcnLandingLayout', () => {
 
   it('未传 navbar / footer 时不渲染对应插槽', () => {
     const { container } = render(
-      <ShadcnLandingLayout>
+      <LandingLayout>
         <section>主内容</section>
-      </ShadcnLandingLayout>,
+      </LandingLayout>,
     );
 
     expect(container.querySelector('[data-slot=landing-navbar]')).toBeNull();
@@ -114,44 +114,44 @@ describe('ShadcnLandingLayout', () => {
   });
 });
 
-describe('Shadcn LayoutRegistry', () => {
+describe('LayoutRegistry', () => {
   it('预注册类型名恰为 admin/blank/login/landing（硬编码断言）', () => {
-    const registry = createShadcnLayoutRegistry();
+    const registry = createLayoutRegistry();
 
     expect(registry.list().sort()).toEqual(
       ['admin', 'blank', 'landing', 'login'].sort(),
     );
   });
 
-  it('四种预注册类型均可解析为 shadcn 实现', () => {
-    const registry = createShadcnLayoutRegistry();
+  it('四种预注册类型均可解析为内置实现', () => {
+    const registry = createLayoutRegistry();
 
-    expect(resolveLayout(registry, 'admin')).toBe(ShadcnAdminLayout);
-    expect(resolveLayout(registry, 'blank')).toBe(ShadcnBlankLayout);
-    expect(resolveLayout(registry, 'login')).toBe(ShadcnLoginLayout);
-    expect(resolveLayout(registry, 'landing')).toBe(ShadcnLandingLayout);
+    expect(resolveLayout(registry, 'admin')).toBe(AdminLayout);
+    expect(resolveLayout(registry, 'blank')).toBe(BlankLayout);
+    expect(resolveLayout(registry, 'login')).toBe(LoginLayout);
+    expect(resolveLayout(registry, 'landing')).toBe(LandingLayout);
   });
 
   it('未知类型回退 BlankLayout 并告警，不抛错（resolveLayout 回退语义）', () => {
     const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
     try {
-      const registry = createShadcnLayoutRegistry();
+      const registry = createLayoutRegistry();
       const component = resolveLayout(registry, 'unknown');
 
-      expect(component).toBe(ShadcnBlankLayout);
+      expect(component).toBe(BlankLayout);
       expect(warn).toHaveBeenCalledOnce();
     } finally {
       warn.mockRestore();
     }
   });
 
-  it('registerShadcnLayouts 注册到已有注册表；业务自定义布局可叠加', () => {
+  it('registerBuiltinLayouts 注册到已有注册表；业务自定义布局可叠加', () => {
     const Workspace = () => <div>workspace</div>;
     const registry = new Registry<LayoutComponent>('LayoutRegistry');
-    registerShadcnLayouts(registry);
+    registerBuiltinLayouts(registry);
     registry.register('workspace', Workspace);
 
-    expect(resolveLayout(registry, 'admin')).toBe(ShadcnAdminLayout);
+    expect(resolveLayout(registry, 'admin')).toBe(AdminLayout);
     expect(resolveLayout(registry, 'workspace')).toBe(Workspace);
   });
 });

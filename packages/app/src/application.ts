@@ -7,7 +7,7 @@ import {
 } from '@pactor-app/ui/interaction';
 import { OverlayManager } from '@pactor-app/ui/interaction';
 import {
-  createShadcnLayoutRegistry,
+  createLayoutRegistry,
   type AdminLayoutConfig,
   type LayoutRegistry,
 } from '@pactor-app/ui/layout';
@@ -72,38 +72,31 @@ export interface PactorApplicationOptions {
   /** 业务组件扩展（写入应用级共享 registry，可覆盖同名内置组件） */
   components?: Record<string, unknown>;
   /**
-   * UI 库切换（设计决策 D4，ui-kit-selection spec）：组件注册表工厂，
-   * 缺省 createShadcnComponentRegistry（shadcn，@pactor-app/ui——唯一内置
+   * 自定义组件注册表覆盖点（设计决策 D4，ui-kit-selection spec）：
+   * 组件注册表工厂，缺省 createComponentRegistry（@pactor-app/ui 内置
    * 实现）；传入自定义工厂可整体替换。
    * options.components 与运行期 registerComponent 叠加在所选注册表之上。
    * 注意：默认路径需导入 `@pactor-app/ui/styles.css`。
    */
   componentRegistry?: () => Registry<unknown>;
   /**
-   * UI 库切换（shell-ui-kit-selection spec）：布局注册表工厂，
-   * 缺省 createShadcnLayoutRegistry（shadcn，@pactor-app/ui——唯一内置
+   * 自定义布局注册表覆盖点（shell-ui-kit-selection spec）：
+   * 布局注册表工厂，缺省 createLayoutRegistry（@pactor-app/ui 内置
    * 实现）；传入自定义工厂可整体替换外壳布局。
    * bootstrap 的 layout.type 解析逻辑不变。
    */
   layoutRegistry?: () => LayoutRegistry;
   /**
-   * UI 库切换（shell-ui-kit-selection spec）：交互层组件对，
-   * 缺省 shadcn 版 ShadcnInteractionProvider / ShadcnOverlayHost
-   * （@pactor-app/ui——唯一内置实现）；传入自定义组件对可替换
-   * overlay / message / confirm 链路。props 类型为
-   * @pactor-app/ui/interaction 的 InteractionProviderProps / OverlayHostProps。
+   * 自定义交互层覆盖点（shell-ui-kit-selection spec）：交互层组件对，
+   * 缺省 @pactor-app/ui 内置的 InteractionProvider / OverlayHost；
+   * 传入自定义组件对可替换 overlay / message / confirm 链路。
+   * props 类型为 @pactor-app/ui/interaction 的
+   * InteractionProviderProps / OverlayHostProps。
    */
   interactionKit?: {
     Provider: ComponentType<InteractionProviderProps>;
     OverlayHost: ComponentType<OverlayHostProps>;
   };
-  /**
-   * UI kit 预设（ui-kit-preset spec）：一次性提供三个 UI 库切换槽位
-   * （内置预设为 @pactor-app/ui 的 shadcnUiKit）。
-   * 每个槽位独立合并，优先级：显式细粒度选项 > ui 预设 > 内置
-   * shadcn 默认。
-   */
-  ui?: UiKit;
   /** 业务动作扩展（可覆盖同名内置/交互动作） */
   actions?: Record<string, ActionHandler>;
   /** 业务服务扩展 */
@@ -128,19 +121,6 @@ export interface PactorApplicationOptions {
   defaultLocale?: string;
   /** 翻译消息表（优先级高于 bootstrap.messages） */
   messages?: I18nMessages;
-}
-
-/**
- * UI kit 预设对象（ui-kit-preset spec）：三个槽位的字段类型直接复用
- * PactorApplicationOptions 既有选项的类型（结构一致，天然向第三方 kit 开放）。
- */
-export interface UiKit {
-  /** 组件注册表工厂（同 options.componentRegistry） */
-  componentRegistry?: PactorApplicationOptions['componentRegistry'];
-  /** 布局注册表工厂（同 options.layoutRegistry） */
-  layoutRegistry?: PactorApplicationOptions['layoutRegistry'];
-  /** 交互层组件对（同 options.interactionKit） */
-  interactionKit?: PactorApplicationOptions['interactionKit'];
 }
 
 /**
@@ -199,7 +179,7 @@ export interface PactorApplicationHandle {
   readonly uiBridge: UiBridge;
   readonly permissionStore: PermissionStore;
   readonly layoutRegistry: LayoutRegistry;
-  /** 交互层 UI kit（Provider / OverlayHost 组件对，缺省 shadcn 版） */
+  /** 交互层组件对（Provider / OverlayHost，缺省内置实现） */
   readonly interactionKit: {
     Provider: ComponentType<InteractionProviderProps>;
     OverlayHost: ComponentType<OverlayHostProps>;
@@ -394,16 +374,14 @@ export function createPactorApplication(
   const routerOptions = options.router ?? {};
 
   const permissionStore = new PermissionStore();
-  // 外壳层 UI kit：布局注册表槽位独立合并（显式选项 > ui 预设 > shadcn 默认）
+  // 外壳层布局注册表：自定义工厂覆盖点，缺省内置实现
   const layoutRegistry =
-    (options.layoutRegistry ?? options.ui?.layoutRegistry)?.() ??
-    createShadcnLayoutRegistry();
+    options.layoutRegistry?.() ?? createLayoutRegistry();
   const navigation = new ReactRouterBinding();
 
   // ---- 组装内核（spec: application-bootstrap，与嵌入模式共享）----
   const assembly = createPactorAssembly({
     componentRegistry: options.componentRegistry,
-    ui: options.ui,
     interactionKit: options.interactionKit,
     components: options.components,
     actions: options.actions,

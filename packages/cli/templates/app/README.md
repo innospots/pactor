@@ -9,7 +9,7 @@ pnpm dev
 
 - `src/pages/home.page.yaml`：示例 Page DSL，经 @pactor-app/vite-plugin 在构建期转换为 JS 模块
 - `src/main.tsx`：`createPactorApplication` + `StaticDslLoader`（本地 DSL 开发）；接入服务端后改用 `api: { baseURL: '/api/runtime' }`
-- 默认 UI kit 为 shadcn，`@pactor-app/ui/styles.css` 样式导入为必需步骤
+- 默认 UI 为 @pactor-app/ui 内置实现，`@pactor-app/ui/styles.css` 样式导入为必需步骤
 
 ## 说明
 

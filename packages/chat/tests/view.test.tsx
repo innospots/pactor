@@ -2,8 +2,8 @@
 import './setup.js';
 
 import { Registry } from '@pactor-app/core';
-import { createShadcnComponentRegistry } from '@pactor-app/ui/components';
-import { createShadcnLayoutRegistry, resolveLayout } from '@pactor-app/ui/layout';
+import { createComponentRegistry } from '@pactor-app/ui/components';
+import { createLayoutRegistry, resolveLayout } from '@pactor-app/ui/layout';
 import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
@@ -90,7 +90,7 @@ describe('ChatView（spec: chat-view / 消息列表渲染）', () => {
 
 describe('PartRenderer（spec: chat-view / PartRenderer）', () => {
   function createChatSafeRegistry(): Registry<unknown> {
-    return createSafeRegistry(createShadcnComponentRegistry(), ['Statistic', 'Card']);
+    return createSafeRegistry(createComponentRegistry(), ['Statistic', 'Card']);
   }
 
   it('dsl part 渲染白名单组件（Statistic），作用域可访问 message.id（spec: dsl part 渲染白名单组件 + DSL 访问 message.id）', async () => {
@@ -355,7 +355,7 @@ describe('ChatView 透传 Composer 扩展 props（spec: chat-composer-extensions
 
 describe('registerChatLayout（spec: chat-view / chat 布局注册）', () => {
   it('注册并解析：resolveLayout 命中 chat 布局（spec: 注册并解析）', () => {
-    const registry = createShadcnLayoutRegistry();
+    const registry = createLayoutRegistry();
     expect(() => resolveLayout(registry, 'chat')).not.toThrow();
     registerChatLayout(registry);
     const layout = resolveLayout(registry, 'chat');
@@ -365,7 +365,7 @@ describe('registerChatLayout（spec: chat-view / chat 布局注册）', () => {
   });
 
   it('chat 布局渲染 header 标题区 + ChatView 区', () => {
-    const registry = createShadcnLayoutRegistry();
+    const registry = createLayoutRegistry();
     registerChatLayout(registry);
     const Layout = resolveLayout(registry, 'chat');
     const store = createStore();

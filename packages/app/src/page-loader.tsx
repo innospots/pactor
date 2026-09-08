@@ -26,7 +26,7 @@ type PageState =
  *   key 变化即整体重建：旧运行时 destroy，新页面重新加载（V1 无 keepAlive）；
  * - 加载中渲染 loading 态；加载/校验失败渲染含重试的受控错误页；
  * - PageRuntimeView 经 PageErrorBoundary 包裹，渲染异常不白屏；
- * - OverlayHost（app.interactionKit 所选实现，缺省 shadcn 版）作为
+ * - OverlayHost（app.interactionKit 所选实现，缺省内置实现）作为
  *   PageRuntimeView children（共享当前页面 Renderer 上下文；page overlay
  *   经 resolvePage 接 loader，子运行时共享应用级 registries——由
  *   interaction host 内部实现）。

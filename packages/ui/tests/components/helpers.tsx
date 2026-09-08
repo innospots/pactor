@@ -13,7 +13,7 @@ import {
 import { cleanup, render, type RenderResult } from '@testing-library/react';
 import { afterEach, expect, vi } from 'vitest';
 
-import { createShadcnComponentRegistry } from '../../src/components/index.js';
+import { createComponentRegistry } from '../../src/components/index.js';
 
 afterEach(cleanup);
 
@@ -21,14 +21,14 @@ export interface RenderDslResult extends RenderResult {
   context: RuntimeContext;
 }
 
-/** 以注册好内置组件（默认 shadcn kit）与内置动作的 RuntimeContext 渲染 DSL 子树 */
+/** 以注册好内置组件（默认内置组件）与内置动作的 RuntimeContext 渲染 DSL 子树 */
 export function renderDsl(
   node: DslNode,
   options: CreateRuntimeContextOptions = {},
 ): RenderDslResult {
   const context = createRuntimeContext({
     ...options,
-    components: options.components ?? createShadcnComponentRegistry(),
+    components: options.components ?? createComponentRegistry(),
   });
   registerBuiltinActions(context.actions);
   const result = render(<DslRenderer context={context} node={node} />);

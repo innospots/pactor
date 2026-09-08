@@ -3,7 +3,7 @@ import './setup.js';
 
 import { Registry, type PageDsl } from '@pactor-app/core';
 import { createPageRuntime } from '@pactor-app/runtime';
-import { createShadcnComponentRegistry } from '@pactor-app/ui/components';
+import { createComponentRegistry } from '@pactor-app/ui/components';
 import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
@@ -26,7 +26,7 @@ afterEach(cleanup);
  */
 
 function fullRegistry(): Registry<unknown> {
-  const registry = createShadcnComponentRegistry();
+  const registry = createComponentRegistry();
   registerChatComponent(registry);
   return registry;
 }
