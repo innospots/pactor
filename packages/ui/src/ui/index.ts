@@ -9,6 +9,17 @@
 export { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from './accordion.js';
 export { Alert, AlertDescription, AlertTitle } from './alert.js';
 export {
+  Attachment,
+  AttachmentAction,
+  AttachmentActions,
+  AttachmentContent,
+  AttachmentDescription,
+  AttachmentGroup,
+  AttachmentMedia,
+  AttachmentTitle,
+  AttachmentTrigger,
+} from './attachment.js';
+export {
   AlertDialog,
   AlertDialogAction,
   AlertDialogCancel,
@@ -35,6 +46,12 @@ export {
 } from './breadcrumb.js';
 export { Button, buttonVariants } from './button.js';
 export { ButtonGroup } from './button-group.js';
+export {
+  Bubble,
+  BubbleContent,
+  BubbleGroup,
+  BubbleReactions,
+} from './bubble.js';
 export { Calendar } from './calendar.js';
 export { ChartContainer, chartColor, CHART_TOKEN_COLORS } from './chart.js';
 export {
@@ -165,6 +182,14 @@ export {
 } from './item.js';
 export { Kbd } from './kbd.js';
 export { Label } from './label.js';
+export {
+  Message,
+  MessageAvatar,
+  MessageContent,
+  MessageFooter,
+  MessageGroup,
+  MessageHeader,
+} from './message.js';
 export { Popover, PopoverContent, PopoverTrigger } from './popover.js';
 export { Progress, ProgressIndicator, ProgressTrack } from './progress.js';
 export { RadioGroup, RadioGroupItem } from './radio-group.js';

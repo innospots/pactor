@@ -284,6 +284,44 @@
   }
 }
 
+/* Attachment 组件需要的自定义工具类 */
+@utility shimmer {
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    var(--muted) 50%,
+    transparent 100%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.5s ease-in-out infinite;
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+@utility scroll-fade-x {
+  mask-image: linear-gradient(
+    to right,
+    transparent,
+    black 8px,
+    black calc(100% - 8px),
+    transparent
+  );
+}
+
+@utility scrollbar-none {
+  scrollbar-width: none;
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
+
 /* 官方 base layer：默认边框色/焦点环色 + 页面底色与文字色 */
 @layer base {
   * {
