@@ -1,0 +1,413 @@
+dsl: '1.0'
+page:
+  id: gallery
+  title: 组件画廊
+  name: themeGallery
+  description: '组件画廊（spec: theme-studio）：纯内置组件 + chat 注册组件静态陈列，作为皮肤效果的验收面（工作室 iframe 预览页）'
+
+meta:
+  version: '1.0'
+  author: platform-team
+
+state:
+  switchOn: true
+  sliderValue: 62
+  radioValue: apple
+  checked: true
+  pageNo: 1
+  tabKey: basic
+  menuKey: overview
+  date: '2026-09-10'
+  draft: ''
+
+dataSources:
+  sales:
+    type: static
+    autoLoad: true
+    value:
+      - { month: 一月, amount: 120, profit: 30 }
+      - { month: 二月, amount: 200, profit: 80 }
+      - { month: 三月, amount: 150, profit: 45 }
+      - { month: 四月, amount: 260, profit: 110 }
+      - { month: 五月, amount: 220, profit: 95 }
+  members:
+    type: static
+    autoLoad: true
+    value:
+      - { id: 1, name: 张三, role: 管理员, age: 28 }
+      - { id: 2, name: 李四, role: 运营, age: 32 }
+      - { id: 3, name: 王五, role: 客服, age: 25 }
+  menuItems:
+    type: static
+    value:
+      - { key: overview, label: 概览, icon: home }
+      - { key: report, label: 报表, icon: list }
+      - { key: settings, label: 设置, icon: settings }
+
+# 根级 children：长滚动陈列，按分组覆盖全部皮肤令牌验收对象
+children:
+  # toast 动作挂载点（Sonner 注册 toast 动作）
+  - type: Sonner
+  - type: Flex
+    props:
+      direction: vertical
+      gap: 20
+      style: { maxWidth: 960, margin: 0 auto, padding: 24 }
+    children:
+      - type: Typography
+        props: { variant: h2, text: 组件画廊 }
+      - type: Text
+        props:
+          type: secondary
+          text: 本页为皮肤验收面：每类皮肤令牌都有可见的对应组件。工作室左侧修改即时生效。
+
+      # ============ 基础 ============
+      - type: Card
+        props:
+          title: 基础：Button / Badge / Typography / Icon
+        children:
+          - type: Flex
+            props:
+              gap: 8
+              style: { flexWrap: wrap, alignItems: center }
+            children:
+              - type: Button
+                props: { text: 主要按钮, variant: primary }
+              - type: Button
+                props: { text: 默认按钮 }
+              - type: Button
+                props: { text: 虚线按钮, variant: dashed }
+              - type: Button
+                props: { text: 链接按钮, variant: link }
+              - type: Button
+                props: { text: 文字按钮, variant: text }
+              - type: Button
+                props: { text: 危险按钮, danger: true }
+              - type: Button
+                props: { text: 禁用按钮, disabled: true }
+          - type: Flex
+            props:
+              gap: 8
+              style: { alignItems: center, marginTop: 12 }
+            children:
+              - type: Badge
+                props: { text: 默认 }
+              - type: Badge
+                props: { text: 草稿, variant: secondary }
+              - type: Badge
+                props: { text: 停用, variant: destructive }
+              - type: Badge
+                props: { text: 描边, variant: outline }
+              - type: Icon
+                props: { name: check-circle, color: green }
+              - type: Icon
+                props: { name: bell, size: lg }
+              - type: Icon
+                props: { name: star }
+          - type: Typography
+            props: { variant: h3, text: 排版标题（Typography） }
+          - type: Typography
+            props: { variant: p, text: 正文段落：皮肤令牌接管全部颜色、圆角与字体族。 }
+          - type: Typography
+            props: { variant: muted, text: 辅助说明文字（muted-foreground 令牌） }
+
+      # ============ 表单 ============
+      - type: Card
+        props:
+          title: 表单：Input / Textarea / Select / Switch / Slider / RadioGroup / Checkbox
+        children:
+          - type: Grid
+            props: { columns: 2, gap: 16 }
+            children:
+              - type: Flex
+                props: { direction: vertical, gap: 12 }
+                children:
+                  - type: Input
+                    props: { label: 名称, placeholder: 请输入名称 }
+                  - type: Textarea
+                    props: { label: 备注, rows: 3, placeholder: 多行文本输入 }
+                  - type: Select
+                    props:
+                      label: 城市
+                      placeholder: 请选择
+                      options:
+                        - { label: 北京, value: bj }
+                        - { label: 上海, value: sh }
+                        - { label: 杭州, value: hz }
+              - type: Flex
+                props: { direction: vertical, gap: 12 }
+                children:
+                  - type: Switch
+                    props:
+                      label: 启用通知（--switch-track 系列）
+                      value: ${state.switchOn}
+                    events:
+                      onChange:
+                        - action: setState
+                          params:
+                            switchOn: ${event}
+                  - type: Slider
+                    props:
+                      label: 音量（--slider-track / range / thumb）
+                      value: ${state.sliderValue}
+                    events:
+                      onChange:
+                        - action: setState
+                          params:
+                            sliderValue: ${event}
+                  - type: RadioGroup
+                    props:
+                      label: 规格（--radio-border / --radio-checked）
+                      value: ${state.radioValue}
+                      options:
+                        - { label: 苹果, value: apple }
+                        - { label: 橙子, value: orange }
+                    events:
+                      onChange:
+                        - action: setState
+                          params:
+                            radioValue: ${event}
+                  - type: Checkbox
+                    props:
+                      label: 同意协议
+                      value: ${state.checked}
+                    events:
+                      onChange:
+                        - action: setState
+                          params:
+                            checked: ${event}
+      - type: Card
+        props:
+          title: 表单：Calendar（--calendar-selected / today / day-hover 系列）
+        children:
+          - type: Calendar
+            props:
+              value: ${state.date}
+            events:
+              onChange:
+                - action: setState
+                  params:
+                    date: ${event}
+
+      # ============ 反馈 ============
+      - type: Card
+        props:
+          title: 反馈：Alert 四态 / Progress / Skeleton / Toast
+        children:
+          - type: Flex
+            props: { direction: vertical, gap: 12 }
+            children:
+              - type: Alert
+                props: { variant: info, message: 信息提示（--info） }
+              - type: Alert
+                props: { variant: success, message: 成功提示（--success） }
+              - type: Alert
+                props: { variant: warning, message: 警告提示（--warning） }
+              - type: Alert
+                props: { variant: error, message: 错误提示（--destructive） }
+              - type: Progress
+                props: { value: 62 }
+              - type: Flex
+                props:
+                  gap: 8
+                  style: { alignItems: center }
+                children:
+                  - type: Skeleton
+                    props: { shape: circle }
+                  - type: Flex
+                    props:
+                      direction: vertical
+                      gap: 6
+                      style: { flex: 1 }
+                    children:
+                      - type: Skeleton
+                        props: { shape: line }
+                      - type: Skeleton
+                        props: { shape: line, width: 60% }
+              - type: Button
+                props: { text: 触发 Toast, variant: primary }
+                events:
+                  onClick:
+                    - action: toast
+                      params: { message: 皮肤已应用, description: Toast 走 popover 令牌, variant: success }
+
+      # ============ 导航 ============
+      - type: Card
+        props:
+          title: 导航：Menu / Tabs / Pagination / Breadcrumb
+        children:
+          - type: Breadcrumb
+            props:
+              items:
+                - { label: 首页, href: / }
+                - { label: 系统, href: / }
+                - { label: 组件画廊 }
+          - type: Flex
+            props:
+              gap: 16
+              style: { marginTop: 12, alignItems: flex-start }
+            children:
+              - type: Menu
+                props:
+                  items: ${data.menuItems}
+                  selectedKey: ${state.menuKey}
+                  style: { width: 200, border: 1px solid var(--border), borderRadius: 8, padding: 4 }
+                events:
+                  onSelect:
+                    - action: setState
+                      params:
+                        menuKey: ${event}
+              - type: Flex
+                props:
+                  direction: vertical
+                  gap: 16
+                  style: { flex: 1 }
+                children:
+                  - type: Tabs
+                    props:
+                      activeKey: ${state.tabKey}
+                      items:
+                        - key: basic
+                          label: 页签一
+                          children:
+                            - type: Text
+                              props: { text: 页签一内容 }
+                        - key: advanced
+                          label: 页签二
+                          children:
+                            - type: Text
+                              props: { text: 页签二内容 }
+                    events:
+                      onChange:
+                        - action: setState
+                          params:
+                            tabKey: ${event}
+                  - type: Pagination
+                    props:
+                      total: 86
+                      pageSize: 10
+                      page: ${state.pageNo}
+                    events:
+                      onChange:
+                        - action: setState
+                          params:
+                            pageNo: ${event}
+
+      # ============ 浮层 ============
+      - type: Card
+        props:
+          title: 浮层：Dialog / Popover / DropdownMenu / HoverCard（可交互打开）
+        children:
+          - type: Flex
+            props:
+              gap: 12
+              style: { flexWrap: wrap }
+            children:
+              - type: Dialog
+                props:
+                  title: 编辑资料
+                  description: 弹层表面走 popover / overlay-background / shadow-color 令牌
+                  trigger:
+                    type: Button
+                    props: { text: 打开 Dialog, variant: primary }
+                children:
+                  - type: Input
+                    props: { placeholder: 昵称 }
+              - type: Popover
+                props:
+                  content:
+                    type: Text
+                    props: { text: 浮层富内容（popover 令牌） }
+                children:
+                  - type: Button
+                    props: { text: 打开 Popover }
+              - type: DropdownMenu
+                props:
+                  items:
+                    - { label: 编辑, value: edit }
+                    - { label: 复制, value: copy }
+                    - { label: 删除, value: delete, danger: true }
+                children:
+                  - type: Button
+                    props: { text: 打开 DropdownMenu }
+              - type: HoverCard
+                props:
+                  content:
+                    type: Text
+                    props: { text: 悬浮卡片内容（popover 令牌） }
+                children:
+                  - type: Button
+                    props: { text: 悬浮 HoverCard, variant: dashed }
+
+      # ============ 数据 ============
+      - type: Card
+        props:
+          title: 数据：Card / Statistic / Table
+        children:
+          - type: Grid
+            props: { columns: 3, gap: 16 }
+            children:
+              - type: Card
+                children:
+                  - type: Statistic
+                    props: { title: 营收（万元）, value: 386.2, precision: 1 }
+              - type: Card
+                children:
+                  - type: Statistic
+                    props: { title: 新增客户, value: 342 }
+              - type: Card
+                children:
+                  - type: Statistic
+                    props: { title: 转化率, value: 23.8, precision: 1, suffix: '%' }
+          - type: Table
+            props:
+              dataSource: ${data.members}
+              style: { marginTop: 16 }
+              columns:
+                - { title: 姓名, dataIndex: name }
+                - { title: 角色, dataIndex: role }
+                - { title: 年龄, dataIndex: age }
+      - type: Card
+        props:
+          title: 数据：Chart（chart-1..5 令牌配色）
+        children:
+          - type: Grid
+            props: { columns: 2, gap: 16 }
+            children:
+              - type: Chart
+                props:
+                  chartType: bar
+                  data: ${data.sales}
+                  xKey: month
+                  yKeys: [amount, profit]
+              - type: Chart
+                props:
+                  chartType: line
+                  data: ${data.sales}
+                  xKey: month
+                  yKeys: [amount, profit]
+
+      # ============ chat 系 ============
+      - type: Card
+        props:
+          title: chat 系：Bubble / Message / ChatInput（@pactor-app/chat 注册）
+        children:
+          - type: Flex
+            props:
+              direction: vertical
+              style: { height: 480, border: 1px solid var(--border), borderRadius: 8, overflow: hidden }
+            children:
+              - type: Chat
+                props:
+                  showHeader: false
+                  conversationId: gallery-demo
+          - type: ChatInput
+            props:
+              placeholder: ChatInput（内置组件形态）
+              value: ${state.draft}
+              style: { marginTop: 12 }
+            events:
+              onChange:
+                - action: setState
+                  params:
+                    draft: ${event}

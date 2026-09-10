@@ -26,6 +26,8 @@ examples/
   vite-starter/ example-vite-starter 最小上手示例（vite-plugin 工作流，端口 5499）
   admin/       example-admin      管理后台示例（StaticDslLoader + 内存 mock，端口 5199）
   chat/        example-chat       @pactor-app/chat 对话示例（mock AI 流式 transport，端口 5399）
+tools/
+  theme-studio/ theme-studio     皮肤工作室（可视化主题编辑 + 组件画廊预览 + 皮肤 CSS 下载，端口 5710，不发布）
 docs/          pactor-docs        Astro Starlight 文档站
 ```
 
@@ -48,6 +50,7 @@ pnpm docs:build     # 构建文档站
 pnpm --filter example-vite-starter dev   # 最小上手示例（vite-plugin 工作流），http://localhost:5499
 pnpm --filter example-admin dev          # 管理后台示例（含皮肤设置），http://localhost:5199
 pnpm --filter example-chat dev           # @pactor-app/chat 对话示例，http://localhost:5399
+pnpm --filter theme-studio dev           # 皮肤工作室（主题编辑 + 画廊预览 + 皮肤下载），http://localhost:5710
 ```
 
 > 示例引用 workspace 包的 dist 产物：改包代码后需先 `pnpm build`，示例才能看到效果。
