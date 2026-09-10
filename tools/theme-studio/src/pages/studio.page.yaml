@@ -1,0 +1,55 @@
+dsl: '1.0'
+page:
+  id: studio
+  title: 皮肤工作室
+  name: themeStudio
+  description: '皮肤工作室（spec: theme-studio）：左栏预置主题 + 令牌编辑器，右侧 iframe 实时预览组件画廊'
+
+meta:
+  version: '1.0'
+  author: platform-team
+
+# 根级 children 局部描述形态（blank 外壳，页面完全自控结构）：
+# 左栏自定义组件（预置主题 / 下载 / 令牌编辑器）+ 右侧 iframe 预览组件，
+# 共享状态走模块级 store（见 src/store.ts），不经 DSL props 穿透
+children:
+  - type: Flex
+    props:
+      direction: vertical
+      style: { height: 100vh }
+    children:
+      # 顶栏：标题 + 下载入口
+      - type: Flex
+        props:
+          gap: 12
+          style: { padding: '10px 16px', borderBottom: 1px solid var(--border), alignItems: center }
+        children:
+          - type: Typography
+            props: { variant: h3, text: 皮肤工作室 }
+          - type: Text
+            props:
+              type: secondary
+              text: 选择预置主题 → 微调令牌 → 右侧画廊实时预览 → 下载皮肤 CSS
+      - type: Flex
+        props:
+          style: { flex: 1, minHeight: 0, alignItems: stretch }
+        children:
+          # 左栏：预置主题列表 + 下载 + 分组令牌编辑器（均可滚动）
+          - type: Flex
+            props:
+              direction: vertical
+              gap: 12
+              style: { width: 400, flexShrink: 0, overflowY: auto, padding: 16, borderRight: 1px solid var(--border) }
+            children:
+              - type: Text
+                props: { text: 预置主题, strong: true }
+              - type: ThemePresetList
+              - type: SkinDownloadButton
+              - type: Separator
+              - type: Text
+                props: { text: 令牌编辑器, strong: true }
+              - type: TokenEditor
+          # 右侧：iframe 加载 /gallery，皮肤经 postMessage 注入
+          - type: SkinPreviewFrame
+            props:
+              style: { flex: 1 }
