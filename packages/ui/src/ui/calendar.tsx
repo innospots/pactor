@@ -53,15 +53,15 @@ function Calendar({
         week: cn('mt-2 flex w-full', defaultClassNames.week),
         day: cn('h-8 w-8 p-0 text-center text-sm', defaultClassNames.day),
         day_button: cn(
-          'size-8 cursor-pointer rounded-md p-0 font-normal hover:bg-accent hover:text-accent-foreground aria-selected:opacity-100',
+          'size-8 cursor-pointer rounded-md p-0 font-normal hover:bg-(--calendar-day-hover-background) hover:text-(--calendar-day-hover-foreground) aria-selected:opacity-100',
           defaultClassNames.day_button,
         ),
         selected: cn(
-          '[&>button]:bg-primary [&>button]:text-primary-foreground [&>button]:hover:bg-primary',
+          '[&>button]:bg-(--calendar-selected-background) [&>button]:text-(--calendar-selected-foreground) [&>button]:hover:bg-(--calendar-selected-background)',
           defaultClassNames.selected,
         ),
         today: cn(
-          '[&>button]:bg-accent [&>button]:text-accent-foreground',
+          '[&>button]:bg-(--calendar-today-background) [&>button]:text-(--calendar-today-foreground)',
           defaultClassNames.today,
         ),
         outside: cn(

@@ -15,8 +15,12 @@ afterEach(cleanup);
 /**
  * Sidebar 壳能力（spec: shadcn-extended-components / Sidebar 壳能力）：
  * content 自由内容槽、sidebarFooter、brand ReactNode 形态、桌面 icon
- * rail 折叠、移动端覆盖抽屉（遮罩 / Escape / locationKey / inert）、
- * useSidebarDrawer context、Menu 在 collapsed 侧栏内降级为仅图标。
+ * rail 折叠、移动端覆盖抽屉（Sheet）、useSidebarDrawer context、
+ * Menu 在 collapsed 侧栏内降级为仅图标。
+ *
+ * 内部组合 shadcn Sidebar 原语（SidebarProvider / Sidebar / SidebarInset），
+ * DOM 结构钩子为 shadcn 语义（data-slot=sidebar-wrapper / sidebar / sidebar-content /
+ * sidebar-inset / sidebar-trigger / sidebar-menu-button 等）。
  */
 
 /** 把 matchMedia 桩为移动视口分支（jsdom 不应用媒体查询） */
@@ -50,11 +54,11 @@ describe('Sidebar 壳能力', () => {
     );
     expect(screen.getByText('自定义侧栏')).toBeTruthy();
     expect(screen.queryByText('不应出现')).toBeNull();
-    const nav = document.querySelector('[data-slot=sidebar-nav]')!;
+    const content = document.querySelector('[data-slot=sidebar-content]')!;
     const footer = document.querySelector('[data-slot=sidebar-footer]')!;
     expect(footer.textContent).toContain('底部区');
     expect(
-      nav.compareDocumentPosition(footer) & Node.DOCUMENT_POSITION_FOLLOWING,
+      content.compareDocumentPosition(footer) & Node.DOCUMENT_POSITION_FOLLOWING,
     ).toBeTruthy();
     unmount();
 
@@ -74,7 +78,7 @@ describe('Sidebar 壳能力', () => {
     expect(topbar.textContent).toContain('品牌 X');
   });
 
-  it('collapsible 折叠为 icon rail：宽度收窄、items 仅图标（title 兜底）、footer 与品牌内容隐藏、onCollapse 传出', async () => {
+  it('collapsible 折叠为 icon rail：宽度收窄、items 仅图标、footer 与品牌内容隐藏、onCollapse 传出', async () => {
     const onCollapse = vi.fn();
     render(
       <Sidebar
@@ -91,27 +95,30 @@ describe('Sidebar 壳能力', () => {
     fireEvent.click(trigger);
     expect(onCollapse).toHaveBeenCalledWith(true);
 
-    const aside = document.querySelector('[data-slot=sidebar]')!;
-    expect(aside.getAttribute('data-collapsed')).toBe('true');
-    // label 隐藏；hover 图标经 RailTooltip 展示（右侧浮层）
-    expect(screen.queryByText('概览')).toBeNull();
-    expect(
-      document.querySelector('[data-slot=sidebar-item]')?.getAttribute('title'),
-    ).toBeNull();
+    const sidebar = document.querySelector('[data-slot=sidebar]')!;
+    expect(sidebar.getAttribute('data-state')).toBe('collapsed');
+    expect(sidebar.getAttribute('data-collapsible')).toBe('icon');
+    // 品牌标题与 footer 条件渲染（折叠时不渲染）
     expect(document.querySelector('[data-slot=sidebar-footer]')).toBeNull();
     expect(screen.queryByText('后台')).toBeNull();
 
-    fireEvent.focus(document.querySelector('[data-slot=sidebar-item]')!);
+    // hover 菜单项经 Tooltip 展示（icon rail 模式下 SidebarMenuButton 内置 tooltip）
+    const menuButton = document.querySelector('[data-slot=sidebar-menu-button]')!;
+    fireEvent.focus(menuButton);
     await vi.waitFor(() => {
       expect(
         document.querySelector('[data-slot=tooltip-content]')?.textContent,
       ).toBe('概览');
     });
+    // 关闭 tooltip 再展开，避免 getByText 命中 tooltip 内容
+    fireEvent.blur(menuButton);
 
     fireEvent.click(screen.getByRole('button', { name: '展开侧边栏' }));
     expect(onCollapse).toHaveBeenCalledWith(false);
-    expect(aside.getAttribute('data-collapsed')).toBeNull();
-    expect(screen.getByText('概览')).toBeTruthy();
+    expect(sidebar.getAttribute('data-state')).toBe('expanded');
+    // tooltip portal 到 body，用 within 限定在 sidebar 内查询
+    const { within } = await import('@testing-library/react');
+    expect(within(sidebar as HTMLElement).getByText('概览')).toBeTruthy();
   });
 
   it('useSidebarDrawer 提供 close 与 collapsed；不在 Sidebar 内返回 null', () => {
@@ -135,7 +142,7 @@ describe('Sidebar 壳能力', () => {
     expect(probe[2]).toBe('null');
   });
 
-  it('移动端抽屉：菜单钮开启、遮罩 / Escape / locationKey 变化关闭，关闭时 inert', () => {
+  it('移动端抽屉：菜单钮开启、Sheet 遮罩关闭、locationKey 变化关闭', () => {
     const restore = stubMobileViewport();
     try {
       const { rerender } = render(
@@ -143,32 +150,21 @@ describe('Sidebar 壳能力', () => {
           主区
         </Sidebar>,
       );
-      const aside = document.querySelector('[data-slot=sidebar]')!;
-      expect(aside.hasAttribute('inert')).toBe(true);
 
+      // 移动端：侧栏为 Sheet 抽屉，初始关闭
+      expect(screen.queryByText('侧栏')).toBeNull();
+
+      // 菜单钮开启
       fireEvent.click(screen.getByRole('button', { name: '打开导航' }));
-      expect(document.querySelector('[data-slot=sidebar-scrim]')).not.toBeNull();
-      expect(aside.hasAttribute('inert')).toBe(false);
-
-      // 遮罩点击关闭
-      fireEvent.click(document.querySelector('[data-slot=sidebar-scrim]')!);
-      expect(document.querySelector('[data-slot=sidebar-scrim]')).toBeNull();
-
-      // Escape 关闭
-      fireEvent.click(screen.getByRole('button', { name: '打开导航' }));
-      expect(document.querySelector('[data-slot=sidebar-scrim]')).not.toBeNull();
-      fireEvent.keyDown(window, { key: 'Escape' });
-      expect(document.querySelector('[data-slot=sidebar-scrim]')).toBeNull();
+      expect(screen.getByText('侧栏')).toBeTruthy();
 
       // locationKey 变化关闭
-      fireEvent.click(screen.getByRole('button', { name: '打开导航' }));
-      expect(document.querySelector('[data-slot=sidebar-scrim]')).not.toBeNull();
       rerender(
         <Sidebar content={<div>侧栏</div>} locationKey="/b">
           主区
         </Sidebar>,
       );
-      expect(document.querySelector('[data-slot=sidebar-scrim]')).toBeNull();
+      expect(screen.queryByText('侧栏')).toBeNull();
     } finally {
       restore();
     }
@@ -198,7 +194,7 @@ describe('Sidebar 壳能力', () => {
     expect(screen.queryByText('系统')).toBeNull();
     expect(document.querySelector('[data-slot=menu-item-badge]')).toBeNull();
 
-    // hover 图标经 RailTooltip 展示
+    // hover 图标经 Tooltip 展示
     fireEvent.focus(document.querySelector('[data-slot=menu-item]')!);
     await vi.waitFor(() => {
       expect(

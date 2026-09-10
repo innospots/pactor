@@ -170,7 +170,7 @@ describe('ChatShell 侧栏增强（spec: chat-dsl-component，决策 D3/D4）', 
     const button = screen.getByRole('button', { name: '收起侧边栏' });
     fireEvent.click(button);
     expect(
-      document.querySelector('[data-slot=sidebar][data-collapsed]'),
+      document.querySelector('[data-slot=sidebar][data-state="collapsed"]'),
     ).toBeTruthy();
     expect(document.querySelector('[data-slot=sidebar-footer]')).toBeNull();
   });

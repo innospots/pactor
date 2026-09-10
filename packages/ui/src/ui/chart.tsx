@@ -3,13 +3,13 @@ import { ResponsiveContainer } from 'recharts';
 
 import { cn } from '../lib/utils.js';
 
-/** 默认图表配色：chart-1..5 语义令牌（按序循环取色） */
+/** 默认图表配色：chart-1..5 语义令牌（按序循环取色，值为 oklch，直接 var() 引用） */
 export const CHART_TOKEN_COLORS = [
-  'hsl(var(--chart-1))',
-  'hsl(var(--chart-2))',
-  'hsl(var(--chart-3))',
-  'hsl(var(--chart-4))',
-  'hsl(var(--chart-5))',
+  'var(--chart-1)',
+  'var(--chart-2)',
+  'var(--chart-3)',
+  'var(--chart-4)',
+  'var(--chart-5)',
 ] as const;
 
 /** 取第 index 个系列的颜色：优先 colors 覆盖，缺省回退 chart-1..5 令牌 */

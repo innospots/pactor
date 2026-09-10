@@ -56,7 +56,7 @@ function ToasterViewport({ className }: { className?: string }) {
             data-slot="toast"
             data-type={item.type ?? 'info'}
             className={cn(
-              'rounded-md border border-border bg-popover px-4 py-3 text-sm text-popover-foreground shadow-md transition-[opacity,transform] duration-200 data-ending-style:animate-toast-out data-starting-style:animate-toast-in',
+              'rounded-md border border-border bg-popover px-4 py-3 text-sm text-popover-foreground shadow-md shadow-(color:--shadow-color) transition-[opacity,transform] duration-200 data-ending-style:animate-toast-out data-starting-style:animate-toast-in',
               toastVariantClass[(item.type as ToastVariant) ?? 'info'] ??
                 toastVariantClass.info,
             )}

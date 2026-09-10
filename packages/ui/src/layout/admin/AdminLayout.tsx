@@ -63,9 +63,9 @@ function navigateMenuItem(
   bridge.push(menu.path);
 }
 
-/** 菜单项基础样式（shadcn 风格：hover/accent 高亮读语义令牌） */
+/** 菜单项基础样式（hover/active 高亮读 --menu-* 皮肤令牌，默认回退语义令牌） */
 const menuItemClass =
-  'flex w-full cursor-pointer items-center gap-2 rounded-md px-3 py-2 text-left text-sm text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground disabled:pointer-events-none disabled:opacity-50';
+  'flex w-full cursor-pointer items-center gap-2 rounded-md px-3 py-2 text-left text-sm text-muted-foreground transition-colors hover:bg-(--menu-hover-background) hover:text-(--menu-hover-foreground) disabled:pointer-events-none disabled:opacity-50';
 
 interface MenuTreeProps {
   menus: readonly MenuItem[];
@@ -200,7 +200,7 @@ function MenuTree({
                 menuItemClass,
                 'mx-auto size-10 justify-center px-0 font-semibold',
                 menu.id === activeMenuId &&
-                  'bg-accent font-semibold text-accent-foreground',
+                  'bg-(--menu-active-background) font-semibold text-(--menu-active-foreground)',
               )}
               disabled={menu.disabled}
               title={menu.title}
@@ -263,7 +263,7 @@ function MenuTree({
             className={cn(
               menuItemClass,
               menu.id === activeMenuId &&
-                'bg-accent font-semibold text-accent-foreground',
+                'bg-(--menu-active-background) font-semibold text-(--menu-active-foreground)',
             )}
             disabled={menu.disabled}
             title={menu.title}
@@ -447,7 +447,7 @@ export function AdminLayout({
             menuItemClass,
             'size-10 justify-center px-0 font-semibold',
             (menu.id === secondaryTopId || menu.id === activeTopId) &&
-              'bg-accent text-accent-foreground',
+              'bg-(--menu-active-background) text-(--menu-active-foreground)',
           )}
           disabled={menu.disabled}
           title={menu.title}

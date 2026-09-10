@@ -56,6 +56,8 @@ function PaginationLink({
         buttonVariants({
           variant: isActive ? 'outline' : 'ghost',
         }),
+        isActive &&
+          'border-(color:--pagination-active-border) bg-(--pagination-active-background) rounded-(--pagination-active-radius)',
         disabled && 'pointer-events-none opacity-50',
         className,
       )}

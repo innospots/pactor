@@ -220,7 +220,7 @@ describe('shell-ui-kit-selection：chat 布局接线', () => {
 
     // chat 布局渲染：Sidebar 外壳 + 菜单项
     await screen.findByText('对话');
-    expect(target.querySelector('[data-slot=sidebar-layout]')).not.toBeNull();
+    expect(target.querySelector('[data-slot=sidebar-wrapper]')).not.toBeNull();
     expect(screen.getByText('智能体')).toBeTruthy();
     // 当前路径 / 命中「对话」菜单项高亮
     const homeItem = screen.getByText('对话').closest('button');
