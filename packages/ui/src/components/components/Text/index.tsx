@@ -28,8 +28,8 @@ export interface TextProps {
 const typeClassMap: Record<TextType, string> = {
   default: '',
   secondary: 'text-muted-foreground',
-  success: 'text-green-600 dark:text-green-400',
-  warning: 'text-amber-600 dark:text-amber-400',
+  success: 'text-success',
+  warning: 'text-warning',
   danger: 'text-destructive',
 };
 

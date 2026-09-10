@@ -24,6 +24,10 @@
  * - `@theme inline` 把语义变量桥接为 Tailwind 颜色工具类
  *   （bg-background / text-foreground / border-border / ring-ring …），
  *   工具类运行时读 var()，主题切换无需重新构建。
+ * - **皮肤契约**：皮肤 CSS 在本样式表之后加载即可覆盖全部令牌换肤；
+ *   组件级令牌（--<component>-<part>-<state>）默认值经 var() 回退到语义令牌；页面背景图经
+ *   --background-image（默认 none）承接渐变/图片。详见
+ *   openspec/changes/add-theme-skin-css/design.md 与 docs 皮肤定制指南。
  */
 
 @import 'tailwindcss';
@@ -116,6 +120,44 @@
   --sidebar-accent-foreground: oklch(0.205 0 0);
   --sidebar-border: oklch(0.922 0 0);
   --sidebar-ring: oklch(0.708 0 0);
+
+  /* 皮肤扩展令牌：字体族 / 页面背景图 / 阴影 / 遮罩 */
+  --font-sans: ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto,
+    'Helvetica Neue', Arial, sans-serif;
+  --background-image: none;
+  --card-shadow: none;
+  --shadow-color: oklch(0 0 0 / 10%);
+  --overlay-background: oklch(0 0 0 / 50%);
+
+  /* 组件级皮肤令牌（命名 --<component>-<part>-<state>，默认值经 var()
+     回退到语义令牌——只覆盖语义令牌时组件仍有合理视觉） */
+  --switch-track: var(--input);
+  --switch-track-checked: var(--primary);
+  --switch-thumb: var(--background);
+  --slider-track: var(--muted);
+  --slider-range: var(--primary);
+  --slider-thumb: var(--background);
+  --radio-border: var(--input);
+  --radio-checked: var(--primary);
+  --progress-track: var(--muted);
+  --progress-indicator: var(--primary);
+  --pagination-active-background: var(--background);
+  --pagination-active-border: var(--border);
+  --pagination-active-radius: calc(var(--radius) * 0.8);
+  --menu-hover-background: var(--accent);
+  --menu-hover-foreground: var(--accent-foreground);
+  --menu-active-background: var(--accent);
+  --menu-active-foreground: var(--accent-foreground);
+  --bubble-background: oklch(from var(--primary) 0.93 calc(c * 0.4) h);
+  --bubble-hover-background: oklch(
+    from var(--primary) 0.88 calc(c * 0.5) h
+  );
+  --calendar-day-hover-background: var(--accent);
+  --calendar-day-hover-foreground: var(--accent-foreground);
+  --calendar-selected-background: var(--primary);
+  --calendar-selected-foreground: var(--primary-foreground);
+  --calendar-today-background: var(--accent);
+  --calendar-today-foreground: var(--accent-foreground);
 }
 
 /* 暗色皮肤：全仓约定的属性开关（挂在根或任意容器上） */
@@ -156,6 +198,12 @@
   --sidebar-accent-foreground: oklch(0.985 0 0);
   --sidebar-border: oklch(1 0 0 / 10%);
   --sidebar-ring: oklch(0.556 0 0);
+
+  /* 暗色下的组件级皮肤令牌覆盖（其余经 var() 引用语义令牌自动适配） */
+  --bubble-background: oklch(from var(--primary) 0.3 calc(c * 0.4) h);
+  --bubble-hover-background: oklch(
+    from var(--primary) 0.35 calc(c * 0.5) h
+  );
 }
 
 /* 系统偏好暗色兜底：未显式设置 data-pactor-theme（三态：light / dark / 不设置=跟随系统）时，
@@ -198,6 +246,12 @@
     --sidebar-accent-foreground: oklch(0.985 0 0);
     --sidebar-border: oklch(1 0 0 / 10%);
     --sidebar-ring: oklch(0.556 0 0);
+
+    /* 与上方 [data-pactor-theme='dark'] 块保持一致的组件级令牌覆盖 */
+    --bubble-background: oklch(from var(--primary) 0.3 calc(c * 0.4) h);
+    --bubble-hover-background: oklch(
+      from var(--primary) 0.35 calc(c * 0.5) h
+    );
   }
 }
 
@@ -330,5 +384,7 @@
 
   body {
     @apply bg-background text-foreground;
+    background-image: var(--background-image);
+    font-family: var(--font-sans);
   }
 }

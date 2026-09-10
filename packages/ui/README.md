@@ -61,6 +61,8 @@ import '@pactor-app/ui/styles.css';
 
 主题契约为 shadcn 语义令牌：`--background` / `--foreground` / `--card` / `--popover` / `--primary` / `--secondary` / `--muted` / `--accent` / `--destructive` / `--border` / `--input` / `--ring` / `--radius`（另补充 `--success` / `--warning` / `--info` 供 Alert 四态），定义在 `:root`，组件工具类经 `var()` 运行时读取。换肤即覆盖变量；内置暗色皮肤经 `<html data-pactor-theme="dark">`（或任意容器）切换，与全仓约定一致。
 
+**皮肤令牌契约（CSS 皮肤文件）**：组件全部颜色/阴影/圆角经令牌解析（无硬编码颜色），宿主在 `styles.css` 之后加载一个普通 CSS 文件即可完整换肤，运行时替换样式表节点即切换皮肤，无需重建。语义令牌之上还有组件级令牌（命名 `--<component>-<part>-<state>`，默认值经 `var()` 回退到语义令牌）覆盖 Switch/Slider/Radio/Progress/Pagination/Menu 系 hover 与选中/Bubble/Calendar/卡片阴影/弹层阴影色/模态遮罩；页面背景经 `--background`（纯色）+ `--background-image`（渐变/图片，默认 `none`）承接，字体族经 `--font-sans`。完整令牌清单与示例见 docs《主题与换肤》指南（docs/src/content/docs/guides/theming.md）。
+
 **preflight 开启（shadcn 官方基线）**：样式表为完整 `tailwindcss`（含 preflight）+ `tw-animate-css` 动画层 + 官方 base layer 的预编译产物，与 [shadcn 官方主题脚手架](https://ui.shadcn.com/docs/theming)一致——导入 `styles.css` 即接受 shadcn 基线全局样式（box-sizing / 边距归零 / 元素字体继承等），宿主的自定义皮肤 CSS 须在其后导入。令牌组含 chart-1..5 与 sidebar 系列；radius 派生为基于 `--radius` 的乘法比例（0.6/0.8/1/1.4/1.8/2.2/2.6）。
 
 ## 独立使用（不经 @pactor-app/app）

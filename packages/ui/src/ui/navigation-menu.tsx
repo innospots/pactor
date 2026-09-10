@@ -53,7 +53,7 @@ function NavigationMenuItem({
 }
 
 const navigationMenuTriggerStyle = cva(
-  'group/navigation-menu-trigger inline-flex h-9 w-max items-center justify-center rounded-md bg-background px-4 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground focus-visible:ring-[3px] focus-visible:ring-ring/50 focus-visible:outline-none disabled:pointer-events-none disabled:opacity-50 data-open:bg-accent/50 data-open:text-accent-foreground',
+  'group/navigation-menu-trigger inline-flex h-9 w-max items-center justify-center rounded-md bg-background px-4 py-2 text-sm font-medium transition-colors hover:bg-(--menu-hover-background) hover:text-(--menu-hover-foreground) focus:bg-(--menu-hover-background) focus:text-(--menu-hover-foreground) focus-visible:ring-[3px] focus-visible:ring-ring/50 focus-visible:outline-none disabled:pointer-events-none disabled:opacity-50 data-open:bg-(--menu-active-background)/50 data-open:text-(--menu-active-foreground)',
 );
 
 function NavigationMenuTrigger({
@@ -103,7 +103,7 @@ function NavigationMenuViewport({ className }: { className?: string }) {
         <NavigationMenuPrimitive.Popup
           data-slot="navigation-menu-popup"
           className={cn(
-            'origin-(--transform-origin) overflow-hidden rounded-md border border-border bg-popover text-popover-foreground shadow-md duration-200 data-open:animate-in data-open:fade-in-0 data-open:zoom-in-95 data-closed:animate-out data-closed:fade-out-0 data-closed:zoom-out-95',
+            'origin-(--transform-origin) overflow-hidden rounded-md border border-border bg-popover text-popover-foreground shadow-md shadow-(color:--shadow-color) duration-200 data-open:animate-in data-open:fade-in-0 data-open:zoom-in-95 data-closed:animate-out data-closed:fade-out-0 data-closed:zoom-out-95',
             className,
           )}
         >
@@ -122,7 +122,7 @@ function NavigationMenuLink({
     <NavigationMenuPrimitive.Link
       data-slot="navigation-menu-link"
       className={cn(
-        "flex flex-col gap-1 rounded-md p-2 text-sm transition-colors outline-none hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground focus-visible:ring-[3px] focus-visible:ring-ring/50 data-active:bg-accent/50 data-active:text-accent-foreground [&_svg:not([class*='size-'])]:size-4",
+        "flex flex-col gap-1 rounded-md p-2 text-sm transition-colors outline-none hover:bg-(--menu-hover-background) hover:text-(--menu-hover-foreground) focus:bg-(--menu-hover-background) focus:text-(--menu-hover-foreground) focus-visible:ring-[3px] focus-visible:ring-ring/50 data-active:bg-(--menu-active-background)/50 data-active:text-(--menu-active-foreground) [&_svg:not([class*='size-'])]:size-4",
         className,
       )}
       {...props}

@@ -3,7 +3,7 @@ import './setup.js';
 
 import { Registry } from '@pactor-app/core';
 import { createComponentRegistry } from '@pactor-app/ui/components';
-import { createLayoutRegistry, resolveLayout } from '@pactor-app/ui/layout';
+import { resolveLayout, type LayoutComponent } from '@pactor-app/ui/layout';
 import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
@@ -357,7 +357,7 @@ describe('registerChatLayout（spec: chat-view / chat 布局注册）', () => {
   it('注册并解析：resolveLayout 命中 chat 布局（spec: 注册并解析）', () => {
     // 空注册表：createLayoutRegistry 已预注册 ui ChatLayout（type 'chat'），
     // registerChatLayout 的不覆盖语义决定此处须以空注册表验证 chat 包自身布局
-    const registry = new Registry('LayoutRegistry');
+    const registry = new Registry<LayoutComponent>('LayoutRegistry');
     registerChatLayout(registry);
     const layout = resolveLayout(registry, 'chat');
     expect(layout).toBeTruthy();
@@ -366,7 +366,7 @@ describe('registerChatLayout（spec: chat-view / chat 布局注册）', () => {
   });
 
   it('chat 布局渲染 header 标题区 + ChatView 区', () => {
-    const registry = new Registry('LayoutRegistry');
+    const registry = new Registry<LayoutComponent>('LayoutRegistry');
     registerChatLayout(registry);
     const Layout = resolveLayout(registry, 'chat');
     const store = createStore();

@@ -208,6 +208,32 @@ export {
   SelectValue,
 } from './select.js';
 export { Separator } from './separator.js';
+export {
+  Sidebar as SidebarRoot,
+  SidebarContent as SidebarContentArea,
+  SidebarFooter as SidebarFooterArea,
+  SidebarGroup,
+  SidebarGroupAction,
+  SidebarGroupContent,
+  SidebarGroupLabel,
+  SidebarHeader as SidebarHeaderArea,
+  SidebarInput,
+  SidebarInset,
+  SidebarMenu,
+  SidebarMenuAction,
+  SidebarMenuBadge,
+  SidebarMenuButton,
+  SidebarMenuItem,
+  SidebarMenuSkeleton,
+  SidebarMenuSub,
+  SidebarMenuSubButton,
+  SidebarMenuSubItem,
+  SidebarProvider,
+  SidebarRail,
+  SidebarSeparator,
+  SidebarTrigger,
+  useSidebar,
+} from './sidebar.js';
 export { Skeleton } from './skeleton.js';
 export { Slider, SliderControl, SliderIndicator, SliderThumb, SliderTrack } from './slider.js';
 export { Spinner } from './spinner.js';

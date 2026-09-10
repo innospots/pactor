@@ -49,7 +49,7 @@ describe('Sidebar', () => {
     expect(member.getAttribute('href')).toBe('/members');
 
     expect(
-      container.querySelector('[data-slot=sidebar-content]')!.textContent,
+      container.querySelector('[data-slot=sidebar-inset]')!.textContent,
     ).toContain('主内容');
   });
 
@@ -63,18 +63,19 @@ describe('Sidebar', () => {
       children: [{ type: 'Text', props: { text: '主内容' } }],
     });
 
-    const aside = container.querySelector('[data-slot=sidebar]')!;
-    expect(aside.getAttribute('data-collapsed')).toBeNull();
+    const sidebar = container.querySelector('[data-slot=sidebar]')!;
+    expect(sidebar.getAttribute('data-state')).toBe('expanded');
 
     fireEvent.click(
       container.querySelector('[data-slot=sidebar-collapse-trigger]')!,
     );
     await expectEventState(context, 'collapsed', true);
-    expect(aside.getAttribute('data-collapsed')).toBe('true');
-    // 折叠后收窄为 icon rail：导航区保留，label 隐藏（hover 经 RailTooltip 展示）
-    expect(container.querySelector('[data-slot=sidebar-nav]')).not.toBeNull();
-    expect(screen.queryByText('概览')).toBeNull();
-    fireEvent.focus(container.querySelector('[data-slot=sidebar-item]')!);
+    expect(sidebar.getAttribute('data-state')).toBe('collapsed');
+    expect(sidebar.getAttribute('data-collapsible')).toBe('icon');
+    // 折叠后收窄为 icon rail：导航区保留（label CSS 视觉隐藏）
+    expect(container.querySelector('[data-slot=sidebar-content]')).not.toBeNull();
+    // hover 菜单项经 Tooltip 展示
+    fireEvent.focus(container.querySelector('[data-slot=sidebar-menu-button]')!);
     await vi.waitFor(() => {
       expect(
         document.querySelector('[data-slot=tooltip-content]')?.textContent,
@@ -85,8 +86,8 @@ describe('Sidebar', () => {
       container.querySelector('[data-slot=sidebar-collapse-trigger]')!,
     );
     await expectEventState(context, 'collapsed', false);
-    expect(aside.getAttribute('data-collapsed')).toBeNull();
-    expect(container.querySelector('[data-slot=sidebar-nav]')).not.toBeNull();
+    expect(sidebar.getAttribute('data-state')).toBe('expanded');
+    expect(container.querySelector('[data-slot=sidebar-content]')).not.toBeNull();
   });
 
   it('通用 props 作用于根节点', () => {
@@ -95,7 +96,7 @@ describe('Sidebar', () => {
       props: { brand: { title: 'x' }, ...COMMON_PROPS },
       children: [{ type: 'Text', props: { text: 'y' } }],
     });
-    expectCommonProps(container.querySelector('[data-slot=sidebar-layout]'));
+    expectCommonProps(container.querySelector('[data-slot=sidebar-wrapper]'));
   });
 
   it('导航项声明 icon 时在文字前渲染图标（链接与纯文本两种形态）', () => {
@@ -111,9 +112,10 @@ describe('Sidebar', () => {
     });
 
     expectIconBeforeLabel(screen.getByRole('link', { name: '概览' }), '概览');
+    // 纯文本项（无 href）渲染为 button
     const textItem = Array.from(
-      container.querySelectorAll('span[data-slot=sidebar-item]'),
-    ).find((el) => el.textContent === '配置');
+      container.querySelectorAll('[data-slot=sidebar-menu-button]'),
+    ).find((el) => el.textContent?.includes('配置'));
     expect(textItem).toBeDefined();
     expectIconBeforeLabel(textItem!, '配置');
   });
@@ -307,7 +309,7 @@ describe('Chart', () => {
       ).toBeGreaterThan(0);
     });
     expect(container.querySelector('svg')!.innerHTML).toContain(
-      'hsl(var(--chart-1))',
+      'var(--chart-1)',
     );
   });
 
