@@ -1,12 +1,12 @@
-dsl: '1.0'
+dsl: "1.0"
 page:
   id: studio
-  title: 皮肤工作室
+  title: 主题配置
   name: themeStudio
-  description: '皮肤工作室（spec: theme-studio）：左栏预置主题 + 令牌编辑器，右侧 iframe 实时预览组件画廊'
+  description: "主题配置（spec: theme-studio）：左栏预置主题 + 令牌编辑器，右侧 iframe 实时预览组件画廊"
 
 meta:
-  version: '1.0'
+  version: "1.0"
   author: platform-team
 
 # 根级 children 局部描述形态（blank 外壳，页面完全自控结构）：
@@ -22,10 +22,15 @@ children:
       - type: Flex
         props:
           gap: 12
-          style: { padding: '10px 16px', borderBottom: 1px solid var(--border), alignItems: center }
+          style:
+            {
+              padding: "10px 16px",
+              borderBottom: 1px solid var(--border),
+              alignItems: center,
+            }
         children:
           - type: Typography
-            props: { variant: h3, text: 皮肤工作室 }
+            props: { variant: h3, text: 主题配置 }
           - type: Text
             props:
               type: secondary
@@ -45,7 +50,15 @@ children:
             props:
               direction: vertical
               gap: 12
-              style: { width: 400, flexShrink: 0, height: 100%, minHeight: 0, padding: 16, borderRight: 1px solid var(--border) }
+              style:
+                {
+                  width: 400,
+                  flexShrink: 0,
+                  height: 100%,
+                  minHeight: 0,
+                  padding: 16,
+                  borderRight: 1px solid var(--border),
+                }
             children:
               # 标题行：左标题右下载，两端对齐
               - type: Flex
@@ -61,7 +74,13 @@ children:
                 props:
                   direction: vertical
                   gap: 12
-                  style: { flexShrink: 0, maxHeight: 40%, overflowY: auto, minHeight: 0 }
+                  style:
+                    {
+                      flexShrink: 0,
+                      maxHeight: 40%,
+                      overflowY: auto,
+                      minHeight: 0,
+                    }
                 children:
                   - type: ThemePresetList
               - type: Separator

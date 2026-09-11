@@ -1,4 +1,4 @@
-import type { BootstrapResource } from '@pactor-app/resource';
+import type { BootstrapResource } from "@pactor-app/resource";
 
 /**
  * 模拟 bootstrap（无后端工具应用）：blank 外壳（页面完全自控结构），
@@ -8,26 +8,26 @@ import type { BootstrapResource } from '@pactor-app/resource';
 export function createBootstrap(): Partial<BootstrapResource> &
   Record<string, unknown> {
   return {
-    app: { name: 'Pactor 皮肤工作室' },
+    app: { name: "Pactor 主题配置" },
     permissions: [],
     menus: [
       {
-        id: 'studio',
-        type: 'page',
-        title: '皮肤工作室',
-        path: '/',
-        pageId: 'studio',
+        id: "studio",
+        type: "page",
+        title: "主题配置",
+        path: "/",
+        pageId: "studio",
       },
       {
-        id: 'gallery',
-        type: 'page',
-        title: '组件画廊',
-        path: '/gallery',
-        pageId: 'gallery',
+        id: "gallery",
+        type: "page",
+        title: "组件画廊",
+        path: "/gallery",
+        pageId: "gallery",
         hidden: true,
       },
     ],
-    layout: { type: 'blank' },
+    layout: { type: "blank" },
     pageVersions: { studio: 1, gallery: 1 },
   };
 }
