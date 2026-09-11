@@ -272,7 +272,7 @@ describe('ActivityTrace 折叠状态机（spec: chat-activity-trace / 轨迹自�
 });
 
 describe('thinking 折叠卡升级（spec: chat-view / PartRenderer thinking）', () => {
-  it('流式期间展开并带进行中指示，正文按 markdown 渲染（spec: thinking 流式展开）', () => {
+  it('流式期间展开并带进行中指示，正文走节流纯文本；结束后回切 markdown（spec: thinking 流式展开）', () => {
     const store = createStore();
     applyChatEvent(store, { type: 'message.start', messageId: 'a1' });
     applyChatEvent(store, {
@@ -280,12 +280,22 @@ describe('thinking 折叠卡升级（spec: chat-view / PartRenderer thinking）'
       messageId: 'a1',
       delta: '**关键**推理',
     });
-    render(<ChatView store={store} />);
+    const { rerender } = render(<ChatView store={store} />);
 
     const card = document.querySelector('.pactor-chat-thinking')!;
     expect(card.getAttribute('data-open')).toBe('true');
     expect(card.getAttribute('data-streaming')).toBe('true');
-    // markdown 正文：渲染为 strong 元素而非源码
+    // 流式期间：纯文本（不解析 markdown，避免逐 token O(n²) 解析）
+    const body = document.querySelector('.pactor-chat-thinking__body')!;
+    expect(body.querySelector('strong')).toBeNull();
+    expect(body.textContent).toContain('**关键**推理');
+
+    // 结束后回切 markdown 渲染（结束后卡片自动折叠，先展开再断言）
+    act(() => {
+      applyChatEvent(store, { type: 'message.end', messageId: 'a1' });
+    });
+    rerender(<ChatView store={store} />);
+    fireEvent.click(screen.getByText('思考过程'));
     const strong = document.querySelector('.pactor-chat-thinking__body strong');
     expect(strong?.textContent).toBe('关键');
   });

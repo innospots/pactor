@@ -5,6 +5,7 @@ import { DslRenderer, useRenderer } from '@pactor-app/runtime';
 import type { ChatArtifact } from '../artifact.js';
 import { guardChatDsl } from '../dsl-guard.js';
 import { useSmoothStreamText } from '../hooks/use-smooth-stream-text.js';
+import { useThrottledValue } from '../hooks/use-throttled-value.js';
 import type { ChatPart } from '../model.js';
 import { buildChatScope, type ChatRuntime, type ChatScope } from '../scope.js';
 import { buildArtifactCardFragment } from './chrome/artifact-card.js';
@@ -69,10 +70,12 @@ function SmoothText({ content, streaming }: { content: string; streaming: boolea
   return <div className="pactor-chat-text">{shown}</div>;
 }
 
-/** streaming 期间的 markdown part：打字机揭示 */
+/** streaming 期间的 markdown part：打字机揭示 + 时间节流
+ * （MarkdownRenderer 全量解析压到 ≤10 次/秒，避免按帧 O(n²) 解析） */
 function SmoothMarkdown({ content, streaming }: { content: string; streaming: boolean }) {
   const shown = useSmoothStreamText(content, streaming);
-  return <MarkdownRenderer content={shown} />;
+  const throttled = useThrottledValue(shown, 100, streaming);
+  return <MarkdownRenderer content={throttled} />;
 }
 
 export function PartRenderer({ part, runtime, scope, streaming = false, onOpenArtifact }: PartRendererProps) {
