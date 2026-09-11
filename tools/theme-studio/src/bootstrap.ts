@@ -2,8 +2,8 @@ import type { BootstrapResource } from "@pactor-app/resource";
 
 /**
  * 模拟 bootstrap（无后端工具应用）：blank 外壳（页面完全自控结构），
- * 菜单仅承载路由映射——工作室页 `/` 与画廊页 `/gallery`
- * （gallery 经 iframe 加载，菜单中隐藏）。
+ * 菜单仅承载路由映射——工作室页 `/`、画廊页 `/gallery` 与示例页 `/demo`
+ * （gallery / demo 经 iframe 加载，菜单中隐藏）。
  */
 export function createBootstrap(): Partial<BootstrapResource> &
   Record<string, unknown> {
@@ -26,8 +26,16 @@ export function createBootstrap(): Partial<BootstrapResource> &
         pageId: "gallery",
         hidden: true,
       },
+      {
+        id: "demo",
+        type: "page",
+        title: "示例页面",
+        path: "/demo",
+        pageId: "demo",
+        hidden: true,
+      },
     ],
     layout: { type: "blank" },
-    pageVersions: { studio: 1, gallery: 1 },
+    pageVersions: { studio: 1, gallery: 1, demo: 1 },
   };
 }

@@ -160,11 +160,12 @@
   --calendar-today-foreground: var(--accent-foreground);
 
   /* 布局组件默认间距（Flex/Grid 未显式指定 gap 时生效；Flex 的
-     small/middle/large 命名档位同样令牌化） */
+     small/middle/large 命名档位以 --flex-gap 为基准按比例派生，
+     皮肤改基准即整体缩放，也可单独覆盖某一档） */
   --flex-gap: 12px;
-  --flex-gap-sm: 8px;
-  --flex-gap-md: 16px;
-  --flex-gap-lg: 24px;
+  --flex-gap-sm: calc(var(--flex-gap) * 0.67);
+  --flex-gap-md: calc(var(--flex-gap) * 1.33);
+  --flex-gap-lg: calc(var(--flex-gap) * 2);
   --grid-gap: 16px;
 }
 

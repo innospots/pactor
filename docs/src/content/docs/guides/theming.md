@@ -165,8 +165,8 @@ document.documentElement.removeAttribute('data-pactor-theme');
 
 | token | 默认值 | 说明 |
 | --- | --- | --- |
-| `--flex-gap` | `12px` | Flex 未指定 gap 时的默认间距 |
-| `--flex-gap-sm` / `-md` / `-lg` | `8px` / `16px` / `24px` | Flex `gap="small"/"middle"/"large"` 命名档位 |
+| `--flex-gap` | `12px` | Flex 未指定 gap 时的默认间距，也是命名档位的计算基准 |
+| `--flex-gap-sm` / `-md` / `-lg` | `×0.67` / `×1.33` / `×2` | Flex `gap="small"/"middle"/"large"` 命名档位，默认按 `--flex-gap` 比例派生（基准 12px 时即 8/16/24px），可单独覆盖 |
 | `--grid-gap` | `16px` | Grid 未指定 gap 时的默认栏间距 |
 
 ### 组件级 token（`--<component>-<part>-<state>`，默认值回退到语义令牌）

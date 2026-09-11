@@ -1,7 +1,7 @@
 /**
- * PreviewModeToggle（DSL 自定义组件）：预览亮色/暗色切换，
- * 放在工作室页顶栏右侧；模式存于模块级 store，SkinPreviewFrame
- * 经 postMessage 同步给 iframe 画廊页。
+ * PreviewModeToggle：预览亮色/暗色切换，渲染在 SkinPreviewFrame 的
+ * Tab 栏右端；模式存于模块级 store，SkinPreviewFrame 经 postMessage
+ * 同步给 iframe 预览页。
  */
 import { useSyncExternalStore, type CSSProperties } from 'react';
 

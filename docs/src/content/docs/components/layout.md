@@ -229,7 +229,7 @@ flex 容器；直接子节点含 `Sider` 时横向、否则纵向（`component` 
 
 | prop | 类型 | 缺省 | 说明 |
 | --- | --- | --- | --- |
-| `panels` | `Array<{ children?: DslNode[], defaultSize?: number }>` | `[]` | 面板列表；`children` 为 DSL 子树，`defaultSize` 按百分比（0-100）解释 |
+| `panels` | `Array<{ children?: DslNode[], defaultSize?: number, defaultSizePx?: number, minSizePx?: number, maxSizePx?: number }>` | `[]` | 面板列表；`children` 为 DSL 子树，`defaultSize` 按百分比（0-100）解释；`defaultSizePx`/`minSizePx`/`maxSizePx` 按像素解释（像素优先于百分比） |
 | `direction` | `horizontal` \| `vertical` | `horizontal` | 排列方向 |
 
 ```yaml

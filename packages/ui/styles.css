@@ -3206,9 +3206,9 @@
   --calendar-today-background: var(--accent);
   --calendar-today-foreground: var(--accent-foreground);
   --flex-gap: 12px;
-  --flex-gap-sm: 8px;
-  --flex-gap-md: 16px;
-  --flex-gap-lg: 24px;
+  --flex-gap-sm: calc(var(--flex-gap) * 0.67);
+  --flex-gap-md: calc(var(--flex-gap) * 1.33);
+  --flex-gap-lg: calc(var(--flex-gap) * 2);
   --grid-gap: 16px;
 }
 [data-pactor-theme='dark'] {
