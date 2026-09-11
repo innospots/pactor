@@ -88,7 +88,7 @@ function TokenRow({ token }: { token: TokenMeta }) {
         }}
       >
         <code style={{ fontSize: 12, fontWeight: 600, flexShrink: 0 }}>
-          {token.name}
+          {token.description}
         </code>
         <span
           title={token.description}
@@ -102,7 +102,7 @@ function TokenRow({ token }: { token: TokenMeta }) {
             color: 'var(--muted-foreground)',
           }}
         >
-          {token.description}
+          {token.name}
         </span>
         {modified && (
           <>
