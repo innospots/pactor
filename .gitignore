@@ -5,3 +5,5 @@ dist/
 coverage/
 .playwright-cli
 /docs/.astro
+.dev.vars
+.wrangler

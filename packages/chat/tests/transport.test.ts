@@ -100,6 +100,28 @@ describe('runChatTurn + createManualDriver（spec: chat-streaming / ChatTranspor
     expect(text).toBe('半截内容');
   });
 
+  it('abort 取消 turn：streaming/pending parts 定格为 ready（thinking 图标不再旋转）', async () => {
+    const store = new ConversationStore();
+    const driver = createManualDriver();
+    const controller = new AbortController();
+    const turn = runChatTurn(store, driver.transport, { text: 'hi' }, { signal: controller.signal });
+
+    driver.push({ type: 'thinking.delta', messageId: 'x', delta: '思考中' });
+    driver.push({ type: 'text.delta', messageId: 'x', delta: '半截' });
+    await vi_waitMicrotask();
+    controller.abort();
+    driver.complete();
+
+    const { assistantMessageId } = await turn;
+    const assistant = store.getMessage(assistantMessageId)!;
+    expect(assistant.status).toBe('cancelled');
+    const unsettled = assistant.parts.filter(
+      (p) =>
+        'status' in p && (p.status === 'streaming' || p.status === 'pending'),
+    );
+    expect(unsettled).toEqual([]);
+  });
+
   it('输入携带模型与上下文：transport.send 收到 model 与 contexts，text 仅为用户文本（spec: 输入携带模型与上下文）', async () => {
     const store = new ConversationStore();
     const send = vi.fn(async function* (_input: ChatInput) {

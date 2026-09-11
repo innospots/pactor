@@ -6,6 +6,8 @@
 import { beforeEach, describe, expect, it } from 'vitest';
 
 import {
+  applyAiTheme,
+  getComposedCss,
   getStudioState,
   resetOverrides,
   selectPreset,
@@ -40,5 +42,22 @@ describe('studio store', () => {
     resetOverrides();
     expect(getStudioState().overrides).toEqual({});
     expect(getStudioState().presetKey).toBe('cream');
+  });
+
+  it('应用 AI 生成结果：亮色进 overrides、暗色进 darkOverrides、preset 置空', () => {
+    selectPreset('cream');
+    applyAiTheme({ '--primary': 'red' }, { '--background': 'black' });
+    const s = getStudioState();
+    expect(s.presetKey).toBeNull();
+    expect(s.overrides).toEqual({ '--primary': 'red' });
+    expect(s.darkOverrides).toEqual({ '--background': 'black' });
+    // 合成 CSS 同时包含两块
+    const css = getComposedCss();
+    expect(css).toContain('--primary: red;');
+    expect(css).toContain("[data-pactor-theme='dark']");
+    expect(css).toContain('--background: black;');
+    // 切换主题后 AI 暗色令牌一并清空
+    selectPreset('chalk');
+    expect(getStudioState().darkOverrides).toEqual({});
   });
 });

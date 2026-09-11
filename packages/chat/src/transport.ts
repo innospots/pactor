@@ -31,9 +31,18 @@ export interface ChatInput {
   contexts?: ChatContextItem[];
 }
 
+/** 传输层发送选项 */
+export interface ChatTransportSendOptions {  /** 取消信号（ChatView 停止按钮 → runChatTurn options.signal 透传）：
+   * transport 应在信号 abort 时尽快终止上游请求并结束事件流 */
+  signal?: AbortSignal;
+}
+
 /** Chat 传输层：发送输入，返回流式事件 */
 export interface ChatTransport {
-  send(input: ChatInput): AsyncIterable<ChatEvent>;
+  send(
+    input: ChatInput,
+    options?: ChatTransportSendOptions,
+  ): AsyncIterable<ChatEvent>;
 }
 
 /** runChatTurn 的可选定制（id 生成等，测试可注入确定性 id） */
@@ -53,6 +62,25 @@ export interface RunChatTurnOptions {
 export interface ChatTurnResult {
   userMessageId: string;
   assistantMessageId: string;
+}
+
+/**
+ * 取消收尾：消息置 cancelled，并把仍停留在 streaming / pending 的
+ * part 一并定格为 ready（与 message.end 收尾语义一致——否则 thinking /
+ * 文本 part 的加载态图标在取消后持续旋转）。
+ */
+function markCancelled(store: ConversationStore, messageId: string): void {
+  const message = store.getMessage(messageId);
+  if (!message) {
+    return;
+  }
+  const parts = message.parts.map((part) =>
+    'status' in part &&
+    (part.status === 'streaming' || part.status === 'pending')
+      ? ({ ...part, status: 'ready' } as ChatPart)
+      : part,
+  );
+  store.updateMessage(messageId, { status: 'cancelled', parts });
 }
 
 /**
@@ -92,16 +120,16 @@ export async function runChatTurn(
   });
 
   try {
-    for await (const event of transport.send(input)) {
+    for await (const event of transport.send(input, { signal: options.signal })) {
       if (options.signal?.aborted) {
-        store.updateMessage(assistantMessageId, { status: 'cancelled' });
+        markCancelled(store, assistantMessageId);
         return { userMessageId, assistantMessageId };
       }
       applyChatEvent(store, { ...event, messageId: assistantMessageId });
     }
     // abort 与流自然结束同时发生：cancelled 优先，不再补 message.end
     if (options.signal?.aborted) {
-      store.updateMessage(assistantMessageId, { status: 'cancelled' });
+      markCancelled(store, assistantMessageId);
       return { userMessageId, assistantMessageId };
     }
     // 流正常结束但未收到 message.end / message.error：兜底收尾

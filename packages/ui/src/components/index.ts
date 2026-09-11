@@ -222,6 +222,8 @@ export { Label } from './components/Label/index.js';
 export type { LabelProps } from './components/Label/index.js';
 export { Field } from './components/Field/index.js';
 export type { FieldProps } from './components/Field/index.js';
+export { ChatInput } from './components/ChatInput/index.js';
+export type { ChatInputProps } from './components/ChatInput/index.js';
 
 // 数据组件
 export { Table } from './components/Table/index.js';

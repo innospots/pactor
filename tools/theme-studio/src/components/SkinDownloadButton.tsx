@@ -4,6 +4,7 @@
  */
 import { useSyncExternalStore, type CSSProperties } from 'react';
 
+import { downloadText } from '../download';
 import { getComposedCss, getStudioState, subscribeStudio } from '../store';
 
 interface SkinDownloadButtonProps {
@@ -15,13 +16,7 @@ export function SkinDownloadButton({ style }: SkinDownloadButtonProps) {
   useSyncExternalStore(subscribeStudio, getStudioState);
 
   const download = (): void => {
-    const css = getComposedCss();
-    const url = URL.createObjectURL(new Blob([css], { type: 'text/css' }));
-    const anchor = document.createElement('a');
-    anchor.href = url;
-    anchor.download = 'pactor-theme.css';
-    anchor.click();
-    URL.revokeObjectURL(url);
+    downloadText('pactor-theme.css', getComposedCss());
   };
 
   return (

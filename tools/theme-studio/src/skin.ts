@@ -10,10 +10,12 @@
  */
 import type { SkinPreset } from './presets';
 
-/** 合成皮肤 CSS 文本：`:root` 亮色覆盖块 + 暗色块（或注释骨架） */
+/** 合成皮肤 CSS 文本：`:root` 亮色覆盖块 + 暗色块（或注释骨架）；
+ * darkOverrides（AI 生成的暗色令牌）并入暗色块且优先于预置主题 */
 export function composeSkinCss(
   preset: SkinPreset | null,
   overrides: Record<string, string>,
+  darkOverrides: Record<string, string> = {},
 ): string {
   const merged: Record<string, string> = { ...(preset?.tokens ?? {}) };
   for (const [name, value] of Object.entries(overrides)) {
@@ -32,8 +34,9 @@ export function composeSkinCss(
   const themeComment =
     preset === null ? '' : `（基于预置主题「${preset.name}」）`;
 
-  // 预置主题带配套暗色令牌组时生成真实暗色块；否则保留注释骨架引导
-  const darkTokens = preset?.darkTokens ?? {};
+  // 预置主题带配套暗色令牌组时生成真实暗色块；AI 暗色令牌并入且优先；
+  // 两者皆无则保留注释骨架引导
+  const darkTokens = { ...(preset?.darkTokens ?? {}), ...darkOverrides };
   const darkBlock =
     Object.keys(darkTokens).length > 0
       ? `[data-pactor-theme='dark'] {

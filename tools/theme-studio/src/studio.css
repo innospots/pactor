@@ -1,0 +1,15 @@
+/**
+ * theme-studio 局部样式微调（加载于 pactor-ui/styles.css 之后）。
+ * 仅覆盖 AI 滑层内的 chat 空态：50% 宽滑层中默认 26px 衬线大标题过大。
+ */
+
+.theme-studio-ai-chat .pactor-chat-empty {
+  padding: 24px 8px;
+}
+
+.theme-studio-ai-chat .pactor-chat-empty__greeting {
+  font-family: var(--font-sans);
+  font-size: 15px;
+  font-weight: 500;
+  line-height: 1.8;
+}
