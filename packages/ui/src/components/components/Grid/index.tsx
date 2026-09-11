@@ -5,7 +5,7 @@ import { cn } from '../../../lib/utils.js';
 export interface GridProps {
   /** 列数，默认 1；每列等宽（columns 取整下限 1） */
   columns?: number;
-  /** 栏间距 */
+  /** 栏间距（px）；未指定时应用默认间距令牌 `--grid-gap`，`gap: 0` 显式关闭 */
   gap?: number;
   /** 通用：根节点 class（与内置样式合并） */
   className?: string;
@@ -24,7 +24,7 @@ export function Grid({ columns = 1, gap, className, style, children }: GridProps
     <div
       data-slot="grid"
       data-columns={cols}
-      className={cn('grid', className)}
+      className={cn('grid', gap === undefined && 'gap-(--grid-gap)', className)}
       style={{
         gridTemplateColumns: `repeat(${cols}, minmax(0, 1fr))`,
         ...(gap !== undefined ? { gap } : {}),

@@ -161,6 +161,14 @@ document.documentElement.removeAttribute('data-pactor-theme');
 | `--shadow-color` | `oklch(0 0 0 / 10%)` | 弹层（Dialog/Sheet/Popover/DropdownMenu/Select/Toast 等）阴影颜色 |
 | `--overlay-background` | `oklch(0 0 0 / 50%)` | 模态遮罩（Dialog/Sheet/Drawer/AlertDialog 背景幕布） |
 
+### 布局间距 token
+
+| token | 默认值 | 说明 |
+| --- | --- | --- |
+| `--flex-gap` | `12px` | Flex 未指定 gap 时的默认间距 |
+| `--flex-gap-sm` / `-md` / `-lg` | `8px` / `16px` / `24px` | Flex `gap="small"/"middle"/"large"` 命名档位 |
+| `--grid-gap` | `16px` | Grid 未指定 gap 时的默认栏间距 |
+
 ### 组件级 token（`--<component>-<part>-<state>`，默认值回退到语义令牌）
 
 组件级令牌的默认值经 `var(--语义令牌)` 引用语义令牌——**只覆盖语义令牌时这些组件也有合理视觉**；需要精细控制时再单独覆盖。
@@ -168,12 +176,12 @@ document.documentElement.removeAttribute('data-pactor-theme');
 | token | 默认值 | 说明 |
 | --- | --- | --- |
 | `--switch-track` / `--switch-track-checked` | `--input` / `--primary` | Switch 轨道（未选中 / 选中） |
-| `--switch-thumb` | `--background` | Switch 滑块 |
+| `--switch-thumb` | `--card` | Switch 滑块 |
 | `--slider-track` / `--slider-range` | `--muted` / `--primary` | Slider 轨道 / 已选进度 |
-| `--slider-thumb` | `--background` | Slider 滑块 |
+| `--slider-thumb` | `--card` | Slider 滑块 |
 | `--radio-border` / `--radio-checked` | `--input` / `--primary` | Radio 圆圈边框（默认）/ 选中（边框与圆点） |
 | `--progress-track` / `--progress-indicator` | `--muted` / `--primary` | Progress 背景 / 进度条 |
-| `--pagination-active-background` / `-border` / `-radius` | `--background` / `--border` / `calc(var(--radius) * 0.8)` | Pagination 当前页背景 / 边框 / 圆角 |
+| `--pagination-active-background` / `-border` / `-radius` | `--card` / `--border` / `calc(var(--radius) * 0.8)` | Pagination 当前页背景 / 边框 / 圆角 |
 | `--menu-hover-background` / `-foreground` | `--accent` / `--accent-foreground` | 菜单项 hover（Menu/DropdownMenu/ContextMenu/Menubar/NavigationMenu/Select/Combobox 列表共用） |
 | `--menu-active-background` / `-foreground` | `--accent` / `--accent-foreground` | 菜单项选中/展开（同上，含 Command 选中项） |
 | `--bubble-background` / `--bubble-hover-background` | 由 `--primary` 派生（暗色另有一套派生值） | Bubble `tinted` 变体背景 / 其 hover |

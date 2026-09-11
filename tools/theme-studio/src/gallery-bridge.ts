@@ -10,15 +10,31 @@
 
 export const SKIN_MESSAGE_TYPE = 'theme-studio:skin';
 export const READY_MESSAGE_TYPE = 'theme-studio:ready';
+export const MODE_MESSAGE_TYPE = 'theme-studio:mode';
 const STYLE_ATTR = 'data-theme-studio';
 
 /** 安装 skin 消息监听（两个路由均安装，代价为零） */
 export function installGalleryBridge(): void {
+  // 预览默认亮色（工作室编辑亮色令牌，暗色仅作验收）；等候 mode 消息切换
+  if (!document.documentElement.hasAttribute('data-pactor-theme')) {
+    document.documentElement.setAttribute('data-pactor-theme', 'light');
+  }
   window.addEventListener('message', (event) => {
     if (event.source !== window.parent) {
       return;
     }
     const data = event.data as { type?: string; css?: unknown } | null;
+    if (
+      data?.type === MODE_MESSAGE_TYPE &&
+      (data as { mode?: string }).mode !== undefined
+    ) {
+      const mode = (data as { mode: string }).mode;
+      document.documentElement.setAttribute(
+        'data-pactor-theme',
+        mode === 'dark' ? 'dark' : 'light',
+      );
+      return;
+    }
     if (data?.type !== SKIN_MESSAGE_TYPE || typeof data.css !== 'string') {
       return;
     }

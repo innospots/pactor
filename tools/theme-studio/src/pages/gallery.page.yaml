@@ -39,6 +39,7 @@ dataSources:
       - { id: 3, name: 王五, role: 客服, age: 25 }
   menuItems:
     type: static
+    autoLoad: true
     value:
       - { key: overview, label: 概览, icon: home }
       - { key: report, label: 报表, icon: list }
@@ -68,7 +69,6 @@ children:
         children:
           - type: Flex
             props:
-              gap: 8
               style: { flexWrap: wrap, alignItems: center }
             children:
               - type: Button
@@ -87,8 +87,7 @@ children:
                 props: { text: 禁用按钮, disabled: true }
           - type: Flex
             props:
-              gap: 8
-              style: { alignItems: center, marginTop: 12 }
+              style: { alignItems: center, marginTop: 12, marginBottom: 12 }
             children:
               - type: Badge
                 props: { text: 默认 }
@@ -105,9 +104,9 @@ children:
               - type: Icon
                 props: { name: star }
           - type: Typography
-            props: { variant: h3, text: 排版标题（Typography） }
+            props: { variant: h3, text: 排版标题（Typography）, style: { marginBottom: 12 } }
           - type: Typography
-            props: { variant: p, text: 正文段落：皮肤令牌接管全部颜色、圆角与字体族。 }
+            props: { variant: p, text: 正文段落：皮肤令牌接管全部颜色、圆角与字体族。, style: { marginBottom: 12 } }
           - type: Typography
             props: { variant: muted, text: 辅助说明文字（muted-foreground 令牌） }
 
@@ -117,10 +116,10 @@ children:
           title: 表单：Input / Textarea / Select / Switch / Slider / RadioGroup / Checkbox
         children:
           - type: Grid
-            props: { columns: 2, gap: 16 }
+            props: { columns: 2 }
             children:
               - type: Flex
-                props: { direction: vertical, gap: 12 }
+                props: { direction: vertical }
                 children:
                   - type: Input
                     props: { label: 名称, placeholder: 请输入名称 }
@@ -135,7 +134,7 @@ children:
                         - { label: 上海, value: sh }
                         - { label: 杭州, value: hz }
               - type: Flex
-                props: { direction: vertical, gap: 12 }
+                props: { direction: vertical }
                 children:
                   - type: Switch
                     props:
@@ -195,7 +194,7 @@ children:
           title: 反馈：Alert 四态 / Progress / Skeleton / Toast
         children:
           - type: Flex
-            props: { direction: vertical, gap: 12 }
+            props: { direction: vertical }
             children:
               - type: Alert
                 props: { variant: info, message: 信息提示（--info） }
@@ -209,7 +208,6 @@ children:
                 props: { value: 62 }
               - type: Flex
                 props:
-                  gap: 8
                   style: { alignItems: center }
                 children:
                   - type: Skeleton
@@ -217,7 +215,6 @@ children:
                   - type: Flex
                     props:
                       direction: vertical
-                      gap: 6
                       style: { flex: 1 }
                     children:
                       - type: Skeleton
@@ -244,7 +241,6 @@ children:
                 - { label: 组件画廊 }
           - type: Flex
             props:
-              gap: 16
               style: { marginTop: 12, alignItems: flex-start }
             children:
               - type: Menu
@@ -260,7 +256,6 @@ children:
               - type: Flex
                 props:
                   direction: vertical
-                  gap: 16
                   style: { flex: 1 }
                 children:
                   - type: Tabs
@@ -300,7 +295,6 @@ children:
         children:
           - type: Flex
             props:
-              gap: 12
               style: { flexWrap: wrap }
             children:
               - type: Dialog
@@ -345,7 +339,7 @@ children:
           title: 数据：Card / Statistic / Table
         children:
           - type: Grid
-            props: { columns: 3, gap: 16 }
+            props: { columns: 3 }
             children:
               - type: Card
                 children:
@@ -372,7 +366,7 @@ children:
           title: 数据：Chart（chart-1..5 令牌配色）
         children:
           - type: Grid
-            props: { columns: 2, gap: 16 }
+            props: { columns: 2 }
             children:
               - type: Chart
                 props:

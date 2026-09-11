@@ -53,7 +53,7 @@ function SheetOverlay({
 }
 
 const sheetVariants = cva(
-  'fixed z-50 flex flex-col gap-4 border-border bg-background shadow-lg shadow-(color:--shadow-color) transition ease-in-out data-open:animate-in data-open:duration-300 data-closed:animate-out data-closed:duration-200',
+  'fixed z-50 flex flex-col gap-4 border-border bg-popover shadow-lg shadow-(color:--shadow-color) transition ease-in-out data-open:animate-in data-open:duration-300 data-closed:animate-out data-closed:duration-200',
   {
     variants: {
       side: {

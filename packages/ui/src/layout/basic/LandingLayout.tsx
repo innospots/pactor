@@ -17,7 +17,7 @@ export function LandingLayout({
       {navbar !== undefined && (
         <header
           data-slot="landing-navbar"
-          className="border-b border-border bg-background"
+          className="border-b border-border bg-card"
         >
           {navbar}
         </header>

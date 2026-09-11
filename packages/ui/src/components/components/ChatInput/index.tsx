@@ -118,7 +118,7 @@ export function ChatInput({
     <div
       data-slot="chat-input"
       className={cn(
-        'rounded-xl border border-border bg-background transition-shadow focus-within:border-ring focus-within:ring-[3px] focus-within:ring-ring/50',
+        'rounded-xl border border-border bg-card transition-shadow focus-within:border-ring focus-within:ring-[3px] focus-within:ring-ring/50',
         className,
       )}
       style={style}

@@ -29,19 +29,19 @@ export function SkinDownloadButton({ style }: SkinDownloadButtonProps) {
       type="button"
       onClick={download}
       style={{
-        width: '100%',
-        padding: '8px 0',
+        padding: '4px 12px',
         borderRadius: 'var(--radius)',
         border: 'none',
         background: 'var(--primary)',
         color: 'var(--primary-foreground)',
-        fontSize: 13,
+        fontSize: 12,
         fontWeight: 600,
         cursor: 'pointer',
+        flexShrink: 0,
         ...style,
       }}
     >
-      下载皮肤 CSS（pactor-theme.css）
+      下载皮肤 CSS
     </button>
   );
 }

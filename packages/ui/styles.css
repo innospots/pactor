@@ -917,6 +917,21 @@
   .justify-items-start {
     justify-items: start;
   }
+  .gap-\(--flex-gap\) {
+    gap: var(--flex-gap);
+  }
+  .gap-\(--flex-gap-lg\) {
+    gap: var(--flex-gap-lg);
+  }
+  .gap-\(--flex-gap-md\) {
+    gap: var(--flex-gap-md);
+  }
+  .gap-\(--flex-gap-sm\) {
+    gap: var(--flex-gap-sm);
+  }
+  .gap-\(--grid-gap\) {
+    gap: var(--grid-gap);
+  }
   .gap-0\.5 {
     gap: calc(var(--spacing) * 0.5);
   }
@@ -1162,17 +1177,17 @@
   .bg-background {
     background-color: var(--background);
   }
-  .bg-background\/60 {
-    background-color: var(--background);
-    @supports (color: color-mix(in lab, red, red)) {
-      background-color: color-mix(in oklab, var(--background) 60%, transparent);
-    }
-  }
   .bg-border {
     background-color: var(--border);
   }
   .bg-card {
     background-color: var(--card);
+  }
+  .bg-card\/60 {
+    background-color: var(--card);
+    @supports (color: color-mix(in lab, red, red)) {
+      background-color: color-mix(in oklab, var(--card) 60%, transparent);
+    }
   }
   .bg-destructive {
     background-color: var(--destructive);
@@ -2390,8 +2405,8 @@
   :is(.\*\:data-\[slot\=bubble-content\]\:bg-\(--bubble-background\) > *)[data-slot="bubble-content"] {
     background-color: var(--bubble-background);
   }
-  :is(.\*\:data-\[slot\=bubble-content\]\:bg-background > *)[data-slot="bubble-content"] {
-    background-color: var(--background);
+  :is(.\*\:data-\[slot\=bubble-content\]\:bg-card > *)[data-slot="bubble-content"] {
+    background-color: var(--card);
   }
   :is(.\*\:data-\[slot\=bubble-content\]\:bg-destructive\/10 > *)[data-slot="bubble-content"] {
     background-color: var(--destructive);
@@ -2714,8 +2729,8 @@
       background-color: color-mix(in oklab, var(--menu-active-background) 50%, transparent);
     }
   }
-  .data-active\:bg-background:where([data-active]:not([data-active='false'])) {
-    background-color: var(--background);
+  .data-active\:bg-card:where([data-active]:not([data-active='false'])) {
+    background-color: var(--card);
   }
   .data-active\:text-\(--menu-active-foreground\):where([data-active]:not([data-active='false'])) {
     color: var(--menu-active-foreground);
@@ -3165,15 +3180,15 @@
   --overlay-background: oklch(0 0 0 / 50%);
   --switch-track: var(--input);
   --switch-track-checked: var(--primary);
-  --switch-thumb: var(--background);
+  --switch-thumb: var(--card);
   --slider-track: var(--muted);
   --slider-range: var(--primary);
-  --slider-thumb: var(--background);
+  --slider-thumb: var(--card);
   --radio-border: var(--input);
   --radio-checked: var(--primary);
   --progress-track: var(--muted);
   --progress-indicator: var(--primary);
-  --pagination-active-background: var(--background);
+  --pagination-active-background: var(--card);
   --pagination-active-border: var(--border);
   --pagination-active-radius: calc(var(--radius) * 0.8);
   --menu-hover-background: var(--accent);
@@ -3190,6 +3205,11 @@
   --calendar-selected-foreground: var(--primary-foreground);
   --calendar-today-background: var(--accent);
   --calendar-today-foreground: var(--accent-foreground);
+  --flex-gap: 12px;
+  --flex-gap-sm: 8px;
+  --flex-gap-md: 16px;
+  --flex-gap-lg: 24px;
+  --grid-gap: 16px;
 }
 [data-pactor-theme='dark'] {
   color-scheme: dark;

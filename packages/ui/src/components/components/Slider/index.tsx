@@ -88,8 +88,8 @@ export function Slider({
       <SliderControl>
         <SliderTrack>
           <SliderIndicator />
-          <SliderThumb />
         </SliderTrack>
+        <SliderThumb />
       </SliderControl>
     </ShadcnSlider>
   );

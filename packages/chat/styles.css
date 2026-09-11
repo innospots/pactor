@@ -3,10 +3,13 @@
  *
  * 技术选型参考 DeepTutor web：语义 CSS 变量 + 语义 class，无 antd。
  *
- * 换肤契约（与 pactor-ui-radix 一致）：
- * 1. 覆盖 CSS 变量（在本样式表之后注入 `--pactor-chat-primary: …;` 等）；
+ * 换肤契约（与 @pactor-app/ui 一致）：
+ * 1. `--pactor-chat-*` 颜色令牌的默认值经 `var(--语义令牌, <chat 默认>)`
+ *    桥接 pactor-ui 语义令牌（--background/--primary/…）——皮肤 CSS 覆盖
+ *    语义令牌时 chat 结构件自动跟随；也可直接覆盖 `--pactor-chat-*` 精调；
  * 2. 内置暗色：`<html data-pactor-theme="dark">`（或挂在任意祖先容器上）；
- *    不设置时跟随系统 prefers-color-scheme（三态：light / dark / 跟随系统）；
+ *    不设置时跟随系统 prefers-color-scheme（三态：light / dark / 跟随系统）。
+ *    颜色令牌无需暗色覆盖块（语义令牌自动翻转），仅投影/遮罩有暗色覆盖；
  * 3. 直接覆盖 `.pactor-chat-*` class。
  *
  * 使用：import 'pactor-chat/styles.css';
@@ -22,21 +25,35 @@
 .pactor-chat-workspace,
 .pactor-chat-inspector,
 .pactor-chat-notice {
-  --pactor-chat-bg: #f7f6f4;
-  --pactor-chat-sidebar-bg: #efedea;
-  --pactor-chat-fg: #1a1d26;
-  --pactor-chat-muted: #f4f4f6;
-  --pactor-chat-muted-fg: #6b7180;
-  --pactor-chat-card: #ffffff;
-  --pactor-chat-border: #e6e7eb;
-  --pactor-chat-primary: #3c47dd;
-  --pactor-chat-primary-fg: #ffffff;
-  --pactor-chat-danger: #d4380d;
-  --pactor-chat-danger-bg: #fff2f0;
-  --pactor-chat-success: #389e0d;
-  --pactor-chat-user-bubble-bg: #eef0fe;
-  --pactor-chat-user-bubble-border: rgb(60 71 221 / 35%);
-  --pactor-chat-code-bg: #f6f7f9;
+  /* 颜色令牌默认值桥接 pactor-ui 语义令牌（皮肤覆盖语义令牌时自动跟随），
+     逗号后为 pactor-ui 缺席时的 chat 品牌默认 */
+  --pactor-chat-bg: var(--background, #f7f6f4);
+  --pactor-chat-sidebar-bg: var(--sidebar, #efedea);
+  --pactor-chat-fg: var(--foreground, #1a1d26);
+  --pactor-chat-muted: var(--muted, #f4f4f6);
+  --pactor-chat-muted-fg: var(--muted-foreground, #6b7180);
+  --pactor-chat-card: var(--card, #ffffff);
+  --pactor-chat-border: var(--border, #e6e7eb);
+  --pactor-chat-primary: var(--primary, #3c47dd);
+  --pactor-chat-primary-fg: var(--primary-foreground, #ffffff);
+  --pactor-chat-danger: var(--destructive, #d4380d);
+  --pactor-chat-danger-bg: color-mix(
+    in oklab,
+    var(--destructive, #d4380d) 8%,
+    var(--background, #fff)
+  );
+  --pactor-chat-success: var(--success, #389e0d);
+  --pactor-chat-user-bubble-bg: color-mix(
+    in oklab,
+    var(--primary, #3c47dd) 7%,
+    var(--background, #fff)
+  );
+  --pactor-chat-user-bubble-border: color-mix(
+    in oklab,
+    var(--primary, #3c47dd) 35%,
+    transparent
+  );
+  --pactor-chat-code-bg: var(--muted, #f6f7f9);
   /* 旧通用圆角令牌（保留兼容）；新组件改用下方圆角阶梯 */
   --pactor-chat-radius: 12px;
   /* 圆角阶梯：sm 控件 / md 卡片 / lg 气泡 / xl composer */
@@ -74,7 +91,8 @@
 }
 
 /* 暗色皮肤：data-pactor-theme="dark"（html 或任意祖先容器）。
-   只覆盖令牌（颜色/投影），组件规则不区分主题。 */
+   颜色令牌经 var() 桥接 pactor-ui 语义令牌，暗色自动翻转，无需覆盖；
+   这里只保留投影与遮罩的暗色值（组件规则不区分主题）。 */
 [data-pactor-theme='dark'] .pactor-chat-view,
 [data-pactor-theme='dark'] .pactor-chat-layout,
 [data-pactor-theme='dark'] .pactor-chat-shell,
@@ -85,60 +103,26 @@
 .pactor-chat-shell[data-pactor-theme='dark'],
 .pactor-chat-workspace[data-pactor-theme='dark'],
 .pactor-chat-notice[data-pactor-theme='dark'] {
-  --pactor-chat-bg: #14161c;
-  --pactor-chat-sidebar-bg: #1b1e26;
-  --pactor-chat-fg: #e4e6ee;
-  --pactor-chat-muted: #1e2129;
-  --pactor-chat-muted-fg: #8b90a0;
-  --pactor-chat-card: #1a1d24;
-  --pactor-chat-border: #2c3038;
-  --pactor-chat-primary: #5b66f0;
-  --pactor-chat-primary-fg: #ffffff;
-  --pactor-chat-danger: #e8690c;
-  --pactor-chat-danger-bg: #2b1d16;
-  --pactor-chat-success: #49aa19;
-  --pactor-chat-user-bubble-bg: #262a45;
-  --pactor-chat-user-bubble-border: rgb(91 102 240 / 45%);
-  --pactor-chat-code-bg: #1e2129;
   --pactor-chat-shadow-sm: 0 1px 2px rgb(0 0 0 / 35%);
   --pactor-chat-shadow-composer:
     0 1px 2px rgb(0 0 0 / 4%),
     0 12px 32px -10px rgb(0 0 0 / 55%);
   --pactor-chat-shell-scrim: rgb(0 0 0 / 55%);
-  --pactor-chat-font-display: 'Songti SC', 'Noto Serif SC', Georgia,
-    'Times New Roman', serif;
 }
 
 /* 系统偏好暗色兜底：未显式设置 data-pactor-theme 时跟随系统
-   （与上方 [data-pactor-theme='dark'] 块内容保持一致） */
+   （与上方 [data-pactor-theme='dark'] 块一致——仅投影与遮罩） */
 @media (prefers-color-scheme: dark) {
   :root:not([data-pactor-theme='light']):not([data-pactor-theme='dark']) .pactor-chat-view,
   :root:not([data-pactor-theme='light']):not([data-pactor-theme='dark']) .pactor-chat-layout,
   :root:not([data-pactor-theme='light']):not([data-pactor-theme='dark']) .pactor-chat-shell,
   :root:not([data-pactor-theme='light']):not([data-pactor-theme='dark']) .pactor-chat-workspace,
   :root:not([data-pactor-theme='light']):not([data-pactor-theme='dark']) .pactor-chat-notice {
-    --pactor-chat-bg: #14161c;
-    --pactor-chat-sidebar-bg: #1b1e26;
-    --pactor-chat-fg: #e4e6ee;
-    --pactor-chat-muted: #1e2129;
-    --pactor-chat-muted-fg: #8b90a0;
-    --pactor-chat-card: #1a1d24;
-    --pactor-chat-border: #2c3038;
-    --pactor-chat-primary: #5b66f0;
-    --pactor-chat-primary-fg: #ffffff;
-    --pactor-chat-danger: #e8690c;
-    --pactor-chat-danger-bg: #2b1d16;
-    --pactor-chat-success: #49aa19;
-    --pactor-chat-user-bubble-bg: #262a45;
-    --pactor-chat-user-bubble-border: rgb(91 102 240 / 45%);
-    --pactor-chat-code-bg: #1e2129;
     --pactor-chat-shadow-sm: 0 1px 2px rgb(0 0 0 / 35%);
     --pactor-chat-shadow-composer:
       0 1px 2px rgb(0 0 0 / 4%),
       0 12px 32px -10px rgb(0 0 0 / 55%);
     --pactor-chat-shell-scrim: rgb(0 0 0 / 55%);
-    --pactor-chat-font-display: 'Songti SC', 'Noto Serif SC', Georgia,
-      'Times New Roman', serif;
   }
 }
 

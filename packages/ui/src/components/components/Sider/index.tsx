@@ -42,7 +42,7 @@ export function Sider({
       data-slot="layout-sider"
       data-collapsed={collapsed || undefined}
       className={cn(
-        'flex min-h-0 shrink-0 flex-col border-r bg-background transition-[width]',
+        'flex min-h-0 shrink-0 flex-col border-r bg-sidebar transition-[width]',
         className,
       )}
       style={{ width: current, ...style }}

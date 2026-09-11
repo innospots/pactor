@@ -12,9 +12,11 @@ export interface StudioState {
   presetKey: string | null;
   /** 用户单项令牌修改（叠加在预置主题之上；空串视为未修改） */
   overrides: Record<string, string>;
+  /** 预览模式（gallery 的 data-pactor-theme；编辑器只编辑亮色令牌） */
+  mode: 'light' | 'dark';
 }
 
-let state: StudioState = { presetKey: 'qingming', overrides: {} };
+let state: StudioState = { presetKey: 'chalk', overrides: {}, mode: 'light' };
 
 const listeners = new Set<() => void>();
 
@@ -35,9 +37,9 @@ export function subscribeStudio(listener: () => void): () => void {
   };
 }
 
-/** 选中预置主题（保留用户 overrides，叠加在新主题之上） */
+/** 选中预置主题；切换主题时清空用户 overrides（新主题从零开始叠加） */
 export function selectPreset(presetKey: string | null): void {
-  state = { ...state, presetKey };
+  state = { ...state, presetKey, overrides: {} };
   emit();
 }
 
@@ -56,6 +58,12 @@ export function setTokenOverride(name: string, value: string): void {
 /** 清空全部用户修改（保留所选预置主题） */
 export function resetOverrides(): void {
   state = { ...state, overrides: {} };
+  emit();
+}
+
+/** 切换预览亮/暗模式 */
+export function setMode(mode: 'light' | 'dark'): void {
+  state = { ...state, mode };
   emit();
 }
 

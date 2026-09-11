@@ -23,17 +23,22 @@ iframe 内画廊页 SHALL 在挂载后向父页面发送 `ready` 消息；左栏
 
 ### Requirement: 预置主题选择与应用
 
-工作室 SHALL 内置多套预置主题，其中 SHALL 包含依据中国传统色（china_colors.md，384 色按 24 节气分组）生成的至少 5 套主题（如 珊瑚赫/青冥/碧山/梔子/齊紫 色系）；每套预置主题 SHALL 只定义其覆盖的语义令牌子集（组件级令牌经默认 `var()` 回退自动跟随）；点击主题 SHALL 即时应用到右侧预览。
+工作室 SHALL 内置至少 5 套**风格化**预置主题——每套是一种完整视觉风格（配色 + 圆角 + 阴影 + 背景底色的组合，如极简、奶油、工业、草木等取向），而非单纯换主色；每套主题 SHALL 同时提供对应的暗色令牌组（`darkTokens`），使皮肤在暗色模式下保持同一风格；主题按钮 SHALL 展示该主题的代表色板（swatches）；点击主题 SHALL 即时应用到右侧预览。主题 MAY 参考中国传统色（china_colors.md）取色。每套主题 SHALL 同时按风格生成语义四色（`--destructive`/`--success`/`--warning`/`--info`，亮暗两组）；每套主题 SHALL 只定义其覆盖的令牌子集（未覆盖的组件级令牌经默认 `var()` 回退自动跟随）。
 
 #### Scenario: 选择主题即时生效
 
-- **WHEN** 用户点击预置主题「青冥」
-- **THEN** 右侧画廊的主按钮、焦点环、图表色板等立即呈现该主题配色，无需刷新
+- **WHEN** 用户点击某套预置主题
+- **THEN** 右侧画廊的配色、圆角、阴影等立即呈现该主题风格，无需刷新
+
+#### Scenario: 主题按钮展示代表色板
+
+- **WHEN** 查看预置主题列表
+- **THEN** 每个主题按钮展示该主题的代表色色板缩略与风格名称
 
 #### Scenario: 预置主题为令牌子集
 
 - **WHEN** 查看任一预置主题的定义
-- **THEN** 其仅覆盖语义令牌子集，未含 `--switch-track` 等组件级令牌，组件级视觉经回退跟随语义令牌
+- **THEN** 其仅覆盖该风格需要的令牌子集，未覆盖的组件级令牌经回退跟随语义令牌
 
 ### Requirement: 单项令牌编辑与实时预览
 
@@ -51,12 +56,12 @@ iframe 内画廊页 SHALL 在挂载后向父页面发送 `ready` 消息；左栏
 
 ### Requirement: 皮肤 CSS 生成与下载
 
-工作室 SHALL 将"当前预置主题令牌 ∪ 用户修改"合成为一份皮肤 CSS 文本（`:root` 覆盖块，MUST 附带注释掉的 `[data-pactor-theme='dark']` 暗色骨架引导），预览与下载 SHALL 使用同一份合成文本；点击下载 SHALL 经 Blob 生成 `pactor-theme.css` 文件下载，该文件在宿主系统中于 `@pactor-app/ui/styles.css` 之后加载即生效。
+工作室 SHALL 将"当前预置主题令牌 ∪ 用户修改"合成为一份皮肤 CSS 文本：`:root` 亮色覆盖块；预置主题含 `darkTokens` 时 MUST 同时生成 `[data-pactor-theme='dark']` 暗色覆盖块，否则附带注释掉的暗色骨架引导。预览与下载 SHALL 使用同一份合成文本；点击下载 SHALL 经 Blob 生成 `pactor-theme.css` 文件下载，该文件在宿主系统中于 `@pactor-app/ui/styles.css` 之后加载即生效。
 
 #### Scenario: 下载文件可用
 
 - **WHEN** 用户选择主题、修改若干令牌后点击下载
-- **THEN** 得到 `pactor-theme.css`，内容为 `:root` 令牌覆盖块（含注释的暗色骨架），且与当前预览效果一致
+- **THEN** 得到 `pactor-theme.css`，内容为 `:root` 令牌覆盖块；主题含暗色令牌组时同时含 `[data-pactor-theme='dark']` 块，且与当前预览效果一致
 
 #### Scenario: 导出与预览同源
 
@@ -71,3 +76,17 @@ iframe 内画廊页 SHALL 在挂载后向父页面发送 `ready` 消息；左栏
 
 - **WHEN** 在工作室修改 `--switch-track-checked`、`--menu-hover-background`、`--pagination-active-background` 等任一组件级令牌
 - **THEN** 画廊中存在对应组件可立即观察到变化
+
+### Requirement: 预览亮色/暗色切换
+
+工作室右侧预览 SHALL 提供亮色/暗色切换控件；切换 SHALL 通过 postMessage 通知 iframe 内画廊页设置对应的 `data-pactor-theme` 属性并即时生效；预览默认亮色（工作室编辑的是亮色令牌，暗色预览用于验收主题暗色风格）。
+
+#### Scenario: 切换暗色预览
+
+- **WHEN** 用户点击预览的暗色切换
+- **THEN** iframe 画廊页设置 `data-pactor-theme="dark"`，呈现所选主题的暗色风格
+
+#### Scenario: 暗色风格来自主题
+
+- **WHEN** 在暗色预览下选择不同预置主题
+- **THEN** 画廊呈现各主题对应的暗色令牌组效果，而非内置默认暗色

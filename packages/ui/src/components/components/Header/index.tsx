@@ -135,7 +135,7 @@ export function Header({
   const hasUser = user !== undefined;
 
   const rootClass = cn(
-    'flex h-14 shrink-0 items-center gap-4 border-b bg-background px-4',
+    'flex h-14 shrink-0 items-center gap-4 border-b bg-card px-4',
     className,
   );
 
