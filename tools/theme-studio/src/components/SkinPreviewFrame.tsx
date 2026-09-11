@@ -15,7 +15,13 @@ import {
   type CSSProperties,
 } from 'react';
 
-import { getComposedCss, getStudioState, subscribeStudio } from '../store';
+import {
+  getComposedCss,
+  getStudioState,
+  setMode,
+  subscribeStudio,
+} from '../store';
+import { MODE_MESSAGE_TYPE } from '../gallery-bridge';
 
 export const SKIN_MESSAGE_TYPE = 'theme-studio:skin';
 export const READY_MESSAGE_TYPE = 'theme-studio:ready';
@@ -27,8 +33,8 @@ interface SkinPreviewFrameProps {
 export function SkinPreviewFrame({ style }: SkinPreviewFrameProps) {
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const [galleryReady, setGalleryReady] = useState(false);
-  // 订阅 store 以在每次主题/令牌变化时重取合成 CSS
-  useSyncExternalStore(subscribeStudio, getStudioState);
+  // 订阅 store 以在每次主题/令牌/模式变化时重取合成 CSS 与模式
+  const { mode } = useSyncExternalStore(subscribeStudio, getStudioState);
 
   useEffect(() => {
     const onMessage = (event: MessageEvent): void => {
@@ -51,6 +57,10 @@ export function SkinPreviewFrame({ style }: SkinPreviewFrameProps) {
       { type: SKIN_MESSAGE_TYPE, css: getComposedCss() },
       window.location.origin,
     );
+    iframeRef.current?.contentWindow?.postMessage(
+      { type: MODE_MESSAGE_TYPE, mode },
+      window.location.origin,
+    );
   });
 
   return (
@@ -58,6 +68,7 @@ export function SkinPreviewFrame({ style }: SkinPreviewFrameProps) {
       ref={iframeRef}
       src="/gallery"
       title="组件画廊预览"
+      data-skin-preview=""
       style={{
         width: '100%',
         height: '100%',

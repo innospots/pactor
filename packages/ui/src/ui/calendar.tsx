@@ -20,7 +20,7 @@ function Calendar({
   return (
     <DayPicker
       showOutsideDays={showOutsideDays}
-      className={cn('bg-background p-3', className)}
+      className={cn('bg-card p-3', className)}
       classNames={{
         root: cn('w-fit', defaultClassNames.root),
         months: cn('relative flex flex-col gap-4 md:flex-row', defaultClassNames.months),

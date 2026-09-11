@@ -19,9 +19,9 @@ export interface FlexProps {
 }
 
 const gapClass: Record<string, string> = {
-  small: 'gap-2',
-  middle: 'gap-4',
-  large: 'gap-6',
+  small: 'gap-(--flex-gap-sm)',
+  middle: 'gap-(--flex-gap-md)',
+  large: 'gap-(--flex-gap-lg)',
 };
 
 const justifyClass: Record<string, string> = {
@@ -41,7 +41,11 @@ const alignClass: Record<string, string> = {
   stretch: 'items-stretch',
 };
 
-/** Flex 布局（shadcn kit）：方向 / 对齐映射 Tailwind 工具类，数字 gap 内联 */
+/**
+ * Flex 布局（shadcn kit）：方向 / 对齐映射 Tailwind 工具类，数字 gap 内联。
+ * gap 未指定时应用默认间距令牌 `--flex-gap`（命名档位读
+ * `--flex-gap-sm/md/lg`），均可被皮肤 CSS 覆盖；`gap: 0` 显式关闭。
+ */
 export function Flex({
   direction = 'horizontal',
   gap,
@@ -57,6 +61,7 @@ export function Flex({
       className={cn(
         'flex',
         direction === 'vertical' && 'flex-col',
+        gap === undefined && 'gap-(--flex-gap)',
         typeof gap === 'string' && gapClass[gap],
         justify && justifyClass[justify],
         align && alignClass[align],

@@ -290,7 +290,7 @@ function MenuTree({
  * （去重、点击导航、关闭当前回退最后一个）。route props 优先、
  * bridge 订阅兜底的选中态来源与 antd 版一致。
  *
- * 样式：Tailwind 工具类读取 shadcn 语义令牌（bg-background / border-border /
+ * 样式：Tailwind 工具类读取 shadcn 语义令牌（页面壳 bg-background、表面 bg-card/bg-sidebar、border-border /
  * text-muted-foreground …），结构钩子用 data-slot 属性。
  */
 export function AdminLayout({
@@ -411,7 +411,7 @@ export function AdminLayout({
     <header
       data-slot="admin-header"
       className={cn(
-        'flex h-14 items-center gap-4 border-b border-border bg-background px-6',
+        'flex h-14 items-center gap-4 border-b border-border bg-card px-6',
         fixedHeader && 'sticky top-0 z-20',
       )}
     >
@@ -473,7 +473,7 @@ export function AdminLayout({
       data-slot="admin-sidebar"
       data-collapsed={effectiveCollapsed || undefined}
       className={cn(
-        'shrink-0 overflow-auto border-r border-border bg-background py-2',
+        'shrink-0 overflow-auto border-r border-border bg-sidebar py-2',
         effectiveCollapsed ? 'w-16 px-1.5' : 'w-52',
         fixedSider &&
           (mode === 'side-full'
@@ -529,7 +529,7 @@ export function AdminLayout({
               : t('pactor.layout.collapseSidebar')
           }
           aria-expanded={!effectiveCollapsed}
-          className="sticky bottom-0 flex w-full cursor-pointer items-center justify-center border-t border-border bg-background py-2 text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
+          className="sticky bottom-0 flex w-full cursor-pointer items-center justify-center border-t border-border bg-sidebar py-2 text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
           onClick={() => setCollapsed((value) => !value)}
         >
           {effectiveCollapsed ? '»' : '«'}
@@ -544,7 +544,7 @@ export function AdminLayout({
         <div
           data-slot="admin-tabs"
           role="tablist"
-          className="flex items-center gap-1 border-b border-border bg-background px-4 pt-2"
+          className="flex items-center gap-1 border-b border-border bg-card px-4 pt-2"
         >
           {tabs.map((tab, index) => (
             <div
@@ -555,7 +555,7 @@ export function AdminLayout({
               className={cn(
                 'inline-flex items-center gap-1 rounded-t-md border border-b-0 border-border px-3 py-1.5 text-sm',
                 tab.key === currentPath
-                  ? 'bg-background font-medium text-foreground'
+                  ? 'bg-card font-medium text-foreground'
                   : 'bg-muted text-muted-foreground',
               )}
             >

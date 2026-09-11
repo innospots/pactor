@@ -133,15 +133,15 @@
      回退到语义令牌——只覆盖语义令牌时组件仍有合理视觉） */
   --switch-track: var(--input);
   --switch-track-checked: var(--primary);
-  --switch-thumb: var(--background);
+  --switch-thumb: var(--card);
   --slider-track: var(--muted);
   --slider-range: var(--primary);
-  --slider-thumb: var(--background);
+  --slider-thumb: var(--card);
   --radio-border: var(--input);
   --radio-checked: var(--primary);
   --progress-track: var(--muted);
   --progress-indicator: var(--primary);
-  --pagination-active-background: var(--background);
+  --pagination-active-background: var(--card);
   --pagination-active-border: var(--border);
   --pagination-active-radius: calc(var(--radius) * 0.8);
   --menu-hover-background: var(--accent);
@@ -158,6 +158,14 @@
   --calendar-selected-foreground: var(--primary-foreground);
   --calendar-today-background: var(--accent);
   --calendar-today-foreground: var(--accent-foreground);
+
+  /* 布局组件默认间距（Flex/Grid 未显式指定 gap 时生效；Flex 的
+     small/middle/large 命名档位同样令牌化） */
+  --flex-gap: 12px;
+  --flex-gap-sm: 8px;
+  --flex-gap-md: 16px;
+  --flex-gap-lg: 24px;
+  --grid-gap: 16px;
 }
 
 /* 暗色皮肤：全仓约定的属性开关（挂在根或任意容器上） */

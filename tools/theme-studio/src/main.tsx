@@ -17,6 +17,7 @@ import { createComponentRegistry } from '@pactor-app/ui/components';
 import type { ReactNode } from 'react';
 
 import { createBootstrap } from './bootstrap';
+import { PreviewModeToggle } from './components/PreviewModeToggle';
 import { SkinDownloadButton } from './components/SkinDownloadButton';
 import { SkinPreviewFrame } from './components/SkinPreviewFrame';
 import { ThemePresetList } from './components/ThemePresetList';
@@ -86,10 +87,11 @@ function ChatProvider({ children }: { children?: ReactNode }) {
   );
 }
 
-// 工作室编辑的是亮色皮肤令牌：强制 light，避免"跟随系统"暗色时
-// 暗色兜底块（:root:not([data-pactor-theme])，特异性高于皮肤的 :root 覆盖）
-// 压住皮肤令牌——否则深色系统下选主题无视觉效果、页面呈暗色
-document.documentElement.setAttribute('data-pactor-theme', 'light');
+// 工作室页强制 light（编辑的是亮色皮肤令牌，避免"跟随系统"暗色时暗色兜底块
+// 压住皮肤的 :root 覆盖）；gallery 页由预览模式消息控制亮/暗，默认 light
+if (window.location.pathname !== '/gallery') {
+  document.documentElement.setAttribute('data-pactor-theme', 'light');
+}
 
 createPactorApplication({
   appId: 'theme-studio',
@@ -102,6 +104,7 @@ createPactorApplication({
     registry.register('ThemePresetList', ThemePresetList);
     registry.register('TokenEditor', TokenEditor);
     registry.register('SkinPreviewFrame', SkinPreviewFrame);
+    registry.register('PreviewModeToggle', PreviewModeToggle);
     registry.register('SkinDownloadButton', SkinDownloadButton);
     return registry;
   },

@@ -101,7 +101,7 @@ export function Table({
       {loading ? (
         <div
           data-slot="table-loading"
-          className="absolute inset-0 z-10 flex items-center justify-center bg-background/60 text-sm text-muted-foreground"
+          className="absolute inset-0 z-10 flex items-center justify-center bg-card/60 text-sm text-muted-foreground"
         >
           {t('pactor.table.loading')}
         </div>

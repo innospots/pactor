@@ -18,7 +18,7 @@ children:
       direction: vertical
       style: { height: 100vh }
     children:
-      # 顶栏：标题 + 下载入口
+      # 顶栏：标题 + 下载入口；右侧预览亮/暗切换
       - type: Flex
         props:
           gap: 12
@@ -30,25 +30,45 @@ children:
             props:
               type: secondary
               text: 选择预置主题 → 微调令牌 → 右侧画廊实时预览 → 下载皮肤 CSS
+          - type: Flex
+            props:
+              style: { flex: 1, justifyContent: flex-end }
+            children:
+              - type: PreviewModeToggle
       - type: Flex
         props:
           style: { flex: 1, minHeight: 0, alignItems: stretch }
         children:
-          # 左栏：预置主题列表 + 下载 + 分组令牌编辑器（均可滚动）
+          # 左栏：高度撑满视口；预置主题区与令牌编辑器各自独立滚动，
+          # 编辑器的分类 tab 固定在滚动区外
           - type: Flex
             props:
               direction: vertical
               gap: 12
-              style: { width: 400, flexShrink: 0, overflowY: auto, padding: 16, borderRight: 1px solid var(--border) }
+              style: { width: 400, flexShrink: 0, height: 100%, minHeight: 0, padding: 16, borderRight: 1px solid var(--border) }
             children:
-              - type: Text
-                props: { text: 预置主题, strong: true }
-              - type: ThemePresetList
-              - type: SkinDownloadButton
+              # 标题行：左标题右下载，两端对齐
+              - type: Flex
+                props:
+                  justify: space-between
+                  align: center
+                children:
+                  - type: Text
+                    props: { text: 预置主题, strong: true }
+                  - type: SkinDownloadButton
+              # 预置主题：独立滚动区
+              - type: Flex
+                props:
+                  direction: vertical
+                  gap: 12
+                  style: { flexShrink: 0, maxHeight: 40%, overflowY: auto, minHeight: 0 }
+                children:
+                  - type: ThemePresetList
               - type: Separator
-              - type: Text
-                props: { text: 令牌编辑器, strong: true }
+              # 令牌编辑器：标题/修改计数/重置全部 合为组件内一行
               - type: TokenEditor
+                props:
+                  style: { flex: 1, minHeight: 0 }
           # 右侧：iframe 加载 /gallery，皮肤经 postMessage 注入
           - type: SkinPreviewFrame
             props:

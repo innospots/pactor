@@ -69,6 +69,11 @@ describe('皮肤令牌契约', () => {
       '--calendar-selected-background',
       '--calendar-selected-foreground',
       '--calendar-today-background',
+      '--flex-gap',
+      '--flex-gap-sm',
+      '--flex-gap-md',
+      '--flex-gap-lg',
+      '--grid-gap',
     ];
     for (const token of tokens) {
       expect(stylesSource).toContain(`${token}:`);
@@ -119,8 +124,8 @@ describe('组件经皮肤令牌渲染', () => {
         <SliderControl>
           <SliderTrack>
             <SliderIndicator />
-            <SliderThumb />
           </SliderTrack>
+          <SliderThumb />
         </SliderControl>
       </Slider>,
     );
