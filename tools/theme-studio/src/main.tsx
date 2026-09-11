@@ -13,10 +13,14 @@ import '@pactor-app/chat/styles.css';
 import { StaticDslLoader } from '@pactor-app/resource';
 // 默认 UI 为 @pactor-app/ui 内置实现，样式表导入为必需步骤
 import '@pactor-app/ui/styles.css';
+// 工作室局部样式微调（须在 ui / chat 样式表之后加载）
+import './studio.css';
 import { createComponentRegistry } from '@pactor-app/ui/components';
 import type { ReactNode } from 'react';
 
 import { createBootstrap } from './bootstrap';
+import { AiGenerateButton } from './components/AiGenerateButton';
+import { AiThemeDrawer } from './components/AiThemeDrawer';
 import { SkinDownloadButton } from './components/SkinDownloadButton';
 import { SkinPreviewFrame } from './components/SkinPreviewFrame';
 import { ThemePresetList } from './components/ThemePresetList';
@@ -107,6 +111,8 @@ createPactorApplication({
     registry.register('TokenEditor', TokenEditor);
     registry.register('SkinPreviewFrame', SkinPreviewFrame);
     registry.register('SkinDownloadButton', SkinDownloadButton);
+    registry.register('AiGenerateButton', AiGenerateButton);
+    registry.register('AiThemeDrawer', AiThemeDrawer);
     return registry;
   },
   providers: ChatProvider,

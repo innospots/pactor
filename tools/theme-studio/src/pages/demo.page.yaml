@@ -493,7 +493,7 @@ children:
                               - type: Icon
                                 props: { name: globe, color: '#1677ff', size: lg }
                               - type: Text
-                                props: { text: Ant Design, style: { fontSize: 12 } }
+                                props: { text: Design, style: { fontSize: 12 } }
                           - type: Flex
                             props: { direction: vertical, gap: 6, style: { alignItems: center } }
                             children:

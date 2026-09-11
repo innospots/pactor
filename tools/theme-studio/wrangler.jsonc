@@ -1,0 +1,20 @@
+{
+  "$schema": "./node_modules/wrangler/config-schema.json",
+  "name": "pactor-theme-studio",
+  "account_id": "43cad862b6a144ea14c0eed27fe3727e",
+  "compatibility_date": "2026-08-11",
+  "dev": {
+    "port": 8781
+  },
+  "main": "worker/index.ts",
+  "assets": {
+    "directory": "./dist",
+    "binding": "ASSETS",
+    "not_found_handling": "single-page-application"
+  },
+  "vars": {
+    "LLM_BASE_URL": "https://api.openai.com/v1",
+    "LLM_MODEL": "gpt-4o-mini"
+    // 可选：LLM_SYSTEM_PROMPT 覆盖默认系统提示词（令牌清单与格式约束始终附加）
+  }
+}

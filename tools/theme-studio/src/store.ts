@@ -12,11 +12,21 @@ export interface StudioState {
   presetKey: string | null;
   /** 用户单项令牌修改（叠加在预置主题之上；空串视为未修改） */
   overrides: Record<string, string>;
+  /** AI 生成的暗色令牌（并入合成 CSS 的暗色块） */
+  darkOverrides: Record<string, string>;
   /** 预览模式（gallery 的 data-pactor-theme；编辑器只编辑亮色令牌） */
   mode: 'light' | 'dark';
+  /** AI 生成滑层开关 */
+  aiDrawerOpen: boolean;
 }
 
-let state: StudioState = { presetKey: 'chalk', overrides: {}, mode: 'light' };
+let state: StudioState = {
+  presetKey: 'chalk',
+  overrides: {},
+  darkOverrides: {},
+  mode: 'light',
+  aiDrawerOpen: false,
+};
 
 const listeners = new Set<() => void>();
 
@@ -39,7 +49,7 @@ export function subscribeStudio(listener: () => void): () => void {
 
 /** 选中预置主题；切换主题时清空用户 overrides（新主题从零开始叠加） */
 export function selectPreset(presetKey: string | null): void {
-  state = { ...state, presetKey, overrides: {} };
+  state = { ...state, presetKey, overrides: {}, darkOverrides: {} };
   emit();
 }
 
@@ -67,7 +77,25 @@ export function setMode(mode: 'light' | 'dark'): void {
   emit();
 }
 
+/** 开关 AI 生成滑层 */
+export function setAiDrawerOpen(open: boolean): void {
+  state = { ...state, aiDrawerOpen: open };
+  emit();
+}
+
+/**
+ * 应用 AI 生成结果（spec: theme-studio-ai-generate / 生成结果解析与应用）：
+ * 亮色令牌进 overrides、暗色进 darkOverrides，preset 置为自定义（null）。
+ */
+export function applyAiTheme(
+  light: Record<string, string>,
+  dark: Record<string, string>,
+): void {
+  state = { ...state, presetKey: null, overrides: { ...light }, darkOverrides: { ...dark } };
+  emit();
+}
+
 /** 当前合成 CSS（预览 postMessage 与下载共用的单一来源） */
 export function getComposedCss(): string {
-  return composeSkinCss(getPreset(state.presetKey), state.overrides);
+  return composeSkinCss(getPreset(state.presetKey), state.overrides, state.darkOverrides);
 }

@@ -11,8 +11,10 @@ meta:
 
 # 根级 children 局部描述形态（blank 外壳，页面完全自控结构）：
 # 左栏自定义组件（预置主题 / 下载 / 令牌编辑器）+ 右侧 iframe 预览组件，
-# 共享状态走模块级 store（见 src/store.ts），不经 DSL props 穿透
+# 共享状态走模块级 store（见 src/store.ts），不经 DSL props 穿透；
+# AiThemeDrawer 为 fixed 定位滑层（不参与文档流布局）
 children:
+  - type: AiThemeDrawer
   - type: Flex
     props:
       direction: vertical
@@ -35,6 +37,12 @@ children:
             props:
               type: secondary
               text: 选择预置主题 → 微调令牌 → 右侧画廊实时预览 → 下载皮肤 CSS
+          # Header 右端：AI 生成入口
+          - type: Flex
+            props:
+              style: { flex: 1, justifyContent: flex-end }
+            children:
+              - type: AiGenerateButton
       - type: Resizable
         props:
           direction: horizontal
