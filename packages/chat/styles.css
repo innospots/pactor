@@ -1103,6 +1103,14 @@ button.pactor-chat-trace__header:hover,
   color: var(--pactor-chat-muted-fg);
 }
 
+/* 流式期间的纯文本正文（结束后回切 markdown 渲染） */
+.pactor-chat-thinking__text {
+  white-space: pre-wrap;
+  word-break: break-word;
+  font-size: 13px;
+  line-height: 1.6;
+}
+
 .pactor-chat-thinking__body .pactor-markdown > :first-child {
   margin-top: 0;
 }

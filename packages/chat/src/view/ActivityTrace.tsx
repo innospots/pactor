@@ -9,6 +9,7 @@ import {
   type ToolTraceEntry,
 } from '../activity.js';
 import type { ChatMessage, ChatPart } from '../model.js';
+import { useThrottledValue } from '../hooks/use-throttled-value.js';
 
 /**
  * ActivityTrace（spec: chat-activity-trace，设计决策 D1/D4）：
@@ -179,7 +180,9 @@ function TraceRow({ entry }: { entry: ToolTraceEntry }) {
 
 type ThinkingPart = Extract<ChatPart, { type: 'thinking' }>;
 
-/** thinking 折叠卡：markdown 正文；流式展开 + 进行中指示，答案阶段自动折叠，支持 pin */
+/** thinking 折叠卡：markdown 正文；流式展开 + 进行中指示，答案阶段自动折叠，支持 pin。
+ * 流式期间正文走节流纯文本（推理模型的 reasoning 可达数万 token，
+ * 逐 token 全量 markdown 解析是 O(n²)，会卡顿甚至崩溃）；结束后回切 markdown */
 function ThinkingCard({
   part,
   answerPhase,
@@ -188,6 +191,7 @@ function ThinkingCard({
   answerPhase: boolean;
 }) {
   const partStreaming = part.status === 'streaming';
+  const shown = useThrottledValue(part.content, 120, partStreaming);
   const { open, toggle } = usePinnedCollapse(partStreaming && !answerPhase);
   return (
     <div
@@ -215,7 +219,11 @@ function ThinkingCard({
       </button>
       {open && (
         <div className="pactor-chat-thinking__body">
-          <MarkdownRenderer content={part.content} />
+          {partStreaming ? (
+            <div className="pactor-chat-thinking__text">{shown}</div>
+          ) : (
+            <MarkdownRenderer content={part.content} />
+          )}
         </div>
       )}
     </div>
