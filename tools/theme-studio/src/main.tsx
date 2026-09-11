@@ -17,12 +17,12 @@ import { createComponentRegistry } from '@pactor-app/ui/components';
 import type { ReactNode } from 'react';
 
 import { createBootstrap } from './bootstrap';
-import { PreviewModeToggle } from './components/PreviewModeToggle';
 import { SkinDownloadButton } from './components/SkinDownloadButton';
 import { SkinPreviewFrame } from './components/SkinPreviewFrame';
 import { ThemePresetList } from './components/ThemePresetList';
 import { TokenEditor } from './components/TokenEditor';
 import { announceGalleryReady, installGalleryBridge } from './gallery-bridge';
+import demoPage from './pages/demo.page.yaml';
 import galleryPage from './pages/gallery.page.yaml';
 import studioPage from './pages/studio.page.yaml';
 
@@ -35,6 +35,7 @@ const loader = new StaticDslLoader({
   pages: {
     studio: studioPage,
     gallery: galleryPage,
+    demo: demoPage,
   },
 });
 
@@ -88,8 +89,9 @@ function ChatProvider({ children }: { children?: ReactNode }) {
 }
 
 // 工作室页强制 light（编辑的是亮色皮肤令牌，避免"跟随系统"暗色时暗色兜底块
-// 压住皮肤的 :root 覆盖）；gallery 页由预览模式消息控制亮/暗，默认 light
-if (window.location.pathname !== '/gallery') {
+// 压住皮肤的 :root 覆盖）；预览路由（gallery / demo）由预览模式消息控制亮/暗，默认 light
+const PREVIEW_ROUTES = ['/gallery', '/demo'];
+if (!PREVIEW_ROUTES.includes(window.location.pathname)) {
   document.documentElement.setAttribute('data-pactor-theme', 'light');
 }
 
@@ -104,14 +106,13 @@ createPactorApplication({
     registry.register('ThemePresetList', ThemePresetList);
     registry.register('TokenEditor', TokenEditor);
     registry.register('SkinPreviewFrame', SkinPreviewFrame);
-    registry.register('PreviewModeToggle', PreviewModeToggle);
     registry.register('SkinDownloadButton', SkinDownloadButton);
     return registry;
   },
   providers: ChatProvider,
 }).mount('#root');
 
-// 画廊页挂载完成后向父页面通告 ready（左栏收到后才发送首次皮肤 CSS）
-if (window.location.pathname === '/gallery') {
+// 预览页挂载完成后向父页面通告 ready（左栏收到后才发送首次皮肤 CSS）
+if (PREVIEW_ROUTES.includes(window.location.pathname)) {
   announceGalleryReady();
 }

@@ -1,0 +1,632 @@
+dsl: '1.0'
+page:
+  id: demo
+  title: 示例页面
+  name: themeDemo
+  description: '示例页面（spec: theme-studio）：仿管理控制台工作台（侧栏菜单 + 横幅 + 卡片信息流），作为皮肤在真实页面结构下的验收面'
+
+meta:
+  version: '1.0'
+  author: platform-team
+
+state:
+  menuKey: home
+  useTab: often
+
+dataSources:
+  menuItems:
+    type: static
+    autoLoad: true
+    value:
+      - { key: home, label: 主页, icon: home }
+      - { key: form, label: 表单页, icon: edit }
+      - key: project
+        label: 项目
+        icon: grid
+        children:
+          - { key: list, label: 列表页, icon: list }
+          - { key: detail, label: 详情页, icon: file-text }
+          - { key: result, label: 结果页, icon: check-circle }
+  todos:
+    type: static
+    autoLoad: true
+    value:
+      - { title: AntV 数据可视化 申请发布, meta: 青士 · 2020-07-01 14:00 }
+      - { title: AntV 数据可视化 申请发布, meta: 青士 · 2020-07-01 14:00 }
+      - { title: AntV 数据可视化 申请发布, meta: 青士 · 2020-07-01 14:00 }
+      - { title: AntV 数据可视化 申请发布, meta: 青士 · 2020-07-01 14:00 }
+  frequents:
+    type: static
+    autoLoad: true
+    value:
+      - { name: Ant Design Pro, owner: 笙笙, team: Ant Design, stage: 测试阶段 }
+      - { name: Ant Design Pro, owner: 笙笙, team: Ant Design, stage: 测试阶段 }
+      - { name: Ant Design Pro, owner: 笙笙, team: Ant Design, stage: 测试阶段 }
+      - { name: Ant Design Pro, owner: 笙笙, team: Ant Design, stage: 测试阶段 }
+      - { name: Ant Design Pro, owner: 笙笙, team: Ant Design, stage: 测试阶段 }
+  recents:
+    type: static
+    autoLoad: true
+    value:
+      - { name: Ant Design Landing, owner: 东风, team: AntV, stage: 开发中 }
+      - { name: Kitchen Sketch 插件, owner: 青椒, team: Kitchen, stage: 已上线 }
+      - { name: 语雀升级版本, owner: 汤尧, team: 语雀, stage: 已上线 }
+  favorites:
+    type: static
+    autoLoad: true
+    value:
+      - { label: Ant Design, icon: globe, color: '#1677ff' }
+      - { label: Pro Components, icon: package, color: '#722ed1' }
+      - { label: Egg, icon: zap, color: '#13c2c2' }
+      - { label: AntV, icon: chart, color: '#2f54eb' }
+      - { label: 语雀, icon: message, color: '#52c41a' }
+      - { label: Kitchen, icon: cloud, color: '#fa8c16' }
+      - { label: 蚂蚁体验科技, icon: building, color: '#8c8c8c' }
+      - { label: 查看全部, icon: more-horizontal, color: '#8c8c8c' }
+  helps:
+    type: static
+    autoLoad: true
+    value:
+      - 语雀是什么
+      - Ant Design 设计原则
+      - 语雀数据安全
+      - 如何使用 Ant Design Pro 模版
+      - 数据可视化常见疑问点
+      - 深入浅出解释 Ant Design Landing
+      - Dumi 使用帮助
+      - 如何参与体验一起造
+  notices:
+    type: static
+    autoLoad: true
+    value:
+      - { badge: 最新, text: 产品力评估模型发布会, time: 1天前 }
+      - { badge: 更新, text: 蚂蚁金服设计平台用最小的作..., time: 1周前 }
+      - { badge: 平台, text: Ant Design 5.0 正式发布, time: 2周前 }
+
+# 根级 children：左侧菜单栏 + 右侧工作台内容（横幅 / 代办 / 常用 / 动态 / 收藏 / 帮助 / 公告）
+children:
+  - type: Flex
+    props:
+      style: { height: 100vh, alignItems: stretch }
+    children:
+      # ===== 左侧菜单 =====
+      - type: Flex
+        props:
+          direction: vertical
+          style:
+            {
+              width: 208,
+              flexShrink: 0,
+              background: var(--card),
+              borderRight: 1px solid var(--border),
+            }
+        children:
+          - type: Flex
+            props:
+              gap: 8
+              style:
+                {
+                  padding: '14px 16px',
+                  alignItems: center,
+                  borderBottom: 1px solid var(--border),
+                }
+            children:
+              - type: Icon
+                props: { name: package, color: var(--primary) }
+              - type: Text
+                props: { text: Pactor Pro, strong: true }
+          - type: Menu
+            props:
+              items: ${data.menuItems}
+              selectedKey: ${state.menuKey}
+              style: { padding: 8 }
+            events:
+              onSelect:
+                - action: setState
+                  params:
+                    menuKey: ${event}
+
+      # ===== 右侧内容 =====
+      - type: Flex
+        props:
+          direction: vertical
+          style:
+            {
+              flex: 1,
+              minWidth: 0,
+              overflowY: auto,
+              padding: 16,
+              background: var(--background),
+            }
+        children:
+          # 欢迎横幅：主色实底（保证文字对比度）+ 透明渐变罩层
+          # （前景色 16% 光泽 → 透明 → 辅色 22% 轻染），亮/暗随令牌联动
+          - type: Flex
+            props:
+              direction: vertical
+              gap: 8
+              style:
+                {
+                  padding: '20px 24px',
+                  borderRadius: var(--radius),
+                  background: 'linear-gradient(120deg, color-mix(in oklab, var(--primary-foreground) 16%, transparent) 0%, transparent 45%, color-mix(in oklab, var(--info, var(--primary-foreground)) 22%, transparent) 100%), var(--primary)',
+                }
+            children:
+              - type: Text
+                props:
+                  text: Hi，欢迎使用应用 Paas 平台！
+                  strong: true
+                  style: { color: var(--primary-foreground), fontSize: 18 }
+              - type: Text
+                props:
+                  text: 轻松创建、部署和管理你的应用，提升研发效率，降低业务成本
+                  style:
+                    {
+                      color: 'color-mix(in oklab, var(--primary-foreground) 80%, transparent)',
+                      fontSize: 13,
+                    }
+
+          # 主体两栏
+          - type: Flex
+            props:
+              style: { marginTop: 12, alignItems: flex-start, gap: 16 }
+            children:
+              # ---- 左列 ----
+              - type: Flex
+                props:
+                  direction: vertical
+                  gap: 16
+                  style: { flex: 2, minWidth: 0 }
+                children:
+                  # 代办事项
+                  - type: Card
+                    children:
+                      - type: Flex
+                        props:
+                          gap: 8
+                          style: { alignItems: center }
+                        children:
+                          - type: Text
+                            props: { text: 代办事项, strong: true }
+                          - type: Badge
+                            props: { text: '12', variant: secondary }
+                      - type: Flex
+                        props:
+                          direction: vertical
+                          style: { marginTop: 8 }
+                        children:
+                          - type: Flex
+                            props:
+                              justify: space-between
+                              align: center
+                              style: { padding: '10px 0', borderBottom: 1px solid var(--border) }
+                            children:
+                              - type: Flex
+                                props: { direction: vertical, gap: 2 }
+                                children:
+                                  - type: Text
+                                    props: { text: AntV 数据可视化 申请发布, strong: true }
+                                  - type: Text
+                                    props: { text: 青士 · 2020-07-01 14:00, type: secondary, style: { fontSize: 12 } }
+                              - type: Flex
+                                props: { gap: 8, style: { alignItems: center } }
+                                children:
+                                  - type: Badge
+                                    props: { text: Ant Design, variant: outline }
+                                  - type: Badge
+                                    props: { text: 待审核 }
+                          - type: Flex
+                            props:
+                              justify: space-between
+                              align: center
+                              style: { padding: '10px 0', borderBottom: 1px solid var(--border) }
+                            children:
+                              - type: Flex
+                                props: { direction: vertical, gap: 2 }
+                                children:
+                                  - type: Text
+                                    props: { text: AntV 数据可视化 申请发布, strong: true }
+                                  - type: Text
+                                    props: { text: 青士 · 2020-07-01 14:00, type: secondary, style: { fontSize: 12 } }
+                              - type: Flex
+                                props: { gap: 8, style: { alignItems: center } }
+                                children:
+                                  - type: Badge
+                                    props: { text: Ant Design, variant: outline }
+                                  - type: Badge
+                                    props: { text: 待审核 }
+                          - type: Flex
+                            props:
+                              justify: space-between
+                              align: center
+                              style: { padding: '10px 0', borderBottom: 1px solid var(--border) }
+                            children:
+                              - type: Flex
+                                props: { direction: vertical, gap: 2 }
+                                children:
+                                  - type: Text
+                                    props: { text: AntV 数据可视化 申请发布, strong: true }
+                                  - type: Text
+                                    props: { text: 青士 · 2020-07-01 14:00, type: secondary, style: { fontSize: 12 } }
+                              - type: Flex
+                                props: { gap: 8, style: { alignItems: center } }
+                                children:
+                                  - type: Badge
+                                    props: { text: Ant Design, variant: outline }
+                                  - type: Badge
+                                    props: { text: 待审核 }
+                      - type: Text
+                        props:
+                          text: 查看全部
+                          type: secondary
+                          style: { textAlign: center, marginTop: 8, fontSize: 13 }
+
+                  # 最常使用 / 最近使用
+                  - type: Card
+                    children:
+                      - type: Flex
+                        props:
+                          justify: space-between
+                          align: center
+                        children:
+                          - type: Text
+                            props: { text: 快捷入口, strong: true }
+                          - type: Button
+                            props: { text: 新建, size: sm }
+                      - type: Tabs
+                        props:
+                          activeKey: ${state.useTab}
+                          style: { marginTop: 8 }
+                          items:
+                            - key: often
+                              label: 最常使用
+                              children:
+                                - type: Flex
+                                  props:
+                                    direction: vertical
+                                    style: { marginTop: 4 }
+                                  children:
+                                    - type: Flex
+                                      props:
+                                        align: center
+                                        gap: 12
+                                        style: { padding: '10px 0', borderBottom: 1px solid var(--border) }
+                                      children:
+                                        - type: Avatar
+                                          props: { fallback: A }
+                                        - type: Text
+                                          props: { text: Ant Design Pro, strong: true, style: { width: 140 } }
+                                        - type: Text
+                                          props: { text: 笙笙, type: secondary, style: { fontSize: 13 } }
+                                        - type: Badge
+                                          props: { text: Ant Design, variant: outline }
+                                        - type: Flex
+                                          props: { style: { flex: 1, justifyContent: flex-end } }
+                                          children:
+                                            - type: Badge
+                                              props: { text: 测试阶段, variant: secondary }
+                                    - type: Flex
+                                      props:
+                                        align: center
+                                        gap: 12
+                                        style: { padding: '10px 0', borderBottom: 1px solid var(--border) }
+                                      children:
+                                        - type: Avatar
+                                          props: { fallback: A }
+                                        - type: Text
+                                          props: { text: Ant Design Pro, strong: true, style: { width: 140 } }
+                                        - type: Text
+                                          props: { text: 笙笙, type: secondary, style: { fontSize: 13 } }
+                                        - type: Badge
+                                          props: { text: Ant Design, variant: outline }
+                                        - type: Flex
+                                          props: { style: { flex: 1, justifyContent: flex-end } }
+                                          children:
+                                            - type: Badge
+                                              props: { text: 测试阶段, variant: secondary }
+                                    - type: Flex
+                                      props:
+                                        align: center
+                                        gap: 12
+                                        style: { padding: '10px 0' }
+                                      children:
+                                        - type: Avatar
+                                          props: { fallback: A }
+                                        - type: Text
+                                          props: { text: Ant Design Pro, strong: true, style: { width: 140 } }
+                                        - type: Text
+                                          props: { text: 笙笙, type: secondary, style: { fontSize: 13 } }
+                                        - type: Badge
+                                          props: { text: Ant Design, variant: outline }
+                                        - type: Flex
+                                          props: { style: { flex: 1, justifyContent: flex-end } }
+                                          children:
+                                            - type: Badge
+                                              props: { text: 测试阶段, variant: secondary }
+                            - key: recent
+                              label: 最近使用
+                              children:
+                                - type: Flex
+                                  props:
+                                    direction: vertical
+                                    style: { marginTop: 4 }
+                                  children:
+                                    - type: Flex
+                                      props:
+                                        align: center
+                                        gap: 12
+                                        style: { padding: '10px 0', borderBottom: 1px solid var(--border) }
+                                      children:
+                                        - type: Avatar
+                                          props: { fallback: L }
+                                        - type: Text
+                                          props: { text: Ant Design Landing, strong: true, style: { width: 140 } }
+                                        - type: Text
+                                          props: { text: 东风, type: secondary, style: { fontSize: 13 } }
+                                        - type: Badge
+                                          props: { text: AntV, variant: outline }
+                                        - type: Flex
+                                          props: { style: { flex: 1, justifyContent: flex-end } }
+                                          children:
+                                            - type: Badge
+                                              props: { text: 开发中 }
+                                    - type: Flex
+                                      props:
+                                        align: center
+                                        gap: 12
+                                        style: { padding: '10px 0' }
+                                      children:
+                                        - type: Avatar
+                                          props: { fallback: K }
+                                        - type: Text
+                                          props: { text: Kitchen Sketch 插件, strong: true, style: { width: 140 } }
+                                        - type: Text
+                                          props: { text: 青椒, type: secondary, style: { fontSize: 13 } }
+                                        - type: Badge
+                                          props: { text: Kitchen, variant: outline }
+                                        - type: Flex
+                                          props: { style: { flex: 1, justifyContent: flex-end } }
+                                          children:
+                                            - type: Badge
+                                              props: { text: 已上线, variant: secondary }
+                      - type: Text
+                        props:
+                          text: 查看全部
+                          type: secondary
+                          style: { textAlign: center, marginTop: 8, fontSize: 13 }
+
+                  # 动态
+                  - type: Card
+                    props:
+                      title: 动态
+                    children:
+                      - type: Flex
+                        props:
+                          direction: vertical
+                          gap: 16
+                        children:
+                          - type: Flex
+                            props:
+                              gap: 12
+                              style: { alignItems: flex-start }
+                            children:
+                              - type: Avatar
+                                props: { fallback: 汤 }
+                              - type: Flex
+                                props: { direction: vertical, gap: 6, style: { flex: 1, minWidth: 0 } }
+                                children:
+                                  - type: Text
+                                    props: { text: 12 分钟前, type: secondary, style: { fontSize: 12 } }
+                                  - type: Text
+                                    props: { text: 汤尧 申请迭代 语雀升级版本 3.4 发布 }
+                                  - type: Flex
+                                    props:
+                                      direction: vertical
+                                      gap: 2
+                                      style:
+                                        {
+                                          padding: 12,
+                                          borderRadius: var(--radius),
+                                          background: var(--muted),
+                                        }
+                                    children:
+                                      - type: Text
+                                        props: { text: '[WIP] ANT02240964', style: { fontSize: 13 } }
+                                      - type: Text
+                                        props: { text: 'Status: opened', type: secondary, style: { fontSize: 12 } }
+                                      - type: Text
+                                        props: { text: 'Repository: xbricks', type: secondary, style: { fontSize: 12 } }
+                          - type: Flex
+                            props:
+                              gap: 12
+                              style: { alignItems: flex-start }
+                            children:
+                              - type: Avatar
+                                props: { fallback: 汤 }
+                              - type: Flex
+                                props: { direction: vertical, gap: 6, style: { flex: 1, minWidth: 0 } }
+                                children:
+                                  - type: Text
+                                    props: { text: 24 分钟前, type: secondary, style: { fontSize: 12 } }
+                                  - type: Text
+                                    props: { text: 汤尧 申请迭代 蚂蚁企业级产品 发布 }
+                          - type: Flex
+                            props:
+                              gap: 12
+                              style: { alignItems: flex-start }
+                            children:
+                              - type: Avatar
+                                props: { fallback: 汤 }
+                              - type: Flex
+                                props: { direction: vertical, gap: 6, style: { flex: 1, minWidth: 0 } }
+                                children:
+                                  - type: Text
+                                    props: { text: 48 分钟前, type: secondary, style: { fontSize: 12 } }
+                                  - type: Text
+                                    props: { text: 汤尧 申请迭代 语雀升级版本 3.3 发布 }
+                      - type: Text
+                        props:
+                          text: 查看全部
+                          type: secondary
+                          style: { textAlign: center, marginTop: 12, fontSize: 13 }
+
+              # ---- 右列 ----
+              - type: Flex
+                props:
+                  direction: vertical
+                  gap: 16
+                  style: { flex: 1, minWidth: 0 }
+                children:
+                  # 我的收藏
+                  - type: Card
+                    props:
+                      title: 我的收藏
+                    children:
+                      - type: Grid
+                        props:
+                          columns: 4
+                          gap: 12
+                        children:
+                          - type: Flex
+                            props: { direction: vertical, gap: 6, style: { alignItems: center } }
+                            children:
+                              - type: Icon
+                                props: { name: globe, color: '#1677ff', size: lg }
+                              - type: Text
+                                props: { text: Ant Design, style: { fontSize: 12 } }
+                          - type: Flex
+                            props: { direction: vertical, gap: 6, style: { alignItems: center } }
+                            children:
+                              - type: Icon
+                                props: { name: package, color: '#722ed1', size: lg }
+                              - type: Text
+                                props: { text: Pro 组件, style: { fontSize: 12 } }
+                          - type: Flex
+                            props: { direction: vertical, gap: 6, style: { alignItems: center } }
+                            children:
+                              - type: Icon
+                                props: { name: zap, color: '#13c2c2', size: lg }
+                              - type: Text
+                                props: { text: Egg, style: { fontSize: 12 } }
+                          - type: Flex
+                            props: { direction: vertical, gap: 6, style: { alignItems: center } }
+                            children:
+                              - type: Icon
+                                props: { name: chart, color: '#2f54eb', size: lg }
+                              - type: Text
+                                props: { text: AntV, style: { fontSize: 12 } }
+                          - type: Flex
+                            props: { direction: vertical, gap: 6, style: { alignItems: center } }
+                            children:
+                              - type: Icon
+                                props: { name: message, color: '#52c41a', size: lg }
+                              - type: Text
+                                props: { text: 语雀, style: { fontSize: 12 } }
+                          - type: Flex
+                            props: { direction: vertical, gap: 6, style: { alignItems: center } }
+                            children:
+                              - type: Icon
+                                props: { name: cloud, color: '#fa8c16', size: lg }
+                              - type: Text
+                                props: { text: Kitchen, style: { fontSize: 12 } }
+                          - type: Flex
+                            props: { direction: vertical, gap: 6, style: { alignItems: center } }
+                            children:
+                              - type: Icon
+                                props: { name: building, color: '#8c8c8c', size: lg }
+                              - type: Text
+                                props: { text: 体验科技, style: { fontSize: 12 } }
+                          - type: Flex
+                            props: { direction: vertical, gap: 6, style: { alignItems: center } }
+                            children:
+                              - type: Icon
+                                props: { name: more-horizontal, color: '#8c8c8c', size: lg }
+                              - type: Text
+                                props: { text: 查看全部, type: secondary, style: { fontSize: 12 } }
+
+                  # 使用帮助
+                  - type: Card
+                    props:
+                      title: 使用帮助
+                    children:
+                      - type: Flex
+                        props:
+                          direction: vertical
+                          gap: 10
+                        children:
+                          - type: Text
+                            props: { text: 语雀是什么, style: { color: var(--primary), fontSize: 13 } }
+                          - type: Text
+                            props: { text: Ant Design 设计原则, style: { color: var(--primary), fontSize: 13 } }
+                          - type: Text
+                            props: { text: 语雀数据安全, style: { color: var(--primary), fontSize: 13 } }
+                          - type: Text
+                            props: { text: 如何使用 Ant Design Pro 模版, style: { color: var(--primary), fontSize: 13 } }
+                          - type: Text
+                            props: { text: 数据可视化常见疑问点, style: { color: var(--primary), fontSize: 13 } }
+                          - type: Text
+                            props: { text: Dumi 使用帮助, style: { color: var(--primary), fontSize: 13 } }
+                      - type: Flex
+                        props:
+                          justify: space-between
+                          style: { marginTop: 12, paddingTop: 12, borderTop: 1px solid var(--border) }
+                        children:
+                          - type: Flex
+                            props: { gap: 4, style: { alignItems: center } }
+                            children:
+                              - type: Icon
+                                props: { name: help-circle, size: sm, color: var(--primary) }
+                              - type: Text
+                                props: { text: 新手引导, style: { color: var(--primary), fontSize: 12 } }
+                          - type: Flex
+                            props: { gap: 4, style: { alignItems: center } }
+                            children:
+                              - type: Icon
+                                props: { name: eye, size: sm, color: var(--primary) }
+                              - type: Text
+                                props: { text: 视频演示, style: { color: var(--primary), fontSize: 12 } }
+                          - type: Flex
+                            props: { gap: 4, style: { alignItems: center } }
+                            children:
+                              - type: Icon
+                                props: { name: file-text, size: sm, color: var(--primary) }
+                              - type: Text
+                                props: { text: 产品文档, style: { color: var(--primary), fontSize: 12 } }
+
+                  # 公告
+                  - type: Card
+                    props:
+                      title: 公告
+                    children:
+                      - type: Flex
+                        props:
+                          direction: vertical
+                          gap: 12
+                        children:
+                          - type: Flex
+                            props: { gap: 8, align: center }
+                            children:
+                              - type: Badge
+                                props: { text: 最新 }
+                              - type: Text
+                                props: { text: 产品力评估模型发布会, style: { flex: 1, fontSize: 13 } }
+                              - type: Text
+                                props: { text: 1天前, type: secondary, style: { fontSize: 12 } }
+                          - type: Flex
+                            props: { gap: 8, align: center }
+                            children:
+                              - type: Badge
+                                props: { text: 更新, variant: secondary }
+                              - type: Text
+                                props: { text: 蚂蚁金服设计平台用最小的作..., style: { flex: 1, fontSize: 13 } }
+                              - type: Text
+                                props: { text: 1周前, type: secondary, style: { fontSize: 12 } }
+                          - type: Flex
+                            props: { gap: 8, align: center }
+                            children:
+                              - type: Badge
+                                props: { text: 平台, variant: outline }
+                              - type: Text
+                                props: { text: Ant Design 5.0 正式发布, style: { flex: 1, fontSize: 13 } }
+                              - type: Text
+                                props: { text: 2周前, type: secondary, style: { fontSize: 12 } }

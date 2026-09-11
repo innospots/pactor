@@ -20,6 +20,12 @@ export interface SliderRange {
   step: number;
 }
 
+/** Radio 档位选项（令牌值为离散档位时使用） */
+export interface RadioOption {
+  label: string;
+  value: string;
+}
+
 export interface TokenMeta {
   /** 令牌名（含 -- 前缀），与 styles.css 的 :root 声明一致 */
   name: string;
@@ -30,6 +36,10 @@ export interface TokenMeta {
   defaultValue: string;
   /** 数值型令牌提供滑杆调节（长度单位 px/rem）；无则仅文本输入 */
   slider?: SliderRange;
+  /** 离散档位令牌提供 Radio 切换（与文本输入并存，值匹配时高亮） */
+  radio?: RadioOption[];
+  /** 派生令牌：默认由其它令牌 calc 派生，编辑器中只读展示（仍可被皮肤 CSS 单独覆盖） */
+  derived?: boolean;
 }
 
 export interface TokenGroup {
@@ -109,10 +119,14 @@ export const TOKEN_GROUPS: TokenGroup[] = [
     title: '尺寸',
     tokens: [
       { name: '--radius', type: 'length', description: '圆角基准（sm/md/lg/xl… 由其乘法派生）', defaultValue: '0.625rem', slider: { min: 0, max: 2, step: 0.125 } },
-      { name: '--flex-gap', type: 'length', description: 'Flex 未指定 gap 时的默认间距', defaultValue: '12px', slider: { min: 0, max: 48, step: 1 } },
-      { name: '--flex-gap-sm', type: 'length', description: 'Flex gap=small 档位', defaultValue: '8px', slider: { min: 0, max: 48, step: 1 } },
-      { name: '--flex-gap-md', type: 'length', description: 'Flex gap=middle 档位', defaultValue: '16px', slider: { min: 0, max: 48, step: 1 } },
-      { name: '--flex-gap-lg', type: 'length', description: 'Flex gap=large 档位', defaultValue: '24px', slider: { min: 0, max: 48, step: 1 } },
+      { name: '--flex-gap', type: 'length', description: 'Flex 间距基准（sm/md/lg 档位按比例派生）', defaultValue: '12px', radio: [
+        { label: '紧凑', value: '8px' },
+        { label: '标准', value: '12px' },
+        { label: '宽松', value: '16px' },
+      ] },
+      { name: '--flex-gap-sm', type: 'length', description: 'Flex gap=small 档位（默认 ×0.67 派生）', defaultValue: 'calc(var(--flex-gap) * 0.67)', derived: true },
+      { name: '--flex-gap-md', type: 'length', description: 'Flex gap=middle 档位（默认 ×1.33 派生）', defaultValue: 'calc(var(--flex-gap) * 1.33)', derived: true },
+      { name: '--flex-gap-lg', type: 'length', description: 'Flex gap=large 档位（默认 ×2 派生）', defaultValue: 'calc(var(--flex-gap) * 2)', derived: true },
       { name: '--grid-gap', type: 'length', description: 'Grid 未指定 gap 时的默认栏间距', defaultValue: '16px', slider: { min: 0, max: 48, step: 1 } },
       { name: '--pagination-active-radius', type: 'length', description: 'Pagination 当前页圆角', defaultValue: 'calc(var(--radius) * 0.8)' },
     ],

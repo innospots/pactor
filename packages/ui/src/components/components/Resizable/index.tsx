@@ -13,6 +13,12 @@ export interface ResizablePanelData {
   children?: DslNode[];
   /** 默认尺寸（百分比，0-100） */
   defaultSize?: number;
+  /** 默认尺寸（像素；与 defaultSize 同时提供时优先生效） */
+  defaultSizePx?: number;
+  /** 最小尺寸（像素） */
+  minSizePx?: number;
+  /** 最大尺寸（像素） */
+  maxSizePx?: number;
 }
 
 export interface ResizableProps {
@@ -29,7 +35,8 @@ export interface ResizableProps {
 /**
  * Resizable 适配器（shadcn kit）：基于 vendored Resizable
  * （react-resizable-panels）；panels 声明面板，相邻面板间为可拖拽手柄；
- * DSL 的 defaultSize 统一按百分比解释。
+ * DSL 的 defaultSize 统一按百分比解释，defaultSizePx/minSizePx/maxSizePx
+ * 按像素解释（像素优先级高于百分比）。
  */
 export function Resizable({
   panels = [],
@@ -45,8 +52,20 @@ export function Resizable({
           {index > 0 ? <ResizableHandle withHandle /> : null}
           <Panel
             defaultSize={
-              typeof panel.defaultSize === 'number'
-                ? `${panel.defaultSize}%`
+              typeof panel.defaultSizePx === 'number'
+                ? `${panel.defaultSizePx}px`
+                : typeof panel.defaultSize === 'number'
+                  ? `${panel.defaultSize}%`
+                  : undefined
+            }
+            minSize={
+              typeof panel.minSizePx === 'number'
+                ? `${panel.minSizePx}px`
+                : undefined
+            }
+            maxSize={
+              typeof panel.maxSizePx === 'number'
+                ? `${panel.maxSizePx}px`
                 : undefined
             }
           >

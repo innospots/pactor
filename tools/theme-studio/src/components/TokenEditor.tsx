@@ -3,13 +3,17 @@
  * （语义令牌 + 组件级令牌，元数据见 ../tokens.ts）。
  *
  * color 型给原生 `<input type="color">` 取色器 + 文本框；数值型（length
- * 且带 slider 范围）给 ui Slider + 文本框；其余给文本输入。修改即写入
+ * 且带 slider 范围）给 ui Slider + 文本框；离散档位型（radio 元数据）
+ * 给 ui RadioGroup + 文本框；派生令牌（derived）只读展示 calc 表达式；
+ * 其余给文本输入。修改即写入
  * store overrides，实时叠加在当前预置主题之上并同步到预览；已修改项旁
  * 提供单项重置。空值 = 不覆盖（回退预置主题 / 默认令牌）。
  */
 import { useMemo, useState, useSyncExternalStore, type CSSProperties } from 'react';
 
 import {
+  RadioGroup,
+  RadioGroupItem,
   Slider,
   SliderControl,
   SliderIndicator,
@@ -128,52 +132,97 @@ function TokenRow({ token }: { token: TokenMeta }) {
         )}
       </div>
       <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-        {token.type === 'color' && (
-          <input
-            type="color"
-            aria-label={`${token.name} 取色器`}
-            value={resolvedColor ?? '#cccccc'}
-            onChange={(event) => setTokenOverride(token.name, event.target.value)}
+        {token.derived ? (
+          <span
             style={{
-              width: 32,
-              height: 28,
-              padding: 0,
-              border: '1px solid var(--border)',
-              borderRadius: 6,
-              background: 'transparent',
-              cursor: 'pointer',
-              flexShrink: 0,
+              fontSize: 11,
+              fontFamily: 'ui-monospace, monospace',
+              color: 'var(--muted-foreground)',
             }}
-          />
-        )}
-        {sliderValue && (
-          <Slider
-            aria-label={`${token.name} 滑杆`}
-            value={sliderValue.num}
-            min={token.slider!.min}
-            max={token.slider!.max}
-            step={token.slider!.step}
-            onValueChange={(next) =>
-              setTokenOverride(token.name, `${next}${sliderValue.unit}`)
-            }
-            style={{ width: 120, flexShrink: 0 }}
           >
-            <SliderControl>
-              <SliderTrack>
-                <SliderIndicator />
-              </SliderTrack>
-              <SliderThumb />
-            </SliderControl>
-          </Slider>
+            派生：{token.defaultValue}
+          </span>
+        ) : (
+          <>
+            {token.type === 'color' && (
+              <input
+                type="color"
+                aria-label={`${token.name} 取色器`}
+                value={resolvedColor ?? '#cccccc'}
+                onChange={(event) => setTokenOverride(token.name, event.target.value)}
+                style={{
+                  width: 32,
+                  height: 28,
+                  padding: 0,
+                  border: '1px solid var(--border)',
+                  borderRadius: 6,
+                  background: 'transparent',
+                  cursor: 'pointer',
+                  flexShrink: 0,
+                }}
+              />
+            )}
+            {token.radio && (
+              <RadioGroup
+                aria-label={`${token.name} 档位`}
+                value={value || ''}
+                onValueChange={(next) =>
+                  setTokenOverride(token.name, String(next))
+                }
+                style={{
+                  display: 'flex',
+                  gap: 10,
+                  alignItems: 'center',
+                  flexShrink: 0,
+                }}
+              >
+                {token.radio.map((option) => (
+                  <label
+                    key={option.value}
+                    style={{
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: 4,
+                      fontSize: 12,
+                      cursor: 'pointer',
+                    }}
+                  >
+                    <RadioGroupItem value={option.value} />
+                    {option.label}
+                  </label>
+                ))}
+              </RadioGroup>
+            )}
+            {sliderValue && (
+              <Slider
+                aria-label={`${token.name} 滑杆`}
+                value={sliderValue.num}
+                min={token.slider!.min}
+                max={token.slider!.max}
+                step={token.slider!.step}
+                onValueChange={(next) =>
+                  setTokenOverride(token.name, `${next}${sliderValue.unit}`)
+                }
+                style={{ width: 120, flexShrink: 0 }}
+              >
+                <SliderControl>
+                  <SliderTrack>
+                    <SliderIndicator />
+                  </SliderTrack>
+                  <SliderThumb />
+                </SliderControl>
+              </Slider>
+            )}
+            <input
+              type="text"
+              aria-label={token.name}
+              value={textValue}
+              placeholder={presetValue || token.defaultValue}
+              onChange={(event) => setTokenOverride(token.name, event.target.value)}
+              style={inputStyle}
+            />
+          </>
         )}
-        <input
-          type="text"
-          aria-label={token.name}
-          value={textValue}
-          placeholder={presetValue || token.defaultValue}
-          onChange={(event) => setTokenOverride(token.name, event.target.value)}
-          style={inputStyle}
-        />
       </div>
     </div>
   );
