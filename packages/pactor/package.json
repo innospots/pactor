@@ -1,6 +1,6 @@
 {
   "name": "pactor-app",
-  "version": "1.2.0",
+  "version": "1.3.0",
   "description": "Pactor meta package: installs the full Server-Driven UI + AI-Native runtime stack (@pactor-app/*) and re-exports the one-stop application API (createPactorApplication)",
   "keywords": [
     "pactor",

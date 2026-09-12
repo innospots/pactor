@@ -1,8 +1,8 @@
 ---
 name: pactor
 description: |
-  Agent skill for rapidly building Pactor Server-Driven UI applications. Covers app bootstrapping, DSL authoring, custom components, theming, events, routing, resources, permissions, AI chat workspaces, and project commands.
-version: 1.2.0
+  Use when working with Pactor — any @pactor-app/* package or the pactor-app meta package. Especially when writing, generating, editing, or debugging Pactor DSL files (*.page.yaml: pages, state, dataSources, components, events, actions, expressions); also when bootstrapping a Pactor app (createPactorApplication, StaticDslLoader), registering custom components/actions/services, building AI chat pages (Chat, ChatShell), configuring themes/layouts/routing/resources/permissions, or using @pactor-app/vite-plugin / @pactor-app/cli (pactor validate).
+version: 1.3.0
 ---
 
 # pactor-app
@@ -143,6 +143,46 @@ Notable behaviors:
 
 Component contracts and per-component props: see the docs site (`docs/src/content/docs/components/`).
 
+## Workflow: authoring DSL pages
+
+When the user asks to build / generate / edit a Pactor DSL file (`*.page.yaml`):
+
+1. Start from the page skeleton below — never invent the top-level shape.
+2. Declare `state` and `dataSources` first, then compose the `body` tree from registered component `type`s only.
+3. Wire interactions via `events` → standard actions; expressions `${...}` read the scope chain.
+4. Validate before delivering: `npx pactor validate <file>` (from `@pactor-app/cli`; inside this monorepo: `node packages/cli/dist/cli.js validate <file>`). Note: the validator checks schema shape only, not component props semantics — use the reference for correct props.
+
+```yaml
+dsl: '1.0'                      # required, DSL spec version
+page:                           # required
+  id: customer-list             # globally unique
+  title: Customer List
+  permission: customer:view     # optional page guard
+state:                          # optional, reactive initial state
+  keyword: ''
+dataSources:                    # optional, named data sources
+  customers:
+    type: service               # static | service | http
+    service: customer.list
+    autoLoad: true
+    params:
+      keyword: ${state.keyword} # expressions, evaluated at load time
+body:                           # UI tree root (DslNode)
+  type: Page
+  props: { title: Customer List }
+  children: [...]
+```
+
+Facts that are NOT guessable and must be followed:
+
+- Top level is `{ dsl, page, state?, dataSources?, actions?, components?, lifecycle?, body? }` — `page` is a wrapper object, `dsl: '1.0'` is mandatory.
+- `Table` reads data via an **expression** (`dataSource: ${data.customers}`), not a source name; column templates use the `cell` key (not `render`) with `${row.x}` scope; pagination is `pagination: { pageSize: 5 }`.
+- Form fields bind via `props.name`; the submit button uses `submit: true` (not `htmlType`); `Form onSubmit` receives all values as `${event.<field>}`.
+- `navigate` takes `to`; `message` takes `text` + `messageType` (a `type` key in action `params` disables expression evaluation).
+- Query linkage = `onSubmit: [setState, reload]`; the data source's `params` referencing `${state.x}` pick up new values on reload.
+
+**Full DSL grammar, action catalog, expression/scopes tables, and copy-paste recipes: read `references/dsl-authoring.md` bundled next to this SKILL.md — read it before writing any non-trivial page.** In the monorepo, per-component props live in `docs/src/content/docs/components/` and the exhaustive DSL reference in `docs/src/content/docs/reference/dsl.md`.
+
 ## Workflow: custom component
 
 1. Write a React component in the business project
@@ -231,21 +271,21 @@ With pactor-app, use the convenience factory `createChatComponentRegistry()` (bu
 body:
   type: Chat
   props:
-    greeting: 你好
+    greeting: Hello
     menu:
-      - { key: new, label: 新建对话, icon: plus }
+      - { key: new, label: New Chat, icon: plus }
     models:                    # built-in model selector (controlled: model + onModelChange)
       - { value: demo, label: demo-mock }
     model: ${state.model}
     contexts:                  # @ mention / + context popovers; service refs resolve via callService
-      - { trigger: '@', label: 智能体, service: agents }
+      - { trigger: '@', label: Agents, service: agents }
     composerFooter:            # composer footer slot (below the toolbar, with divider)
       type: DropdownMenu
       props:
-        items: [{ label: 默认工作空间, value: 默认工作空间, icon: folder }]
+        items: [{ label: Default Workspace, value: Default Workspace, icon: folder }]
       children:
         - type: Button
-          props: { text: 选择工作空间, variant: text, size: small }
+          props: { text: Select Workspace, variant: text, size: small }
     messageActions: [copy, regenerate, edit]
   events:
     onModelChange:
@@ -317,6 +357,7 @@ pnpm pactor create my-app
 
 ## References
 
+- **DSL authoring reference (bundled)**: `references/dsl-authoring.md` — full page grammar, dataSources, expressions/scopes, action catalog, recipes, common mistakes. Read it before writing DSL.
 - Framework design specification: `docs/src/content/docs/framework-design.md`
 - Quick start: `docs/src/content/docs/guides/getting-started.md`
 - @pactor-app/app docs: `docs/src/content/docs/packages/app.md`
@@ -329,4 +370,4 @@ pnpm pactor create my-app
 
 ## How to use this skill
 
-This skill is maintained as `packages/skill/SKILL.md`. AI agents can copy or link this file into their skill directory to provide contextual guidance when reading or editing Pactor projects.
+This skill is maintained as `packages/skill/SKILL.md` together with `references/dsl-authoring.md`. AI agents can copy or link the whole `packages/skill` directory into their skill directory to provide contextual guidance when reading or editing Pactor projects.
