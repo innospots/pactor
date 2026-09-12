@@ -29,7 +29,7 @@
     "docs:dev": "pnpm --filter pactor-docs dev",
     "docs:build": "pnpm --filter pactor-docs build",
     "docs:preview": "pnpm --filter pactor-docs preview",
-    "release": "pnpm build && pnpm test && pnpm -r publish"
+    "release": "pnpm -r --filter \"./packages/*\" --if-present build && pnpm -r --filter \"./packages/*\" --if-present test && vitest run tests/ && pnpm -r --filter \"./packages/*\" publish"
   },
   "devDependencies": {
     "@pactor-app/core": "workspace:*",
