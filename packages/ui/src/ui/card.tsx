@@ -3,12 +3,31 @@ import * as React from 'react';
 import { cn } from '../lib/utils.js';
 
 /** shadcn/ui Card（vendored 源码） */
-function Card({ className, ...props }: React.ComponentProps<'div'>) {
+
+/** 圆角档位（静态映射：Tailwind 预编译扫描源码，动态拼接类名不进产物） */
+export type CardRounded = 'none' | 'sm' | 'md' | 'lg' | 'xl' | '2xl' | '3xl';
+
+const cardRoundedClasses: Record<CardRounded, string> = {
+  none: 'rounded-none',
+  sm: 'rounded-sm',
+  md: 'rounded-md',
+  lg: 'rounded-lg',
+  xl: 'rounded-xl',
+  '2xl': 'rounded-2xl',
+  '3xl': 'rounded-3xl',
+};
+
+function Card({
+  className,
+  rounded = 'lg',
+  ...props
+}: React.ComponentProps<'div'> & { rounded?: CardRounded }) {
   return (
     <div
       data-slot="card"
       className={cn(
-        'flex flex-col gap-6 rounded-xl border border-border bg-card py-6 text-card-foreground shadow-(--card-shadow)',
+        'flex flex-col gap-6 border border-border bg-card py-6 text-card-foreground shadow-(--card-shadow)',
+        cardRoundedClasses[rounded],
         className,
       )}
       {...props}

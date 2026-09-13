@@ -157,6 +157,7 @@ flex 容器；直接子节点含 `Sider` 时横向、否则纵向（`component` 
 | --- | --- | --- |
 | `title` | string | 卡片标题 |
 | `bordered` | boolean（默认 true） | 是否有边框 |
+| `rounded` | `'none' \| 'sm' \| 'md' \| 'lg' \| 'xl' \| '2xl' \| '3xl'`（默认 `'lg'`，即 `--radius` 基准值） | 圆角档位（随皮肤令牌 `--radius` 缩放） |
 
 ### Sidebar
 

@@ -3,17 +3,12 @@
 ## Purpose
 
 V1 基础组件目录与 antd 适配约定（`pactor-ui-antd` components 层）。DSL 只暴露框架级 props，不直接暴露 antd 原生 API。
-
-
 ## Requirements
-
 ### Requirement: 组件注册入口
 
 模块 SHALL 提供 `registerBuiltinComponents(registry)` 与 `createBuiltinComponentRegistry()`，按 DSL 类型名注册全部 V1 组件：Page、Grid、Flex、Card、Button、Alert、Statistic、Tabs、Table、Form、Input、Select、Layout、Header、Sider、Content、Footer、Menu、Link。
 
-#
-
-### Scenario: 注册后全部类型可解析
+#### Scenario: 注册后全部类型可解析
 
 - **WHEN** 调用 `createBuiltinComponentRegistry()` 后查询上述 12 个类型名
 - **THEN** 每个 `has(type)` 均为 `true`
@@ -54,7 +49,7 @@ V1 基础组件目录与 antd 适配约定（`pactor-ui-antd` components 层）�
 ### Requirement: 展示与布局组件
 
 - **Page**：SHALL 渲染可选 `title` 与 children 内容区。
-- **Card**：SHALL 支持 `title`、`bordered` 与 children。
+- **Card**：SHALL 支持 `title`、`bordered`、`rounded`（圆角档位：`'none' | 'sm' | 'md' | 'lg' | 'xl' | '2xl' | '3xl'`，缺省 `'lg'`——即 `--radius` 基准值，随皮肤令牌变化）与 children。
 - **Alert**：SHALL 支持 `message`、`description`、`variant`（success/info/warning/error）。
 - **Statistic**：SHALL 支持 `title`、`value`（可为表达式解析后的数字）、`precision`、`suffix`。
 - **Grid**：SHALL 按 `columns`（默认 1）与 `gap` 把 children 均分栏渲染。
@@ -74,6 +69,11 @@ V1 基础组件目录与 antd 适配约定（`pactor-ui-antd` components 层）�
 
 - **WHEN** Statistic 的 `value` 为 `"${data.summary.total}"` 且数据已加载
 - **THEN** 渲染该数值
+
+#### Scenario: Card 圆角档位
+
+- **WHEN** DSL 为 `{ type: 'Card', props: { rounded: 'sm', title: '紧凑卡片' } }`
+- **THEN** 卡片根节点类名含 `rounded-sm`；未声明 `rounded` 时为 `rounded-lg`（--radius 基准）
 
 ### Requirement: Tabs 容器
 
@@ -120,3 +120,4 @@ Input SHALL 支持框架级 `type` prop，取值为 `'text' | 'password'`，缺�
 
 - **WHEN** DSL 声明 `{ type: 'Link', props: { text: '详情', href: '/items/1', target: '_blank' } }`
 - **THEN** 渲染 `<a href="/items/1" target="_blank" rel="noreferrer">详情</a>`
+

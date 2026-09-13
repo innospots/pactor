@@ -166,3 +166,21 @@ describe('Renderer 组合渲染', () => {
     );
   });
 });
+
+describe('Card 圆角档位（rounded）', () => {
+  it('缺省为 rounded-lg（--radius 基准）', () => {
+    const { container } = renderDsl({ type: 'Card', props: { title: '默认' } });
+    const card = container.querySelector('[data-slot=card]')!;
+    expect(card.className).toContain('rounded-lg');
+  });
+
+  it('rounded: sm 时根节点类名为 rounded-sm', () => {
+    const { container } = renderDsl({
+      type: 'Card',
+      props: { title: '紧凑卡片', rounded: 'sm' },
+    });
+    const card = container.querySelector('[data-slot=card]')!;
+    expect(card.className).toContain('rounded-sm');
+    expect(card.className).not.toContain('rounded-lg');
+  });
+});

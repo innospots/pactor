@@ -3,10 +3,7 @@
 ## Purpose
 
 应用级国际化（i18n）：`createPactorApplication` / bootstrap 的 locale 与 messages 配置，RuntimeContext 的 i18n 上下文，表达式 `t()` 翻译函数，以及内置组件/布局默认文案的覆盖机制。
-
-
 ## Requirements
-
 ### Requirement: 应用级 i18n 配置
 
 系统 SHALL 支持通过 `createPactorApplication(options)` 或 bootstrap 配置国际化资源。配置项包括 `locale`（当前语言）、`defaultLocale`（回退语言）、`messages`（键值翻译表）。未配置时系统 MUST 按现状工作，不强制要求 i18n。
@@ -79,7 +76,7 @@ app 实例 SHALL 提供 `setLocale(locale, messages?)`，更新当前会话的�
 
 ### Requirement: 内置组件默认文案国际化
 
-内置组件（Table、Form、Select 等）的默认提示文案 SHALL 使用 i18n key 并允许业务覆盖。内置 key 的命名空间 MUST 以 `pactor.` 开头并保持稳定；未覆盖时回退到内置默认中文文案。
+内置组件（Table、Form、Select、DatePicker 等）的默认提示文案 SHALL 使用 i18n key 并允许业务覆盖。内置 key 的命名空间 MUST 以 `pactor.` 开头并保持稳定；未覆盖时回退到内置默认中文文案。DatePicker 的默认文案 SHALL 使用 `pactor.datePicker.*` 一组 key（placeholder / placeholderRange / today / thisWeek / thisMonth）；日期选择类组件的日历本体（月份/星期标题）SHALL 按当前 locale 切换（经 date-fns locale 映射，未知 locale 回退 en-US）。
 
 #### Scenario: 覆盖 Table 空状态文案
 
@@ -90,3 +87,14 @@ app 实例 SHALL 提供 `setLocale(locale, messages?)`，更新当前会话的�
 
 - **WHEN** messages 提供 `pactor.form.required` 为 `'This field is required'`
 - **THEN** 表单校验失败时显示该文案
+
+#### Scenario: 覆盖 DatePicker 预设文案
+
+- **WHEN** messages 提供 `pactor.datePicker.today` 为 `'Today!'` 且渲染 DatePicker 的缺省预设
+- **THEN** 预设栏第一项显示 `'Today!'`
+
+#### Scenario: 日历按 locale 切换
+
+- **WHEN** 应用 locale 为 `en-US` 且打开 DatePicker 浮层
+- **THEN** 日历的月份与星期标题显示为英文
+

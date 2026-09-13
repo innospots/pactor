@@ -2,7 +2,7 @@
 name: pactor
 description: |
   Use when working with Pactor — any @pactor-app/* package or the pactor-app meta package. Especially when writing, generating, editing, or debugging Pactor DSL files (*.page.yaml: pages, state, dataSources, components, events, actions, expressions); also when bootstrapping a Pactor app (createPactorApplication, StaticDslLoader), registering custom components/actions/services, building AI chat pages (Chat, ChatShell), configuring themes/layouts/routing/resources/permissions, or using @pactor-app/vite-plugin / @pactor-app/cli (pactor validate).
-version: 1.7.0
+version: 1.8.0
 ---
 
 # pactor-app
