@@ -112,6 +112,9 @@ export const TOKEN_GROUPS: TokenGroup[] = [
       { name: '--calendar-selected-foreground', type: 'color', description: '日历选中日文字', defaultValue: 'var(--primary-foreground)' },
       { name: '--calendar-today-background', type: 'color', description: '日历今日背景', defaultValue: 'var(--accent)' },
       { name: '--calendar-today-foreground', type: 'color', description: '日历今日文字', defaultValue: 'var(--accent-foreground)' },
+      { name: '--calendar-today-border', type: 'color', description: '日历今日边框', defaultValue: 'var(--primary)' },
+      { name: '--calendar-range-background', type: 'color', description: '日历范围中间日背景', defaultValue: 'var(--accent)' },
+      { name: '--calendar-range-foreground', type: 'color', description: '日历范围中间日文字', defaultValue: 'var(--accent-foreground)' },
     ],
   },
   {
