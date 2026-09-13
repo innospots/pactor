@@ -7,14 +7,42 @@ description: 导航类 DSL 组件——Menu / Link / Breadcrumb / Pagination / T
 
 ### Menu
 
-导航菜单（哑渲染：items 经表达式注入，不读外壳层 MenuRegistry）。在 Sidebar 内且侧栏折叠（icon rail）时自动降级为仅图标（label / badge / dot / 分组隐藏），hover 图标显示 Tooltip 提示。
+导航菜单（哑渲染：items 经表达式注入，不读外壳层 MenuRegistry）。在 Sidebar 内且侧栏折叠（icon rail）时自动降级为仅图标（label / badge / dot / 分组隐藏），hover 图标显示 Tooltip 提示；含 `children` 的目录项则以 hover 右侧滑出浮层（flyout）展示子菜单（完整形态：label / icon / badge / dot / 选中态，点选叶子触发 `onSelect` 并关闭浮层，点击目录按钮也可切换），不在 rail 内平铺子菜单图标。
 
 | prop | 类型 | 说明 |
 | --- | --- | --- |
 | `items` | `{ key, label, icon?, badge?, dot?, group?, disabled?, children? }[]` | 菜单树（如 `${data.menus}`；`icon` 为图标名（Icon 白名单，kebab/Pascal 均可），渲染于文字前；`badge` 为角标、`dot` 为 danger 系状态圆点、`group` 为分组标题（相邻同组只渲染一次）、`disabled` 置灰不可选） |
 | `mode` | `inline`（默认）\| `horizontal` | inline 用于 Sider，horizontal 用于 Header |
 | `selectedKey` | string | 受控选中项 |
+| `collapsible` | boolean（默认 `false`） | 仅 inline 模式生效：含 `children` 的目录项可折叠——点击只展开/收起（不触发 `onSelect`），右端 chevron 指示（展开时旋转 180°）；展开状态组件内部维护，初始为 `defaultExpandedKeys` ∪ `selectedKey` 的祖先目录链（挂载时算一次，`selectedKey` 后续变化不重置手动状态） |
+| `defaultExpandedKeys` | string[] | 初始额外展开的目录 key |
 | 事件 `onSelect` | — | 点选传出 key（典型接 `navigate` 或 `setState`） |
+
+可折叠子菜单示例：
+
+```yaml
+- type: Menu
+  props:
+    collapsible: true
+    defaultExpandedKeys: [system]
+    selectedKey: ${state.currentMenu}
+    items:
+      - { key: home, label: 首页, icon: home }
+      - key: customer
+        label: 客户管理
+        icon: users
+        children:
+          - { key: customer-list, label: 客户列表 }
+      - key: system
+        label: 系统管理
+        icon: settings
+        children:
+          - { key: system-user, label: 用户管理 }
+  events:
+    onSelect:
+      - action: setState
+        params: { currentMenu: ${event} }
+```
 
 自由组合示例（见 `examples/admin/src/pages/layout-demo.page.yaml`）：
 
