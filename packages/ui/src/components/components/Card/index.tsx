@@ -6,6 +6,7 @@ import {
   CardContent,
   CardHeader,
   CardTitle,
+  type CardRounded,
 } from '../../../ui/card.js';
 
 export interface CardProps {
@@ -13,6 +14,8 @@ export interface CardProps {
   title?: string;
   /** 是否有边框，默认 true（false 去边框与阴影） */
   bordered?: boolean;
+  /** 圆角档位，默认 'lg'（即 --radius 基准值） */
+  rounded?: CardRounded;
   /** 通用：根节点 class（与内置样式合并） */
   className?: string;
   /** 通用：根节点内联样式（布局逃逸口，如 `{ flex: 1 }`） */
@@ -20,10 +23,11 @@ export interface CardProps {
   children?: ReactNode;
 }
 
-/** Card 适配器（shadcn kit）：可选标题 + 边框开关（bordered=false 去边框与阴影） */
-export function Card({ title, bordered = true, className, style, children }: CardProps) {
+/** Card 适配器（shadcn kit）：可选标题 + 边框开关（bordered=false 去边框与阴影）+ 圆角档位 */
+export function Card({ title, bordered = true, rounded, className, style, children }: CardProps) {
   return (
     <ShadcnCard
+      rounded={rounded}
       className={cn('gap-4 py-4', !bordered && 'border-transparent shadow-none', className)}
       style={style}
     >

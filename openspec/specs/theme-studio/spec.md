@@ -3,10 +3,7 @@
 ## Purpose
 
 皮肤工作室（tools/theme-studio）：pactor 应用（DSL 页面），预置风格主题（含中国传统色系列，亮暗双态、语义四色）+ 分组令牌编辑器（颜色/尺寸/风格）+ iframe 画廊实时预览（亮/暗切换）+ 皮肤 CSS 合成与下载。
-
 ## Requirements
-
-
 ### Requirement: 工作室布局与预览隔离
 
 主题工作室 SHALL 为仓库根目录 `tools/theme-studio` 下的独立 pactor 应用（`createPactorApplication` + `StaticDslLoader` + DSL 页面，`private: true` 不发布 npm，纳入 pnpm workspace）：工作室页与画廊页 SHALL 以 `*.page.yaml` DSL 结构定义；页面布局为左栏（预置主题 + 令牌编辑器）与右侧 iframe 预览；预置主题列表、令牌编辑器、预览 iframe、下载按钮 SHALL 实现为自定义 React 组件并经 `componentRegistry` 注册后在 DSL 中引用；iframe SHALL 加载同源的 `/gallery` 画廊页，皮肤 CSS SHALL 通过 `postMessage` 传递并在 iframe 内 upsert 单个 `<style>` 节点生效，与宿主真实加载方式（在 `pactor-ui/styles.css` 之后级联覆盖）一致。
@@ -63,12 +60,22 @@ iframe 内画廊页 SHALL 在挂载后向父页面发送 `ready` 消息；左栏
 
 ### Requirement: 皮肤 CSS 生成与下载
 
-工作室 SHALL 将"当前预置主题令牌 ∪ 用户修改"合成为一份皮肤 CSS 文本：`:root` 亮色覆盖块；预置主题含 `darkTokens` 时 MUST 同时生成 `[data-pactor-theme='dark']` 暗色覆盖块，否则附带注释掉的暗色骨架引导。预览与下载 SHALL 使用同一份合成文本；点击下载 SHALL 经 Blob 生成 `pactor-theme.css` 文件下载，该文件在宿主系统中于 `@pactor-app/ui/styles.css` 之后加载即生效。
+工作室 SHALL 将"tokens.ts 令牌默认值 ∪ 预置主题令牌 ∪ 用户修改"（后者优先）合成为一份皮肤 CSS 文本：`:root` 亮色覆盖块 MUST 包含 tokens.ts 登记的全部令牌（预置主题未定义的令牌以默认值出现在导出中，如 `--sidebar` 基座族）；预置主题含 `darkTokens` 时 MUST 同时生成 `[data-pactor-theme='dark']` 暗色覆盖块（暗色块不做默认值兜底，未提供的暗色令牌回退内置暗色皮肤），否则附带注释掉的暗色骨架引导。预览与下载 SHALL 使用同一份合成文本；点击下载 SHALL 经 Blob 生成 `pactor-theme.css` 文件下载，该文件在宿主系统中于 `@pactor-app/ui/styles.css` 之后加载即生效。
 
 #### Scenario: 下载文件可用
 
 - **WHEN** 用户选择主题、修改若干令牌后点击下载
-- **THEN** 得到 `pactor-theme.css`，内容为 `:root` 令牌覆盖块；主题含暗色令牌组时同时含 `[data-pactor-theme='dark']` 块，且与当前预览效果一致
+- **THEN** 得到 `pactor-theme.css`，内容为 `:root` 令牌覆盖块（含全部已知令牌）；主题含暗色令牌组时同时含 `[data-pactor-theme='dark']` 块，且与当前预览效果一致
+
+#### Scenario: 导出包含预置主题未定义的令牌
+
+- **WHEN** 所选预置主题未定义 `--sidebar`（基座族）且用户未修改它
+- **THEN** 导出 CSS 的 `:root` 块仍包含 `--sidebar`，值为 tokens.ts 登记的默认值
+
+#### Scenario: 覆盖优先级不变
+
+- **WHEN** 同一令牌同时存在于默认值、预置主题与用户修改中
+- **THEN** 导出值依次由用户修改 > 预置主题 > 默认值决定
 
 #### Scenario: 导出与预览同源
 
@@ -97,3 +104,18 @@ iframe 内画廊页 SHALL 在挂载后向父页面发送 `ready` 消息；左栏
 
 - **WHEN** 在暗色预览下选择不同预置主题
 - **THEN** 画廊呈现各主题对应的暗色令牌组效果，而非内置默认暗色
+
+### Requirement: AI 生成入口
+
+主题工作室 SHALL 在工作室页 Header 右端提供「AI 生成」入口按钮，点击后打开 AI 生成滑层（见 theme-studio-ai-generate 能力）；工作室的预览皮肤来源 SHALL 在「预置主题 + 手动令牌覆盖」之外支持「AI 生成结果」，AI 结果 MUST 以与手动覆盖相同的 store 覆盖层机制叠加到预览与下载产物中。
+
+#### Scenario: 入口可见
+
+- **WHEN** 打开主题工作室首页
+- **THEN** Header 右端可见「AI 生成」按钮，点击后打开 AI 生成滑层
+
+#### Scenario: AI 结果叠加
+
+- **WHEN** 用户在 AI 滑层中将生成结果应用到预览
+- **THEN** 右侧预览与「下载皮肤 CSS」产物与手动修改令牌走同一覆盖层与合成逻辑
+

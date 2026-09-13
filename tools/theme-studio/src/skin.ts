@@ -1,23 +1,29 @@
 /**
  * 皮肤 CSS 合成（spec: theme-studio / 皮肤 CSS 生成与下载）。
  *
- * `composeSkinCss(preset, overrides)` 把「预置主题令牌 ∪ 用户修改」合成为
- * 一份皮肤 CSS 文本：`:root` 亮色覆盖块（overrides 优先于预置主题）；
- * 预置主题带 darkTokens 时同时生成真实 `[data-pactor-theme='dark']` 暗色块，
- * 否则附带注释掉的暗色骨架引导。预览（postMessage 注入
+ * `composeSkinCss(preset, overrides)` 把「令牌默认值 ∪ 预置主题令牌 ∪ 用户修改」
+ *（后者优先）合成为一份皮肤 CSS 文本：`:root` 亮色覆盖块包含 tokens.ts
+ * 登记的全部令牌；预置主题带 darkTokens 时同时生成真实
+ * `[data-pactor-theme='dark']` 暗色块，否则附带注释掉的暗色骨架引导。预览（postMessage 注入
  * iframe）与下载（Blob 导出 pactor-theme.css）共用同一份文本，
  * 保证导出与预览严格一致。
  */
 import type { SkinPreset } from './presets';
+import { TOKEN_DEFAULTS } from './resolve';
 
 /** 合成皮肤 CSS 文本：`:root` 亮色覆盖块 + 暗色块（或注释骨架）；
+ * 亮色合并链：tokens.ts 默认值（全量令牌）→ 预置主题 tokens → 用户 overrides（后者优先），
+ * 预置主题未定义的令牌（如 --sidebar 基座族）以默认值出现在导出中；
  * darkOverrides（AI 生成的暗色令牌）并入暗色块且优先于预置主题 */
 export function composeSkinCss(
   preset: SkinPreset | null,
   overrides: Record<string, string>,
   darkOverrides: Record<string, string> = {},
 ): string {
-  const merged: Record<string, string> = { ...(preset?.tokens ?? {}) };
+  const merged: Record<string, string> = {
+    ...TOKEN_DEFAULTS,
+    ...(preset?.tokens ?? {}),
+  };
   for (const [name, value] of Object.entries(overrides)) {
     const trimmed = value.trim();
     if (trimmed === '') {

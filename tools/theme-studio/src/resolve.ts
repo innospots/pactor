@@ -57,8 +57,8 @@ export function normalizeComputedColor(computed: string): string | null {
   return null;
 }
 
-/** 令牌默认值表（tokens.ts 元数据即契约清单） */
-const TOKEN_DEFAULTS: Record<string, string> = Object.fromEntries(
+/** 令牌默认值表（tokens.ts 元数据即契约清单；皮肤合成与颜色解析共用） */
+export const TOKEN_DEFAULTS: Record<string, string> = Object.fromEntries(
   TOKEN_GROUPS.flatMap((group) =>
     group.tokens.map((token) => [token.name, token.defaultValue] as const),
   ),
