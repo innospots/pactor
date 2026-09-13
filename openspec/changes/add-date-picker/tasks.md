@@ -46,3 +46,4 @@
 - [x] 7.5 同步 `docs/src/content/docs/components/form.md` DatePicker 小节(同面板可选范围、今天为定位型预设)
 - [x] 7.6 左右面板不显示同一月份:月份同步/导航时强制右面板月份 ≥ 左面板月份+1(同月值回显或单侧导航越界时对侧顺延/回退),补测试并复跑验证
 - [x] 7.7 今天的日期显示边框:vendored `ui/calendar.tsx` 的 today 类补边框(`--calendar-today-border` 令牌,styles.css/:root 按既有别名约定给值),theming.md 令牌表同步,补测试并复跑验证
+- [x] 7.8 修复 range 模式点击「今天」后全部日期呈选中样式的 bug:同日区间(start==end)的 `inRange: { after, before }` 被 DayPicker 当开放区间匹配几乎所有日期;inRange 仅在 end 严格晚于 start(按日历日)时构造,补回归测试
