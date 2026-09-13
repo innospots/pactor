@@ -22,6 +22,7 @@ import { ChatInput } from './components/ChatInput/index.js';
 import { Content } from './components/Content/index.js';
 import { ContextMenu } from './components/ContextMenu/index.js';
 import { DataTable } from './components/DataTable/index.js';
+import { DatePicker } from './components/DatePicker/index.js';
 import { Dialog } from './components/Dialog/index.js';
 import { Drawer } from './components/Drawer/index.js';
 import { DropdownMenu } from './components/DropdownMenu/index.js';
@@ -138,6 +139,7 @@ export const builtinComponents = {
   HoverCard,
   // 复合类扩展组件（第三批）
   Calendar,
+  DatePicker,
   InputOTP,
   Combobox,
   Carousel,

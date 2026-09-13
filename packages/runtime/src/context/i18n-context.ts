@@ -29,6 +29,11 @@ const defaultMessages = {
     'pactor.alertDialog.cancel': '取消',
     'pactor.command.empty': '无匹配结果',
     'pactor.overlay.close': '关闭',
+    'pactor.datePicker.placeholder': '选择日期',
+    'pactor.datePicker.placeholderRange': '选择日期范围',
+    'pactor.datePicker.today': '今天',
+    'pactor.datePicker.thisWeek': '本周',
+    'pactor.datePicker.thisMonth': '本月',
   },
   'en-US': {
     'pactor.layout.expandSidebar': 'Expand sidebar',
@@ -44,6 +49,11 @@ const defaultMessages = {
     'pactor.alertDialog.cancel': 'Cancel',
     'pactor.command.empty': 'No results found',
     'pactor.overlay.close': 'Close',
+    'pactor.datePicker.placeholder': 'Select date',
+    'pactor.datePicker.placeholderRange': 'Select date range',
+    'pactor.datePicker.today': 'Today',
+    'pactor.datePicker.thisWeek': 'This Week',
+    'pactor.datePicker.thisMonth': 'This Month',
   },
 };
 

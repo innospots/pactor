@@ -110,6 +110,15 @@ export type { IconProps, IconSize } from './components/Icon/index.js';
 // 复合类扩展组件（第三批）
 export { Calendar } from './components/Calendar/index.js';
 export type { CalendarProps } from './components/Calendar/index.js';
+export { DatePicker } from './components/DatePicker/index.js';
+export type {
+  DatePickerPreset,
+  DatePickerPresetKey,
+  DatePickerProps,
+  DatePickerRangeProps,
+  DatePickerSingleProps,
+  DateRangeValue,
+} from './components/DatePicker/index.js';
 export { InputOTP } from './components/InputOTP/index.js';
 export type { InputOTPProps } from './components/InputOTP/index.js';
 export { Combobox } from './components/Combobox/index.js';

@@ -57,11 +57,11 @@ function Calendar({
           defaultClassNames.day_button,
         ),
         selected: cn(
-          '[&>button]:bg-(--calendar-selected-background) [&>button]:text-(--calendar-selected-foreground) [&>button]:hover:bg-(--calendar-selected-background)',
+          '[&>button]:bg-(--calendar-selected-background) [&>button]:text-(--calendar-selected-foreground) [&>button]:hover:bg-(--calendar-selected-background) [&>button]:hover:text-(--calendar-selected-foreground)',
           defaultClassNames.selected,
         ),
         today: cn(
-          '[&>button]:bg-(--calendar-today-background) [&>button]:text-(--calendar-today-foreground)',
+          '[&>button]:bg-(--calendar-today-background) [&>button]:text-(--calendar-today-foreground) [&>button]:hover:bg-(--calendar-today-background) [&>button]:hover:text-(--calendar-today-foreground) [&>button]:border [&>button]:border-(--calendar-today-border)',
           defaultClassNames.today,
         ),
         outside: cn(

@@ -188,6 +188,8 @@ document.documentElement.removeAttribute('data-pactor-theme');
 | `--calendar-day-hover-background` / `-foreground` | `--accent` / `--accent-foreground` | Calendar 日期 hover |
 | `--calendar-selected-background` / `-foreground` | `--primary` / `--primary-foreground` | Calendar 选中日 |
 | `--calendar-today-background` / `-foreground` | `--accent` / `--accent-foreground` | Calendar 今日 |
+| `--calendar-today-border` | `--primary` | Calendar 今日边框标识 |
+| `--calendar-range-background` / `-foreground` | `--accent` / `--accent-foreground` | DatePicker range 区间中间日期 |
 
 ## 工具类桥接（`@theme inline`）
 

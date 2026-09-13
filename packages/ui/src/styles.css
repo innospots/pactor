@@ -158,6 +158,9 @@
   --calendar-selected-foreground: var(--primary-foreground);
   --calendar-today-background: var(--accent);
   --calendar-today-foreground: var(--accent-foreground);
+  --calendar-today-border: var(--primary);
+  --calendar-range-background: var(--accent);
+  --calendar-range-foreground: var(--accent-foreground);
 
   /* 布局组件默认间距（Flex/Grid 未显式指定 gap 时生效；Flex 的
      small/middle/large 命名档位以 --flex-gap 为基准按比例派生，
