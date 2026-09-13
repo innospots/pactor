@@ -409,6 +409,30 @@ describe('DatePicker', () => {
     });
   });
 
+  it('「今天」预设（range，无既有选择）：仅今天一格呈端点选中态，无中间过渡样式', async () => {
+    renderDsl({
+      type: 'DatePicker',
+      props: { mode: 'range' },
+    });
+
+    await openPicker();
+    fireEvent.click(screen.getByText('今天'));
+
+    // 恰好只有今天一个格子呈开始日端点选中态，无中间过渡样式
+    expect(endpointCells(startPanel())).toHaveLength(1);
+    expect(endpointCells(endPanel())).toHaveLength(0);
+    expect(
+      document.querySelectorAll('[class*="calendar-range-background"]'),
+    ).toHaveLength(0);
+
+    // 再点今天格完成同日区间（today ~ today）：仍只有端点选中态、无过渡样式
+    clickPanelDay(startPanel(), format(new Date(), 'd'));
+    expect(endpointCells(startPanel())).toHaveLength(1);
+    expect(
+      document.querySelectorAll('[class*="calendar-range-background"]'),
+    ).toHaveLength(0);
+  });
+
   it('「今天」预设（range）：定位型——清空范围、定位当前月、今天为开始日，不触发 onChange', async () => {
     const { context } = renderDsl({
       type: 'DatePicker',

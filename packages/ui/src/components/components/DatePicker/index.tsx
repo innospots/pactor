@@ -310,12 +310,19 @@ export function DatePicker(props: DatePickerProps) {
 
   // 区间选中态经 modifiers 施加（开始日/结束日端点 + 严格位于两端之间的
   // 过渡样式）；结束日清空（pending 期间）时无端点与中间样式。
+  // inRange 仅在 end 严格晚于 start（按日历日）时构造：同日区间（start==end）
+  // 的 { after, before } 会被 DayPicker 当作开放区间匹配几乎所有日期。
+  const hasInnerRange =
+    isRange &&
+    rangeStart !== undefined &&
+    rangeEnd !== undefined &&
+    isBefore(startOfDay(rangeStart), startOfDay(rangeEnd));
   // 只传 modifiers / modifiersClassNames，不传 classNames，避免整体覆盖 vendored 样式
   const rangeModifiers = isRange
     ? {
         ...(rangeStart ? { rangeStart } : {}),
         ...(rangeEnd ? { rangeEnd } : {}),
-        ...(rangeStart && rangeEnd
+        ...(hasInnerRange
           ? { inRange: { after: rangeStart, before: rangeEnd } }
           : {}),
       }
@@ -324,7 +331,7 @@ export function DatePicker(props: DatePickerProps) {
     ? {
         ...(rangeStart ? { rangeStart: RANGE_ENDPOINT_CLASSES } : {}),
         ...(rangeEnd ? { rangeEnd: RANGE_ENDPOINT_CLASSES } : {}),
-        ...(rangeStart && rangeEnd ? { inRange: IN_RANGE_CLASSES } : {}),
+        ...(hasInnerRange ? { inRange: IN_RANGE_CLASSES } : {}),
       }
     : undefined;
 
