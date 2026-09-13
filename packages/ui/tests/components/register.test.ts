@@ -68,8 +68,9 @@ const EXTENDED_TYPES = [
   'Collapsible',
   'Tooltip',
   'HoverCard',
-  // 第三批：表单类（Calendar/InputOTP/Combobox）+ 复合类
+  // 第三批：表单类（Calendar/DatePicker/InputOTP/Combobox）+ 复合类
   'Calendar',
+  'DatePicker',
   'InputOTP',
   'Combobox',
   'Carousel',

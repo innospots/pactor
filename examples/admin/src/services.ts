@@ -24,15 +24,22 @@ interface Customer {
   createdAt: string;
 }
 
+/** 相对今天生成 ISO 日期（yyyy-MM-dd），让日期预设（今天/最近7天/最近30天）始终能筛出演示数据 */
+function daysAgo(n: number): string {
+  const d = new Date();
+  d.setDate(d.getDate() - n);
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+}
+
 const customers: Customer[] = [
-  { id: 1, name: '云栖科技', phone: '13800000001', level: 'A', region: '浙江', city: '杭州', owner: '张三', createdAt: '2025-01-12' },
-  { id: 2, name: '临平贸易', phone: '13800000002', level: 'B', region: '浙江', city: '杭州', owner: '李四', createdAt: '2025-02-03' },
-  { id: 3, name: '西湖文创', phone: '13800000003', level: 'A', region: '浙江', city: '宁波', owner: '张三', createdAt: '2025-03-18' },
-  { id: 4, name: '滨江软件园', phone: '13800000004', level: 'C', region: '浙江', city: '杭州', owner: '王五', createdAt: '2025-04-25' },
-  { id: 5, name: '未来科技城', phone: '13800000005', level: 'B', region: '江苏', city: '南京', owner: '李四', createdAt: '2025-05-30' },
-  { id: 6, name: '钱塘物流', phone: '13800000006', level: 'C', region: '江苏', city: '苏州', owner: '赵六', createdAt: '2025-06-11' },
-  { id: 7, name: '之江实验室', phone: '13800000007', level: 'A', region: '广东', city: '深圳', owner: '王五', createdAt: '2025-07-08' },
-  { id: 8, name: '富春智造', phone: '13800000008', level: 'B', region: '广东', city: '广州', owner: '赵六', createdAt: '2025-08-19' },
+  { id: 1, name: '云栖科技', phone: '13800000001', level: 'A', region: '浙江', city: '杭州', owner: '张三', createdAt: daysAgo(1) },
+  { id: 2, name: '临平贸易', phone: '13800000002', level: 'B', region: '浙江', city: '杭州', owner: '李四', createdAt: daysAgo(5) },
+  { id: 3, name: '西湖文创', phone: '13800000003', level: 'A', region: '浙江', city: '宁波', owner: '张三', createdAt: daysAgo(12) },
+  { id: 4, name: '滨江软件园', phone: '13800000004', level: 'C', region: '浙江', city: '杭州', owner: '王五', createdAt: daysAgo(20) },
+  { id: 5, name: '未来科技城', phone: '13800000005', level: 'B', region: '江苏', city: '南京', owner: '李四', createdAt: daysAgo(35) },
+  { id: 6, name: '钱塘物流', phone: '13800000006', level: 'C', region: '江苏', city: '苏州', owner: '赵六', createdAt: daysAgo(60) },
+  { id: 7, name: '之江实验室', phone: '13800000007', level: 'A', region: '广东', city: '深圳', owner: '王五', createdAt: daysAgo(75) },
+  { id: 8, name: '富春智造', phone: '13800000008', level: 'B', region: '广东', city: '广州', owner: '赵六', createdAt: daysAgo(100) },
 ];
 
 const DELAY_MS = 300;
@@ -45,12 +52,15 @@ function delay<T>(value: T): Promise<T> {
 
 const list: ServiceHandler = (params) => {
   const keyword = typeof params['keyword'] === 'string' ? params['keyword'].trim() : '';
-  const result =
-    keyword === ''
-      ? [...customers]
-      : customers.filter(
-          (c) => c.name.includes(keyword) || c.owner.includes(keyword),
-        );
+  // 创建时间范围筛选（DatePicker range 值 { start, end } 经 state 传入，ISO 字符串可直接字典序比较）
+  const createdStart = typeof params['createdStart'] === 'string' ? params['createdStart'] : '';
+  const createdEnd = typeof params['createdEnd'] === 'string' ? params['createdEnd'] : '';
+  const result = customers.filter(
+    (c) =>
+      (keyword === '' || c.name.includes(keyword) || c.owner.includes(keyword)) &&
+      (createdStart === '' || c.createdAt >= createdStart) &&
+      (createdEnd === '' || c.createdAt <= createdEnd),
+  );
   return delay(result);
 };
 

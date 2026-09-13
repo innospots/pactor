@@ -1,6 +1,6 @@
 ---
 title: 表单组件
-description: 表单类 DSL 组件——Form / Input / Select / Textarea / Checkbox / RadioGroup / Switch / Slider / Label / Field / Calendar / InputOTP / Combobox 的 props 契约、FieldRule 校验规则与 DSL 示例
+description: 表单类 DSL 组件——Form / Input / Select / Textarea / Checkbox / RadioGroup / Switch / Slider / Label / Field / Calendar / DatePicker / InputOTP / Combobox 的 props 契约、FieldRule 校验规则与 DSL 示例
 ---
 
 Form 容器与录入控件。全部录入组件可在 `Form` 内按 `name` 参与值收集与校验（`label` / `rules` 生效，值为字段初始值，优先于 Form 的 `initialValues`），也可独立使用（`value` 为受控值）。
@@ -15,7 +15,7 @@ Form 容器与录入控件。全部录入组件可在 `Form` 内按 `name` 参�
 | 事件 `onSubmit` | — | 校验通过后触发，`event` 为表单 values，同时写入 `${form.<field>}` |
 | 事件 `onValuesChange` | — | 字段变化，`event` 为变化字段单键对象 `{ <field>: <newValue> }` |
 
-Form 内声明 `name` 的 Input / Select 及本页其余录入组件（Textarea / Checkbox / RadioGroup / Switch / Slider / Calendar / InputOTP / Combobox）自动成为表单项（label / rules 生效，值由 Form 托管）。
+Form 内声明 `name` 的 Input / Select 及本页其余录入组件（Textarea / Checkbox / RadioGroup / Switch / Slider / Calendar / DatePicker / InputOTP / Combobox）自动成为表单项（label / rules 生效，值由 Form 托管）。
 
 ### Input
 
@@ -241,6 +241,48 @@ AI 对话输入框的通用结构构件：外层圆角容器（focus-within 高�
       action: setState
       params:
         birthday: ${event}
+```
+
+### DatePicker
+
+日期/范围选择：input 风格触发器 + Popover 浮层内嵌日历（react-day-picker）。值契约按 `mode` 区分——single 为 ISO 日期字符串（`yyyy-MM-dd`），range 为 `{ start, end }` ISO 对象（仅起点与终点都选定后才触发 `onChange`，仅选定一端的中间态不触发）。range 模式浮层内为左右双面板，两个面板各有独立的月份导航箭头（左箭头只改左面板月份，右面板同理；两面板始终不显示同一月份——同月区间提交/回显时右面板自动顺延下一月，单侧导航越界时对侧顺延/回退以保持右面板始终晚于左面板）；选择语义为「任意面板两次点击」：第一次点击（任意面板）设定开始日并清空结束日，第二次点击（可与第一次同一面板）不早于开始日即提交 `{ start, end }`、早于开始日则视为新的开始日重新开始，已存在完整区间时再点击开始新一轮选择。默认文案（placeholder、内置预设名）使用 `pactor.datePicker.*` i18n key，可用 messages 覆盖；日历的月份/星期标题随应用 locale 切换（内置 zh-CN / en-US，未知 locale 回退英文）。
+
+| prop | 类型 | 缺省 | 说明 |
+| --- | --- | --- | --- |
+| `name` | string | — | 字段名；在 Form 内声明 name 即自动成为表单项 |
+| `label` | string | — | 表单项标签 |
+| `rules` | FieldRule[] | — | 校验规则（见[校验规则（FieldRule）](#校验规则fieldrule)） |
+| `mode` | `single` \| `range` | `single` | 选择模式 |
+| `value` | string（single）\| `{ start, end }`（range） | — | 受控值（ISO `yyyy-MM-dd`）；Form 内作为字段初始值 |
+| `placeholder` | string | i18n 缺省（选择日期 / 选择日期范围） | 占位文案 |
+| `presets` | 数组 \| `false` | range 缺省内置三项（今天/本周/本月），single 无 | 快捷预设栏；`false` 关闭 |
+| `disabled` | boolean | — | 禁用 |
+| 事件 `onChange` | — | — | single 传 ISO 字符串（清除传 `undefined`）；range 传 `{ start, end }` ISO 对象 |
+
+`presets` 数组项支持三种形态：
+
+- `{ key: 'today' | 'thisWeek' | 'thisMonth', label? }`：内置计算与内置文案，`label` 可覆盖（「本周/本月」边界按当前 locale 计算，如 zh-CN 一周从周一开始）；
+- `{ label, days: N }`：最近 N 天（含今天）；
+- `{ label, range: { start, end } }`：显式 ISO 区间。
+
+点击预设即完成选择并触发 `onChange`，浮层保持打开（可继续微调）。例外：「今天」是定位型预设——range 模式点击「今天」清空当前范围选择、面板定位到当前月并选中今天作为开始日（等待结束日），不触发 `onChange`；single 模式点击「今天」选中今天并触发 `onChange`。
+
+```yaml
+- type: DatePicker
+  props:
+    name: period
+    label: 统计周期
+    mode: range
+    presets:
+      - { key: today }
+      - { key: thisWeek, label: 本周至今 }
+      - { label: 最近30天, days: 30 }
+      - { label: Q3, range: { start: '2026-07-01', end: '2026-09-30' } }
+  events:
+    onChange:
+      action: setState
+      params:
+        period: ${event}
 ```
 
 ### InputOTP

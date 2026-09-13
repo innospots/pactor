@@ -91,6 +91,11 @@ describe('通用 props 契约（className / style）', () => {
     expectCommonProps(container.firstElementChild);
   });
 
+  it('DatePicker（独立渲染为触发器）', () => {
+    renderDsl({ type: 'DatePicker', props: { ...COMMON_PROPS } });
+    expectCommonProps(document.querySelector('[data-slot=datepicker-trigger]'));
+  });
+
   it('Input / Select 在 Form 内：通用 props 挂在 form-item 容器', () => {
     const node: DslNode = {
       type: 'Form',

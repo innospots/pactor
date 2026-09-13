@@ -1081,6 +1081,9 @@
     --tw-border-style: none;
     border-style: none;
   }
+  .border-\(--calendar-today-border\) {
+    border-color: var(--calendar-today-border);
+  }
   .border-\(color\:--pagination-active-border\) {
     border-color: var(--pagination-active-border);
   }
@@ -2035,6 +2038,12 @@
     .hover\:text-\(--calendar-day-hover-foreground\):hover {
       color: var(--calendar-day-hover-foreground);
     }
+    .hover\:text-\(--calendar-selected-foreground\):hover {
+      color: var(--calendar-selected-foreground);
+    }
+    .hover\:text-\(--calendar-today-foreground\):hover {
+      color: var(--calendar-today-foreground);
+    }
     .hover\:text-\(--menu-hover-foreground\):hover {
       color: var(--menu-hover-foreground);
     }
@@ -2957,25 +2966,30 @@
   .\[\&\>\[data-slot\=text\]\]\:text-muted-foreground > [data-slot=text] {
     color: var(--muted-foreground);
   }
-  .\[\&\>\[data-slot\=toggle\]\]\:rounded-none > [data-slot=toggle] {
-    border-radius: 0;
-  }
-  .\[\&\>\[data-slot\=toggle\]\]\:first\:rounded-l-md > [data-slot=toggle]:first-child {
-    border-top-left-radius: calc(var(--radius) * 0.8);
-    border-bottom-left-radius: calc(var(--radius) * 0.8);
-  }
-  .\[\&\>\[data-slot\=toggle\]\]\:last\:rounded-r-md > [data-slot=toggle]:last-child {
-    border-top-right-radius: calc(var(--radius) * 0.8);
-    border-bottom-right-radius: calc(var(--radius) * 0.8);
-  }
   .\[\&\>button\]\:hidden > button {
     display: none;
+  }
+  .\[\&\>button\]\:rounded-none > button {
+    border-radius: 0;
+  }
+  .\[\&\>button\]\:border > button {
+    border-style: var(--tw-border-style);
+    border-width: 1px;
+  }
+  .\[\&\>button\]\:border-\(--calendar-today-border\) > button {
+    border-color: var(--calendar-today-border);
+  }
+  .\[\&\>button\]\:bg-\(--calendar-range-background\) > button {
+    background-color: var(--calendar-range-background);
   }
   .\[\&\>button\]\:bg-\(--calendar-selected-background\) > button {
     background-color: var(--calendar-selected-background);
   }
   .\[\&\>button\]\:bg-\(--calendar-today-background\) > button {
     background-color: var(--calendar-today-background);
+  }
+  .\[\&\>button\]\:text-\(--calendar-range-foreground\) > button {
+    color: var(--calendar-range-foreground);
   }
   .\[\&\>button\]\:text-\(--calendar-selected-foreground\) > button {
     color: var(--calendar-selected-foreground);
@@ -2986,6 +3000,15 @@
   @media (hover: hover) {
     .\[\&\>button\]\:hover\:bg-\(--calendar-selected-background\) > button:hover {
       background-color: var(--calendar-selected-background);
+    }
+    .\[\&\>button\]\:hover\:bg-\(--calendar-today-background\) > button:hover {
+      background-color: var(--calendar-today-background);
+    }
+    .\[\&\>button\]\:hover\:text-\(--calendar-selected-foreground\) > button:hover {
+      color: var(--calendar-selected-foreground);
+    }
+    .\[\&\>button\]\:hover\:text-\(--calendar-today-foreground\) > button:hover {
+      color: var(--calendar-today-foreground);
     }
   }
   .\[\&\>li\]\:mt-2 > li {
@@ -3205,6 +3228,9 @@
   --calendar-selected-foreground: var(--primary-foreground);
   --calendar-today-background: var(--accent);
   --calendar-today-foreground: var(--accent-foreground);
+  --calendar-today-border: var(--primary);
+  --calendar-range-background: var(--accent);
+  --calendar-range-foreground: var(--accent-foreground);
   --flex-gap: 12px;
   --flex-gap-sm: calc(var(--flex-gap) * 0.67);
   --flex-gap-md: calc(var(--flex-gap) * 1.33);
