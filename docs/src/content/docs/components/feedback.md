@@ -12,6 +12,8 @@ description: 反馈与弹层类 DSL 组件——Alert / Dialog / AlertDialog / D
 | `message` | string | 主文案 |
 | `description` | string | 辅助说明 |
 | `variant` | `info`（默认）\| `success` \| `warning` \| `error` | 变体 |
+| `showIcon` | boolean | 为 true 时按 variant 显示默认图标（success ✓ / info ℹ / warning ⚠ / error ✕） |
+| `icon` | string | 自定义图标名（[Icon 白名单](./display.mdx#icon)，提供时隐含 `showIcon`） |
 
 ### Dialog
 

@@ -1,6 +1,6 @@
 {
   "name": "@pactor-app/markdown",
-  "version": "1.8.0",
+  "version": "1.9.0",
   "description": "Pactor Markdown module: safe Markdown renderer (react-markdown AST, no raw HTML) and DSL Markdown component adapter",
   "keywords": [
     "pactor",

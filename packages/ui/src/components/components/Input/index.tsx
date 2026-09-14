@@ -1,3 +1,4 @@
+import { useI18n } from '@pactor-app/runtime';
 import { useEffect, useId, type CSSProperties } from 'react';
 
 import { cn } from '../../../lib/utils.js';
@@ -23,6 +24,9 @@ export interface InputProps {
   type?: 'text' | 'password';
   placeholder?: string;
   disabled?: boolean;
+  /** 值为非空时显示清除按钮，点击清空当前值；开启后独立渲染的
+   *  className/style 挂控件包裹节点（含清除按钮），未开启时保持挂控件本身 */
+  allowClear?: boolean;
   /** 输入事件，传出 string 值（非原生 event，设计决策 D2） */
   onChange?: (value: string) => void;
   /** 通用：根节点 class（Form 内为 form-item 容器，独立渲染时为控件本身） */
@@ -46,11 +50,13 @@ export function Input({
   type = 'text',
   placeholder,
   disabled,
+  allowClear,
   onChange,
   className,
   style,
 }: InputProps) {
   const form = useFormContext();
+  const { t } = useI18n();
   const controlId = useId();
   const inForm = form?.inForm === true && typeof name === 'string' && name !== '';
 
@@ -64,8 +70,61 @@ export function Input({
     return undefined;
   });
 
+  const fieldValue = inForm && form && name ? form.values[name] : undefined;
+  const currentValue =
+    typeof fieldValue === 'string' ? fieldValue : inForm ? '' : (value ?? '');
+  const showClear = allowClear === true && disabled !== true && currentValue !== '';
+
+  const handleClear = () => {
+    if (inForm && form && name) {
+      form.setValue(name, '');
+    }
+    onChange?.('');
+  };
+
+  const inFormRoot = inForm === true;
+  const input = (
+    <ShadcnInput
+      id={controlId}
+      type={type}
+      value={currentValue}
+      placeholder={placeholder}
+      disabled={disabled}
+      className={!inFormRoot && allowClear !== true ? className : undefined}
+      style={!inFormRoot && allowClear !== true ? style : undefined}
+      onChange={(event) => {
+        if (inForm && form && name) {
+          form.setValue(name, event.target.value);
+        }
+        onChange?.(event.target.value);
+      }}
+    />
+  );
+  const clearButton = showClear ? (
+    <button
+      type="button"
+      aria-label={t('pactor.input.clear')}
+      className="shrink-0 cursor-pointer text-muted-foreground hover:text-foreground"
+      onClick={handleClear}
+    >
+      ×
+    </button>
+  ) : null;
+  // allowClear 需要包裹节点承载清除按钮；未开启时保持裸控件（className/style 挂 input 本身）
+  const control =
+    allowClear === true ? (
+      <span
+        className={cn('flex items-center gap-1', !inFormRoot && className)}
+        style={inFormRoot ? undefined : style}
+      >
+        {input}
+        {clearButton}
+      </span>
+    ) : (
+      input
+    );
+
   if (inForm && form && name) {
-    const fieldValue = form.values[name];
     const error = form.errors[name];
     return (
       <div
@@ -81,17 +140,7 @@ export function Input({
             {label}
           </label>
         ) : null}
-        <ShadcnInput
-          id={controlId}
-          type={type}
-          value={typeof fieldValue === 'string' ? fieldValue : ''}
-          placeholder={placeholder}
-          disabled={disabled}
-          onChange={(event) => {
-            form.setValue(name, event.target.value);
-            onChange?.(event.target.value);
-          }}
-        />
+        {control}
         {error ? (
           <div data-slot="form-error" className="text-sm text-destructive">
             {error}
@@ -101,15 +150,5 @@ export function Input({
     );
   }
 
-  return (
-    <ShadcnInput
-      type={type}
-      value={value ?? ''}
-      placeholder={placeholder}
-      disabled={disabled}
-      className={className}
-      style={style}
-      onChange={(event) => onChange?.(event.target.value)}
-    />
-  );
+  return control;
 }

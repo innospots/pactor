@@ -1882,6 +1882,33 @@
     --tw-shadow: 0 1px 3px 0 var(--tw-shadow-color, rgb(0 0 0 / 0.1)), 0 1px 2px -1px var(--tw-shadow-color, rgb(0 0 0 / 0.1));
     box-shadow: var(--tw-inset-shadow), var(--tw-inset-ring-shadow), var(--tw-ring-offset-shadow), var(--tw-ring-shadow), var(--tw-shadow);
   }
+  .group-data-\[variant\=line\]\/tabs-list\:-mb-px:is(:where(.group\/tabs-list)[data-variant="line"] *) {
+    margin-bottom: -1px;
+  }
+  .group-data-\[variant\=line\]\/tabs-list\:h-9:is(:where(.group\/tabs-list)[data-variant="line"] *) {
+    height: calc(var(--spacing) * 9);
+  }
+  .group-data-\[variant\=line\]\/tabs-list\:rounded-none:is(:where(.group\/tabs-list)[data-variant="line"] *) {
+    border-radius: 0;
+  }
+  .group-data-\[variant\=line\]\/tabs-list\:border-x-0:is(:where(.group\/tabs-list)[data-variant="line"] *) {
+    border-inline-style: var(--tw-border-style);
+    border-inline-width: 0px;
+  }
+  .group-data-\[variant\=line\]\/tabs-list\:border-t-0:is(:where(.group\/tabs-list)[data-variant="line"] *) {
+    border-top-style: var(--tw-border-style);
+    border-top-width: 0px;
+  }
+  .group-data-\[variant\=line\]\/tabs-list\:border-b-2:is(:where(.group\/tabs-list)[data-variant="line"] *) {
+    border-bottom-style: var(--tw-border-style);
+    border-bottom-width: 2px;
+  }
+  .group-data-\[variant\=line\]\/tabs-list\:py-1\.5:is(:where(.group\/tabs-list)[data-variant="line"] *) {
+    padding-block: calc(var(--spacing) * 1.5);
+  }
+  .group-data-\[variant\=line\]\/tabs-list\:text-muted-foreground:is(:where(.group\/tabs-list)[data-variant="line"] *) {
+    color: var(--muted-foreground);
+  }
   .group-data-\[vaul-drawer-direction\=bottom\]\/drawer-content\:block:is(:where(.group\/drawer-content)[data-vaul-drawer-direction="bottom"] *) {
     display: block;
   }
@@ -2744,24 +2771,30 @@
   .data-closed\:slide-out-to-top:where([data-closed]:not([data-closed='false'])) {
     --tw-exit-translate-y: -100%;
   }
-  .data-active\:border-border:where([data-active]:not([data-active='false'])) {
-    border-color: var(--border);
-  }
   .data-active\:bg-\(--menu-active-background\)\/50:where([data-active]:not([data-active='false'])) {
     background-color: var(--menu-active-background);
     @supports (color: color-mix(in lab, red, red)) {
       background-color: color-mix(in oklab, var(--menu-active-background) 50%, transparent);
     }
   }
-  .data-active\:bg-card:where([data-active]:not([data-active='false'])) {
-    background-color: var(--card);
-  }
   .data-active\:text-\(--menu-active-foreground\):where([data-active]:not([data-active='false'])) {
     color: var(--menu-active-foreground);
   }
-  .data-active\:shadow-sm:where([data-active]:not([data-active='false'])) {
+  .group-data-\[variant\=default\]\/tabs-list\:data-active\:border-border:is(:where(.group\/tabs-list)[data-variant="default"] *):where([data-active]:not([data-active='false'])) {
+    border-color: var(--border);
+  }
+  .group-data-\[variant\=default\]\/tabs-list\:data-active\:bg-card:is(:where(.group\/tabs-list)[data-variant="default"] *):where([data-active]:not([data-active='false'])) {
+    background-color: var(--card);
+  }
+  .group-data-\[variant\=default\]\/tabs-list\:data-active\:shadow-sm:is(:where(.group\/tabs-list)[data-variant="default"] *):where([data-active]:not([data-active='false'])) {
     --tw-shadow: 0 1px 3px 0 var(--tw-shadow-color, rgb(0 0 0 / 0.1)), 0 1px 2px -1px var(--tw-shadow-color, rgb(0 0 0 / 0.1));
     box-shadow: var(--tw-inset-shadow), var(--tw-inset-ring-shadow), var(--tw-ring-offset-shadow), var(--tw-ring-shadow), var(--tw-shadow);
+  }
+  .group-data-\[variant\=line\]\/tabs-list\:data-active\:border-b-primary:is(:where(.group\/tabs-list)[data-variant="line"] *):where([data-active]:not([data-active='false'])) {
+    border-bottom-color: var(--primary);
+  }
+  .group-data-\[variant\=line\]\/tabs-list\:data-active\:text-foreground:is(:where(.group\/tabs-list)[data-variant="line"] *):where([data-active]:not([data-active='false'])) {
+    color: var(--foreground);
   }
   .data-disabled\:pointer-events-none:where([data-disabled]:not([data-disabled='false'])) {
     pointer-events: none;

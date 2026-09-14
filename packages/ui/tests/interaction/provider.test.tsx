@@ -180,4 +180,33 @@ describe('InteractionProvider：confirm 动作经 shadcn Dialog 确认框', () =
       expect(document.querySelector('[data-slot=confirm-dialog]')).toBeNull();
     });
   });
+
+  it('关闭动画期间内容保持：弹层仍挂载时标题不被清空（防闪烁回归）', async () => {
+    const { ui, engine } = setupProvider();
+    await vi.waitFor(() => {
+      expect(ui.modal).toBeDefined();
+    });
+
+    const executed = engine.execute({
+      action: 'confirm',
+      params: { title: '删除确认', content: '确定删除该记录吗？' },
+    });
+    await screen.findByText('删除确认');
+
+    fireEvent.click(screen.getByRole('button', { name: '取消' }));
+
+    // 关闭动画未结束的窗口期内，弹层若仍挂载则内容必须原样保留
+    // （修复前：先 setConfirmState(null) 再隐藏，弹层会闪空内容）
+    const dialog = document.querySelector('[data-slot=confirm-dialog]');
+    if (dialog) {
+      expect(dialog.querySelector('[data-slot=dialog-title]')?.textContent).toBe(
+        '删除确认',
+      );
+      expect(dialog.textContent).toContain('确定删除该记录吗？');
+    }
+    await expect(executed).resolves.toEqual({ ok: true, data: false });
+    await vi.waitFor(() => {
+      expect(document.querySelector('[data-slot=confirm-dialog]')).toBeNull();
+    });
+  });
 });
