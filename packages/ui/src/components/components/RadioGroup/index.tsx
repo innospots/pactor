@@ -23,6 +23,8 @@ export interface RadioGroupProps {
   rules?: FieldRule[];
   /** 选项列表 */
   options?: RadioGroupOption[];
+  /** 选项排列方向，默认 vertical */
+  direction?: 'horizontal' | 'vertical';
   /** 受控值（独立渲染时生效）；Form 内作为字段初始值（优先于 Form initialValues） */
   value?: string | number | boolean;
   disabled?: boolean;
@@ -37,13 +39,15 @@ export interface RadioGroupProps {
 /**
  * RadioGroup 适配器（shadcn kit）：基于 vendored RadioGroup（Base UI）；
  * Base UI RadioGroup 的 value 原生支持 string/number/boolean，
- * onChange 传出选中项原始 value。
+ * onChange 传出选中项原始 value。`direction` 控制选项横/纵排列；
+ * label 经 htmlFor 关联 Base UI 隐藏原生 input，点击 label 即选中对应项。
  */
 export function RadioGroup({
   name,
   label,
   rules,
   options = [],
+  direction = 'vertical',
   value,
   disabled,
   onChange,
@@ -81,11 +85,15 @@ export function RadioGroup({
       onValueChange={handleChange}
       disabled={disabled}
       name={inForm ? name : undefined}
-      className={cn(!inForm && className)}
+      className={cn(
+        direction === 'horizontal' && 'flex flex-wrap items-center gap-x-6 gap-y-2',
+        !inForm && className,
+      )}
       style={inForm ? undefined : style}
     >
       {options.map((option, index) => {
         const optionId = `${controlId}-${index}`;
+        const optionDisabled = disabled || option.disabled;
         return (
           <span key={String(option.value)} className="inline-flex items-center gap-2">
             <RadioGroupItem
@@ -93,7 +101,13 @@ export function RadioGroup({
               value={option.value}
               disabled={option.disabled}
             />
-            <label htmlFor={optionId} className="text-sm leading-none font-medium">
+            <label
+              htmlFor={optionId}
+              className={cn(
+                'text-sm leading-none font-medium',
+                optionDisabled ? 'cursor-not-allowed opacity-50' : 'cursor-pointer',
+              )}
+            >
               {option.label}
             </label>
           </span>

@@ -125,7 +125,7 @@ AI 对话输入框的通用结构构件：外层圆角容器（focus-within 高�
 
 ### RadioGroup
 
-单选组。Base UI RadioGroup 的 value 原生支持 string / number / boolean，`onChange` 传出选中项原始 value。
+单选组。Base UI RadioGroup 的 value 原生支持 string / number / boolean，`onChange` 传出选中项原始 value。点击选项 label 文本即选中对应项。
 
 | prop | 类型 | 缺省 | 说明 |
 | --- | --- | --- | --- |
@@ -133,6 +133,7 @@ AI 对话输入框的通用结构构件：外层圆角容器（focus-within 高�
 | `label` | string | — | 表单项标签 |
 | `rules` | FieldRule[] | — | 校验规则（见[校验规则（FieldRule）](#校验规则fieldrule)） |
 | `options` | `Array<{ label: string, value: string \| number \| boolean, disabled?: boolean }>` | `[]` | 选项列表 |
+| `direction` | `vertical` \| `horizontal` | `vertical` | 选项排列方向 |
 | `value` | string \| number \| boolean | — | 受控值（独立渲染时生效）；Form 内作为字段初始值 |
 | `disabled` | boolean | — | 整组禁用 |
 | 事件 `onChange` | — | — | 选中变化时触发，`${event}` 为选中项的 value（保留原始类型） |

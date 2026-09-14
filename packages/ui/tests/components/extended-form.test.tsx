@@ -214,6 +214,45 @@ describe('RadioGroup', () => {
     });
     expectCommonProps(container.querySelector('[data-slot=radio-group]'));
   });
+
+  it('direction=horizontal 时选项横向排列', () => {
+    const { container } = renderDsl({
+      type: 'RadioGroup',
+      props: {
+        direction: 'horizontal',
+        options: [
+          { label: '大', value: 'l' },
+          { label: '小', value: 's' },
+        ],
+      },
+    });
+    const group = container.querySelector('[data-slot=radio-group]');
+    expect(group?.className).toContain('flex');
+    expect(group?.className).not.toContain('grid');
+  });
+
+  it('点击 label 文本选中对应选项', async () => {
+    const user = userEvent.setup();
+    const { container, context } = renderDsl({
+      type: 'RadioGroup',
+      props: {
+        options: [
+          { label: '大', value: 'l' },
+          { label: '小', value: 's' },
+        ],
+      },
+      events: {
+        onChange: { action: 'setState', params: { size: '${event}' } },
+      },
+    });
+
+    const label = [...container.querySelectorAll('label')].find(
+      (el) => el.textContent === '小',
+    );
+    expect(label).toBeTruthy();
+    await user.click(label!);
+    await expectEventState(context, 'size', 's');
+  });
 });
 
 describe('Slider', () => {
