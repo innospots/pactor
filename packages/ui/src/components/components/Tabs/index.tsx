@@ -20,6 +20,8 @@ export interface TabsProps {
   items?: TabItem[];
   /** 当前激活页签 key（可绑表达式） */
   activeKey?: string;
+  /** 页签栏样式：default 胶囊（缺省）/ line 下划线 */
+  variant?: 'default' | 'line';
   /** 页签切换事件，传出新激活的 key */
   onChange?: (key: string) => void;
   /** 通用：根节点 class（与内置样式合并） */
@@ -33,7 +35,7 @@ export interface TabsProps {
  * 基于 vendored shadcn Tabs（@base-ui/react），每个 pane 的内容经
  * renderChildren 渲染；未传 activeKey 时缺省激活第一个页签。
  */
-export function Tabs({ items = [], activeKey, onChange, className, style }: TabsProps) {
+export function Tabs({ items = [], activeKey, variant, onChange, className, style }: TabsProps) {
   const { renderChildren } = useRenderer();
   return (
     <ShadcnTabs
@@ -43,7 +45,7 @@ export function Tabs({ items = [], activeKey, onChange, className, style }: Tabs
       className={className}
       style={style}
     >
-      <TabsList>
+      <TabsList variant={variant}>
         {items.map((item) => (
           <TabsTrigger key={item.key} value={item.key}>
             {item.label}

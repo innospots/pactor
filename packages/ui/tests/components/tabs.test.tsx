@@ -44,4 +44,32 @@ describe('Tabs 容器', () => {
       expect(context.state.get('tab')).toBe('b');
     });
   });
+
+  it('variant="line" 时 TabsList 带 data-variant=line（下划线样式钩子）', () => {
+    const { container } = renderDsl({
+      type: 'Tabs',
+      props: {
+        variant: 'line',
+        items: [
+          { key: 'a', label: '页签A' },
+          { key: 'b', label: '页签B' },
+        ],
+      },
+    });
+
+    const list = container.querySelector('[data-slot=tabs-list]');
+    expect(list?.getAttribute('data-variant')).toBe('line');
+    expect(list?.className).toContain('border-b');
+  });
+
+  it('缺省 variant 为 default（胶囊样式）', () => {
+    const { container } = renderDsl({
+      type: 'Tabs',
+      props: { items: [{ key: 'a', label: '页签A' }] },
+    });
+
+    const list = container.querySelector('[data-slot=tabs-list]');
+    expect(list?.getAttribute('data-variant')).toBe('default');
+    expect(list?.className).toContain('bg-muted');
+  });
 });

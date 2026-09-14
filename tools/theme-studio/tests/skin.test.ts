@@ -15,11 +15,18 @@ import { TOKEN_NAMES } from '../src/tokens';
 const preset = SKIN_PRESETS[0]!;
 
 describe('composeSkinCss', () => {
-  it('预置主题令牌原样合成进 :root 块', () => {
+  it('预置主题令牌原样合成进亮色块', () => {
     const css = composeSkinCss(preset, {});
-    expect(css).toContain(':root {');
+    expect(css).toContain(":root:not([data-pactor-theme='dark']) {");
     expect(css).toContain(`--primary: ${preset.tokens['--primary']};`);
     expect(css).toContain(preset.name);
+  });
+
+  it('亮色块排除暗色模式：亮色令牌不覆盖内置暗色皮肤', () => {
+    // 回归：裸 `:root` 与内置 [data-pactor-theme='dark'] 同优先级（0,1,0），
+    // 皮肤后加载会把亮色 --border（近白色）泄漏进暗色模式，导致暗色边框刺眼
+    const css = composeSkinCss(preset, {});
+    expect(css).not.toMatch(/(^|\n):root \{/);
   });
 
   it('导出包含全部已知令牌：无预置主题时以默认值兜底', () => {
@@ -118,6 +125,22 @@ describe('预置主题为风格化令牌子集', () => {
         expect(item.tokens[name], `${item.key} ${name}`).toBeTruthy();
         expect(item.darkTokens[name], `${item.key} dark ${name}`).toBeTruthy();
       }
+    }
+  });
+
+  it('每套主题的暗色令牌组含 --border/--input（导出的暗色块自包含边框色）', () => {
+    for (const item of SKIN_PRESETS) {
+      expect(item.darkTokens['--border'], `${item.key} dark --border`).toBeTruthy();
+      expect(item.darkTokens['--input'], `${item.key} dark --input`).toBeTruthy();
+    }
+  });
+
+  it('导出的暗色块包含 --border 令牌', () => {
+    for (const item of SKIN_PRESETS) {
+      const css = composeSkinCss(item, {});
+      const darkStart = css.indexOf("[data-pactor-theme='dark'] {");
+      const darkBlock = css.slice(darkStart, css.indexOf('}', darkStart));
+      expect(darkBlock, item.key).toContain(`--border: ${item.darkTokens['--border']};`);
     }
   });
 

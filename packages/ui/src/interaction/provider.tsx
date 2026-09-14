@@ -31,7 +31,9 @@ interface ToastItem {
   content: ReactNode;
 }
 
-/** confirm 对话框状态（pending 表示等待用户选择） */
+/** confirm 对话框内容（pending 表示等待用户选择）；
+ * 与 confirmOpen 分离：关闭时先翻 open 标志，内容等退出动画结束
+ * （onOpenChangeComplete）后才清空，避免弹层消失过程中闪空内容 */
 interface ConfirmState {
   title?: unknown;
   content?: unknown;
@@ -54,7 +56,9 @@ const toastTypeClass: Record<ToastType, string> = {
  * InteractionProvider：mount 时向 UiBridge 注入自绘实现：
  *
  * - `modal.confirm({ title, content, onOk, onCancel })`：vendored shadcn
- *   Dialog 渲染确认框，确定/取消回调后关闭（先关闭再回调）；
+ *   Dialog 渲染确认框，确定/取消时先关闭再回调（与 antd Modal.confirm
+ *   时序一致）；内容状态与 open 标志分离，待关闭动画结束才清空，
+ *   避免退出动画期间渲染空内容导致闪烁；
  * - `message.{success,error,info,warning}`：toast 栈（容器固定右上角，
  *   自动约 3s 消失，类型色条读语义令牌）。
  *
@@ -65,6 +69,7 @@ export function InteractionProvider({
   children,
 }: InteractionProviderProps) {
   const [confirmState, setConfirmState] = useState<ConfirmState | null>(null);
+  const [confirmOpen, setConfirmOpen] = useState(false);
   const [toasts, setToasts] = useState<ToastItem[]>([]);
   const { t } = useI18n();
 
@@ -81,6 +86,7 @@ export function InteractionProvider({
     const modalImpl: UiModal = {
       confirm(config) {
         setConfirmState({ ...config });
+        setConfirmOpen(true);
       },
     };
     const messageImpl: UiMessage = {
@@ -101,15 +107,16 @@ export function InteractionProvider({
     };
   }, [bridge, modal, message]);
 
-  // 确认对话框：先关闭再回调（与 antd Modal.confirm 时序一致）
+  // 确认对话框：先发起关闭再回调（与 antd Modal.confirm 时序一致）；
+  // 内容（confirmState）保留到关闭动画结束，由 onOpenChangeComplete 清空
   const handleOk = () => {
     const state = confirmState;
-    setConfirmState(null);
+    setConfirmOpen(false);
     state?.onOk?.();
   };
   const handleCancel = () => {
     const state = confirmState;
-    setConfirmState(null);
+    setConfirmOpen(false);
     state?.onCancel?.();
   };
 
@@ -120,10 +127,15 @@ export function InteractionProvider({
         createPortal(
           <>
             <Dialog
-              open={confirmState !== null}
+              open={confirmOpen}
               onOpenChange={(open) => {
                 if (!open) {
                   handleCancel();
+                }
+              }}
+              onOpenChangeComplete={(open) => {
+                if (!open) {
+                  setConfirmState(null);
                 }
               }}
             >

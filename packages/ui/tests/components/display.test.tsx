@@ -67,6 +67,31 @@ describe('Alert', () => {
     expect(alert.className).toContain('text-destructive');
     expect(screen.getByText('请重试')).toBeTruthy();
   });
+
+  it('缺省不渲染图标', () => {
+    render(<Alert message="提示" variant="info" />);
+
+    expect(screen.getByRole('alert').querySelector('svg')).toBeNull();
+  });
+
+  it('showIcon：按 variant 渲染默认图标', () => {
+    render(<Alert message="操作成功" variant="success" showIcon />);
+
+    expect(screen.getByRole('alert').querySelector('svg[data-slot=icon]')).toBeTruthy();
+  });
+
+  it('icon：自定义图标名（隐含 showIcon，白名单外渲染占位并标 data-unknown）', () => {
+    const { unmount } = render(<Alert message="下载完成" icon="download" />);
+    expect(
+      screen.getByRole('alert').querySelector('svg[data-slot=icon]:not([data-unknown])'),
+    ).toBeTruthy();
+    unmount();
+
+    render(<Alert message="未知图标" icon="not-a-real-icon" />);
+    expect(
+      screen.getByRole('alert').querySelector('svg[data-unknown="not-a-real-icon"]'),
+    ).toBeTruthy();
+  });
 });
 
 describe('Page / Card / Flex', () => {
