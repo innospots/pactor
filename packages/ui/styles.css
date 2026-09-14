@@ -967,8 +967,14 @@
     margin-block-start: calc(calc(var(--spacing) * 5) * var(--tw-space-y-reverse));
     margin-block-end: calc(calc(var(--spacing) * 5) * calc(1 - var(--tw-space-y-reverse)));
   }
+  .gap-x-6 {
+    column-gap: calc(var(--spacing) * 6);
+  }
   .gap-y-0\.5 {
     row-gap: calc(var(--spacing) * 0.5);
+  }
+  .gap-y-2 {
+    row-gap: calc(var(--spacing) * 2);
   }
   .self-end {
     align-self: flex-end;
@@ -2754,6 +2760,10 @@
   .data-closed\:fade-out-0:where([data-closed]:not([data-closed='false'])) {
     --tw-exit-opacity: calc(0/100);
     --tw-exit-opacity: 0;
+  }
+  .data-closed\:fill-mode-forwards:where([data-closed]:not([data-closed='false'])) {
+    animation-fill-mode: forwards;
+    --tw-animation-fill-mode: forwards;
   }
   .data-closed\:zoom-out-95:where([data-closed]:not([data-closed='false'])) {
     --tw-exit-scale: calc(95*1%);
