@@ -11,6 +11,7 @@ description: 复合与其他 DSL 组件——Button / Accordion / Collapsible / 
 | --- | --- | --- |
 | `text` | string | 按钮文本 |
 | `icon` | string | 图标名（Icon 白名单，kebab-case / PascalCase 均可），渲染在文本前；`loading` 时图标位由旋转图标取代 |
+| `tooltip` | string | 提示文案，hover / focus 按钮时展示 Tooltip（按钮禁用（含 loading）时 hover 不触发，focus 仍可达） |
 | `variant` | `default`（默认）\| `primary` \| `dashed` \| `link` \| `text` | 变体 |
 | `danger` | boolean | 危险态 |
 | `size` | `small` \| `middle`（默认）\| `large` | 尺寸 |

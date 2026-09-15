@@ -490,3 +490,35 @@ describe('Select 选项', () => {
     expect(formLabel.getAttribute('for')).toBe(input.id);
   });
 });
+
+describe('Select 宽度', () => {
+  it('Form 内控件占满整行（w-full），独立渲染保持内容自然宽度', () => {
+    const { container } = renderDsl({
+      type: 'Form',
+      children: [
+        {
+          type: 'Select',
+          props: {
+            name: 'type',
+            label: '类型',
+            options: [{ label: 'X', value: 'x' }],
+          },
+        },
+      ],
+    });
+
+    const trigger = container.querySelector('[data-slot=select-trigger]');
+    expect(trigger?.className).toContain('w-full');
+    expect(trigger?.closest('span')?.className).toContain('w-full');
+
+    const standalone = renderDsl({
+      type: 'Select',
+      props: { options: [{ label: 'X', value: 'x' }] },
+    });
+    const standaloneTrigger = standalone.container.querySelector(
+      '[data-slot=select-trigger]',
+    );
+    expect(standaloneTrigger?.className).toContain('w-fit');
+    expect(standaloneTrigger?.className).not.toContain('w-full');
+  });
+});

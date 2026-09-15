@@ -327,3 +327,28 @@ describe('Icon', () => {
     expect((icon as HTMLElement).style.opacity).toBe('0.5');
   });
 });
+
+describe('Text', () => {
+  it.each([
+    ['small', 'text-xs'],
+    ['large', 'text-lg'],
+  ] as const)('size: %s 映射字号类 %s', (size, cls) => {
+    renderDsl({
+      type: 'Text',
+      props: { text: '正文', size },
+    });
+
+    expect(screen.getByText('正文').className).toContain(cls);
+  });
+
+  it('size 缺省（middle）继承字号：不挂字号类', () => {
+    renderDsl({
+      type: 'Text',
+      props: { text: '正文' },
+    });
+
+    const el = screen.getByText('正文');
+    expect(el.className).not.toContain('text-xs');
+    expect(el.className).not.toContain('text-lg');
+  });
+});

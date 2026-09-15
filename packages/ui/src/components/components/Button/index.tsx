@@ -6,6 +6,11 @@ import {
   Button as ShadcnButton,
   type buttonVariants,
 } from '../../../ui/button.js';
+import {
+  Tooltip as ShadcnTooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from '../../../ui/tooltip.js';
 import { Icon } from '../Icon/index.js';
 import type { VariantProps } from 'class-variance-authority';
 
@@ -20,6 +25,8 @@ export interface ButtonProps {
   text?: string;
   /** 图标名（Icon 白名单，kebab-case / PascalCase 均可），渲染在文本前 */
   icon?: string;
+  /** 提示文案：hover / focus 按钮时展示 Tooltip */
+  tooltip?: string;
   /** 变体，默认 default */
   variant?: ButtonVariant;
   /** 危险态 */
@@ -64,11 +71,13 @@ const sizeMap: Record<
  * props 契约与 pactor-components（antd 版）一致；`submit: true` 时作为
  * Form 的提交按钮（type=submit）；danger 映射 destructive（link/text
  * 变体保持原样、文字标红）；loading 显示旋转图标并禁用（优先于 icon）；
- * `icon` 渲染文本前图标（对齐 Alert 的 icon 通道）。
+ * `icon` 渲染文本前图标（对齐 Alert 的 icon 通道）；`tooltip` 经 vendored
+ * Tooltip 包装（Trigger render 合并到按钮本体）。
  */
 export function Button({
   text,
   icon,
+  tooltip,
   variant = 'default',
   danger,
   size = 'middle',
@@ -81,7 +90,7 @@ export function Button({
   children,
 }: ButtonProps) {
   const textual = variant === 'link' || variant === 'text';
-  return (
+  const button = (
     <ShadcnButton
       type={submit ? 'submit' : 'button'}
       variant={danger && !textual ? 'destructive' : variantMap[variant]}
@@ -104,4 +113,17 @@ export function Button({
       {text ?? children}
     </ShadcnButton>
   );
+
+  if (tooltip) {
+    // Trigger 以 render 合并到按钮本体（不引入额外包裹节点，根节点仍为按钮；
+    // 禁用时 disabled:pointer-events-none 致 hover 不触发，focus 仍可达）
+    return (
+      <ShadcnTooltip>
+        <TooltipTrigger render={button} />
+        <TooltipContent>{tooltip}</TooltipContent>
+      </ShadcnTooltip>
+    );
+  }
+
+  return button;
 }
