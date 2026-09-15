@@ -8,6 +8,7 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from '../../../ui/breadcrumb.js';
+import { useSpaLinkClick } from '../../spa-link.js';
 
 /** 面包屑项；href 缺省时渲染为纯文本 */
 export interface BreadcrumbItemData {
@@ -27,8 +28,10 @@ export interface BreadcrumbProps {
 /**
  * Breadcrumb 适配器（shadcn kit）：items 声明路径，带 href 的非末项
  * 渲染为可点击链接，末项渲染为当前页纯文本（aria-current="page"）。
+ * 链接站内路径的普通左键点击走渲染上下文路由（同 Link 组件规则）。
  */
 export function Breadcrumb({ items = [], className, style }: BreadcrumbProps) {
+  const handleSpaClick = useSpaLinkClick();
   return (
     <ShadcnBreadcrumb className={className} style={style}>
       <BreadcrumbList>
@@ -41,7 +44,12 @@ export function Breadcrumb({ items = [], className, style }: BreadcrumbProps) {
                 {isLast || !item.href ? (
                   <BreadcrumbPage>{item.label}</BreadcrumbPage>
                 ) : (
-                  <BreadcrumbLink href={item.href}>{item.label}</BreadcrumbLink>
+                  <BreadcrumbLink
+                    href={item.href}
+                    onClick={(event) => handleSpaClick(event, item.href)}
+                  >
+                    {item.label}
+                  </BreadcrumbLink>
                 )}
               </BreadcrumbItem>
             </Fragment>

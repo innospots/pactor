@@ -28,7 +28,10 @@ Form 内声明 `name` 的 Input / Select 及本页其余录入组件（Textarea 
 | `type` | `text`（默认）\| `password` | `password` 掩码输入 |
 | `placeholder` | string | 占位文案 |
 | `disabled` | boolean | 禁用 |
+| `controlClassName` | string | 控件本体 class：独立渲染时与 `className` 同点合并；Form 内 `className` 挂 form-item 容器、本 prop 仍挂控件节点（Form 内精确设置控件样式，如宽度，时使用） |
 | 事件 `onChange` | — | 传出 string 值 |
+
+> **className 挂载点约定**：全部录入组件的 `className` / `style` 在 Form 内挂 `form-item` 容器（影响整项布局），独立渲染时挂控件本体；Input / Select 另提供 `controlClassName` 作为 Form 内直达控件本体的精确通道。
 
 ### Select
 
@@ -38,6 +41,7 @@ Form 内声明 `name` 的 Input / Select 及本页其余录入组件（Textarea 
 | `options` | `{ label, value, disabled? }[]`（value: string \| number \| boolean） | 选项列表；`disabled: true` 的选项不可选；远程任意字段名经 dataSource 的 `valueField` / `labelField` / `disabledField` 映射 |
 | `value` | string \| number \| boolean | 同 Input 的初始值语义 |
 | `allowClear` | boolean | 可清空 |
+| `controlClassName` | string | 控件本体 class（挂载规则同 Input） |
 | 事件 `onChange` | — | 传出选中 value |
 
 ### Textarea
@@ -208,6 +212,7 @@ AI 对话输入框的通用结构构件：外层圆角容器（focus-within 高�
 | prop | 类型 | 缺省 | 说明 |
 | --- | --- | --- | --- |
 | `label` | string | — | 表单项标签 |
+| `required` | boolean | — | 必填标记（label 前渲染红色 `*`；仅视觉标记，校验仍由 Form rules 承担） |
 | `description` | string | — | 辅助说明文案 |
 | `error` | string | — | 错误文案（声明式展示，如校验失败信息） |
 | children | DslNode[] | — | 控件 DSL 子树（经 Renderer children 机制渲染） |

@@ -83,7 +83,19 @@ const Page = createPactorPage({ loader, services, permissions: ['customer:view']
 ```
 
 - 交互层（confirm / message / overlay）与整应用模式一致；多实例状态互相隔离
-- 跳转为自然导航：`Link` 组件渲染原生 `<a href>`，`navigate` 动作退化为 `location.assign`——不注入宿主路由对象
+- 站内导航：`Link` / `Breadcrumb` 渲染原生 `<a href>` 并拦截站内左键点击，`navigate` 动作与链接点击共用同一实现——缺省退化为 `location.assign` 整页跳转，可经工厂选项 `navigate` 注入宿主路由（SPA 导航）：
+
+```tsx
+// Next.js（App Router）
+const router = useRouter();
+const Page = createPactorPage({ navigate: (to) => router.push(to) });
+
+// React Router
+const navigate = useNavigate();
+const Page = createPactorPage({ navigate: (to) => navigate(to) });
+```
+
+需要完全自定义链接渲染（prefetch、scroll restoration 等）时，可经 `components` 注册表覆盖同名组件，样式子组件从 `@pactor-app/ui/ui` 导入（`BreadcrumbLink` 支持 `render` prop 换成宿主路由组件）。
 - `route.params` / `route.query` 经 props 纯数据注入（如 Next.js 的 `searchParams`）
 
 ## 文档

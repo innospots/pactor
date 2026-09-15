@@ -35,11 +35,32 @@ function BreadcrumbItem({ className, ...props }: React.ComponentProps<'li'>) {
   );
 }
 
-function BreadcrumbLink({ className, ...props }: React.ComponentProps<'a'>) {
+function BreadcrumbLink({
+  className,
+  render,
+  ...props
+}: React.ComponentProps<'a'> & {
+  /**
+   * 以宿主元素替换默认 `<a>`（Base UI render 习惯用法，等价 Radix asChild）——
+   * 如 Next.js `<Link>` / react-router `<Link>`；class 合并、其余 props 透传。
+   */
+  render?: React.ReactElement;
+}) {
+  const linkClassName = cn('transition-colors hover:text-foreground', className);
+  if (render) {
+    return React.cloneElement(render, {
+      'data-slot': 'breadcrumb-link',
+      ...props,
+      className: cn(
+        linkClassName,
+        (render.props as { className?: string }).className,
+      ),
+    } as Partial<React.ComponentProps<'a'>>);
+  }
   return (
     <a
       data-slot="breadcrumb-link"
-      className={cn('transition-colors hover:text-foreground', className)}
+      className={linkClassName}
       {...props}
     />
   );

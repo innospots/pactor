@@ -31,6 +31,9 @@ export interface InputProps {
   onChange?: (value: string) => void;
   /** 通用：根节点 class（Form 内为 form-item 容器，独立渲染时为控件本身） */
   className?: string;
+  /** 控件本体 class（无论是否在 Form 内都挂控件节点；独立渲染时与
+   *  className 同点合并——Form 内需要精确设置控件样式（如宽度）时使用） */
+  controlClassName?: string;
   /** 通用：根节点内联样式（同 className 的挂载规则） */
   style?: CSSProperties;
 }
@@ -53,6 +56,7 @@ export function Input({
   allowClear,
   onChange,
   className,
+  controlClassName,
   style,
 }: InputProps) {
   const form = useFormContext();
@@ -90,7 +94,10 @@ export function Input({
       value={currentValue}
       placeholder={placeholder}
       disabled={disabled}
-      className={!inFormRoot && allowClear !== true ? className : undefined}
+      className={cn(
+        !inFormRoot && allowClear !== true && className,
+        allowClear !== true && controlClassName,
+      )}
       style={!inFormRoot && allowClear !== true ? style : undefined}
       onChange={(event) => {
         if (inForm && form && name) {
@@ -114,7 +121,11 @@ export function Input({
   const control =
     allowClear === true ? (
       <span
-        className={cn('flex items-center gap-1', !inFormRoot && className)}
+        className={cn(
+          'flex items-center gap-1',
+          !inFormRoot && className,
+          controlClassName,
+        )}
         style={inFormRoot ? undefined : style}
       >
         {input}

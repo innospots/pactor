@@ -49,6 +49,27 @@ describe('Button', () => {
       expect(context.state.get('clicked')).toBe(true);
     });
   });
+
+  it('icon 在文本前渲染图标；loading 时图标位由旋转图标取代', () => {
+    renderDsl({
+      type: 'Button',
+      props: { text: '保存', icon: 'check' },
+    });
+
+    const button = screen.getByRole('button', { name: '保存' });
+    const icon = button.querySelector('[data-slot=icon]');
+    expect(icon).not.toBeNull();
+    // 图标为按钮首个子节点（位于文本之前）
+    expect(button.firstChild).toBe(icon);
+
+    renderDsl({
+      type: 'Button',
+      props: { text: '提交', icon: 'check', loading: true },
+    });
+    const loadingButton = screen.getByRole('button', { name: '提交' });
+    expect(loadingButton.querySelector('[data-slot=icon]')).toBeNull();
+    expect(loadingButton.querySelector('.animate-spin')).not.toBeNull();
+  });
 });
 
 describe('Alert', () => {

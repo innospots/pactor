@@ -338,6 +338,61 @@ describe('Field', () => {
     });
     expectCommonProps(container.querySelector('[data-slot=field]'));
   });
+
+  it('required 在 label 前渲染必填星号', () => {
+    const { container } = renderDsl({
+      type: 'Field',
+      props: { label: '邮箱', required: true },
+    });
+
+    const label = container.querySelector('[data-slot=field-label]');
+    expect(label?.textContent).toBe('* 邮箱');
+    const asterisk = label?.querySelector('span[aria-hidden]');
+    expect(asterisk?.className).toContain('text-destructive');
+  });
+
+  it('Input / Select 的 controlClassName 挂控件本体（Form 内不挂 form-item）', () => {
+    const { container } = renderDsl({
+      type: 'Form',
+      children: [
+        {
+          type: 'Input',
+          props: { name: 'a', label: 'A', controlClassName: 'ctrl-input' },
+        },
+        {
+          type: 'Select',
+          props: {
+            name: 'b',
+            label: 'B',
+            options: [{ label: 'X', value: 'x' }],
+            controlClassName: 'ctrl-select',
+          },
+        },
+      ],
+    });
+
+    const formItem = container.querySelector('[data-slot=form-item]');
+    expect(formItem?.className).not.toContain('ctrl-input');
+
+    const input = container.querySelector('input');
+    expect(input?.className).toContain('ctrl-input');
+
+    const selectControl = container
+      .querySelector('[data-slot=select-trigger]')
+      ?.closest('span');
+    expect(selectControl?.className).toContain('ctrl-select');
+  });
+
+  it('Input 独立渲染：controlClassName 与 className 同点合并', () => {
+    const { container } = renderDsl({
+      type: 'Input',
+      props: { className: 'root-cls', controlClassName: 'ctrl-cls' },
+    });
+
+    const input = container.querySelector('input');
+    expect(input?.className).toContain('root-cls');
+    expect(input?.className).toContain('ctrl-cls');
+  });
 });
 
 describe('表单类通用 props（Form 内）', () => {

@@ -162,6 +162,54 @@ describe('PactorPage 嵌入式页面', () => {
     });
   });
 
+  it('注入 navigate 后 DSL navigate 动作走宿主路由实现', async () => {
+    const navigate = vi.fn();
+    const page: PageDsl = {
+      dsl: '1.0',
+      page: { id: 'p', title: 'P' },
+      body: {
+        type: 'Page',
+        children: [
+          {
+            type: 'Button',
+            props: { text: '跳转' },
+            events: {
+              onClick: { action: 'navigate', params: { to: '/spa/path' } },
+            },
+          },
+        ],
+      },
+    };
+    const Page = createPactorPage({ navigate });
+
+    render(<Page pageDsl={page} />);
+    fireEvent.click(await screen.findByRole('button', { name: '跳转' }));
+
+    await waitFor(() => {
+      expect(navigate).toHaveBeenCalledWith('/spa/path');
+    });
+  });
+
+  it('注入 navigate 后 Link 站内点击走宿主路由（SPA 导航）', async () => {
+    const navigate = vi.fn();
+    const page: PageDsl = {
+      dsl: '1.0',
+      page: { id: 'p', title: 'P' },
+      body: {
+        type: 'Page',
+        children: [
+          { type: 'Link', props: { text: '详情', href: '/items/1' } },
+        ],
+      },
+    };
+    const Page = createPactorPage({ navigate });
+
+    render(<Page pageDsl={page} />);
+    fireEvent.click(await screen.findByRole('link', { name: '详情' }));
+
+    expect(navigate).toHaveBeenCalledWith('/items/1');
+  });
+
   it('page 为 service 引用：远端加载 PageDsl 后渲染', async () => {
     const service = vi.fn(async () => detailPage);
     const Page = createPactorPage({ services: { 'dsl.page': service } });

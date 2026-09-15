@@ -38,6 +38,9 @@ export interface SelectProps {
   onChange?: (value: unknown) => void;
   /** 通用：根节点 class（Form 内为 form-item 容器，独立渲染时为控件包裹） */
   className?: string;
+  /** 控件本体 class（无论是否在 Form 内都挂控件包裹节点；独立渲染时与
+   *  className 同点合并——Form 内需要精确设置控件样式（如宽度）时使用） */
+  controlClassName?: string;
   /** 通用：根节点内联样式（同 className 的挂载规则） */
   style?: CSSProperties;
 }
@@ -63,6 +66,7 @@ export function Select({
   allowClear,
   onChange,
   className,
+  controlClassName,
   style,
 }: SelectProps) {
   const form = useFormContext();
@@ -95,7 +99,11 @@ export function Select({
   const inFormRoot = inForm === true;
   const select = (
     <span
-      className={cn('inline-flex items-center gap-1', !inFormRoot && className)}
+      className={cn(
+        'inline-flex items-center gap-1',
+        !inFormRoot && className,
+        controlClassName,
+      )}
       style={inFormRoot ? undefined : style}
     >
       <ShadcnSelect<SelectOption['value']>
