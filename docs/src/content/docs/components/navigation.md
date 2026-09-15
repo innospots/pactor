@@ -131,9 +131,11 @@ body:
 
 | prop | 类型 | 说明 |
 | --- | --- | --- |
-| `items` | `{ key, label, children?: DslNode[] }[]` | 页签列表，pane 内容为 DSL 子树 |
+| `items` | `{ key, label, children?: DslNode[], className?, style? }[]` | 页签列表，pane 内容为 DSL 子树；`className` / `style` 为该页签内容区样式（叠加在 `contentClassName` / `contentStyle` 之后） |
 | `activeKey` | string | 当前激活 key（可绑表达式） |
-| `variant` | `default`（缺省）\| `line` | 页签栏样式：胶囊 / 下划线 |
+| `variant` | `default`（缺省）\| `line` | 页签栏样式：胶囊 / 下划线（`line` 页签栏默认通栏，下划线轨道占满容器宽） |
+| `contentClassName` | string | 页签内容区 class（全部 pane 共用，与内置样式合并） |
+| `contentStyle` | CSSProperties | 页签内容区内联样式（同 `contentClassName` 的挂载规则） |
 | 事件 `onChange` | — | 切换时传出新 key |
 
 ### Menubar
