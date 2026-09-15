@@ -49,6 +49,13 @@ export interface PactorPageProps {
  * （无路由、无外壳布局）；route 上下文经 props 纯数据注入。
  */
 export interface PactorPageOptions extends Omit<PactorAssemblyOptions, 'navigate'> {
+  /**
+   * 站内导航实现（D2：可选注入宿主路由，缺省退化）——如 Next.js
+   * `router.push` / react-router `navigate`；缺省以 `location.assign`
+   * 整页跳转。DSL `navigate` 动作与链接类组件的站内点击（`route.navigate`）
+   * 均走此实现。
+   */
+  navigate?: (to: string) => void;
   /** 资源加载器（按 pageId 加载页面时需要） */
   loader?: DslResourceLoader;
   /** 权限码列表（缺省全部放行；细粒度控制可传 permission 适配器） */
@@ -80,14 +87,17 @@ type EmbeddedPageState =
 export function createPactorPage(
   options: PactorPageOptions = {},
 ): ComponentType<PactorPageProps> {
-  const assembly = createPactorAssembly({
-    ...options,
-    // 嵌入模式：navigate 退化为自然跳转（设计决策 D2，不注入宿主路由对象）
-    navigate: (to) => {
+  // 嵌入模式：navigate 可选注入宿主路由（方案：D2 可选注入），缺省退化为自然跳转
+  const navigate =
+    options.navigate ??
+    ((to: string) => {
       if (typeof window !== 'undefined') {
         window.location.assign(to);
       }
-    },
+    });
+  const assembly = createPactorAssembly({
+    ...options,
+    navigate,
   });
   // 权限：显式适配器 > 权限码列表 > 缺省全部放行（嵌入模式无 bootstrap）
   let permission: PermissionAdapter;
@@ -113,6 +123,8 @@ export function createPactorPage(
       services: assembly.services,
       capabilities: assembly.capabilities,
       permission,
+      // route.navigate 与 DSL navigate 动作共用同一实现（宿主注入或缺省整页跳转）
+      router: { navigate },
       http: assembly.httpAdapter,
       route: { params: route?.params ?? {}, query: route?.query ?? {} },
       locale: options.locale ?? 'zh-CN',

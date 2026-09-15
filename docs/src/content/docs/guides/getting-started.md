@@ -198,7 +198,21 @@ const Page = createPactorPage({ loader, services });
 
 DSL 内部的局部子树也支持同样的动态引用（根级 `children`、节点 `children`、`components` 命名组件），完整语义见 [DSL 参考 - 动态 DSL 引用](/reference/dsl/#动态-dsl-引用dlsourceref)。
 
-嵌入模式的跳转是**自然导航**（不注入宿主路由对象）：`Link` 组件渲染原生 `<a href>`，`navigate` 动作退化为 `location.assign` 整页跳转，目标页由宿主路由系统承接。权限默认全部放行，需管控时传 `permissions: string[]`。
+嵌入模式的站内导航：`Link` / `Breadcrumb` 等链接类组件渲染原生 `<a href>`（保留 SEO、中键/Cmd+点击新窗口、右键复制链接等原生语义），并拦截「站内路径（`/` 开头）+ 左键无修饰键」的点击改走导航实现。`navigate` 动作与链接点击共用同一实现——缺省退化为 `location.assign` 整页跳转（目标页由宿主路由系统承接）；也可经工厂选项 `navigate` 注入宿主路由实现 SPA 导航：
+
+```tsx
+// Next.js（App Router）
+const router = useRouter();
+const Page = createPactorPage({ loader, navigate: (to) => router.push(to) });
+
+// React Router
+const navigate = useNavigate();
+const Page = createPactorPage({ loader, navigate: (to) => navigate(to) });
+```
+
+需要完全自定义链接渲染（如 prefetch、scroll restoration）时，可经 `components` 注册表覆盖同名组件，样式子组件从 `@pactor-app/ui/ui` 导入（`BreadcrumbLink` 支持 `render` prop 换成宿主路由组件）。
+
+权限默认全部放行，需管控时传 `permissions: string[]`。
 
 **HTTP 钩子**（`httpAdapter`）：对页面运行时所有 HTTP 出口做统一加工——`request` 在发出前加工请求配置（如注入 token），`response` 在收到后加工返回数据（如归一化后端包裹结构）：
 

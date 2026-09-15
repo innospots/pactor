@@ -6,6 +6,7 @@ import {
   Button as ShadcnButton,
   type buttonVariants,
 } from '../../../ui/button.js';
+import { Icon } from '../Icon/index.js';
 import type { VariantProps } from 'class-variance-authority';
 
 /** DSL Button 变体（框架级协议） */
@@ -17,6 +18,8 @@ export type ButtonSize = 'small' | 'middle' | 'large';
 export interface ButtonProps {
   /** 按钮文本；也可用 children 渲染内容 */
   text?: string;
+  /** 图标名（Icon 白名单，kebab-case / PascalCase 均可），渲染在文本前 */
+  icon?: string;
   /** 变体，默认 default */
   variant?: ButtonVariant;
   /** 危险态 */
@@ -60,10 +63,12 @@ const sizeMap: Record<
  * Button 适配器（shadcn kit）：vendored shadcn Button（cva 变体）。
  * props 契约与 pactor-components（antd 版）一致；`submit: true` 时作为
  * Form 的提交按钮（type=submit）；danger 映射 destructive（link/text
- * 变体保持原样、文字标红）；loading 显示旋转图标并禁用。
+ * 变体保持原样、文字标红）；loading 显示旋转图标并禁用（优先于 icon）；
+ * `icon` 渲染文本前图标（对齐 Alert 的 icon 通道）。
  */
 export function Button({
   text,
+  icon,
   variant = 'default',
   danger,
   size = 'middle',
@@ -91,7 +96,11 @@ export function Button({
         className,
       )}
     >
-      {loading ? <Loader2 aria-hidden className="animate-spin" /> : null}
+      {loading ? (
+        <Loader2 aria-hidden className="animate-spin" />
+      ) : icon ? (
+        <Icon name={icon} size="sm" />
+      ) : null}
       {text ?? children}
     </ShadcnButton>
   );

@@ -120,7 +120,8 @@ export interface PactorAssemblyOptions {
   httpAdapter?: PactorHttpHooks;
   /**
    * DSL `navigate` 动作的跳转实现（两种形态的差异点）：
-   * 整应用模式 = 导航桥 push（react-router）；嵌入模式 = location.assign
+   * 整应用模式 = 导航桥 push（react-router）；嵌入模式 = 宿主注入或
+   * 缺省 location.assign（embedded 层兜底）
    */
   navigate: (to: string) => void;
 }

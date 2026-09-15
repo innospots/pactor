@@ -50,19 +50,26 @@
 - **WHEN** 嵌入页 DSL 触发 `confirm` / `message` / `overlay.open` 动作
 - **THEN** 交互行为与整应用模式一致（经工厂组装的 interaction kit 渲染）
 
-### Requirement: 嵌入模式的自然跳转
+### Requirement: 嵌入模式的站内导航
 
-嵌入模式下 DSL 的跳转 MUST 为自然导航，不依赖宿主路由实现：`Link` 组件渲染原生 `<a href>`（支持 `target`）；`navigate` 动作缺省以 `location.assign(to)` 整页跳转。
+嵌入模式下 DSL 的跳转缺省为自然导航、不依赖宿主路由实现；宿主 SHALL 可经工厂选项 `navigate` 注入自己的路由实现（如 Next.js `router.push`）。`navigate` 动作与链接类组件的站内点击共用同一实现：缺省以 `location.assign(to)` 整页跳转，注入后走宿主路由（SPA 导航）。
+
+链接类组件（`Link`、`Breadcrumb` 等）MUST 仍渲染原生 `<a href>` 保留原生语义（SEO、中键/Cmd+点击新窗口、右键复制链接、屏幕阅读器），仅拦截「站内路径（`/` 开头）+ 左键无修饰键 + target 缺省或 `_self`」的点击，`preventDefault` 后走注入的导航实现；外链、锚点、显式 target、修饰键/中键点击 MUST 保持原生行为。
 
 #### Scenario: Link 渲染原生锚点
 
 - **WHEN** DSL 声明 `{ type: 'Link', props: { text: '详情', href: '/items/1' } }`
-- **THEN** 渲染 `<a href="/items/1">详情</a>`，点击由浏览器自然跳转
+- **THEN** 渲染 `<a href="/items/1">详情</a>`；未注入 `navigate` 时点击由浏览器自然跳转
 
 #### Scenario: navigate 动作整页跳转
 
 - **WHEN** 嵌入页 DSL 触发 `navigate` 动作且未注入任何路由适配
 - **THEN** 以 `location.assign` 跳转目标路径
+
+#### Scenario: 注入宿主路由后 SPA 导航
+
+- **WHEN** 工厂选项注入 `navigate: (to) => router.push(to)`，DSL 触发 `navigate` 动作或点击站内 `Link` / `Breadcrumb` 链接项（左键无修饰键）
+- **THEN** 调用注入的 `navigate(to)`，不发生整页刷新；Cmd/Ctrl+点击、中键点击仍新标签打开
 
 ### Requirement: 多实例隔离
 
