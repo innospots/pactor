@@ -30,7 +30,8 @@ const tabsListVariants = cva(
     variants: {
       variant: {
         default: 'h-9 rounded-lg bg-muted p-[3px]',
-        line: 'h-auto gap-1 rounded-none border-b border-border bg-transparent p-0',
+        // line：页签栏通栏（下划线轨道占满容器宽），触发器自然宽度靠左排列
+        line: 'h-auto w-full justify-start gap-1 rounded-none border-b border-border bg-transparent p-0',
       },
     },
     defaultVariants: {
@@ -66,8 +67,9 @@ function TabsTrigger({
         // default 变体：激活态胶囊（边框 + 卡片底 + 阴影）
         'group-data-[variant=default]/tabs-list:data-active:border-border group-data-[variant=default]/tabs-list:data-active:bg-card group-data-[variant=default]/tabs-list:data-active:shadow-sm',
         // line 变体：下划线指示——弱化未激活文字，激活态底部 2px 主色线
-        //（叠在 List 的底边轨道上），无底色/圆角/阴影
-        'group-data-[variant=line]/tabs-list:-mb-px group-data-[variant=line]/tabs-list:h-9 group-data-[variant=line]/tabs-list:rounded-none group-data-[variant=line]/tabs-list:border-x-0 group-data-[variant=line]/tabs-list:border-t-0 group-data-[variant=line]/tabs-list:border-b-2 group-data-[variant=line]/tabs-list:py-1.5 group-data-[variant=line]/tabs-list:text-muted-foreground group-data-[variant=line]/tabs-list:data-active:border-b-primary group-data-[variant=line]/tabs-list:data-active:text-foreground',
+        //（叠在 List 的底边轨道上），无底色/圆角/阴影；通栏 List 下取消
+        // flex-1 拉伸，触发器保持自然宽度
+        'group-data-[variant=line]/tabs-list:-mb-px group-data-[variant=line]/tabs-list:h-9 group-data-[variant=line]/tabs-list:flex-none group-data-[variant=line]/tabs-list:rounded-none group-data-[variant=line]/tabs-list:border-x-0 group-data-[variant=line]/tabs-list:border-t-0 group-data-[variant=line]/tabs-list:border-b-2 group-data-[variant=line]/tabs-list:py-1.5 group-data-[variant=line]/tabs-list:text-muted-foreground group-data-[variant=line]/tabs-list:data-active:border-b-primary group-data-[variant=line]/tabs-list:data-active:text-foreground',
         className,
       )}
       {...props}

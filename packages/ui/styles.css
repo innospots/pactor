@@ -740,6 +740,9 @@
   .flex-1 {
     flex: 1;
   }
+  .flex-none {
+    flex: none;
+  }
   .shrink-0 {
     flex-shrink: 0;
   }
@@ -1893,6 +1896,9 @@
   }
   .group-data-\[variant\=line\]\/tabs-list\:h-9:is(:where(.group\/tabs-list)[data-variant="line"] *) {
     height: calc(var(--spacing) * 9);
+  }
+  .group-data-\[variant\=line\]\/tabs-list\:flex-none:is(:where(.group\/tabs-list)[data-variant="line"] *) {
+    flex: none;
   }
   .group-data-\[variant\=line\]\/tabs-list\:rounded-none:is(:where(.group\/tabs-list)[data-variant="line"] *) {
     border-radius: 0;
