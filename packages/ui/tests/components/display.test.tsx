@@ -1,5 +1,5 @@
 // @vitest-environment jsdom
-import { act, render, screen } from '@testing-library/react';
+import { act, fireEvent, render, screen } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
 
 import { Alert, Card, Flex, Grid } from '../../src/components/index.js';
@@ -69,6 +69,23 @@ describe('Button', () => {
     const loadingButton = screen.getByRole('button', { name: '提交' });
     expect(loadingButton.querySelector('[data-slot=icon]')).toBeNull();
     expect(loadingButton.querySelector('.animate-spin')).not.toBeNull();
+  });
+
+  it('tooltip：focus 按钮展示提示浮层，点击行为不受影响', async () => {
+    const { context } = renderDsl({
+      type: 'Button',
+      props: { text: '删除', tooltip: '不可恢复' },
+      events: { onClick: { action: 'setState', params: { clicked: true } } },
+    });
+
+    const button = screen.getByRole('button', { name: '删除' });
+    fireEvent.focus(button);
+    expect(await screen.findByText('不可恢复')).toBeTruthy();
+
+    button.click();
+    await vi.waitFor(() => {
+      expect(context.state.get('clicked')).toBe(true);
+    });
   });
 });
 

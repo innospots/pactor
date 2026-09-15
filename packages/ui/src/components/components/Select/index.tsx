@@ -100,7 +100,10 @@ export function Select({
   const select = (
     <span
       className={cn(
-        'inline-flex items-center gap-1',
+        // Form / Field（Form 上下文）内控件占满整行宽度；独立渲染保持内容自然宽度
+        inFormRoot
+          ? 'flex w-full items-center gap-1'
+          : 'inline-flex items-center gap-1',
         !inFormRoot && className,
         controlClassName,
       )}
@@ -113,7 +116,7 @@ export function Select({
         disabled={disabled}
         name={inForm ? name : undefined}
       >
-        <SelectTrigger id={controlId}>
+        <SelectTrigger id={controlId} className={inFormRoot ? 'w-full' : undefined}>
           <SelectValue placeholder={placeholder} />
         </SelectTrigger>
         <SelectContent>
