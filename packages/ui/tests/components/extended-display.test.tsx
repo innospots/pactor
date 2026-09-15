@@ -270,6 +270,18 @@ describe('Icon', () => {
     const icon = container.querySelector('[data-slot=icon]');
     expect(icon).not.toBeNull();
     expect(icon!.getAttribute('data-unknown')).toBe('no-such-icon');
+    // 占位图标跟随上下文文本色（currentColor），不硬编码 muted——
+    // 避免在 danger 等有色按钮上撞色
+    expect(icon!.getAttribute('class')).not.toContain('text-muted-foreground');
+  });
+
+  it('lucide 规范名别名命中（trash-2 / circle-check 等不落入占位）', () => {
+    const { container } = renderDsl({ type: 'Icon', props: { name: 'trash-2' } });
+
+    const icon = container.querySelector('[data-slot=icon]');
+    expect(icon).not.toBeNull();
+    expect(icon!.getAttribute('data-unknown')).toBeNull();
+    expect(icon!.getAttribute('class')).toContain('lucide-trash-2');
   });
 
   it.each([

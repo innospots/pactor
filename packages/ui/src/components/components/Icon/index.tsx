@@ -206,6 +206,27 @@ export const ICONS: Record<string, LucideIcon> = {
   quote: Quote,
   chat: MessageSquare,
   brain: Brain,
+  // lucide 规范名别名（kebab-case 原名直通；上方短别名保留兼容）——
+  // 白名单文档承诺 kebab-case 键，缺别名时规范名（如 trash-2）会落入未知占位
+  'trash-2': Trash2,
+  'share-2': Share2,
+  'building-2': Building2,
+  house: House,
+  'triangle-alert': TriangleAlert,
+  'circle-alert': CircleAlert,
+  'circle-check': CircleCheck,
+  'circle-x': CircleX,
+  'circle-question-mark': CircleQuestionMark,
+  'square-pen': SquarePen,
+  'refresh-ccw': RefreshCcw,
+  'chart-column': ChartColumn,
+  'layout-grid': LayoutGrid,
+  funnel: Funnel,
+  'loader-circle': LoaderCircle,
+  ellipsis: Ellipsis,
+  'ellipsis-vertical': EllipsisVertical,
+  'message-circle': MessageCircle,
+  'lock-open': LockOpen,
 };
 
 /** DSL Icon 尺寸（数字直接作 px） */
@@ -243,7 +264,8 @@ const sizePx: Record<Exclude<IconSize, number>, number> = {
 /**
  * Icon 适配器（shadcn kit）：按 name 从 lucide 白名单渲染图标。
  * 未知名渲染占位图标（help-circle）并标 `data-unknown`，不抛错
- * （与 chat messageActions 图标白名单同约定）。
+ * （与 chat messageActions 图标白名单同约定）；占位图标跟随上下文
+ * 文本色（currentColor），避免在 danger 等有色按钮上撞色。
  */
 export function Icon({
   name,
@@ -265,7 +287,7 @@ export function Icon({
         size={px}
         color={color}
         strokeWidth={strokeWidth}
-        className={cn('shrink-0 text-muted-foreground', className)}
+        className={cn('shrink-0', className)}
         style={style}
         aria-hidden="true"
       />
