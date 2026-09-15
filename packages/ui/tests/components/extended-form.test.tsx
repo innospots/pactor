@@ -417,3 +417,68 @@ describe('表单类通用 props（Form 内）', () => {
     }
   });
 });
+
+describe('Field 布局与节点样式', () => {
+  it('有 label 时控件容器默认 mt-2；无 label 时不加', () => {
+    const withLabel = renderDsl({
+      type: 'Field',
+      props: { label: '邮箱' },
+      children: [{ type: 'Input', props: { placeholder: 'x' } }],
+    });
+    expect(
+      withLabel.container.querySelector('[data-slot=field-control]')?.className,
+    ).toContain('mt-2');
+
+    const noLabel = renderDsl({
+      type: 'Field',
+      children: [{ type: 'Input', props: { placeholder: 'x' } }],
+    });
+    expect(
+      noLabel.container.querySelector('[data-slot=field-control]')?.className,
+    ).not.toContain('mt-2');
+  });
+
+  it('label / 控件容器 / description / error 各节点可独立加样式', () => {
+    const { container } = renderDsl({
+      type: 'Field',
+      props: {
+        label: '邮箱',
+        description: '用于接收通知',
+        error: '格式不正确',
+        labelClassName: 'lbl-cls',
+        controlClassName: 'ctrl-cls',
+        descriptionClassName: 'desc-cls',
+        errorClassName: 'err-cls',
+        labelStyle: { fontSize: 13 },
+        controlStyle: { width: 320 },
+        descriptionStyle: { opacity: 0.6 },
+        errorStyle: { marginTop: 4 },
+      },
+      children: [{ type: 'Input', props: { placeholder: 'x' } }],
+    });
+
+    const label = container.querySelector('[data-slot=field-label]') as HTMLElement;
+    expect(label.className).toContain('lbl-cls');
+    expect(label.style.fontSize).toBe('13px');
+
+    const control = container.querySelector('[data-slot=field-control]') as HTMLElement;
+    expect(control.className).toContain('ctrl-cls');
+    expect(control.className).toContain('mt-2');
+    expect(control.style.width).toBe('320px');
+
+    expect(
+      container.querySelector('[data-slot=field-description]')?.className,
+    ).toContain('desc-cls');
+    expect(
+      (container.querySelector('[data-slot=field-description]') as HTMLElement)
+        .style.opacity,
+    ).toBe('0.6');
+    expect(container.querySelector('[data-slot=field-error]')?.className).toContain(
+      'err-cls',
+    );
+    expect(
+      (container.querySelector('[data-slot=field-error]') as HTMLElement).style
+        .marginTop,
+    ).toBe('4px');
+  });
+});
