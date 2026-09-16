@@ -194,6 +194,7 @@ export type {
   HeaderLocale,
   HeaderMenuItem,
   HeaderProps,
+  HeaderTheme,
   HeaderUser,
   HeaderUserItem,
 } from './components/Header/index.js';

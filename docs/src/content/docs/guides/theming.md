@@ -111,8 +111,8 @@ document.documentElement.removeAttribute('data-pactor-theme');
 
 注意属性名是 `data-pactor-theme`（不是 `data-theme`），避免与宿主自己的主题属性冲突。皮肤文件可以为暗色单独给值（`[data-pactor-theme='dark']` 选择器块，见方式一示例）；皮肤未提供暗色值时，组件回退到内置暗色令牌，不会出现未着色的破损状态。
 
-:::caution[只定义亮色令牌的皮肤在"跟随系统暗色"时不生效]
-内置暗色兜底选择器是 `:root:not([data-pactor-theme='light']):not([data-pactor-theme='dark'])`（媒体查询内），特异性高于皮肤文件的 `:root` 块。宿主未设置 `data-pactor-theme` 且系统为深色时，皮肤的 `:root` 亮色令牌会被暗色兜底压住。两种对策：皮肤文件同时提供暗色块，或宿主显式设置 `data-pactor-theme="light"` 锁定亮色。
+:::note[皮肤亮色令牌优先于"跟随系统暗色"兜底]
+内置系统暗色兜底选择器经 `:where()` 降为与 `:root` 默认块同优先级，恒低于皮肤文件的亮色块 `:root:not([data-pactor-theme='dark'])`——加载皮肤后，系统深色偏好不会把皮肤压成内置暗色。皮肤需要暗色变体时，在皮肤文件中提供 `[data-pactor-theme='dark']` 块（宿主显式设置属性时生效）；如需跟随系统，可在皮肤文件中自行附带 `@media (prefers-color-scheme: dark)` 块。
 :::
 
 ## 方式三：data-slot 结构覆盖

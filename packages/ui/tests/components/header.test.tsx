@@ -13,7 +13,7 @@ import {
   type RuntimeContext,
 } from '@pactor-app/runtime';
 import { fireEvent, render, screen, type RenderResult } from '@testing-library/react';
-import { describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it } from 'vitest';
 
 import { createComponentRegistry } from '../../src/components/index.js';
 import {
@@ -303,6 +303,62 @@ describe('Header 国际化切换', () => {
     expect(screen.getByText('fr-FR').getAttribute('data-slot')).toBe(
       'header-locales',
     );
+  });
+});
+
+describe('Header 深浅色切换', () => {
+  afterEach(() => {
+    document.documentElement.removeAttribute('data-pactor-theme');
+  });
+
+  it('themeToggle 为 true 时在右侧渲染切换按钮；点击翻转 data-pactor-theme 并经 onThemeChange 传出新主题', async () => {
+    const { container, context } = renderDsl({
+      type: 'Header',
+      props: { themeToggle: true },
+      events: {
+        onThemeChange: { action: 'setState', params: { theme: '${event}' } },
+      },
+    });
+
+    const right = container.querySelector('[data-slot=header-right]')!;
+    const toggle = right.querySelector('[data-slot=header-theme-toggle]')!;
+    expect(toggle).not.toBeNull();
+    // 缺省 light：显示 moon 图标
+    expect(toggle.querySelector('svg.lucide-moon')).not.toBeNull();
+
+    fireEvent.click(toggle);
+    expect(document.documentElement.getAttribute('data-pactor-theme')).toBe(
+      'dark',
+    );
+    await expectEventState(context, 'theme', 'dark');
+    expect(toggle.querySelector('svg.lucide-sun')).not.toBeNull();
+
+    fireEvent.click(toggle);
+    expect(document.documentElement.getAttribute('data-pactor-theme')).toBeNull();
+    await expectEventState(context, 'theme', 'light');
+    expect(toggle.querySelector('svg.lucide-moon')).not.toBeNull();
+  });
+
+  it('初始为 dark（documentElement 已带属性）时显示 sun 图标，点击后移除属性', () => {
+    document.documentElement.setAttribute('data-pactor-theme', 'dark');
+    const { container } = renderDsl({
+      type: 'Header',
+      props: { themeToggle: true },
+    });
+
+    const toggle = container.querySelector('[data-slot=header-theme-toggle]')!;
+    expect(toggle.querySelector('svg.lucide-sun')).not.toBeNull();
+
+    fireEvent.click(toggle);
+    expect(document.documentElement.getAttribute('data-pactor-theme')).toBeNull();
+  });
+
+  it('缺省（themeToggle 未声明）时不渲染切换按钮', () => {
+    const { container } = renderDsl({
+      type: 'Header',
+      props: { title: '控制台' },
+    });
+    expect(container.querySelector('[data-slot=header-theme-toggle]')).toBeNull();
   });
 });
 

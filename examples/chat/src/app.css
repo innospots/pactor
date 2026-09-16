@@ -1,12 +1,11 @@
 /**
  * examples/chat 私有样式：槽位自定义 UI 已随内建特性下沉
  * （spec: chat-builtin-features），这里只保留：
- * - 页面壳高度链（html/body/#root、.demo-app、.demo-main）与外壳皮肤
- *   令牌（--demo-bg/--demo-fg，暗色由包内建 theme 操作写
- *   documentElement 的 data-pactor-theme 触发覆盖）；
- * - 示例皮肤「清新薄荷」（换肤契约路径 1：令牌覆盖）——chat 结构件
- *   覆写 --pactor-chat-*（挂在组件根上，需以 .demo-app 提升优先级），
- *   槽位原语（footer 用户卡等 pactor-ui 组件）覆写 shadcn 语义令牌；
+ * - 页面壳高度链（html/body/#root、.demo-app、.demo-main）；
+ * - 示例皮肤「清新薄荷」（换肤契约路径 1）：令牌声明在 :root
+ *   （与应用皮肤同层），chat 结构件经 pactor-chat/styles.css 的
+ *   var() 桥接自动跟随；不钉死在容器上，保证后加载的皮肤（如
+ *   theme-studio 生成皮肤）按层叠覆盖后对 ui 与 chat 同时生效；
  * - 宿主 DSL 页面（agents/settings 等非对话页）的限宽居中规则。
  * 参考默认形态（spec: chat-default-skin）的布局——空态居中组、极简
  * 头部、侧栏品牌行/折叠/「最近」分组/底部用户卡——全部由 pactor-chat
@@ -24,41 +23,19 @@ body,
   padding: 0;
 }
 
-/* 示例外壳的视觉令牌（皮肤本身由 pactor-chat/styles.css 提供） */
-.demo-app {
-  --demo-bg: #f5faf8;
-  --demo-fg: #1c2b28;
-}
-
-/* ============================================================
- * 示例皮肤「清新薄荷」：换肤契约路径 1（令牌覆盖）。
- * chat 结构件令牌声明在组件根（.pactor-chat-* 自身），故以
- * .demo-app 前缀提升优先级；shadcn 令牌在 :root，.demo-app
- * 继承覆盖即可。
- * ============================================================ */
-
-/* chat 结构件（对应 packages/chat/styles.css 的令牌块选择器） */
-.demo-app .pactor-chat-view,
-.demo-app .pactor-chat-layout,
-.demo-app .pactor-chat-shell,
-.demo-app .pactor-chat-workspace,
-.demo-app .pactor-chat-inspector,
-.demo-app .pactor-chat-notice {
-  --pactor-chat-bg: #f5faf8;
-  --pactor-chat-sidebar-bg: #eaf3ef;
-  --pactor-chat-fg: #1c2b28;
-  --pactor-chat-muted: #edf5f1;
-  --pactor-chat-muted-fg: #5f7a74;
-  --pactor-chat-border: #d9e7e2;
-  --pactor-chat-primary: #0d9488;
-  --pactor-chat-primary-fg: #ffffff;
-  --pactor-chat-user-bubble-bg: #d9efe7;
-  --pactor-chat-user-bubble-border: rgb(13 148 136 / 30%);
-  --pactor-chat-code-bg: #eef5f1;
-}
-
-/* 槽位原语（pactor-ui 组件消费的 shadcn 语义令牌） */
-.demo-app {
+/* 示例外壳的视觉令牌与示例皮肤「清新薄荷」（亮色）——声明在 :root
+   （与应用皮肤同层，后加载的皮肤按层叠覆盖）；chat 结构件经
+   pactor-chat/styles.css 的 var() 桥接自动跟随语义令牌；
+   --demo-* 页壳令牌以语义令牌为源，换肤时页壳同步跟随 */
+:root {
+  --demo-bg: var(--background);
+  --demo-fg: var(--foreground);
+  --background: #f5faf8;
+  --foreground: #1c2b28;
+  --sidebar: #eaf3ef;
+  --muted: #edf5f1;
+  --muted-foreground: #5f7a74;
+  --border: #d9e7e2;
   --primary: #0d9488;
   --primary-foreground: #ffffff;
   --accent: #e1f1ec;
@@ -67,10 +44,15 @@ body,
 }
 
 /* 暗色覆盖：内建 theme 操作把 data-pactor-theme 写在 documentElement 上；
-   未设置时跟随系统 prefers-color-scheme（与包内样式表的三态语义一致） */
-[data-pactor-theme='dark'] .demo-app {
-  --demo-bg: #0f1513;
-  --demo-fg: #e4e6ee;
+   未设置时跟随系统 prefers-color-scheme（与包内样式表的三态语义一致）。
+   语义令牌暗色翻转后 chat 结构件经桥接自动跟随，无需单独覆盖。 */
+:root[data-pactor-theme='dark'] {
+  --background: #101716;
+  --foreground: #e2ede9;
+  --sidebar: #16211f;
+  --muted: #1a2624;
+  --muted-foreground: #7d938d;
+  --border: #26332f;
   --primary: #2dd4bf;
   --primary-foreground: #06302b;
   --accent: #1c2e2a;
@@ -78,56 +60,21 @@ body,
   --ring: #2dd4bf;
 }
 
-[data-pactor-theme='dark'] .demo-app .pactor-chat-view,
-[data-pactor-theme='dark'] .demo-app .pactor-chat-layout,
-[data-pactor-theme='dark'] .demo-app .pactor-chat-shell,
-[data-pactor-theme='dark'] .demo-app .pactor-chat-workspace,
-[data-pactor-theme='dark'] .demo-app .pactor-chat-inspector,
-[data-pactor-theme='dark'] .demo-app .pactor-chat-notice {
-  /* 暗色必须全量重声明浅色覆盖过的令牌：浅色块与包内暗色块同
-     优先级（0,2,0）且后加载，不全量覆盖会把浅色留在暗色里 */
-  --pactor-chat-bg: #101716;
-  --pactor-chat-sidebar-bg: #16211f;
-  --pactor-chat-fg: #e2ede9;
-  --pactor-chat-muted: #1a2624;
-  --pactor-chat-muted-fg: #7d938d;
-  --pactor-chat-border: #26332f;
-  --pactor-chat-primary: #2dd4bf;
-  --pactor-chat-primary-fg: #06302b;
-  --pactor-chat-user-bubble-bg: #143b36;
-  --pactor-chat-user-bubble-border: rgb(45 212 191 / 40%);
-  --pactor-chat-code-bg: #1a2624;
-}
-
-/* 系统偏好暗色兜底：未显式设置 data-pactor-theme 时跟随系统 */
+/* 系统偏好暗色兜底：未显式设置 data-pactor-theme 时跟随系统
+   （与 pactor-ui 兜底块同优先级，本文件后加载胜出） */
 @media (prefers-color-scheme: dark) {
-  :root:not([data-pactor-theme='light']):not([data-pactor-theme='dark']) .demo-app {
-    --demo-bg: #0f1513;
-    --demo-fg: #e4e6ee;
+  :root:not([data-pactor-theme='light']):not([data-pactor-theme='dark']) {
+    --background: #101716;
+    --foreground: #e2ede9;
+    --sidebar: #16211f;
+    --muted: #1a2624;
+    --muted-foreground: #7d938d;
+    --border: #26332f;
     --primary: #2dd4bf;
     --primary-foreground: #06302b;
     --accent: #1c2e2a;
     --accent-foreground: #d7ece7;
     --ring: #2dd4bf;
-  }
-
-  :root:not([data-pactor-theme='light']):not([data-pactor-theme='dark']) .demo-app .pactor-chat-view,
-  :root:not([data-pactor-theme='light']):not([data-pactor-theme='dark']) .demo-app .pactor-chat-layout,
-  :root:not([data-pactor-theme='light']):not([data-pactor-theme='dark']) .demo-app .pactor-chat-shell,
-  :root:not([data-pactor-theme='light']):not([data-pactor-theme='dark']) .demo-app .pactor-chat-workspace,
-  :root:not([data-pactor-theme='light']):not([data-pactor-theme='dark']) .demo-app .pactor-chat-inspector,
-  :root:not([data-pactor-theme='light']):not([data-pactor-theme='dark']) .demo-app .pactor-chat-notice {
-    --pactor-chat-bg: #101716;
-    --pactor-chat-sidebar-bg: #16211f;
-    --pactor-chat-fg: #e2ede9;
-    --pactor-chat-muted: #1a2624;
-    --pactor-chat-muted-fg: #7d938d;
-    --pactor-chat-border: #26332f;
-    --pactor-chat-primary: #2dd4bf;
-    --pactor-chat-primary-fg: #06302b;
-    --pactor-chat-user-bubble-bg: #143b36;
-    --pactor-chat-user-bubble-border: rgb(45 212 191 / 40%);
-    --pactor-chat-code-bg: #1a2624;
   }
 }
 

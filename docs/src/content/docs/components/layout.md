@@ -25,9 +25,9 @@ flex 容器；直接子节点含 `Sider` 时横向、否则纵向（`component` 
 
 ### Header
 
-顶部区域（横向 flex、垂直居中、下边框）。缺省为纯语义容器（仅渲染 children）；可选声明五个结构区域：品牌区、通用下拉、横向菜单、用户区、国际化切换，任意组合均可。
+顶部区域（横向 flex、垂直居中、下边框）。缺省为纯语义容器（仅渲染 children）；可选声明六个结构区域：品牌区、通用下拉、横向菜单、深浅色切换、用户区、国际化切换，任意组合均可。
 
-区域排布固定：**左区** = 品牌区（`brandPosition: 'left'` 时）→ 通用下拉（`position: 'left'` 时）→ 横向菜单；**右区** = 通用下拉（`'right'` 时）→ 品牌区（`'right'` 时）→ 国际化切换 → 用户区；children 渲染于左右区之间的弹性区（`flex-1`）。
+区域排布固定：**左区** = 品牌区（`brandPosition: 'left'` 时）→ 通用下拉（`position: 'left'` 时）→ 横向菜单；**右区** = 通用下拉（`'right'` 时）→ 品牌区（`'right'` 时）→ 深浅色切换 → 国际化切换 → 用户区；children 渲染于左右区之间的弹性区（`flex-1`）。
 
 | prop | 类型 | 缺省 | 说明 |
 | --- | --- | --- | --- |
@@ -38,6 +38,7 @@ flex 容器；直接子节点含 `Sider` 时横向、否则纵向（`component` 
 | `menu` | `Array<{ key, label, icon?, children? }>` | — | 横向菜单（可含表达式），语义复用 horizontal Menu（`children` 为弹出式子菜单，可嵌套）；`icon` 为图标名（Icon 白名单），渲染于文字前（叶子项与子菜单触发器/子项均生效） |
 | `user` | `{ name, avatar?, items?: Array<{ label, value, icon? }> }` | — | 用户区（右侧）；`avatar` 缺省时以用户名首字符占位；`items` 缺省或为空时纯展示（无下拉）；`icon` 为图标名（Icon 白名单），渲染于文字前 |
 | `locales` | `Array<{ label, value }>` | — | 国际化切换（右侧下拉）；触发器显示当前 locale 对应的 label（未命中显示 value 本身） |
+| `themeToggle` | boolean | `false` | 右侧展示深浅色切换按钮（国际化切换之前）；点击翻转 `document.documentElement` 的 `data-pactor-theme`（dark ↔ 移除），图标随状态切换（dark 显 sun / light 显 moon） |
 | children | DslNode[] | — | 中部弹性区内容 |
 
 | 事件 | `${event}` 载荷 | 说明 |
@@ -46,6 +47,7 @@ flex 容器；直接子节点含 `Sider` 时横向、否则纵向（`component` 
 | `onDropdownSelect` | string（选中项 `value`） | 通用下拉选中 |
 | `onUserSelect` | string（选中项 `value`） | 用户区菜单选中 |
 | `onLocaleChange` | string（选中的 locale 值） | 语言切换；Header 只发事件，不改写全局 locale（生效接线见下方示例） |
+| `onThemeChange` | `'light'` \| `'dark'`（切换后的主题） | 深浅色切换；Header 默认已改写 `data-pactor-theme`，事件可用于持久化偏好（如写入 localStorage / 用户设置） |
 
 全组合示例：
 

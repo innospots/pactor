@@ -232,7 +232,10 @@ function SidebarRoot({
             : 'right-0 group-data-[collapsible=offcanvas]:right-[calc(var(--sidebar-width)*-1)]',
           variant === 'floating' || variant === 'inset'
             ? 'p-2 group-data-[collapsible=icon]:w-[calc(var(--sidebar-width-icon)+(--spacing(4))+2px)]'
-            : 'group-data-[collapsible=icon]:w-(--sidebar-width-icon) group-data-[side=left]:border-r group-data-[side=right]:border-l',
+            : // 边框色显式声明：不能只给宽度——宿主引入 Tailwind 时其
+              // preflight（同为 base 层且后加载）会把默认 border-color
+              // 重置为 currentColor，宽度型边框会脱离皮肤令牌
+              'border-sidebar-border group-data-[collapsible=icon]:w-(--sidebar-width-icon) group-data-[side=left]:border-r group-data-[side=right]:border-l',
           className,
         )}
         {...props}

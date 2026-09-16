@@ -215,9 +215,12 @@
 }
 
 /* 系统偏好暗色兜底：未显式设置 data-pactor-theme（三态：light / dark / 不设置=跟随系统）时，
-   系统偏好暗色即应用暗色令牌——与上方 [data-pactor-theme='dark'] 块内容保持一致 */
+   系统偏好暗色即应用暗色令牌——与上方 [data-pactor-theme='dark'] 块内容保持一致。
+   两个 :not 包在 :where() 内：整块优先级降为 (0,1,0)，与上方 :root 默认块相同、
+   靠后定义胜出；同时低于皮肤文件的亮色块 :root:not([data-pactor-theme='dark'])（0,2,0），
+   保证加载皮肤后系统暗色偏好不会压过皮肤亮色令牌 */
 @media (prefers-color-scheme: dark) {
-  :root:not([data-pactor-theme='light']):not([data-pactor-theme='dark']) {
+  :root:where(:not([data-pactor-theme='light']):not([data-pactor-theme='dark'])) {
     color-scheme: dark;
     --background: oklch(0.145 0 0);
     --foreground: oklch(0.985 0 0);
