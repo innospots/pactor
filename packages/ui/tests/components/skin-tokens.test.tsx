@@ -85,13 +85,21 @@ describe('皮肤令牌契约', () => {
       /\[data-pactor-theme='dark'\]\s*\{([\s\S]*?)\n\}/,
     );
     const mediaBlock = stylesSource.match(
-      /prefers-color-scheme:\s*dark[\s\S]*?:root:not\(\[data-pactor-theme='light'\]\):not\(\[data-pactor-theme='dark'\]\)\s*\{([\s\S]*?)\n\s*\}/,
+      /prefers-color-scheme:\s*dark[\s\S]*?:root:where\(:not\(\[data-pactor-theme='light'\]\):not\(\[data-pactor-theme='dark'\]\)\)\s*\{([\s\S]*?)\n\s*\}/,
     );
     for (const block of [darkBlock?.[1], mediaBlock?.[1]]) {
       expect(block).toBeTruthy();
       expect(block).toContain('--bubble-background:');
       expect(block).toContain('--bubble-hover-background:');
     }
+  });
+
+  it('系统暗色兜底块经 :where() 降优先级（0,1,0），不压过皮肤亮色块（0,2,0）', () => {
+    // theme-studio 皮肤亮色块为 :root:not([data-pactor-theme='dark'])（0,2,0）；
+    // 兜底块若不降优先级（:root + 双 :not = 0,3,0）会在系统暗色时压过一切皮肤
+    expect(stylesSource).toContain(
+      ":root:where(:not([data-pactor-theme='light']):not([data-pactor-theme='dark']))",
+    );
   });
 
   it('组件级令牌默认值经 var() 回退到语义令牌', () => {

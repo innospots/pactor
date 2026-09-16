@@ -3338,7 +3338,7 @@
   );
 }
 @media (prefers-color-scheme: dark) {
-  :root:not([data-pactor-theme='light']):not([data-pactor-theme='dark']) {
+  :root:where(:not([data-pactor-theme='light']):not([data-pactor-theme='dark'])) {
     color-scheme: dark;
     --background: oklch(0.145 0 0);
     --foreground: oklch(0.985 0 0);

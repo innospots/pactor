@@ -203,3 +203,18 @@ describe('Sidebar 壳能力', () => {
     });
   });
 });
+
+describe('Sidebar 边框皮肤令牌', () => {
+  it('侧栏容器侧边框显式声明 border-sidebar-border（不依赖默认 border-color）', () => {
+    render(
+      <Sidebar content={<div>侧栏</div>}>
+        <div>主区</div>
+      </Sidebar>,
+    );
+
+    const container = document.querySelector('[data-slot=sidebar-container]');
+    // 宿主引入 Tailwind 时其 preflight 会把 * 的 border-color 重置为
+    // currentColor（同 base 层且后加载），宽度型边框必须自带颜色类
+    expect(container?.className).toContain('border-sidebar-border');
+  });
+});

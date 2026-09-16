@@ -53,7 +53,7 @@
 
 ### Requirement: 暗色模式下的皮肤行为
 
-皮肤文件 SHALL 支持为 `[data-pactor-theme='dark']`（及跟随系统的 `prefers-color-scheme` 媒体查询）单独提供令牌值；皮肤未提供暗色值时，组件 SHALL 回退到内置暗色令牌，现有暗色三态（light 强制亮 / dark 强制暗 / 不设置跟随系统）语义 MUST NOT 改变。
+皮肤文件 SHALL 支持为 `[data-pactor-theme='dark']`（及跟随系统的 `prefers-color-scheme` 媒体查询）单独提供令牌值；皮肤亮色令牌 SHALL 优先于内置系统暗色兜底（兜底选择器经 `:where()` 降为与 `:root` 默认块同优先级，皮肤亮色块 `:root:not([data-pactor-theme='dark'])` 恒高于它），加载皮肤后系统暗色偏好 MUST NOT 把皮肤压成内置暗色。未加载皮肤时，内置暗色三态（light 强制亮 / dark 强制暗 / 不设置跟随系统）语义 MUST NOT 改变。宿主显式设置 `data-pactor-theme="dark"` 时，皮肤暗色块（有则）与内置暗色令牌照常生效。
 
 #### Scenario: 皮肤提供暗色令牌
 
@@ -62,8 +62,8 @@
 
 #### Scenario: 皮肤未提供暗色令牌
 
-- **WHEN** 皮肤文件仅定义 `:root` 令牌且宿主切换到暗色模式
-- **THEN** 未被皮肤覆盖的令牌回退为内置暗色值，组件视觉不出现未着色的破损状态
+- **WHEN** 皮肤文件仅定义亮色令牌块且宿主未设置 `data-pactor-theme`、系统偏好为暗色
+- **THEN** 皮肤亮色令牌继续生效（不被内置暗色兜底压盖）；宿主显式设置 `data-pactor-theme="dark"` 时，未被皮肤暗色块覆盖的令牌回退为内置暗色值，组件视觉不出现未着色的破损状态
 
 ### Requirement: 前景文字可读性配对
 

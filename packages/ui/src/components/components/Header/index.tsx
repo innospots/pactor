@@ -1,6 +1,6 @@
 import { useI18n } from '@pactor-app/runtime';
 import { ChevronDownIcon } from 'lucide-react';
-import type { CSSProperties, ReactNode } from 'react';
+import { useState, type CSSProperties, type ReactNode } from 'react';
 
 import { cn } from '../../../lib/utils.js';
 import { Avatar, AvatarFallback, AvatarImage } from '../../../ui/avatar.js';
@@ -65,6 +65,9 @@ export interface HeaderLocale {
   value: string;
 }
 
+/** 深浅色主题（themeToggle 切换结果） */
+export type HeaderTheme = 'light' | 'dark';
+
 export interface HeaderProps {
   /** 品牌区 logo 图片地址（可含表达式） */
   logo?: string;
@@ -80,6 +83,10 @@ export interface HeaderProps {
   user?: HeaderUser;
   /** 国际化切换选项 */
   locales?: HeaderLocale[];
+  /** 右侧展示深浅色切换按钮（缺省 false）；点击切换 documentElement 的 data-pactor-theme */
+  themeToggle?: boolean;
+  /** 主题切换事件，传出切换后的主题（'light' | 'dark'） */
+  onThemeChange?: (theme: HeaderTheme) => void;
   /** 菜单选中事件，传出选中项 key */
   onMenuSelect?: (key: string) => void;
   /** 通用下拉选中事件，传出选中项 value */
@@ -101,12 +108,12 @@ const menuItemClass =
 
 /**
  * Header 顶部区域（shadcn kit，语义对齐 antd Layout.Header）：
- * 横向 flex、垂直居中、默认下边框。除 children 外可携带五个可选结构
- * 区域（品牌区 / 通用下拉 / 横向菜单 / 用户区 / 国际化切换）；全部区域
- * props 缺省时退化为纯容器。
+ * 横向 flex、垂直居中、默认下边框。除 children 外可携带六个可选结构
+ * 区域（品牌区 / 通用下拉 / 横向菜单 / 深浅色切换 / 用户区 / 国际化切换）；
+ * 全部区域 props 缺省时退化为纯容器。
  *
  * 排布固定：左区（品牌?→下拉?→菜单?）— flex-1 中区（children）—
- * 右区（下拉?→品牌?→locales→user）。区域内部直接组合 src/ui 原语
+ * 右区（下拉?→品牌?→主题切换?→locales→user）。区域内部直接组合 src/ui 原语
  * （dropdown-menu / avatar），事件值透传给 Header 自身的事件 props。
  */
 export function Header({
@@ -117,6 +124,8 @@ export function Header({
   menu,
   user,
   locales,
+  themeToggle = false,
+  onThemeChange,
   onMenuSelect,
   onDropdownSelect,
   onUserSelect,
@@ -140,7 +149,7 @@ export function Header({
   );
 
   // 纯容器回归：全部区域缺省时输出与变更前一致
-  if (!hasBrand && !dropdown && !hasMenu && !hasUser && !hasLocales) {
+  if (!hasBrand && !dropdown && !hasMenu && !hasUser && !hasLocales && !themeToggle) {
     return (
       <header data-slot="layout-header" className={rootClass} style={style}>
         {children}
@@ -170,7 +179,7 @@ export function Header({
   );
 
   const showLeft = brandLeft || dropdownLeft || hasMenu;
-  const showRight = dropdownRight || brandRight || hasLocales || hasUser;
+  const showRight = dropdownRight || brandRight || hasLocales || hasUser || themeToggle;
 
   return (
     <header data-slot="layout-header" className={rootClass} style={style}>
@@ -188,6 +197,7 @@ export function Header({
         <div data-slot="header-right" className="flex items-center gap-4">
           {dropdownRight && dropdownNode}
           {brandRight && brandNode}
+          {themeToggle && <HeaderThemeToggle onSelect={onThemeChange} />}
           {hasLocales && (
             <HeaderLocalesArea locales={locales} onSelect={onLocaleChange} />
           )}
@@ -386,5 +396,56 @@ function HeaderLocalesArea({
         ))}
       </DropdownMenuContent>
     </DropdownMenuRoot>
+  );
+}
+
+/** 读取当前主题（documentElement 的 data-pactor-theme，缺省 light） */
+function readCurrentTheme(): HeaderTheme {
+  if (typeof document === 'undefined') {
+    return 'light';
+  }
+  return document.documentElement.getAttribute('data-pactor-theme') === 'dark'
+    ? 'dark'
+    : 'light';
+}
+
+/**
+ * 深浅色切换：点击时按 documentElement 当前值翻转 data-pactor-theme
+ *（dark ↔ 移除），图标随状态切换（dark 显 sun / light 显 moon）；
+ * 与 chat 包 WorkspaceHeader 的内建 theme 操作同款语义。
+ */
+function HeaderThemeToggle({
+  onSelect,
+}: {
+  onSelect?: (theme: HeaderTheme) => void;
+}) {
+  const [theme, setTheme] = useState<HeaderTheme>(readCurrentTheme);
+
+  const handleToggle = (): void => {
+    const next = readCurrentTheme() === 'dark' ? 'light' : 'dark';
+    if (next === 'dark') {
+      document.documentElement.setAttribute('data-pactor-theme', 'dark');
+    } else {
+      document.documentElement.removeAttribute('data-pactor-theme');
+    }
+    setTheme(next);
+    onSelect?.(next);
+  };
+
+  return (
+    <button
+      type="button"
+      data-slot="header-theme-toggle"
+      className="flex size-8 cursor-pointer items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-accent/50 hover:text-foreground"
+      title={theme === 'dark' ? '切换为浅色' : '切换为深色'}
+      aria-label="切换明暗主题"
+      onClick={handleToggle}
+    >
+      {theme === 'dark' ? (
+        <Icon name="sun" size="sm" />
+      ) : (
+        <Icon name="moon" size="sm" />
+      )}
+    </button>
   );
 }

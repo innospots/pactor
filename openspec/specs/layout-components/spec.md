@@ -30,7 +30,7 @@ DSL 布局组件（`@pactor-app/ui` components 层）：`Layout` / `Header` / `S
 
 ### Requirement: Header / Content / Footer 语义容器
 
-`Header` SHALL 渲染顶部区域容器（横向 flex、垂直居中、默认下边框）；除 children 外，Header 可携带可选结构区域（品牌区、通用下拉、横向菜单、用户区、国际化切换，见"Header 结构区域" requirement），全部区域 props 缺省时退化为纯容器。`Content` SHALL 渲染主内容区容器（`flex: 1` 占据剩余空间）；`Footer` SHALL 渲染底部区域容器（默认居中、弱化的辅助文本样式）。`Content` 与 `Footer` MUST NOT 内置导航、品牌或业务逻辑，内容完全由 children DSL 声明；`Header` 的内置逻辑 MUST 仅限上述五个可选结构区域。
+`Header` SHALL 渲染顶部区域容器（横向 flex、垂直居中、默认下边框）；除 children 外，Header 可携带可选结构区域（品牌区、通用下拉、横向菜单、深浅色切换、用户区、国际化切换，见各结构区域 requirement），全部区域 props 缺省时退化为纯容器。`Content` SHALL 渲染主内容区容器（`flex: 1` 占据剩余空间）；`Footer` SHALL 渲染底部区域容器（默认居中、弱化的辅助文本样式）。`Content` 与 `Footer` MUST NOT 内置导航、品牌或业务逻辑，内容完全由 children DSL 声明；`Header` 的内置逻辑 MUST 仅限上述六个可选结构区域。
 
 #### Scenario: Content 占据剩余空间
 
@@ -107,9 +107,23 @@ DSL 布局组件（`@pactor-app/ui` components 层）：`Layout` / `Header` / `S
 - **WHEN** DSL 为 `{ type: 'Header', props: { locales: [{ label: '中文', value: 'zh-CN' }, { label: 'English', value: 'en-US' }] } }` 且当前 locale 为 zh-CN、用户选中 "English"
 - **THEN** 触发器显示"中文"，`onLocaleChange` 动作执行时 `${event}` 为 `'en-US'`
 
+### Requirement: Header 深浅色切换
+
+`Header` SHALL 支持 `themeToggle: boolean` prop（缺省 false）：为 true 时在头部右侧区域（国际化切换之前）渲染深浅色切换按钮。点击时按 `document.documentElement` 当前 `data-pactor-theme` 翻转（dark ↔ 移除属性），图标随状态切换（dark 显示 sun，light 显示 moon）；切换触发事件 `onThemeChange`，事件载荷为切换后的主题（`'light' | 'dark'`）。
+
+#### Scenario: 切换主题
+
+- **WHEN** DSL 为 `{ type: 'Header', props: { themeToggle: true } }` 且用户点击切换按钮
+- **THEN** `document.documentElement` 的 `data-pactor-theme` 在 `'dark'` 与移除之间翻转，`onThemeChange` 动作执行时 `${event}` 为切换后的主题
+
+#### Scenario: 缺省不渲染
+
+- **WHEN** Header 未声明 `themeToggle`
+- **THEN** 不渲染切换按钮；其余区域 props 也缺省时仍退化为纯容器
+
 ### Requirement: Header 区域排布与 children 共存
 
-Header 的结构区域 SHALL 按固定规则排布：左侧区域 = 品牌区（`brandPosition: 'left'` 时）→ 通用下拉（`position: 'left'` 时）→ 横向菜单；右侧区域 = 通用下拉（`'right'` 时）→ 品牌区（`'right'` 时）→ 国际化切换 → 用户区；左右区域之间以弹性空间分隔。children MUST 继续渲染，置于左右区域之间的弹性区。全部区域 props 与 children 可任意组合，均可选。
+Header 的结构区域 SHALL 按固定规则排布：左侧区域 = 品牌区（`brandPosition: 'left'` 时）→ 通用下拉（`position: 'left'` 时）→ 横向菜单；右侧区域 = 通用下拉（`'right'` 时）→ 品牌区（`'right'` 时）→ 深浅色切换 → 国际化切换 → 用户区；左右区域之间以弹性空间分隔。children MUST 继续渲染，置于左右区域之间的弹性区。全部区域 props 与 children 可任意组合，均可选。
 
 #### Scenario: 全区域组合排布
 
