@@ -4,13 +4,14 @@
  * 技术选型参考 DeepTutor web：语义 CSS 变量 + 语义 class，无 antd。
  *
  * 换肤契约（与 @pactor-app/ui 一致）：
- * 1. `--pactor-chat-*` 颜色令牌的默认值经 `var(--语义令牌, <chat 默认>)`
+ * 1. `--pactor-chat-*` 令牌默认值声明在 `:root`，颜色经 `var(--语义令牌, <chat 默认>)`
  *    桥接 pactor-ui 语义令牌（--background/--primary/…）——皮肤 CSS 覆盖
- *    语义令牌时 chat 结构件自动跟随；也可直接覆盖 `--pactor-chat-*` 精调；
+ *    语义令牌时 chat 结构件自动跟随；也可直接在皮肤里覆盖 `--pactor-chat-*` 精调
+ *    （令牌定义在 :root，皮肤声明恒优先于本文件默认值）；
  * 2. 内置暗色：`<html data-pactor-theme="dark">`（或挂在任意祖先容器上）；
  *    不设置时跟随系统 prefers-color-scheme（三态：light / dark / 跟随系统）。
  *    颜色令牌无需暗色覆盖块（语义令牌自动翻转），仅投影/遮罩有暗色覆盖；
- * 3. 直接覆盖 `.pactor-chat-*` class。
+ * 3. 结构覆盖仍可直接写 `.pactor-chat-*` class 规则。
  *
  * 使用：import 'pactor-chat/styles.css';
  */
@@ -19,12 +20,11 @@
  * 1. 皮肤 token（light）
  * ============================================================ */
 
-.pactor-chat-view,
-.pactor-chat-layout,
-.pactor-chat-shell,
-.pactor-chat-workspace,
-.pactor-chat-inspector,
-.pactor-chat-notice {
+/* 令牌默认值声明在 :root（而非 chat 容器类）：容器级直接声明会压过一切
+   自 :root 继承的皮肤覆盖（继承恒输于直接声明）；置于 :root 后，
+   theme-studio 皮肤块 :root:not([data-pactor-theme='dark'])（0,2,0）
+   及同名 :root 规则（后加载胜出）均可覆盖 --pactor-chat-* 精调 */
+:root {
   /* 颜色令牌默认值桥接 pactor-ui 语义令牌（皮肤覆盖语义令牌时自动跟随），
      逗号后为 pactor-ui 缺席时的 chat 品牌默认 */
   --pactor-chat-bg: var(--background, #f7f6f4);
@@ -94,17 +94,10 @@
 
 /* 暗色皮肤：data-pactor-theme="dark"（html 或任意祖先容器）。
    颜色令牌经 var() 桥接 pactor-ui 语义令牌，暗色自动翻转，无需覆盖；
-   这里只保留投影与遮罩的暗色值（组件规则不区分主题）。 */
-[data-pactor-theme='dark'] .pactor-chat-view,
-[data-pactor-theme='dark'] .pactor-chat-layout,
-[data-pactor-theme='dark'] .pactor-chat-shell,
-[data-pactor-theme='dark'] .pactor-chat-workspace,
-[data-pactor-theme='dark'] .pactor-chat-notice,
-.pactor-chat-view[data-pactor-theme='dark'],
-.pactor-chat-layout[data-pactor-theme='dark'],
-.pactor-chat-shell[data-pactor-theme='dark'],
-.pactor-chat-workspace[data-pactor-theme='dark'],
-.pactor-chat-notice[data-pactor-theme='dark'] {
+   这里只保留投影与遮罩的暗色值（组件规则不区分主题）。
+   声明落在属性载体元素上（后代继承），与皮肤暗色块同优先级（0,1,0）、
+   皮肤后加载胜出——皮肤的暗色精调优先生效。 */
+[data-pactor-theme='dark'] {
   --pactor-chat-shadow-sm: 0 1px 2px rgb(0 0 0 / 35%);
   --pactor-chat-shadow-composer:
     0 1px 2px rgb(0 0 0 / 4%),
@@ -113,13 +106,10 @@
 }
 
 /* 系统偏好暗色兜底：未显式设置 data-pactor-theme 时跟随系统
-   （与上方 [data-pactor-theme='dark'] 块一致——仅投影与遮罩） */
+   （与上方 [data-pactor-theme='dark'] 块一致——仅投影与遮罩）。
+   :where() 降优先级为 (0,1,0)：皮肤亮色块（0,2,0）加载后不被压盖 */
 @media (prefers-color-scheme: dark) {
-  :root:not([data-pactor-theme='light']):not([data-pactor-theme='dark']) .pactor-chat-view,
-  :root:not([data-pactor-theme='light']):not([data-pactor-theme='dark']) .pactor-chat-layout,
-  :root:not([data-pactor-theme='light']):not([data-pactor-theme='dark']) .pactor-chat-shell,
-  :root:not([data-pactor-theme='light']):not([data-pactor-theme='dark']) .pactor-chat-workspace,
-  :root:not([data-pactor-theme='light']):not([data-pactor-theme='dark']) .pactor-chat-notice {
+  :root:where(:not([data-pactor-theme='light']):not([data-pactor-theme='dark'])) {
     --pactor-chat-shadow-sm: 0 1px 2px rgb(0 0 0 / 35%);
     --pactor-chat-shadow-composer:
       0 1px 2px rgb(0 0 0 / 4%),
