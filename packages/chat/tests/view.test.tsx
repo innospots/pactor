@@ -199,7 +199,9 @@ describe('PartRenderer（spec: chat-view / PartRenderer）', () => {
 
     render(<ChatView store={store} />);
     await screen.findByText('正文回答');
-    // 折叠面板标题可见，但 thinking 内容默认不展开（不在文档中）
+    // 外层轨迹区默认折叠，thinking 卡片随之隐藏；展开外层后卡片标题可见，
+    // 但 thinking 内容默认不展开（不在文档中）
+    fireEvent.click(screen.getByText('已完成'));
     expect(screen.getByText('思考过程')).toBeTruthy();
     expect(screen.queryByText('深层推理内容')).toBeNull();
   });

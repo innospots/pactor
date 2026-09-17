@@ -156,6 +156,76 @@ describe('ActivityTrace 配对工具轨迹（spec: chat-activity-trace / 配对�
     expect(body.textContent).toContain('上游超时');
   });
 
+  it('工具调用列表与状态头同块，思考过程为独立块', () => {
+    const store = createStore();
+    store.appendMessage({
+      id: 'a1',
+      role: 'assistant',
+      status: 'completed',
+      parts: [
+        { type: 'thinking', content: '先想想', status: 'ready' },
+        {
+          type: 'tool-call',
+          name: 'search',
+          title: '搜索数据',
+          status: 'success',
+        },
+        { type: 'tool-result', name: 'search', status: 'success', result: 1 },
+        { type: 'text', content: '正文', status: 'ready' },
+      ],
+    });
+
+    render(<ChatView store={store} />);
+    fireEvent.click(screen.getByText(/已完成 · 1 个工具调用/));
+
+    const trace = document.querySelector('.pactor-chat-trace')!;
+    const entries = document.querySelector('.pactor-chat-trace__entries')!;
+    const thinking = document.querySelector('.pactor-chat-thinking')!;
+    expect(entries).toBeTruthy();
+    expect(thinking).toBeTruthy();
+    // entries 必须在 thinking 之前（工具列表与“已完成 · n 个工具调用”放在一起）
+    expect(
+      entries.compareDocumentPosition(thinking) &
+        Node.DOCUMENT_POSITION_FOLLOWING,
+    ).toBeTruthy();
+    // 两块同在统一折叠的外层容器内，但思考过程不嵌在工具列表块内
+    expect(trace.contains(entries)).toBe(true);
+    expect(trace.contains(thinking)).toBe(true);
+    expect(thinking.closest('.pactor-chat-trace__entries')).toBeNull();
+  });
+
+  it('外层容器统一折叠展开：折叠时工具列表与思考过程同时隐藏', () => {
+    const store = createStore();
+    store.appendMessage({
+      id: 'a1',
+      role: 'assistant',
+      status: 'completed',
+      parts: [
+        { type: 'thinking', content: '先想想', status: 'ready' },
+        { type: 'tool-call', name: 'search', title: '搜索数据', status: 'success' },
+        { type: 'tool-result', name: 'search', status: 'success', result: 1 },
+        { type: 'text', content: '正文', status: 'ready' },
+      ],
+    });
+
+    render(<ChatView store={store} />);
+    const header = screen.getByText(/已完成 · 1 个工具调用/);
+
+    // 默认折叠：两块都不可见
+    expect(document.querySelector('.pactor-chat-trace__entries')).toBeNull();
+    expect(document.querySelector('.pactor-chat-thinking')).toBeNull();
+
+    // 展开：两块同时出现
+    fireEvent.click(header);
+    expect(document.querySelector('.pactor-chat-trace__entries')).toBeTruthy();
+    expect(document.querySelector('.pactor-chat-thinking')).toBeTruthy();
+
+    // 再折叠：两块同时隐藏
+    fireEvent.click(header);
+    expect(document.querySelector('.pactor-chat-trace__entries')).toBeNull();
+    expect(document.querySelector('.pactor-chat-thinking')).toBeNull();
+  });
+
   it('多个工具调用按序排列，状态图标区分 waiting/running/success/failed', () => {
     const store = createStore();
     store.appendMessage({
@@ -290,11 +360,12 @@ describe('thinking 折叠卡升级（spec: chat-view / PartRenderer thinking）'
     expect(body.querySelector('strong')).toBeNull();
     expect(body.textContent).toContain('**关键**推理');
 
-    // 结束后回切 markdown 渲染（结束后卡片自动折叠，先展开再断言）
+    // 结束后回切 markdown 渲染（外层轨迹区与卡片均自动折叠，逐层展开再断言）
     act(() => {
       applyChatEvent(store, { type: 'message.end', messageId: 'a1' });
     });
     rerender(<ChatView store={store} />);
+    fireEvent.click(screen.getByText('已完成'));
     fireEvent.click(screen.getByText('思考过程'));
     const strong = document.querySelector('.pactor-chat-thinking__body strong');
     expect(strong?.textContent).toBe('关键');
@@ -312,13 +383,14 @@ describe('thinking 折叠卡升级（spec: chat-view / PartRenderer thinking）'
     // 流式期间展开
     expect(screen.getByText('深层推理内容')).toBeTruthy();
 
-    // 正文开始流式 → 自动折叠
+    // 正文开始流式 → 外层轨迹区自动折叠（thinking 随之隐藏）
     act(() => {
       applyChatEvent(store, { type: 'text.delta', messageId: 'a1', delta: '正文回答' });
     });
     expect(screen.queryByText('深层推理内容')).toBeNull();
 
-    // 用户点击展开 → pin；正文继续流式不再自动折叠
+    // 用户展开外层轨迹区 → pin，再展开 thinking 卡 → pin；正文继续流式不再自动折叠
+    fireEvent.click(screen.getByText('正在生成回复…'));
     fireEvent.click(screen.getByText('思考过程'));
     expect(screen.getByText('深层推理内容')).toBeTruthy();
     act(() => {
@@ -340,6 +412,11 @@ describe('thinking 折叠卡升级（spec: chat-view / PartRenderer thinking）'
     });
     render(<ChatView store={store} />);
 
+    // 外层轨迹区默认折叠，thinking 卡片随之隐藏
+    expect(document.querySelector('.pactor-chat-thinking')).toBeNull();
+
+    // 展开外层 → thinking 卡片出现且自身默认折叠，markdown 正文在展开后渲染
+    fireEvent.click(screen.getByText('已完成'));
     const card = document.querySelector('.pactor-chat-thinking')!;
     expect(card.getAttribute('data-open')).toBe('false');
     expect(card.getAttribute('data-streaming')).toBe('false');

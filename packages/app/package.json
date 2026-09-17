@@ -1,6 +1,6 @@
 {
   "name": "@pactor-app/app",
-  "version": "1.15.5",
+  "version": "1.15.6",
   "description": "Pactor application: one-stop composition layer (createPactorApplication) wiring loader, bootstrap, registries, router, layout, interaction and page runtimes",
   "keywords": [
     "pactor",
