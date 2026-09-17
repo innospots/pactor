@@ -218,3 +218,17 @@ describe('Sidebar 边框皮肤令牌', () => {
     expect(container?.className).toContain('border-sidebar-border');
   });
 });
+
+describe('Sidebar 宽度皮肤令牌', () => {
+  it('wrapper 不内联 --sidebar-width / --sidebar-width-icon（内联样式会压过皮肤表）', () => {
+    render(
+      <Sidebar content={<div>侧栏</div>}>
+        <div>主区</div>
+      </Sidebar>,
+    );
+
+    const wrapper = document.querySelector('[data-slot=sidebar-wrapper]')!;
+    // 宽度默认值由 styles.css :root 提供，皮肤文件可覆盖；内联注入会赢过一切样式表
+    expect(wrapper.getAttribute('style') ?? '').not.toContain('--sidebar-width');
+  });
+});

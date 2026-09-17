@@ -14,6 +14,9 @@
  * 本块优先级（0,2,0）高于系统偏好暗色兜底块（:where() 降为 0,1,0），
  * 因此加载皮肤后系统暗色偏好不会把皮肤压成内置暗色；
  * 显式 `data-pactor-theme='dark'` 时本块不匹配，暗色块照常生效（三态语义不受影响）。
+ * 亮/暗两块都显式声明 color-scheme：皮肤令牌压过兜底块时，兜底块的
+ * color-scheme: dark 声明仍会命中（皮肤不覆盖该属性），导致亮色皮肤下
+ * 原生滚动条/表单控件呈现深色；显式声明后浏览器原生控件随皮肤明暗翻转。
  */
 import type { SkinPreset } from './presets';
 import { TOKEN_DEFAULTS } from './resolve';
@@ -53,6 +56,7 @@ export function composeSkinCss(
   const darkBlock =
     Object.keys(darkTokens).length > 0
       ? `[data-pactor-theme='dark'] {
+  color-scheme: dark;
 ${Object.entries(darkTokens)
   .map(([name, value]) => `  ${name}: ${value};`)
   .join('\n')}
@@ -61,6 +65,7 @@ ${Object.entries(darkTokens)
       : `/* 可选：暗色皮肤骨架。取消注释并按需覆盖暗色令牌；
    未提供的令牌回退到内置暗色皮肤。
 [data-pactor-theme='dark'] {
+  color-scheme: dark;
   --background: oklch(0.145 0 0);
   --foreground: oklch(0.985 0 0);
 }
@@ -72,6 +77,7 @@ ${Object.entries(darkTokens)
  * 用法：在 \`@pactor-app/ui/styles.css\` 之后加载本文件（后加载者胜出）。
  */
 :root:not([data-pactor-theme='dark']) {
+  color-scheme: light;
 ${lines}
 }
 

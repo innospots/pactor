@@ -29,6 +29,20 @@ describe('composeSkinCss', () => {
     expect(css).not.toMatch(/(^|\n):root \{/);
   });
 
+  it('亮/暗块均显式声明 color-scheme：皮肤下原生滚动条随皮肤明暗翻转', () => {
+    // 回归：皮肤令牌压过系统暗色兜底块时，兜底块的 color-scheme: dark
+    // 仍命中（皮肤不声明该属性），亮色皮肤下滚动条呈现默认黑色
+    const css = composeSkinCss(preset, {});
+    const lightBlock = css.match(
+      /:root:not\(\[data-pactor-theme='dark'\]\) \{([\s\S]*?)\n\}/,
+    )?.[1];
+    expect(lightBlock).toContain('color-scheme: light;');
+    const darkBlock = css.match(
+      /\[data-pactor-theme='dark'\] \{([\s\S]*?)\n\}/,
+    )?.[1];
+    expect(darkBlock).toContain('color-scheme: dark;');
+  });
+
   it('导出包含全部已知令牌：无预置主题时以默认值兜底', () => {
     const css = composeSkinCss(null, { '--radius': '1.5rem' });
     expect(css).toContain('--radius: 1.5rem;');

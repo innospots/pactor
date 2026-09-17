@@ -132,6 +132,8 @@ export const TOKEN_GROUPS: TokenGroup[] = [
       { name: '--flex-gap-lg', type: 'length', description: 'Flex gap=large 档位（默认 ×2 派生）', defaultValue: 'calc(var(--flex-gap) * 2)', derived: true },
       { name: '--grid-gap', type: 'length', description: 'Grid 未指定 gap 时的默认栏间距', defaultValue: '16px', slider: { min: 0, max: 48, step: 1 } },
       { name: '--pagination-active-radius', type: 'length', description: 'Pagination 当前页圆角', defaultValue: 'calc(var(--radius) * 0.8)' },
+      { name: '--sidebar-width', type: 'length', description: 'Sidebar 展开宽度（桌面端）', defaultValue: '16rem', slider: { min: 12, max: 24, step: 0.5 } },
+      { name: '--sidebar-width-icon', type: 'length', description: 'Sidebar 折叠后的 icon rail 宽度', defaultValue: '3rem', slider: { min: 2, max: 5, step: 0.25 } },
     ],
   },
   {

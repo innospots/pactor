@@ -121,6 +121,9 @@
   --sidebar-accent-foreground: var(--accent-foreground);
   --sidebar-border: var(--border);
   --sidebar-ring: var(--ring);
+  /* sidebar 宽度（展开 / 折叠 icon rail）：皮肤可覆盖；sidebar.tsx 不再内联注入 */
+  --sidebar-width: 16rem;
+  --sidebar-width-icon: 3rem;
 
   /* 皮肤扩展令牌：字体族 / 页面背景图 / 阴影 / 遮罩 */
   --font-sans: ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto,
