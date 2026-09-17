@@ -165,7 +165,7 @@ flex 容器；直接子节点含 `Sider` 时横向、否则纵向（`component` 
 
 页面外壳：品牌区 + 侧栏（`items` 嵌套导航或 `content` 自由内容槽）+ children 主内容区；样式取 sidebar 系列语义令牌。
 
-- **桌面（≥768px）**：侧栏与主区 flex 同行；`collapsible` 时品牌行右端渲染折叠按钮，折叠后侧栏收窄为 icon rail（64px）——导航仅图标（label / badge / 分组 / 品牌内容 / 底部区隐藏），hover 图标显示 Tooltip 提示；
+- **桌面（≥768px）**：侧栏与主区 flex 同行；`collapsible` 时品牌行右端渲染折叠按钮，折叠后侧栏收窄为 icon rail（宽度为 `--sidebar-width-icon` 令牌，默认 3rem）——导航仅图标（label / badge / 分组 / 品牌内容 / 底部区隐藏），hover 图标显示 Tooltip 提示；侧栏展开/折叠宽度分别为皮肤令牌 `--sidebar-width` / `--sidebar-width-icon`（Theme Studio 可生成），主内容区随之自适应；
 - **移动端（<768px，`drawer` 缺省开启）**：侧栏退出文档流变为左侧覆盖抽屉——顶栏菜单按钮开启，遮罩点击 / Escape / `locationKey` 变化关闭，关闭时容器 `inert`；移动端不渲染折叠按钮、品牌维持顶栏；
 - 侧栏内容（如 Menu）可经 `useSidebarDrawer()` 取 `close()`（导航后关抽屉）与 `collapsed`（降级为纯图标展示）；Menu 在 collapsed 侧栏内自动降级为仅图标。
 
@@ -195,6 +195,27 @@ flex 容器；直接子节点含 `Sider` 时横向、否则纵向（`component` 
     - type: Text
       props: { text: 主内容区 }
 ```
+
+:::caution[与 Header 组合时，Header 要放进 Sidebar 的 children]
+Sidebar 是通高 fixed 外壳（侧栏从视口顶到底）。`Layout > Header + Sidebar` 并列写法中，侧栏会盖住通栏 Header 的左段，且侧栏宽度/折叠变化时 Header 不跟随。正确组合是把 Header 作为 Sidebar children 的第一个节点——它渲染在主内容弹性区（sidebar-inset）顶部，自动从侧栏右缘开始并随宽度令牌与折叠自适应：
+
+```yaml
+- type: Sidebar
+  props:
+    brand: { title: 控制台 }
+    collapsible: true
+    items: [{ label: 概览, href: / }]
+  children:
+    - type: Header
+      props:
+        locales: [{ label: 中文, value: zh-CN }]
+        user: { name: 管理员 }
+    - type: Content
+      children:
+        - type: Text
+          props: { text: 主内容区 }
+```
+:::
 
 ### Separator
 

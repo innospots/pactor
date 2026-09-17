@@ -1,6 +1,9 @@
 // @vitest-environment jsdom
 import './setup.js';
 
+import { readFileSync } from 'node:fs';
+import { join } from 'node:path';
+
 import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { afterEach, describe, expect, it } from 'vitest';
 
@@ -222,5 +225,15 @@ describe('AppShell 侧栏底部槽（spec: chat-app-shell / 侧栏底部槽）',
       </AppShell>,
     );
     expect(document.querySelector('[data-slot=sidebar-footer]')).toBeNull();
+  });
+});
+
+describe('AppShell 侧栏宽度令牌（chat-on-ui-sidebar 统一）', () => {
+  it('styles.css 不再钉死侧栏宽度：无 --pactor-chat-sidebar-width 与失效的 [data-collapsed] 规则', () => {
+    // 侧栏宽度统一由 ui 皮肤令牌 --sidebar-width / --sidebar-width-icon 驱动
+    //（theme-studio 皮肤可覆盖）；chat 私有令牌与等不存在属性的旧规则已移除
+    const css = readFileSync(join(__dirname, '../styles.css'), 'utf8');
+    expect(css).not.toContain('--pactor-chat-sidebar-width');
+    expect(css).not.toMatch(/\[data-collapsed\]\s*\{[^}]*width/);
   });
 });

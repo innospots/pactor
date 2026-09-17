@@ -1,6 +1,6 @@
 {
   "name": "@pactor-app/ui",
-  "version": "1.15.1",
+  "version": "1.15.2",
   "description": "Pactor UI kit (shadcn): the single built-in UI kit — vendored shadcn/ui components (Base UI primitives + cva + tailwind-merge + lucide-react), props contracts, interaction core (OverlayManager / UiBridge) and layouts, with build-time Tailwind v4 prebuilt styles.css (zero consumer-side Tailwind config)",
   "keywords": [
     "pactor",
