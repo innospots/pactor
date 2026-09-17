@@ -1,6 +1,6 @@
 {
   "name": "@pactor-app/runtime",
-  "version": "1.15.5",
+  "version": "1.15.6",
   "description": "Pactor runtime: RuntimeContext, StateStore, DataSource runtime, action engine, React renderer and page runtime",
   "keywords": [
     "pactor",

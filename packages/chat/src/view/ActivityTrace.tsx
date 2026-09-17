@@ -17,8 +17,11 @@ import { useThrottledValue } from '../hooks/use-throttled-value.js';
  *
  * - 流式状态头（StreamingStatus）：动画图标 + 呼吸状态文案 + 秒级计时，
  *   模式由纯函数 detectStreamingMode 推导；消息结束后定格为完成态；
- * - 配对工具轨迹（TraceRow）：pairToolTraces 输出的单行可展开条目；
- * - thinking 折叠卡（ThinkingCard）：markdown 正文，流式展开 + 进行中指示，
+ *   状态头同时是外层容器的折叠开关，统一折叠/展开区内全部内容；
+ * - 配对工具轨迹（TraceRow）：pairToolTraces 输出的单行可展开条目，
+ *   与状态头同块、紧随其后；
+ * - thinking 折叠卡（ThinkingCard）：与工具列表并排的独立块，
+ *   markdown 正文，流式展开 + 进行中指示，
  *   答案阶段自动折叠，用户操作后 pin。
  *
  * 折叠状态机（每条消息独立，随组件实例记忆）：`auto | pinned-open |
@@ -241,6 +244,8 @@ export function ActivityTrace({ message }: ActivityTraceProps) {
   // 答案阶段：正文开始流式（responding）或消息已结束 → 轨迹区自动折叠
   const answerPhase = mode === 'responding' || !streaming;
   const { open, toggle } = usePinnedCollapse(!answerPhase);
+  // 外层统一折叠：工具列表或 thinking 任一存在即可折叠展开
+  const collapsible = entries.length > 0 || thinkingParts.length > 0;
 
   // 计时起点：消息创建时间；缺省（直接 append 的历史消息）用组件挂载时刻
   const mountTimeRef = useRef(0);
@@ -269,7 +274,7 @@ export function ActivityTrace({ message }: ActivityTraceProps) {
         {statusText(message, mode, entries.length)}
       </span>
       <span className="pactor-chat-trace__elapsed">{elapsed}s</span>
-      {entries.length > 0 && (
+      {collapsible && (
         <span className="pactor-chat-trace__chevron">
           <Icon name="chevron-right" size={12} />
         </span>
@@ -279,7 +284,7 @@ export function ActivityTrace({ message }: ActivityTraceProps) {
 
   return (
     <div className="pactor-chat-trace" data-open={open}>
-      {entries.length > 0 ? (
+      {collapsible ? (
         <button
           type="button"
           className="pactor-chat-trace__header"
@@ -291,19 +296,23 @@ export function ActivityTrace({ message }: ActivityTraceProps) {
       ) : (
         <div className="pactor-chat-trace__header">{header}</div>
       )}
-      {thinkingParts.map((part, index) => (
-        <ThinkingCard
-          key={part.id ?? index}
-          part={part}
-          answerPhase={answerPhase}
-        />
-      ))}
-      {open && entries.length > 0 && (
-        <div className="pactor-chat-trace__entries">
-          {entries.map((entry) => (
-            <TraceRow key={entry.callIndex} entry={entry} />
+      {open && (
+        <>
+          {entries.length > 0 && (
+            <div className="pactor-chat-trace__entries">
+              {entries.map((entry) => (
+                <TraceRow key={entry.callIndex} entry={entry} />
+              ))}
+            </div>
+          )}
+          {thinkingParts.map((part, index) => (
+            <ThinkingCard
+              key={part.id ?? index}
+              part={part}
+              answerPhase={answerPhase}
+            />
           ))}
-        </div>
+        </>
       )}
     </div>
   );

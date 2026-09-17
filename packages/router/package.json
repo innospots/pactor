@@ -1,6 +1,6 @@
 {
   "name": "@pactor-app/router",
-  "version": "1.15.5",
+  "version": "1.15.6",
   "description": "Pactor router: menu registry, path matcher, navigation bridge and React Router dynamic route bindings",
   "keywords": [
     "pactor",

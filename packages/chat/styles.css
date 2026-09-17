@@ -1716,3 +1716,29 @@ button.pactor-chat-trace__header:hover,
     animation: none !important;
   }
 }
+
+.pactor-markdown {
+  line-height: 2;
+}
+
+.pactor-markdown hr {
+  margin: 1em 0;
+}
+
+.pactor-markdown h2 {
+  font-size: 1.2rem;
+  font-weight: 600;
+}
+
+.pactor-markdown h1 {
+  font-size: 1.3rem;
+  font-weight: 600;
+}
+
+.pactor-chat-thinking {
+  margin-top: 8px;
+}
+
+.pactor-chat-thinking__body .pactor-markdown {
+  line-height: 1.5;
+}
