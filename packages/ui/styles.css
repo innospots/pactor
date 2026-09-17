@@ -818,6 +818,9 @@
   .animate-caret-blink {
     animation: caret-blink 1.25s ease-out infinite;
   }
+  .animate-out {
+    animation: exit var(--tw-animation-duration,var(--tw-duration,.15s))var(--tw-ease,ease)var(--tw-animation-delay,0s)var(--tw-animation-iteration-count,1)var(--tw-animation-direction,normal)var(--tw-animation-fill-mode,none);
+  }
   .animate-pulse {
     animation: var(--animate-pulse);
   }
@@ -1716,6 +1719,10 @@
   .ease-out {
     --tw-ease: var(--ease-out);
     transition-timing-function: var(--ease-out);
+  }
+  .fill-mode-forwards {
+    animation-fill-mode: forwards;
+    --tw-animation-fill-mode: forwards;
   }
   .outline-none {
     --tw-outline-style: none;
