@@ -282,18 +282,6 @@
   display: none;
 }
 
-/* 对话列在 shell content 内的间距（content 区 padding 承担）与
- * 面板打开时的贴右处理见下方 :has 规则 */
-
-/* shell 主内容区：列布局 + 内边距（ui Sidebar 的 sidebar-content 仅
-   min-w-0 flex-1，对话列间距由这里承担） */
-.pactor-chat-shell [data-slot='sidebar-content'] {
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
-  padding: 12px 16px 16px;
-}
-
 /* 产出物面板打开（spec: chat-artifact-panel）：面板贴容器右缘——
  * 内容区右/上/下 padding 归零，面板 border-left 作分隔线 */
 .pactor-chat-shell [data-slot='sidebar-content']:has(> .pactor-chat-inspector-host) {
