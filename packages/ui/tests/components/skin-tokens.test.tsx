@@ -59,6 +59,8 @@ describe('皮肤令牌契约', () => {
       '--pagination-active-background',
       '--pagination-active-border',
       '--pagination-active-radius',
+      '--sidebar-width',
+      '--sidebar-width-icon',
       '--menu-hover-background',
       '--menu-hover-foreground',
       '--menu-active-background',

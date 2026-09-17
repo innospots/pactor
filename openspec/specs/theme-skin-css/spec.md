@@ -53,7 +53,7 @@
 
 ### Requirement: 暗色模式下的皮肤行为
 
-皮肤文件 SHALL 支持为 `[data-pactor-theme='dark']`（及跟随系统的 `prefers-color-scheme` 媒体查询）单独提供令牌值；皮肤亮色令牌 SHALL 优先于内置系统暗色兜底（兜底选择器经 `:where()` 降为与 `:root` 默认块同优先级，皮肤亮色块 `:root:not([data-pactor-theme='dark'])` 恒高于它），加载皮肤后系统暗色偏好 MUST NOT 把皮肤压成内置暗色。未加载皮肤时，内置暗色三态（light 强制亮 / dark 强制暗 / 不设置跟随系统）语义 MUST NOT 改变。宿主显式设置 `data-pactor-theme="dark"` 时，皮肤暗色块（有则）与内置暗色令牌照常生效。
+皮肤文件 SHALL 支持为 `[data-pactor-theme='dark']`（及跟随系统的 `prefers-color-scheme` 媒体查询）单独提供令牌值；皮肤亮色令牌 SHALL 优先于内置系统暗色兜底（兜底选择器经 `:where()` 降为与 `:root` 默认块同优先级，皮肤亮色块 `:root:not([data-pactor-theme='dark'])` 恒高于它），加载皮肤后系统暗色偏好 MUST NOT 把皮肤压成内置暗色。皮肤亮色块与暗色块 SHALL 分别显式声明 `color-scheme: light` / `color-scheme: dark`，使原生滚动条与表单控件随皮肤明暗翻转（兜底块的 `color-scheme: dark` 声明不被令牌覆盖，皮肤不声明时会漏进亮色皮肤）。未加载皮肤时，内置暗色三态（light 强制亮 / dark 强制暗 / 不设置跟随系统）语义 MUST NOT 改变。宿主显式设置 `data-pactor-theme="dark"` 时，皮肤暗色块（有则）与内置暗色令牌照常生效。
 
 #### Scenario: 皮肤提供暗色令牌
 

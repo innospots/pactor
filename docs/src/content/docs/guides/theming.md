@@ -112,7 +112,7 @@ document.documentElement.removeAttribute('data-pactor-theme');
 注意属性名是 `data-pactor-theme`（不是 `data-theme`），避免与宿主自己的主题属性冲突。皮肤文件可以为暗色单独给值（`[data-pactor-theme='dark']` 选择器块，见方式一示例）；皮肤未提供暗色值时，组件回退到内置暗色令牌，不会出现未着色的破损状态。
 
 :::note[皮肤亮色令牌优先于"跟随系统暗色"兜底]
-内置系统暗色兜底选择器经 `:where()` 降为与 `:root` 默认块同优先级，恒低于皮肤文件的亮色块 `:root:not([data-pactor-theme='dark'])`——加载皮肤后，系统深色偏好不会把皮肤压成内置暗色。皮肤需要暗色变体时，在皮肤文件中提供 `[data-pactor-theme='dark']` 块（宿主显式设置属性时生效）；如需跟随系统，可在皮肤文件中自行附带 `@media (prefers-color-scheme: dark)` 块。
+内置系统暗色兜底选择器经 `:where()` 降为与 `:root` 默认块同优先级，恒低于皮肤文件的亮色块 `:root:not([data-pactor-theme='dark'])`——加载皮肤后，系统深色偏好不会把皮肤压成内置暗色。皮肤需要暗色变体时，在皮肤文件中提供 `[data-pactor-theme='dark']` 块（宿主显式设置属性时生效）；如需跟随系统，可在皮肤文件中自行附带 `@media (prefers-color-scheme: dark)` 块。Theme Studio 生成的皮肤在亮/暗块中分别声明 `color-scheme: light / dark`，原生滚动条与表单控件随皮肤明暗翻转；手写皮肤请同样声明，否则系统深色偏好下亮色皮肤的滚动条会呈现浏览器默认深色。
 :::
 
 ## 方式三：data-slot 结构覆盖
@@ -151,6 +151,7 @@ document.documentElement.removeAttribute('data-pactor-theme');
 | `--ring` | 焦点环颜色 |
 | `--chart-1` … `--chart-5` | 图表色板（按序循环取色） |
 | `--sidebar` 系列（`-foreground` / `-primary` / `-primary-foreground` / `-accent` / `-accent-foreground` / `-border` / `-ring`） | 侧栏表面与其上元素 |
+| `--sidebar-width` / `--sidebar-width-icon` | 侧栏展开宽度（默认 `16rem`）/ 折叠后 icon rail 宽度（默认 `3rem`）；Theme Studio 生成的皮肤可覆盖 |
 
 ### 形状与阴影 token
 
