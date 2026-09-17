@@ -237,3 +237,33 @@ describe('AppShell 侧栏宽度令牌（chat-on-ui-sidebar 统一）', () => {
     expect(css).not.toMatch(/\[data-collapsed\]\s*\{[^}]*width/);
   });
 });
+
+describe('皮肤优先级契约（皮肤覆盖恒优先于 chat 默认值）', () => {
+  const css = readFileSync(join(__dirname, '../styles.css'), 'utf8');
+
+  it('--pactor-chat-* 令牌默认值声明在 :root（容器级直接声明会压过皮肤继承值）', () => {
+    const rootBlock = css.match(/(?:^|\n):root \{([\s\S]*?)\n\}/)?.[1];
+    expect(rootBlock).toBeTruthy();
+    for (const token of [
+      '--pactor-chat-bg:',
+      '--pactor-chat-primary:',
+      '--pactor-chat-radius-lg:',
+      '--pactor-chat-shadow-sm:',
+    ]) {
+      expect(rootBlock).toContain(token);
+    }
+  });
+
+  it('暗色覆盖声明在属性载体上（不绑定容器类），皮肤暗色块同优先级后加载胜出', () => {
+    const darkBlock = css.match(/\[data-pactor-theme='dark'\] \{([\s\S]*?)\n\}/)?.[1];
+    expect(darkBlock).toContain('--pactor-chat-shadow-sm:');
+    // 不得退回容器级后代选择器（皮肤 :root 暗色块会被直接声明压盖）
+    expect(css).not.toContain("[data-pactor-theme='dark'] .pactor-chat-");
+  });
+
+  it('系统暗色兜底经 :where() 降优先级（0,1,0），不压过皮肤亮色块', () => {
+    expect(css).toContain(
+      ":root:where(:not([data-pactor-theme='light']):not([data-pactor-theme='dark']))",
+    );
+  });
+});

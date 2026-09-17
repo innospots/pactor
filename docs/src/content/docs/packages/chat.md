@@ -65,7 +65,7 @@ const safeRegistry = createSafeRegistry(createComponentRegistry(), [
 
 ### 皮肤
 
-视图颜色全部经 `--pactor-chat-*` CSS 变量表达：覆盖变量即换肤，`<html data-pactor-theme="dark">` 启用内置暗色。结构布局（高度、对话列居中、面板贴右）由包内样式自持，嵌入时宿主只需给容器定高。
+视图颜色全部经 `--pactor-chat-*` CSS 变量表达（默认值声明在 `:root`，经 `var(--语义令牌, <chat 默认>)` 桥接 ui 语义令牌）：覆盖变量即换肤——皮肤在 `:root` 覆盖 `--pactor-chat-*` 或 ui 语义令牌均优先于包内默认值；`<html data-pactor-theme="dark">` 启用内置暗色。侧栏宽度由 ui 皮肤令牌 `--sidebar-width` / `--sidebar-width-icon` 驱动（theme-studio 皮肤可直接覆盖）。结构布局（高度、对话列居中、面板贴右）由包内样式自持，嵌入时宿主只需给容器定高。
 
 ## Chat：一等 DSL 组件
 
