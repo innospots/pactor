@@ -69,8 +69,10 @@
   /* 衬线展示字体栈：空状态问候 / chat 布局标题 */
   --pactor-chat-font-display: 'Songti SC', 'Noto Serif SC', Georgia,
     'Times New Roman', serif;
-  /* AppShell：侧栏宽度 / 移动端顶栏高度 / 抽屉遮罩色 */
-  --pactor-chat-sidebar-width: 240px;
+  /* AppShell：移动端顶栏高度 / 抽屉遮罩色。
+     侧栏宽度不走 chat 私有令牌——统一由 ui 皮肤令牌驱动：
+     --sidebar-width（展开，默认 16rem）/ --sidebar-width-icon（折叠 icon rail，
+     默认 3rem），theme-studio 生成的皮肤可直接覆盖两者 */
   --pactor-chat-shell-topbar-height: 44px;
   --pactor-chat-shell-scrim: rgb(0 0 0 / 40%);
   /* 产出物面板（spec: chat-artifact-panel）：桌面固定宽右栏 */
@@ -257,14 +259,10 @@
   --sidebar-ring: var(--pactor-chat-primary);
 }
 
-/* 侧栏宽度对齐令牌（覆盖 ui 的 w-60；icon rail 64px 与历史一致） */
-.pactor-chat-shell [data-slot='sidebar'] {
-  width: var(--pactor-chat-sidebar-width);
-}
-
-.pactor-chat-shell [data-slot='sidebar'][data-collapsed] {
-  width: 64px;
-}
+/* 侧栏宽度由 ui 皮肤令牌驱动（--sidebar-width / --sidebar-width-icon，
+   经 ui Sidebar 的 gap / 固定容器工具类引用），chat 不再单独覆盖；
+   原 chat 私有侧栏宽度令牌与 [data-collapsed] 规则一并移除——
+   后者自 chat-on-ui-sidebar 重构后等的是不存在的属性，从未生效 */
 
 /* 移动端顶栏高度与遮罩色对齐令牌 */
 .pactor-chat-shell [data-slot='sidebar-topbar'] {
