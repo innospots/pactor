@@ -22,9 +22,22 @@ export { ConversationStore } from './store.js';
 // 产出物模型与 Store（spec: chat-artifact-panel，零 React）
 export {
   ArtifactStore,
+  ARTIFACT_IMAGE_EXTENSIONS,
+  collectArtifacts,
+  isImageArtifact,
+  mergeArtifacts,
+  resolveArtifactFileType,
   type ArtifactPatch,
   type ChatArtifact,
 } from './artifact.js';
+
+// 产物下载（spec: chat-artifact-panel / 产物下载）
+export {
+  buildArtifactBlob,
+  downloadArtifact,
+  resolveArtifactFilename,
+  saveBlob,
+} from './artifact-download.js';
 
 // Streaming 事件模型与 reducer（零 React）
 export { applyChatEvent, type ChatEvent } from './events.js';
@@ -112,7 +125,11 @@ export {
 } from './view/ChatShell.js';
 export {
   ArtifactPanel,
+  buildArtifactTree,
   type ArtifactPanelProps,
+  type ArtifactTreeNode,
+  type ArtifactViewer,
+  type ArtifactViewers,
 } from './view/ArtifactPanel.js';
 export { type ChatHeaderAction } from './view/WorkspaceHeader.js';
 
@@ -133,7 +150,11 @@ export {
   ActivityTrace,
   type ActivityTraceProps,
 } from './view/ActivityTrace.js';
-export { MessageBubble, type MessageBubbleProps } from './view/MessageBubble.js';
+export {
+  formatMessageTime,
+  MessageBubble,
+  type MessageBubbleProps,
+} from './view/MessageBubble.js';
 export {
   collectMessageText,
   MessageActions,

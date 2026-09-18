@@ -31,6 +31,10 @@ export interface ChatChromeHandlers {
   headerAction?: (action: string) => void;
   /** 产出物面板关闭（spec: chat-on-ui-components） */
   panelClose?: () => void;
+  /** 产出物面板 列表视图 / 内容视图 切换（产物目录列表） */
+  panelToggleList?: () => void;
+  /** 产出物面板下载当前产物 */
+  panelDownload?: () => void;
 }
 
 let handlers: ChatChromeHandlers = {};
@@ -132,4 +136,14 @@ export function ensureChatChromeActions(
  */
 export function invokeChatPanelClose(): void {
   handlers.panelClose?.();
+}
+
+/** 面板产物列表 / 内容视图切换（与 panelClose 同一直调模式） */
+export function invokeChatPanelToggleList(): void {
+  handlers.panelToggleList?.();
+}
+
+/** 面板下载当前产物（与 panelClose 同一直调模式） */
+export function invokeChatPanelDownload(): void {
+  handlers.panelDownload?.();
 }

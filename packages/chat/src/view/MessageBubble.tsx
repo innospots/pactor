@@ -51,6 +51,20 @@ export interface MessageBubbleProps {
   onOpenArtifact?: (artifact: ChatArtifact) => void;
 }
 
+/**
+ * 消息时间格式化（assistant 消息底部时间戳）：
+ * 当天 HH:mm；非当天 M月d日 HH:mm
+ */
+export function formatMessageTime(ts: number, now: number = Date.now()): string {
+  const date = new Date(ts);
+  const hh = String(date.getHours()).padStart(2, '0');
+  const mm = String(date.getMinutes()).padStart(2, '0');
+  if (new Date(now).toDateString() === date.toDateString()) {
+    return `${hh}:${mm}`;
+  }
+  return `${date.getMonth() + 1}月${date.getDate()}日 ${hh}:${mm}`;
+}
+
 /** user 消息的内联编辑框：预填原文本，确认回调新文本，取消静默关闭 */
 function MessageEditForm({
   initialText,
@@ -148,6 +162,10 @@ export function MessageBubble({
           part.type === 'tool-call' ||
           part.type === 'tool-result',
       ));
+  // assistant 终态消息底部展示时间戳（流式 / 待响应期间与无 createdAt
+  // 的历史消息不展示）；user / system 消息不展示
+  const showTime =
+    message.role === 'assistant' && !live && message.createdAt !== undefined;
   return (
     <div
       className={`pactor-chat-message pactor-chat-message--${message.role}`}
@@ -184,19 +202,40 @@ export function MessageBubble({
           )}
         </div>
       )}
-      {!editing && (
-        <MessageActions
-          message={message}
-          actions={messageActions}
-          showRegenerate={showRegenerate}
-          onRegenerate={onRegenerate}
-          onRetry={onRetry}
-          onEdit={onEditResend ? () => setEditing(true) : undefined}
-          forceVisible={message.status === 'error'}
-          callService={callService}
-          onMessageAction={onMessageAction}
-        />
-      )}
+      {!editing &&
+        (showTime ? (
+          <div className="pactor-chat-message__footer">
+            <MessageActions
+              message={message}
+              actions={messageActions}
+              showRegenerate={showRegenerate}
+              onRegenerate={onRegenerate}
+              onRetry={onRetry}
+              onEdit={onEditResend ? () => setEditing(true) : undefined}
+              forceVisible={message.status === 'error'}
+              callService={callService}
+              onMessageAction={onMessageAction}
+            />
+            <span
+              className="pactor-chat-message__time"
+              title={new Date(message.createdAt!).toLocaleString()}
+            >
+              {formatMessageTime(message.createdAt!)}
+            </span>
+          </div>
+        ) : (
+          <MessageActions
+            message={message}
+            actions={messageActions}
+            showRegenerate={showRegenerate}
+            onRegenerate={onRegenerate}
+            onRetry={onRetry}
+            onEdit={onEditResend ? () => setEditing(true) : undefined}
+            forceVisible={message.status === 'error'}
+            callService={callService}
+            onMessageAction={onMessageAction}
+          />
+        ))}
     </div>
   );
 }

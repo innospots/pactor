@@ -238,6 +238,36 @@ describe('AppShell 侧栏宽度令牌（chat-on-ui-sidebar 统一）', () => {
   });
 });
 
+describe('对话列内间距契约（产物栏调宽时聊天区左右恒留 gutter）', () => {
+  it('.pactor-chat-workspace 宽度为 calc(100% - 2 × gutter)，而非 100%', () => {
+    // 产物栏拖拽调宽挤压剩余空间时，margin auto 会塌到 0；
+    // width 预留 gutter 后，左右内间距由宽度计算保证，与面板宽度无关
+    const css = readFileSync(join(__dirname, '../styles.css'), 'utf8');
+    const block = css.match(
+      /\.pactor-chat-workspace\s*\{([\s\S]*?)\n\}/,
+    )?.[1];
+    expect(block).toContain(
+      'width: calc(100% - 2 * var(--pactor-chat-content-gutter))',
+    );
+    expect(block).not.toMatch(/^\s*width:\s*100%;/m);
+  });
+
+  it('面板打开时 gutter 由容器侧保证：host padding-left + 面板 margin-left', () => {
+    // 对话列 calc 宽度在 flex 行内把面板宽度计入 100% 基准，shrink 后
+    // margin auto 塌 0；容器侧两条规则与面板宽度无关地保住左右间距
+    const css = readFileSync(join(__dirname, '../styles.css'), 'utf8');
+    expect(css).toContain(
+      '.pactor-chat-inspector-host__row:has(> .pactor-chat-inspector)',
+    );
+    expect(css).toMatch(
+      /\.pactor-chat-inspector-host__row:has\(> \.pactor-chat-inspector\)\s*\{[^}]*padding-left:\s*var\(--pactor-chat-content-gutter\)/,
+    );
+    expect(css).toMatch(
+      /\.pactor-chat-inspector-host__row > \.pactor-chat-inspector\s*\{[^}]*margin-left:\s*var\(--pactor-chat-content-gutter\)/,
+    );
+  });
+});
+
 describe('皮肤优先级契约（皮肤覆盖恒优先于 chat 默认值）', () => {
   const css = readFileSync(join(__dirname, '../styles.css'), 'utf8');
 
