@@ -24,11 +24,12 @@ pnpm --filter example-chat dev   # http://localhost:5399
 | `帮我生成一份月报` | markdown kind 产出物 → 消息内产出物卡片 + 右侧面板自动打开 |
 | `帮我写一段代码` | code kind 产出物（只读代码块，language 角标）→ 右侧面板 |
 | `帮我生成一个统计页面` | dsl kind 产出物 → 面板内经白名单组件活预览渲染 |
+| `生成一组文件` | 一条消息连续 6 个产出物（md / csv / ts / json / sql / txt，各带尺寸与类型图标）→ 卡片区收起为前 4 张 + 「展开 / 收起」与「查看所有产物（6) ›」（`events.onOpenArtifactList` → 开面板定位产物目录） |
 
 ## 页面与交互
 
 - **菜单外壳**（内置 ChatLayout，ui 布局层 type `'chat'`）：对话 / 我的智能体 / 系统设置 + 「最近」分组历史会话来自 bootstrap 菜单（group / dot / badge 扩展字段透传），菜单与高亮由 registry/bridge 自动推导，点击 → bridge.push。移动端侧栏变覆盖抽屉。如需自定义菜单事件（如 `?id=` 历史会话高亮），可注册薄封装覆盖（见 `ChatAppLayout.tsx` 备用实现）
-- **对话页**（`/chat`）：body 为无侧栏形态的 `Chat`；`conversationId` 取 `${route.query.id || 'conv-demo'}`——从智能体列表进入时每个智能体一个独立会话（store 按会话 id 缓存）。产出物面板为受控闭环：`artifact` / `panelOpen` 绑页面 state，`onArtifact` → `setState` 开面板，`onPanelClose` → `setState` 关面板
+- **对话页**（`/chat`）：body 为无侧栏形态的 `Chat`；`conversationId` 取 `${route.query.id || 'conv-demo'}`——从智能体列表进入时每个智能体一个独立会话（store 按会话 id 缓存）。产出物面板为受控闭环：`artifact` / `panelOpen` 绑页面 state，`onArtifact` → `setState` 开面板，`onPanelClose` → `setState` 关面板，`onOpenArtifactList`（卡片区"查看所有产物"）→ `setState panelOpen=true`（面板自动定位产物目录视图）
 - **我的智能体**（`/agents`）：白名单组件（Page/Grid/Card/Alert/Button）声明的 mock 列表，「开始对话」→ DSL `navigate` 动作跳 `/chat?id=agent-xxx`
 - **系统设置**（`/settings`）：Form/Input/Select 表单，`onSubmit` → `setState` 保存 + `message` 成功提示 + 下方卡片回显
 - **对话页 header**（包内建，`headerActions` / `editableTitle` 声明）：左侧会话标题默认「新的对话」，点击进入编辑，Enter / blur 提交（Esc 取消）；右侧操作组依次为导出 Markdown（当前会话）、明暗切换、清空当前会话——默认行为在包内执行，事件经 DSL `events` 接 toast 提示

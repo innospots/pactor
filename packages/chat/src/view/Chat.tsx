@@ -140,6 +140,8 @@ export interface ChatProps {
   onArtifact?: (artifact: ChatArtifact) => void;
   /** 产出物卡片"在面板中打开"按钮点击回调（event 作用域含 artifact；受控场景的开面板入口） */
   onOpenArtifact?: (artifact: ChatArtifact) => void;
+  /** 卡片区"查看所有产物"点击回调（event 为空对象 {}；受控典型接法：setState panelOpen=true，面板自动定位产物目录视图） */
+  onOpenArtifactList?: () => void;
   /** 面板 tab / 目录列表点击切换回调（event 作用域含 artifact；受控典型接法：setState artifact=${event.artifact}） */
   onSelectArtifact?: (artifact: ChatArtifact) => void;
   className?: string;
@@ -305,6 +307,7 @@ export function Chat({
   inspector,
   onArtifact,
   onOpenArtifact,
+  onOpenArtifactList,
   onSelectArtifact,
   className,
   onSend,
@@ -382,6 +385,7 @@ export function Chat({
       inspector={resolveSlot(inspector)}
       onArtifact={onArtifact}
       onOpenArtifact={onOpenArtifact}
+      onOpenArtifactList={onOpenArtifactList}
       onSelectArtifact={onSelectArtifact}
     />
   );
@@ -399,7 +403,7 @@ type DslEventHandler = (event: unknown) => void;
  * DSL 侧即 event.text / event.key / event.item / event.artifact /
  * event.model / event.contexts / event.theme / event.title /
  * event.action / event.message（onMessageAction）
- * （onExport / onClear / onPanelClose 为空对象 {}）。
+ * （onExport / onClear / onPanelClose / onOpenArtifactList 为空对象 {}）。
  */
 function ChatDslAdapter({
   onSend,
@@ -407,6 +411,7 @@ function ChatDslAdapter({
   onPanelClose,
   onArtifact,
   onOpenArtifact,
+  onOpenArtifactList,
   onSelectArtifact,
   onModelChange,
   onContextsChange,
@@ -423,6 +428,7 @@ function ChatDslAdapter({
   | 'onPanelClose'
   | 'onArtifact'
   | 'onOpenArtifact'
+  | 'onOpenArtifactList'
   | 'onSelectArtifact'
   | 'onModelChange'
   | 'onContextsChange'
@@ -437,6 +443,7 @@ function ChatDslAdapter({
   onPanelClose?: DslEventHandler;
   onArtifact?: DslEventHandler;
   onOpenArtifact?: DslEventHandler;
+  onOpenArtifactList?: DslEventHandler;
   onSelectArtifact?: DslEventHandler;
   onModelChange?: DslEventHandler;
   onContextsChange?: DslEventHandler;
@@ -467,6 +474,9 @@ function ChatDslAdapter({
         onOpenArtifact
           ? (artifact: ChatArtifact) => onOpenArtifact({ artifact })
           : undefined
+      }
+      onOpenArtifactList={
+        onOpenArtifactList ? () => onOpenArtifactList({}) : undefined
       }
       onSelectArtifact={
         onSelectArtifact

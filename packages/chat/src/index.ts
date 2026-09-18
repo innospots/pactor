@@ -24,9 +24,14 @@ export {
   ArtifactStore,
   ARTIFACT_IMAGE_EXTENSIONS,
   collectArtifacts,
+  formatArtifactSize,
   isImageArtifact,
   mergeArtifacts,
   resolveArtifactFileType,
+  resolveArtifactIcon,
+  resolveArtifactIconName,
+  type ArtifactIconSpec,
+  type ArtifactIconTone,
   type ArtifactPatch,
   type ChatArtifact,
 } from './artifact.js';
@@ -131,6 +136,10 @@ export {
   type ArtifactViewer,
   type ArtifactViewers,
 } from './view/ArtifactPanel.js';
+export {
+  artifactCardMeta,
+  ChatArtifactCard,
+} from './view/chrome/artifact-card.js';
 export { type ChatHeaderAction } from './view/WorkspaceHeader.js';
 
 // React 视图

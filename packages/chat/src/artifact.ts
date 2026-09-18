@@ -57,6 +57,122 @@ export function isImageArtifact(artifact: ChatArtifact): boolean {
   return ext !== null && ARTIFACT_IMAGE_EXTENSIONS.includes(ext);
 }
 
+/** 产物图标的着色档位（卡片图标底色 / 前景色按 tone 取色） */
+export type ArtifactIconTone = 'green' | 'blue' | 'amber' | 'violet' | 'slate';
+
+/** 产物图标规格：ui Icon 白名单名 + 着色档位 */
+export interface ArtifactIconSpec {
+  name: string;
+  tone: ArtifactIconTone;
+}
+
+/** 产物图标的扩展名分桶（小写不带点）→ 图标名 + 着色档位 */
+const ARTIFACT_ICON_BY_EXTENSION: Record<string, ArtifactIconSpec> = {
+  // 表格数据（绿）
+  csv: { name: 'table', tone: 'green' },
+  tsv: { name: 'table', tone: 'green' },
+  xls: { name: 'table', tone: 'green' },
+  xlsx: { name: 'table', tone: 'green' },
+  // 数据 / 数据库（琥珀）
+  json: { name: 'database', tone: 'amber' },
+  sql: { name: 'database', tone: 'amber' },
+  // 脚本（蓝，终端图标）
+  sh: { name: 'terminal', tone: 'blue' },
+  bash: { name: 'terminal', tone: 'blue' },
+  zsh: { name: 'terminal', tone: 'blue' },
+  // 代码 / 配置（蓝）
+  js: { name: 'code', tone: 'blue' },
+  mjs: { name: 'code', tone: 'blue' },
+  cjs: { name: 'code', tone: 'blue' },
+  jsx: { name: 'code', tone: 'blue' },
+  ts: { name: 'code', tone: 'blue' },
+  mts: { name: 'code', tone: 'blue' },
+  cts: { name: 'code', tone: 'blue' },
+  tsx: { name: 'code', tone: 'blue' },
+  py: { name: 'code', tone: 'blue' },
+  rb: { name: 'code', tone: 'blue' },
+  go: { name: 'code', tone: 'blue' },
+  rs: { name: 'code', tone: 'blue' },
+  java: { name: 'code', tone: 'blue' },
+  kt: { name: 'code', tone: 'blue' },
+  c: { name: 'code', tone: 'blue' },
+  h: { name: 'code', tone: 'blue' },
+  cc: { name: 'code', tone: 'blue' },
+  cpp: { name: 'code', tone: 'blue' },
+  cs: { name: 'code', tone: 'blue' },
+  swift: { name: 'code', tone: 'blue' },
+  php: { name: 'code', tone: 'blue' },
+  css: { name: 'code', tone: 'blue' },
+  scss: { name: 'code', tone: 'blue' },
+  less: { name: 'code', tone: 'blue' },
+  html: { name: 'code', tone: 'blue' },
+  vue: { name: 'code', tone: 'blue' },
+  svelte: { name: 'code', tone: 'blue' },
+  yaml: { name: 'code', tone: 'blue' },
+  yml: { name: 'code', tone: 'blue' },
+  toml: { name: 'code', tone: 'blue' },
+  xml: { name: 'code', tone: 'blue' },
+  // 文档 / 文本（石板灰）
+  md: { name: 'file-text', tone: 'slate' },
+  markdown: { name: 'file-text', tone: 'slate' },
+  mdx: { name: 'file-text', tone: 'slate' },
+  txt: { name: 'file-text', tone: 'slate' },
+  text: { name: 'file-text', tone: 'slate' },
+  log: { name: 'file-text', tone: 'slate' },
+  rst: { name: 'file-text', tone: 'slate' },
+  pdf: { name: 'file-text', tone: 'slate' },
+  doc: { name: 'file-text', tone: 'slate' },
+  docx: { name: 'file-text', tone: 'slate' },
+};
+
+/**
+ * 产物图标（图标名 + 着色档位）：文件扩展名优先（图片类 → image/violet，
+ * 表格 / 数据 / 脚本 / 代码 / 文档按扩展名分桶），无扩展名或未知扩展名
+ * 时按 kind 兜底（code → code/blue、dsl → layout-grid/slate、其余
+ * file-text 或 file，均 slate）。卡片 / 面板下拉 / 目录树共用，
+ * 保证同一产物在各处图标一致。
+ */
+export function resolveArtifactIcon(artifact: ChatArtifact): ArtifactIconSpec {
+  const ext = resolveArtifactFileType(artifact);
+  if (ext !== null) {
+    if (ARTIFACT_IMAGE_EXTENSIONS.includes(ext)) {
+      return { name: 'image', tone: 'violet' };
+    }
+    const spec = ARTIFACT_ICON_BY_EXTENSION[ext];
+    if (spec !== undefined) {
+      return spec;
+    }
+  }
+  if (artifact.kind === 'code') {
+    return { name: 'code', tone: 'blue' };
+  }
+  if (artifact.kind === 'dsl') {
+    return { name: 'layout-grid', tone: 'slate' };
+  }
+  return ext === null
+    ? { name: 'file-text', tone: 'slate' }
+    : { name: 'file', tone: 'slate' };
+}
+
+/** 产物图标名（resolveArtifactIcon 的 name 部分，面板下拉 / 目录树用） */
+export function resolveArtifactIconName(artifact: ChatArtifact): string {
+  return resolveArtifactIcon(artifact).name;
+}
+
+/** 产物尺寸展示（meta.size 字节数 → "512 B / 3.5 KB / 12.0 MB"；非法输入返回 null） */
+export function formatArtifactSize(size: unknown): string | null {
+  if (typeof size !== 'number' || !Number.isFinite(size) || size < 0) {
+    return null;
+  }
+  if (size < 1024) {
+    return `${size} B`;
+  }
+  if (size < 1024 * 1024) {
+    return `${(size / 1024).toFixed(1)} KB`;
+  }
+  return `${(size / 1024 / 1024).toFixed(1)} MB`;
+}
+
 /** update 的补丁：id 不可改 */
 export type ArtifactPatch = Partial<Omit<ChatArtifact, 'id'>>;
 

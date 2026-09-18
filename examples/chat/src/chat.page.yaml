@@ -118,11 +118,16 @@ body:
       - action: setState
         params:
           panelOpen: false
-    # 消息流产出物卡片"在面板中打开"：受控场景的重开面板入口
+    # 消息流产出物卡片整卡点击：受控场景的重开面板入口
     onOpenArtifact:
       - action: setState
         params:
           artifact: ${event.artifact}
+          panelOpen: true
+    # 卡片区"查看所有产物"：开面板（面板自动定位产物目录视图）
+    onOpenArtifactList:
+      - action: setState
+        params:
           panelOpen: true
     # 面板 tab / 目录列表点击切换产物：受控闭环
     onSelectArtifact:

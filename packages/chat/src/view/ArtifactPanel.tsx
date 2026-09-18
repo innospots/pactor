@@ -13,7 +13,7 @@ import {
 } from 'react';
 
 import type { ChatArtifact } from '../artifact.js';
-import { isImageArtifact, resolveArtifactFileType } from '../artifact.js';
+import { isImageArtifact, resolveArtifactFileType, resolveArtifactIconName } from '../artifact.js';
 import { downloadArtifact } from '../artifact-download.js';
 import { CHAT_DENIED_TYPE, guardChatDsl } from '../dsl-guard.js';
 import { createChatRuntime, type ChatRuntime } from '../scope.js';
@@ -47,13 +47,21 @@ export interface ArtifactPanelProps {
   artifact?: ChatArtifact | null;
   /**
    * 会话内全部产出物（多产物场景）：提供后 header 左端展示目录列表
-   * 切换钮；多于 1 个时 header 下沿展示 tab 条（kind 图标 + 名称）
+   * 切换钮，文件名处展示产物切换下拉
    */
   artifacts?: ChatArtifact[];
-  /** 当前激活产出物 id（tabs 高亮；缺省取 artifact.id） */
+  /** 当前激活产出物 id（下拉高亮；缺省取 artifact.id） */
   activeArtifactId?: string;
-  /** tab / 目录列表点击切换回调（受控切换，面板不自改外部状态） */
+  /** 下拉 / 目录列表点击切换回调（受控切换，面板不自改外部状态） */
   onSelectArtifact?: (artifact: ChatArtifact) => void;
+  /**
+   * 定位产物目录视图的请求信号（卡片区"查看所有产物"）：数值变化即
+   * 切换列表视图并经 onViewRequestConsumed 消费复位（消费后普通
+   * 打开回内容视图）
+   */
+  viewRequest?: number | null;
+  /** viewRequest 消费回调（组合层复位信号） */
+  onViewRequestConsumed?: () => void;
   /** 面板内容槽：提供时整体替代内建渲染器（标题栏保留） */
   inspector?: ReactNode;
   /** 关闭按钮 / 遮罩点击回调 */
@@ -156,15 +164,9 @@ function ArtifactDslContent({
   );
 }
 
-/** kind 图标：tabs / 目录列表共用 */
-function ArtifactKindIcon({ kind }: { kind: ChatArtifact['kind'] }) {
-  const name =
-    kind === 'code'
-      ? 'code'
-      : kind === 'dsl'
-        ? 'layout-grid'
-        : 'file-text';
-  return <Icon name={name} size={13} />;
+/** 产物图标（扩展名优先，kind 兜底）：tabs / 目录列表共用 */
+function ArtifactKindIcon({ artifact }: { artifact: ChatArtifact }) {
+  return <Icon name={resolveArtifactIconName(artifact)} size={13} />;
 }
 
 /**
@@ -261,7 +263,7 @@ function ArtifactTreeRow({
           data-active={node.artifact.id === activeId}
           onClick={() => onSelect?.(node.artifact!)}
         >
-          <ArtifactKindIcon kind={node.artifact.kind} />
+          <ArtifactKindIcon artifact={node.artifact} />
           <span className="pactor-chat-inspector__list-item-title">
             {node.artifact.title}
           </span>
@@ -382,6 +384,8 @@ export function ArtifactPanel({
   artifacts,
   activeArtifactId,
   onSelectArtifact,
+  viewRequest,
+  onViewRequestConsumed,
   inspector,
   onClose,
   safeRegistry,
@@ -392,12 +396,22 @@ export function ArtifactPanel({
   const runtime = useArtifactRuntime(safeRegistry, user);
 
   // 产物目录列表视图：header 左端切换钮在 内容 / 列表 间切换；
-  // 激活产物变化（新产物打开 / tab 切换）自动回内容视图
+  // 激活产物变化（新产物打开 / 下拉切换）自动回内容视图
   const [view, setView] = useState<'content' | 'list'>('content');
   const activeId = activeArtifactId ?? artifact?.id;
   useEffect(() => {
     setView('content');
   }, [activeId]);
+  // "查看所有产物"定位产物目录视图：信号到达即切列表并消费复位
+  // （声明在 activeId 复位之后——同一次打开（激活首项 + 信号）
+  // 两个 effect 同提交触发时列表视图胜出）
+  useEffect(() => {
+    if (viewRequest != null) {
+      setView('list');
+      onViewRequestConsumed?.();
+    }
+    // onViewRequestConsumed 由组合层内联提供，随渲染恒新，不入依赖
+  }, [viewRequest]);
   const showListButton = artifacts !== undefined && artifacts.length > 0;
   // 有产物清单时 header 文件名处渲染切换下拉（单产物亦可经下拉进列表语义）
   const showMenu = artifacts !== undefined && artifacts.length > 0;
@@ -437,20 +451,21 @@ export function ArtifactPanel({
     if (!panel) {
       return;
     }
-    const hostRect = panel.parentElement?.getBoundingClientRect();
-    // jsdom 等无布局环境 host 宽为 0 → 回退视口宽
-    const hostWidth =
-      hostRect !== undefined && hostRect.width > 0
-        ? hostRect.width
-        : window.innerWidth;
-    const maxWidth = (hostWidth * 2) / 3;
     const startWidth = panel.getBoundingClientRect().width;
     const startX = event.clientX;
     const prevUserSelect = document.body.style.userSelect;
     document.body.style.userSelect = 'none';
 
     const onMove = (moveEvent: PointerEvent): void => {
-      // 向左拖（clientX 减小）→ 变宽；夹取 [min-width 令牌 480px, host 宽 2/3]
+      // 向左拖（clientX 减小）→ 变宽；夹取 [min-width 令牌 480px, host 宽 2/3]。
+      // host 宽每次移动重测（拖拽中窗口 / 侧栏尺寸可能变化）；CSS 侧另有
+      // max-width 硬兜底（inline width 不能覆盖 max-width）
+      const hostRect = panel.parentElement?.getBoundingClientRect();
+      const hostWidth =
+        hostRect !== undefined && hostRect.width > 0
+          ? hostRect.width
+          : window.innerWidth;
+      const maxWidth = (hostWidth * 2) / 3;
       const next = startWidth + (startX - moveEvent.clientX);
       setWidth(Math.round(Math.min(Math.max(next, 480), maxWidth)));
     };
