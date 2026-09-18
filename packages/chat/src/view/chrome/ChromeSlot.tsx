@@ -33,9 +33,10 @@ export interface ChromeSlotProps {
   /**
    * 片段依赖的 chat 内部组件：渲染前注册进 ambient registry
    * （has 检查不覆盖宿主；宿主占用同名时视同类型缺失回退——
-   * 不允许宿主实现混入 chrome 内部结构）
+   * 不允许宿主实现混入 chrome 内部结构）。
+   * props 形态各组件不同（无参 / artifact 等），此处收窄为 any
    */
-  components?: Record<string, ComponentType>;
+  components?: Record<string, ComponentType<any>>;
   /** 仅 DSL 路径的外层包装（如 Composer 的拖放 / 冒泡承接容器） */
   wrap?: (children: ReactNode) => ReactNode;
 }

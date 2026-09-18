@@ -2,13 +2,16 @@ import { Icon } from '@pactor-app/ui/components';
 import { MarkdownRenderer } from '@pactor-app/markdown';
 import { DslRenderer, useRenderer } from '@pactor-app/runtime';
 
-import type { ChatArtifact } from '../artifact.js';
 import { guardChatDsl } from '../dsl-guard.js';
 import { useSmoothStreamText } from '../hooks/use-smooth-stream-text.js';
 import { useThrottledValue } from '../hooks/use-throttled-value.js';
 import type { ChatPart } from '../model.js';
 import { buildChatScope, type ChatRuntime, type ChatScope } from '../scope.js';
-import { buildArtifactCardFragment } from './chrome/artifact-card.js';
+import {
+  ARTIFACT_CARD_INTERNAL_COMPONENTS,
+  buildArtifactCardFragment,
+  ChatArtifactCard,
+} from './chrome/artifact-card.js';
 import { ChromeSlot } from './chrome/ChromeSlot.js';
 import { buildErrorFragment, buildStatusFragment } from './chrome/feedback.js';
 
@@ -22,8 +25,8 @@ import { buildErrorFragment, buildStatusFragment } from './chrome/feedback.js';
  * - tool-call / tool-result / thinking → 不在此渲染（由 assistant 消息
  *   顶部的 ActivityTrace 配对 / 折叠呈现，见 chat-activity-trace）
  * - error → 自绘警示条；status → 弱提示文本
- * - artifact → 产出物卡片（标题 + kind 角标 + "在面板中打开"按钮，
- *   spec: chat-artifact-panel）
+ * - artifact → 产出物卡片（ChatArtifactCard 内部组件：着色图标盒 +
+ *   标题 + 元信息 + 右上箭头，整卡点击打开面板，spec: chat-artifact-panel）
  *
  * 视图零 antd 依赖，颜色经 `@pactor-app/chat/styles.css` 的
  * `--pactor-chat-*` 变量表达。
@@ -36,8 +39,6 @@ export interface PartRendererProps {
   scope?: ChatScope;
   /** 所属消息是否流式中（text/markdown 启用平滑揭示） */
   streaming?: boolean;
-  /** artifact 卡片"在面板中打开"回调（spec: chat-artifact-panel） */
-  onOpenArtifact?: (artifact: ChatArtifact) => void;
 }
 
 /** 白名单外组件的受控占位（注册名 ChatDenied，见 dsl-guard） */
@@ -78,7 +79,7 @@ function SmoothMarkdown({ content, streaming }: { content: string; streaming: bo
   return <MarkdownRenderer content={throttled} />;
 }
 
-export function PartRenderer({ part, runtime, scope, streaming = false, onOpenArtifact }: PartRendererProps) {
+export function PartRenderer({ part, runtime, scope, streaming = false }: PartRendererProps) {
   switch (part.type) {
     case 'text':
       return <SmoothText content={part.content} streaming={streaming} />;
@@ -144,33 +145,15 @@ export function PartRenderer({ part, runtime, scope, streaming = false, onOpenAr
       );
 
     case 'artifact':
-      // 产出物卡片（spec: chat-artifact-panel）：标题 + kind 角标 +
-      // "在面板中打开"按钮；DSL 路径经 chat.openArtifact 内建动作、
-      // 回退路径经 onOpenArtifact prop，均走同一面板打开路径
+      // 产出物卡片（spec: chat-artifact-panel）：整卡可点击——着色图标盒 +
+      // 标题 + 元信息（尺寸 · 类型）+ 右上箭头；DSL 片段与 fallback 共用
+      // ChatArtifactCard 内部组件，点击经 invokeChatOpenArtifact 走
+      // chat.openArtifact 同一 handlers 注册表（行为零分叉）
       return (
         <ChromeSlot
           fragment={buildArtifactCardFragment(part.artifact)}
-          fallback={
-            <div
-              className="pactor-chat-artifact-card"
-              data-artifact-kind={part.artifact.kind}
-            >
-              <span className="pactor-chat-artifact-card__title">
-                {part.artifact.title}
-              </span>
-              <span className="pactor-chat-artifact-card__kind">
-                {part.artifact.kind}
-              </span>
-              <button
-                type="button"
-                className="pactor-chat-artifact-card__open"
-                onClick={() => onOpenArtifact?.(part.artifact)}
-              >
-                <Icon name="panel-right-open" size={13} strokeWidth={1.7} />
-                在面板中打开
-              </button>
-            </div>
-          }
+          components={ARTIFACT_CARD_INTERNAL_COMPONENTS}
+          fallback={<ChatArtifactCard artifact={part.artifact} />}
         />
       );
 

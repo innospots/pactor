@@ -141,6 +141,8 @@ export interface ChatWorkspaceProps {
   onArtifact?: (artifact: ChatArtifact) => void;
   /** 产出物卡片"在面板中打开"回调（runtime 绑定 events.onOpenArtifact 时传入） */
   onOpenArtifact?: (artifact: ChatArtifact) => void;
+  /** 卡片区"查看所有产物"回调（runtime 绑定 events.onOpenArtifactList 时传入） */
+  onOpenArtifactList?: () => void;
   /**
    * 面板 tab / 目录列表点击切换回调（runtime 绑定 events.onSelectArtifact
    * 时传入；受控典型接法：setState artifact=${event.artifact}）。
@@ -208,6 +210,7 @@ export function createChatWorkspace(
     inspector,
     onArtifact,
     onOpenArtifact,
+    onOpenArtifactList,
     onSelectArtifact,
     headerActions,
     editableTitle,
@@ -259,6 +262,7 @@ export function createChatWorkspace(
           inspector={inspector ? <DslNodeSlot node={inspector} /> : undefined}
           onArtifact={onArtifact}
           onOpenArtifact={onOpenArtifact}
+          onOpenArtifactList={onOpenArtifactList}
           onSelectArtifact={onSelectArtifact}
           headerActions={headerActions}
           editableTitle={editableTitle}

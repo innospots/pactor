@@ -207,6 +207,13 @@ export interface ChatCompositionProps {
    * 并行 store.open（纯 React 零接线可用）。
    */
   onOpenArtifact?: (artifact: ChatArtifact) => void;
+  /**
+   * 卡片区"查看所有产物（n)"点击回调（spec: chat-artifact-panel /
+   * 卡片区收起）：无条件触发——受控场景的开面板入口（DSL 侧典型接法：
+   * setState panelOpen=true）；面板同时经内部信号定位产物目录视图；
+   * 非受控场景并行打开面板（无激活产物时激活列表首项）。
+   */
+  onOpenArtifactList?: () => void;
 }
 
 /**
@@ -256,6 +263,7 @@ export function ChatComposition({
   inspector,
   onArtifact,
   onOpenArtifact,
+  onOpenArtifactList,
 }: ChatCompositionProps): ReactNode {
   // store 首渲染确定、ref 保持：重渲染 / props 变化不重建（决策 D2）
   const storeRef = useRef<ConversationStore | null>(null);
@@ -324,6 +332,22 @@ export function ChatComposition({
     onOpenArtifact?.(next);
     if (!panelControlled) {
       artifactStore.open(next);
+    }
+  };
+
+  // 卡片区"查看所有产物"：无条件触发宿主回调（受控场景的开面板入口）；
+  // 面板经 viewRequest 信号定位产物目录视图（受控 / 非受控一致）；
+  // 非受控时并行打开面板（无激活产物时激活列表首项——面板打开条件
+  // 为 store 存在激活项，目录视图下该激活项不作内容展示）
+  const [listViewRequest, setListViewRequest] = useState<number | null>(null);
+  const handleOpenArtifactList = (): void => {
+    onOpenArtifactList?.();
+    setListViewRequest((value) => (value ?? 0) + 1);
+    if (!panelControlled && artifactStore.get() === null) {
+      const first = mergedArtifacts[0];
+      if (first !== undefined) {
+        artifactStore.open(first);
+      }
     }
   };
 
@@ -460,6 +484,7 @@ export function ChatComposition({
         onPlusMenu={services.onPlusMenu}
         onArtifact={onArtifact}
         onOpenArtifact={handleOpenArtifact}
+        onOpenArtifactList={handleOpenArtifactList}
         models={models}
         model={currentModel}
         onModelChange={handleModelChange}
@@ -480,6 +505,10 @@ export function ChatComposition({
   // 窄屏由 CSS 媒体查询退化为右侧覆盖抽屉（遮罩点击关闭）；
   // 关闭 / 未配置时不渲染面板 DOM。
   //
+  // header 位置：收进 __main 左列（header + 对话区），与对话区同宽——
+  // 面板独占右列全高，header 不覆盖面板上方；面板关闭时 __main 占满
+  // 行宽，header 自然通栏。
+  //
   // 结构稳定性：面板功能被使用（受控 props / 事件回调 / inspector /
   // 注入 artifactStore 任一提供）时恒渲染 host 包裹层，面板开关只改
   // host 内面板子树的显隐——否则 main 在树中的深度随开关变化，整个
@@ -493,6 +522,7 @@ export function ChatComposition({
     onPanelClose !== undefined ||
     onArtifact !== undefined ||
     onOpenArtifact !== undefined ||
+    onOpenArtifactList !== undefined ||
     services.artifactStore !== undefined;
   if (!panelFeatureUsed && !effectivePanelOpen) {
     return workspaceHeader ? (
@@ -506,9 +536,11 @@ export function ChatComposition({
   }
   return (
     <div className="pactor-chat-inspector-host">
-      {workspaceHeader}
       <div className="pactor-chat-inspector-host__row">
-        {main}
+        <div className="pactor-chat-inspector-host__main">
+          {workspaceHeader}
+          {main}
+        </div>
         {effectivePanelOpen ? (
           <>
             <div
@@ -526,6 +558,8 @@ export function ChatComposition({
               safeRegistry={services.safeRegistry}
               user={services.user}
               artifactViewers={services.artifactViewers}
+              viewRequest={listViewRequest}
+              onViewRequestConsumed={() => setListViewRequest(null)}
             />
           </>
         ) : null}

@@ -2,6 +2,7 @@ import { DropdownMenu, Icon } from '@pactor-app/ui/components';
 import { createContext, useContext, type ReactNode } from 'react';
 
 import type { ChatArtifact } from '../../artifact.js';
+import { resolveArtifactIconName } from '../../artifact.js';
 import {
   invokeChatPanelClose,
   invokeChatPanelDownload,
@@ -33,15 +34,9 @@ export const ChatPanelContext = createContext<ChatPanelContextValue | null>(
   null,
 );
 
-/** kind → Icon 白名单名（下拉项 / 触发器共用） */
-function kindIconName(kind: ChatArtifact['kind'] | undefined): string {
-  if (kind === 'code') {
-    return 'code';
-  }
-  if (kind === 'dsl') {
-    return 'layout-grid';
-  }
-  return 'file-text';
+/** 产物 → Icon 白名单名（扩展名优先，kind 兜底；无产物时占位 file） */
+function artifactIconName(artifact: ChatArtifact | undefined): string {
+  return artifact ? resolveArtifactIconName(artifact) : 'file';
 }
 
 /**
@@ -118,7 +113,7 @@ export function ChatPanelArtifactMenu(): ReactNode {
       items={ctx.artifacts.map((item) => ({
         label: item.title,
         value: item.id,
-        icon: kindIconName(item.kind),
+        icon: artifactIconName(item),
       }))}
       onSelect={(value) => {
         const target = ctx.artifacts.find((item) => item.id === value);
@@ -132,7 +127,7 @@ export function ChatPanelArtifactMenu(): ReactNode {
         data-view={ctx.view}
       >
         <Icon
-          name={inList ? 'folder' : kindIconName(active?.kind)}
+          name={inList ? 'folder' : artifactIconName(active)}
           size={13}
         />
         <span className="pactor-chat-inspector__title">

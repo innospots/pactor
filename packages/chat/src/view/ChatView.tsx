@@ -91,8 +91,10 @@ export interface ChatViewProps
    * 产出物事件）；同一 part 只触发一次，框架不擅自打开面板
    */
   onArtifact?: (artifact: ChatArtifact) => void;
-  /** artifact 卡片"在面板中打开"回调（透传 PartRenderer） */
+  /** artifact 卡片"在面板中打开"回调（整卡点击，经包级 handlers 桥接） */
   onOpenArtifact?: (artifact: ChatArtifact) => void;
+  /** 卡片区"查看所有产物"回调（打开面板并定位产物目录视图） */
+  onOpenArtifactList?: () => void;
   /**
    * 内建模型选择（spec: chat-model-selector，决策 D5）：
    * `model` + `onModelChange` 同时提供即受控（以 props 为准）；
@@ -164,6 +166,7 @@ export function ChatView({
   className,
   onArtifact,
   onOpenArtifact,
+  onOpenArtifactList,
   attachments,
   onAttachmentsChange,
   onAttachFiles,
@@ -310,10 +313,13 @@ export function ChatView({
   handleSendRef.current = handleSend;
   const onOpenArtifactRef = useRef(onOpenArtifact);
   onOpenArtifactRef.current = onOpenArtifact;
+  const onOpenArtifactListRef = useRef(onOpenArtifactList);
+  onOpenArtifactListRef.current = onOpenArtifactList;
   useEffect(() => {
     setChatChromeHandlers({
       sendSuggestion: (text) => handleSendRef.current(text),
       openArtifact: (artifact) => onOpenArtifactRef.current?.(artifact),
+      openArtifactList: () => onOpenArtifactListRef.current?.(),
     });
   }, []);
 
@@ -418,7 +424,6 @@ export function ChatView({
               messageActions={messageActions}
               callService={callService}
               onMessageAction={onMessageAction}
-              onOpenArtifact={onOpenArtifact}
             />
           ))
         )}

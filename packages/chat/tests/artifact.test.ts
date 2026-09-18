@@ -1,7 +1,7 @@
 import { describe, expect, it, vi } from 'vitest';
 
 import type { ChatArtifact } from '../src/index.js';
-import { ArtifactStore, collectArtifacts, isImageArtifact, mergeArtifacts, resolveArtifactFileType } from '../src/index.js';
+import { ArtifactStore, collectArtifacts, formatArtifactSize, isImageArtifact, mergeArtifacts, resolveArtifactFileType, resolveArtifactIcon, resolveArtifactIconName } from '../src/index.js';
 
 const MARKDOWN_ARTIFACT: ChatArtifact = {
   id: 'a1',
@@ -232,5 +232,92 @@ describe('resolveArtifactFileType / isImageArtifact（常见文件预览）', ()
       false,
     );
     expect(isImageArtifact(MARKDOWN_ARTIFACT)).toBe(false);
+  });
+});
+
+describe('resolveArtifactIconName（产物文件类型图标）', () => {
+  it('图片扩展名 → image', () => {
+    for (const ext of ['png', 'jpg', 'svg', 'webp']) {
+      expect(
+        resolveArtifactIconName({ ...MARKDOWN_ARTIFACT, title: `图.${ext}` }),
+      ).toBe('image');
+    }
+  });
+
+  it('扩展名分桶：文档 file-text / 表格 table / 代码 code / sql database', () => {
+    expect(
+      resolveArtifactIconName({ ...MARKDOWN_ARTIFACT, title: '月报.md' }),
+    ).toBe('file-text');
+    expect(
+      resolveArtifactIconName({ ...MARKDOWN_ARTIFACT, title: '数据.csv' }),
+    ).toBe('table');
+    expect(
+      resolveArtifactIconName({ ...MARKDOWN_ARTIFACT, title: '脚本.TS' }),
+    ).toBe('code');
+    expect(
+      resolveArtifactIconName({ ...MARKDOWN_ARTIFACT, title: '查询.sql' }),
+    ).toBe('database');
+  });
+
+  it('显式 fileType 参与图标解析（优先于 title）', () => {
+    expect(
+      resolveArtifactIconName({
+        ...MARKDOWN_ARTIFACT,
+        title: '无扩展名',
+        fileType: 'png',
+      }),
+    ).toBe('image');
+  });
+
+  it('无扩展名 / 未知扩展名按 kind 兜底，最终兜底 file', () => {
+    expect(
+      resolveArtifactIconName({ ...MARKDOWN_ARTIFACT, title: '无扩展名' }),
+    ).toBe('file-text');
+    expect(
+      resolveArtifactIconName({
+        ...MARKDOWN_ARTIFACT,
+        kind: 'code',
+        title: '无扩展名',
+      }),
+    ).toBe('code');
+    expect(
+      resolveArtifactIconName({
+        ...MARKDOWN_ARTIFACT,
+        kind: 'dsl',
+        title: '无扩展名',
+      }),
+    ).toBe('layout-grid');
+    expect(
+      resolveArtifactIconName({ ...MARKDOWN_ARTIFACT, title: '压缩包.zip' }),
+    ).toBe('file');
+  });
+});
+
+describe('resolveArtifactIcon（图标 + 着色档位）与 formatArtifactSize', () => {
+  it('tone 分桶：表格 green / 数据 amber / 代码 blue / 脚本 terminal / 图片 violet / 文档 slate', () => {
+    expect(resolveArtifactIcon({ ...MARKDOWN_ARTIFACT, title: '数据.csv' })).toEqual({ name: 'table', tone: 'green' });
+    expect(resolveArtifactIcon({ ...MARKDOWN_ARTIFACT, title: '配置.json' })).toEqual({ name: 'database', tone: 'amber' });
+    expect(resolveArtifactIcon({ ...MARKDOWN_ARTIFACT, title: '脚本.sh' })).toEqual({ name: 'terminal', tone: 'blue' });
+    expect(resolveArtifactIcon({ ...MARKDOWN_ARTIFACT, title: '组件.tsx' })).toEqual({ name: 'code', tone: 'blue' });
+    expect(resolveArtifactIcon({ ...MARKDOWN_ARTIFACT, title: '图.png' })).toEqual({ name: 'image', tone: 'violet' });
+    expect(resolveArtifactIcon({ ...MARKDOWN_ARTIFACT, title: '月报.md' })).toEqual({ name: 'file-text', tone: 'slate' });
+  });
+
+  it('kind 兜底带 tone；未知扩展名 file/slate', () => {
+    expect(
+      resolveArtifactIcon({ ...MARKDOWN_ARTIFACT, kind: 'code', title: '无扩展名' }),
+    ).toEqual({ name: 'code', tone: 'blue' });
+    expect(
+      resolveArtifactIcon({ ...MARKDOWN_ARTIFACT, title: '压缩包.zip' }),
+    ).toEqual({ name: 'file', tone: 'slate' });
+  });
+
+  it('formatArtifactSize：B / KB / MB 档位，非法输入返回 null', () => {
+    expect(formatArtifactSize(512)).toBe('512 B');
+    expect(formatArtifactSize(3584)).toBe('3.5 KB');
+    expect(formatArtifactSize(12 * 1024 * 1024)).toBe('12.0 MB');
+    expect(formatArtifactSize(-1)).toBeNull();
+    expect(formatArtifactSize('1KB')).toBeNull();
+    expect(formatArtifactSize(undefined)).toBeNull();
   });
 });

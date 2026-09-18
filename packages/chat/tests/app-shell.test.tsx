@@ -266,6 +266,13 @@ describe('对话列内间距契约（产物栏调宽时聊天区左右恒留 gut
       /\.pactor-chat-inspector-host__row > \.pactor-chat-inspector\s*\{[^}]*margin-left:\s*var\(--pactor-chat-content-gutter\)/,
     );
   });
+
+  it('面板宽度硬上限：max-width 2/3 兜底拖拽 inline 宽度（inline width 不能覆盖 max-width）', () => {
+    const css = readFileSync(join(__dirname, '../styles.css'), 'utf8');
+    expect(css).toMatch(
+      /\.pactor-chat-inspector\s*\{[^}]*max-width:\s*calc\(100% \* 2 \/ 3\)/,
+    );
+  });
 });
 
 describe('皮肤优先级契约（皮肤覆盖恒优先于 chat 默认值）', () => {

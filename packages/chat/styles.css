@@ -54,6 +54,17 @@
     transparent
   );
   --pactor-chat-code-bg: var(--muted, #f6f7f9);
+  /* 产出物卡片图标盒 tone 配色（表格 green / 数据 amber / 代码 blue /
+     图片 violet；文档与兜底走 --pactor-chat-muted(-fg) 不入列）。
+     暗色值见下方 [data-pactor-theme='dark'] 载体块 */
+  --pactor-chat-artifact-tone-green-fg: #16a34a;
+  --pactor-chat-artifact-tone-green-bg: #dcfce7;
+  --pactor-chat-artifact-tone-blue-fg: #2563eb;
+  --pactor-chat-artifact-tone-blue-bg: #dbeafe;
+  --pactor-chat-artifact-tone-amber-fg: #d97706;
+  --pactor-chat-artifact-tone-amber-bg: #fef3c7;
+  --pactor-chat-artifact-tone-violet-fg: #7c3aed;
+  --pactor-chat-artifact-tone-violet-bg: #ede9fe;
   /* 旧通用圆角令牌（保留兼容）；新组件改用下方圆角阶梯 */
   --pactor-chat-radius: 12px;
   /* 圆角阶梯：sm 控件 / md 卡片 / lg 气泡 / xl composer */
@@ -115,6 +126,15 @@
     0 1px 2px rgb(0 0 0 / 4%),
     0 12px 32px -10px rgb(0 0 0 / 55%);
   --pactor-chat-shell-scrim: rgb(0 0 0 / 55%);
+  /* 产出物卡片图标盒 tone 配色（暗色） */
+  --pactor-chat-artifact-tone-green-fg: #4ade80;
+  --pactor-chat-artifact-tone-green-bg: #14532d;
+  --pactor-chat-artifact-tone-blue-fg: #93c5fd;
+  --pactor-chat-artifact-tone-blue-bg: #1e3a8a;
+  --pactor-chat-artifact-tone-amber-fg: #fbbf24;
+  --pactor-chat-artifact-tone-amber-bg: #451a03;
+  --pactor-chat-artifact-tone-violet-fg: #c4b5fd;
+  --pactor-chat-artifact-tone-violet-bg: #2e1065;
 }
 
 /* 系统偏好暗色兜底：未显式设置 data-pactor-theme 时跟随系统
@@ -127,6 +147,15 @@
       0 1px 2px rgb(0 0 0 / 4%),
       0 12px 32px -10px rgb(0 0 0 / 55%);
     --pactor-chat-shell-scrim: rgb(0 0 0 / 55%);
+    /* 产出物卡片图标盒 tone 配色（暗色） */
+    --pactor-chat-artifact-tone-green-fg: #4ade80;
+    --pactor-chat-artifact-tone-green-bg: #14532d;
+    --pactor-chat-artifact-tone-blue-fg: #93c5fd;
+    --pactor-chat-artifact-tone-blue-bg: #1e3a8a;
+    --pactor-chat-artifact-tone-amber-fg: #fbbf24;
+    --pactor-chat-artifact-tone-amber-bg: #451a03;
+    --pactor-chat-artifact-tone-violet-fg: #c4b5fd;
+    --pactor-chat-artifact-tone-violet-bg: #2e1065;
   }
 }
 
@@ -192,7 +221,8 @@
 /* ------------------------------------------------------------
  * ChatWorkspace（spec: chat-dsl-page）：createChatWorkspace 工厂
  * 返回组件的外层容器 = 对话列（ChatView）；工作区头部（header）
- * 上移为全宽容器的直接子级，不随对话列限宽。
+ * 收进面板 host 的 __main 左列——面板打开时与对话区同宽（不覆盖
+ * 面板上方），面板关闭时随 __main 通栏；不随对话列限宽。
  * ------------------------------------------------------------ */
 
 .pactor-chat-workspace {
@@ -328,9 +358,9 @@
  * 面板关闭 / 未配置时不渲染 DOM（组合层保证）。
  * ------------------------------------------------------------ */
 
-/* 面板打开时的容器：header 通栏（host 直接子级）+ 行内容器
- * （workspace / AppShell 与面板 flex 并排）；host 在 shell content
- * 内撑满剩余高度与宽度 */
+/* 面板打开时的容器：行内容器 __row 承载左右两列——__main 左列
+ * （header + 对话区，同宽；header 不覆盖面板上方）与面板右列
+ * （独占全高）；host 在 shell content 内撑满剩余高度与宽度 */
 .pactor-chat-inspector-host {
   display: flex;
   flex-direction: column;
@@ -341,8 +371,8 @@
   background: var(--pactor-chat-bg);
 }
 
-/* host 行内容器：对话列与面板的 flex 行（gutter 契约挂在行上——
- * host padding 会同时作用于通栏 header） */
+/* host 行内容器：__main 左列与面板的 flex 行（gutter 契约挂在行上——
+ * __main 内的 header / 对话列共享行 padding 的左 gutter） */
 .pactor-chat-inspector-host__row {
   display: flex;
   flex: 1;
@@ -350,15 +380,20 @@
   min-height: 0;
 }
 
-/* 面板打开时行内直子：AppShell 填满剩余空间；workspace 只缩不伸，
- * 宽度受 --pactor-chat-content-width 限宽，margin auto 在剩余空间内居中 */
-.pactor-chat-inspector-host__row > .pactor-chat-shell {
+/* __main 左列：header + 主区（AppShell / workspace）纵向堆叠，
+ * 宽度 = 行宽减去面板宽（面板打开时 header 与对话区同宽） */
+.pactor-chat-inspector-host__main {
+  display: flex;
+  flex-direction: column;
   flex: 1;
   min-width: 0;
+  min-height: 0;
 }
 
-.pactor-chat-inspector-host__row > .pactor-chat-workspace {
-  flex: 0 1 auto;
+.pactor-chat-inspector-host__main > .pactor-chat-shell,
+.pactor-chat-inspector-host__main > .pactor-chat-workspace {
+  flex: 1;
+  min-height: 0;
   min-width: 0;
 }
 
@@ -379,8 +414,11 @@
   position: relative;
   display: flex;
   flex-direction: column;
-  /* 默认宽对齐对话列；上限 host 宽 2/3（与拖拽夹取一致），下限 min-width 令牌 */
+  /* 默认宽对齐对话列；上限 host 宽 2/3（与拖拽夹取一致），下限 min-width 令牌。
+   * max-width 是拖拽 inline 宽度的硬兜底：inline width 不能覆盖 max-width，
+   * 拖拽夹取偏差 / 拖拽后窗口尺寸变化时面板也不会突破 2/3 上限 */
   width: min(var(--pactor-chat-inspector-width), calc(100% * 2 / 3));
+  max-width: calc(100% * 2 / 3);
   min-width: var(--pactor-chat-inspector-min-width);
   flex-shrink: 0;
   border-left: 1px solid var(--pactor-chat-border);
@@ -424,9 +462,8 @@
   font-weight: 600;
 }
 
-/* kind 角标（与产出物卡片角标同款） */
-.pactor-chat-inspector__kind,
-.pactor-chat-artifact-card__kind {
+/* kind 角标 */
+.pactor-chat-inspector__kind {
   flex-shrink: 0;
   padding: 0 6px;
   border-radius: 999px;
@@ -599,8 +636,10 @@
     right: 0;
     z-index: 50;
     box-shadow: var(--pactor-chat-shadow-composer);
-    /* 抽屉形态：宽度不超出视口，下限令牌不适用 */
+    /* 抽屉形态：宽度不超出视口，下限令牌不适用；
+     * max-width 兜底拖拽残留的 inline 宽度（桌面拖拽后切窄屏） */
     width: min(var(--pactor-chat-inspector-width), 92vw);
+    max-width: 92vw;
     min-width: 0;
   }
 
@@ -616,23 +655,79 @@
 
 /* ------------------------------------------------------------
  * 产出物卡片（spec: chat-artifact-panel / artifact 消息 part）：
- * 消息流内 artifact part 的内联呈现——标题 + kind 角标 + 打开按钮。
+ * 消息流内 artifact part 的内联呈现——整卡可点击：着色图标盒
+ * （按文件类型 tone 取色）+ 标题 + 元信息行（尺寸 · 类型）+
+ * 右上箭头。结构与 ChatArtifactCard 内部组件一一对应。
  * ------------------------------------------------------------ */
 
 .pactor-chat-artifact-card {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 10px;
+  box-sizing: border-box;
+  width: 100%;
   margin: 8px 0;
-  padding: 10px 12px;
+  padding: 12px 14px;
   border: 1px solid var(--pactor-chat-border);
   border-radius: var(--pactor-chat-radius-md);
   background: var(--pactor-chat-card);
+  color: var(--pactor-chat-fg);
   box-shadow: var(--pactor-chat-shadow-sm);
+  font: inherit;
+  cursor: pointer;
+  text-align: left;
+  transition: background-color 0.15s ease;
+}
+
+.pactor-chat-artifact-card:hover {
+  background: var(--pactor-chat-muted);
+}
+
+/* 着色图标盒（36px 圆角盒；tone 着色，暗色值见下方覆盖块） */
+.pactor-chat-artifact-card__icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+  width: 36px;
+  height: 36px;
+  border-radius: var(--pactor-chat-radius-sm);
+  background: var(--pactor-chat-muted);
+  color: var(--pactor-chat-muted-fg);
+}
+
+/* 按文件类型着色（tone 见 artifact.ts resolveArtifactIcon；色值走
+ * --pactor-chat-artifact-tone-* 令牌，暗色经载体块覆盖、皮肤可精调）：
+ * 表格 green / 数据 amber / 代码 blue / 图片 violet / 文档与兜底 slate */
+.pactor-chat-artifact-card--green .pactor-chat-artifact-card__icon {
+  color: var(--pactor-chat-artifact-tone-green-fg);
+  background: var(--pactor-chat-artifact-tone-green-bg);
+}
+
+.pactor-chat-artifact-card--blue .pactor-chat-artifact-card__icon {
+  color: var(--pactor-chat-artifact-tone-blue-fg);
+  background: var(--pactor-chat-artifact-tone-blue-bg);
+}
+
+.pactor-chat-artifact-card--amber .pactor-chat-artifact-card__icon {
+  color: var(--pactor-chat-artifact-tone-amber-fg);
+  background: var(--pactor-chat-artifact-tone-amber-bg);
+}
+
+.pactor-chat-artifact-card--violet .pactor-chat-artifact-card__icon {
+  color: var(--pactor-chat-artifact-tone-violet-fg);
+  background: var(--pactor-chat-artifact-tone-violet-bg);
+}
+
+.pactor-chat-artifact-card__text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  flex: 1 1 auto;
+  min-width: 0;
 }
 
 .pactor-chat-artifact-card__title {
-  flex: 1;
   min-width: 0;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -641,23 +736,45 @@
   font-size: 13px;
 }
 
-.pactor-chat-artifact-card__open {
-  flex-shrink: 0;
+/* 元信息行（尺寸 · 类型标签） */
+.pactor-chat-artifact-card__meta {
+  font-size: 11px;
+  color: var(--pactor-chat-muted-fg);
+}
+
+/* 右上箭头（打开面板暗示） */
+.pactor-chat-artifact-card__arrow {
+  flex: none;
+  color: var(--pactor-chat-muted-fg);
+}
+
+/* 连续产物卡片组（spec: chat-artifact-panel / 卡片区收起）：
+ * 同一消息内连续 artifact part 合组；超 4 个收起，footer 右端
+ * 「展开 / 收起」+「查看所有产物(n) ›」（打开面板产物目录视图） */
+.pactor-chat-artifact-group__footer {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 12px;
+  margin: -2px 0 8px;
+}
+
+.pactor-chat-artifact-group__toggle,
+.pactor-chat-artifact-group__all {
   display: inline-flex;
   align-items: center;
-  gap: 4px;
-  white-space: nowrap;
-  padding: 4px 10px;
-  border: 1px solid var(--pactor-chat-border);
+  gap: 3px;
+  padding: 2px 4px;
+  border: none;
   border-radius: var(--pactor-chat-radius-sm);
   background: transparent;
   color: var(--pactor-chat-primary);
   font-size: 12px;
   cursor: pointer;
-  transition: background 0.15s ease;
 }
 
-.pactor-chat-artifact-card__open:hover {
+.pactor-chat-artifact-group__toggle:hover,
+.pactor-chat-artifact-group__all:hover {
   background: var(--pactor-chat-muted);
 }
 
@@ -783,7 +900,7 @@
   display: flex;
   flex-direction: column;
   gap: 16px;
-  padding: 24px 2px 4px;
+  padding: 24px 2px;
   scrollbar-width: thin;
   scrollbar-color: var(--pactor-chat-border) transparent;
   -webkit-mask-image: linear-gradient(
@@ -959,8 +1076,6 @@
 .pactor-chat-message__actions {
   display: flex;
   gap: 4px;
-
-  opacity: 0;
   transition: opacity 0.15s ease;
 }
 
@@ -984,7 +1099,6 @@
 .pactor-chat-message__time {
   flex-shrink: 0;
   color: var(--pactor-chat-muted-fg);
-  font-size: 11px;
   line-height: 18px;
 }
 

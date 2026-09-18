@@ -5,12 +5,46 @@ import type {
   BuiltinMessageAction,
   ChatMessage,
   ChatMessageAction,
+  ChatPart,
 } from '../model.js';
 import type { ChatRuntime, ChatScope } from '../scope.js';
 import { ActivityTrace } from './ActivityTrace.js';
+import {
+  ARTIFACT_CARD_INTERNAL_COMPONENTS,
+  buildArtifactCardGroupFragment,
+  ChatArtifactCardGroup,
+} from './chrome/artifact-card.js';
+import { ChromeSlot } from './chrome/ChromeSlot.js';
 import type { CallChatService } from './context-sources.js';
 import { collectMessageText, MessageActions } from './MessageActions.js';
 import { PartRenderer } from './PartRenderer.js';
+
+/** 消息正文渲染段：单个 part，或连续 artifact part 归并的产物卡片组 */
+export type MessagePartSegment = ChatPart | ChatArtifact[];
+
+/**
+ * 连续 artifact part 归并（spec: chat-artifact-panel / 卡片区收起）：
+ * 同一消息内相邻的 artifact part 合成一个卡片组（组内超 4 个由
+ * ChatArtifactCardGroup 收起），非 artifact part 保持原位原序。
+ */
+export function groupArtifactParts(
+  parts: readonly ChatPart[],
+): MessagePartSegment[] {
+  const segments: MessagePartSegment[] = [];
+  for (const part of parts) {
+    if (part.type === 'artifact' && part.artifact) {
+      const last = segments[segments.length - 1];
+      if (Array.isArray(last)) {
+        last.push(part.artifact);
+      } else {
+        segments.push([part.artifact]);
+      }
+    } else {
+      segments.push(part);
+    }
+  }
+  return segments;
+}
 
 /**
  * MessageBubble：按 role 区分呈现（参考 DeepTutor web 消息区设计）——
@@ -47,8 +81,6 @@ export interface MessageBubbleProps {
   callService?: CallChatService;
   /** 全部动作（含内建）点击的并行通知 */
   onMessageAction?: (actionId: string, message: ChatMessage) => void;
-  /** artifact 卡片"在面板中打开"回调（透传 PartRenderer） */
-  onOpenArtifact?: (artifact: ChatArtifact) => void;
 }
 
 /**
@@ -135,7 +167,6 @@ export function MessageBubble({
   messageActions,
   callService,
   onMessageAction,
-  onOpenArtifact,
 }: MessageBubbleProps) {
   const [editing, setEditing] = useState(false);
   const bubbleScope: ChatScope = {
@@ -189,16 +220,24 @@ export function MessageBubble({
           message.role !== 'assistant' ? (
             <span className="pactor-chat-message__pending">…</span>
           ) : (
-            message.parts.map((part, index) => (
-              <PartRenderer
-                key={part.id ?? index}
-                part={part}
-                runtime={runtime}
-                scope={bubbleScope}
-                streaming={streaming}
-                onOpenArtifact={onOpenArtifact}
-              />
-            ))
+            groupArtifactParts(message.parts).map((segment, index) =>
+              Array.isArray(segment) ? (
+                <ChromeSlot
+                  key={`artifacts:${segment[0]!.id}`}
+                  fragment={buildArtifactCardGroupFragment(segment)}
+                  components={ARTIFACT_CARD_INTERNAL_COMPONENTS}
+                  fallback={<ChatArtifactCardGroup artifacts={segment} />}
+                />
+              ) : (
+                <PartRenderer
+                  key={segment.id ?? index}
+                  part={segment}
+                  runtime={runtime}
+                  scope={bubbleScope}
+                  streaming={streaming}
+                />
+              ),
+            )
           )}
         </div>
       )}
