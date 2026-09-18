@@ -64,7 +64,7 @@ SHALL 导出 `ChatServicesProvider` 与 `useChatServices()`：宿主在应用根
 
 ### Requirement: Header 配置
 
-`Chat` SHALL 支持 header 三层配置：`title?` 标量（内建 header 标题）；`headerExtra?: DslNode`（标题右侧槽，经 renderChildren 渲染）；`header?: DslNode`（整体替换内建 header）；`showHeader?: false` 关闭 header。DslNode 槽仅在页面运行时可渲染；纯 React 使用时对应 props SHALL 接受 ReactNode。
+`Chat` SHALL 支持 header 三层配置：`title?` 标量（内建 header 标题）；`headerExtra?: DslNode`（标题右侧槽，经 renderChildren 渲染）；`header?: DslNode`（整体替换内建 header）；`showHeader?: false` 关闭 header。DslNode 槽仅在页面运行时可渲染；纯 React 使用时对应 props SHALL 接受 ReactNode。header SHALL 渲染为全宽容器（产物面板 host / with-header 包裹层）的直接子级，不随对话列限宽——产物面板调宽时 header 保持通栏。
 
 内建 header SHALL 支持操作组配置 `headerActions?: ('export' | 'theme' | 'clear')[]`：按数组顺序在内建 header 右侧（headerExtra 槽之前）渲染对应图标按钮——export 将当前会话消息序列化为 Markdown 并触发下载；theme 切换 `document.documentElement` 的 `data-pactor-theme`；clear 清空当前会话 store。各操作 SHALL 同时触发并行事件（`events.onExport` / `onThemeChange`（event.theme）/ `onClear`），事件为通知语义，默认行为总在包内执行。`Chat` SHALL 支持 `editableTitle?: boolean`：开启后点击标题进入编辑，Enter / blur 提交并触发 `events.onTitleChange`（event.title）。`headerActions` 缺省时不渲染任何操作按钮。
 
@@ -134,6 +134,8 @@ ChatShell SHALL 支持侧栏增强（设计决策 D3/D4）：`brand` 提供时�
 
 `Chat` SHALL 支持产出物面板的受控配置：`artifact?: ChatArtifact` 与 `panelOpen?: boolean` 可绑 DSL state（`${state.x}`）；`events.onPanelClose` 在面板关闭按钮/遮罩点击时触发（典型接法：setState panelOpen=false）。受控 props 提供时以其为准；未提供时由内部 ArtifactStore 状态驱动。`inspector?: DslNode`（或 ReactNode）槽提供时 SHALL 整体替代面板内建渲染器。
 
+多产物场景下，面板切换下拉与目录列表的产物清单 SHALL 由组合层自动从会话消息流归集（受控 / 非受控一致，无需 DSL 接线），`artifacts?: ChatArtifact[]` 可显式覆盖；下拉 / 目录列表点击切换 SHALL 触发 `events.onSelectArtifact`（event 作用域含 `artifact`），受控 DSL 场景的典型接法为 setState 写 artifact。
+
 #### Scenario: 受控开关闭环
 
 - **WHEN** DSL 将 panelOpen 绑定 ${state.panelOpen} 且 onPanelClose 配 setState，点击关闭按钮
@@ -143,6 +145,11 @@ ChatShell SHALL 支持侧栏增强（设计决策 D3/D4）：`brand` 提供时�
 
 - **WHEN** DSL 提供 inspector DslNode 槽
 - **THEN** 面板内容区渲染该节点而非内建渲染器
+
+#### Scenario: tab / 目录列表切换产物
+
+- **WHEN** 会话含多个 artifact part 且 DSL 配置 onSelectArtifact 为 setState 动作链，点击面板 tab 或目录列表项
+- **THEN** 动作以 event.artifact 为被选中产出物数据执行
 
 ### Requirement: 产出物事件
 

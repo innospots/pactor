@@ -37,8 +37,8 @@ const safeRegistry = createSafeRegistry(createComponentRegistry(), [
 ### 消息渲染
 
 - **富内容 part**：文本 / markdown（安全渲染）/ DSL（LLM 下发的界面片段，Safe Registry 白名单渲染）/ 思考过程（折叠卡）/ 工具调用与结果（配对的活动轨迹）/ 错误 / 状态提示；
-- **活动轨迹**：assistant 消息顶部的流式状态头（呼吸文案 + 计时）+ 工具调用配对条目，进入答案阶段自动折叠；
-- **消息操作条**：hover 显现，内建复制 / 重新生成 / 编辑重发 / 重试；`messageActions` 声明式配置——数组即真相，可覆盖内建字段或追加自定义动作（经服务桥派发）；
+- **活动轨迹**：assistant 消息顶部的流式状态头（呼吸文案 + 计时）+ 工具调用配对条目 + 思考过程折叠卡（与工具列表为独立块）；状态头统一折叠/展开全部内容，进入答案阶段自动折叠（带单向闩锁——流式期间模式回跳不反复展开折叠）；
+- **消息操作条**：hover 显现，内建复制 / 重新生成 / 编辑重发 / 重试；`messageActions` 声明式配置——数组即真相，可覆盖内建字段或追加自定义动作（经服务桥派发）；assistant 终态消息底部常显时间戳（当天 HH:mm、非当天带日期）；
 - **空态与建议**：空会话渲染问候语 + 副标题 + 起始建议（点击即发送），问候组与输入框垂直居中；首条消息进入后恢复消息列表 + 钉底输入框。
 
 ### 流式交互
@@ -57,7 +57,13 @@ const safeRegistry = createSafeRegistry(createComponentRegistry(), [
 
 ### 产出物面板（Inspector）
 
-右侧预览面板承载 LLM 的结果物（报告、代码、页面片段）：markdown / code / text / dsl 四种内建渲染；消息流内产出物卡片可"在面板中打开"；桌面固定宽右栏（左缘可拖拽调宽），窄屏退化为覆盖抽屉；`artifact` / `panelOpen` 支持受控配置。
+右侧预览面板承载 LLM 的结果物（报告、代码、页面片段、图片）：
+
+- **内建渲染**：markdown / code / text / dsl 四种 kind；图片类文件（png / jpg / svg / webp 等，经 `fileType` 或 title 扩展名识别）按图片预览——content 为 URL / data URL，svg 另支持原始标记；
+- **自定义查看器**：`artifactViewers`（服务注入，函数不进 DSL props）按扩展名 / kind 对特定文件格式提供自定义预览，优先于内建渲染；
+- **下载**：header 右端下载钮把当前激活产物存为本地文件（文本类按 fileType / kind 补扩展名，dsl 存 JSON，svg 原始标记存 .svg，图片 URL 经 fetch 取回、失败降级新标签打开）；
+- **多产物**：header 文件名处为切换下拉（图标 + 名称，点击列出全部产物）；左端目录钮切换产物目录列表视图（按产物 id 的 `/` 分段建目录树），列表视图下目录钮隐藏、文件名处显示"产物目录"，点选产物即回内容视图。产物列表缺省由组合层自动从会话消息流归集（受控 / 非受控一致），受控 DSL 侧接 `events.onSelectArtifact`（`setState artifact=${event.artifact}`）完成切换闭环；
+- **布局**：桌面固定宽右栏，默认宽与对话列一致（`--pactor-chat-content-width`），左缘可拖拽调宽（夹取 `--pactor-chat-inspector-min-width` 480px ~ 页面宽 2/3）；面板背景 `--pactor-chat-inspector-bg` 略深于聊天区底色；面板调宽时聊天区左右恒保留 `--pactor-chat-content-gutter` 内间距；窄屏退化为覆盖抽屉；`artifact` / `panelOpen` 支持受控配置。
 
 ### 菜单外壳（ChatShell / AppShell）
 
@@ -125,14 +131,14 @@ body:
 
 | 分组 | props / 事件 |
 | --- | --- |
-| 头部 | `title` / `headerExtra` / `header` / `showHeader` / `headerActions` / `editableTitle`（头部按内容自动渲染，无内容不渲染） |
+| 头部 | `title` / `headerExtra` / `header` / `showHeader` / `headerActions` / `editableTitle`（头部按内容自动渲染，无内容不渲染；header 通栏于工作区与产物面板之上，不随对话列限宽） |
 | 侧栏 | `menu` / `activeMenuKey` / `sidebar`（替代槽），事件 `onMenuSelect` |
 | 空态 | `greeting` / `subtitle` / `suggestions` |
 | 模型 | `models` / `model` / `modelPlacement`，事件 `onModelChange` |
 | 上下文 | `contexts`，事件 `onContextsChange` |
 | 消息操作 | `messageActions`，事件 `onMessageAction` |
 | Composer | `toolbarStart` / `toolbarEnd` / `composerFooter` / `composerBottom` / `hideToolbar` |
-| 产出物面板 | `artifact` / `panelOpen` / `inspector`，事件 `onArtifact` / `onPanelClose` / `onOpenArtifact` |
+| 产出物面板 | `artifact` / `panelOpen` / `inspector` / `artifacts`，事件 `onArtifact` / `onPanelClose` / `onOpenArtifact` / `onSelectArtifact` |
 
 事件均为并行通知，内建默认行为总在包内执行。完整装配参考 `examples/chat`。
 

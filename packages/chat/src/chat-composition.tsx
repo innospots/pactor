@@ -3,13 +3,14 @@ import { useRenderer } from '@pactor-app/runtime';
 import {
   Component,
   isValidElement,
+  useMemo,
   useRef,
   useState,
   useSyncExternalStore,
   type ReactNode,
 } from 'react';
 
-import { ArtifactStore, type ChatArtifact } from './artifact.js';
+import { ArtifactStore, collectArtifacts, mergeArtifacts, type ChatArtifact } from './artifact.js';
 import type { ChatWorkspaceServices } from './chat-workspace.js';
 import { useChatModel } from './hooks/use-chat-model.js';
 import type {
@@ -186,6 +187,13 @@ export interface ChatCompositionProps {
    */
   artifact?: ChatArtifact | null;
   panelOpen?: boolean;
+  /**
+   * 多产物列表（tabs / 目录列表视图数据源）：非受控时缺省取内部
+   * ArtifactStore 的列表；受控场景由宿主注入（配合 onSelectArtifact）
+   */
+  artifacts?: ChatArtifact[];
+  /** tab / 目录列表点击切换回调；受控场景的典型接法：setState artifact=... */
+  onSelectArtifact?: (artifact: ChatArtifact) => void;
   /** 面板关闭按钮 / 窄屏遮罩点击回调（DSL 侧典型接法：setState panelOpen=false） */
   onPanelClose?: () => void;
   /** 面板内容槽：提供时整体替代内建渲染器（标题栏保留） */
@@ -242,6 +250,8 @@ export function ChatComposition({
   onSend,
   artifact,
   panelOpen,
+  artifacts: artifactsProp,
+  onSelectArtifact,
   onPanelClose,
   inspector,
   onArtifact,
@@ -269,12 +279,36 @@ export function ChatComposition({
     (listener) => artifactStore.subscribe(listener),
     () => artifactStore.get(),
   );
+  // 多产物列表：tabs / 目录列表视图的数据源——消息流归集为主
+  // （受控 / 非受控一致），合并 store 打开记录（流式补丁版本优先）。
+  // 消息数组引用不变时 useMemo 结果稳定（快照安全）
+  const storeArtifacts = useSyncExternalStore(
+    (listener) => artifactStore.subscribe(listener),
+    () => artifactStore.list(),
+  );
+  const messages = useSyncExternalStore(
+    (listener) => store.subscribe(listener),
+    () => store.getMessages(),
+  );
+  const streamArtifacts = useMemo(() => collectArtifacts(messages), [messages]);
+  const mergedArtifacts = useMemo(
+    () => mergeArtifacts(streamArtifacts, storeArtifacts),
+    [streamArtifacts, storeArtifacts],
+  );
   const effectiveArtifact = panelControlled
     ? (artifact ?? null)
     : storeArtifact;
   const effectivePanelOpen = panelControlled
     ? (panelOpen ?? artifact != null)
     : storeArtifact !== null;
+  const effectiveArtifacts = artifactsProp ?? mergedArtifacts;
+  const handleSelectArtifact = (next: ChatArtifact): void => {
+    onSelectArtifact?.(next);
+    if (!panelControlled) {
+      // open = upsert + 激活：流内未打开过的产物一并入列
+      artifactStore.open(next);
+    }
+  };
 
   // 关闭：受控只回调（面板不单方面改外部状态）；非受控同时落 store
   const handlePanelClose = (): void => {
@@ -376,26 +410,29 @@ export function ChatComposition({
         headerModelChip !== undefined;
   const renderHeader = showHeader !== false && hasHeaderContent;
 
+  // header 不随对话列限宽：上移为全宽容器（host / with-header 包裹层）
+  // 的直接子级，产物面板调宽时保持通栏
+  const workspaceHeader = renderHeader
+    ? (header ?? (
+        <WorkspaceHeader
+          title={title}
+          headerExtra={headerExtra}
+          headerActions={headerActions}
+          editableTitle={editableTitle}
+          headerStart={headerModelChip}
+          store={store}
+          onExport={onExport}
+          onThemeChange={onThemeChange}
+          onClear={onClear}
+          onTitleChange={onTitleChange}
+        />
+      ))
+    : null;
+
   const workspace = (
     <div
       className={`pactor-chat-workspace${className ? ` ${className}` : ''}`}
     >
-      {renderHeader ? (
-        (header ?? (
-          <WorkspaceHeader
-            title={title}
-            headerExtra={headerExtra}
-            headerActions={headerActions}
-            editableTitle={editableTitle}
-            headerStart={headerModelChip}
-            store={store}
-            onExport={onExport}
-            onThemeChange={onThemeChange}
-            onClear={onClear}
-            onTitleChange={onTitleChange}
-          />
-        ))
-      ) : null}
       <ChatView
         store={store}
         transport={services.transport}
@@ -458,27 +495,41 @@ export function ChatComposition({
     onOpenArtifact !== undefined ||
     services.artifactStore !== undefined;
   if (!panelFeatureUsed && !effectivePanelOpen) {
-    return main;
+    return workspaceHeader ? (
+      <div className="pactor-chat-with-header">
+        {workspaceHeader}
+        {main}
+      </div>
+    ) : (
+      main
+    );
   }
   return (
     <div className="pactor-chat-inspector-host">
-      {main}
-      {effectivePanelOpen ? (
-        <>
-          <div
-            className="pactor-chat-inspector__scrim"
-            aria-hidden
-            onClick={handlePanelClose}
-          />
-          <ArtifactPanel
-            artifact={effectiveArtifact}
-            inspector={inspector}
-            onClose={handlePanelClose}
-            safeRegistry={services.safeRegistry}
-            user={services.user}
-          />
-        </>
-      ) : null}
+      {workspaceHeader}
+      <div className="pactor-chat-inspector-host__row">
+        {main}
+        {effectivePanelOpen ? (
+          <>
+            <div
+              className="pactor-chat-inspector__scrim"
+              aria-hidden
+              onClick={handlePanelClose}
+            />
+            <ArtifactPanel
+              artifact={effectiveArtifact}
+              artifacts={effectiveArtifacts}
+              activeArtifactId={effectiveArtifact?.id}
+              onSelectArtifact={handleSelectArtifact}
+              inspector={inspector}
+              onClose={handlePanelClose}
+              safeRegistry={services.safeRegistry}
+              user={services.user}
+              artifactViewers={services.artifactViewers}
+            />
+          </>
+        ) : null}
+      </div>
     </div>
   );
 }

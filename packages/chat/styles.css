@@ -75,10 +75,22 @@
      默认 3rem），theme-studio 生成的皮肤可直接覆盖两者 */
   --pactor-chat-shell-topbar-height: 44px;
   --pactor-chat-shell-scrim: rgb(0 0 0 / 40%);
-  /* 产出物面板（spec: chat-artifact-panel）：桌面固定宽右栏 */
-  --pactor-chat-inspector-width: 320px;
+  /* 产出物面板（spec: chat-artifact-panel）：桌面固定宽右栏。
+     默认宽与对话列一致（--pactor-chat-content-width），
+     宽度夹取 [--pactor-chat-inspector-min-width, host 宽 2/3]；
+     背景略深于聊天区底色，视觉上与消息流区分 */
+  --pactor-chat-inspector-width: var(--pactor-chat-content-width);
+  --pactor-chat-inspector-min-width: 480px;
+  --pactor-chat-inspector-bg: color-mix(
+    in srgb,
+    var(--pactor-chat-bg) 96%,
+    black
+  );
   /* 对话列限宽居中（spec: chat-app-shell 嵌入契约）：置 none 关闭限宽 */
   --pactor-chat-content-width: 768px;
+  /* 对话列左右最小内间距（spec: chat-artifact-panel / 拖拽调宽）：
+     面板调宽挤压剩余空间时，对话列左右始终保留该间距 */
+  --pactor-chat-content-gutter: 16px;
 }
 
 .pactor-chat-view {
@@ -179,7 +191,8 @@
 
 /* ------------------------------------------------------------
  * ChatWorkspace（spec: chat-dsl-page）：createChatWorkspace 工厂
- * 返回组件的外层容器 = 可选头部（title + headerExtra）+ ChatView。
+ * 返回组件的外层容器 = 对话列（ChatView）；工作区头部（header）
+ * 上移为全宽容器的直接子级，不随对话列限宽。
  * ------------------------------------------------------------ */
 
 .pactor-chat-workspace {
@@ -188,13 +201,30 @@
   height: 100%;
   min-height: 0;
   /* 对话列缺省限宽居中（spec: chat-app-shell 嵌入契约）：
-   * shell content / 面板 host / 独立块级容器三场景统一生效 */
-  width: 100%;
+   * shell content / 面板 host / 独立块级容器三场景统一生效。
+   * width 用 calc 预留 gutter——产物栏调宽挤压时，max-width 限宽
+   * 失效（剩余空间不足）后左右仍恒保留 --pactor-chat-content-gutter
+   * 内间距，不会贴到容器边缘或面板分隔线 */
+  width: calc(100% - 2 * var(--pactor-chat-content-gutter));
   max-width: var(--pactor-chat-content-width);
   margin-inline: auto;
   color: var(--pactor-chat-fg);
   font-size: 14px;
   line-height: 1.6;
+}
+
+/* header 承载容器（无产物面板路径）：header 通栏 + 主区填满剩余高度 */
+.pactor-chat-with-header {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 0;
+}
+
+.pactor-chat-with-header > .pactor-chat-shell,
+.pactor-chat-with-header > .pactor-chat-workspace {
+  flex: 1;
+  min-height: 0;
 }
 
 .pactor-chat-workspace__header {
@@ -298,10 +328,12 @@
  * 面板关闭 / 未配置时不渲染 DOM（组合层保证）。
  * ------------------------------------------------------------ */
 
-/* 面板打开时的同行容器：workspace（或 AppShell）与面板 flex 并排，
- * host 在 shell content 内撑满剩余高度与宽度 */
+/* 面板打开时的容器：header 通栏（host 直接子级）+ 行内容器
+ * （workspace / AppShell 与面板 flex 并排）；host 在 shell content
+ * 内撑满剩余高度与宽度 */
 .pactor-chat-inspector-host {
   display: flex;
+  flex-direction: column;
   flex: 1;
   width: 100%;
   min-height: 0;
@@ -309,26 +341,50 @@
   background: var(--pactor-chat-bg);
 }
 
-/* 面板打开时 host 内的直子：AppShell 填满剩余空间；workspace 只缩不伸，
+/* host 行内容器：对话列与面板的 flex 行（gutter 契约挂在行上——
+ * host padding 会同时作用于通栏 header） */
+.pactor-chat-inspector-host__row {
+  display: flex;
+  flex: 1;
+  width: 100%;
+  min-height: 0;
+}
+
+/* 面板打开时行内直子：AppShell 填满剩余空间；workspace 只缩不伸，
  * 宽度受 --pactor-chat-content-width 限宽，margin auto 在剩余空间内居中 */
-.pactor-chat-inspector-host > .pactor-chat-shell {
+.pactor-chat-inspector-host__row > .pactor-chat-shell {
   flex: 1;
   min-width: 0;
 }
 
-.pactor-chat-inspector-host > .pactor-chat-workspace {
+.pactor-chat-inspector-host__row > .pactor-chat-workspace {
   flex: 0 1 auto;
   min-width: 0;
+}
+
+/* 对话列左右最小内间距（gutter 契约，spec: chat-artifact-panel / 拖拽调宽）：
+ * 对话列自身的 calc 宽度在 flex 行内会把面板宽度一并计入 100% 基准，
+ * shrink 后 margin auto 塌到 0；因此面板打开时的 gutter 由容器侧保证——
+ * 左：row padding-left；右：面板 margin-left（对话列与分隔线的间距）。
+ * 面板关闭（:has 不命中）时不加 row padding，避免与对话列 calc 重复计算 */
+.pactor-chat-inspector-host__row:has(> .pactor-chat-inspector) {
+  padding-left: var(--pactor-chat-content-gutter);
+}
+
+.pactor-chat-inspector-host__row > .pactor-chat-inspector {
+  margin-left: var(--pactor-chat-content-gutter);
 }
 
 .pactor-chat-inspector {
   position: relative;
   display: flex;
   flex-direction: column;
-  width: var(--pactor-chat-inspector-width);
+  /* 默认宽对齐对话列；上限 host 宽 2/3（与拖拽夹取一致），下限 min-width 令牌 */
+  width: min(var(--pactor-chat-inspector-width), calc(100% * 2 / 3));
+  min-width: var(--pactor-chat-inspector-min-width);
   flex-shrink: 0;
   border-left: 1px solid var(--pactor-chat-border);
-  background: var(--pactor-chat-bg);
+  background: var(--pactor-chat-inspector-bg);
   color: var(--pactor-chat-fg);
   font-size: 14px;
   line-height: 1.6;
@@ -384,6 +440,92 @@
   flex-shrink: 0;
 }
 
+.pactor-chat-inspector__list-toggle {
+  flex-shrink: 0;
+}
+
+/* 产物切换下拉（spec: chat-artifact-panel / 多产物切换）：
+ * header 文件名处触发器（图标 + 名称 + chevron），占用标题区剩余宽度 */
+.pactor-chat-inspector__header .dropdown-menu-trigger-wrap {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+}
+
+.pactor-chat-inspector__menu-trigger {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+  max-width: 100%;
+  padding: 3px 6px;
+  border-radius: var(--pactor-chat-radius-sm);
+  cursor: pointer;
+  color: var(--pactor-chat-fg);
+}
+
+.pactor-chat-inspector__menu-trigger:hover {
+  background: var(--pactor-chat-muted);
+}
+
+.pactor-chat-inspector__menu-trigger .pactor-chat-inspector__title {
+  min-width: 0;
+}
+
+/* 产物目录列表视图（spec: chat-artifact-panel / 产物目录）：
+ * 目录（可折叠）+ 产物行（kind 图标 + 名称 + kind 角标） */
+.pactor-chat-inspector__list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.pactor-chat-inspector__list-children {
+  padding-left: 18px;
+}
+
+.pactor-chat-inspector__list-folder,
+.pactor-chat-inspector__list-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 7px 8px;
+  border: none;
+  border-radius: var(--pactor-chat-radius-sm);
+  background: transparent;
+  color: var(--pactor-chat-fg);
+  font-size: 13px;
+  text-align: left;
+  cursor: pointer;
+}
+
+.pactor-chat-inspector__list-folder {
+  color: var(--pactor-chat-muted-fg);
+}
+
+.pactor-chat-inspector__list-folder:hover,
+.pactor-chat-inspector__list-item:hover {
+  background: var(--pactor-chat-muted);
+}
+
+.pactor-chat-inspector__list-item[data-active='true'] {
+  background: var(--pactor-chat-muted);
+  font-weight: 600;
+}
+
+.pactor-chat-inspector__list-folder[data-open='true'] .pactor-chat-trace__chevron {
+  transform: rotate(90deg);
+}
+
+.pactor-chat-inspector__list-item-title {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 .pactor-chat-inspector__body {
   flex: 1;
   min-height: 0;
@@ -394,6 +536,20 @@
 /* code 产出物：只读代码块（language 右上角标，不引高亮依赖） */
 .pactor-chat-inspector__code {
   position: relative;
+}
+
+/* 图片类产出物（spec: chat-artifact-panel / 常见文件预览）：
+ * 居中自适应面板宽；svg 原始标记经 data URL 呈现 */
+.pactor-chat-inspector__image {
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+}
+
+.pactor-chat-inspector__image img {
+  max-width: 100%;
+  height: auto;
+  border-radius: var(--pactor-chat-radius-sm);
 }
 
 .pactor-chat-inspector__code pre {
@@ -443,6 +599,9 @@
     right: 0;
     z-index: 50;
     box-shadow: var(--pactor-chat-shadow-composer);
+    /* 抽屉形态：宽度不超出视口，下限令牌不适用 */
+    width: min(var(--pactor-chat-inspector-width), 92vw);
+    min-width: 0;
   }
 
   /* 窄屏覆盖抽屉形态：不显示拖拽手柄（spec scenario: 窄屏无拖拽手柄） */
@@ -800,6 +959,7 @@
 .pactor-chat-message__actions {
   display: flex;
   gap: 4px;
+
   opacity: 0;
   transition: opacity 0.15s ease;
 }
@@ -812,6 +972,20 @@
 /* error 消息的重试入口常显（不依赖 hover） */
 .pactor-chat-message__actions--visible {
   opacity: 1;
+}
+
+/* assistant 终态消息底部行：操作条 + 常显时间戳 */
+.pactor-chat-message__footer {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.pactor-chat-message__time {
+  flex-shrink: 0;
+  color: var(--pactor-chat-muted-fg);
+  font-size: 11px;
+  line-height: 18px;
 }
 
 /* user 消息内联编辑框（编辑重发） */
@@ -1725,14 +1899,27 @@ button.pactor-chat-trace__header:hover,
   margin: 1em 0;
 }
 
+.pactor-markdown h3 {
+  font-size: 1.1em;
+}
+
 .pactor-markdown h2 {
-  font-size: 1.2rem;
-  font-weight: 600;
+  font-size: 1.2em;
 }
 
 .pactor-markdown h1 {
   font-size: 1.3rem;
+}
+
+.pactor-markdown h1,
+.pactor-markdown h2,
+.pactor-markdown h3,
+.pactor-markdown h4,
+.pactor-markdown h5,
+.pactor-markdown h6 {
   font-weight: 600;
+  margin-top: .5em;
+  margin-bottom: .5em;
 }
 
 .pactor-chat-thinking {

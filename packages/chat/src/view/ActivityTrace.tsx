@@ -25,7 +25,9 @@ import { useThrottledValue } from '../hooks/use-throttled-value.js';
  *   答案阶段自动折叠，用户操作后 pin。
  *
  * 折叠状态机（每条消息独立，随组件实例记忆）：`auto | pinned-open |
- * pinned-closed`——auto 跟随流式阶段；用户点击后 pin，不再自动变更。
+ * pinned-closed`——auto 跟随流式阶段但带单向闩锁（自动折叠一次后
+ * 不再自动展开，防止 mode 回跳引起展开/折叠闪烁）；用户点击后 pin，
+ * 不再自动变更。
  */
 
 export interface ActivityTraceProps {
@@ -35,12 +37,24 @@ export interface ActivityTraceProps {
 /** 折叠状态机（D4）：auto 跟随 autoOpen；pin 后不再自动变更 */
 type TraceCollapse = 'auto' | 'pinned-open' | 'pinned-closed';
 
+/**
+ * auto 档单向闩锁：见过一次自动折叠后即锁定折叠——流式期间 mode 在
+ * reasoning/tool/responding 间回跳（正文流式中又来工具调用 / 思考）时，
+ * 展开 ↔ 折叠不反复切换（闪烁）；用户手动 toggle 仍可 pin 展开
+ */
 function usePinnedCollapse(autoOpen: boolean): {
   open: boolean;
   toggle: () => void;
 } {
   const [state, setState] = useState<TraceCollapse>('auto');
-  const open = state === 'auto' ? autoOpen : state === 'pinned-open';
+  const autoCollapsedRef = useRef(false);
+  if (state === 'auto' && !autoOpen) {
+    autoCollapsedRef.current = true;
+  }
+  const open =
+    state === 'auto'
+      ? autoOpen && !autoCollapsedRef.current
+      : state === 'pinned-open';
   const toggle = (): void => {
     setState(open ? 'pinned-closed' : 'pinned-open');
   };

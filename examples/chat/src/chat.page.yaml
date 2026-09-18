@@ -124,6 +124,11 @@ body:
         params:
           artifact: ${event.artifact}
           panelOpen: true
+    # 面板 tab / 目录列表点击切换产物：受控闭环
+    onSelectArtifact:
+      - action: setState
+        params:
+          artifact: ${event.artifact}
     # 模型切换：受控闭环（event.model 回写 state.model）
     onModelChange:
       - action: setState
