@@ -617,6 +617,9 @@
   .min-h-svh {
     min-height: 100svh;
   }
+  .w-\(--anchor-width\) {
+    width: var(--anchor-width);
+  }
   .w-\(--sidebar-width\) {
     width: var(--sidebar-width);
   }
@@ -634,6 +637,9 @@
   }
   .w-5 {
     width: calc(var(--spacing) * 5);
+  }
+  .w-7 {
+    width: calc(var(--spacing) * 7);
   }
   .w-8 {
     width: calc(var(--spacing) * 8);
@@ -671,9 +677,6 @@
   .w-80 {
     width: calc(var(--spacing) * 80);
   }
-  .w-\[--anchor-width\] {
-    width: --anchor-width;
-  }
   .w-\[100px\] {
     width: 100px;
   }
@@ -709,6 +712,9 @@
   }
   .max-w-sm {
     max-width: var(--container-sm);
+  }
+  .min-w-\(--anchor-width\) {
+    min-width: var(--anchor-width);
   }
   .min-w-0 {
     min-width: 0px;
@@ -869,6 +875,9 @@
   .list-none {
     list-style-type: none;
   }
+  .\[appearance\:textfield\] {
+    appearance: textfield;
+  }
   .auto-rows-min {
     grid-auto-rows: min-content;
   }
@@ -981,6 +990,16 @@
   }
   .gap-y-2 {
     row-gap: calc(var(--spacing) * 2);
+  }
+  :where(.divide-y > :not(:last-child)) {
+    --tw-divide-y-reverse: 0;
+    border-bottom-style: var(--tw-border-style);
+    border-top-style: var(--tw-border-style);
+    border-top-width: calc(1px * var(--tw-divide-y-reverse));
+    border-bottom-width: calc(1px * calc(1 - var(--tw-divide-y-reverse)));
+  }
+  :where(.divide-input > :not(:last-child)) {
+    border-color: var(--input);
   }
   .self-end {
     align-self: flex-end;
@@ -1369,6 +1388,9 @@
   .pr-3 {
     padding-right: calc(var(--spacing) * 3);
   }
+  .pr-7 {
+    padding-right: calc(var(--spacing) * 7);
+  }
   .pr-8 {
     padding-right: calc(var(--spacing) * 8);
   }
@@ -1398,6 +1420,9 @@
   }
   .text-left {
     text-align: left;
+  }
+  .text-right {
+    text-align: right;
   }
   .align-middle {
     vertical-align: middle;
@@ -2905,6 +2930,12 @@
     border-style: var(--tw-border-style);
     border-width: 0px;
   }
+  .\[\&\:\:-webkit-inner-spin-button\]\:appearance-none::-webkit-inner-spin-button {
+    appearance: none;
+  }
+  .\[\&\:\:-webkit-outer-spin-button\]\:appearance-none::-webkit-outer-spin-button {
+    appearance: none;
+  }
   .\[\&\:has\(\[role\=checkbox\]\)\]\:pr-0:has([role=checkbox]) {
     padding-right: 0px;
   }
@@ -3452,6 +3483,11 @@
   inherits: false;
   initial-value: 0;
 }
+@property --tw-divide-y-reverse {
+  syntax: "*";
+  inherits: false;
+  initial-value: 0;
+}
 @property --tw-border-style {
   syntax: "*";
   inherits: false;
@@ -3722,6 +3758,7 @@
       --tw-skew-y: initial;
       --tw-scroll-snap-strictness: proximity;
       --tw-space-y-reverse: 0;
+      --tw-divide-y-reverse: 0;
       --tw-border-style: solid;
       --tw-leading: initial;
       --tw-font-weight: initial;

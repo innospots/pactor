@@ -5,11 +5,14 @@ import { Registry, type PageDsl } from '@pactor-app/core';
 import { createPageRuntime } from '@pactor-app/runtime';
 import { createComponentRegistry } from '@pactor-app/ui/components';
 import { cleanup, fireEvent, render, screen } from '@testing-library/react';
+import { readFileSync } from 'node:fs';
+import { join } from 'node:path';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import {
   ArtifactPanel,
   ArtifactStore,
+  buildArtifactTree,
   Chat,
   ChatServicesProvider,
   ChatView,
@@ -90,12 +93,12 @@ describe('ArtifactPanel（spec: chat-artifact-panel / ArtifactPanel 视图与内
   });
 
   it('拖拽调宽：手柄左拖变宽（spec scenario: 拖拽调宽）', () => {
-    // jsdom 无布局：面板 320、宿主容器 1000（mock getBoundingClientRect）
+    // jsdom 无布局：面板 560、宿主容器 1000（mock getBoundingClientRect）
     const rectSpy = vi
       .spyOn(HTMLElement.prototype, 'getBoundingClientRect')
       .mockImplementation(function (this: HTMLElement) {
         const width = this.classList?.contains('pactor-chat-inspector')
-          ? 320
+          ? 560
           : 1000;
         return {
           width,
@@ -116,8 +119,8 @@ describe('ArtifactPanel（spec: chat-artifact-panel / ArtifactPanel 视图与内
 
     fireEvent.pointerDown(handle, { clientX: 500 });
     fireEvent.pointerMove(document, { clientX: 400 });
-    // 320 + (500-400) = 420（容器 1000 的 70% = 700，未触顶）
-    expect((panel as HTMLElement).style.width).toBe('420px');
+    // 560 + (500-400) = 660（容器 1000 的 2/3 ≈ 666.7，未触顶）
+    expect((panel as HTMLElement).style.width).toBe('660px');
     // 拖拽期间禁文本选择
     expect(document.body.style.userSelect).toBe('none');
 
@@ -126,12 +129,44 @@ describe('ArtifactPanel（spec: chat-artifact-panel / ArtifactPanel 视图与内
     rectSpy.mockRestore();
   });
 
-  it('拖拽夹取下限：右拖超过 240px 后保持 240px（spec scenario: 拖拽夹取下限）', () => {
+  it('拖拽夹取上限：左拖超过 host 宽 2/3 后保持 2/3（spec scenario: 拖拽夹取上限）', () => {
     const rectSpy = vi
       .spyOn(HTMLElement.prototype, 'getBoundingClientRect')
       .mockImplementation(function (this: HTMLElement) {
         const width = this.classList?.contains('pactor-chat-inspector')
-          ? 320
+          ? 560
+          : 1000;
+        return {
+          width,
+          height: 600,
+          top: 0,
+          left: 0,
+          right: width,
+          bottom: 600,
+          x: 0,
+          y: 0,
+          toJSON: () => ({}),
+        } as DOMRect;
+      });
+
+    render(<ArtifactPanel artifact={MARKDOWN_ARTIFACT} />);
+    const panel = document.querySelector('.pactor-chat-inspector')!;
+    const handle = screen.getByRole('separator', { name: '拖动调整面板宽度' });
+
+    fireEvent.pointerDown(handle, { clientX: 500 });
+    // 560 + (500-(-900)) = 1960 → 夹取 1000*2/3 ≈ 666.7 → 667
+    fireEvent.pointerMove(document, { clientX: -900 });
+    expect((panel as HTMLElement).style.width).toBe('667px');
+    fireEvent.pointerUp(document);
+    rectSpy.mockRestore();
+  });
+
+  it('拖拽夹取下限：右拖低于 480px 后保持 480px（spec scenario: 拖拽夹取下限）', () => {
+    const rectSpy = vi
+      .spyOn(HTMLElement.prototype, 'getBoundingClientRect')
+      .mockImplementation(function (this: HTMLElement) {
+        const width = this.classList?.contains('pactor-chat-inspector')
+          ? 560
           : 1000;
         return {
           width,
@@ -152,7 +187,7 @@ describe('ArtifactPanel（spec: chat-artifact-panel / ArtifactPanel 视图与内
 
     fireEvent.pointerDown(handle, { clientX: 500 });
     fireEvent.pointerMove(document, { clientX: 900 });
-    expect((panel as HTMLElement).style.width).toBe('240px');
+    expect((panel as HTMLElement).style.width).toBe('480px');
     fireEvent.pointerUp(document);
     rectSpy.mockRestore();
   });
@@ -234,7 +269,7 @@ describe('ArtifactPanel（spec: chat-artifact-panel / ArtifactPanel 视图与内
 });
 
 describe('artifact 消息 part（spec: chat-artifact-panel / artifact 消息 part）', () => {
-  it('消息流内产出物卡片：渲染标题 + kind 角标 + 打开按钮，而非原始 JSON（spec scenario）', () => {
+  it('消息流内产出物卡片：整卡可点击——着色图标盒 + 标题 + 元信息 + 箭头，而非原始 JSON（spec scenario）', () => {
     const store = new ConversationStore();
     store.appendMessage({
       id: 'a1',
@@ -252,13 +287,46 @@ describe('artifact 消息 part（spec: chat-artifact-panel / artifact 消息 par
     render(<ChatView store={store} />);
     const card = document.querySelector('.pactor-chat-artifact-card')!;
     expect(card).toBeTruthy();
+    // 整卡即按钮（aria-label 带产物标题）
+    expect(card.tagName).toBe('BUTTON');
+    // 文件类型图标盒（扩展名优先，kind 兜底 → markdown 无扩展名得 file-text/slate）
+    expect(card.querySelector('.pactor-chat-artifact-card__icon')).toBeTruthy();
+    expect(card.className).toContain('pactor-chat-artifact-card--slate');
     expect(card.textContent).toContain('分析报告');
-    expect(card.textContent).toContain('markdown');
-    expect(
-      screen.getByRole('button', { name: '在面板中打开' }),
-    ).toBeTruthy();
+    // 元信息行：类型标签（无扩展名时 kind 大写）
+    expect(card.textContent).toContain('MARKDOWN');
+    // 右上箭头
+    expect(card.querySelector('.pactor-chat-artifact-card__arrow')).toBeTruthy();
     // 不渲染原始 JSON
     expect(screen.queryByText(/"kind":/)).toBeNull();
+  });
+
+  it('卡片元信息：扩展名大写 + meta.size 尺寸（"尺寸 · 类型"）', () => {
+    const store = new ConversationStore();
+    store.appendMessage({
+      id: 'a1',
+      role: 'assistant',
+      status: 'completed',
+      parts: [
+        {
+          type: 'artifact',
+          status: 'ready',
+          artifact: {
+            id: 'a2',
+            kind: 'markdown',
+            title: '本月经营月报.md',
+            content: '# 月报',
+            meta: { size: 3584 },
+          },
+        },
+      ],
+    });
+
+    render(<ChatView store={store} />);
+    const card = document.querySelector('.pactor-chat-artifact-card')!;
+    expect(card.textContent).toContain('3.5 KB · MD');
+    // 图标 tone 按文件类型修饰类挂在卡片根上
+    expect(card.className).toContain('pactor-chat-artifact-card--slate');
   });
 
   it('卡片打开按钮触发 onOpenArtifact 回调（纯展示组件可测）', () => {
@@ -274,9 +342,101 @@ describe('artifact 消息 part（spec: chat-artifact-panel / artifact 消息 par
     });
 
     render(<ChatView store={store} onOpenArtifact={onOpenArtifact} />);
-    fireEvent.click(screen.getByRole('button', { name: '在面板中打开' }));
+    fireEvent.click(screen.getByRole('button', { name: /在面板中打开/ }));
     expect(onOpenArtifact).toHaveBeenCalledTimes(1);
     expect(onOpenArtifact).toHaveBeenCalledWith(MARKDOWN_ARTIFACT);
+  });
+});
+
+describe('产物卡片组收起（spec: chat-artifact-panel / 卡片区收起）', () => {
+  function buildArtifacts(count: number): ChatArtifact[] {
+    return Array.from({ length: count }, (_, index) => ({
+      id: `f${index + 1}`,
+      kind: 'markdown' as const,
+      title: `产物${index + 1}.md`,
+      content: `# 产物${index + 1}`,
+    }));
+  }
+
+  function artifactParts(artifacts: ChatArtifact[]) {
+    return artifacts.map((artifact) => ({
+      type: 'artifact' as const,
+      status: 'ready' as const,
+      artifact,
+    }));
+  }
+
+  function appendArtifactMessage(
+    store: ConversationStore,
+    count: number,
+  ): void {
+    store.appendMessage({
+      id: 'a1',
+      role: 'assistant',
+      status: 'completed',
+      parts: artifactParts(buildArtifacts(count)),
+    });
+  }
+
+  it('多于 4 个产物只展示 4 个 + 展开按钮；展开查看全部，可再收起', () => {
+    const store = new ConversationStore();
+    appendArtifactMessage(store, 6);
+    render(<ChatView store={store} />);
+
+    expect(
+      document.querySelectorAll('.pactor-chat-artifact-card'),
+    ).toHaveLength(4);
+    fireEvent.click(screen.getByRole('button', { name: /展开/ }));
+    expect(
+      document.querySelectorAll('.pactor-chat-artifact-card'),
+    ).toHaveLength(6);
+    fireEvent.click(screen.getByRole('button', { name: /收起/ }));
+    expect(
+      document.querySelectorAll('.pactor-chat-artifact-card'),
+    ).toHaveLength(4);
+  });
+
+  it('4 个及以下不收起（无 footer 按钮）', () => {
+    const store = new ConversationStore();
+    appendArtifactMessage(store, 4);
+    render(<ChatView store={store} />);
+    expect(
+      document.querySelectorAll('.pactor-chat-artifact-card'),
+    ).toHaveLength(4);
+    expect(screen.queryByRole('button', { name: /展开/ })).toBeNull();
+    expect(screen.queryByRole('button', { name: /查看所有产物/ })).toBeNull();
+  });
+
+  it('非连续 artifact part 不并组（被文本分隔的两段各自成组）', () => {
+    const store = new ConversationStore();
+    const artifacts = buildArtifacts(6);
+    store.appendMessage({
+      id: 'a1',
+      role: 'assistant',
+      status: 'completed',
+      parts: [
+        ...artifactParts(artifacts.slice(0, 3)),
+        { type: 'text', content: '分隔' },
+        ...artifactParts(artifacts.slice(3)),
+      ],
+    });
+    render(<ChatView store={store} />);
+    // 3 + 3 均不超阈值：全部展示、无收起 footer
+    expect(
+      document.querySelectorAll('.pactor-chat-artifact-card'),
+    ).toHaveLength(6);
+    expect(screen.queryByRole('button', { name: /展开/ })).toBeNull();
+  });
+
+  it('"查看所有产物(n)"触发 onOpenArtifactList 回调', () => {
+    const onOpenArtifactList = vi.fn();
+    const store = new ConversationStore();
+    appendArtifactMessage(store, 6);
+    render(<ChatView store={store} onOpenArtifactList={onOpenArtifactList} />);
+    fireEvent.click(
+      screen.getByRole('button', { name: /查看所有产物\(6\)/ }),
+    );
+    expect(onOpenArtifactList).toHaveBeenCalledTimes(1);
   });
 });
 
@@ -303,11 +463,40 @@ describe('Chat 面板集成（spec: chat-artifact-panel / 面板布局与响应�
     renderChat(<Chat artifact={MARKDOWN_ARTIFACT} panelOpen />);
     const host = document.querySelector('.pactor-chat-inspector-host')!;
     expect(host).toBeTruthy();
-    // workspace 与面板在 flex 行内同级
-    expect(host.querySelector(':scope > .pactor-chat-workspace')).toBeTruthy();
-    const panel = host.querySelector(':scope > .pactor-chat-inspector')!;
+    // __main 左列（对话区）与面板在 host 行内容器内同级
+    const row = host.querySelector(
+      ':scope > .pactor-chat-inspector-host__row',
+    )!;
+    const mainCol = row.querySelector(
+      ':scope > .pactor-chat-inspector-host__main',
+    )!;
+    expect(mainCol.querySelector(':scope > .pactor-chat-workspace')).toBeTruthy();
+    const panel = row.querySelector(':scope > .pactor-chat-inspector')!;
     expect(panel).toBeTruthy();
     expect(panel.textContent).toContain('分析报告');
+  });
+
+  it('工作区 header 收进 __main 左列（与对话区同宽，不覆盖面板上方）', () => {
+    renderChat(
+      <Chat artifact={MARKDOWN_ARTIFACT} panelOpen title="助手工作区" />,
+    );
+    const host = document.querySelector('.pactor-chat-inspector-host')!;
+    // header 不是 host 直接子级（不通栏横跨面板）
+    expect(
+      host.querySelector(':scope > .pactor-chat-workspace__header'),
+    ).toBeNull();
+    // header 在 __main 左列内、对话区之前
+    const mainCol = host.querySelector('.pactor-chat-inspector-host__main')!;
+    const header = mainCol.querySelector(
+      ':scope > .pactor-chat-workspace__header',
+    );
+    expect(header).toBeTruthy();
+    // header 不在限宽的对话列内
+    expect(
+      document.querySelector(
+        '.pactor-chat-workspace .pactor-chat-workspace__header',
+      ),
+    ).toBeNull();
   });
 
   it('受控：仅提供 artifact 即受控（面板随 artifact 出现）', () => {
@@ -409,11 +598,11 @@ describe('Chat 面板集成（spec: chat-artifact-panel / 面板布局与响应�
     driver.complete();
 
     // 框架不擅自开面板：卡片出现但面板未开
-    await screen.findByRole('button', { name: '在面板中打开' });
+    await screen.findByRole('button', { name: /在面板中打开/ });
     expect(document.querySelector('.pactor-chat-inspector')).toBeNull();
 
     // 点击卡片按钮 → 面板以该 artifact 打开
-    fireEvent.click(screen.getByRole('button', { name: '在面板中打开' }));
+    fireEvent.click(screen.getByRole('button', { name: /在面板中打开/ }));
     await screen.findByText('结论');
     expect(document.querySelector('.pactor-chat-inspector')).toBeTruthy();
 
@@ -451,11 +640,54 @@ describe('Chat 面板集成（spec: chat-artifact-panel / 面板布局与响应�
 
     // 受控：点击卡片按钮触发回调（面板开关由宿主决定，本身保持关闭）
     fireEvent.click(
-      await screen.findByRole('button', { name: '在面板中打开' }),
+      await screen.findByRole('button', { name: /在面板中打开/ }),
     );
     expect(onOpenArtifact).toHaveBeenCalledTimes(1);
     expect(onOpenArtifact).toHaveBeenCalledWith(MARKDOWN_ARTIFACT);
     expect(document.querySelector('.pactor-chat-inspector')).toBeNull();
+  });
+
+  it('非受控："查看所有产物"打开面板并定位产物目录视图（spec scenario）', async () => {
+    const driver = createManualDriver();
+    render(
+      <ChatServicesProvider value={{ transport: driver.transport }}>
+        <Chat />
+      </ChatServicesProvider>,
+    );
+
+    fireEvent.change(document.querySelector('.pactor-chat-composer textarea')!, {
+      target: { value: '给我报告' },
+    });
+    fireEvent.keyDown(document.querySelector('.pactor-chat-composer textarea')!, {
+      key: 'Enter',
+    });
+    for (let index = 1; index <= 6; index += 1) {
+      driver.push({
+        type: 'artifact',
+        messageId: 'x',
+        partId: `p${index}`,
+        artifact: {
+          id: `f${index}`,
+          kind: 'markdown',
+          title: `产物${index}.md`,
+          content: `# 产物${index}`,
+        },
+      });
+    }
+    driver.push({ type: 'message.end', messageId: 'x' });
+    driver.complete();
+
+    // 框架不擅自开面板：卡片组收起为 4 张 + footer
+    const all = await screen.findByRole('button', { name: /查看所有产物\(6\)/ });
+    expect(document.querySelector('.pactor-chat-inspector')).toBeNull();
+    expect(
+      document.querySelectorAll('.pactor-chat-artifact-card'),
+    ).toHaveLength(4);
+
+    // 点击"查看所有产物" → 面板打开并定位产物目录视图
+    fireEvent.click(all);
+    await screen.findByText('产物目录');
+    expect(document.querySelector('.pactor-chat-inspector')).toBeTruthy();
   });
 
   it('非受控：services.artifactStore 注入即生效（store.open → 面板打开）', async () => {
@@ -691,7 +923,7 @@ describe('Chat 面板 DSL 集成（spec: chat-dsl-component / 产出物面板配
     await vi.waitFor(() => {
       expect(document.querySelector('.pactor-chat-inspector')).toBeNull();
     });
-    fireEvent.click(screen.getByRole('button', { name: '在面板中打开' }));
+    fireEvent.click(screen.getByRole('button', { name: /在面板中打开/ }));
     await vi.waitFor(() => {
       expect(document.querySelector('.pactor-chat-inspector')).toBeTruthy();
     });
@@ -759,5 +991,406 @@ describe('Chat 面板 DSL 集成（spec: chat-dsl-component / 产出物面板配
     driver.push({ type: 'message.end', messageId: 'x' });
     driver.complete();
     await runtime.destroy();
+  });
+});
+
+describe('ArtifactPanel 多产物（tabs / 目录列表视图）', () => {
+  const CODE_ARTIFACT: ChatArtifact = {
+    id: 'a2',
+    kind: 'code',
+    title: '生成脚本',
+    content: 'echo hi',
+    language: 'bash',
+  };
+  const NESTED_ARTIFACT: ChatArtifact = {
+    id: 'reports/q3/monthly',
+    kind: 'markdown',
+    title: 'Q3 月报',
+    content: '# Q3',
+  };
+  const ALL = [MARKDOWN_ARTIFACT, CODE_ARTIFACT, NESTED_ARTIFACT];
+
+  it('buildArtifactTree：id 的 / 分段建目录层级，无分段平铺根层', () => {
+    const tree = buildArtifactTree(ALL);
+    // 根层：目录 reports 在前（目录优先），两个文件在后
+    expect(tree.map((n) => n.name)).toEqual(['reports', '分析报告', '生成脚本']);
+    const reports = tree[0]!;
+    expect(reports.artifact).toBeUndefined();
+    expect(reports.children.map((n) => n.name)).toEqual(['q3']);
+    expect(reports.children[0]!.children[0]!.artifact?.id).toBe(
+      'reports/q3/monthly',
+    );
+  });
+
+  it('多产物时 header 文件名处为切换下拉，点击菜单项切换', async () => {
+    const onSelect = vi.fn();
+    render(
+      <ArtifactPanel
+        artifact={MARKDOWN_ARTIFACT}
+        artifacts={ALL}
+        activeArtifactId="a1"
+        onSelectArtifact={onSelect}
+      />,
+    );
+    // 不再有 tab 条；触发器展示当前产物名
+    expect(document.querySelector('.pactor-chat-inspector__tab')).toBeNull();
+    const trigger = document.querySelector(
+      '.pactor-chat-inspector__menu-trigger',
+    )!;
+    expect(trigger.textContent).toContain('分析报告');
+
+    // 打开下拉 → 列出全部产物 → 点击切换
+    fireEvent.click(trigger);
+    await screen.findByText('生成脚本');
+    fireEvent.click(screen.getByText('生成脚本'));
+    expect(onSelect).toHaveBeenCalledWith(CODE_ARTIFACT);
+  });
+
+  it('未提供 artifacts 时文件名处为纯标题（无下拉）', () => {
+    render(<ArtifactPanel artifact={MARKDOWN_ARTIFACT} />);
+    expect(
+      document.querySelector('.pactor-chat-inspector__menu-trigger'),
+    ).toBeNull();
+    expect(screen.queryByRole('button', { name: '产物目录' })).toBeNull();
+  });
+
+  it('header 左端目录钮切换到目录列表视图，点击产物查看内容；列表视图隐藏返回钮且标题显示"产物目录"', () => {
+    const onSelect = vi.fn();
+    render(
+      <ArtifactPanel
+        artifact={MARKDOWN_ARTIFACT}
+        artifacts={ALL}
+        activeArtifactId="a1"
+        onSelectArtifact={onSelect}
+      />,
+    );
+    // 内容视图：markdown 正文在，列表不在
+    expect(document.querySelector('.pactor-chat-inspector__list')).toBeNull();
+
+    fireEvent.click(screen.getByRole('button', { name: '产物目录' }));
+    // 列表视图：目录树渲染（reports 目录 + 根层产物）；
+    // 返回钮隐藏，文件名处显示"产物目录"，kind 角标隐藏
+    expect(document.querySelector('.pactor-chat-inspector__list')).toBeTruthy();
+    expect(screen.getByText('reports')).toBeTruthy();
+    expect(
+      document.querySelector('.pactor-chat-inspector__list-toggle'),
+    ).toBeNull();
+    expect(
+      document.querySelector('.pactor-chat-inspector__menu-trigger')
+        ?.textContent,
+    ).toContain('产物目录');
+    expect(
+      document.querySelector(
+        '.pactor-chat-inspector__header .pactor-chat-inspector__kind',
+      ),
+    ).toBeNull();
+    const listTitles = [
+      ...document.querySelectorAll('.pactor-chat-inspector__list-item-title'),
+    ].map((el) => el.textContent);
+    expect(listTitles).toContain('分析报告');
+
+    // 目录展开（默认展开）：嵌套产物可见，点击触发切换
+    const nested = [
+      ...document.querySelectorAll('.pactor-chat-inspector__list-item-title'),
+    ].find((el) => el.textContent === 'Q3 月报')!;
+    fireEvent.click(nested.closest('button')!);
+    expect(onSelect).toHaveBeenCalledWith(NESTED_ARTIFACT);
+  });
+
+  it('未提供 artifacts 时不渲染目录钮（单产物受控场景不变）', () => {
+    render(<ArtifactPanel artifact={MARKDOWN_ARTIFACT} />);
+    expect(screen.queryByRole('button', { name: '产物目录' })).toBeNull();
+    expect(document.querySelector('.pactor-chat-inspector__tabs')).toBeNull();
+  });
+
+  it('激活产物变化自动回到内容视图', () => {
+    const { rerender } = render(
+      <ArtifactPanel
+        artifact={MARKDOWN_ARTIFACT}
+        artifacts={ALL}
+        activeArtifactId="a1"
+        onSelectArtifact={() => {}}
+      />,
+    );
+    fireEvent.click(screen.getByRole('button', { name: '产物目录' }));
+    expect(document.querySelector('.pactor-chat-inspector__list')).toBeTruthy();
+
+    rerender(
+      <ArtifactPanel
+        artifact={CODE_ARTIFACT}
+        artifacts={ALL}
+        activeArtifactId="a2"
+        onSelectArtifact={() => {}}
+      />,
+    );
+    expect(document.querySelector('.pactor-chat-inspector__list')).toBeNull();
+    expect(screen.getByText('echo hi')).toBeTruthy();
+  });
+
+  it('非受控组合层：多产物经内部 store 驱动下拉切换', async () => {
+    const store = new ConversationStore();
+    const artifactStore = new ArtifactStore();
+    artifactStore.open(MARKDOWN_ARTIFACT);
+    artifactStore.open(CODE_ARTIFACT);
+    render(
+      <ChatServicesProvider
+        value={{
+          transport: createManualDriver().transport,
+          store,
+          artifactStore,
+        }}
+      >
+        <Chat />
+      </ChatServicesProvider>,
+    );
+    // 触发器展示当前激活产物（后打开的 CODE）
+    const trigger = document.querySelector(
+      '.pactor-chat-inspector__menu-trigger',
+    )!;
+    expect(trigger.textContent).toContain('生成脚本');
+
+    // 下拉切到第一个产物 → 内容区展示其 markdown
+    fireEvent.click(trigger);
+    const item = await screen.findByText('分析报告');
+    fireEvent.click(item);
+    expect(
+      document.querySelector('.pactor-chat-inspector__menu-trigger')
+        ?.textContent,
+    ).toContain('分析报告');
+  });
+});
+
+describe('ArtifactPanel 常见文件预览与自定义查看器', () => {
+  it('txt / 无扩展名文本：kind text 预格式渲染（现状保持）', () => {
+    render(
+      <ArtifactPanel
+        artifact={{ id: 'f1', kind: 'text', title: '说明.txt', content: '纯文本内容' }}
+      />,
+    );
+    const pre = document.querySelector('.pactor-chat-inspector__text')!;
+    expect(pre.textContent).toBe('纯文本内容');
+  });
+
+  it('图片类：title 扩展名命中即按图片渲染（content 为 URL）', () => {
+    render(
+      <ArtifactPanel
+        artifact={{
+          id: 'img1',
+          kind: 'text',
+          title: '架构图.png',
+          content: 'https://example.com/arch.png',
+        }}
+      />,
+    );
+    const img = document.querySelector(
+      '.pactor-chat-inspector__image img',
+    ) as HTMLImageElement;
+    expect(img).toBeTruthy();
+    expect(img.src).toBe('https://example.com/arch.png');
+    expect(img.alt).toBe('架构图.png');
+    // 不再按 text 预格式渲染
+    expect(document.querySelector('.pactor-chat-inspector__text')).toBeNull();
+  });
+
+  it('显式 fileType 优先于 title；svg 原始标记经 data URL 呈现', () => {
+    const svg = '<svg xmlns="http://www.w3.org/2000/svg"><rect width="10" height="10"/></svg>';
+    render(
+      <ArtifactPanel
+        artifact={{
+          id: 'img2',
+          kind: 'text',
+          title: '图标',
+          fileType: 'SVG',
+          content: svg,
+        }}
+      />,
+    );
+    const img = document.querySelector(
+      '.pactor-chat-inspector__image img',
+    ) as HTMLImageElement;
+    expect(img.src.startsWith('data:image/svg+xml;utf8,')).toBe(true);
+    expect(decodeURIComponent(img.src)).toContain('<svg');
+  });
+
+  it('自定义查看器按扩展名命中，优先于内建图片渲染', () => {
+    render(
+      <ArtifactPanel
+        artifact={{
+          id: 'img3',
+          kind: 'text',
+          title: '数据.png',
+          content: 'https://example.com/d.png',
+        }}
+        artifactViewers={{
+          png: (artifact) => <div data-testid="custom-png">{artifact.title} 自定义预览</div>,
+        }}
+      />,
+    );
+    expect(screen.getByTestId('custom-png').textContent).toContain(
+      '数据.png 自定义预览',
+    );
+    expect(document.querySelector('.pactor-chat-inspector__image')).toBeNull();
+  });
+
+  it('自定义查看器按 kind 命中；扩展名键优先于 kind 键', () => {
+    render(
+      <ArtifactPanel
+        artifact={{
+          id: 'doc1',
+          kind: 'markdown',
+          title: '报告.md',
+          content: '# 正文',
+        }}
+        artifactViewers={{
+          markdown: () => <div data-testid="kind-viewer">kind 查看器</div>,
+          md: () => <div data-testid="ext-viewer">扩展名查看器</div>,
+        }}
+      />,
+    );
+    expect(screen.getByTestId('ext-viewer')).toBeTruthy();
+    expect(screen.queryByTestId('kind-viewer')).toBeNull();
+  });
+
+  it('services.artifactViewers 注入：组合层面板生效', async () => {
+    const store = new ConversationStore();
+    const artifactStore = new ArtifactStore();
+    artifactStore.open({
+      id: 'w1',
+      kind: 'text',
+      title: '配置.yaml',
+      content: 'a: 1',
+    });
+    render(
+      <ChatServicesProvider
+        value={{
+          transport: createManualDriver().transport,
+          store,
+          artifactStore,
+          artifactViewers: {
+            yaml: (artifact) => (
+              <div data-testid="yaml-viewer">YAML 预览：{artifact.title}</div>
+            ),
+          },
+        }}
+      >
+        <Chat />
+      </ChatServicesProvider>,
+    );
+    expect(screen.getByTestId('yaml-viewer').textContent).toContain(
+      '配置.yaml',
+    );
+  });
+
+  it('面板背景令牌：--pactor-chat-inspector-bg 区别于 --pactor-chat-bg', () => {
+    const css = readFileSync(join(__dirname, '../styles.css'), 'utf8');
+    expect(css).toContain('--pactor-chat-inspector-bg:');
+    expect(css).toMatch(
+      /\.pactor-chat-inspector\s*\{[^}]*background:\s*var\(--pactor-chat-inspector-bg\)/,
+    );
+  });
+});
+
+describe('ArtifactPanel 产物下载', () => {
+  function stubObjectUrl(): void {
+    // jsdom 无 URL.createObjectURL
+    vi.stubGlobal('URL', {
+      ...URL,
+      createObjectURL: vi.fn(() => 'blob:mock'),
+      revokeObjectURL: vi.fn(),
+    });
+  }
+
+  it('文件名：title 带扩展名原样；无扩展名按 fileType / kind 补齐', async () => {
+    const { resolveArtifactFilename } = await import('../src/index.js');
+    expect(
+      resolveArtifactFilename({ ...MARKDOWN_ARTIFACT, title: '报告.md' }),
+    ).toBe('报告.md');
+    expect(resolveArtifactFilename(MARKDOWN_ARTIFACT)).toBe('分析报告.md');
+    expect(
+      resolveArtifactFilename({
+        id: 'c1',
+        kind: 'text',
+        title: '架构图',
+        fileType: 'png',
+        content: 'https://x/a.png',
+      }),
+    ).toBe('架构图.png');
+    expect(
+      resolveArtifactFilename({
+        id: 'd1',
+        kind: 'dsl',
+        title: '面板',
+        content: { type: 'Flex' },
+      }),
+    ).toBe('面板.json');
+  });
+
+  it('Blob 构建：markdown 文本、dsl JSON、svg 原始标记', async () => {
+    const { buildArtifactBlob } = await import('../src/index.js');
+    const mdBlob = buildArtifactBlob(MARKDOWN_ARTIFACT)!;
+    expect(mdBlob.type).toContain('text/markdown');
+    expect(await mdBlob.text()).toBe('## 结论\n\n一切正常');
+
+    const dslBlob = buildArtifactBlob({
+      id: 'd1',
+      kind: 'dsl',
+      title: '面板',
+      content: { type: 'Flex', children: [] },
+    })!;
+    expect(dslBlob.type).toBe('application/json');
+    expect(JSON.parse(await dslBlob.text())).toEqual({
+      type: 'Flex',
+      children: [],
+    });
+
+    const svgBlob = buildArtifactBlob({
+      id: 's1',
+      kind: 'text',
+      title: '图标.svg',
+      content: '<svg xmlns="http://www.w3.org/2000/svg"/>',
+    })!;
+    expect(svgBlob.type).toBe('image/svg+xml');
+  });
+
+  it('点击 header 下载钮触发本地下载（文件名 + Blob）', () => {
+    stubObjectUrl();
+    const clickSpy = vi
+      .spyOn(HTMLAnchorElement.prototype, 'click')
+      .mockImplementation(() => {});
+    render(<ArtifactPanel artifact={MARKDOWN_ARTIFACT} />);
+
+    fireEvent.click(screen.getByRole('button', { name: '下载产物' }));
+    expect(URL.createObjectURL).toHaveBeenCalled();
+    expect(clickSpy).toHaveBeenCalled();
+    // 临时锚点携带下载文件名（点击后即移除，从 mock 调用记录中断言）
+    clickSpy.mockRestore();
+    vi.unstubAllGlobals();
+  });
+
+  it('下载文件名写入锚点 download 属性', () => {
+    stubObjectUrl();
+    const appended: HTMLAnchorElement[] = [];
+    const original = document.body.appendChild.bind(document.body);
+    const appendSpy = vi
+      .spyOn(document.body, 'appendChild')
+      .mockImplementation((node) => {
+        if (node instanceof HTMLAnchorElement && node.download) {
+          appended.push(node);
+          return node;
+        }
+        return original(node);
+      });
+    vi.spyOn(HTMLAnchorElement.prototype, 'click').mockImplementation(() => {});
+    render(<ArtifactPanel artifact={MARKDOWN_ARTIFACT} />);
+
+    fireEvent.click(screen.getByRole('button', { name: '下载产物' }));
+    expect(appended[0]?.download).toBe('分析报告.md');
+    appendSpy.mockRestore();
+    vi.unstubAllGlobals();
+  });
+
+  it('无激活产物时不渲染下载钮', () => {
+    render(<ArtifactPanel artifact={null} inspector={<div>自定义</div>} />);
+    expect(screen.queryByRole('button', { name: '下载产物' })).toBeNull();
   });
 });

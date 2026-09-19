@@ -18,6 +18,8 @@ import {
   PopoverContent,
   PopoverTrigger,
   Select,
+  SelectContent,
+  SelectItem,
   SelectTrigger,
   SelectValue,
 } from '../src/ui/index.js';
@@ -149,5 +151,22 @@ describe('/ui 原语可渲染', () => {
       </Select>,
     );
     expect(screen.getByText('选择')).toBeDefined();
+  });
+
+  it('Select：弹层最小宽度跟随触发器（--anchor-width）', async () => {
+    render(
+      <Select open>
+        <SelectTrigger>
+          <SelectValue placeholder="选择" />
+        </SelectTrigger>
+        <SelectContent>
+          <SelectItem value="a">选项 A</SelectItem>
+        </SelectContent>
+      </Select>,
+    );
+    // listbox 角色在 Popup 内层的 List 上，弹层本体取最近的 select-content 祖先
+    const list = await screen.findByRole('listbox');
+    const popup = list.closest('[data-slot="select-content"]');
+    expect(popup?.className).toContain('min-w-(--anchor-width)');
   });
 });

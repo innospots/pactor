@@ -2,7 +2,7 @@
 
 `@pactor-app/chat` 对话示例：以 `pactor-app` 一站式 API（`createPactorApplication`）装配的多页面工作台（spec: example-chat-on-pactor-app）——菜单（对话 `/chat`、我的智能体 `/agents`、系统设置 `/settings` + 「最近」分组历史会话）与布局（`layout.type: 'chat'`）由模拟 bootstrap 资源下发（`StaticDslLoader`），框架内置 BrowserRouter + `DynamicDslRoute` 承担路由出口；外壳为内置 `ChatLayout`（ui 布局层 type `'chat'`：Sidebar + Menu 组合，菜单从 bootstrap 自动推导），三个页面各自以 `.page.yaml` 声明（@pactor-app/vite-plugin 编译），菜单切换 = URL 变化，刷新按 URL 还原页面。
 
-对话页演示产出物面板（spec: chat-artifact-panel）完整链路：建议词 / 口令触发 → mock transport 产出 artifact part（markdown / code / dsl 三种 kind）→ `events.onArtifact` → `setState` 打开右侧面板（dsl kind 经 Safe Registry 白名单活预览）→ `onPanelClose` 关闭。运行时服务（transport / safeRegistry / capabilities / confirm / 附件伪上传 / callService 服务桥）由 `ChatProvider`（createPactorApplication 的 providers 槽）经 `ChatServicesProvider` 注入；`ConversationStore` 按会话 id 缓存于模块级 Map 并按当前 `?id=` 就近注入——跨页面切换 / 切换智能体会话消息不丢。
+对话页演示产出物面板（spec: chat-artifact-panel）完整链路：建议词 / 口令触发 → mock transport 产出 artifact part（markdown / code / dsl 三种 kind）→ `events.onArtifact` → `setState` 打开右侧面板（dsl kind 经 Safe Registry 白名单活预览）→ `onPanelClose` 关闭。多产物时面板 header 文件名处切换下拉选择产物（`events.onSelectArtifact` → `setState artifact=${event.artifact}` 闭环，产物清单由组合层自动从消息流归集），header 左端目录钮展示产物目录列表（目录视图下返回钮隐藏、标题显示"产物目录"），右端下载钮把当前产物存为本地文件。运行时服务（transport / safeRegistry / capabilities / confirm / 附件伪上传 / callService 服务桥）由 `ChatProvider`（createPactorApplication 的 providers 槽）经 `ChatServicesProvider` 注入；`ConversationStore` 按会话 id 缓存于模块级 Map 并按当前 `?id=` 就近注入——跨页面切换 / 切换智能体会话消息不丢。
 
 聊天页结构全部经 `chat.page.yaml` 的 `Chat` props 声明（spec: chat-builtin-features）：内建 header（可编辑标题 + 导出 / 明暗 / 清空操作组）、模型选择（受控闭环 `model` + `onModelChange`）、`@` / `+` 上下文弹层与 chips（`contexts` 的 service 引用经宿主 `callService` 解析），宿主不含任何槽位组件。明暗主题由内建 theme 操作写 `documentElement` 的 `data-pactor-theme` 切换（@pactor-app/chat 皮肤与示例外壳令牌随之响应）。移动端 <768px：侧栏变抽屉（顶栏品牌区 + 菜单按钮），产出物面板变右侧覆盖抽屉（遮罩点击关闭）。
 
@@ -24,11 +24,12 @@ pnpm --filter example-chat dev   # http://localhost:5399
 | `帮我生成一份月报` | markdown kind 产出物 → 消息内产出物卡片 + 右侧面板自动打开 |
 | `帮我写一段代码` | code kind 产出物（只读代码块，language 角标）→ 右侧面板 |
 | `帮我生成一个统计页面` | dsl kind 产出物 → 面板内经白名单组件活预览渲染 |
+| `生成一组文件` | 一条消息连续 6 个产出物（md / csv / ts / json / sql / txt，各带尺寸与类型图标）→ 卡片区收起为前 4 张 + 「展开 / 收起」与「查看所有产物（6) ›」（`events.onOpenArtifactList` → 开面板定位产物目录） |
 
 ## 页面与交互
 
 - **菜单外壳**（内置 ChatLayout，ui 布局层 type `'chat'`）：对话 / 我的智能体 / 系统设置 + 「最近」分组历史会话来自 bootstrap 菜单（group / dot / badge 扩展字段透传），菜单与高亮由 registry/bridge 自动推导，点击 → bridge.push。移动端侧栏变覆盖抽屉。如需自定义菜单事件（如 `?id=` 历史会话高亮），可注册薄封装覆盖（见 `ChatAppLayout.tsx` 备用实现）
-- **对话页**（`/chat`）：body 为无侧栏形态的 `Chat`；`conversationId` 取 `${route.query.id || 'conv-demo'}`——从智能体列表进入时每个智能体一个独立会话（store 按会话 id 缓存）。产出物面板为受控闭环：`artifact` / `panelOpen` 绑页面 state，`onArtifact` → `setState` 开面板，`onPanelClose` → `setState` 关面板
+- **对话页**（`/chat`）：body 为无侧栏形态的 `Chat`；`conversationId` 取 `${route.query.id || 'conv-demo'}`——从智能体列表进入时每个智能体一个独立会话（store 按会话 id 缓存）。产出物面板为受控闭环：`artifact` / `panelOpen` 绑页面 state，`onArtifact` → `setState` 开面板，`onPanelClose` → `setState` 关面板，`onOpenArtifactList`（卡片区"查看所有产物"）→ `setState panelOpen=true`（面板自动定位产物目录视图）
 - **我的智能体**（`/agents`）：白名单组件（Page/Grid/Card/Alert/Button）声明的 mock 列表，「开始对话」→ DSL `navigate` 动作跳 `/chat?id=agent-xxx`
 - **系统设置**（`/settings`）：Form/Input/Select 表单，`onSubmit` → `setState` 保存 + `message` 成功提示 + 下方卡片回显
 - **对话页 header**（包内建，`headerActions` / `editableTitle` 声明）：左侧会话标题默认「新的对话」，点击进入编辑，Enter / blur 提交（Esc 取消）；右侧操作组依次为导出 Markdown（当前会话）、明暗切换、清空当前会话——默认行为在包内执行，事件经 DSL `events` 接 toast 提示

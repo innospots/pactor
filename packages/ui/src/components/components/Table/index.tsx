@@ -21,6 +21,8 @@ export interface TableColumn {
   title?: string;
   dataIndex?: string;
   width?: number | string;
+  /** 列内容水平对齐（表头与单元格同时生效），默认 left */
+  align?: 'left' | 'center' | 'right';
   cell?: DslNode;
 }
 
@@ -59,6 +61,13 @@ function renderCellValue(value: unknown): string {
   }
   return String(value);
 }
+
+/** 列水平对齐 → text-align 类（left 为表格默认，无需加类） */
+const columnAlignClass = {
+  left: undefined,
+  center: 'text-center',
+  right: 'text-right',
+} as const;
 
 /**
  * Table 适配器（shadcn kit，语义对齐 antd 版）：vendored shadcn Table 原语
@@ -112,6 +121,9 @@ export function Table({
             {columns.map((column, index) => (
               <TableHead
                 key={column.dataIndex ?? String(index)}
+                className={
+                  column.align ? columnAlignClass[column.align] : undefined
+                }
                 style={
                   column.width !== undefined ? { width: column.width } : undefined
                 }
@@ -141,7 +153,12 @@ export function Table({
                   key={key === undefined || key === null ? rowIndex : String(key)}
                 >
                   {columns.map((column, columnIndex) => (
-                    <TableCell key={column.dataIndex ?? String(columnIndex)}>
+                    <TableCell
+                      key={column.dataIndex ?? String(columnIndex)}
+                      className={
+                        column.align ? columnAlignClass[column.align] : undefined
+                      }
+                    >
                       {column.cell
                         ? renderChildren([column.cell], { row, rowIndex })
                         : renderCellValue(

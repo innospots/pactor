@@ -128,7 +128,7 @@ The built-in shadcn-style UI (`@pactor-app/ui`) registers these DSL component ty
 - **Page & layout**: `Page`, `Layout` / `Header` / `Sider` / `Content` / `Footer`, `Grid`, `Flex`, `Card`, `Sidebar`
 - **Basic**: `Button`, `Alert`, `Statistic`, `Menu`, `Link`, `Text`, `Typography`, `Icon`
 - **Data**: `Table`, `Tabs`, `DataTable`, `Chart`
-- **Form**: `Form`, `Input`, `Select`, `Textarea`, `Checkbox`, `RadioGroup`, `Switch`, `Slider`, `Label`, `Field`, `ChatInput`, `DatePicker`
+- **Form**: `Form`, `Input`, `NumberInput`, `Select`, `Textarea`, `Checkbox`, `RadioGroup`, `Switch`, `Slider`, `Label`, `Field`, `ChatInput`, `DatePicker`
 - **Display**: `Badge`, `Avatar`, `Skeleton`, `Separator`, `Kbd`, `Spinner`, `Empty`, `AspectRatio`, `Progress`, `Calendar`, `Carousel`, `Item`
 - **Navigation**: `Breadcrumb`, `Pagination`, `Menubar`, `NavigationMenu`, `DropdownMenu`, `ContextMenu`
 - **Overlay & feedback**: `Dialog`, `AlertDialog`, `Drawer`, `Sheet`, `Popover`, `Tooltip`, `HoverCard`, `Sonner`, `Accordion`, `Collapsible`

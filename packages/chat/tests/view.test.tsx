@@ -389,3 +389,69 @@ describe('registerChatLayout（spec: chat-view / chat 布局注册）', () => {
     expect(document.querySelector('.pactor-chat-layout')).toBeTruthy();
   });
 });
+
+describe('消息时间戳（assistant 消息底部）', () => {
+  it('completed 的 assistant 消息展示时间（当天 HH:mm）；user 消息不展示', () => {
+    const store = createStore();
+    const at = new Date();
+    at.setHours(14, 32, 0, 0);
+    store.appendMessage({
+      id: 'u1',
+      role: 'user',
+      status: 'completed',
+      createdAt: at.getTime(),
+      parts: [{ type: 'text', content: '看下数据', status: 'ready' }],
+    });
+    store.appendMessage({
+      id: 'a1',
+      role: 'assistant',
+      status: 'completed',
+      createdAt: at.getTime(),
+      parts: [{ type: 'text', content: '结论如下', status: 'ready' }],
+    });
+    render(<ChatView store={store} />);
+
+    const times = document.querySelectorAll('.pactor-chat-message__time');
+    expect(times.length).toBe(1);
+    expect(times[0]!.textContent).toBe('14:32');
+    // 时间戳挂在 assistant 消息的 footer 内
+    expect(
+      document
+        .querySelector('[data-message-id="a1"] .pactor-chat-message__footer')
+        ?.contains(times[0]!),
+    ).toBe(true);
+  });
+
+  it('流式中的 assistant 消息不展示时间', () => {
+    const store = createStore();
+    store.appendMessage({
+      id: 'a1',
+      role: 'assistant',
+      status: 'streaming',
+      createdAt: Date.now(),
+      parts: [{ type: 'text', content: '生成中', status: 'streaming' }],
+    });
+    render(<ChatView store={store} />);
+    expect(document.querySelector('.pactor-chat-message__time')).toBeNull();
+  });
+
+  it('无 createdAt 的历史消息不展示时间', () => {
+    const store = createStore();
+    store.appendMessage({
+      id: 'a1',
+      role: 'assistant',
+      status: 'completed',
+      parts: [{ type: 'text', content: '历史消息', status: 'ready' }],
+    });
+    render(<ChatView store={store} />);
+    expect(document.querySelector('.pactor-chat-message__time')).toBeNull();
+  });
+
+  it('formatMessageTime：非当天带日期', async () => {
+    const { formatMessageTime } = await import('../src/index.js');
+    const past = new Date('2026-09-01T09:05:00').getTime();
+    const now = new Date('2026-09-18T10:00:00').getTime();
+    expect(formatMessageTime(past, now)).toBe('9月1日 09:05');
+    expect(formatMessageTime(now, now)).toBe('10:00');
+  });
+});

@@ -1018,6 +1018,11 @@ body:
         params:
           artifact: ${event.artifact}
           panelOpen: true
+    # 面板 tab / 目录列表点击切换产物：受控闭环
+    onSelectArtifact:
+      - action: setState
+        params:
+          artifact: ${event.artifact}
     # 模型切换：受控闭环（event.model 回写 state.model）
     onModelChange:
       - action: setState
@@ -1037,7 +1042,7 @@ body:
 
 要点说明：
 
-- **受控闭环是本页的主线**：模型选择（`model: ${state.model}` ↔ `onModelChange` → setState）、产出物面板（`artifact` / `panelOpen` ↔ `onArtifact` / `onPanelClose` / `onOpenArtifact` → setState）、工作空间下拉（`onSelect` → setState 回写 `state.workspace`，触发按钮文案 `${state.workspace || '选择工作空间'}` 回显）都是"props 绑 state、事件回写 state"的标准闭环；`Chat` 本身不擅自开面板、不擅自改模型。
+- **受控闭环是本页的主线**：模型选择（`model: ${state.model}` ↔ `onModelChange` → setState）、产出物面板（`artifact` / `panelOpen` ↔ `onArtifact` / `onPanelClose` / `onOpenArtifact` / `onSelectArtifact` → setState）、工作空间下拉（`onSelect` → setState 回写 `state.workspace`，触发按钮文案 `${state.workspace || '选择工作空间'}` 回显）都是"props 绑 state、事件回写 state"的标准闭环；`Chat` 本身不擅自开面板、不擅自改模型。多产物场景下面板的 tab 条与目录列表由组合层自动从消息流归集产物（无需 DSL 接线），切换经 `onSelectArtifact` 回写 state。
 - **Composer 槽位即扩展点**：`composerFooter`（工具栏下方 footer 区，本例为「选择工作空间」DropdownMenu）与 `composerBottom`（输入框之外正下方的弱提示行，本例为免责声明）都是 DslNode 槽，内容完全由页面 DSL 声明；`hideToolbar` 可整体关闭默认工具栏行（Enter 发送保留）。
 - **`conversationId` 取路由 query**（`${route.query.id || 'conv-demo'}`）：智能体列表页与侧栏「最近」分组经 `navigate` 动作跳 `/chat?id=xxx` 进入独立会话，刷新后按 URL 还原——路由由框架内建 BrowserRouter + DynamicDslRoute 承担（见 `examples/chat/src/main.tsx`），DSL 只消费 `route.query`。
 - **service 引用是 DSL 与宿主函数的边界**：`contexts[].service`（`agents` / `contexts`）与 `messageActions[].service`（`quoteMessage`）都是字符串引用，运行时经 `ChatServices.callService(name, params)` 派发到宿主注册的服务——函数不进 DSL，符合"DSL 只承载可序列化数据"的约束。
