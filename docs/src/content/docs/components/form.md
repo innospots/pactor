@@ -1,6 +1,6 @@
 ---
 title: 表单组件
-description: 表单类 DSL 组件——Form / Input / Select / Textarea / Checkbox / RadioGroup / Switch / Slider / Label / Field / Calendar / DatePicker / InputOTP / Combobox 的 props 契约、FieldRule 校验规则与 DSL 示例
+description: 表单类 DSL 组件——Form / Input / NumberInput / Select / Textarea / Checkbox / RadioGroup / Switch / Slider / Label / Field / Calendar / DatePicker / InputOTP / Combobox 的 props 契约、FieldRule 校验规则与 DSL 示例
 ---
 
 Form 容器与录入控件。全部录入组件可在 `Form` 内按 `name` 参与值收集与校验（`label` / `rules` 生效，值为字段初始值，优先于 Form 的 `initialValues`），也可独立使用（`value` 为受控值）。
@@ -15,7 +15,7 @@ Form 容器与录入控件。全部录入组件可在 `Form` 内按 `name` 参�
 | 事件 `onSubmit` | — | 校验通过后触发，`event` 为表单 values，同时写入 `${form.<field>}` |
 | 事件 `onValuesChange` | — | 字段变化，`event` 为变化字段单键对象 `{ <field>: <newValue> }` |
 
-Form 内声明 `name` 的 Input / Select 及本页其余录入组件（Textarea / Checkbox / RadioGroup / Switch / Slider / Calendar / DatePicker / InputOTP / Combobox）自动成为表单项（label / rules 生效，值由 Form 托管）。
+Form 内声明 `name` 的 Input / NumberInput / Select 及本页其余录入组件（Textarea / Checkbox / RadioGroup / Switch / Slider / Calendar / DatePicker / InputOTP / Combobox）自动成为表单项（label / rules 生效，值由 Form 托管）。
 
 ### Input
 
@@ -31,9 +31,35 @@ Form 内声明 `name` 的 Input / Select 及本页其余录入组件（Textarea 
 | `controlClassName` | string | 控件本体 class：独立渲染时与 `className` 同点合并；Form 内 `className` 挂 form-item 容器、本 prop 仍挂控件节点（Form 内精确设置控件样式，如宽度，时使用） |
 | 事件 `onChange` | — | 传出 string 值 |
 
-> **className 挂载点约定**：全部录入组件的 `className` / `style` 在 Form 内挂 `form-item` 容器（影响整项布局），独立渲染时挂控件本体；Input / Select 另提供 `controlClassName` 作为 Form 内直达控件本体的精确通道。
+> **className 挂载点约定**：全部录入组件的 `className` / `style` 在 Form 内挂 `form-item` 容器（影响整项布局），独立渲染时挂控件本体；Input / NumberInput / Select 另提供 `controlClassName` 作为 Form 内直达控件本体的精确通道。
+
+### NumberInput
+
+数字输入框。右侧带增加/减少步进按钮（按 `step` 增减、以 `min`/`max` 钳制，到达边界或 `disabled` 时对应按钮禁用；原生步进箭头已隐藏，键盘 ArrowUp/ArrowDown 步进不受影响）。输入过程保留中间文本（如 `-` / `1.`），可解析为数字时传出经 min/max 钳制与 precision 规整后的 number，清空时传出 `undefined`。
+
+| prop | 类型 | 缺省 | 说明 |
+| --- | --- | --- | --- |
+| `name` | string | — | 字段名；在 Form 内声明 name 即自动成为表单项 |
+| `label` | string | — | 表单项标签 |
+| `rules` | FieldRule[] | — | 校验规则（见[校验规则（FieldRule）](#校验规则fieldrule)） |
+| `value` | number | — | 受控值（独立渲染时生效）；Form 内作为字段初始值（优先于 Form `initialValues`） |
+| `min` | number | — | 最小值（输入越界时钳制） |
+| `max` | number | — | 最大值（输入越界时钳制） |
+| `step` | number | `1` | 步长（原生步进按钮步距） |
+| `precision` | number | — | 小数精度位数；声明后输入值按此精度四舍五入 |
+| `placeholder` | string | — | 占位文案 |
+| `disabled` | boolean | — | 禁用 |
+| `controlClassName` | string | — | 控件本体 class（挂载规则同 Input） |
+| 事件 `onChange` | — | — | 输入时触发，`${event}` 为 number（清空时为 `undefined`） |
+
+```yaml
+- type: NumberInput
+  props: { name: qty, label: 数量, min: 0, max: 100, step: 1 }
+```
 
 ### Select
+
+下拉弹层默认左边缘对齐触发器（`align="start"`），最小宽度跟随触发器宽度（Base UI Positioner 暴露的 `--anchor-width`），选项更长时随内容撑宽。
 
 | prop | 类型 | 说明 |
 | --- | --- | --- |

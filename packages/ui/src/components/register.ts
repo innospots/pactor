@@ -46,6 +46,7 @@ import { Link } from './components/Link/index.js';
 import { Menu } from './components/Menu/index.js';
 import { Menubar } from './components/Menubar/index.js';
 import { NavigationMenu } from './components/NavigationMenu/index.js';
+import { NumberInput } from './components/NumberInput/index.js';
 import { Page } from './components/Page/index.js';
 import { Pagination } from './components/Pagination/index.js';
 import { Popover } from './components/Popover/index.js';
@@ -90,6 +91,7 @@ export const builtinComponents = {
   Table,
   Form,
   Input,
+  NumberInput,
   Select,
   // Layout 需要原始 DSL 子树做方向推导（含 Sider 判定），以 withScope 注册
   Layout: { component: Layout, withScope: true },

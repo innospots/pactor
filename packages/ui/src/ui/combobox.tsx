@@ -53,7 +53,10 @@ function ComboboxContent({
   return (
     <PopoverContent
       data-slot="combobox-content"
-      className={cn('w-[--anchor-width] p-0', className)}
+      // 弹层宽度跟随触发器（--anchor-width 需经 var() 引用；
+      // 此前写成方括号形式 w-[--anchor-width]，缺少 var() 包裹，
+      // 会编译为无效的 `width: --anchor-width`）
+      className={cn('w-(--anchor-width) p-0', className)}
       {...props}
     >
       {children}
