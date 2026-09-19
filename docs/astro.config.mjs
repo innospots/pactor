@@ -39,6 +39,18 @@ export default defineConfig({
           ],
         },
         {
+          label: '样式',
+          items: [
+            { label: '样式总览', slug: 'style' },
+            { label: '色彩', slug: 'style/colors' },
+            { label: '字体', slug: 'style/fonts' },
+            { label: '排版', slug: 'style/typography' },
+            { label: '布局', slug: 'style/layout' },
+            { label: '形态', slug: 'style/shape' },
+            { label: '动效', slug: 'style/motion' },
+          ],
+        },
+        {
           label: '参考',
           items: [{ label: 'DSL 参考', slug: 'reference/dsl' }],
         },
