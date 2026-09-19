@@ -48,6 +48,7 @@ const EXTENDED_TYPES = [
   'RadioGroup',
   'Switch',
   'Slider',
+  'NumberInput',
   'Label',
   'Field',
   // 第二批：导航类

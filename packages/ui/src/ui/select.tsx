@@ -55,7 +55,9 @@ function SelectContent({
   children,
   side = 'bottom',
   sideOffset = 4,
-  align = 'center',
+  // 弹层左边缘对齐触发器左边缘（shadcn 上游默认为 'center'，居中会显得
+  // 弹层"对着触发器中间"，与主流控制台左对齐惯例不符，故改默认值）
+  align = 'start',
   alignItemWithTrigger = false,
   ...props
 }: SelectPrimitive.Popup.Props &
@@ -75,7 +77,11 @@ function SelectContent({
         <SelectPrimitive.Popup
           data-slot="select-content"
           className={cn(
-            'relative z-50 max-h-96 min-w-[8rem] overflow-x-hidden overflow-y-auto rounded-md border border-border bg-popover text-popover-foreground shadow-md shadow-(color:--shadow-color) duration-200 data-open:animate-in data-open:fade-in-0 data-open:zoom-in-95 data-closed:animate-out data-closed:fill-mode-forwards data-closed:fade-out-0 data-closed:zoom-out-95',
+            // min-w 跟随触发器宽度（Base UI Positioner 在定位元素上暴露
+            // --anchor-width，Popup 作为其子节点可经 var() 继承到），
+            // 选项更长时弹层随内容继续撑宽；不再使用固定的 min-w-[8rem]
+            //（触发器比 8rem 宽时弹层会显得比触发器窄）
+            'relative z-50 max-h-96 min-w-(--anchor-width) overflow-x-hidden overflow-y-auto rounded-md border border-border bg-popover text-popover-foreground shadow-md shadow-(color:--shadow-color) duration-200 data-open:animate-in data-open:fade-in-0 data-open:zoom-in-95 data-closed:animate-out data-closed:fill-mode-forwards data-closed:fade-out-0 data-closed:zoom-out-95',
             className,
           )}
           {...props}

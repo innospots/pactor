@@ -8,6 +8,7 @@ import {
   applyChatEvent,
   ChatView,
   ConversationStore,
+  detectStreamingMode,
 } from '../src/index.js';
 
 afterEach(cleanup);
@@ -280,6 +281,49 @@ describe('ActivityTrace 折叠状态机（spec: chat-activity-trace / 轨迹自�
     // 答案阶段：自动折叠，条目收起
     expect(document.querySelector('.pactor-chat-trace__entry')).toBeNull();
     expect(screen.getByText('正在生成回复…')).toBeTruthy();
+  });
+
+  it('答案阶段又来工具调用不重新自动展开（单向闩锁，防闪烁）', () => {
+    const store = createStore();
+    applyChatEvent(store, { type: 'message.start', messageId: 'a1' });
+    applyChatEvent(store, {
+      type: 'tool.start',
+      messageId: 'a1',
+      name: 'search',
+      title: '搜索数据',
+    });
+    applyChatEvent(store, {
+      type: 'tool.result',
+      messageId: 'a1',
+      name: 'search',
+      status: 'success',
+      result: 1,
+    });
+    render(<ChatView store={store} />);
+    expect(document.querySelector('.pactor-chat-trace__entry')).toBeTruthy();
+
+    // 正文开始流式 → 自动折叠
+    act(() => {
+      applyChatEvent(store, { type: 'text.delta', messageId: 'a1', delta: '正文' });
+    });
+    expect(document.querySelector('.pactor-chat-trace__entry')).toBeNull();
+
+    // 答案阶段又来工具活动（mode 回跳 'tool'，answerPhase 变 false）：
+    // 单向闩锁保持折叠，不重新自动展开
+    act(() => {
+      applyChatEvent(store, {
+        type: 'tool.start',
+        messageId: 'a1',
+        name: 'write',
+        title: '写入文件',
+      });
+    });
+    expect(detectStreamingMode(store.getMessage('a1')!)).toBe('tool');
+    expect(document.querySelector('.pactor-chat-trace__entry')).toBeNull();
+
+    // 用户仍可手动展开（pin）
+    fireEvent.click(screen.getByText('正在调用工具…'));
+    expect(document.querySelector('.pactor-chat-trace__entry')).toBeTruthy();
   });
 
   it('用户手动展开后 pin，正文继续流式不再自动折叠（spec: 用户固定展开）', () => {

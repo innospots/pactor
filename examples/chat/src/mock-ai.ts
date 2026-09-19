@@ -178,6 +178,25 @@ async function* artifactPageTurn(messageId: string): AsyncGenerator<ChatEvent> {
   yield* streamText(messageId, '已生成统计页面 DSL，右侧面板以白名单组件活预览渲染。');
 }
 
+/** 「批量」产出物意图：一条消息连续 6 个 artifact part（卡片区收起：只展示 4 张 + 展开 / 查看所有产物） */
+async function* multiFileTurn(messageId: string): AsyncGenerator<ChatEvent> {
+  yield* streamThinking(messageId, '用户需要一组文件，整理为多个产出物连续下发……');
+  await sleep(400);
+  const files: Array<{ id: string; kind: 'markdown' | 'code' | 'text'; title: string; content: string; meta?: Record<string, unknown> }> = [
+    { id: 'art-batch-readme', kind: 'markdown', title: 'README.md', content: '# 批量产物\n\n本产物由 mock 批量意图生成。', meta: { size: 3584 } },
+    { id: 'art-batch-data', kind: 'text', title: '月度数据.csv', content: '月份,营收\n1,128.6', meta: { size: 20480 } },
+    { id: 'art-batch-app', kind: 'code', title: 'app.ts', content: "export const main = () => 'hi';", language: 'ts', meta: { size: 512 } },
+    { id: 'art-batch-config', kind: 'text', title: 'config.json', content: '{ "name": "demo" }', meta: { size: 96 } },
+    { id: 'art-batch-query', kind: 'code', title: 'query.sql', content: 'SELECT * FROM revenue;', meta: { size: 128 } },
+    { id: 'art-batch-notes', kind: 'text', title: '发布说明.txt', content: 'v1.0 首批发布。', meta: { size: 64 } },
+  ];
+  for (const [index, file] of files.entries()) {
+    yield { type: 'artifact', messageId, partId: `batch-${index}`, artifact: file };
+    await sleep(120);
+  }
+  yield* streamText(messageId, '已生成 6 个文件：卡片区默认只展示 4 张，点击「展开」查看全部，或点「查看所有产物」在右侧面板目录中浏览。');
+}
+
 /** 「导出」意图的 DSL：按钮触发高风险 capability（data.export），经 confirm 确认后执行 */
 const EXPORT_DSL: DslNode = {
   type: 'Card',
@@ -256,7 +275,7 @@ async function* defaultTurn(messageId: string, text: string): AsyncGenerator<Cha
   yield* streamThinking(messageId, `收到用户输入「${text}」，组织回复……`);
   yield* streamText(
     messageId,
-    `你刚才说：「${text}」。\n\n我是 **@pactor-app/chat** 的 mock AI，可以演示这些能力：\n\n- 发送「**天气**」：思考过程 + 工具调用 + 结论\n- 发送「**报表**」：LLM 下发 DSL 卡片（Safe Registry 渲染）\n- 发送「**导出**」：高风险 capability 确认链\n- 发送「**月报**」：markdown 产出物 → 右侧面板\n- 发送「**代码**」：code 产出物 → 右侧面板\n- 发送「**页面**」：dsl 产出物 → 右侧面板活预览\n\n支持数学公式（KaTeX）：行内 $E=mc^2$，块级：\n\n$$\\bar{x} = \\frac{1}{n}\\sum_{i=1}^{n} x_i$$\n\n\`\`\`ts\n// 真实接入：实现 ChatTransport 对接你的 SSE / WebSocket 服务端\ninterface ChatTransport {\n  send(input: ChatInput): AsyncIterable<ChatEvent>;\n}\n\`\`\``,
+    `你刚才说：「${text}」。\n\n我是 **@pactor-app/chat** 的 mock AI，可以演示这些能力：\n\n- 发送「**天气**」：思考过程 + 工具调用 + 结论\n- 发送「**报表**」：LLM 下发 DSL 卡片（Safe Registry 渲染）\n- 发送「**导出**」：高风险 capability 确认链\n- 发送「**月报**」：markdown 产出物 → 右侧面板\n- 发送「**代码**」：code 产出物 → 右侧面板\n- 发送「**页面**」：dsl 产出物 → 右侧面板活预览\n- 发送「**批量**」：一条消息 6 个产出物 → 卡片区收起（4 张 + 展开 / 查看所有产物）\n\n支持数学公式（KaTeX）：行内 $E=mc^2$，块级：\n\n$$\\bar{x} = \\frac{1}{n}\\sum_{i=1}^{n} x_i$$\n\n\`\`\`ts\n// 真实接入：实现 ChatTransport 对接你的 SSE / WebSocket 服务端\ninterface ChatTransport {\n  send(input: ChatInput): AsyncIterable<ChatEvent>;\n}\n\`\`\``,
     { format: 'markdown', chunk: 4 },
   );
 }
@@ -295,6 +314,8 @@ export function createMockAiTransport(): ChatTransport {
         yield* monthlyReportTurn(messageId);
       } else if (text.includes('代码')) {
         yield* codeTurn(messageId);
+      } else if (/批量|一组文件/.test(text)) {
+        yield* multiFileTurn(messageId);
       } else if (/报表|统计|卡片/.test(text)) {
         yield* reportTurn(messageId);
       } else if (text.includes('导出')) {

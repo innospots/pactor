@@ -5,12 +5,46 @@ import type {
   BuiltinMessageAction,
   ChatMessage,
   ChatMessageAction,
+  ChatPart,
 } from '../model.js';
 import type { ChatRuntime, ChatScope } from '../scope.js';
 import { ActivityTrace } from './ActivityTrace.js';
+import {
+  ARTIFACT_CARD_INTERNAL_COMPONENTS,
+  buildArtifactCardGroupFragment,
+  ChatArtifactCardGroup,
+} from './chrome/artifact-card.js';
+import { ChromeSlot } from './chrome/ChromeSlot.js';
 import type { CallChatService } from './context-sources.js';
 import { collectMessageText, MessageActions } from './MessageActions.js';
 import { PartRenderer } from './PartRenderer.js';
+
+/** 消息正文渲染段：单个 part，或连续 artifact part 归并的产物卡片组 */
+export type MessagePartSegment = ChatPart | ChatArtifact[];
+
+/**
+ * 连续 artifact part 归并（spec: chat-artifact-panel / 卡片区收起）：
+ * 同一消息内相邻的 artifact part 合成一个卡片组（组内超 4 个由
+ * ChatArtifactCardGroup 收起），非 artifact part 保持原位原序。
+ */
+export function groupArtifactParts(
+  parts: readonly ChatPart[],
+): MessagePartSegment[] {
+  const segments: MessagePartSegment[] = [];
+  for (const part of parts) {
+    if (part.type === 'artifact' && part.artifact) {
+      const last = segments[segments.length - 1];
+      if (Array.isArray(last)) {
+        last.push(part.artifact);
+      } else {
+        segments.push([part.artifact]);
+      }
+    } else {
+      segments.push(part);
+    }
+  }
+  return segments;
+}
 
 /**
  * MessageBubble：按 role 区分呈现（参考 DeepTutor web 消息区设计）——
@@ -47,8 +81,20 @@ export interface MessageBubbleProps {
   callService?: CallChatService;
   /** 全部动作（含内建）点击的并行通知 */
   onMessageAction?: (actionId: string, message: ChatMessage) => void;
-  /** artifact 卡片"在面板中打开"回调（透传 PartRenderer） */
-  onOpenArtifact?: (artifact: ChatArtifact) => void;
+}
+
+/**
+ * 消息时间格式化（assistant 消息底部时间戳）：
+ * 当天 HH:mm；非当天 M月d日 HH:mm
+ */
+export function formatMessageTime(ts: number, now: number = Date.now()): string {
+  const date = new Date(ts);
+  const hh = String(date.getHours()).padStart(2, '0');
+  const mm = String(date.getMinutes()).padStart(2, '0');
+  if (new Date(now).toDateString() === date.toDateString()) {
+    return `${hh}:${mm}`;
+  }
+  return `${date.getMonth() + 1}月${date.getDate()}日 ${hh}:${mm}`;
 }
 
 /** user 消息的内联编辑框：预填原文本，确认回调新文本，取消静默关闭 */
@@ -121,7 +167,6 @@ export function MessageBubble({
   messageActions,
   callService,
   onMessageAction,
-  onOpenArtifact,
 }: MessageBubbleProps) {
   const [editing, setEditing] = useState(false);
   const bubbleScope: ChatScope = {
@@ -148,6 +193,10 @@ export function MessageBubble({
           part.type === 'tool-call' ||
           part.type === 'tool-result',
       ));
+  // assistant 终态消息底部展示时间戳（流式 / 待响应期间与无 createdAt
+  // 的历史消息不展示）；user / system 消息不展示
+  const showTime =
+    message.role === 'assistant' && !live && message.createdAt !== undefined;
   return (
     <div
       className={`pactor-chat-message pactor-chat-message--${message.role}`}
@@ -171,32 +220,61 @@ export function MessageBubble({
           message.role !== 'assistant' ? (
             <span className="pactor-chat-message__pending">…</span>
           ) : (
-            message.parts.map((part, index) => (
-              <PartRenderer
-                key={part.id ?? index}
-                part={part}
-                runtime={runtime}
-                scope={bubbleScope}
-                streaming={streaming}
-                onOpenArtifact={onOpenArtifact}
-              />
-            ))
+            groupArtifactParts(message.parts).map((segment, index) =>
+              Array.isArray(segment) ? (
+                <ChromeSlot
+                  key={`artifacts:${segment[0]!.id}`}
+                  fragment={buildArtifactCardGroupFragment(segment)}
+                  components={ARTIFACT_CARD_INTERNAL_COMPONENTS}
+                  fallback={<ChatArtifactCardGroup artifacts={segment} />}
+                />
+              ) : (
+                <PartRenderer
+                  key={segment.id ?? index}
+                  part={segment}
+                  runtime={runtime}
+                  scope={bubbleScope}
+                  streaming={streaming}
+                />
+              ),
+            )
           )}
         </div>
       )}
-      {!editing && (
-        <MessageActions
-          message={message}
-          actions={messageActions}
-          showRegenerate={showRegenerate}
-          onRegenerate={onRegenerate}
-          onRetry={onRetry}
-          onEdit={onEditResend ? () => setEditing(true) : undefined}
-          forceVisible={message.status === 'error'}
-          callService={callService}
-          onMessageAction={onMessageAction}
-        />
-      )}
+      {!editing &&
+        (showTime ? (
+          <div className="pactor-chat-message__footer">
+            <MessageActions
+              message={message}
+              actions={messageActions}
+              showRegenerate={showRegenerate}
+              onRegenerate={onRegenerate}
+              onRetry={onRetry}
+              onEdit={onEditResend ? () => setEditing(true) : undefined}
+              forceVisible={message.status === 'error'}
+              callService={callService}
+              onMessageAction={onMessageAction}
+            />
+            <span
+              className="pactor-chat-message__time"
+              title={new Date(message.createdAt!).toLocaleString()}
+            >
+              {formatMessageTime(message.createdAt!)}
+            </span>
+          </div>
+        ) : (
+          <MessageActions
+            message={message}
+            actions={messageActions}
+            showRegenerate={showRegenerate}
+            onRegenerate={onRegenerate}
+            onRetry={onRetry}
+            onEdit={onEditResend ? () => setEditing(true) : undefined}
+            forceVisible={message.status === 'error'}
+            callService={callService}
+            onMessageAction={onMessageAction}
+          />
+        ))}
     </div>
   );
 }

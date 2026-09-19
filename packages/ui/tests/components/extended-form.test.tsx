@@ -1,7 +1,7 @@
 // @vitest-environment jsdom
 /**
  * 扩展表单类组件契约（spec: shadcn-extended-components / 表单类组件）：
- * Textarea / Checkbox / RadioGroup / Switch / Slider / Label / Field 的
+ * Textarea / Checkbox / RadioGroup / Switch / Slider / NumberInput / Label / Field 的
  * Form 集成（name 即成表单项、值收集、错误展示）、事件值规范化与通用 props。
  */
 import { fireEvent, screen } from '@testing-library/react';
@@ -297,6 +297,105 @@ describe('Slider', () => {
       props: { value: 2, ...COMMON_PROPS },
     });
     expectCommonProps(container.querySelector('[data-slot=slider]'));
+  });
+});
+
+describe('NumberInput', () => {
+  it('独立渲染：输入触发 onChange 且传出 number', async () => {
+    const { context } = renderDsl({
+      type: 'NumberInput',
+      props: { placeholder: '请输入数量' },
+      events: {
+        onChange: { action: 'setState', params: { qty: '${event}' } },
+      },
+    });
+
+    const input = screen.getByPlaceholderText('请输入数量');
+    fireEvent.change(input, { target: { value: '42' } });
+    await expectEventState(context, 'qty', 42);
+  });
+
+  it('输入越界按 min/max 钳制，precision 规整小数', async () => {
+    const { context } = renderDsl({
+      type: 'NumberInput',
+      props: { min: 0, max: 10, precision: 1, placeholder: '数量' },
+      events: {
+        onChange: { action: 'setState', params: { qty: '${event}' } },
+      },
+    });
+
+    const input = screen.getByPlaceholderText('数量');
+    fireEvent.change(input, { target: { value: '99' } });
+    await expectEventState(context, 'qty', 10);
+
+    fireEvent.change(input, { target: { value: '3.26' } });
+    await expectEventState(context, 'qty', 3.3);
+  });
+
+  it('Form 内声明 name 渲染为 form-item，输入值参与提交', async () => {
+    const { container, context } = renderDsl({
+      type: 'Form',
+      children: [
+        { type: 'NumberInput', props: { name: 'qty', label: '数量', min: 0 } },
+        { type: 'Button', props: { text: '提交', submit: true } },
+      ],
+    });
+
+    expect(container.querySelector('[data-slot=form-item]')).not.toBeNull();
+
+    fireEvent.change(screen.getByLabelText('数量'), { target: { value: '5' } });
+    fireEvent.click(screen.getByRole('button', { name: '提交' }));
+
+    await vi.waitFor(() => {
+      expect(context.state.get('form')).toEqual({ qty: 5 });
+    });
+  });
+
+  it('步进按钮按 step 增减并以 min/max 钳制，到达边界禁用对应按钮', async () => {
+    const { context } = renderDsl(
+      {
+        type: 'NumberInput',
+        props: { min: 0, max: 2, step: 1, value: '${state.qty}' },
+        events: {
+          onChange: { action: 'setState', params: { qty: '${event}' } },
+        },
+      },
+      { state: { qty: 1 } },
+    );
+
+    fireEvent.click(screen.getByRole('button', { name: '增加' }));
+    await expectEventState(context, 'qty', 2);
+
+    // 到达 max 后增加按钮禁用；减少按钮仍可用
+    await vi.waitFor(() => {
+      expect(
+        (screen.getByRole('button', { name: '增加' }) as HTMLButtonElement)
+          .disabled,
+      ).toBe(true);
+    });
+    fireEvent.click(screen.getByRole('button', { name: '减少' }));
+    await expectEventState(context, 'qty', 1);
+  });
+
+  it('空值点击增加按钮以 0 为基准步进并经 min 钳制', async () => {
+    const { context } = renderDsl({
+      type: 'NumberInput',
+      props: { min: 5, step: 2 },
+      events: {
+        onChange: { action: 'setState', params: { qty: '${event}' } },
+      },
+    });
+
+    fireEvent.click(screen.getByRole('button', { name: '增加' }));
+    await expectEventState(context, 'qty', 5);
+  });
+
+  it('通用 props 作用于根节点（独立渲染）', () => {
+    const { container } = renderDsl({
+      type: 'NumberInput',
+      props: { value: 2, ...COMMON_PROPS },
+    });
+    expectCommonProps(container.querySelector('[data-slot=number-input]'));
   });
 });
 

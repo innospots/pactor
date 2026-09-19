@@ -184,7 +184,9 @@ describe('chat-on-ui-components（spec: chat-on-ui-components）', () => {
       '.pactor-chat-inspector__header .pactor-chat-chrome',
     );
     expect(header).not.toBeNull();
-    const closeButton = header!.querySelector('button')!;
+    const closeButton = header!.querySelector(
+      'button[aria-label="关闭面板"]',
+    )!;
     fireEvent.click(closeButton);
 
     // 受控闭环：onPanelClose → setState panelOpen=false → 面板关闭

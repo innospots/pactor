@@ -1,7 +1,7 @@
 import { describe, expect, it, vi } from 'vitest';
 
 import type { ChatArtifact } from '../src/index.js';
-import { ArtifactStore } from '../src/index.js';
+import { ArtifactStore, collectArtifacts, formatArtifactSize, isImageArtifact, mergeArtifacts, resolveArtifactFileType, resolveArtifactIcon, resolveArtifactIconName } from '../src/index.js';
 
 const MARKDOWN_ARTIFACT: ChatArtifact = {
   id: 'a1',
@@ -74,5 +74,250 @@ describe('ArtifactStore（spec: chat-artifact-panel / 产出物模型与 Artifac
       type: 'Card',
       props: { title: '卡片' },
     });
+  });
+});
+
+describe('ArtifactStore 多产物列表（tabs / 目录列表视图数据源）', () => {
+  const SECOND: ChatArtifact = {
+    id: 'a2',
+    kind: 'code',
+    title: '脚本',
+    content: 'echo hi',
+    language: 'bash',
+  };
+
+  it('open 按 id upsert：新 id 追加进列表，同 id 替换且位置不变', () => {
+    const store = new ArtifactStore();
+    store.open(MARKDOWN_ARTIFACT);
+    store.open(SECOND);
+    expect(store.list().map((a) => a.id)).toEqual(['a1', 'a2']);
+
+    const updated = { ...MARKDOWN_ARTIFACT, title: '分析报告 v2' };
+    store.open(updated);
+    expect(store.list().map((a) => a.id)).toEqual(['a1', 'a2']);
+    expect(store.list()[0]!.title).toBe('分析报告 v2');
+    // open 同时激活
+    expect(store.get()?.id).toBe('a1');
+  });
+
+  it('list 返回的数组引用在不变时保持稳定（useSyncExternalStore 快照安全）', () => {
+    const store = new ArtifactStore();
+    const before = store.list();
+    store.open(MARKDOWN_ARTIFACT);
+    const after = store.list();
+    expect(after).not.toBe(before);
+    expect(store.list()).toBe(after);
+  });
+
+  it('activate 切换激活项；未知 id 告警并忽略；重复激活不通知', () => {
+    const store = new ArtifactStore();
+    store.open(MARKDOWN_ARTIFACT);
+    store.open(SECOND);
+    const listener = vi.fn();
+    store.subscribe(listener);
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
+
+    store.activate('a1');
+    expect(store.get()?.id).toBe('a1');
+    expect(listener).toHaveBeenCalledTimes(1);
+
+    store.activate('a1');
+    expect(listener).toHaveBeenCalledTimes(1);
+
+    store.activate('nope');
+    expect(store.get()?.id).toBe('a1');
+    expect(warn).toHaveBeenCalled();
+    warn.mockRestore();
+  });
+
+  it('close 只清空激活项：面板关闭，列表保留供重开切换', () => {
+    const store = new ArtifactStore();
+    store.open(MARKDOWN_ARTIFACT);
+    store.open(SECOND);
+    store.close();
+    expect(store.get()).toBeNull();
+    expect(store.list().map((a) => a.id)).toEqual(['a1', 'a2']);
+    // 重开历史产物
+    store.activate('a1');
+    expect(store.get()?.id).toBe('a1');
+  });
+
+  it('update 只补丁激活项，列表中其余产物不变', () => {
+    const store = new ArtifactStore();
+    store.open(MARKDOWN_ARTIFACT);
+    store.open(SECOND);
+    store.update({ title: '脚本 v2' });
+    expect(store.list()[0]).toEqual(MARKDOWN_ARTIFACT);
+    expect(store.list()[1]!.title).toBe('脚本 v2');
+  });
+});
+
+describe('collectArtifacts / mergeArtifacts（tabs 数据源归集）', () => {
+  const SECOND: ChatArtifact = {
+    id: 'a2',
+    kind: 'code',
+    title: '脚本',
+    content: 'echo hi',
+  };
+
+  it('collectArtifacts：按消息序归集 ready artifact part，同 id 取最新，streaming 跳过', () => {
+    const messages = [
+      {
+        parts: [
+          { type: 'artifact', artifact: MARKDOWN_ARTIFACT, status: 'ready' },
+          {
+            type: 'artifact',
+            artifact: { ...SECOND, title: '脚本 v1' },
+            status: 'streaming',
+          },
+        ],
+      },
+      {
+        parts: [
+          { type: 'text', content: '正文' },
+          { type: 'artifact', artifact: SECOND, status: 'ready' },
+          {
+            type: 'artifact',
+            artifact: { ...MARKDOWN_ARTIFACT, title: '分析报告 v2' },
+            status: 'ready',
+          },
+        ],
+      },
+    ];
+    const result = collectArtifacts(messages);
+    // 首次出现序；a1 取最新版本；streaming 的 v1 被 ready 覆盖
+    expect(result.map((a) => a.id)).toEqual(['a1', 'a2']);
+    expect(result[0]!.title).toBe('分析报告 v2');
+    expect(result[1]!.title).toBe('脚本');
+  });
+
+  it('mergeArtifacts：stream 顺序为主，冲突取 store 版本，store 独有追加', () => {
+    const stream = [MARKDOWN_ARTIFACT];
+    const opened = [
+      { ...MARKDOWN_ARTIFACT, title: '分析报告 补丁版' },
+      SECOND,
+    ];
+    const merged = mergeArtifacts(stream, opened);
+    expect(merged.map((a) => a.id)).toEqual(['a1', 'a2']);
+    expect(merged[0]!.title).toBe('分析报告 补丁版');
+  });
+});
+
+describe('resolveArtifactFileType / isImageArtifact（常见文件预览）', () => {
+  it('显式 fileType 优先：大小写与带点均归一化', () => {
+    expect(
+      resolveArtifactFileType({ ...MARKDOWN_ARTIFACT, fileType: '.PNG' }),
+    ).toBe('png');
+    expect(
+      resolveArtifactFileType({ ...MARKDOWN_ARTIFACT, fileType: 'Md' }),
+    ).toBe('md');
+  });
+
+  it('缺省从 title 扩展名推导；无扩展名返回 null', () => {
+    expect(
+      resolveArtifactFileType({ ...MARKDOWN_ARTIFACT, title: '图表.JPG' }),
+    ).toBe('jpg');
+    expect(
+      resolveArtifactFileType({ ...MARKDOWN_ARTIFACT, title: '无扩展名' }),
+    ).toBeNull();
+  });
+
+  it('isImageArtifact：常见图片扩展名命中，其余不命中', () => {
+    for (const ext of ['png', 'jpg', 'jpeg', 'gif', 'svg', 'webp']) {
+      expect(
+        isImageArtifact({ ...MARKDOWN_ARTIFACT, title: `图.${ext}` }),
+      ).toBe(true);
+    }
+    expect(isImageArtifact({ ...MARKDOWN_ARTIFACT, title: '文档.md' })).toBe(
+      false,
+    );
+    expect(isImageArtifact(MARKDOWN_ARTIFACT)).toBe(false);
+  });
+});
+
+describe('resolveArtifactIconName（产物文件类型图标）', () => {
+  it('图片扩展名 → image', () => {
+    for (const ext of ['png', 'jpg', 'svg', 'webp']) {
+      expect(
+        resolveArtifactIconName({ ...MARKDOWN_ARTIFACT, title: `图.${ext}` }),
+      ).toBe('image');
+    }
+  });
+
+  it('扩展名分桶：文档 file-text / 表格 table / 代码 code / sql database', () => {
+    expect(
+      resolveArtifactIconName({ ...MARKDOWN_ARTIFACT, title: '月报.md' }),
+    ).toBe('file-text');
+    expect(
+      resolveArtifactIconName({ ...MARKDOWN_ARTIFACT, title: '数据.csv' }),
+    ).toBe('table');
+    expect(
+      resolveArtifactIconName({ ...MARKDOWN_ARTIFACT, title: '脚本.TS' }),
+    ).toBe('code');
+    expect(
+      resolveArtifactIconName({ ...MARKDOWN_ARTIFACT, title: '查询.sql' }),
+    ).toBe('database');
+  });
+
+  it('显式 fileType 参与图标解析（优先于 title）', () => {
+    expect(
+      resolveArtifactIconName({
+        ...MARKDOWN_ARTIFACT,
+        title: '无扩展名',
+        fileType: 'png',
+      }),
+    ).toBe('image');
+  });
+
+  it('无扩展名 / 未知扩展名按 kind 兜底，最终兜底 file', () => {
+    expect(
+      resolveArtifactIconName({ ...MARKDOWN_ARTIFACT, title: '无扩展名' }),
+    ).toBe('file-text');
+    expect(
+      resolveArtifactIconName({
+        ...MARKDOWN_ARTIFACT,
+        kind: 'code',
+        title: '无扩展名',
+      }),
+    ).toBe('code');
+    expect(
+      resolveArtifactIconName({
+        ...MARKDOWN_ARTIFACT,
+        kind: 'dsl',
+        title: '无扩展名',
+      }),
+    ).toBe('layout-grid');
+    expect(
+      resolveArtifactIconName({ ...MARKDOWN_ARTIFACT, title: '压缩包.zip' }),
+    ).toBe('file');
+  });
+});
+
+describe('resolveArtifactIcon（图标 + 着色档位）与 formatArtifactSize', () => {
+  it('tone 分桶：表格 green / 数据 amber / 代码 blue / 脚本 terminal / 图片 violet / 文档 slate', () => {
+    expect(resolveArtifactIcon({ ...MARKDOWN_ARTIFACT, title: '数据.csv' })).toEqual({ name: 'table', tone: 'green' });
+    expect(resolveArtifactIcon({ ...MARKDOWN_ARTIFACT, title: '配置.json' })).toEqual({ name: 'database', tone: 'amber' });
+    expect(resolveArtifactIcon({ ...MARKDOWN_ARTIFACT, title: '脚本.sh' })).toEqual({ name: 'terminal', tone: 'blue' });
+    expect(resolveArtifactIcon({ ...MARKDOWN_ARTIFACT, title: '组件.tsx' })).toEqual({ name: 'code', tone: 'blue' });
+    expect(resolveArtifactIcon({ ...MARKDOWN_ARTIFACT, title: '图.png' })).toEqual({ name: 'image', tone: 'violet' });
+    expect(resolveArtifactIcon({ ...MARKDOWN_ARTIFACT, title: '月报.md' })).toEqual({ name: 'file-text', tone: 'slate' });
+  });
+
+  it('kind 兜底带 tone；未知扩展名 file/slate', () => {
+    expect(
+      resolveArtifactIcon({ ...MARKDOWN_ARTIFACT, kind: 'code', title: '无扩展名' }),
+    ).toEqual({ name: 'code', tone: 'blue' });
+    expect(
+      resolveArtifactIcon({ ...MARKDOWN_ARTIFACT, title: '压缩包.zip' }),
+    ).toEqual({ name: 'file', tone: 'slate' });
+  });
+
+  it('formatArtifactSize：B / KB / MB 档位，非法输入返回 null', () => {
+    expect(formatArtifactSize(512)).toBe('512 B');
+    expect(formatArtifactSize(3584)).toBe('3.5 KB');
+    expect(formatArtifactSize(12 * 1024 * 1024)).toBe('12.0 MB');
+    expect(formatArtifactSize(-1)).toBeNull();
+    expect(formatArtifactSize('1KB')).toBeNull();
+    expect(formatArtifactSize(undefined)).toBeNull();
   });
 });

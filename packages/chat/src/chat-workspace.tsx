@@ -2,6 +2,7 @@ import type { DslNode, Registry } from '@pactor-app/core';
 import type { ReactNode } from 'react';
 
 import type { ArtifactStore, ChatArtifact } from './artifact.js';
+import type { ArtifactViewers } from './view/ArtifactPanel.js';
 import type {
   ChatCapabilityRegistry,
   ChatConfirm,
@@ -39,6 +40,12 @@ export interface ChatWorkspaceServices {
   storeFactory?: () => ConversationStore;
   /** 产出物面板 store（spec: chat-artifact-panel）；缺省包内默认构造 */
   artifactStore?: ArtifactStore;
+  /**
+   * 自定义产物查看器（spec: chat-artifact-panel / 自定义预览）：
+   * 按键（扩展名小写不带点，或 kind）对特定文件格式提供自定义预览，
+   * 优先于内建渲染器；函数不进 DSL props，统一经服务注入
+   */
+  artifactViewers?: ArtifactViewers;
   /** Safe Registry（createSafeRegistry 包装后的白名单注册表） */
   safeRegistry?: Registry<unknown>;
   /** capability 白名单与确认链 */
@@ -134,6 +141,14 @@ export interface ChatWorkspaceProps {
   onArtifact?: (artifact: ChatArtifact) => void;
   /** 产出物卡片"在面板中打开"回调（runtime 绑定 events.onOpenArtifact 时传入） */
   onOpenArtifact?: (artifact: ChatArtifact) => void;
+  /** 卡片区"查看所有产物"回调（runtime 绑定 events.onOpenArtifactList 时传入） */
+  onOpenArtifactList?: () => void;
+  /**
+   * 面板 tab / 目录列表点击切换回调（runtime 绑定 events.onSelectArtifact
+   * 时传入；受控典型接法：setState artifact=${event.artifact}）。
+   * 多产物列表缺省由组合层从消息流归集，无需显式注入
+   */
+  onSelectArtifact?: (artifact: ChatArtifact) => void;
   /**
    * 内建 header 操作组（spec: chat-dsl-component / Header 配置，决策 D4）：
    * 按数组顺序渲染（headerExtra 槽之前）；缺省不渲染
@@ -195,6 +210,8 @@ export function createChatWorkspace(
     inspector,
     onArtifact,
     onOpenArtifact,
+    onOpenArtifactList,
+    onSelectArtifact,
     headerActions,
     editableTitle,
     onExport,
@@ -245,6 +262,8 @@ export function createChatWorkspace(
           inspector={inspector ? <DslNodeSlot node={inspector} /> : undefined}
           onArtifact={onArtifact}
           onOpenArtifact={onOpenArtifact}
+          onOpenArtifactList={onOpenArtifactList}
+          onSelectArtifact={onSelectArtifact}
           headerActions={headerActions}
           editableTitle={editableTitle}
           onExport={onExport}
