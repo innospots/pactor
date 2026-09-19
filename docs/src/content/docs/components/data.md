@@ -16,7 +16,7 @@ description: 数据类 DSL 组件——Table / DataTable / Chart 的 props 契�
 | `pagination` | `false` \| `{ pageSize? }` | 分页配置 |
 | 事件 `onChange` | — | 分页变化，传出 `{ current, pageSize, total }` |
 
-TableColumn：`title`、`dataIndex`、`width`、`cell`（DslNode 行模板，作用域注入 `row` / `rowIndex`——行内按钮的显隐禁用与动作参数都经 `${row.xxx}` 表达，见 [state 与表达式](/reference/dsl/#表达式与作用域)）。
+TableColumn：`title`、`dataIndex`、`width`、`align`（`'left' | 'center' | 'right'`，表头与单元格同时生效，默认 left）、`cell`（DslNode 行模板，作用域注入 `row` / `rowIndex`——行内按钮的显隐禁用与动作参数都经 `${row.xxx}` 表达，见 [state 与表达式](/reference/dsl/#表达式与作用域)）。
 
 ### DataTable
 

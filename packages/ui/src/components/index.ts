@@ -216,6 +216,8 @@ export { useFormContext } from './components/Form/context.js';
 export type { FormContextValue } from './components/Form/context.js';
 export { Input } from './components/Input/index.js';
 export type { FieldRule, InputProps } from './components/Input/index.js';
+export { NumberInput } from './components/NumberInput/index.js';
+export type { NumberInputProps } from './components/NumberInput/index.js';
 export { Select } from './components/Select/index.js';
 export type { SelectOption, SelectProps } from './components/Select/index.js';
 export { Textarea } from './components/Textarea/index.js';

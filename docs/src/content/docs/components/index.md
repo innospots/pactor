@@ -46,6 +46,7 @@ DSL 的 `type` 引用 Component Registry 注册名。`@pactor-app/ui`（shadcn k
 | [Item](/components/display/#item) | 展示 |
 | [Form](/components/form/#form) | 表单 |
 | [Input](/components/form/#input) | 表单 |
+| [NumberInput](/components/form/#numberinput) | 表单 |
 | [Select](/components/form/#select) | 表单 |
 | [Textarea](/components/form/#textarea) | 表单 |
 | [ChatInput](/components/form/#chatinput) | 表单 |

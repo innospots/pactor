@@ -6,7 +6,7 @@ shadcn/ui 组件目录扩展：在既有 20 个 DSL 类型之外，将 shadcn/ui
 ## Requirements
 ### Requirement: 扩展组件注册入口
 
-`builtinComponents` 注册表与 `createComponentRegistry()` SHALL 在既有 20 个类型之外注册全部扩展组件类型：展示类（Badge、Avatar、Skeleton、Separator、Kbd、Spinner、Empty、AspectRatio、Tooltip、HoverCard、Progress、Icon）、导航类（Breadcrumb、Pagination、Menubar、NavigationMenu、DropdownMenu、ContextMenu）、表单类（Textarea、Checkbox、RadioGroup、Switch、Slider、Label、Field、Calendar、DatePicker、InputOTP、Combobox）、反馈与弹层类（Dialog、AlertDialog、Drawer、Sheet、Popover、Sonner、Accordion、Collapsible）、复合类（Carousel、Command、Resizable、ScrollArea、Toggle、ToggleGroup、ButtonGroup、InputGroup、Item、Typography）、页面级组合类（Sidebar、DataTable、Chart）。扩展类型 MUST NOT 与既有 20 个类型重名冲突（重名者沿用既有实现，如 Alert/Card/Tabs）。
+`builtinComponents` 注册表与 `createComponentRegistry()` SHALL 在既有 20 个类型之外注册全部扩展组件类型：展示类（Badge、Avatar、Skeleton、Separator、Kbd、Spinner、Empty、AspectRatio、Tooltip、HoverCard、Progress、Icon）、导航类（Breadcrumb、Pagination、Menubar、NavigationMenu、DropdownMenu、ContextMenu）、表单类（Textarea、Checkbox、RadioGroup、Switch、Slider、NumberInput、Label、Field、Calendar、DatePicker、InputOTP、Combobox）、反馈与弹层类（Dialog、AlertDialog、Drawer、Sheet、Popover、Sonner、Accordion、Collapsible）、复合类（Carousel、Command、Resizable、ScrollArea、Toggle、ToggleGroup、ButtonGroup、InputGroup、Item、Typography）、页面级组合类（Sidebar、DataTable、Chart）。扩展类型 MUST NOT 与既有 20 个类型重名冲突（重名者沿用既有实现，如 Alert/Card/Tabs）。
 
 #### Scenario: 注册后全部扩展类型可解析
 
@@ -116,6 +116,7 @@ SHALL 提供以下表单类 DSL 组件，全部 MUST 可在 Form 内按 `name` �
 - **RadioGroup**：`name` / `options`（`Array<{ label, value }>`），onChange 传选中 value。
 - **Switch**：`name` / `label?`，onChange 传 boolean。
 - **Slider**：`name` / `min` / `max` / `step`，onChange 传 number。
+- **NumberInput**：`name` / `min` / `max` / `step` / `precision`，右侧带增加/减少步进按钮（到达边界禁用），onChange 传 number（清空传 undefined）。
 - **Label**：`text`，独立使用的表单标签。
 - **Field**：通用表单项容器（`label` / `description` / `error`），children 为控件 DSL 子树。
 - **Calendar**：`name` / `mode`（single），onChange 传 ISO 日期字符串。
