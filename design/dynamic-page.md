@@ -89,17 +89,25 @@ export interface SitemapResource extends BootstrapResource {
   `layouts` 按键合并，`id` / `path` 冲突后源覆盖前源并 dev 告警；
   `app` / `user` / `permissions` / `auth` 取第一个源
 
-### 落地影响（实现时需补的能力）
+### 落地情况（已实现，@pactor-app/app v1.19.0）
 
-1. `@pactor-app/resource`：`SitemapDslLoader`——内联 `pageDsl` 预置进
-   `id@version` 缓存，缺省项走 `loadPage`；认证状态变化时失效 sitemap
-   缓存并重取，登出时清空全部本地缓存（不跨用户残留）；
-   `DslResourceLoader` 接口不变
-2. `@pactor-app/router`：`SitemapMenuItem` 的 `layout` / `public` 字段
-   透传；构建 MenuRegistry 前把 `type: 'page'` 条目与 `pages[]` 合并
-   （`path` / `title` 继承）；路由守卫：非 public + 无 user → 重定向
-   `loginPath`
-3. `@pactor-app/ui`：注册 `PageOutlet` 组件；布局解析从固定注册表扩展为
-   DSL 布局（`layouts[name]` 渲染，页面塞进 PageOutlet）；表达式作用域对
-   布局 DSL 暴露 `menus`（现有内建布局内部消费菜单树，未开放为作用域，
-   需新增）
+规范能力已沉淀为 `@pactor-app/app` 的 `SitemapApp` 组件 + 配套导出
+（`packages/app/src/sitemap/`），starter（`starters/next-app-starter`）
+只做宿主接线：
+
+1. `fetchSitemap`（多源拉取合并）+ `createSitemapLoader`（内联 pageDsl
+   预置 `id@version` 缓存，缺省项经 `pageEndpoint` 懒加载；认证状态变化
+   由宿主整页重载触发重取）
+2. `mergeSitemapMenus`（`type: 'page'` 条目 path / title 自 pages 继承）+
+   MenuRegistry 路由解析；匿名守卫（非 public 且无 user →
+   `navigate(auth.loginPath)`）；`activeMenu` 高亮解析
+3. DSL 布局渲染：`PageOutlet` / `SitemapMenu` 组件内置于布局运行时，
+   布局 DSL 合成 PageDsl 渲染；`session.context` 服务桥（布局与页面 DSL
+   经 `${data.session.*}` 读 user / app / menus）
+
+仍待框架原生化的缺口（当前经服务桥 / 组件内置规避）：
+
+- 表达式作用域原生暴露 `menus`（现为 `session.context` 服务桥）
+- `service.call` 内置动作（现为宿主经 `options.actions` 扩展）
+- 登出缓存清理（`SitemapApp` 无本地持久缓存，整页重载即清；原生
+  SitemapDslLoader 入 resource 包时需实现缓存失效钩子）

@@ -98,6 +98,39 @@ const Page = createPactorPage({ navigate: (to) => navigate(to) });
 需要完全自定义链接渲染（prefetch、scroll restoration 等）时，可经 `components` 注册表覆盖同名组件，样式子组件从 `@pactor-app/ui/ui` 导入（`BreadcrumbLink` 支持 `render` prop 换成宿主路由组件）。
 - `route.params` / `route.query` 经 props 纯数据注入（如 Next.js 的 `searchParams`）
 
+## Sitemap 动态页面（SitemapApp）
+
+`design/dynamic-page.md` 的框架实现：一个 sitemap 对象（页面 url / 名称 / 结构 / DSL / DSL 布局）驱动整个应用。框架不持有路由——宿主注入 `pathname` 与 `navigate`，天然兼容 Next.js App Router、react-router 或任意宿主：
+
+```tsx
+import { SitemapApp } from '@pactor-app/app';
+
+// Next.js（App Router）：挂在 layout.tsx（跨导航常驻，切换导航只刷新内容区）
+<SitemapApp
+  sources={['/api/sitemap']}        // sitemap 接口 URL（可多源合并）
+  pathname={usePathname()}
+  navigate={(to) => router.push(to)}
+  services={{ 'auth.login': login }} // 业务服务（session.context 自动注册）
+  httpAdapter={httpHooks}            // 可选：跨域改写 / 响应拆包
+/>
+```
+
+内置能力（无需自行拼装）：多源拉取合并（冲突后源覆盖前源）、`menus × pages` 继承（`path` / `title` 缺省自引用页面）、MenuRegistry 路由解析（含 `:param`）、匿名守卫（非 `public` 且无 user → `navigate(auth.loginPath)`）、DSL 布局渲染（`PageOutlet` 页面出口、`SitemapMenu` 选中态与 `activeMenu` 高亮）、页面内联 / 懒加载（`id@version` 缓存，`pageEndpoint` 可配）、`session.context` 服务桥（DSL 经 `${data.session.*}` 读 user / app / menus）、布局常驻（同布局名切换导航仅内容区重建）。
+
+| Props | 说明 |
+| --- | --- |
+| `sources`（必填） | sitemap 接口 URL 列表 |
+| `pathname` / `navigate`（必填） | 宿主路由注入；http(s) 外链自动新标签打开 |
+| `query` | 当前 query（`${route.query.x}` 可读） |
+| `pageEndpoint` | 懒加载页面端点（缺省 `/api/pages/{id}`） |
+| `services` / `actions` / `components` | 业务扩展（`components` 中 `PageOutlet` / `SitemapMenu` 为布局保留名） |
+| `httpAdapter` | `PactorHttpHooks`：request / response 统一加工 |
+| `fetcher` | fetch 实现注入（SSR / 测试） |
+| `sessionService` | 会话桥服务名（缺省 `session.context`） |
+| `loading` / `renderError` / `renderNotFound` | 状态视图定制 |
+
+配套导出（高级用法）：`fetchSitemap`、`createSitemapLoader`、`mergeSitemapMenus`、`toSitemapNavItems`、`createSitemapSessionServices` 与类型 `SitemapResource` / `SitemapMenuItem` / `SitemapPageEntry` / `LayoutDsl` / `SitemapSessionContext`。完整示例工程见 `starters/next-app-starter`。
+
 ## 文档
 
 完整文档见 <https://github.com/426-330/pactor/tree/main/docs>（`pnpm docs:dev` 本地启动文档站）。

@@ -8,9 +8,21 @@ importers:
 
   .:
     dependencies:
+      '@pactor-app/core':
+        specifier: link:../../packages/core
+        version: link:../../packages/core
+      '@pactor-app/runtime':
+        specifier: link:../../packages/runtime
+        version: link:../../packages/runtime
+      '@pactor-app/ui':
+        specifier: link:../../packages/ui
+        version: link:../../packages/ui
       next:
         specifier: 16.3.5
         version: 16.3.5(@babel/core@7.29.7)(@types/node@20.19.43)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
+      pactor-app:
+        specifier: link:../../packages/pactor
+        version: link:../../packages/pactor
       react:
         specifier: 19.2.8
         version: 19.2.8

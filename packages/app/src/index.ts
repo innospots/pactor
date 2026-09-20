@@ -24,3 +24,24 @@ export type { PactorHttpHooks } from './assembly.js';
 // 嵌入式页面（spec: embedded-page-view）：存量项目局部嵌入，不接管路由
 export { createPactorPage, PactorPage } from './embedded.js';
 export type { PactorPageOptions, PactorPageProps } from './embedded.js';
+
+// Sitemap 动态页面（design/dynamic-page.md）：配置 sitemap 源即成应用
+export { SitemapApp } from './sitemap/SitemapApp.js';
+export type { SitemapAppProps } from './sitemap/SitemapApp.js';
+export { fetchSitemap } from './sitemap/fetch.js';
+export type { FetchSitemapOptions } from './sitemap/fetch.js';
+export { createSitemapLoader } from './sitemap/loader.js';
+export type { SitemapLoaderOptions } from './sitemap/loader.js';
+export {
+  mergeSitemapMenus,
+  toSitemapNavItems,
+} from './sitemap/merge.js';
+export type { SitemapNavItem } from './sitemap/merge.js';
+export { createSitemapSessionServices } from './sitemap/session.js';
+export type { SitemapSessionContext } from './sitemap/session.js';
+export type {
+  LayoutDsl,
+  SitemapMenuItem,
+  SitemapPageEntry,
+  SitemapResource,
+} from './sitemap/types.js';
