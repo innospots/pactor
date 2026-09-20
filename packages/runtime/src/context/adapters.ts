@@ -82,7 +82,14 @@ export function createFetchHttpAdapter(): HttpAdapter {
         body = JSON.stringify(config.body);
       }
 
-      const response = await fetch(url, { method, headers, body });
+      const response = await fetch(url, {
+        method,
+        headers,
+        body,
+        // 跨源 cookie 会话（服务端开通 CORS + Allow-Credentials 时生效；
+        // 同源行为不变）
+        credentials: 'include',
+      });
       if (!response.ok) {
         throw new Error(
           `[@pactor-app/runtime] http request failed: ${response.status} ${response.statusText} (${config.url})`,

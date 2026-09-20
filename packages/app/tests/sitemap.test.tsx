@@ -3,13 +3,16 @@
  * SitemapApp（design/dynamic-page.md）：多源合并 / menus×pages 继承 /
  * 缓存加载器 / 匿名守卫 / DSL 布局渲染 / activeMenu 高亮。
  */
-import { act, cleanup, render, screen, waitFor } from '@testing-library/react';
+import { act, cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { StrictMode } from 'react';
 import type { PageDsl } from '@pactor-app/core';
 import { MenuRegistry } from '@pactor-app/router';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import {
+  createHttpHooks,
   createSitemapLoader,
+  defaultSitemapActions,
   defaultSitemapGuard,
   fetchSitemap,
   mergeSitemapMenus,
@@ -139,6 +142,10 @@ describe('fetchSitemap', () => {
     ) as unknown as typeof fetch;
     await fetchSitemap(['/api/sitemap'], { fetcher });
     expect(vi.mocked(fetcher).mock.calls[0]![0]).toBe('/api/sitemap');
+    // 跨源 cookie 会话：credentials: 'include'
+    expect(vi.mocked(fetcher).mock.calls[0]![1]).toMatchObject({
+      credentials: 'include',
+    });
   });
 
   it('httpHooks：request 改写地址，response 拆包', async () => {
@@ -265,6 +272,80 @@ describe('resolveSitemapRoute', () => {
 
   it('未命中路径：menu 与 route 均为 null', () => {
     expect(resolve(createSitemap(), '/nope')).toEqual({ menu: null, route: null });
+  });
+});
+
+describe('createHttpHooks', () => {
+  // jsdom 页面源：http://localhost:3000
+  it('request：缺省不改写（服务端 CORS 直连）；proxyPrefix 时跨域改写', async () => {
+    const direct = createHttpHooks();
+    expect(
+      (await direct.request!({ url: 'https://api.example.com/a/b?x=1' })).url,
+    ).toBe('https://api.example.com/a/b?x=1');
+
+    const proxied = createHttpHooks({ proxyPrefix: '/api-external' });
+    expect(
+      (await proxied.request!({ url: 'https://api.example.com/a/b?x=1' })).url,
+    ).toBe('/api-external/a/b?x=1');
+    // 同源绝对地址 / 相对地址不改写
+    expect(
+      (await proxied.request!({ url: 'http://localhost:3000/api/x' })).url,
+    ).toBe('http://localhost:3000/api/x');
+    expect((await proxied.request!({ url: '/api/x' })).url).toBe('/api/x');
+  });
+
+  it('request：自定义公共头注入', async () => {
+    const hooks = createHttpHooks({
+      headers: () => ({ authorization: 'Bearer t' }),
+    });
+    const config = await hooks.request!({ url: 'https://a.com/sitemap' });
+    expect(config.url).toBe('https://a.com/sitemap');
+    expect(config.headers).toEqual({ authorization: 'Bearer t' });
+  });
+
+  it('response：包裹结构拆包，非 0 抛错，非包裹透传，envelope:false 关闭', async () => {
+    const hooks = createHttpHooks();
+    expect(await hooks.response!({ code: 0, data: { a: 1 } })).toEqual({ a: 1 });
+    expect(() => hooks.response!({ code: 401, data: null, message: '未登录' })).toThrow(
+      '未登录',
+    );
+    expect(await hooks.response!({ a: 1 })).toEqual({ a: 1 });
+    const raw = createHttpHooks({ envelope: false });
+    expect(await raw.response!({ code: 401, data: null })).toEqual({
+      code: 401,
+      data: null,
+    });
+  });
+});
+
+describe('defaultSitemapActions', () => {
+  const fakeCtx = (handler?: unknown) =>
+    ({ context: { services: { get: () => handler } } }) as never;
+
+  it('service.call：调用已注册服务并透传求值后的 params', async () => {
+    const handler = vi.fn(async () => ({ echoed: true }));
+    const result = await defaultSitemapActions['service.call']!(
+      {
+        action: 'service.call',
+        params: { service: 'demo.echo', params: { a: 1 } },
+      },
+      fakeCtx(handler),
+    );
+    expect(result).toEqual({ ok: true, data: { echoed: true } });
+    expect(handler).toHaveBeenCalledWith({ a: 1 });
+  });
+
+  it('service.call：服务未注册 / 缺参数受控失败', async () => {
+    const missing = await defaultSitemapActions['service.call']!(
+      { action: 'service.call', params: { service: 'nope' } },
+      fakeCtx(undefined),
+    );
+    expect(missing.ok).toBe(false);
+    const noName = await defaultSitemapActions['service.call']!(
+      { action: 'service.call', params: {} },
+      fakeCtx(undefined),
+    );
+    expect(noName.ok).toBe(false);
   });
 });
 
@@ -413,5 +494,111 @@ describe('SitemapApp', () => {
     );
     await screen.findByText('首页内容');
     expect(navigate).not.toHaveBeenCalled();
+  });
+
+  it('request 失败 → 后续动作继续执行（message 提示）', async () => {
+    const failPage: PageDsl = {
+      dsl: '1.0',
+      page: { id: 'home', title: '首页' },
+      body: {
+        type: 'Button',
+        props: { text: '提交' },
+        events: {
+          onClick: [
+            {
+              id: 'r',
+              action: 'request',
+              params: { method: 'POST', url: 'http://127.0.0.1:9/unreachable' },
+            },
+            {
+              action: 'if',
+              params: {
+                condition: '${actions.r.token}',
+                else: [
+                  {
+                    action: 'message',
+                    params: { messageType: 'error', text: '操作失败提示' },
+                  },
+                ],
+              },
+            },
+          ],
+        },
+      },
+    };
+    const sitemap = {
+      ...createSitemap(),
+      user: { name: 'A' },
+      pages: [{ id: 'home', path: '/', title: '首页', version: 1, pageDsl: failPage }],
+    };
+    const fetcher = (async () => jsonResponse(sitemap)) as unknown as typeof fetch;
+    render(
+      <StrictMode>
+        <SitemapApp
+          sources={['/api/sitemap']}
+          pathname="/"
+          navigate={vi.fn()}
+          fetcher={fetcher}
+        />
+      </StrictMode>,
+    );
+    fireEvent.click(await screen.findByText('提交'));
+    await screen.findByText('操作失败提示');
+  });
+
+  it('缺省动作：service.call 开箱可用，宿主同名覆盖', async () => {
+    const callPage: PageDsl = {
+      dsl: '1.0',
+      page: { id: 'home', title: '首页' },
+      body: {
+        type: 'Button',
+        props: { text: '调用服务' },
+        events: {
+          onClick: [
+            {
+              action: 'service.call',
+              params: { service: 'demo.echo', params: { a: 1 } },
+            },
+          ],
+        },
+      },
+    };
+    const sitemap = {
+      ...createSitemap(),
+      user: { name: 'A' },
+      pages: [{ id: 'home', path: '/', title: '首页', version: 1, pageDsl: callPage }],
+    };
+    const fetcher = (async () => jsonResponse(sitemap)) as unknown as typeof fetch;
+    const echo = vi.fn(async () => ({ ok: 1 }));
+    const custom = vi.fn(() => ({ ok: true as const }));
+
+    // 默认实现：调用 props.services 注册的服务
+    const { unmount } = render(
+      <SitemapApp
+        sources={['/api/sitemap']}
+        pathname="/"
+        navigate={vi.fn()}
+        fetcher={fetcher}
+        services={{ 'demo.echo': echo }}
+      />,
+    );
+    fireEvent.click(await screen.findByText('调用服务'));
+    await waitFor(() => expect(echo).toHaveBeenCalledWith({ a: 1 }));
+    unmount();
+
+    // 宿主 actions 同名覆盖默认实现
+    render(
+      <SitemapApp
+        sources={['/api/sitemap']}
+        pathname="/"
+        navigate={vi.fn()}
+        fetcher={fetcher}
+        services={{ 'demo.echo': echo }}
+        actions={{ 'service.call': custom }}
+      />,
+    );
+    fireEvent.click(await screen.findByText('调用服务'));
+    await waitFor(() => expect(custom).toHaveBeenCalled());
+    expect(echo).toHaveBeenCalledTimes(1);
   });
 });

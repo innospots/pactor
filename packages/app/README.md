@@ -122,7 +122,7 @@ import { SitemapApp } from '@pactor-app/app';
 />
 ```
 
-内置能力（无需自行拼装）：多源拉取合并（冲突后源覆盖前源）、`menus × pages` 继承（`path` / `title` 缺省自引用页面）、MenuRegistry 路由解析（含 `:param`）、访问守卫（缺省匿名守卫：非 `public` 且无 user → `navigate(auth.loginPath)`，`guard` prop 可替换为角色鉴权等策略）、DSL 布局渲染（`PageOutlet` 页面出口、`SitemapMenu` 选中态与 `activeMenu` 高亮）、页面内联 / 懒加载（`id@version` 缓存，`pageEndpoint` 可配）、`session.context` 服务桥（DSL 经 `${data.session.*}` 读 user / app / menus）、布局常驻（同布局名切换导航仅内容区重建）。布局名解析链：`menu.layout` → 顶层 `layout` → `layouts` 首键。
+内置能力（无需自行拼装）：多源拉取合并（冲突后源覆盖前源）、`menus × pages` 继承（`path` / `title` 缺省自引用页面）、MenuRegistry 路由解析（含 `:param`）、访问守卫（缺省匿名守卫：非 `public` 且无 user → `navigate(auth.loginPath)`，`guard` prop 可替换为角色鉴权等策略）、DSL 布局渲染（`PageOutlet` 页面出口、`SitemapMenu` 选中态与 `activeMenu` 高亮）、页面内联 / 懒加载（`id@version` 缓存，`pageEndpoint` 可配）、`session.context` 服务桥（DSL 经 `${data.session.*}` 读 user / app / menus）、缺省动作（`app.reload` 整页重载、`service.call` 服务调用，宿主 `actions` 同名覆盖）、布局常驻（同布局名切换导航仅内容区重建）。布局名解析链：`menu.layout` → 顶层 `layout` → `layouts` 首键。
 
 | Props | 说明 |
 | --- | --- |
@@ -131,14 +131,15 @@ import { SitemapApp } from '@pactor-app/app';
 | `pathname` / `navigate` | 宿主路由注入；缺省用内置浏览器路由（纯前端 SPA 零配置）；http(s) 外链自动新标签打开 |
 | `query` | 当前 query（`${route.query.x}` 可读）；缺省自 `location.search` 解析 |
 | `pageEndpoint` | 懒加载页面端点（缺省 `/api/pages/{id}`） |
-| `services` / `actions` / `components` | 业务扩展（`components` 中 `PageOutlet` / `SitemapMenu` 为布局保留名） |
+| `services` / `components` | 业务扩展（`components` 中 `PageOutlet` / `SitemapMenu` 为布局保留名） |
+| `actions` | 业务动作；内置 `app.reload` / `service.call` 默认值，同名覆盖 |
 | `guard` | 访问守卫（缺省 `defaultSitemapGuard`：匿名访问非 `public` 页 → 重定向 `auth.loginPath`） |
-| `httpAdapter` | `PactorHttpHooks`：所有 HTTP 出口（sitemap 源 / 页面端点 / 页面运行时）的 request / response 统一加工 |
+| `httpAdapter` | `PactorHttpHooks`：所有 HTTP 出口（sitemap 源 / 页面端点 / 页面运行时）的 request / response 统一加工；`createHttpHooks()` 为默认实现（`{ code, data, message }` 拆包；可选 `proxyPrefix` 代理改写 / `headers` 公共头） |
 | `fetcher` | fetch 实现注入（SSR / 测试） |
 | `sessionService` | 会话桥服务名（缺省 `session.context`） |
 | `loading` / `renderError` / `renderNotFound` | 状态视图定制 |
 
-配套导出（高级用法）：`fetchSitemap`、`createSitemapLoader`、`mergeSitemapMenus`、`toSitemapNavItems`、`resolveSitemapRoute`、`defaultSitemapGuard`、`withHttpHooks`、`createSitemapSessionServices` 与类型 `SitemapResource` / `SitemapMenuItem` / `SitemapPageEntry` / `LayoutDsl` / `SitemapRouteMatch` / `SitemapRouteResolution` / `SitemapGuard` / `SitemapSessionContext`。完整示例工程见 `starters/next-app-starter`。
+配套导出（高级用法）：`fetchSitemap`、`createSitemapLoader`、`mergeSitemapMenus`、`toSitemapNavItems`、`resolveSitemapRoute`、`defaultSitemapGuard`、`defaultSitemapActions`、`createHttpHooks`、`withHttpHooks`、`createSitemapSessionServices` 与类型 `SitemapResource` / `SitemapMenuItem` / `SitemapPageEntry` / `LayoutDsl` / `SitemapRouteMatch` / `SitemapRouteResolution` / `SitemapGuard` / `SitemapSessionContext`。完整示例工程见 `starters/next-app-starter`（宿主路由模式）与 `starters/spa-starter`（纯前端内置路由模式）。
 
 ## 文档
 

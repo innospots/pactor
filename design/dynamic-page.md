@@ -92,8 +92,8 @@ export interface SitemapResource extends BootstrapResource {
 ### 落地情况（已实现，@pactor-app/app v1.19.0）
 
 规范能力已沉淀为 `@pactor-app/app` 的 `SitemapApp` 组件 + 配套导出
-（`packages/app/src/sitemap/`），starter（`starters/next-app-starter`）
-只做宿主接线：
+（`packages/app/src/sitemap/`），starter（`starters/next-app-starter`
+宿主路由模式、`starters/spa-starter` 纯前端内置路由模式）只做宿主接线：
 
 1. `fetchSitemap`（多源拉取合并）+ `createSitemapLoader`（内联 pageDsl
    预置 `id@version` 缓存，缺省项经 `pageEndpoint` 懒加载；认证状态变化

@@ -38,25 +38,26 @@ app/
 src/
   pactor/
     config.ts              # ★ 入口配置：sitemapSources 接口 URL 列表
-    services.ts            # 演示服务（auth.login / auth.logout）+ 扩展动作
-    http.ts                # PactorHttpHooks（跨域改写 + 响应拆包）
     App.tsx                # 薄壳：框架 SitemapApp + 宿主路由（pathname / navigate）
   server/
     accounts.ts            # 演示账号与会话 cookie
-    sitemap.ts             # mock sitemap 数据源（layouts / pages / menus 按角色裁剪）
+    cors.ts                # CORS 头（演示放开跨源，含预检响应）
+    sitemap.ts             # mock sitemap 数据源（layouts / pages / menus 按角色裁剪；
+                           # 登录 / 登出在 DSL 中用内置 request 动作表达）
 ```
 
 `App.tsx` 全部内容即：
 
 ```tsx
+const httpHooks = createHttpHooks();
+
 <SitemapApp
   sources={sitemapSources}
+  baseUrl={apiBaseUrl}
   pathname={pathname}
   query={query}
   navigate={(to) => router.push(to)}
   pageEndpoint={pageEndpoint}
-  services={demoServices}
-  actions={demoActions}
   httpAdapter={httpHooks}
 />
 ```
@@ -68,7 +69,7 @@ src/
 ## 接入真实后端
 
 1. 把 `src/pactor/config.ts` 的 `sitemapSources` 改成你的接口 URL（可多个，
-   冲突后源覆盖前源；相对路径由 `apiBaseUrl` 补全，见「跨域代理与 HTTP 钩子」）。
+   冲突后源覆盖前源；相对路径由 `apiBaseUrl` 补全，见「跨域与 HTTP 钩子」）。
 2. 服务端按 `SitemapResource`（自 `pactor-app` 导入类型）返回 JSON：
    - `layouts`：DSL 布局（`PageOutlet` 为页面出口，`SitemapMenu` 渲染导航，
      `${data.session.*}` 读会话数据）
@@ -78,27 +79,30 @@ src/
    - `auth.loginPath`：未登录重定向目标
 3. 懒加载页：实现 `GET {pageEndpoint}/{id}` 返回 PageResource envelope
    （缺省 `/api/pages/{id}`，可在 `config.ts` 调整）。
-4. 替换 `services.ts` 的演示服务（`auth.login` / `auth.logout`）为真实实现；
-   `session.context` 会话桥由框架内置，无需自行注册。
+4. 登录 / 登出等接口调用直接在 DSL 中用内置 `request` 动作表达（参考
+   `src/server/sitemap.ts` 的登录页 / 布局 DSL，URL 指向你的真实接口）；
+   有客户端服务层时可用内置 `service.call` 动作桥接，`session.context`
+   会话桥由框架内置，均无需自行注册。
 
-## 跨域代理与 HTTP 钩子
+## 跨域与 HTTP 钩子
 
 模板的外部接口以 `apiBaseUrl`（`src/pactor/config.ts`，缺省
-`http://11.11.3.109:9011`）为基准：`sitemapSources` / `pageEndpoint`
-只写相对路径，由 `SitemapApp` 的 `baseUrl` 补全为外部绝对地址。绝对地址
-浏览器直连会跨域，模板内置两层机制：
+`http://localhost:9011`）为基准：`sitemapSources` / `pageEndpoint`
+只写相对路径，由 `SitemapApp` 的 `baseUrl` 补全为外部绝对地址。
+**假定服务端已开通 CORS，浏览器直连，无需项目内代理**——本模板的
+mock API 已在路由层放开跨源（`src/server/cors.ts`：Allow-Origin 回显
+请求源 + Allow-Credentials，POST 预检经 `OPTIONS` 响应；cookie 会话
+跨源可达，框架 fetch 均带 `credentials: 'include'`）。
 
-1. **项目内代理**（`next.config.ts` rewrites）：httpHooks 把外部绝对地址
-   改写到 `/api-external/*`，由 Next 服务端转发到 `EXTERNAL_API_BASE`
-   （缺省同 `apiBaseUrl`，可用环境变量覆盖，见 `.env.example`），
-   跨域变同源。
-2. **HTTP 钩子**（`src/pactor/http.ts` 的 `PactorHttpHooks`）：接入框架的
-   全部 HTTP 出口（sitemap 源、页面懒加载端点、DSL `request` 动作、
-   http 类型 dataSource、动态 DSL 引用）——
-   - `request`：外部绝对地址自动改写到代理前缀；可注入公共头
-     （Authorization / 租户头等）
-   - `response`：`{ code, data, message }` 包裹结构拆包为 `data`，业务错误码
-     抛错（DSL 动作按失败处理）；后端协议不同改这里
+**HTTP 钩子**（框架默认实现 `createHttpHooks`，`src/pactor/App.tsx`）：
+接入框架的全部 HTTP 出口（sitemap 源、页面懒加载端点、DSL `request`
+动作、http 类型 dataSource、动态 DSL 引用）——
+- `request`：缺省不改写地址（CORS 直连）；服务端不开 CORS 时传
+  `proxyPrefix`，把跨域地址改写到项目内代理前缀（需自行配置
+  Next rewrites / nginx 转发）；可注入公共头（Authorization 等）
+- `response`：`{ code, data, message }` 包裹结构拆包为 `data`，业务错误码
+  抛错（DSL 动作按失败处理）；后端包裹协议不同传 `envelope: false`
+  或自行实现 `PactorHttpHooks`
 
 ## 与设计文档的差异
 

@@ -26,11 +26,13 @@ export { createPactorPage, PactorPage } from './embedded.js';
 export type { PactorPageOptions, PactorPageProps } from './embedded.js';
 
 // Sitemap 动态页面（design/dynamic-page.md）：配置 sitemap 源即成应用
+export { defaultSitemapActions } from './sitemap/actions.js';
 export { SitemapApp } from './sitemap/SitemapApp.js';
 export type { SitemapAppProps } from './sitemap/SitemapApp.js';
 export { fetchSitemap } from './sitemap/fetch.js';
 export type { FetchSitemapOptions } from './sitemap/fetch.js';
-export { withHttpHooks } from './sitemap/http.js';
+export { createHttpHooks, withHttpHooks } from './sitemap/http.js';
+export type { CreateHttpHooksOptions } from './sitemap/http.js';
 export { createSitemapLoader } from './sitemap/loader.js';
 export type { SitemapLoaderOptions } from './sitemap/loader.js';
 export {

@@ -59,6 +59,7 @@ export function createSitemapLoader(
       } else {
         const res = await fetcher(resolveUrl(pageEndpoint(pageId), options.baseUrl), {
           cache: 'no-store',
+          credentials: 'include',
         });
         if (!res.ok) {
           throw new Error(
