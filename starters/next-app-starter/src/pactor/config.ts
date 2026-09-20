@@ -4,10 +4,14 @@
  * （id / path 冲突后源覆盖前源并告警），app / user / permissions / auth
  * 取第一个源。
  *
- * 跨域：外部接口走项目内代理前缀（next.config.ts 的 rewrites）——
- * 配置 EXTERNAL_API_BASE 后，把源写成 `${apiProxyPrefix}/sitemap` 即可。
+ * 外部接口（跨域）：sources / pageEndpoint 只写相对路径，由 apiBaseUrl
+ * 补全为外部绝对地址；经 httpHooks 改写进项目内代理前缀（apiProxyPrefix），
+ * 由 next.config.ts 的 rewrites 转发，跨域变同源。
  */
 export const sitemapSources: string[] = ["/api/sitemap"];
+
+/** 外部接口基准地址（SitemapApp baseUrl）：相对接口路径以此为基准补全 */
+export const apiBaseUrl = "http://11.11.3.109:9011";
 
 /** 外部接口代理前缀（与 next.config.ts 的 rewrites 对应） */
 export const apiProxyPrefix = "/api-external";

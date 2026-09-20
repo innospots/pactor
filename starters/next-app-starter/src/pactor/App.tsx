@@ -4,7 +4,7 @@ import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { Suspense } from "react";
 import { SitemapApp } from "pactor-app";
 
-import { pageEndpoint, sitemapSources } from "./config";
+import { apiBaseUrl, pageEndpoint, sitemapSources } from "./config";
 import { httpHooks } from "./http";
 import { demoActions, demoServices } from "./services";
 
@@ -31,6 +31,7 @@ function PactorAppInner() {
   return (
     <SitemapApp
       sources={sitemapSources}
+      baseUrl={apiBaseUrl}
       pathname={pathname}
       query={Object.fromEntries(searchParams.entries())}
       navigate={(to) => router.push(to)}

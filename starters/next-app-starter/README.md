@@ -68,7 +68,7 @@ src/
 ## 接入真实后端
 
 1. 把 `src/pactor/config.ts` 的 `sitemapSources` 改成你的接口 URL（可多个，
-   冲突后源覆盖前源）。
+   冲突后源覆盖前源；相对路径由 `apiBaseUrl` 补全，见「跨域代理与 HTTP 钩子」）。
 2. 服务端按 `SitemapResource`（自 `pactor-app` 导入类型）返回 JSON：
    - `layouts`：DSL 布局（`PageOutlet` 为页面出口，`SitemapMenu` 渲染导航，
      `${data.session.*}` 读会话数据）
@@ -83,15 +83,18 @@ src/
 
 ## 跨域代理与 HTTP 钩子
 
-sitemapSources 与 DSL 内的接口地址大多是外部绝对地址，浏览器直连会跨域。
-模板内置两层机制：
+模板的外部接口以 `apiBaseUrl`（`src/pactor/config.ts`，缺省
+`http://11.11.3.109:9011`）为基准：`sitemapSources` / `pageEndpoint`
+只写相对路径，由 `SitemapApp` 的 `baseUrl` 补全为外部绝对地址。绝对地址
+浏览器直连会跨域，模板内置两层机制：
 
-1. **项目内代理**（`next.config.ts` rewrites）：配置 `EXTERNAL_API_BASE`
-   （见 `.env.example`）后，浏览器请求 `/api-external/*` 由 Next 服务端转发
-   到外部接口，跨域变同源。`sitemapSources` 与 DSL 里的外部地址写成
-   `/api-external/...` 即可。
-2. **HTTP 钩子**（`src/pactor/http.ts` 的 `PactorHttpHooks`）：接入页面运行时的
-   全部 HTTP 出口（DSL `request` 动作、http 类型 dataSource、动态 DSL 引用）——
+1. **项目内代理**（`next.config.ts` rewrites）：httpHooks 把外部绝对地址
+   改写到 `/api-external/*`，由 Next 服务端转发到 `EXTERNAL_API_BASE`
+   （缺省同 `apiBaseUrl`，可用环境变量覆盖，见 `.env.example`），
+   跨域变同源。
+2. **HTTP 钩子**（`src/pactor/http.ts` 的 `PactorHttpHooks`）：接入框架的
+   全部 HTTP 出口（sitemap 源、页面懒加载端点、DSL `request` 动作、
+   http 类型 dataSource、动态 DSL 引用）——
    - `request`：外部绝对地址自动改写到代理前缀；可注入公共头
      （Authorization / 租户头等）
    - `response`：`{ code, data, message }` 包裹结构拆包为 `data`，业务错误码
