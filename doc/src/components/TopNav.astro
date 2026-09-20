@@ -1,0 +1,32 @@
+---
+/**
+ * 统一顶部导航：Logo + 四模块入口 + 搜索入口（占位）+ 构建版本。
+ * 「文档」为指向现有 docs 文档站的外链（地址收敛为 config.ts 单一常量）；
+ * 「主题生成器 / 案例」标记「待设计」，span 渲染、不可导航，不指向不存在的页面。
+ */
+import { DOCS_SITE_URL } from '../config';
+import buildInfo from '../generated/build-info.json';
+---
+
+<header class="topbar">
+  <button class="btn small mobile-btn" data-drawer-toggle="left" aria-label="打开分类导航">目录</button>
+  <a class="brand" href="/styles/overview" style="text-decoration:none;color:inherit">
+    <div class="logo">UI</div>
+    <span>UI Design System</span>
+  </a>
+  <nav class="topnav">
+    <a class="navitem" href={DOCS_SITE_URL} target="_blank" rel="noreferrer">文档</a>
+    <a class="navitem active" href="/styles/overview" aria-current="page">资产库</a>
+    <span class="navitem pending">主题生成器<span class="pending-dot">待设计</span></span>
+    <span class="navitem pending">案例<span class="pending-dot">待设计</span></span>
+  </nav>
+  <div class="top-actions">
+    <button class="search-trigger" type="button" title="全局搜索即将上线" aria-label="搜索（即将上线）">
+      <span>⌕</span>
+      <span class="label">搜索组件、主题、模板、素材…</span>
+      <span class="key">⌘K</span>
+    </button>
+    <button class="btn small mobile-btn" data-drawer-toggle="right" aria-label="打开页面看板">看板</button>
+    <span class="version" title={`构建版本 ${buildInfo.version} · ${buildInfo.commit}`}>build {buildInfo.version}</span>
+  </div>
+</header>

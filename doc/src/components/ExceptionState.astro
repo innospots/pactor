@@ -1,0 +1,30 @@
+---
+/**
+ * 通用异常状态：loading / empty / no-results / missing / broken-ref /
+ * copy-fail / link-broken。按 kind 渲染图标 + 标题 + 提示 + 可选操作区
+ * （具名插槽 <slot name="action" />，如重试、复制回退、替代资产入口）。
+ */
+import { EXCEPTION_STATES, type ExceptionKind } from '../lib/exception-state';
+
+interface Props {
+  kind: ExceptionKind;
+  title?: string;
+  hint?: string;
+}
+
+const { kind, title, hint } = Astro.props;
+const def = EXCEPTION_STATES[kind];
+---
+
+<div class="exception" role="status" data-exception-kind={kind}>
+  <div class="exception-icon" aria-hidden="true">{def.icon}</div>
+  <div class="exception-title">{title ?? def.title}</div>
+  <div class="exception-hint">{hint ?? def.hint}</div>
+  {
+    Astro.slots.has('action') && (
+      <div class="exception-actions">
+        <slot name="action" />
+      </div>
+    )
+  }
+</div>

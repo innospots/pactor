@@ -1,0 +1,42 @@
+---
+/**
+ * 主题总览页 /themes/overview（任务 4.6）。
+ * CategoryOverview 承载分类介绍与使用指引；主题构成链路、16 色系入口
+ * （分组筛选写 URL）、主题生成器入口为自定义区（ThemesOverviewSections）。
+ */
+import CategoryOverview from '../../templates/CategoryOverview.astro';
+import ThemesOverviewSections from '../../components/ThemesOverviewSections.astro';
+import { themes, themeFamilies } from '../../assets-data/themes';
+import { SITE_NAV } from '../../site-nav';
+
+const category = SITE_NAV.find((c) => c.id === 'themes')!;
+const total = themes.length;
+const families = themeFamilies.length;
+const integrated = themes.filter((t) => t.integration === 'integrated').length;
+
+const intro = [
+  `主题资产按 ${families} 个文化色系组织，合计 ${total} 个主题（每系 5 个，构建期统计）；本期已接入 ${integrated} 个（含完整 10 阶 OKLCH 色阶与语义 Token 映射），其余主题元数据完整、色阶待设计确认基准色后接入。`,
+  '色系与主题命名取自中国传统色名（如朱砂、玄青）；传统色参考用于产品浏览，不替代国家标准色度坐标，最终基准色值以设计确认并校准后的记录为准。',
+  '主题按「传统参考色 → UI 主色 → 色阶 → 语义 Token → 组件页面」链路构成；深色体系目前仅玄青系 5 个主题为完整深色（modeSupport=dark），其余为浅色完整 + 深色兼容预览。',
+].join('\n\n');
+
+const guidance = [
+  '- **选色系**：先按产品气质在暖 / 自然 / 冷 / 中性四组中缩小范围（高能量选暖色，沉稳专业选冷色或中性色），再在同一色系内比较 5 个主题的色域与推荐场景。',
+  '- **选模式**：浅色产品任选色系；深色完整体验目前选玄青系；浅色为主、需深色预览的选 modeSupport=light-with-dark-preview 的主题。',
+  '- **看接入状态**：已接入主题提供完整色阶表、语义映射与复制配置；待接入主题仅元数据，详情页如实标注「不适用」。',
+  '- **用数据说话**：主题数、接入数、色块颜色均由构建期数据统计 / 取值，页面不手写数字。',
+].join('\n');
+---
+
+<CategoryOverview
+  category={category}
+  intro={intro}
+  guidance={guidance}
+  relatedCategories={['components', 'styles']}
+  extraSections={ThemesOverviewSections}
+  extraHeadings={[
+    { id: 'sec-pipeline', text: '主题构成链路' },
+    { id: 'sec-families', text: '色系入口' },
+    { id: 'sec-generator', text: '主题生成器' },
+  ]}
+/>

@@ -1,0 +1,368 @@
+---
+/**
+ * 主题详情页 /themes/<family>/<slug>（任务 4.8）。
+ * getStaticPaths 遍历全部 80 个主题：所有主题可访问。
+ * 已接入主题（21 个，含完整色阶与语义映射）渲染完整章节；
+ * 待接入主题（59 个）渲染章节骨架，不适用章节以 na-box 注明原因，
+ * 不静默省略、不填充模拟内容。
+ * 复制配置：差量输出 = baseThemeId + overrides JSON；完整输出 =
+ * resolvedTokens JSON；均经 CopyButton 内部 buildCopyText 追加构建标注。
+ */
+import AssetLibraryLayout from '../../../layouts/AssetLibraryLayout.astro';
+import StatusBadges from '../../../components/StatusBadges.astro';
+import CopyButton from '../../../components/CopyButton';
+import { themes, themeFamilies, themeDefs } from '../../../assets-data/themes';
+import { findSection } from '../../../site-nav';
+import { toInspectAttrs } from '../../../lib/inspect';
+import { hexToOklch } from '../../../lib/color';
+import type { ThemeFamilyId, ThemeModeSupport } from '../../../assets-data/types';
+
+interface PathProps {
+  familyId: ThemeFamilyId;
+  slug: string;
+}
+
+export function getStaticPaths() {
+  return themes.map((t) => ({
+    params: {
+      family: t.familyId,
+      slug: t.id.slice(`theme.${t.familyId}.`.length),
+    },
+    props: { familyId: t.familyId, slug: t.id } satisfies PathProps,
+  }));
+}
+
+const MODE_SUPPORT_LABEL: Record<ThemeModeSupport, string> = {
+  'light-only': '仅浅色',
+  'light-with-dark-preview': '浅色+深色预览',
+  dark: '深色',
+  dual: '双模式',
+};
+
+const { familyId, slug } = Astro.props as PathProps;
+const theme = themes.find((t) => t.id === slug)!;
+const family = themeFamilies.find((f) => f.id === `family.${familyId}`)!;
+const section = findSection('themes', familyId)!;
+const def = themeDefs.find((d) => d.id === theme.id);
+const currentPath = `/themes/${familyId}/${theme.id.slice(`theme.${familyId}.`.length)}`;
+const integrated = theme.integration === 'integrated' && !!theme.scale;
+
+/** UI 主色：取语义映射 primary；OKLCH 优先取色阶中同 HEX 条目，未命中用 culori 转换 */
+const primaryHex = theme.resolvedTokens?.primary;
+const primaryScaleEntry = primaryHex
+  ? theme.scale?.find((s) => s.hex.toLowerCase() === primaryHex.toLowerCase())
+  : undefined;
+const primaryOklch = primaryHex
+  ? (primaryScaleEntry?.oklch ?? hexToOklch(primaryHex))
+  : undefined;
+
+/** 复制配置内容 */
+const deltaCopy = JSON.stringify(
+  {
+    baseThemeId: theme.baseThemeId ?? null,
+    overrides: theme.overrides ?? {},
+  },
+  null,
+  2,
+);
+const fullCopy = theme.resolvedTokens
+  ? JSON.stringify(theme.resolvedTokens, null, 2)
+  : '';
+
+const headings = [
+  { id: 'sec-summary', text: '摘要' },
+  { id: 'sec-primary', text: 'UI 主色' },
+  { id: 'sec-scale', text: '色阶' },
+  { id: 'sec-tokens', text: '语义映射' },
+  { id: 'sec-a11y', text: '可访问性' },
+  { id: 'sec-copy', text: '复制配置' },
+];
+
+const meta = [
+  { label: '规范 ID', value: theme.id },
+  { label: '色系', value: `主题 / ${section.name}` },
+  { label: '模式支持', value: MODE_SUPPORT_LABEL[theme.modeSupport] },
+  { label: '传统色出处', value: theme.traditionalColorRef ?? '—' },
+  {
+    label: '接入状态',
+    value: integrated ? '已接入' : '待资产接入（仅元数据）',
+  },
+  { label: '路由', value: currentPath },
+];
+
+const tokenEntries = Object.entries(theme.resolvedTokens ?? {});
+---
+
+<AssetLibraryLayout
+  title={`${theme.name}主题`}
+  description={`${family.name}色系 / ${theme.name}：${theme.description}`}
+  category="themes"
+  currentPath={currentPath}
+  headings={headings}
+  meta={meta}
+>
+  <div class="breadcrumb">
+    资产库 / <a href="/themes/overview">主题</a> / <a href={`/themes/${familyId}`}>{family.name}</a> / {theme.name}
+  </div>
+  <div class="page-head">
+    <div
+      class="page-head-main"
+      {...toInspectAttrs({
+        id: theme.id,
+        name: `${theme.name}主题`,
+        type: '主题',
+        maturity: theme.maturity,
+        change: theme.change,
+        integration: theme.integration,
+        description: `${family.name}色系`,
+      })}
+    >
+      <h1>{theme.name}主题</h1>
+      <div class="page-desc">{theme.description}</div>
+      <StatusBadges
+        maturity={theme.maturity}
+        change={theme.change}
+        integration={theme.integration}
+      />
+    </div>
+  </div>
+
+  <section class="section" id="sec-summary">
+    <h2 class="section-title">摘要</h2>
+    <table class="data-table">
+      <tbody>
+        <tr>
+          <th>规范 ID</th>
+          <td><code>{theme.id}</code></td>
+        </tr>
+        <tr>
+          <th>色系</th>
+          <td><a href={`/themes/${familyId}`}>{family.name}色系</a>（<code>family.{familyId}</code>）</td>
+        </tr>
+        <tr>
+          <th>模式支持</th>
+          <td>{MODE_SUPPORT_LABEL[theme.modeSupport]}（<code>{theme.modeSupport}</code>）</td>
+        </tr>
+        <tr>
+          <th>传统色出处</th>
+          <td>{theme.traditionalColorRef ?? '—'}</td>
+        </tr>
+        <tr>
+          <th>基准色</th>
+          <td>
+            {
+              def?.baseHex ? (
+                <>
+                  <span class="swatch-chip" style={`background:${def.baseHex}`} />{' '}
+                  <code>{def.baseHex}</code>
+                </>
+              ) : (
+                '待设计确认'
+              )
+            }
+          </td>
+        </tr>
+        <tr>
+          <th>差量基础</th>
+          <td>
+            {theme.baseThemeId ? <code>{theme.baseThemeId}</code> : '基础主题（无差量，完整定义）'}
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section class="section" id="sec-primary">
+    <h2 class="section-title">UI 主色</h2>
+    {
+      integrated && primaryHex ? (
+        <div>
+          <p class="section-sub">
+            主色取自语义映射 <code>resolvedTokens.primary</code>，是主题在组件上的核心品牌色；色阶中同值条目已标注对应步进。
+          </p>
+          <table class="data-table">
+            <tbody>
+              <tr>
+                <th>色块</th>
+                <td><span class="swatch-chip lg" style={`background:${primaryHex}`} /></td>
+              </tr>
+              <tr>
+                <th>HEX</th>
+                <td><code>{primaryHex}</code></td>
+              </tr>
+              <tr>
+                <th>OKLCH</th>
+                <td>{primaryOklch ? <code>{primaryOklch}</code> : '—'}</td>
+              </tr>
+              <tr>
+                <th>色阶步进</th>
+                <td>{primaryScaleEntry ? <>step {primaryScaleEntry.step}</> : '不在 10 阶色阶中（直接校准值）'}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      ) : (
+        <div class="na-box">
+          <b>不适用：</b>该主题为待接入状态，语义映射（resolvedTokens）尚未生成；基准色待设计确认后生成色阶与 UI 主色。
+        </div>
+      )
+    }
+  </section>
+
+  <section class="section" id="sec-scale">
+    <h2 class="section-title">色阶</h2>
+    {
+      integrated && theme.scale ? (
+        <div>
+          <p class="section-sub">
+            OKLCH 生成的 10 阶色阶（step 1 最浅 → step 10 最深），附 sRGB 回退与 HEX；点击行可在右侧看板查看条目属性。
+          </p>
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>step</th>
+                <th>色块</th>
+                <th>HEX</th>
+                <th>OKLCH</th>
+                <th>sRGB 回退</th>
+              </tr>
+            </thead>
+            <tbody>
+              {
+                theme.scale.map((s) => (
+                  <tr
+                    {...toInspectAttrs({
+                      id: `${theme.id}.scale.${s.step}`,
+                      name: `${theme.name}色阶 step ${s.step}`,
+                      type: '色阶条目',
+                      integration: 'integrated',
+                      props: {
+                        HEX: s.hex,
+                        OKLCH: s.oklch,
+                        'sRGB 回退': s.srgbFallback,
+                      },
+                    })}
+                  >
+                    <td class="num">{s.step}</td>
+                    <td><span class="swatch-chip" style={`background:${s.hex}`} /></td>
+                    <td><code>{s.hex}</code></td>
+                    <td><code>{s.oklch}</code></td>
+                    <td><code>{s.srgbFallback}</code></td>
+                  </tr>
+                ))
+              }
+            </tbody>
+          </table>
+        </div>
+      ) : (
+        <div class="na-box">
+          <b>不适用：</b>色阶待资产接入：基准色待设计确认，确认后经生成脚本产出 10 阶 OKLCH 色阶（当前主题仅元数据）。
+        </div>
+      )
+    }
+  </section>
+
+  <section class="section" id="sec-tokens">
+    <h2 class="section-title">语义映射</h2>
+    {
+      integrated && tokenEntries.length > 0 ? (
+        <div>
+          <p class="section-sub">
+            resolvedTokens 完整解析映射（键名对齐组件库语义令牌，省略 <code>--</code> 前缀）；每行可复制为 CSS 变量声明。
+          </p>
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Token</th>
+                <th>值</th>
+                <th>复制</th>
+              </tr>
+            </thead>
+            <tbody>
+              {
+                tokenEntries.map(([key, value]) => (
+                  <tr
+                    {...toInspectAttrs({
+                      id: `${theme.id}.token.${key}`,
+                      name: `语义 Token ${key}`,
+                      type: '语义Token',
+                      integration: 'integrated',
+                      props: { 值: value },
+                    })}
+                  >
+                    <td><code>{key}</code></td>
+                    <td><code>{value}</code></td>
+                    <td>
+                      <div class="token-cell">
+                        <CopyButton
+                          client:load
+                          text={`--${key}: ${value};`}
+                          label="复制"
+                          commentStyle="slash"
+                        />
+                      </div>
+                    </td>
+                  </tr>
+                ))
+              }
+            </tbody>
+          </table>
+        </div>
+      ) : (
+        <div class="na-box">
+          <b>不适用：</b>语义映射待资产接入：resolvedTokens 由生成脚本在基准色确认后产出；当前主题仅元数据。
+        </div>
+      )
+    }
+  </section>
+
+  <section class="section" id="sec-a11y">
+    <h2 class="section-title">可访问性</h2>
+    <div class="na-box">
+      <b>不适用：</b>对比度数据待接入：主色与前景 / 背景的 WCAG 对比度验收为发布矩阵（§12）待办项，当前主题成熟度为实验；数据接入后在此展示对比度与达标级别。
+    </div>
+  </section>
+
+  <section class="section" id="sec-copy">
+    <h2 class="section-title">复制配置</h2>
+    {
+      integrated ? (
+        <div>
+          <p class="section-sub">
+            两种输出均经复制按钮追加构建标注（构建版本 + Git 提交号）；差量输出用于以本主题为基础派生变体，完整输出用于一次性导入全部语义 Token。
+          </p>
+          {theme.baseThemeId ? (
+            <p class="section-sub">
+              本主题为差量主题，基于 <code>{theme.baseThemeId}</code>（{theme.baseThemeVersion ?? '版本未标注'}）。
+            </p>
+          ) : (
+            <p class="section-sub">
+              本主题为基础主题（无 baseThemeId），差量输出为 <code>"baseThemeId": null</code> 与空 overrides；派生变体时请以此为基底引用本主题 ID。
+            </p>
+          )}
+          <div class="actions">
+            <CopyButton
+              client:load
+              text={deltaCopy}
+              label="复制差量配置（baseThemeId + overrides）"
+              commentStyle="slash"
+              small={false}
+            />
+            <CopyButton
+              client:load
+              text={fullCopy}
+              label="复制完整配置（resolvedTokens）"
+              commentStyle="slash"
+              small={false}
+            />
+          </div>
+          <pre class="code-block">{fullCopy}</pre>
+        </div>
+      ) : (
+        <div class="na-box">
+          <b>不适用：</b>复制配置待资产接入：色阶与语义映射尚未生成，暂无可复制的真实配置；不提供模拟输出。
+        </div>
+      )
+    }
+  </section>
+</AssetLibraryLayout>
