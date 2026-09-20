@@ -48,7 +48,7 @@ export interface SitemapResource extends BootstrapResource {
   menus: SitemapMenuItem[];
 }
 
-/** 菜单高亮解析结果（SitemapApp 内部使用） */
+/** 可渲染路由匹配结果（resolveSitemapRoute 产物） */
 export interface SitemapRouteMatch {
   pageId: string;
   layoutName: string;

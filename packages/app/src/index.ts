@@ -30,6 +30,7 @@ export { SitemapApp } from './sitemap/SitemapApp.js';
 export type { SitemapAppProps } from './sitemap/SitemapApp.js';
 export { fetchSitemap } from './sitemap/fetch.js';
 export type { FetchSitemapOptions } from './sitemap/fetch.js';
+export { withHttpHooks } from './sitemap/http.js';
 export { createSitemapLoader } from './sitemap/loader.js';
 export type { SitemapLoaderOptions } from './sitemap/loader.js';
 export {
@@ -37,6 +38,16 @@ export {
   toSitemapNavItems,
 } from './sitemap/merge.js';
 export type { SitemapNavItem } from './sitemap/merge.js';
+export {
+  defaultSitemapGuard,
+  resolveSitemapRoute,
+} from './sitemap/route.js';
+export type {
+  SitemapGuard,
+  SitemapGuardContext,
+  SitemapGuardDecision,
+  SitemapRouteResolution,
+} from './sitemap/route.js';
 export { createSitemapSessionServices } from './sitemap/session.js';
 export type { SitemapSessionContext } from './sitemap/session.js';
 export type {
@@ -44,4 +55,5 @@ export type {
   SitemapMenuItem,
   SitemapPageEntry,
   SitemapResource,
+  SitemapRouteMatch,
 } from './sitemap/types.js';

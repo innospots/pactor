@@ -100,14 +100,21 @@ const Page = createPactorPage({ navigate: (to) => navigate(to) });
 
 ## Sitemap 动态页面（SitemapApp）
 
-`design/dynamic-page.md` 的框架实现：一个 sitemap 对象（页面 url / 名称 / 结构 / DSL / DSL 布局）驱动整个应用。框架不持有路由——宿主注入 `pathname` 与 `navigate`，天然兼容 Next.js App Router、react-router 或任意宿主：
+`design/dynamic-page.md` 的框架实现：一个 sitemap 对象（页面 url / 名称 / 结构 / DSL / DSL 布局）驱动整个应用。两种路由模式：**纯前端 SPA** 不传路由 props（内置浏览器路由：History API 导航 + popstate 前进后退）；**宿主路由**（Next.js App Router、react-router 等）注入 `pathname` / `navigate`：
 
 ```tsx
 import { SitemapApp } from '@pactor-app/app';
 
+// 纯前端 SPA：只配 sitemap 源即可
+<SitemapApp
+  sources={['/api/sitemap']}
+  services={{ 'auth.login': login }}
+/>
+
 // Next.js（App Router）：挂在 layout.tsx（跨导航常驻，切换导航只刷新内容区）
 <SitemapApp
   sources={['/api/sitemap']}        // sitemap 接口 URL（可多源合并）
+  baseUrl="https://api.example.com" // 可选：sources / pageEndpoint 相对路径基准
   pathname={usePathname()}
   navigate={(to) => router.push(to)}
   services={{ 'auth.login': login }} // 业务服务（session.context 自动注册）
@@ -115,21 +122,23 @@ import { SitemapApp } from '@pactor-app/app';
 />
 ```
 
-内置能力（无需自行拼装）：多源拉取合并（冲突后源覆盖前源）、`menus × pages` 继承（`path` / `title` 缺省自引用页面）、MenuRegistry 路由解析（含 `:param`）、匿名守卫（非 `public` 且无 user → `navigate(auth.loginPath)`）、DSL 布局渲染（`PageOutlet` 页面出口、`SitemapMenu` 选中态与 `activeMenu` 高亮）、页面内联 / 懒加载（`id@version` 缓存，`pageEndpoint` 可配）、`session.context` 服务桥（DSL 经 `${data.session.*}` 读 user / app / menus）、布局常驻（同布局名切换导航仅内容区重建）。
+内置能力（无需自行拼装）：多源拉取合并（冲突后源覆盖前源）、`menus × pages` 继承（`path` / `title` 缺省自引用页面）、MenuRegistry 路由解析（含 `:param`）、访问守卫（缺省匿名守卫：非 `public` 且无 user → `navigate(auth.loginPath)`，`guard` prop 可替换为角色鉴权等策略）、DSL 布局渲染（`PageOutlet` 页面出口、`SitemapMenu` 选中态与 `activeMenu` 高亮）、页面内联 / 懒加载（`id@version` 缓存，`pageEndpoint` 可配）、`session.context` 服务桥（DSL 经 `${data.session.*}` 读 user / app / menus）、布局常驻（同布局名切换导航仅内容区重建）。布局名解析链：`menu.layout` → 顶层 `layout` → `layouts` 首键。
 
 | Props | 说明 |
 | --- | --- |
-| `sources`（必填） | sitemap 接口 URL 列表 |
-| `pathname` / `navigate`（必填） | 宿主路由注入；http(s) 外链自动新标签打开 |
-| `query` | 当前 query（`${route.query.x}` 可读） |
+| `sources`（必填） | sitemap 接口 URL 列表（相对路径以 `baseUrl` 补全） |
+| `baseUrl` | 接口基准地址：`sources` / `pageEndpoint` 只写相对路径时以此为基准补全 |
+| `pathname` / `navigate` | 宿主路由注入；缺省用内置浏览器路由（纯前端 SPA 零配置）；http(s) 外链自动新标签打开 |
+| `query` | 当前 query（`${route.query.x}` 可读）；缺省自 `location.search` 解析 |
 | `pageEndpoint` | 懒加载页面端点（缺省 `/api/pages/{id}`） |
 | `services` / `actions` / `components` | 业务扩展（`components` 中 `PageOutlet` / `SitemapMenu` 为布局保留名） |
-| `httpAdapter` | `PactorHttpHooks`：request / response 统一加工 |
+| `guard` | 访问守卫（缺省 `defaultSitemapGuard`：匿名访问非 `public` 页 → 重定向 `auth.loginPath`） |
+| `httpAdapter` | `PactorHttpHooks`：所有 HTTP 出口（sitemap 源 / 页面端点 / 页面运行时）的 request / response 统一加工 |
 | `fetcher` | fetch 实现注入（SSR / 测试） |
 | `sessionService` | 会话桥服务名（缺省 `session.context`） |
 | `loading` / `renderError` / `renderNotFound` | 状态视图定制 |
 
-配套导出（高级用法）：`fetchSitemap`、`createSitemapLoader`、`mergeSitemapMenus`、`toSitemapNavItems`、`createSitemapSessionServices` 与类型 `SitemapResource` / `SitemapMenuItem` / `SitemapPageEntry` / `LayoutDsl` / `SitemapSessionContext`。完整示例工程见 `starters/next-app-starter`。
+配套导出（高级用法）：`fetchSitemap`、`createSitemapLoader`、`mergeSitemapMenus`、`toSitemapNavItems`、`resolveSitemapRoute`、`defaultSitemapGuard`、`withHttpHooks`、`createSitemapSessionServices` 与类型 `SitemapResource` / `SitemapMenuItem` / `SitemapPageEntry` / `LayoutDsl` / `SitemapRouteMatch` / `SitemapRouteResolution` / `SitemapGuard` / `SitemapSessionContext`。完整示例工程见 `starters/next-app-starter`。
 
 ## 文档
 

@@ -1,8 +1,16 @@
+import type { PactorHttpHooks } from '../assembly.js';
+
+import { withHttpHooks } from './http.js';
 import type { SitemapResource } from './types.js';
+import { resolveUrl } from './url.js';
 
 export interface FetchSitemapOptions {
   /** fetch 实现（缺省全局 fetch；SSR / 测试可注入） */
   fetcher?: typeof fetch;
+  /** 接口基准地址：sources 为相对路径时以此为基准补全 */
+  baseUrl?: string;
+  /** HTTP 钩子：与页面运行时同一套 request / response 加工 */
+  httpHooks?: PactorHttpHooks;
 }
 
 /**
@@ -14,10 +22,12 @@ export async function fetchSitemap(
   sources: string[],
   options: FetchSitemapOptions = {},
 ): Promise<SitemapResource> {
-  const fetcher = options.fetcher ?? fetch;
+  const fetcher = withHttpHooks(options.fetcher ?? fetch, options.httpHooks);
   const responses = await Promise.all(
     sources.map(async (url) => {
-      const res = await fetcher(url, { cache: 'no-store' });
+      const res = await fetcher(resolveUrl(url, options.baseUrl), {
+        cache: 'no-store',
+      });
       if (!res.ok) {
         throw new Error(`[@pactor-app/app] sitemap 源 ${url} 请求失败：HTTP ${res.status}`);
       }

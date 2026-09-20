@@ -3,14 +3,17 @@
  * SitemapApp（design/dynamic-page.md）：多源合并 / menus×pages 继承 /
  * 缓存加载器 / 匿名守卫 / DSL 布局渲染 / activeMenu 高亮。
  */
-import { render, screen, waitFor } from '@testing-library/react';
+import { act, cleanup, render, screen, waitFor } from '@testing-library/react';
 import type { PageDsl } from '@pactor-app/core';
-import { describe, expect, it, vi } from 'vitest';
+import { MenuRegistry } from '@pactor-app/router';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import {
   createSitemapLoader,
+  defaultSitemapGuard,
   fetchSitemap,
   mergeSitemapMenus,
+  resolveSitemapRoute,
   SitemapApp,
 } from '../src/index.js';
 import type { SitemapResource } from '../src/index.js';
@@ -59,6 +62,8 @@ function createSitemap(overrides: Partial<SitemapResource> = {}): SitemapResourc
 
 const jsonResponse = (data: unknown): Response =>
   new Response(JSON.stringify(data), { status: 200 });
+
+afterEach(cleanup);
 
 describe('mergeSitemapMenus', () => {
   it('type: page 条目缺省继承引用页面的 path / title，覆写优先', () => {
@@ -112,6 +117,45 @@ describe('fetchSitemap', () => {
     // app / auth 取第一个源
     expect(merged.app).toEqual(a.app);
   });
+
+  it('baseUrl：相对源地址以 baseUrl 补全，绝对地址原样', async () => {
+    const sitemap = createSitemap();
+    const fetcher = vi.fn(async () => jsonResponse(sitemap)) as unknown as typeof fetch;
+    await fetchSitemap(['api/sitemap', '/sitemap2', 'https://cdn.example.com/s.json'], {
+      fetcher,
+      baseUrl: 'https://api.example.com/',
+    });
+    const urls = vi.mocked(fetcher).mock.calls.map((c) => c[0]);
+    expect(urls).toEqual([
+      'https://api.example.com/api/sitemap',
+      'https://api.example.com/sitemap2',
+      'https://cdn.example.com/s.json',
+    ]);
+  });
+
+  it('baseUrl 缺省：相对地址原样传递（由宿主环境解析）', async () => {
+    const fetcher = vi.fn(async () =>
+      jsonResponse(createSitemap()),
+    ) as unknown as typeof fetch;
+    await fetchSitemap(['/api/sitemap'], { fetcher });
+    expect(vi.mocked(fetcher).mock.calls[0]![0]).toBe('/api/sitemap');
+  });
+
+  it('httpHooks：request 改写地址，response 拆包', async () => {
+    const sitemap = createSitemap();
+    const fetcher = vi.fn(async (url: string) =>
+      jsonResponse({ data: url === 'https://proxy/api/sitemap' ? sitemap : null }),
+    ) as unknown as typeof fetch;
+    const merged = await fetchSitemap(['/api/sitemap'], {
+      fetcher,
+      httpHooks: {
+        request: (config) => ({ ...config, url: `https://proxy${config.url}` }),
+        response: (data) => (data as { data: unknown }).data,
+      },
+    });
+    expect(vi.mocked(fetcher).mock.calls[0]![0]).toBe('https://proxy/api/sitemap');
+    expect(merged.id).toBe('site');
+  });
 });
 
 describe('createSitemapLoader', () => {
@@ -144,6 +188,109 @@ describe('createSitemapLoader', () => {
     const second = await loader.loadPage('lazy');
     expect(first).toBe(second);
     expect(fetcher).toHaveBeenCalledTimes(1);
+  });
+
+  it('baseUrl：懒加载端点相对路径以 baseUrl 补全', async () => {
+    const fetcher = vi.fn(async () =>
+      jsonResponse({
+        id: 'lazy',
+        resourceType: 'page',
+        version: 1,
+        dslVersion: '1.0',
+        schema: textPage('lazy', '懒加载'),
+      }),
+    ) as unknown as typeof fetch;
+    const sitemap = createSitemap({
+      pages: [{ id: 'lazy', path: '/lazy', title: '懒页', version: 1 }],
+    });
+    const loader = createSitemapLoader(sitemap, {
+      fetcher,
+      baseUrl: 'https://api.example.com',
+    });
+    await loader.loadPage('lazy');
+    expect(vi.mocked(fetcher).mock.calls[0]![0]).toBe(
+      'https://api.example.com/api/pages/lazy',
+    );
+  });
+
+  it('httpHooks：页面端点请求同样经过 response 拆包', async () => {
+    const page = {
+      id: 'lazy',
+      resourceType: 'page',
+      version: 1,
+      dslVersion: '1.0',
+      schema: textPage('lazy', '懒加载'),
+    };
+    const fetcher = vi.fn(async () =>
+      jsonResponse({ data: page }),
+    ) as unknown as typeof fetch;
+    const sitemap = createSitemap({
+      pages: [{ id: 'lazy', path: '/lazy', title: '懒页' }],
+    });
+    const loader = createSitemapLoader(sitemap, {
+      fetcher,
+      httpHooks: { response: (data) => (data as { data: unknown }).data },
+    });
+    const resource = await loader.loadPage('lazy');
+    expect(resource.id).toBe('lazy');
+    expect(resource.schema.body).toEqual(textPage('lazy', '懒加载').body);
+  });
+});
+
+describe('resolveSitemapRoute', () => {
+  const resolve = (sitemap: SitemapResource, pathname: string) =>
+    resolveSitemapRoute(sitemap, new MenuRegistry(mergeSitemapMenus(sitemap)), pathname);
+
+  it('布局名解析链：menu.layout → 顶层 layout → layouts 首键', () => {
+    const base = createSitemap();
+    // 顶层 layout
+    expect(resolve(base, '/')!.route!.layoutName).toBe('admin');
+    // menu.layout 优先
+    const withMenuLayout = createSitemap({
+      layouts: { ...base.layouts, bare: { dsl: '1.0', body: { type: 'PageOutlet' } } },
+      menus: [{ id: 'home', type: 'page', pageId: 'home', title: '首页', layout: 'bare' }],
+    });
+    expect(resolve(withMenuLayout, '/')!.route!.layoutName).toBe('bare');
+    // 无顶层 layout → layouts 首键
+    const noTopLayout = createSitemap({ layout: undefined });
+    expect(resolve(noTopLayout, '/')!.route!.layoutName).toBe('admin');
+  });
+
+  it('activeMenu：高亮 key 取指向菜单项的 path', () => {
+    const res = resolve(createSitemap(), '/reports/42');
+    expect(res.route!.pageId).toBe('detail');
+    expect(res.route!.highlightKey).toBe('/');
+    expect(res.route!.params).toEqual({ id: '42' });
+  });
+
+  it('未命中路径：menu 与 route 均为 null', () => {
+    expect(resolve(createSitemap(), '/nope')).toEqual({ menu: null, route: null });
+  });
+});
+
+describe('defaultSitemapGuard', () => {
+  it('匿名访问非 public 页（含未命中）→ 重定向 loginPath', () => {
+    const sitemap = createSitemap();
+    expect(defaultSitemapGuard({ sitemap, pathname: '/', menu: null })).toEqual({
+      allow: false,
+      redirectTo: '/login',
+    });
+    const custom = createSitemap({ auth: { loginPath: '/signin' } });
+    expect(defaultSitemapGuard({ sitemap: custom, pathname: '/', menu: null })).toEqual({
+      allow: false,
+      redirectTo: '/signin',
+    });
+  });
+
+  it('public 页与登录用户放行', () => {
+    const loginMenu = { id: 'login', type: 'page' as const, pageId: 'login', title: '登录', public: true };
+    expect(
+      defaultSitemapGuard({ sitemap: createSitemap(), pathname: '/login', menu: loginMenu }),
+    ).toEqual({ allow: true });
+    const authed = { ...createSitemap(), user: { name: 'A' } };
+    expect(defaultSitemapGuard({ sitemap: authed, pathname: '/', menu: null })).toEqual({
+      allow: true,
+    });
   });
 });
 
@@ -178,6 +325,25 @@ describe('SitemapApp', () => {
     expect(navigate).not.toHaveBeenCalled();
   });
 
+  it('baseUrl：sources 相对地址以 baseUrl 补全请求', async () => {
+    const fetcher = vi.fn(async () =>
+      jsonResponse(createSitemap()),
+    ) as unknown as typeof fetch;
+    render(
+      <SitemapApp
+        sources={['api/sitemap']}
+        baseUrl="https://api.example.com"
+        pathname="/login"
+        navigate={vi.fn()}
+        fetcher={fetcher}
+      />,
+    );
+    await screen.findByText('登录页');
+    expect(vi.mocked(fetcher).mock.calls[0]![0]).toBe(
+      'https://api.example.com/api/sitemap',
+    );
+  });
+
   it('activeMenu：隐藏详情页高亮指向的菜单项', async () => {
     renderApp({ ...createSitemap(), user: { name: 'A' } }, '/reports/42');
     await screen.findByText('详情内容');
@@ -186,5 +352,66 @@ describe('SitemapApp', () => {
       const selected = document.querySelector('[aria-current="page"]');
       expect(selected?.textContent).toContain('首页');
     });
+  });
+
+  it('纯前端模式：未注入路由 props 时用内置浏览器路由', async () => {
+    window.history.pushState(null, '', '/');
+    const fetcher = (async () =>
+      jsonResponse({ ...createSitemap(), user: { name: 'A' } })
+    ) as unknown as typeof fetch;
+    render(<SitemapApp sources={['/api/sitemap']} fetcher={fetcher} />);
+    await screen.findByText('首页内容');
+    // 浏览器导航（pushState + popstate）→ 内容区随路由切换
+    act(() => {
+      window.history.pushState(null, '', '/reports/42');
+      window.dispatchEvent(new Event('popstate'));
+    });
+    await screen.findByText('详情内容');
+    expect(window.location.pathname).toBe('/reports/42');
+  });
+
+  it('纯前端模式：匿名守卫经 History API 重定向登录页', async () => {
+    window.history.pushState(null, '', '/');
+    const fetcher = (async () =>
+      jsonResponse(createSitemap())
+    ) as unknown as typeof fetch;
+    render(<SitemapApp sources={['/api/sitemap']} fetcher={fetcher} />);
+    await screen.findByText('登录页');
+    expect(window.location.pathname).toBe('/login');
+  });
+
+  it('guard：自定义守卫替换缺省重定向', async () => {
+    const fetcher = (async () =>
+      jsonResponse(createSitemap())
+    ) as unknown as typeof fetch;
+    const navigate = vi.fn();
+    render(
+      <SitemapApp
+        sources={['/api/sitemap']}
+        pathname="/"
+        navigate={navigate}
+        fetcher={fetcher}
+        guard={() => ({ allow: false, redirectTo: '/register' })}
+      />,
+    );
+    await waitFor(() => expect(navigate).toHaveBeenCalledWith('/register'));
+  });
+
+  it('guard：放行匿名访问时不重定向', async () => {
+    const fetcher = (async () =>
+      jsonResponse(createSitemap())
+    ) as unknown as typeof fetch;
+    const navigate = vi.fn();
+    render(
+      <SitemapApp
+        sources={['/api/sitemap']}
+        pathname="/"
+        navigate={navigate}
+        fetcher={fetcher}
+        guard={() => ({ allow: true })}
+      />,
+    );
+    await screen.findByText('首页内容');
+    expect(navigate).not.toHaveBeenCalled();
   });
 });
