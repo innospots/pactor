@@ -130,9 +130,9 @@ SHALL 导出 `ArtifactPanel` 组件：标题栏（可选目录列表钮 + 标题
 
 ### Requirement: 面板布局与响应式
 
-提供面板时（打开态）SHALL 在工作区右侧以固定宽栏渲染（宽度经 CSS 变量 `--pactor-chat-inspector-width` 可调，缺省与对话列同宽 `--pactor-chat-content-width`，上限容器宽 2/3）；面板宽度上限 SHALL 经 CSS `max-width` 硬约束（拖拽的 inline 宽度不能突破，窗口尺寸变化后同样生效）；面板背景 SHALL 略深于聊天区底色（`--pactor-chat-inspector-bg`）；面板调宽时对话列左右 SHALL 恒保留 `--pactor-chat-content-gutter` 内间距；桌面缺省布局 SHALL 为：host 行内容器分左右两列——`__main` 左列（工作区 header + 对话区纵向堆叠，header 与对话区同宽、不覆盖面板上方）与面板右列（独占全高、贴视口（容器）右缘无留白），对话列在 `__main` 内限宽居中（`--pactor-chat-content-width`）；窄屏（<768px，与 AppShell 断点一致）SHALL 退化为右侧覆盖抽屉（遮罩点击关闭）。面板关闭/未配置时 MUST NOT 渲染面板 DOM。
+提供面板时（打开态）SHALL 在工作区右侧以固定宽栏渲染（宽度经 CSS 变量 `--pactor-chat-inspector-width` 可调，缺省与对话列同宽 `--pactor-chat-content-width`，上限 min(`--pactor-chat-inspector-max-width` 缺省 600px, 容器宽 2/3)）；面板宽度上限 SHALL 经 CSS `max-width` 硬约束（拖拽的 inline 宽度不能突破，窗口尺寸变化后同样生效）；面板背景 SHALL 略深于聊天区底色（`--pactor-chat-inspector-bg`）；面板调宽时对话列左右 SHALL 恒保留 `--pactor-chat-content-gutter` 内间距（由对话列自身 `calc(100% - 2 × gutter)` 宽度保证——对话列包含块为 __main 左列，面板宽不计入 100% 基准；容器侧 MUST NOT 再加 padding/margin，否则 header 被内缩）；桌面缺省布局 SHALL 为：host 行内容器分左右两列——`__main` 左列（工作区 header + 对话区纵向堆叠，header 随 __main 通栏：左贴宿主边缘、右贴面板分隔线，不覆盖面板上方）与面板右列（独占全高、贴视口（容器）右缘无留白），对话列在 `__main` 内限宽居中（`--pactor-chat-content-width`）；聊天区 header 与面板 header SHALL 等高（统一 `min-height: --pactor-chat-header-height` 缺省 48px，border-box；任一内容更高时自然撑开）；窄屏（<768px，与 AppShell 断点一致）SHALL 退化为右侧覆盖抽屉（遮罩点击关闭）。面板关闭/未配置时 MUST NOT 渲染面板 DOM。
 
-桌面形态下 SHALL 提供面板左缘拖拽手柄（`role="separator"` + `aria-orientation="vertical"` + aria-label）：pointer 拖拽实时改变面板宽度，宽度夹取在 [`--pactor-chat-inspector-min-width`（缺省 480px）, 容器宽 2/3] 区间；拖拽期间 MUST 禁用页面文本选择；拖拽结果为组件内部状态（inline 宽度覆盖令牌缺省），MUST NOT 要求受控 props；窄屏覆盖抽屉形态 MUST NOT 显示手柄。
+桌面形态下 SHALL 提供面板左缘拖拽手柄（`role="separator"` + `aria-orientation="vertical"` + aria-label）：pointer 拖拽实时改变面板宽度，宽度夹取在 [`--pactor-chat-inspector-min-width`（缺省 480px）, min(`--pactor-chat-inspector-max-width`（缺省 600px）, 容器宽 2/3)] 区间；拖拽期间 MUST 禁用页面文本选择；拖拽结果为组件内部状态（inline 宽度覆盖令牌缺省），MUST NOT 要求受控 props；窄屏覆盖抽屉形态 MUST NOT 显示手柄。
 
 #### Scenario: 桌面并排
 
@@ -142,7 +142,12 @@ SHALL 导出 `ArtifactPanel` 组件：标题栏（可选目录列表钮 + 标题
 #### Scenario: 拖拽调宽
 
 - **WHEN** 桌面视口拖拽面板左缘手柄向左 100px
-- **THEN** 面板宽度增加约 100px 且不超过容器宽 2/3
+- **THEN** 面板宽度增加约 100px 且不超过 min(600px, 容器宽 2/3)
+
+#### Scenario: 拖拽夹取上限
+
+- **WHEN** 向左拖拽手柄超过 min(600px, 容器宽 2/3) 上限
+- **THEN** 面板宽度保持该上限
 
 #### Scenario: 拖拽夹取下限
 

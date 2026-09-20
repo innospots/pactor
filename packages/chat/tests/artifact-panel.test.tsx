@@ -93,12 +93,12 @@ describe('ArtifactPanel（spec: chat-artifact-panel / ArtifactPanel 视图与内
   });
 
   it('拖拽调宽：手柄左拖变宽（spec scenario: 拖拽调宽）', () => {
-    // jsdom 无布局：面板 560、宿主容器 1000（mock getBoundingClientRect）
+    // jsdom 无布局：面板 480、宿主容器 1000（mock getBoundingClientRect）
     const rectSpy = vi
       .spyOn(HTMLElement.prototype, 'getBoundingClientRect')
       .mockImplementation(function (this: HTMLElement) {
         const width = this.classList?.contains('pactor-chat-inspector')
-          ? 560
+          ? 480
           : 1000;
         return {
           width,
@@ -119,8 +119,8 @@ describe('ArtifactPanel（spec: chat-artifact-panel / ArtifactPanel 视图与内
 
     fireEvent.pointerDown(handle, { clientX: 500 });
     fireEvent.pointerMove(document, { clientX: 400 });
-    // 560 + (500-400) = 660（容器 1000 的 2/3 ≈ 666.7，未触顶）
-    expect((panel as HTMLElement).style.width).toBe('660px');
+    // 480 + (500-400) = 580（上限 min(600, 容器 1000 的 2/3 ≈ 666.7)，未触顶）
+    expect((panel as HTMLElement).style.width).toBe('580px');
     // 拖拽期间禁文本选择
     expect(document.body.style.userSelect).toBe('none');
 
@@ -129,7 +129,7 @@ describe('ArtifactPanel（spec: chat-artifact-panel / ArtifactPanel 视图与内
     rectSpy.mockRestore();
   });
 
-  it('拖拽夹取上限：左拖超过 host 宽 2/3 后保持 2/3（spec scenario: 拖拽夹取上限）', () => {
+  it('拖拽夹取上限：左拖超过 600px 上限后保持 600px（spec scenario: 拖拽夹取上限）', () => {
     const rectSpy = vi
       .spyOn(HTMLElement.prototype, 'getBoundingClientRect')
       .mockImplementation(function (this: HTMLElement) {
@@ -154,9 +154,41 @@ describe('ArtifactPanel（spec: chat-artifact-panel / ArtifactPanel 视图与内
     const handle = screen.getByRole('separator', { name: '拖动调整面板宽度' });
 
     fireEvent.pointerDown(handle, { clientX: 500 });
-    // 560 + (500-(-900)) = 1960 → 夹取 1000*2/3 ≈ 666.7 → 667
+    // 560 + (500-(-900)) = 1960 → 夹取 min(600, 1000*2/3 ≈ 666.7) → 600
     fireEvent.pointerMove(document, { clientX: -900 });
-    expect((panel as HTMLElement).style.width).toBe('667px');
+    expect((panel as HTMLElement).style.width).toBe('600px');
+    fireEvent.pointerUp(document);
+    rectSpy.mockRestore();
+  });
+
+  it('拖拽夹取上限：窄 host 下 2/3 低于 600px 时保持 host 宽 2/3', () => {
+    const rectSpy = vi
+      .spyOn(HTMLElement.prototype, 'getBoundingClientRect')
+      .mockImplementation(function (this: HTMLElement) {
+        const width = this.classList?.contains('pactor-chat-inspector')
+          ? 480
+          : 780;
+        return {
+          width,
+          height: 600,
+          top: 0,
+          left: 0,
+          right: width,
+          bottom: 600,
+          x: 0,
+          y: 0,
+          toJSON: () => ({}),
+        } as DOMRect;
+      });
+
+    render(<ArtifactPanel artifact={MARKDOWN_ARTIFACT} />);
+    const panel = document.querySelector('.pactor-chat-inspector')!;
+    const handle = screen.getByRole('separator', { name: '拖动调整面板宽度' });
+
+    fireEvent.pointerDown(handle, { clientX: 500 });
+    // 480 + (500-(-400)) = 1380 → 夹取 min(600, 780*2/3 = 520) → 520
+    fireEvent.pointerMove(document, { clientX: -400 });
+    expect((panel as HTMLElement).style.width).toBe('520px');
     fireEvent.pointerUp(document);
     rectSpy.mockRestore();
   });
@@ -476,7 +508,7 @@ describe('Chat 面板集成（spec: chat-artifact-panel / 面板布局与响应�
     expect(panel.textContent).toContain('分析报告');
   });
 
-  it('工作区 header 收进 __main 左列（与对话区同宽，不覆盖面板上方）', () => {
+  it('工作区 header 收进 __main 左列（随 __main 通栏，不覆盖面板上方）', () => {
     renderChat(
       <Chat artifact={MARKDOWN_ARTIFACT} panelOpen title="助手工作区" />,
     );

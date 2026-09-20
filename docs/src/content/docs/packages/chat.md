@@ -65,7 +65,7 @@ const safeRegistry = createSafeRegistry(createComponentRegistry(), [
 - **多产物**：header 文件名处为切换下拉（文件类型图标 + 名称，点击列出全部产物）；左端目录钮切换产物目录列表视图（按产物 id 的 `/` 分段建目录树），列表视图下目录钮隐藏、文件名处显示"产物目录"，点选产物即回内容视图。产物列表缺省由组合层自动从会话消息流归集（受控 / 非受控一致），受控 DSL 侧接 `events.onSelectArtifact`（`setState artifact=${event.artifact}`）完成切换闭环；
 - **消息流卡片**：assistant 消息中的 artifact part 内联渲染为产出物卡片（整卡可点击：着色图标盒 + 标题 + 元信息行「尺寸 · 类型」+ 右上箭头）；图标经 `resolveArtifactIcon` 解析（扩展名优先分桶并带着色档位——图片 image/violet、表格 table/green、数据 database/amber、代码 code/blue、脚本 terminal/blue、文档 file-text/slate，kind 兜底），与面板下拉、目录树中的同一产物图标一致；元信息行的尺寸取 `meta.size`（`formatArtifactSize` 格式化 B / KB / MB），类型标签取扩展名大写（缺省 kind 大写）；图标盒色值走 `--pactor-chat-artifact-tone-*` 令牌（暗色自动翻转，皮肤可精调）；
 - **卡片区收起**：同一消息内连续的 artifact part 合为一组，多于 4 个时只展示前 4 张卡片，下方右侧「展开 / 收起」切换查看全部，其右侧「查看所有产物（n) ›」打开面板并定位产物目录视图（受控 DSL 侧接 `events.onOpenArtifactList` → `setState panelOpen=true`）；
-- **布局**：桌面固定宽右栏，默认宽与对话列一致（`--pactor-chat-content-width`），左缘可拖拽调宽（夹取 `--pactor-chat-inspector-min-width` 480px ~ 页面宽 2/3）；面板背景 `--pactor-chat-inspector-bg` 略深于聊天区底色；面板调宽时聊天区左右恒保留 `--pactor-chat-content-gutter` 内间距；窄屏退化为覆盖抽屉；`artifact` / `panelOpen` 支持受控配置。
+- **布局**：桌面固定宽右栏，默认宽与对话列一致（`--pactor-chat-content-width`），左缘可拖拽调宽（夹取 `--pactor-chat-inspector-min-width` 480px ~ min(`--pactor-chat-inspector-max-width` 600px, 页面宽 2/3)）；面板背景 `--pactor-chat-inspector-bg` 略深于聊天区底色；面板调宽时聊天区左右恒保留 `--pactor-chat-content-gutter` 内间距；窄屏退化为覆盖抽屉；`artifact` / `panelOpen` 支持受控配置。
 
 ### 菜单外壳（ChatShell / AppShell）
 
@@ -133,7 +133,7 @@ body:
 
 | 分组 | props / 事件 |
 | --- | --- |
-| 头部 | `title` / `headerExtra` / `header` / `showHeader` / `headerActions` / `editableTitle`（头部按内容自动渲染，无内容不渲染；产物面板打开时 header 与对话区同宽、不覆盖面板上方，面板关闭时通栏；不随对话列限宽） |
+| 头部 | `title` / `headerExtra` / `header` / `showHeader` / `headerActions` / `editableTitle`（头部按内容自动渲染，无内容不渲染；产物面板打开时 header 随聊天区通栏、不覆盖面板上方，面板关闭时通栏；不随对话列限宽） |
 | 侧栏 | `menu` / `activeMenuKey` / `sidebar`（替代槽），事件 `onMenuSelect` |
 | 空态 | `greeting` / `subtitle` / `suggestions` |
 | 模型 | `models` / `model` / `modelPlacement`，事件 `onModelChange` |

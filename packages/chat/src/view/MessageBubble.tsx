@@ -1,8 +1,11 @@
 import { useRef, useState } from 'react';
 
+import { Icon } from '@pactor-app/ui/components';
+
 import type { ChatArtifact } from '../artifact.js';
 import type {
   BuiltinMessageAction,
+  ChatAgentIdentity,
   ChatMessage,
   ChatMessageAction,
   ChatPart,
@@ -56,6 +59,11 @@ export function groupArtifactParts(
  */
 export interface MessageBubbleProps {
   message: ChatMessage;
+  /**
+   * 会话级 Agent 身份兜底：assistant 消息未自带 message.agent 时
+   * 以其在消息顶部展示「图标 + 加粗名称」（单 Agent 会话的便捷配置）
+   */
+  agent?: ChatAgentIdentity;
   /** 透传给 dsl part 的渲染运行时与作用域 */
   runtime?: ChatRuntime;
   scope?: Omit<ChatScope, 'message'>;
@@ -156,8 +164,36 @@ function MessageEditForm({
   );
 }
 
+/** agent.icon 按图片 URL 渲染的判定（否则按 ui Icon 白名单名渲染） */
+function isAgentIconUrl(icon: string): boolean {
+  return /^(https?:|data:|\/)/.test(icon);
+}
+
+/** assistant 消息顶部的 Agent 身份行：图标 + 加粗名称 */
+function AgentHeader({ agent }: { agent: ChatAgentIdentity }) {
+  return (
+    <div className="pactor-chat-message__agent">
+      {agent.icon !== undefined &&
+        (isAgentIconUrl(agent.icon) ? (
+          <img
+            className="pactor-chat-message__agent-icon"
+            src={agent.icon}
+            alt=""
+            aria-hidden
+          />
+        ) : (
+          <span className="pactor-chat-message__agent-icon" aria-hidden>
+            <Icon name={agent.icon} />
+          </span>
+        ))}
+      <span className="pactor-chat-message__agent-name">{agent.name}</span>
+    </div>
+  );
+}
+
 export function MessageBubble({
   message,
+  agent,
   runtime,
   scope,
   showRegenerate = false,
@@ -197,6 +233,9 @@ export function MessageBubble({
   // 的历史消息不展示）；user / system 消息不展示
   const showTime =
     message.role === 'assistant' && !live && message.createdAt !== undefined;
+  // assistant 消息顶部的 Agent 身份行：消息自带身份优先，会话级兜底在后
+  const agentIdentity =
+    message.role === 'assistant' ? (message.agent ?? agent) : undefined;
   return (
     <div
       className={`pactor-chat-message pactor-chat-message--${message.role}`}
@@ -214,6 +253,7 @@ export function MessageBubble({
         />
       ) : (
         <div className="pactor-chat-message__body">
+          {agentIdentity && <AgentHeader agent={agentIdentity} />}
           {showTrace && <ActivityTrace message={message} />}
           {message.parts.length === 0 &&
           message.status === 'pending' &&

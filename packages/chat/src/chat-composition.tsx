@@ -15,6 +15,7 @@ import type { ChatWorkspaceServices } from './chat-workspace.js';
 import { useChatModel } from './hooks/use-chat-model.js';
 import type {
   BuiltinMessageAction,
+  ChatAgentIdentity,
   ChatAttachment,
   ChatContextItem,
   ChatContextSource,
@@ -114,6 +115,11 @@ export interface ChatCompositionProps {
   services: ChatWorkspaceServices;
   title?: string;
   greeting?: string;
+  /**
+   * 会话级 Agent 身份（透传 ChatView）：assistant 消息顶部
+   * 「图标 + 加粗名称」展示的兜底，消息自带 message.agent 优先
+   */
+  agent?: ChatAgentIdentity;
   subtitle?: string;
   suggestions?: ChatSuggestion[];
   conversationId?: string;
@@ -226,6 +232,7 @@ export function ChatComposition({
   services,
   title,
   greeting,
+  agent,
   subtitle,
   suggestions,
   conversationId,
@@ -460,6 +467,7 @@ export function ChatComposition({
       <ChatView
         store={store}
         transport={services.transport}
+        agent={agent}
         onSend={handleSend}
         safeRegistry={services.safeRegistry}
         capabilities={services.capabilities}
@@ -505,9 +513,9 @@ export function ChatComposition({
   // 窄屏由 CSS 媒体查询退化为右侧覆盖抽屉（遮罩点击关闭）；
   // 关闭 / 未配置时不渲染面板 DOM。
   //
-  // header 位置：收进 __main 左列（header + 对话区），与对话区同宽——
-  // 面板独占右列全高，header 不覆盖面板上方；面板关闭时 __main 占满
-  // 行宽，header 自然通栏。
+  // header 位置：收进 __main 左列（header + 对话区），随 __main 通栏
+  // （左贴宿主边缘、右贴面板分隔线）——面板独占右列全高，header 不覆盖
+  // 面板上方；面板关闭时 __main 占满行宽，header 同样通栏。
   //
   // 结构稳定性：面板功能被使用（受控 props / 事件回调 / inspector /
   // 注入 artifactStore 任一提供）时恒渲染 host 包裹层，面板开关只改

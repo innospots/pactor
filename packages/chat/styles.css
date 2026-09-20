@@ -88,10 +88,12 @@
   --pactor-chat-shell-scrim: rgb(0 0 0 / 40%);
   /* 产出物面板（spec: chat-artifact-panel）：桌面固定宽右栏。
      默认宽与对话列一致（--pactor-chat-content-width），
-     宽度夹取 [--pactor-chat-inspector-min-width, host 宽 2/3]；
+     宽度夹取 [--pactor-chat-inspector-min-width,
+              min(--pactor-chat-inspector-max-width, host 宽 2/3)]；
      背景略深于聊天区底色，视觉上与消息流区分 */
   --pactor-chat-inspector-width: var(--pactor-chat-content-width);
   --pactor-chat-inspector-min-width: 480px;
+  --pactor-chat-inspector-max-width: 600px;
   --pactor-chat-inspector-bg: color-mix(
     in srgb,
     var(--pactor-chat-bg) 96%,
@@ -102,6 +104,10 @@
   /* 对话列左右最小内间距（spec: chat-artifact-panel / 拖拽调宽）：
      面板调宽挤压剩余空间时，对话列左右始终保留该间距 */
   --pactor-chat-content-gutter: 16px;
+  /* 聊天区 header 与产物面板 header 的公共高度（min-height，border-box）：
+     两边内容自然高度不同（面板侧 menu-trigger 更高），经统一 min-height
+     对齐，面板打开时两条分隔线同高；内容更高时自然撑开 */
+  --pactor-chat-header-height: 48px;
 }
 
 .pactor-chat-view {
@@ -221,8 +227,8 @@
 /* ------------------------------------------------------------
  * ChatWorkspace（spec: chat-dsl-page）：createChatWorkspace 工厂
  * 返回组件的外层容器 = 对话列（ChatView）；工作区头部（header）
- * 收进面板 host 的 __main 左列——面板打开时与对话区同宽（不覆盖
- * 面板上方），面板关闭时随 __main 通栏；不随对话列限宽。
+ * 收进面板 host 的 __main 左列——面板打开时随 __main 通栏（左贴
+ * 宿主边缘、右贴面板分隔线，不覆盖面板上方），不随对话列限宽。
  * ------------------------------------------------------------ */
 
 .pactor-chat-workspace {
@@ -232,8 +238,9 @@
   min-height: 0;
   /* 对话列缺省限宽居中（spec: chat-app-shell 嵌入契约）：
    * shell content / 面板 host / 独立块级容器三场景统一生效。
-   * width 用 calc 预留 gutter——产物栏调宽挤压时，max-width 限宽
-   * 失效（剩余空间不足）后左右仍恒保留 --pactor-chat-content-gutter
+   * width 用 calc 预留 gutter——对话列包含块是 __main 左列（面板
+   * 宽度不计入 100% 基准），产物栏调宽挤压、max-width 限宽失效
+   * （剩余空间不足）后左右仍恒保留 --pactor-chat-content-gutter
    * 内间距，不会贴到容器边缘或面板分隔线 */
   width: calc(100% - 2 * var(--pactor-chat-content-gutter));
   max-width: var(--pactor-chat-content-width);
@@ -265,6 +272,9 @@
   padding: 10px 16px;
   border-bottom: 1px solid var(--pactor-chat-border);
   flex-shrink: 0;
+  /* 与产物面板 header 等高（--pactor-chat-header-height） */
+  box-sizing: border-box;
+  min-height: var(--pactor-chat-header-height);
 }
 
 .pactor-chat-workspace__title {
@@ -359,8 +369,8 @@
  * ------------------------------------------------------------ */
 
 /* 面板打开时的容器：行内容器 __row 承载左右两列——__main 左列
- * （header + 对话区，同宽；header 不覆盖面板上方）与面板右列
- * （独占全高）；host 在 shell content 内撑满剩余高度与宽度 */
+ * （header + 对话区纵向堆叠；header 通栏、不覆盖面板上方）与面板
+ * 右列（独占全高）；host 在 shell content 内撑满剩余高度与宽度 */
 .pactor-chat-inspector-host {
   display: flex;
   flex-direction: column;
@@ -371,8 +381,10 @@
   background: var(--pactor-chat-bg);
 }
 
-/* host 行内容器：__main 左列与面板的 flex 行（gutter 契约挂在行上——
- * __main 内的 header / 对话列共享行 padding 的左 gutter） */
+/* host 行内容器：__main 左列与面板的 flex 行。对话列 gutter 契约
+ * 由对话列自身 calc 宽度保证（见 .pactor-chat-workspace）——容器侧
+ * 不加 padding/margin，否则 __main 内的 header 会被内缩，两端无法
+ * 贴到宿主边缘与面板分隔线 */
 .pactor-chat-inspector-host__row {
   display: flex;
   flex: 1;
@@ -381,7 +393,7 @@
 }
 
 /* __main 左列：header + 主区（AppShell / workspace）纵向堆叠，
- * 宽度 = 行宽减去面板宽（面板打开时 header 与对话区同宽） */
+ * 宽度 = 行宽减去面板宽（header 通栏：左贴宿主边缘、右贴面板分隔线） */
 .pactor-chat-inspector-host__main {
   display: flex;
   flex-direction: column;
@@ -397,28 +409,20 @@
   min-width: 0;
 }
 
-/* 对话列左右最小内间距（gutter 契约，spec: chat-artifact-panel / 拖拽调宽）：
- * 对话列自身的 calc 宽度在 flex 行内会把面板宽度一并计入 100% 基准，
- * shrink 后 margin auto 塌到 0；因此面板打开时的 gutter 由容器侧保证——
- * 左：row padding-left；右：面板 margin-left（对话列与分隔线的间距）。
- * 面板关闭（:has 不命中）时不加 row padding，避免与对话列 calc 重复计算 */
-.pactor-chat-inspector-host__row:has(> .pactor-chat-inspector) {
-  padding-left: var(--pactor-chat-content-gutter);
-}
-
-.pactor-chat-inspector-host__row > .pactor-chat-inspector {
-  margin-left: var(--pactor-chat-content-gutter);
-}
-
 .pactor-chat-inspector {
   position: relative;
   display: flex;
   flex-direction: column;
-  /* 默认宽对齐对话列；上限 host 宽 2/3（与拖拽夹取一致），下限 min-width 令牌。
+  /* 默认宽对齐对话列；上限 min(max-width 令牌 600px, host 宽 2/3)（与拖拽夹取一致），
+   * 下限 min-width 令牌。
    * max-width 是拖拽 inline 宽度的硬兜底：inline width 不能覆盖 max-width，
-   * 拖拽夹取偏差 / 拖拽后窗口尺寸变化时面板也不会突破 2/3 上限 */
-  width: min(var(--pactor-chat-inspector-width), calc(100% * 2 / 3));
-  max-width: calc(100% * 2 / 3);
+   * 拖拽夹取偏差 / 拖拽后窗口尺寸变化时面板也不会突破上限 */
+  width: min(
+    var(--pactor-chat-inspector-width),
+    var(--pactor-chat-inspector-max-width),
+    calc(100% * 2 / 3)
+  );
+  max-width: min(var(--pactor-chat-inspector-max-width), calc(100% * 2 / 3));
   min-width: var(--pactor-chat-inspector-min-width);
   flex-shrink: 0;
   border-left: 1px solid var(--pactor-chat-border);
@@ -449,6 +453,9 @@
   padding: 10px 12px;
   border-bottom: 1px solid var(--pactor-chat-border);
   flex-shrink: 0;
+  /* 与聊天区 header 等高（--pactor-chat-header-height） */
+  box-sizing: border-box;
+  min-height: var(--pactor-chat-header-height);
 }
 
 .pactor-chat-inspector__title {
@@ -495,7 +502,9 @@
   gap: 6px;
   min-width: 0;
   max-width: 100%;
-  padding: 3px 6px;
+  /* 纵向 padding 2px：自身 26.4px + header padding 20px + border 1px
+   * ≤ --pactor-chat-header-height（48px），不撑破两侧 header 等高 */
+  padding: 2px 6px;
   border-radius: var(--pactor-chat-radius-sm);
   cursor: pointer;
   color: var(--pactor-chat-fg);
@@ -1058,6 +1067,40 @@
 /* assistant：左侧通栏排版（无气泡底色） */
 .pactor-chat-message--assistant {
   align-items: stretch;
+}
+
+/* assistant 消息顶部 Agent 身份行：图标 + 加粗名称 */
+.pactor-chat-message__agent {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+  font-size: 13px;
+  line-height: 18px;
+  color: var(--pactor-chat-fg);
+}
+
+.pactor-chat-message__agent-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 1.1em;
+  height: 1.1em;
+  color: var(--pactor-chat-muted-fg);
+}
+
+img.pactor-chat-message__agent-icon {
+  border-radius: var(--pactor-chat-radius-sm, 4px);
+  object-fit: cover;
+}
+
+.pactor-chat-message__agent-name {
+  font-size: 1.1em;
+  font-weight: 600;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 /* system：居中弱提示 */

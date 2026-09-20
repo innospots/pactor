@@ -457,7 +457,8 @@ export function ArtifactPanel({
     document.body.style.userSelect = 'none';
 
     const onMove = (moveEvent: PointerEvent): void => {
-      // 向左拖（clientX 减小）→ 变宽；夹取 [min-width 令牌 480px, host 宽 2/3]。
+      // 向左拖（clientX 减小）→ 变宽；夹取 [min-width 令牌 480px,
+      // min(max-width 令牌 600px, host 宽 2/3)]。
       // host 宽每次移动重测（拖拽中窗口 / 侧栏尺寸可能变化）；CSS 侧另有
       // max-width 硬兜底（inline width 不能覆盖 max-width）
       const hostRect = panel.parentElement?.getBoundingClientRect();
@@ -465,7 +466,7 @@ export function ArtifactPanel({
         hostRect !== undefined && hostRect.width > 0
           ? hostRect.width
           : window.innerWidth;
-      const maxWidth = (hostWidth * 2) / 3;
+      const maxWidth = Math.min(600, (hostWidth * 2) / 3);
       const next = startWidth + (startX - moveEvent.clientX);
       setWidth(Math.round(Math.min(Math.max(next, 480), maxWidth)));
     };

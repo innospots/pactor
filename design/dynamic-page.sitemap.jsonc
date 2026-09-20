@@ -1,0 +1,229 @@
+// 方案 B（选定）：扁平 pages + 独立 menus + DSL 布局
+// pages：页面定义（id 主键，pageDsl 内联或缺省懒加载）
+// menus：导航/路由树，条目经 pageId 引用页面、layout 引用布局
+// layouts：布局结构定义（DSL），按名称被 menus 条目引用
+{
+  "id": "site",
+  "resourceType": "sitemap",
+  "version": 12,
+  "dslVersion": "1.0",
+  "etag": "W/\"site-v12\"",
+  "updatedAt": "2026-09-20T10:00:00Z",
+
+  "app": { "name": "动态页面示例" },
+  "user": { "name": "Ariake" },
+  "permissions": ["report:view"],
+  // 应用级缺省布局名（menus 条目未指定 layout 时使用），引用 layouts 的键
+  "layout": "admin",
+  // 匿名访问控制：访问非 public 页且未登录时重定向到 loginPath
+  "auth": { "loginPath": "/login" },
+
+  // —— 布局定义：DSL 描述外壳结构，PageOutlet 为页面内容出口 ——
+  // 布局 DSL 可读取应用级作用域（menus / user / app），与页面 DSL 一样受控求值
+  "layouts": {
+    "admin": {
+      "dsl": "1.0",
+      "body": {
+        "type": "Flex",
+        "props": { "direction": "row", "height": "100vh" },
+        "children": [
+          {
+            "type": "Sider",
+            "children": [
+              // 菜单数据来自 menus 作用域（合并 pages 后的可见菜单树）
+              { "type": "Menu", "props": { "items": "${menus}" } }
+            ]
+          },
+          {
+            "type": "Flex",
+            "props": { "direction": "column", "flex": 1 },
+            "children": [
+              {
+                // Content 上方的 Header：左应用名、右用户信息
+                "type": "Header",
+                "props": { "justify": "space-between", "align": "center" },
+                "children": [
+                  { "type": "Text", "props": { "text": "${app.name}" } },
+                  {
+                    // 右侧用户区：DropdownMenu 包触发器（头像 + 用户名）
+                    "type": "DropdownMenu",
+                    "props": {
+                      "items": [
+                        { "label": "个人设置", "value": "settings", "icon": "settings" },
+                        { "label": "退出登录", "value": "logout", "icon": "log-out" }
+                      ]
+                    },
+                    "events": {
+                      "onSelect": [
+                        {
+                          "action": "if",
+                          "params": {
+                            "condition": "${event.value == 'logout'}",
+                            "then": [
+                              // 宿主注册的服务（清会话），成功后回登录页
+                              { "action": "request", "params": { "service": "auth.logout" } },
+                              { "action": "navigate", "params": { "to": "/login" } }
+                            ],
+                            "else": [
+                              { "action": "navigate", "params": { "to": "/settings" } }
+                            ]
+                          }
+                        }
+                      ]
+                    },
+                    "children": [
+                      { "type": "Avatar", "props": { "fallback": "${user.name}" } },
+                      { "type": "Text", "props": { "text": "${user.name}" } }
+                    ]
+                  }
+                ]
+              },
+              {
+                "type": "Content",
+                "children": [
+                  // 页面内容出口：路由命中的页面 DSL 渲染在此
+                  { "type": "PageOutlet" }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    },
+    "login": {
+      "dsl": "1.0",
+      "body": {
+        "type": "Flex",
+        "props": { "direction": "column", "justify": "center", "align": "center", "height": "100vh" },
+        "children": [
+          { "type": "PageOutlet" }
+        ]
+      }
+    },
+    "blank": {
+      "dsl": "1.0",
+      "body": { "type": "PageOutlet" }
+    }
+  },
+
+  // —— 页面定义：扁平列表，id 主键；pageDsl 缺省 → loadPage(id) 懒加载 ——
+  "pages": [
+    {
+      "id": "login",
+      "path": "/login",
+      "title": "登录",
+      "version": 1,
+      "pageDsl": {
+        "dsl": "1.0",
+        "page": { "id": "login", "title": "登录" },
+        "body": {
+          "type": "Page",
+          "props": { "title": "登录" },
+          "children": [
+            { "type": "Text", "props": { "text": "登录表单 DSL" } }
+          ]
+        }
+      }
+    },
+    {
+      "id": "register",
+      "path": "/register",
+      "title": "注册",
+      "version": 1,
+      "pageDsl": {
+        "dsl": "1.0",
+        "page": { "id": "register", "title": "注册" },
+        "body": {
+          "type": "Page",
+          "props": { "title": "注册" },
+          "children": [
+            { "type": "Text", "props": { "text": "注册表单 DSL" } }
+          ]
+        }
+      }
+    },
+    {
+      "id": "home",
+      "path": "/",
+      "title": "首页",
+      "version": 3,
+      "pageDsl": {
+        "dsl": "1.0",
+        "page": { "id": "home", "title": "首页" },
+        "state": { "keyword": "" },
+        "body": {
+          "type": "Page",
+          "props": { "title": "首页" },
+          "children": [
+            { "type": "Alert", "props": { "message": "欢迎使用动态页面" } }
+          ]
+        }
+      }
+    },
+    {
+      "id": "monthly",
+      "path": "/reports/monthly",
+      "title": "月报",
+      "version": 7
+      // 无 pageDsl → 运行时 loadPage('monthly') 懒加载，
+      // version 参与缓存键（monthly@7），sitemap 刷新后按页 diff 失效
+    },
+    {
+      "id": "monthly-detail",
+      "path": "/reports/monthly/:id",
+      "title": "月报详情",
+      "version": 2,
+      "pageDsl": {
+        "dsl": "1.0",
+        "page": { "id": "monthly-detail", "title": "月报详情" },
+        "body": {
+          "type": "Page",
+          "children": [
+            { "type": "Text", "props": { "text": "详情 ${route.params.id}" } }
+          ]
+        }
+      }
+    }
+  ],
+
+  // —— 导航/路由树：MenuItem + layout 引用 + public 标记 ——
+  // type: 'page' 的条目经 pageId 引用页面，path / title 缺省从页面继承，
+  // 仅分叉时覆写（如 monthly 的菜单标题）；group / link 自带 title / path；
+  // 路由守卫与布局切换消费合并后的条目
+  "menus": [
+    {
+      "id": "login", "type": "page", "pageId": "login",
+      "layout": "login", "public": true, "hidden": true
+    },
+    {
+      "id": "register", "type": "page", "pageId": "register",
+      "layout": "login", "public": true, "hidden": true
+    },
+    {
+      "id": "home", "type": "page", "pageId": "home",
+      "icon": "home", "layout": "admin", "order": 1
+    },
+    {
+      "id": "reports",
+      "type": "group",
+      "title": "报表",
+      "icon": "chart",
+      "order": 2,
+      "children": [
+        {
+          "id": "monthly", "type": "page", "pageId": "monthly",
+          "title": "报表中心",
+          "icon": "chart", "layout": "admin", "permission": "report:view"
+        },
+        {
+          "id": "monthly-detail", "type": "page", "pageId": "monthly-detail",
+          "layout": "admin", "hidden": true, "activeMenu": "monthly"
+        }
+      ]
+    },
+    {
+      "id": "help", "type": "link", "title": "帮助",
+      "path": "https://docs.example.com", "external": true, "order": 3
+    }
+  ]
+}

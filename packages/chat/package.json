@@ -1,6 +1,6 @@
 {
   "name": "@pactor-app/chat",
-  "version": "1.18.0",
+  "version": "1.18.1",
   "description": "Pactor chat: AI message rendering protocol (message model, streaming reducer, safe registry, capability action) and chat runtime view (ChatView / MessageBubble / PartRenderer / Composer / chat layout)",
   "keywords": [
     "pactor",
