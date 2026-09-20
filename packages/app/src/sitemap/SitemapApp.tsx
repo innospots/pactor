@@ -15,6 +15,7 @@ import {
 import { PactorPage } from '../embedded.js';
 import type { PactorHttpHooks } from '../assembly.js';
 
+import { useBrowserRoute } from './browser-route.js';
 import { fetchSitemap, type FetchSitemapOptions } from './fetch.js';
 import { createSitemapLoader, type SitemapLoaderOptions } from './loader.js';
 import {
@@ -22,27 +23,38 @@ import {
   toSitemapNavItems,
 } from './merge.js';
 import {
+  defaultSitemapGuard,
+  resolveSitemapRoute,
+  type SitemapGuard,
+  type SitemapGuardDecision,
+} from './route.js';
+import {
   createSitemapSessionServices,
   type SitemapSessionContext,
 } from './session.js';
-import type { SitemapMenuItem, SitemapResource } from './types.js';
+import type { SitemapResource } from './types.js';
 
 /**
  * SitemapApp（design/dynamic-page.md）：sitemap 驱动的动态页面应用组件。
- * 简单配置即可实现动态页面——框架不持有路由（宿主传 pathname / navigate，
- * 兼容 Next App Router、react-router 或任意宿主）：
+ * 简单配置即可实现动态页面。两种路由模式：
+ * - 纯前端 SPA：不传路由 props，内置浏览器路由（History API + popstate）；
+ * - 宿主路由（Next App Router / react-router / 任意宿主）：注入 pathname / navigate。
  *
  * ```tsx
  * <SitemapApp
  *   sources={['/api/sitemap']}
+ *   baseUrl="https://api.example.com"
  *   pathname={usePathname()}
  *   navigate={(to) => router.push(to)}
  *   services={{ 'auth.login': login }}
  * />
  * ```
  *
- * 内置：多源拉取合并、menus×pages 继承、MenuRegistry 路由解析、匿名守卫
- * （非 public 且无 user → navigate 到 auth.loginPath）、DSL 布局渲染
+ * baseUrl 可选：sources / pageEndpoint 只写相对路径时以此为基准补全。
+ *
+ * 内置：多源拉取合并、menus×pages 继承、MenuRegistry 路由解析、访问守卫
+ * （缺省匿名守卫：非 public 且无 user → navigate 到 auth.loginPath，
+ * 可经 guard prop 替换）、DSL 布局渲染
  * （PageOutlet 页面出口 + SitemapMenu 选中态 / activeMenu 高亮）、
  * 页面内联 / 懒加载（id@version 缓存）、session.context 服务桥
  * （${data.session.*}）。
@@ -50,13 +62,16 @@ import type { SitemapMenuItem, SitemapResource } from './types.js';
  * 布局常驻：切换导航（同布局名）时仅 PageOutlet 内页面随路由重建。
  */
 export interface SitemapAppProps {
-  /** sitemap 接口 URL 列表（多源合并，冲突后源覆盖前源） */
+  /** sitemap 接口 URL 列表（多源合并，冲突后源覆盖前源）；相对路径以 baseUrl 补全 */
   sources: string[];
-  /** 当前路径（宿主路由注入，如 Next usePathname） */
-  pathname: string;
-  /** 站内导航实现（如 Next router.push）；http(s) 外链自动新标签打开 */
-  navigate: (to: string) => void;
-  /** 当前 query（宿主注入，DSL ${route.query.x} 可读） */
+  /** 接口基准地址：sources / pageEndpoint 中的相对路径以此为基准补全 */
+  baseUrl?: string;
+  /** 当前路径（宿主路由注入，如 Next usePathname）；缺省用内置浏览器路由 */
+  pathname?: string;
+  /** 站内导航实现（如 Next router.push）；http(s) 外链自动新标签打开；
+   * 缺省用内置浏览器路由（History API） */
+  navigate?: (to: string) => void;
+  /** 当前 query（DSL ${route.query.x} 可读）；缺省自 location.search 解析 */
   query?: Record<string, string>;
   /** 懒加载页面端点，缺省 /api/pages/{id} */
   pageEndpoint?: SitemapLoaderOptions['pageEndpoint'];
@@ -66,10 +81,12 @@ export interface SitemapAppProps {
   actions?: Record<string, ActionHandler>;
   /** 业务组件（同名覆盖内建；PageOutlet / SitemapMenu 为布局保留名） */
   components?: Record<string, unknown>;
-  /** HTTP 钩子：页面运行时所有 HTTP 出口的统一加工（跨域改写 / 拆包） */
+  /** HTTP 钩子：所有 HTTP 出口（sitemap 源 / 页面端点 / 页面运行时）的统一加工（跨域改写 / 拆包） */
   httpAdapter?: PactorHttpHooks;
   /** fetch 实现（缺省全局 fetch；SSR / 测试可注入） */
   fetcher?: FetchSitemapOptions['fetcher'];
+  /** 访问守卫（缺省 defaultSitemapGuard：匿名访问非 public 页 → 重定向 auth.loginPath） */
+  guard?: SitemapGuard;
   /** 会话服务名（缺省 session.context） */
   sessionService?: string;
   /** 加载中视图 */
@@ -115,13 +132,22 @@ function SitemapMenu({
 }
 
 export function SitemapApp(props: SitemapAppProps) {
-  const { sources, pathname, navigate, fetcher } = props;
+  const { sources, fetcher, baseUrl } = props;
+  // 宿主未注入路由时回退到内置浏览器路由（纯前端 SPA 模式）
+  const browserRoute = useBrowserRoute();
+  const pathname = props.pathname ?? browserRoute.pathname;
+  const query = props.query ?? browserRoute.query;
+  const navigate = props.navigate ?? browserRoute.navigate;
   const [state, setState] = useState<LoadState>({ status: 'loading' });
 
   useEffect(() => {
     let cancelled = false;
     setState({ status: 'loading' });
-    fetchSitemap(sources, { fetcher })
+    fetchSitemap(sources, {
+      fetcher,
+      baseUrl,
+      httpHooks: props.httpAdapter,
+    })
       .then((sitemap) => {
         if (!cancelled) {
           setState({ status: 'ready', sitemap });
@@ -140,7 +166,7 @@ export function SitemapApp(props: SitemapAppProps) {
     };
     // sources 由宿主以稳定引用传入（模块级常量或 memo）
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [fetcher, JSON.stringify(sources)]);
+  }, [fetcher, baseUrl, props.httpAdapter, JSON.stringify(sources)]);
 
   const registry = useMemo(
     () =>
@@ -149,25 +175,31 @@ export function SitemapApp(props: SitemapAppProps) {
         : null,
     [state],
   );
-  const match = useMemo(
-    () => registry?.findByPath(pathname) ?? null,
-    [registry, pathname],
+  // 路由解析（纯函数）：菜单命中 + 布局名 + activeMenu 高亮 key
+  const resolution = useMemo(
+    () =>
+      state.status === 'ready' && registry !== null
+        ? resolveSitemapRoute(state.sitemap, registry, pathname)
+        : null,
+    [state, registry, pathname],
   );
 
   const sitemap = state.status === 'ready' ? state.sitemap : null;
-  const loginPath = sitemap?.auth?.loginPath ?? '/login';
-  const needsLogin =
-    sitemap !== null &&
-    (match === null || (match.menu as SitemapMenuItem).public !== true) &&
-    sitemap.user === undefined &&
-    pathname !== loginPath;
+  const guard = props.guard ?? defaultSitemapGuard;
+  const decision: SitemapGuardDecision = useMemo(
+    () =>
+      sitemap !== null && resolution !== null
+        ? guard({ sitemap, pathname, menu: resolution.menu })
+        : { allow: true },
+    [sitemap, resolution, guard, pathname],
+  );
 
-  // 匿名守卫：未登录访问非 public 页 → 重定向登录页
+  // 访问守卫：判定重定向时执行 navigate（缺省 = 匿名访问非 public 页 → 登录页）
   useEffect(() => {
-    if (needsLogin) {
-      navigate(loginPath);
+    if (!decision.allow) {
+      navigate(decision.redirectTo);
     }
-  }, [needsLogin, loginPath, navigate]);
+  }, [decision, navigate]);
 
   if (state.status === 'loading') {
     return <Centered>{props.loading ?? '加载中…'}</Centered>;
@@ -179,24 +211,20 @@ export function SitemapApp(props: SitemapAppProps) {
       <Centered>sitemap 加载失败：{state.error.message}</Centered>
     );
   }
-  if (sitemap === null || registry === null || needsLogin) {
-    return <Centered>跳转登录页…</Centered>;
+  if (sitemap === null || registry === null || resolution === null) {
+    return null;
   }
-  if (match === null || match.menu.pageId === undefined) {
+  if (!decision.allow) {
+    return <Centered>重定向…</Centered>;
+  }
+  if (resolution.route === null) {
     return props.renderNotFound !== undefined ? (
       <>{props.renderNotFound(pathname)}</>
     ) : (
       <Centered>页面不存在（{pathname}）</Centered>
     );
   }
-  const layoutName =
-    (match.menu as SitemapMenuItem).layout ?? sitemap.layout ?? 'admin';
-
-  // 菜单高亮：activeMenu 指向其他菜单 id 时高亮该项（隐藏页场景）；
-  // key 与 toSitemapNavItems 一致（path ?? id）
-  const highlightId = match.menu.activeMenu ?? match.menu.id;
-  const highlightItem = registry.findById(highlightId);
-  const highlightKey = highlightItem?.path ?? highlightId;
+  const { pageId, layoutName, highlightKey, params } = resolution.route;
 
   return (
     // key 只随布局名变化：切换导航（同布局）时布局常驻，
@@ -206,10 +234,12 @@ export function SitemapApp(props: SitemapAppProps) {
         key={layoutName}
         sitemap={sitemap}
         registry={registry}
-        pageId={match.menu.pageId}
+        pageId={pageId}
         layoutName={layoutName}
         pathname={pathname}
-        routeParams={match.params}
+        query={query}
+        navigate={navigate}
+        routeParams={params}
         props={props}
       />
     </NavHighlightContext.Provider>
@@ -222,6 +252,8 @@ function SitemapLayout({
   pageId,
   layoutName,
   pathname,
+  query,
+  navigate: hostNavigate,
   routeParams,
   props,
 }: {
@@ -230,6 +262,8 @@ function SitemapLayout({
   pageId: string;
   layoutName: string;
   pathname: string;
+  query: Record<string, string>;
+  navigate: (to: string) => void;
   routeParams: Record<string, string>;
   props: SitemapAppProps;
 }) {
@@ -249,10 +283,10 @@ function SitemapLayout({
       if (/^https?:\/\//.test(to)) {
         window.open(to, '_blank', 'noopener');
       } else {
-        props.navigate(to);
+        hostNavigate(to);
       }
     },
-    [props],
+    [hostNavigate],
   );
 
   const loader = useMemo(
@@ -261,8 +295,17 @@ function SitemapLayout({
         pageEndpoint: props.pageEndpoint,
         fetcher: props.fetcher,
         sessionService,
+        baseUrl: props.baseUrl,
+        httpHooks: props.httpAdapter,
       }),
-    [sitemap, props.pageEndpoint, props.fetcher, sessionService],
+    [
+      sitemap,
+      props.pageEndpoint,
+      props.fetcher,
+      props.baseUrl,
+      props.httpAdapter,
+      sessionService,
+    ],
   );
   const services = useMemo(
     () => ({
@@ -300,7 +343,7 @@ function SitemapLayout({
         <PactorPage
           key={`${pageId}@${pathname}`}
           pageId={pageId}
-          route={{ params: routeParams, query: props.query }}
+          route={{ params: routeParams, query }}
           loader={loader}
           services={services}
           actions={props.actions}

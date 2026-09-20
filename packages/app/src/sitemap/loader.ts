@@ -1,6 +1,10 @@
 import type { DslResourceLoader, PageResource } from '@pactor-app/resource';
 
+import type { PactorHttpHooks } from '../assembly.js';
+
+import { withHttpHooks } from './http.js';
 import type { SitemapResource } from './types.js';
+import { resolveUrl } from './url.js';
 
 export interface SitemapLoaderOptions {
   /** 懒加载页面端点（pages[].pageDsl 缺省时按 id 获取），缺省 /api/pages/{id} */
@@ -9,6 +13,10 @@ export interface SitemapLoaderOptions {
   fetcher?: typeof fetch;
   /** 会话服务名（注入每个页面的 dataSource），缺省 'session.context' */
   sessionService?: string;
+  /** 接口基准地址：pageEndpoint 返回相对路径时以此为基准补全 */
+  baseUrl?: string;
+  /** HTTP 钩子：与页面运行时同一套 request / response 加工 */
+  httpHooks?: PactorHttpHooks;
 }
 
 const defaultPageEndpoint = (pageId: string): string => `/api/pages/${pageId}`;
@@ -26,6 +34,7 @@ export function createSitemapLoader(
 ): DslResourceLoader {
   const pageEndpoint = options.pageEndpoint ?? defaultPageEndpoint;
   const sessionService = options.sessionService ?? 'session.context';
+  const fetcher = withHttpHooks(options.fetcher ?? fetch, options.httpHooks);
   const pageById = new Map(sitemap.pages.map((p) => [p.id, p]));
   const cache = new Map<string, PageResource>();
 
@@ -48,8 +57,9 @@ export function createSitemapLoader(
           schema: entry.pageDsl,
         };
       } else {
-        const fetcher = options.fetcher ?? fetch;
-        const res = await fetcher(pageEndpoint(pageId), { cache: 'no-store' });
+        const res = await fetcher(resolveUrl(pageEndpoint(pageId), options.baseUrl), {
+          cache: 'no-store',
+        });
         if (!res.ok) {
           throw new Error(
             `[@pactor-app/app] 页面 ${pageId} 加载失败：HTTP ${res.status}`,
