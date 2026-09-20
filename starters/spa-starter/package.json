@@ -1,0 +1,30 @@
+{
+  "name": "spa-starter",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@pactor-app/core": "link:../../packages/core",
+    "@pactor-app/runtime": "link:../../packages/runtime",
+    "@pactor-app/ui": "link:../../packages/ui",
+    "pactor-app": "link:../../packages/pactor",
+    "react": "19.2.8",
+    "react-dom": "19.2.8",
+    "react-router-dom": "^7.18.2"
+  },
+  "devDependencies": {
+    "@types/node": "^20",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "@vitejs/plugin-react": "^5.0.0",
+    "typescript": "^5",
+    "vite": "^8.2.1"
+  },
+  "packageManager": "pnpm@10.27.0"
+}

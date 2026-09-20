@@ -10,6 +10,13 @@ import type { DemoUser } from "./accounts";
  * 匿名 → public 页（登录/注册）；登录后 → 该角色可见的 menus / pages / permissions。
  */
 
+/**
+ * 服务端下发的接口地址：DSL 中直接引用后端绝对地址（跨域），
+ * 客户端 httpHooks 自动改写进项目内代理前缀。登录 / 登出即普通 HTTP
+ * 调用，DSL 用内置 request 动作表达，无需客户端注册服务。
+ */
+const apiBase = "http://localhost:9011";
+
 /* ---------------- 布局（DSL 定义，PageOutlet 为页面内容出口） ---------------- */
 /* 布局 body 内 ${data.session.*} 由客户端注入的 session dataSource 提供
  *（user / app / menus）；${route.params.pathname} 为当前路径（客户端注入）。 */
@@ -94,8 +101,11 @@ const layouts: Record<string, LayoutDsl> = {
                           condition: "${event == 'logout'}",
                           then: [
                             {
-                              action: "service.call",
-                              params: { service: "auth.logout" },
+                              action: "request",
+                              params: {
+                                method: "POST",
+                                url: `${apiBase}/api/auth/logout`,
+                              },
                             },
                             {
                               action: "app.reload",
@@ -180,10 +190,11 @@ const loginPage: PageDsl = {
         { action: "setState", params: { submitting: true } },
         {
           id: "loginResult",
-          action: "service.call",
+          action: "request",
           params: {
-            service: "auth.login",
-            params: {
+            method: "POST",
+            url: `${apiBase}/api/auth/login`,
+            body: {
               username: "${event.username}",
               password: "${event.password}",
             },

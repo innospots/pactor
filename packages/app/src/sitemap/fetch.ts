@@ -27,6 +27,9 @@ export async function fetchSitemap(
     sources.map(async (url) => {
       const res = await fetcher(resolveUrl(url, options.baseUrl), {
         cache: 'no-store',
+        // 跨源 cookie 会话（服务端开通 CORS + Allow-Credentials 时生效；
+        // 同源行为不变）
+        credentials: 'include',
       });
       if (!res.ok) {
         throw new Error(`[@pactor-app/app] sitemap 源 ${url} 请求失败：HTTP ${res.status}`);

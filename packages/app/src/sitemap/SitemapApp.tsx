@@ -15,6 +15,7 @@ import {
 import { PactorPage } from '../embedded.js';
 import type { PactorHttpHooks } from '../assembly.js';
 
+import { defaultSitemapActions } from './actions.js';
 import { useBrowserRoute } from './browser-route.js';
 import { fetchSitemap, type FetchSitemapOptions } from './fetch.js';
 import { createSitemapLoader, type SitemapLoaderOptions } from './loader.js';
@@ -57,7 +58,7 @@ import type { SitemapResource } from './types.js';
  * 可经 guard prop 替换）、DSL 布局渲染
  * （PageOutlet 页面出口 + SitemapMenu 选中态 / activeMenu 高亮）、
  * 页面内联 / 懒加载（id@version 缓存）、session.context 服务桥
- * （${data.session.*}）。
+ * （${data.session.*}）、缺省动作（app.reload / service.call）。
  *
  * 布局常驻：切换导航（同布局名）时仅 PageOutlet 内页面随路由重建。
  */
@@ -77,7 +78,7 @@ export interface SitemapAppProps {
   pageEndpoint?: SitemapLoaderOptions['pageEndpoint'];
   /** 业务服务（auth.login 等）；session.context 由组件自动注册 */
   services?: Record<string, ServiceHandler>;
-  /** 业务动作（app.reload 等） */
+  /** 业务动作；框架内置 app.reload / service.call 默认值，同名覆盖 */
   actions?: Record<string, ActionHandler>;
   /** 业务组件（同名覆盖内建；PageOutlet / SitemapMenu 为布局保留名） */
   components?: Record<string, unknown>;
@@ -314,6 +315,11 @@ function SitemapLayout({
     }),
     [session, sessionService, props.services],
   );
+  // 缺省动作（app.reload / service.call）开箱即用，宿主同名覆盖
+  const actions = useMemo(
+    () => ({ ...defaultSitemapActions, ...props.actions }),
+    [props.actions],
+  );
 
   const layoutDsl = sitemap.layouts[layoutName];
   // LayoutDsl → 合成 PageDsl：注入 session dataSource（${data.session.*}）。
@@ -346,7 +352,7 @@ function SitemapLayout({
           route={{ params: routeParams, query }}
           loader={loader}
           services={services}
-          actions={props.actions}
+          actions={actions}
           permissions={sitemap.permissions ?? []}
           navigate={navigate}
           httpAdapter={props.httpAdapter}
@@ -357,7 +363,7 @@ function SitemapLayout({
       <PactorPage
         pageDsl={layoutPage}
         services={services}
-        actions={props.actions}
+        actions={actions}
         navigate={navigate}
         httpAdapter={props.httpAdapter}
         components={{ PageOutlet, SitemapMenu, ...props.components }}

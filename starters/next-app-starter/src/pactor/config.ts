@@ -4,17 +4,14 @@
  * （id / path 冲突后源覆盖前源并告警），app / user / permissions / auth
  * 取第一个源。
  *
- * 外部接口（跨域）：sources / pageEndpoint 只写相对路径，由 apiBaseUrl
- * 补全为外部绝对地址；经 httpHooks 改写进项目内代理前缀（apiProxyPrefix），
- * 由 next.config.ts 的 rewrites 转发，跨域变同源。
+ * 外部接口：sources / pageEndpoint 只写相对路径，由 apiBaseUrl 补全为
+ * 外部绝对地址；服务端已开通 CORS（cookie 会话见 src/server/cors.ts），
+ * 浏览器直连，无需项目内代理。
  */
 export const sitemapSources: string[] = ["/api/sitemap"];
 
 /** 外部接口基准地址（SitemapApp baseUrl）：相对接口路径以此为基准补全 */
-export const apiBaseUrl = "http://11.11.3.109:9011";
-
-/** 外部接口代理前缀（与 next.config.ts 的 rewrites 对应） */
-export const apiProxyPrefix = "/api-external";
+export const apiBaseUrl = "http://localhost:9011";
 
 /** 懒加载页面端点（pages[].pageDsl 缺省时按 id 获取） */
 export const pageEndpoint = (pageId: string): string => `/api/pages/${pageId}`;
