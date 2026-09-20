@@ -150,6 +150,20 @@ export interface ChatMessageAction {
   service?: string;
 }
 
+/**
+ * 消息归属 Agent 身份：assistant 消息顶部以「图标 + 加粗名称」展示
+ * 返回该消息的 Agent。DSL 可表达的纯数据对象。
+ */
+export interface ChatAgentIdentity {
+  /** Agent 展示名（加粗渲染） */
+  name: string;
+  /**
+   * 图标：@pactor-app/ui Icon 白名单名（未知名渲染占位图标），
+   * 或图片 URL（http(s): / data: / 绝对路径开头按 <img> 渲染）
+   */
+  icon?: string;
+}
+
 /** Chat 消息 */
 export interface ChatMessage {
   id: string;
@@ -158,6 +172,8 @@ export interface ChatMessage {
   parts: ChatPart[];
   createdAt?: number;
   attachments?: ChatAttachment[];
+  /** 返回该消息的 Agent 身份（assistant 消息顶部展示） */
+  agent?: ChatAgentIdentity;
 }
 
 /** updatePart 的定位参数：数组下标或 part id */

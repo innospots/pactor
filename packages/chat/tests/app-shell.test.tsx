@@ -252,25 +252,23 @@ describe('对话列内间距契约（产物栏调宽时聊天区左右恒留 gut
     expect(block).not.toMatch(/^\s*width:\s*100%;/m);
   });
 
-  it('面板打开时 gutter 由容器侧保证：host padding-left + 面板 margin-left', () => {
-    // 对话列 calc 宽度在 flex 行内把面板宽度计入 100% 基准，shrink 后
-    // margin auto 塌 0；容器侧两条规则与面板宽度无关地保住左右间距
+  it('面板打开时 gutter 由对话列自身 calc 保证：容器侧无 padding/margin 规则', () => {
+    // 对话列包含块是 __main 左列（面板宽不计入 100% 基准），calc 预留的
+    // gutter 与面板宽度无关地恒成立；容器侧若再加 padding/margin 会把
+    // __main 内的 header 一并内缩，两端无法贴到宿主边缘与面板分隔线
     const css = readFileSync(join(__dirname, '../styles.css'), 'utf8');
-    expect(css).toContain(
+    expect(css).not.toContain(
       '.pactor-chat-inspector-host__row:has(> .pactor-chat-inspector)',
     );
-    expect(css).toMatch(
-      /\.pactor-chat-inspector-host__row:has\(> \.pactor-chat-inspector\)\s*\{[^}]*padding-left:\s*var\(--pactor-chat-content-gutter\)/,
-    );
-    expect(css).toMatch(
-      /\.pactor-chat-inspector-host__row > \.pactor-chat-inspector\s*\{[^}]*margin-left:\s*var\(--pactor-chat-content-gutter\)/,
+    expect(css).not.toMatch(
+      /\.pactor-chat-inspector-host__row\s*>\s*\.pactor-chat-inspector\s*\{/,
     );
   });
 
-  it('面板宽度硬上限：max-width 2/3 兜底拖拽 inline 宽度（inline width 不能覆盖 max-width）', () => {
+  it('面板宽度硬上限：max-width min(600px 令牌, 2/3) 兜底拖拽 inline 宽度（inline width 不能覆盖 max-width）', () => {
     const css = readFileSync(join(__dirname, '../styles.css'), 'utf8');
     expect(css).toMatch(
-      /\.pactor-chat-inspector\s*\{[^}]*max-width:\s*calc\(100% \* 2 \/ 3\)/,
+      /\.pactor-chat-inspector\s*\{[^}]*max-width:\s*min\(var\(--pactor-chat-inspector-max-width\),\s*calc\(100% \* 2 \/ 3\)\)/,
     );
   });
 });

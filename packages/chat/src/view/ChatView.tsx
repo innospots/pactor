@@ -10,6 +10,7 @@ import { useChatAutoScroll } from '../hooks/use-chat-auto-scroll.js';
 import { useChatModel } from '../hooks/use-chat-model.js';
 import type {
   BuiltinMessageAction,
+  ChatAgentIdentity,
   ChatContextItem,
   ChatContextSource,
   ChatMessage,
@@ -68,6 +69,11 @@ export interface ChatViewProps
   store: ConversationStore;
   /** 注入后发送即驱动 turn；缺省时仅触发 onSend */
   transport?: ChatTransport;
+  /**
+   * 会话级 Agent 身份（assistant 消息顶部「图标 + 加粗名称」展示的兜底，
+   * 消息自带 message.agent 时以消息为准）；未配置不渲染身份行
+   */
+  agent?: ChatAgentIdentity;
   onSend?: (text: string) => void;
   /** Safe Registry（createSafeRegistry 包装后的白名单注册表） */
   safeRegistry?: Registry<unknown>;
@@ -152,6 +158,7 @@ function lastContentLength(messages: ChatMessage[]): number {
 export function ChatView({
   store,
   transport,
+  agent,
   onSend,
   safeRegistry,
   capabilities,
@@ -415,6 +422,7 @@ export function ChatView({
             <MessageBubble
               key={message.id}
               message={message}
+              agent={agent}
               runtime={runtime}
               scope={scope}
               showRegenerate={message.id === regenerableMessageId}

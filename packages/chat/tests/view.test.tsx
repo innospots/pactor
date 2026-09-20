@@ -88,6 +88,67 @@ describe('ChatView（spec: chat-view / 消息列表渲染）', () => {
   });
 });
 
+describe('ChatView（Agent 身份行）', () => {
+  it('会话级 agent：assistant 消息顶部渲染图标 + 加粗名称；user 消息不渲染', () => {
+    const store = createStore();
+    store.appendMessage({
+      id: 'u1',
+      role: 'user',
+      status: 'completed',
+      parts: [{ type: 'text', content: '看下数据', status: 'ready' }],
+    });
+    store.appendMessage({
+      id: 'a1',
+      role: 'assistant',
+      status: 'completed',
+      parts: [{ type: 'markdown', content: '一切正常', status: 'ready' }],
+    });
+
+    render(
+      <ChatView store={store} agent={{ name: '数据资产', icon: 'database' }} />,
+    );
+    const header = document.querySelector(
+      '.pactor-chat-message--assistant .pactor-chat-message__agent',
+    );
+    expect(header).toBeTruthy();
+    const name = header!.querySelector('.pactor-chat-message__agent-name')!;
+    expect(name.textContent).toBe('数据资产');
+    expect(header!.querySelector('.pactor-chat-message__agent-icon')).toBeTruthy();
+    expect(
+      document.querySelector('.pactor-chat-message--user .pactor-chat-message__agent'),
+    ).toBeNull();
+  });
+
+  it('message.agent 优先于会话级 agent；均无则不渲染身份行', () => {
+    const store = createStore();
+    store.appendMessage({
+      id: 'a1',
+      role: 'assistant',
+      status: 'completed',
+      parts: [{ type: 'markdown', content: '一', status: 'ready' }],
+      agent: { name: '批量值班', icon: 'bell' },
+    });
+    store.appendMessage({
+      id: 'a2',
+      role: 'assistant',
+      status: 'completed',
+      parts: [{ type: 'markdown', content: '二', status: 'ready' }],
+    });
+
+    const { unmount } = render(
+      <ChatView store={store} agent={{ name: '数据资产' }} />,
+    );
+    const names = Array.from(
+      document.querySelectorAll('.pactor-chat-message__agent-name'),
+    ).map((node) => node.textContent);
+    expect(names).toEqual(['批量值班', '数据资产']);
+    unmount();
+
+    render(<ChatView store={createStore()} />);
+    expect(document.querySelector('.pactor-chat-message__agent')).toBeNull();
+  });
+});
+
 describe('PartRenderer（spec: chat-view / PartRenderer）', () => {
   function createChatSafeRegistry(): Registry<unknown> {
     return createSafeRegistry(createComponentRegistry(), ['Statistic', 'Card']);

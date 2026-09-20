@@ -2,6 +2,7 @@
 export {
   createChatId,
   type BuiltinMessageAction,
+  type ChatAgentIdentity,
   type ChatAttachment,
   type ChatContextItem,
   type ChatContextSource,

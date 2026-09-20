@@ -7,6 +7,7 @@ import { useChatServices } from '../chat-services.js';
 import type { ChatArtifact } from '../artifact.js';
 import type {
   BuiltinMessageAction,
+  ChatAgentIdentity,
   ChatContextItem,
   ChatContextSource,
   ChatMessage,
@@ -50,6 +51,12 @@ export interface ChatProps {
   title?: string;
   /** 空会话问候语 */
   greeting?: string;
+  /**
+   * 会话级 Agent 身份（DSL 可表达对象）：assistant 消息顶部以
+   * 「图标 + 加粗名称」展示返回消息的 Agent；消息自带
+   * message.agent 时以消息为准；未配置不渲染身份行
+   */
+  agent?: ChatAgentIdentity;
   /** 空会话副标题 */
   subtitle?: string;
   /** 空会话起始建议；空数组 / 未传时不渲染建议区 */
@@ -272,6 +279,7 @@ export function ChatSidebarMenu({
 export function Chat({
   title,
   greeting,
+  agent,
   subtitle,
   suggestions,
   conversationId,
@@ -350,6 +358,7 @@ export function Chat({
       services={services}
       title={title}
       greeting={greeting}
+      agent={agent}
       subtitle={subtitle}
       suggestions={suggestions}
       conversationId={conversationId}

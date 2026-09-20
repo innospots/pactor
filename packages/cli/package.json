@@ -1,6 +1,6 @@
 {
   "name": "@pactor-app/cli",
-  "version": "1.18.0",
+  "version": "1.18.1",
   "description": "Pactor CLI: local DSL toolchain (validate / inspect / lint / schema / build / create)",
   "keywords": [
     "pactor",
