@@ -1,6 +1,6 @@
 {
   "name": "@pactor-app/core",
-  "version": "1.19.0",
+  "version": "1.20.0",
   "description": "Pactor core: DSL protocol types and generic Registry (React-free, zero dependencies)",
   "keywords": [
     "pactor",
