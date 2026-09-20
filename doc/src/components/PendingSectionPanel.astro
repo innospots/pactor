@@ -1,0 +1,91 @@
+---
+/**
+ * 待接入分类板块的完整页面（任务 4b.1：样式 / 模板 / 素材的非总览页）。
+ * 渲染面包屑、标题、「该分类内容待资产接入」异常态与同分类板块导航；
+ * 不出现任何模拟资产条目。
+ */
+import AssetLibraryLayout from '../layouts/AssetLibraryLayout.astro';
+import ExceptionState from './ExceptionState.astro';
+import { findCategory, findSection } from '../site-nav';
+import type { AssetCategory } from '../assets-data/types';
+
+interface Props {
+  categoryId: AssetCategory;
+  slug: string;
+}
+
+const { categoryId, slug } = Astro.props;
+const category = findCategory(categoryId)!;
+const item = findSection(categoryId, slug)!;
+const currentPath = `/${category.routePrefix}/${slug}`;
+const siblings = category.items.filter((i) => i.slug !== 'overview');
+
+const headings = [
+  { id: 'sec-pending', text: '接入状态' },
+  { id: 'sec-nav', text: '板块导航' },
+];
+
+const meta = [
+  { label: '分类', value: category.label },
+  { label: '板块', value: item.name },
+  { label: '路由', value: currentPath },
+  { label: '条目数', value: '待资产接入' },
+  { label: '维护方式', value: 'Git 静态构建' },
+];
+---
+
+<AssetLibraryLayout
+  title={`${item.name} · ${category.label}`}
+  description={`${category.label} / ${item.name}：本板块资产数据待接入，不展示模拟内容。`}
+  category={categoryId}
+  currentPath={currentPath}
+  headings={headings}
+  meta={meta}
+>
+  <div class="breadcrumb">
+    资产库 / <a href={`/${category.routePrefix}/overview`}>{category.label}</a> / {item.name}
+  </div>
+  <div class="page-head">
+    <div class="page-head-main">
+      <h1>{item.name}</h1>
+      <div class="badges">
+        <span class="badge info">{category.label}</span>
+        <span class="badge warning">待资产接入</span>
+      </div>
+    </div>
+  </div>
+
+  <section class="section" id="sec-pending">
+    <h2 class="section-title">接入状态</h2>
+    <ExceptionState
+      kind="empty"
+      title="该分类内容待资产接入"
+      hint="本板块资产数据尚未接入，本期不展示模拟资产条目；数据经构建期校验接入后，本页将自动替换为正式条目列表。"
+    />
+  </section>
+
+  <section class="section" id="sec-nav">
+    <h2 class="section-title">板块导航</h2>
+    <p class="section-sub">
+      「{category.label}」分类共 {siblings.length}
+      个二级板块，当前板块内容待接入。
+    </p>
+    <div class="grid">
+      {
+        siblings.map((s) => (
+          <a class="card link-card" href={`/${category.routePrefix}/${s.slug}`}>
+            <div class="card-body">
+              <div class="card-title">{s.name}</div>
+              <div class="card-desc">
+                {s.slug === slug ? '当前所在板块' : `查看「${s.name}」板块`}
+              </div>
+              <div class="badges">
+                <span class="badge warning">待接入</span>
+              </div>
+            </div>
+          </a>
+        ))
+      }
+    </div>
+  </section>
+</AssetLibraryLayout>

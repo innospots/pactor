@@ -1,0 +1,196 @@
+---
+/**
+ * 分类总览页模板（spec：分类总览页）。
+ * 渲染：面包屑、分类介绍、二级子菜单入口卡片网格（构建期条目计数）、
+ * 精选资产、使用指引（markdown）、关联分类导航。
+ * 子菜单计数一律用 site-nav 的 sectionCount，不自行统计。
+ */
+import AssetLibraryLayout from '../layouts/AssetLibraryLayout.astro';
+import StatusBadges from '../components/StatusBadges.astro';
+import { findCategory, sectionCount, type SiteNavCategory } from '../site-nav';
+import { renderMarkdown } from '../lib/markdown';
+import { toInspectAttrs } from '../lib/inspect';
+import type { AstroComponentFactory } from 'astro/runtime/server/index.js';
+import type { AssetCategory, ChangeFlag, Maturity } from '../assets-data/types';
+
+export interface FeaturedItem {
+  id: string;
+  name: string;
+  description: string;
+  href: string;
+  maturity: Maturity;
+  change?: ChangeFlag;
+}
+
+interface Props {
+  category: SiteNavCategory;
+  /** 分类介绍：Astro 片段组件或 markdown 字符串 */
+  intro?: string | AstroComponentFactory;
+  featuredItems?: FeaturedItem[];
+  /** 使用指引（markdown 子集字符串） */
+  guidance?: string;
+  /** 关联分类 id 数组 */
+  relatedCategories?: AssetCategory[];
+  /** 追加在「子分类」之后、「精选资产」之前的自定义区（Astro 组件，自行渲染 section） */
+  extraSections?: AstroComponentFactory;
+  /** 自定义区的页内锚点（并入右侧看板目录） */
+  extraHeadings?: { id: string; text: string }[];
+}
+
+const {
+  category,
+  intro,
+  featuredItems = [],
+  guidance,
+  relatedCategories = [],
+  extraSections,
+  extraHeadings = [],
+} = Astro.props;
+
+const currentPath = `/${category.routePrefix}/overview`;
+const sections = category.items.filter((i) => i.slug !== 'overview');
+const totalCount = category.items.reduce(
+  (n, i) => n + sectionCount(category.id, i.slug),
+  0,
+);
+
+const headings = [
+  { id: 'sec-intro', text: '分类介绍' },
+  { id: 'sec-sections', text: '子分类' },
+  ...extraHeadings,
+  ...(featuredItems.length > 0 ? [{ id: 'sec-featured', text: '精选资产' }] : []),
+  ...(guidance ? [{ id: 'sec-guidance', text: '使用指引' }] : []),
+  ...(relatedCategories.length > 0 ? [{ id: 'sec-related', text: '关联分类' }] : []),
+];
+
+const meta = [
+  { label: '分类', value: category.label },
+  { label: '子板块', value: `${sections.length} 个` },
+  { label: '条目总数', value: totalCount > 0 ? `${totalCount}` : '待资产接入' },
+  { label: '路由', value: currentPath },
+];
+
+const Intro = typeof intro === 'function' ? intro : null;
+const ExtraSections = typeof extraSections === 'function' ? extraSections : null;
+const related = relatedCategories
+  .map((id) => findCategory(id))
+  .filter((c): c is SiteNavCategory => Boolean(c));
+---
+
+<AssetLibraryLayout
+  title={`${category.label}总览`}
+  description={`${category.label}分类总览：子分类导航、精选资产与使用指引`}
+  category={category.id}
+  currentPath={currentPath}
+  headings={headings}
+  meta={meta}
+>
+  <div class="breadcrumb">资产库 / {category.label} / 总览</div>
+  <div class="page-head">
+    <div class="page-head-main">
+      <h1>{category.label}总览</h1>
+    </div>
+  </div>
+
+  <section class="section" id="sec-intro">
+    <h2 class="section-title">分类介绍</h2>
+    {
+      Intro ? (
+        <Intro />
+      ) : intro ? (
+        <div class="note-md" set:html={renderMarkdown(intro)} />
+      ) : null
+    }
+  </section>
+
+  <section class="section" id="sec-sections">
+    <h2 class="section-title">子分类</h2>
+    <p class="section-sub">
+      共 {sections.length} 个子板块；条目数由构建期资产数据统计，标注「待接入」的板块内容尚未接入。
+    </p>
+    <div class="grid">
+      {
+        sections.map((item) => {
+          const count = sectionCount(category.id, item.slug);
+          return (
+            <a class="card link-card" href={`/${category.routePrefix}/${item.slug}`}>
+              <div class="card-body">
+                <div class="card-title">{item.name}</div>
+                <div class="card-desc">查看「{item.name}」全部条目</div>
+                <div class="badges">
+                  {count > 0 ? (
+                    <span class="badge info">{count} 条</span>
+                  ) : (
+                    <span class="badge warning">待接入</span>
+                  )}
+                </div>
+              </div>
+            </a>
+          );
+        })
+      }
+    </div>
+  </section>
+
+  {
+    ExtraSections && (
+      <div class="extra-sections">
+        <ExtraSections />
+      </div>
+    )
+  }
+
+  {
+    featuredItems.length > 0 && (
+      <section class="section" id="sec-featured">
+        <h2 class="section-title">精选资产</h2>
+        <div class="grid">
+          {featuredItems.map((item) => (
+            <a
+              class="card link-card"
+              href={item.href}
+              {...toInspectAttrs({
+                id: item.id,
+                name: item.name,
+                type: '精选资产',
+                maturity: item.maturity,
+                change: item.change,
+                description: item.description,
+              })}
+            >
+              <div class="card-body">
+                <div class="card-title">{item.name}</div>
+                <div class="card-desc">{item.description}</div>
+                <StatusBadges maturity={item.maturity} change={item.change} />
+              </div>
+            </a>
+          ))}
+        </div>
+      </section>
+    )
+  }
+
+  {
+    guidance && (
+      <section class="section" id="sec-guidance">
+        <h2 class="section-title">使用指引</h2>
+        <div class="note-md" set:html={renderMarkdown(guidance)} />
+      </section>
+    )
+  }
+
+  {
+    related.length > 0 && (
+      <section class="section" id="sec-related">
+        <h2 class="section-title">关联分类</h2>
+        <div class="actions">
+          {related.map((c) => (
+            <a class="btn" href={`/${c.routePrefix}/overview`}>
+              {c.label} →
+            </a>
+          ))}
+        </div>
+      </section>
+    )
+  }
+</AssetLibraryLayout>

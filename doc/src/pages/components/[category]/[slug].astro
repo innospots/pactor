@@ -1,0 +1,160 @@
+---
+/**
+ * 组件详情页 /components/<category>/<slug>（任务 4.5）。
+ * getStaticPaths 遍历全部 137 个组件：所有组件可访问；
+ * component.button 与 component.chat-message 为完整详情（内容来自
+ * assets-data/details/component-details.ts，API 属性经 packages/ui、
+ * packages/chat 真实 props 核对），其余组件渲染章节骨架——
+ * 不适用的章节标注原因，不静默省略、不填充模拟内容。
+ */
+import AssetDetail from '../../../templates/AssetDetail.astro';
+import { components } from '../../../assets-data/components';
+import { componentDetailContents } from '../../../assets-data/details/component-details';
+import { SITE_NAV, findSection } from '../../../site-nav';
+import type { ComponentCategoryId } from '../../../assets-data/types';
+
+interface PathProps {
+  categoryId: ComponentCategoryId;
+  slug: string;
+}
+
+export function getStaticPaths() {
+  return components.map((c) => ({
+    params: {
+      category: c.category,
+      slug: c.id.slice('component.'.length),
+    },
+    props: { categoryId: c.category, slug: c.id } satisfies PathProps,
+  }));
+}
+
+const { categoryId, slug } = Astro.props as PathProps;
+const component = components.find((c) => c.id === slug)!;
+const detail = componentDetailContents[component.id];
+const section = findSection('components', categoryId)!;
+const categoryNav = SITE_NAV.find((c) => c.id === 'components')!;
+const currentPath = `/components/${categoryId}/${component.id.slice('component.'.length)}`;
+
+/** 同分类其他组件（关联资产，最多 8 个） */
+const related = components
+  .filter((c) => c.category === categoryId && c.id !== component.id)
+  .slice(0, 8)
+  .map((c) => ({
+    id: c.id,
+    name: c.name,
+    href: `/components/${c.category}/${c.id.slice('component.'.length)}`,
+    maturity: c.maturity,
+    note: c.purpose,
+  }));
+
+const metaInfoBody = [
+  `| 字段 | 值 |`,
+  `| --- | --- |`,
+  `| 规范 ID | \`${component.id}\` |`,
+  `| 名称 | ${component.name} |`,
+  `| 二级分类 | ${section.name}（\`${categoryId}\`） |`,
+  `| 用途 | ${component.purpose} |`,
+  `| 描述 | ${component.description} |`,
+].join('\n');
+---
+
+<AssetDetail
+  title={component.name}
+  description={`${component.purpose}。${component.description}`}
+  category="components"
+  currentPath={currentPath}
+  parent={{ name: `${section.name}组件`, href: `/components/${categoryId}` }}
+  status={{
+    maturity: component.maturity,
+    change: component.change,
+    integration: component.integration,
+  }}
+  inspect={{
+    id: component.id,
+    name: component.name,
+    type: '组件',
+    maturity: component.maturity,
+    change: component.change,
+    integration: component.integration,
+    description: component.purpose,
+  }}
+  meta={[
+    { label: '规范 ID', value: component.id },
+    { label: '分类', value: `${categoryNav.label} / ${section.name}` },
+    { label: '用途', value: component.purpose },
+    { label: '接入状态', value: component.integration === 'integrated' ? '已接入' : '待资产接入' },
+    { label: '路由', value: currentPath },
+  ]}
+  sections={[
+    {
+      title: '元信息',
+      body: metaInfoBody,
+    },
+    {
+      title: '预览',
+      notApplicable:
+        detail?.previewNote ??
+        '组件运行态预览待接入（后续批次）；接入前本页仅提供元信息与章节骨架。',
+    },
+    {
+      title: '何时用',
+      notApplicable: detail
+        ? undefined
+        : '「何时使用 / 何时不用」内容待资产接入；接入前请参考分类集合页的选型规则。',
+      body: detail?.whenToUse,
+    },
+    {
+      title: '变体',
+      notApplicable: detail
+        ? undefined
+        : '类型与视觉变体内容待资产接入（后续批次）。',
+      body: detail
+        ? [
+            `| 变体 | 视觉形态 | 适用场景 |`,
+            `| --- | --- | --- |`,
+            ...detail.variants.map((v) => `| ${v.name} | ${v.visual} | ${v.scene} |`),
+          ].join('\n')
+        : undefined,
+    },
+    {
+      title: 'API 属性',
+      notApplicable: detail
+        ? undefined
+        : '属性 / 事件 / 插槽内容待资产接入（后续批次）。',
+      body: detail
+        ? [
+            `| 属性 | 类型 | 默认值 | 说明 |`,
+            `| --- | --- | --- | --- |`,
+            ...detail.apiProps.map(
+              (p) => `| \`${p.name}\` | \`${p.type}\` | ${p.defaultValue} | ${p.description} |`,
+            ),
+          ].join('\n')
+        : undefined,
+    },
+    {
+      title: '使用规范',
+      notApplicable: detail
+        ? undefined
+        : '使用规范 / 正反例内容待资产接入（后续批次）。',
+      body: detail
+        ? [
+            detail.guidelines,
+            '',
+            '**正例**',
+            '',
+            ...detail.examplesDo.map((e) => `- ✓ ${e}`),
+            '',
+            '**反例**',
+            '',
+            ...detail.examplesDont.map((e) => `- ✕ ${e}`),
+          ].join('\n')
+        : undefined,
+    },
+    {
+      title: 'Design Token 映射',
+      notApplicable:
+        '组件 tokenRefs 为空：样式 Token 数据尚未接入，三层映射（Primitive → Semantic → Component）待样式 Token 接入后回填。',
+    },
+  ]}
+  related={related}
+/>

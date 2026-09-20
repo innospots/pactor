@@ -1,0 +1,67 @@
+---
+/**
+ * 资产库二级菜单路由（任务 4b.1 收敛版）：仅生成样式 / 模板 / 素材三个
+ * 「本期无内容数据」分类的页面；组件与主题的板块页已由专属路由接管
+ * （components/*、themes/*）。
+ * - overview：CategoryOverview 总览（intro 说明内容建设中，子菜单计数为 0
+ *   时卡片自动显示「待接入」徽章）；
+ * - 非 overview：PendingSectionPanel 渲染「待资产接入」异常态 + 板块导航。
+ * 本路由不展示任何模拟资产条目（阶段 B 的 demo 占位卡片已移除）。
+ */
+import CategoryOverview from '../../templates/CategoryOverview.astro';
+import PendingSectionPanel from '../../components/PendingSectionPanel.astro';
+import { SITE_NAV, findCategory, type SiteNavCategory } from '../../site-nav';
+import type { AssetCategory } from '../../assets-data/types';
+
+interface PathProps {
+  categoryId: AssetCategory;
+  slug: string;
+}
+
+/** 本期仅骨架接入的三个分类（组件 / 主题由 pages/components/*、pages/themes/* 生成） */
+export function getStaticPaths() {
+  const SKELETON_CATEGORIES: AssetCategory[] = ['styles', 'templates', 'materials'];
+  return SITE_NAV.filter((cat) => SKELETON_CATEGORIES.includes(cat.id)).flatMap(
+    (cat) =>
+      cat.items.map((item) => ({
+        params: { category: cat.routePrefix, section: item.slug },
+        props: { categoryId: cat.id, slug: item.slug } satisfies PathProps,
+      })),
+  );
+}
+
+/** 各分类总览介绍：如实说明内容建设中（任务 4b.1） */
+const CATEGORY_INTRO: Record<'styles' | 'templates' | 'materials', string> = {
+  styles:
+    '本板块承载样式 Token 与视觉规则，按 Primitive → Semantic → Component 三层模型组织，覆盖色彩、字体、排版、布局、形态、动效六个维度。本期 Token 数据尚未接入，各板块如实标注「待接入」，不展示模拟内容。',
+  templates:
+    '本板块按任务类型组织页面模板（页面骨架、图表、列表、表单、详情、结果、个人、登录、Chat、支付、设置、文字共 12 个板块），提供页面结构与组件组合参考。本期模板数据尚未接入，各板块如实标注「待接入」，不展示模拟内容。',
+  materials:
+    '本板块集中管理图标、SVG 图形、图片与插画、生成提示词、Logo 与品牌、UI 样式资源、媒体与动效、文案与数据、素材站点共 9 个板块，条目含独立拆分的权利字段。本期素材数据尚未接入，各板块如实标注「待接入」，不展示模拟内容。',
+};
+
+const CATEGORY_GUIDANCE: Record<'styles' | 'templates' | 'materials', string> = {
+  styles:
+    '- 样式资产以规范 ID 为唯一引用键（如 color.brand.500），展示名可本地化。\n- Token 值与别名互斥：要么给出具体值，要么别名引用另一 Token。\n- 数据以 Git 维护、构建期内嵌，接入后本总览的子板块计数自动更新。',
+  templates:
+    '- 模板引用组件规范 ID（componentRefs），不复制组件定义。\n- 模板数据接入后可从组件详情页反向定位引用它的页面模板。\n- 数据以 Git 维护、构建期内嵌，接入后本总览的子板块计数自动更新。',
+  materials:
+    '- 素材权利字段独立拆分（来源 / 许可证 / 署名 / 商用 / 修改 / 再分发 / 审核状态），禁止合并为单一「授权状态」。\n- 外链条目按可用性标注（可用 / 需复核 / 受限 / 失效），失效条目禁用跳转。\n- 数据以 Git 维护、构建期内嵌，接入后本总览的子板块计数自动更新。',
+};
+
+const { categoryId, slug } = Astro.props as PathProps;
+const category = findCategory(categoryId)! as SiteNavCategory;
+---
+
+{
+  slug === 'overview' ? (
+    <CategoryOverview
+      category={category}
+      intro={CATEGORY_INTRO[categoryId]}
+      guidance={CATEGORY_GUIDANCE[categoryId]}
+      relatedCategories={['components', 'themes']}
+    />
+  ) : (
+    <PendingSectionPanel categoryId={categoryId} slug={slug} />
+  )
+}

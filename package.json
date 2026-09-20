@@ -29,6 +29,9 @@
     "docs:dev": "pnpm --filter pactor-docs dev",
     "docs:build": "pnpm --filter pactor-docs build",
     "docs:preview": "pnpm --filter pactor-docs preview",
+    "asset:dev": "pnpm --filter pactor-asset-library dev",
+    "asset:build": "pnpm --filter pactor-asset-library build",
+    "asset:preview": "pnpm --filter pactor-asset-library preview",
     "release": "pnpm -r --filter \"./packages/*\" --if-present build && pnpm -r --filter \"./packages/*\" --if-present test && vitest run tests/ && pnpm -r --filter \"./packages/*\" publish"
   },
   "devDependencies": {

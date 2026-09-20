@@ -1,0 +1,130 @@
+---
+/**
+ * 资产库三栏布局壳（design D5）：58px 顶栏 + 左导航 / 中内容 / 右看板 + 30px 底栏。
+ * 中间区独立滚动；<1024px 左右栏收起为抽屉（少量 vanilla JS 控制开合）。
+ * 底栏展示构建期注入的真实构建版本 / 最近同步时间 / Git 提交号。
+ */
+import '../styles/asset-library.css';
+import TopNav from '../components/TopNav.astro';
+import SideNav from '../components/SideNav.astro';
+import Inspector from '../components/Inspector.tsx';
+import { SITE_NAME } from '../config';
+import buildInfo from '../generated/build-info.json';
+import type { AssetCategory } from '../assets-data/types';
+
+interface Props {
+  title: string;
+  description?: string;
+  category: AssetCategory;
+  currentPath: string;
+  /** 右侧看板默认态的页面目录（页内锚点） */
+  headings?: { id: string; text: string }[];
+  /** 右侧看板默认态的元信息键值 */
+  meta?: { label: string; value: string }[];
+}
+
+const {
+  title,
+  description,
+  category,
+  currentPath,
+  headings = [],
+  meta = [],
+} = Astro.props;
+
+function formatBuiltAt(iso: string): string {
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return iso;
+  const pad = (n: number) => String(n).padStart(2, '0');
+  return (
+    `${d.getUTCFullYear()}-${pad(d.getUTCMonth() + 1)}-${pad(d.getUTCDate())} ` +
+    `${pad(d.getUTCHours())}:${pad(d.getUTCMinutes())} UTC`
+  );
+}
+
+const builtAtText = formatBuiltAt(buildInfo.builtAt);
+---
+
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="generator" content={Astro.generator} />
+    {description && <meta name="description" content={description} />}
+    <title>{title} · {SITE_NAME}</title>
+  </head>
+  <body>
+    <TopNav />
+    <div class="shell">
+      <SideNav category={category} currentPath={currentPath} />
+      <main class="main" id="main">
+        <div class="content">
+          <slot />
+        </div>
+      </main>
+      <aside class="inspector" id="inspector">
+        <Inspector client:load headings={headings} meta={meta} />
+      </aside>
+    </div>
+    <div class="drawer-overlay" id="drawerOverlay"></div>
+    <footer class="footer">
+      <span
+        >当前构建版本：{buildInfo.version}　·　最近同步：{builtAtText}　·　Git commit：{
+          buildInfo.commit
+        }</span
+      >
+      <span class="right">静态构建 · Git 管理 · 无在线编辑</span>
+    </footer>
+    <script>
+      // 小屏抽屉开合（<1024px）：顶栏「目录 / 看板」按钮、遮罩、Esc、岛内的收起按钮
+      const sidebar = document.getElementById('sidebar');
+      const inspector = document.getElementById('inspector');
+      const overlay = document.getElementById('drawerOverlay');
+
+      const anyOpen = () =>
+        Boolean(
+          sidebar?.classList.contains('open') ||
+            inspector?.classList.contains('open'),
+        );
+      const syncOverlay = () => overlay?.classList.toggle('show', anyOpen());
+      const closeDrawers = () => {
+        sidebar?.classList.remove('open');
+        inspector?.classList.remove('open');
+        syncOverlay();
+      };
+
+      document.querySelectorAll('[data-drawer-toggle]').forEach((btn) => {
+        btn.addEventListener('click', () => {
+          const target =
+            btn.getAttribute('data-drawer-toggle') === 'left'
+              ? sidebar
+              : inspector;
+          const other = target === sidebar ? inspector : sidebar;
+          other?.classList.remove('open');
+          target?.classList.toggle('open');
+          syncOverlay();
+        });
+      });
+      overlay?.addEventListener('click', closeDrawers);
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') closeDrawers();
+      });
+      document.addEventListener('assetlib:close-drawer', closeDrawers);
+
+      // 左侧导航滚动位置保持（详情浏览往返后不丢失）
+      const SCROLL_KEY = 'assetlib:sidebar-scroll';
+      const sideMenu = document.getElementById('sidebar');
+      const saved = Number(sessionStorage.getItem(SCROLL_KEY) ?? '0');
+      if (sideMenu && saved > 0) sideMenu.scrollTop = saved;
+      sideMenu?.addEventListener(
+        'scroll',
+        () => {
+          sessionStorage.setItem(SCROLL_KEY, String(sideMenu.scrollTop));
+        },
+        { passive: true },
+      );
+    </script>
+  </body>
+</html>

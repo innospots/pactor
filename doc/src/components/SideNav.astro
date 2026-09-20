@@ -1,0 +1,61 @@
+---
+/**
+ * 左侧分类导航：5 个一级 Tab + 当前分类二级菜单（无三级菜单）。
+ * 切换 Tab 即链接到该分类「总览」；条目计数构建期从数据模块长度计算，
+ * 数据为空时显示「待接入」角标而非 0。
+ */
+import { SITE_NAV, sectionCount } from '../site-nav';
+import type { AssetCategory } from '../assets-data/types';
+
+interface Props {
+  category: AssetCategory;
+  currentPath: string;
+}
+
+const { category, currentPath } = Astro.props;
+const current = SITE_NAV.find((c) => c.id === category) ?? SITE_NAV[0];
+---
+
+<aside class="sidebar" id="sidebar">
+  <nav class="asset-tabs" aria-label="资产分类">
+    {
+      SITE_NAV.map((cat) => (
+        <a
+          class={`asset-tab${cat.id === current.id ? ' active' : ''}`}
+          href={`/${cat.routePrefix}/overview`}
+          aria-current={cat.id === current.id ? 'page' : undefined}
+        >
+          {cat.label}
+        </a>
+      ))
+    }
+  </nav>
+  <div class="side-title">{current.label}目录</div>
+  <div class="side-menu" id="sideMenu">
+    {
+      current.items.map((item) => {
+        const href = `/${current.routePrefix}/${item.slug}`;
+        const count = sectionCount(current.id, item.slug);
+        return (
+          <a
+            class={`menu-item${href === currentPath ? ' active' : ''}`}
+            href={href}
+            aria-current={href === currentPath ? 'page' : undefined}
+          >
+            <span>{item.name}</span>
+            <span class="menu-count">
+              {count > 0 ? (
+                count
+              ) : (
+                <span class="badge warning">待接入</span>
+              )}
+            </span>
+          </a>
+        );
+      })
+    }
+  </div>
+  <div class="side-note">
+    条目数由构建期资产数据统计；标注「待接入」的板块内容尚未接入，页面仅展示框架与占位说明。
+  </div>
+</aside>
