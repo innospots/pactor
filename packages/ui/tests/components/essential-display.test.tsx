@@ -395,4 +395,18 @@ describe('Segmented', () => {
     });
     expectCommonProps(container.querySelector('[data-slot=segmented]'));
   });
+
+  it('滑动指示块：有选中项时渲染、无选中项时不渲染', () => {
+    const { container } = renderDsl({
+      type: 'Segmented',
+      props: { options, value: 'day' },
+    });
+    expect(container.querySelector('[data-slot=segmented-indicator]')).not.toBeNull();
+
+    const { container: unselected } = renderDsl({
+      type: 'Segmented',
+      props: { options },
+    });
+    expect(unselected.querySelector('[data-slot=segmented-indicator]')).toBeNull();
+  });
 });

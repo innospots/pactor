@@ -23,6 +23,8 @@ export interface AssetDetailSection {
   title: string;
   /** 章节内容：Astro 片段组件或 markdown 字符串；与 notApplicable 互斥 */
   body?: string | AstroComponentFactory;
+  /** body 为片段组件时透传的 props */
+  bodyProps?: Record<string, unknown>;
   /** 不适用的原因；给出时渲染「不适用：原因」 */
   notApplicable?: string;
 }
@@ -121,7 +123,7 @@ const preparedSections = sections.map((s, i) => ({
             {s.notApplicable}
           </div>
         ) : s.FragmentBody ? (
-          <s.FragmentBody />
+          <s.FragmentBody {...(s.bodyProps ?? {})} />
         ) : typeof s.body === 'string' ? (
           <div class="note-md" set:html={renderMarkdown(s.body)} />
         ) : null}
@@ -133,7 +135,7 @@ const preparedSections = sections.map((s, i) => ({
     related.length > 0 && (
       <section class="section" id="sec-related">
         <h2 class="section-title">关联资产</h2>
-        <div class="grid">
+        <div class="card-grid">
           {related.map((r) => (
             <a
               class="card link-card"

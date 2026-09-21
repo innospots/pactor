@@ -11,7 +11,7 @@ export const generalComponents: ComponentEntry[] = [
   { id: 'component.icon', name: 'Icon', category: 'general', purpose: '传达操作、状态或对象含义', maturity: 'stable', change: 'new', integration: 'integrated', description: '中文惯用名：图标。' },
   { id: 'component.typography', name: 'Typography', category: 'general', purpose: '组织标题、正文和辅助文本', maturity: 'stable', change: 'new', integration: 'integrated', description: '中文惯用名：排版。' },
   { id: 'component.link', name: 'Link', category: 'general', purpose: '跳转页面、位置或外部资源', maturity: 'stable', change: 'new', integration: 'integrated', description: '中文惯用名：链接。' },
-  { id: 'component.divider', name: 'Divider', category: 'general', purpose: '分隔内容分组', maturity: 'stable', change: 'new', integration: 'integrated', description: '中文惯用名：分割线。' },
+  { id: 'component.separator', name: 'Separator', category: 'general', purpose: '分隔内容分组', maturity: 'stable', change: 'new', integration: 'integrated', description: '中文惯用名：分割线。设计文档原名：Divider。' },
   { id: 'component.avatar', name: 'Avatar', category: 'general', purpose: '表示用户、组织或对象身份', maturity: 'stable', change: 'new', integration: 'integrated', description: '中文惯用名：头像。' },
   { id: 'component.badge', name: 'Badge', category: 'general', purpose: '表示数量、提醒或附着状态', maturity: 'stable', change: 'new', integration: 'integrated', description: '中文惯用名：徽标。' },
   { id: 'component.tag', name: 'Tag', category: 'general', purpose: '标记分类、属性或可移除条件', maturity: 'stable', change: 'new', integration: 'integrated', description: '中文惯用名：标签。' },

@@ -1,4 +1,4 @@
-import { useEffect, useState, type CSSProperties } from 'react';
+import { useEffect, useLayoutEffect, useRef, useState, type CSSProperties } from 'react';
 
 import { cn } from '../../../lib/utils.js';
 import { useFormContext } from '../Form/context.js';
@@ -36,8 +36,9 @@ export interface SegmentedProps {
 }
 
 /**
- * Segmented 适配器（shadcn kit）：药丸式分段选择器（选中项高亮）；
- * onChange 传出选中项 value（DSL 语义值）；Form 集成同 Slider 模式。
+ * Segmented 适配器（shadcn kit）：药丸式分段选择器，选中项由滑动
+ * 指示块（absolute pill，left/width 过渡）承载高亮；onChange 传出
+ * 选中项 value（DSL 语义值）；Form 集成同 Slider 模式。
  */
 export function Segmented({
   name,
@@ -74,22 +75,48 @@ export function Segmented({
     onChange?.(option.value);
   };
 
+  // 滑动指示块：量取选中按钮的位置与宽度，left/width 过渡平滑移动
+  const itemRefs = useRef<(HTMLButtonElement | null)[]>([]);
+  const [indicator, setIndicator] = useState<{ left: number; width: number } | null>(null);
+  const activeIndex = options.findIndex((option) => option.value === current);
+
+  useLayoutEffect(() => {
+    const measure = () => {
+      const el = activeIndex >= 0 ? itemRefs.current[activeIndex] : null;
+      setIndicator(el ? { left: el.offsetLeft, width: el.offsetWidth } : null);
+    };
+    measure();
+    window.addEventListener('resize', measure);
+    return () => window.removeEventListener('resize', measure);
+  }, [activeIndex, options]);
+
   const control = (
     <div
       data-slot="segmented"
       role="radiogroup"
       className={cn(
-        'inline-flex items-center gap-1 rounded-full bg-muted p-1',
+        'relative inline-flex items-center gap-1 rounded-full bg-muted p-1',
         disabled && 'cursor-not-allowed opacity-50',
         inForm ? undefined : className,
       )}
       style={inForm ? undefined : style}
     >
-      {options.map((option) => {
+      {indicator ? (
+        <span
+          data-slot="segmented-indicator"
+          aria-hidden
+          className="pointer-events-none absolute top-1 bottom-1 rounded-full bg-background shadow-sm motion-safe:transition-[left,width] motion-safe:duration-200 motion-safe:ease-out"
+          style={{ left: indicator.left, width: indicator.width }}
+        />
+      ) : null}
+      {options.map((option, index) => {
         const active = current === option.value;
         return (
           <button
             key={option.value}
+            ref={(el) => {
+              itemRefs.current[index] = el;
+            }}
             type="button"
             role="radio"
             aria-checked={active}
@@ -98,9 +125,9 @@ export function Segmented({
             disabled={disabled === true || option.disabled === true}
             onClick={() => handleChange(option)}
             className={cn(
-              'inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-sm whitespace-nowrap transition-colors',
+              'relative inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-sm whitespace-nowrap transition-colors',
               active
-                ? 'bg-background font-medium text-foreground shadow-sm'
+                ? 'font-medium text-foreground'
                 : 'text-muted-foreground hover:text-foreground',
               'disabled:cursor-not-allowed disabled:opacity-50',
             )}

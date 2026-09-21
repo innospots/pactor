@@ -1,0 +1,93 @@
+/**
+ * 可预览组件清单（单一来源）：详情页「预览」章节据此决定渲染
+ * 运行态预览岛还是 previewNote 说明。组件 id 与 ComponentPreview.tsx
+ * 注册表保持一致；component.chat-message 为消息模型（由会话视图呈现），
+ * 不提供独立预览。
+ */
+export const PREVIEWABLE_IDS: readonly string[] = [
+  'component.button',
+  'component.rate',
+  'component.time-picker',
+  'component.color-picker',
+  'component.upload',
+  'component.tree-select',
+  'component.cascader',
+  'component.transfer',
+  'component.mentions',
+  'component.list',
+  'component.tree',
+  'component.descriptions',
+  'component.timeline',
+  'component.image',
+  'component.qrcode',
+  'component.segmented',
+  'component.message',
+  'component.notification',
+  'component.popconfirm',
+  'component.result',
+  'component.loading-overlay',
+  'component.watermark',
+  'component.tour',
+  // 通用
+  'component.icon',
+  'component.typography',
+  'component.link',
+  'component.separator',
+  'component.avatar',
+  'component.badge',
+  'component.tooltip',
+  // 布局
+  'component.layout',
+  'component.grid',
+  'component.flex',
+  'component.splitter',
+  'component.resizable',
+  'component.aspect-ratio',
+  'component.scroll-area',
+  // 导航
+  'component.menu',
+  'component.tabs',
+  'component.breadcrumb',
+  'component.pagination',
+  'component.dropdown-menu',
+  'component.navigation-menu',
+  // 数据录入
+  'component.input',
+  'component.textarea',
+  'component.number-input',
+  'component.select',
+  'component.combobox',
+  'component.checkbox',
+  'component.radio-group',
+  'component.switch',
+  'component.slider',
+  'component.date-picker',
+  'component.form',
+  // 数据展示
+  'component.card',
+  'component.table',
+  'component.statistic',
+  'component.calendar',
+  'component.accordion',
+  'component.carousel',
+  'component.empty',
+  'component.data-table',
+  // 反馈
+  'component.alert',
+  'component.dialog',
+  'component.drawer',
+  'component.popover',
+  'component.progress',
+  'component.skeleton',
+  'component.spinner',
+  // 图表（Chart/Statistic 覆盖的 5 种）
+  'component.metric-card',
+  'component.line-chart',
+  'component.column-chart',
+  'component.area-chart',
+  'component.pie-chart',
+];
+
+export function isPreviewable(id: string): boolean {
+  return PREVIEWABLE_IDS.includes(id);
+}
