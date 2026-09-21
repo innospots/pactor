@@ -295,3 +295,21 @@ export { Watermark } from './components/Watermark/index.js';
 export type { WatermarkProps } from './components/Watermark/index.js';
 export { Tour } from './components/Tour/index.js';
 export type { TourProps, TourStep } from './components/Tour/index.js';
+
+// 基础补齐类扩展组件（第六批：通用 / 布局 / 导航）
+export { Tag } from './components/Tag/index.js';
+export type { TagColor, TagProps } from './components/Tag/index.js';
+export { Status } from './components/Status/index.js';
+export type { StatusProps, StatusType } from './components/Status/index.js';
+export { Space } from './components/Space/index.js';
+export type { SpaceProps } from './components/Space/index.js';
+export { Container } from './components/Container/index.js';
+export type { ContainerProps, ContainerSize } from './components/Container/index.js';
+export { Steps } from './components/Steps/index.js';
+export type { StepItemData, StepsProps, StepStatus } from './components/Steps/index.js';
+export { Anchor } from './components/Anchor/index.js';
+export type { AnchorItemData, AnchorProps } from './components/Anchor/index.js';
+export { BackTop } from './components/BackTop/index.js';
+export type { BackTopProps } from './components/BackTop/index.js';
+export { Affix } from './components/Affix/index.js';
+export type { AffixProps } from './components/Affix/index.js';

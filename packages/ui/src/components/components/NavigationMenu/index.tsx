@@ -89,6 +89,8 @@ export function NavigationMenu({ items = [], className, style }: NavigationMenuP
                 href={item.href}
                 className={cn(
                   navigationMenuTriggerStyle(),
+                  // NavigationMenuLink 默认 flex-col（下拉面板链接布局），直链需改回横向
+                  'flex-row items-center',
                   item.icon !== undefined && 'gap-2',
                 )}
               >

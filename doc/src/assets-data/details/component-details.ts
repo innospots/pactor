@@ -10,8 +10,12 @@
  * - 第五批 22 个组件（数据录入 8 / 数据展示 7 / 反馈 7）：API 属性与结构
  *   提炼自 packages/ui 对应适配器，见同目录 data-entry-details.ts /
  *   data-display-details.ts / feedback-details.ts。
+ * - 第六批 8 个组件（通用 2 / 布局 2 / 导航 4：Tag / Status / Space /
+ *   Container / Steps / Anchor / BackTop / Affix）：API 属性与结构提炼自
+ *   packages/ui 对应适配器，见同目录 basic-details.ts。
  */
 
+import { basicDetailContents } from './basic-details.ts';
 import { dataEntryDetailContents } from './data-entry-details.ts';
 import { dataDisplayDetailContents } from './data-display-details.ts';
 import { feedbackDetailContents } from './feedback-details.ts';
@@ -162,4 +166,6 @@ export const componentDetailContents: Record<string, ComponentDetailContent> = {
   ...dataEntryDetailContents,
   ...dataDisplayDetailContents,
   ...feedbackDetailContents,
+  // 第六批 8 个组件（packages/ui 真实实现已核对）
+  ...basicDetailContents,
 };

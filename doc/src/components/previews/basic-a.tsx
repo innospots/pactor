@@ -390,8 +390,166 @@ function CollapsePreview() {
   return <DslPreview node={COLLAPSE_NODE} />;
 }
 
+const TAG_NODE: DslNode = {
+  type: 'Space',
+  props: { wrap: true },
+  children: [
+    { type: 'Tag', props: { text: '默认' } },
+    { type: 'Tag', props: { text: '已发布', color: 'success' } },
+    { type: 'Tag', props: { text: '待审核', color: 'warning' } },
+    { type: 'Tag', props: { text: '已驳回', color: 'error' } },
+    { type: 'Tag', props: { text: '进行中', color: 'info' } },
+    { type: 'Tag', props: { text: '可移除', color: 'info', closable: true } },
+    { type: 'Tag', props: { text: '带图标', icon: 'flag' } },
+  ],
+};
+
+function TagPreview() {
+  return <DslPreview node={TAG_NODE} />;
+}
+
+const STATUS_NODE: DslNode = {
+  type: 'Space',
+  props: { size: 'large', wrap: true },
+  children: [
+    { type: 'Status', props: { status: 'success', text: '运行正常' } },
+    { type: 'Status', props: { status: 'processing', text: '同步中' } },
+    { type: 'Status', props: { status: 'error', text: '服务异常' } },
+    { type: 'Status', props: { status: 'warning', text: '即将过期' } },
+    { type: 'Status', props: { status: 'default', text: '未启用' } },
+  ],
+};
+
+function StatusPreview() {
+  return <DslPreview node={STATUS_NODE} />;
+}
+
+const SPACE_NODE: DslNode = {
+  type: 'Space',
+  props: { wrap: true },
+  children: [
+    { type: 'Button', props: { text: '主要操作', variant: 'primary' } },
+    { type: 'Button', props: { text: '次要操作' } },
+    { type: 'Button', props: { text: '文字按钮', variant: 'link' } },
+    { type: 'Tag', props: { text: '标签', color: 'success' } },
+  ],
+};
+
+function SpacePreview() {
+  return <DslPreview node={SPACE_NODE} />;
+}
+
+const CONTAINER_NODE: DslNode = {
+  type: 'Container',
+  props: { size: 'md' },
+  children: [
+    {
+      type: 'Alert',
+      props: { variant: 'info', showIcon: true, message: 'Container md 居中限宽', description: '两侧留白由 Container 统一建立，内部可放任意 DSL 子树。' },
+    },
+  ],
+};
+
+function ContainerPreview() {
+  return <DslPreview node={CONTAINER_NODE} />;
+}
+
+const STEPS_NODE: DslNode = {
+  type: 'Steps',
+  props: {
+    current: 1,
+    items: [
+      { title: '提交订单', description: '已完成' },
+      { title: '支付', description: '进行中' },
+      { title: '发货', description: '等待' },
+      { title: '完成' },
+    ],
+  },
+};
+
+function StepsPreview() {
+  return (
+    <div style={columnStyle}>
+      <DslPreview node={STEPS_NODE} />
+      <DslPreview
+        node={{
+          type: 'Steps',
+          props: {
+            current: 2,
+            items: [{ title: '提交' }, { title: '审核' }, { title: '支付', status: 'error', description: '支付失败，请重试' }],
+          },
+        }}
+      />
+    </div>
+  );
+}
+
+const ANCHOR_ITEMS = [
+  { href: '#basic', title: '基础信息', children: [{ href: '#basic-contact', title: '联系方式' }] },
+  { href: '#security', title: '安全设置' },
+  { href: '#notify', title: '通知偏好' },
+];
+
+function AnchorPreview() {
+  return (
+    <div style={{ maxWidth: 220 }}>
+      <DslPreview
+        node={{
+          type: 'Anchor',
+          props: { activeKey: '${state.active}', items: ANCHOR_ITEMS },
+          events: { onChange: { action: 'setState', params: { active: '${event}' } } },
+        }}
+        state={{ active: '#basic' }}
+      />
+      <span style={{ display: 'block', marginTop: 8, fontSize: 12, color: 'var(--muted-text)' }}>
+        受控演示：activeKey 绑定 state.active，点击经 onChange 回写（本站无对应锚点，仅切换高亮）。
+      </span>
+    </div>
+  );
+}
+
+const BACKTOP_NODE: DslNode = {
+  type: 'BackTop',
+  // 站点为容器内滚动（window 不滚动），以负阈值强制展示按钮形态
+  props: { visibilityHeight: -1 },
+};
+
+function BackTopPreview() {
+  return (
+    <div style={columnStyle}>
+      <DslPreview node={BACKTOP_NODE} />
+      <span style={{ fontSize: 12, color: 'var(--muted-text)' }}>
+        按钮悬浮于视口右下角（本预览以负阈值强制展示）；页面滚动超过 visibilityHeight（默认 400px）后出现，点击平滑回顶。
+      </span>
+    </div>
+  );
+}
+
+const AFFIX_NODE: DslNode = {
+  type: 'Affix',
+  props: { offsetTop: 0 },
+  children: [
+    {
+      type: 'Alert',
+      props: { variant: 'warning', showIcon: true, message: 'Affix 吸附条', description: '基于 sticky：在滚动祖先内滚动越过 offsetTop 后保持吸附（本预览为静态形态）。' },
+    },
+  ],
+};
+
+function AffixPreview() {
+  return <DslPreview node={AFFIX_NODE} />;
+}
+
 export const PREVIEWS_A: Record<string, () => ReactElement> = {
   'component.icon': IconPreview,
+  'component.tag': TagPreview,
+  'component.status': StatusPreview,
+  'component.space': SpacePreview,
+  'component.container': ContainerPreview,
+  'component.steps': StepsPreview,
+  'component.anchor': AnchorPreview,
+  'component.back-top': BackTopPreview,
+  'component.affix': AffixPreview,
   'component.typography': TypographyPreview,
   'component.link': LinkPreview,
   'component.separator': DividerPreview,

@@ -36,6 +36,8 @@ export const PREVIEWABLE_IDS: readonly string[] = [
   'component.avatar',
   'component.badge',
   'component.tooltip',
+  'component.tag',
+  'component.status',
   // 布局
   'component.layout',
   'component.grid',
@@ -44,6 +46,8 @@ export const PREVIEWABLE_IDS: readonly string[] = [
   'component.resizable',
   'component.aspect-ratio',
   'component.scroll-area',
+  'component.space',
+  'component.container',
   // 导航
   'component.menu',
   'component.tabs',
@@ -51,6 +55,10 @@ export const PREVIEWABLE_IDS: readonly string[] = [
   'component.pagination',
   'component.dropdown-menu',
   'component.navigation-menu',
+  'component.steps',
+  'component.anchor',
+  'component.back-top',
+  'component.affix',
   // 数据录入
   'component.input',
   'component.textarea',
