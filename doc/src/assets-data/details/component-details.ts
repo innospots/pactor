@@ -16,8 +16,12 @@
  * - 第七批 11 个组件（媒体与内容）：API 属性与结构提炼自 packages/ui
  *   对应适配器（Markdown / CodeBlock 复用 @pactor-app/markdown），
  *   见同目录 media-details.ts。
+ * - 第八批 15 个组件（AI 与会话，packages/ui components/chat 子目录）：
+ *   见同目录 ai-chat-details.ts；其中 component.chat-message 以 ui 承接版
+ *   覆盖下方早期（chat 消息模型）条目。
  */
 
+import { aiChatDetailContents } from './ai-chat-details.ts';
 import { basicDetailContents } from './basic-details.ts';
 import { dataEntryDetailContents } from './data-entry-details.ts';
 import { dataDisplayDetailContents } from './data-display-details.ts';
@@ -174,4 +178,7 @@ export const componentDetailContents: Record<string, ComponentDetailContent> = {
   ...basicDetailContents,
   // 第七批 11 个组件（packages/ui 真实实现已核对）
   ...mediaDetailContents,
+  // 第八批 15 个组件（packages/ui 真实实现已核对；
+  // component.chat-message 以 ui 承接版覆盖上方 chat 消息模型条目）
+  ...aiChatDetailContents,
 };

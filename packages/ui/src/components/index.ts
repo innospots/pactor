@@ -337,3 +337,41 @@ export { DiffViewer, diffLines } from './components/DiffViewer/index.js';
 export type { DiffViewerProps } from './components/DiffViewer/index.js';
 export { JSONViewer } from './components/JSONViewer/index.js';
 export type { JSONViewerProps } from './components/JSONViewer/index.js';
+
+// AI 与会话类扩展组件（第八批：components/chat 子目录）
+export { Bubble } from './components/chat/Bubble/index.js';
+export type { BubbleProps, BubbleVariant } from './components/chat/Bubble/index.js';
+export { Sender } from './components/chat/Sender/index.js';
+export type { SenderProps } from './components/chat/Sender/index.js';
+export { Thinking } from './components/chat/Thinking/index.js';
+export type { ThinkingProps, ThinkingStatus } from './components/chat/Thinking/index.js';
+export { AgentStatus } from './components/chat/AgentStatus/index.js';
+export type { AgentStatusProps, AgentStatusType } from './components/chat/AgentStatus/index.js';
+export { StreamingText } from './components/chat/StreamingText/index.js';
+export type { StreamingTextProps } from './components/chat/StreamingText/index.js';
+export { Suggestion } from './components/chat/Suggestion/index.js';
+export type { SuggestionItem, SuggestionProps } from './components/chat/Suggestion/index.js';
+export { Prompt } from './components/chat/Prompt/index.js';
+export type { PromptProps } from './components/chat/Prompt/index.js';
+export { Welcome } from './components/chat/Welcome/index.js';
+export type { WelcomePromptItem, WelcomeProps } from './components/chat/Welcome/index.js';
+export { Citation } from './components/chat/Citation/index.js';
+export type { CitationItem, CitationProps } from './components/chat/Citation/index.js';
+export { Attachment } from './components/chat/Attachment/index.js';
+export type { AttachmentItemData, AttachmentProps } from './components/chat/Attachment/index.js';
+export { ToolCall } from './components/chat/ToolCall/index.js';
+export type { ToolCallProps, ToolCallStatus } from './components/chat/ToolCall/index.js';
+export { ChatMessage } from './components/chat/ChatMessage/index.js';
+export type {
+  ChatMessageActionItem,
+  ChatMessageAgent,
+  ChatMessagePart,
+  ChatMessageProps,
+  ChatMessageStatus,
+} from './components/chat/ChatMessage/index.js';
+export { MessageList } from './components/chat/MessageList/index.js';
+export type { MessageListItem, MessageListProps } from './components/chat/MessageList/index.js';
+export { Composer } from './components/chat/Composer/index.js';
+export type { ComposerProps } from './components/chat/Composer/index.js';
+export { ConversationList } from './components/chat/ConversationList/index.js';
+export type { ConversationItemData, ConversationListProps } from './components/chat/ConversationList/index.js';
