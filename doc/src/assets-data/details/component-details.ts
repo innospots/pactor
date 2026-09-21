@@ -1,13 +1,20 @@
 /**
- * 组件完整详情内容（任务 4.5 代表组件）。
- * 仅收录已核对真实实现来源的代表组件；未收录组件的详情页渲染章节骨架，
+ * 组件完整详情内容。
+ * 仅收录已核对真实实现来源的组件；未收录组件的详情页渲染章节骨架，
  * 相关章节标「不适用 / 待资产接入」，不填充模拟内容。
  * - component.button：API 属性提炼自 packages/ui Button 适配器
  *   （packages/ui/src/components/components/Button/index.tsx 的 ButtonProps）；
  * - component.chat-message：消息模型提炼自 packages/chat 消息状态机
  *   （packages/chat/src/model.ts 的 ChatMessage / ChatPart），
- *   呈现结构参考 packages/chat/src/view/MessageBubble.tsx。
+ *   呈现结构参考 packages/chat/src/view/MessageBubble.tsx；
+ * - 第五批 22 个组件（数据录入 8 / 数据展示 7 / 反馈 7）：API 属性与结构
+ *   提炼自 packages/ui 对应适配器，见同目录 data-entry-details.ts /
+ *   data-display-details.ts / feedback-details.ts。
  */
+
+import { dataEntryDetailContents } from './data-entry-details.ts';
+import { dataDisplayDetailContents } from './data-display-details.ts';
+import { feedbackDetailContents } from './feedback-details.ts';
 
 /** 变体条目 */
 export interface ComponentVariant {
@@ -58,7 +65,7 @@ export const componentDetailContents: Record<string, ComponentDetailContent> = {
       '- 需要展示加载进度的长时间任务：使用 Progress 类反馈组件，Button 的 loading 仅表示操作进行中。',
     ].join('\n'),
     previewNote:
-      '组件运行态预览待接入（后续批次）。静态结构：Button 渲染为单个 <button> 根节点（vendored shadcn Button 适配），variant=primary 映射实心主按钮、default 映射描边按钮；loading 时前置旋转图标并禁用点击；icon 通道在文本前渲染 Icon；配置 tooltip 时以 Tooltip 包裹，但根节点仍为按钮本体。',
+      '静态结构：Button 渲染为单个 <button> 根节点（vendored shadcn Button 适配），variant=primary 映射实心主按钮、default 映射描边按钮；loading 时前置旋转图标并禁用点击；icon 通道在文本前渲染 Icon；配置 tooltip 时以 Tooltip 包裹，但根节点仍为按钮本体。',
     variants: [
       { name: 'default 默认', visual: '描边按钮（outline）', scene: '常规操作；与主按钮成组出现的次操作' },
       { name: 'primary 主要', visual: '实心品牌色按钮', scene: '每区唯一的高权重主行动（提交、创建、确认）' },
@@ -82,7 +89,7 @@ export const componentDetailContents: Record<string, ComponentDetailContent> = {
     ],
     guidelines: [
       '- 同一区域最多一个 primary 实心主按钮，其余操作降级为 default / text。',
-      '- 危险操作（danger）必须配合二次确认（Popconfirm 或 Modal），确认文案说明后果。',
+      '- 危险操作（danger）必须配合二次确认（Popconfirm 或 Dialog），确认文案说明后果。',
       '- 提交类操作使用 submit + loading：进行中禁用并防重复提交。',
       '- 按钮文案用动词开头（「保存」「创建项目」），不超过 6 字，避免「确定 / 取消」以外的模糊文案。',
       '- link / text 变体不承载主流程动作；禁用态保持可见，不用隐藏代替。',
@@ -150,4 +157,9 @@ export const componentDetailContents: Record<string, ComponentDetailContent> = {
       '对 error 消息不提供重试或解释，用户无法恢复会话。',
     ],
   },
+
+  // 第五批 22 个组件（packages/ui 真实实现已核对）
+  ...dataEntryDetailContents,
+  ...dataDisplayDetailContents,
+  ...feedbackDetailContents,
 };

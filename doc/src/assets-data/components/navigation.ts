@@ -12,8 +12,8 @@ export const navigationComponents: ComponentEntry[] = [
   { id: 'component.pagination', name: 'Pagination', category: 'navigation', purpose: '在多页数据之间切换', maturity: 'stable', change: 'new', integration: 'integrated', description: '中文惯用名：分页。' },
   { id: 'component.steps', name: 'Steps', category: 'navigation', purpose: '表示流程阶段与当前进度', maturity: 'stable', change: 'new', integration: 'integrated', description: '中文惯用名：步骤条。' },
   { id: 'component.anchor', name: 'Anchor', category: 'navigation', purpose: '在长页面章节间定位', maturity: 'stable', change: 'new', integration: 'integrated', description: '中文惯用名：锚点。' },
-  { id: 'component.dropdown', name: 'Dropdown', category: 'navigation', purpose: '从临时操作或导航菜单中选择', maturity: 'stable', change: 'new', integration: 'integrated', description: '中文惯用名：下拉菜单。' },
-  { id: 'component.navigation', name: 'Navigation', category: 'navigation', purpose: '提供顶部、底部或全局导航', maturity: 'stable', change: 'new', integration: 'integrated', description: '中文惯用名：导航。' },
+  { id: 'component.dropdown-menu', name: 'DropdownMenu', category: 'navigation', purpose: '从临时操作或导航菜单中选择', maturity: 'stable', change: 'new', integration: 'integrated', description: '中文惯用名：下拉菜单。设计文档原名：Dropdown。' },
+  { id: 'component.navigation-menu', name: 'NavigationMenu', category: 'navigation', purpose: '提供顶部、底部或全局导航', maturity: 'stable', change: 'new', integration: 'integrated', description: '中文惯用名：导航。设计文档原名：Navigation。' },
   { id: 'component.back-top', name: 'BackTop', category: 'navigation', purpose: '返回长页面顶部', maturity: 'stable', change: 'new', integration: 'integrated', description: '中文惯用名：回到顶部。' },
   { id: 'component.affix', name: 'Affix', category: 'navigation', purpose: '在滚动时固定关键导航或操作', maturity: 'stable', change: 'new', integration: 'integrated', description: '中文惯用名：固钉。' },
 ];

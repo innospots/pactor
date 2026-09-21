@@ -9,9 +9,9 @@ export interface QRCodeProps {
   value?: string;
   /** 尺寸（px），缺省 128 */
   size?: number;
-  /** 码体颜色（hex，如 000000 或 ffffffff 带透明度），缺省为生成库内建黑色 */
+  /** 码体颜色（# 开头 hex，支持 3/4/6/8 位，8 位含透明度），非法值回退为生成库内建黑色 */
   color?: string;
-  /** 背景色（hex，同 color 格式），缺省为生成库内建白色 */
+  /** 背景色（同 color 格式），非法值回退为生成库内建白色 */
   bgColor?: string;
   /** 带边框与内边距 */
   bordered?: boolean;

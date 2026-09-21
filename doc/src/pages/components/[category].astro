@@ -63,8 +63,8 @@ const CATEGORY_INFO: Record<
     description:
       '选择正确控件，高效、准确地采集和校验数据：输入、数字、选择、级联、日期、上传、开关与完整表单。',
     guidance: [
-      '- Select / Autocomplete / Cascader / TreeSelect：候选少且固定用 Select；候选多可搜索用 Autocomplete；层级数据用 Cascader / TreeSelect。',
-      '- Checkbox / Radio / Switch：多选 Checkbox，单选 Radio，即时启停 Switch。',
+      '- Select / Combobox / Cascader / TreeSelect：候选少且固定用 Select；候选多可搜索用 Combobox；层级数据用 Cascader / TreeSelect。',
+      '- Checkbox / RadioGroup / Switch：多选 Checkbox，单选 RadioGroup，即时启停 Switch。',
       '- DatePicker 与 TimePicker 分开选日期与时间；范围选择使用 Range 变体。',
       '- 校验状态覆盖默认、聚焦、已填、禁用、只读、校验中、警告与错误。',
     ].join('\n'),
@@ -73,8 +73,8 @@ const CATEGORY_INFO: Record<
     description:
       '根据数据结构、规模和用户任务选择展示形式：卡片、列表、表格、树、折叠、描述、时间线与空态骨架。',
     guidance: [
-      '- Card / List / Table：单对象用 Card，同构集合用 List 或 Table；高密度编辑与虚拟化用 DataGrid。',
-      '- Tree 与 Collapse：层级数据用 Tree，内容分组收纳用 Collapse。',
+      '- Card / List / Table：单对象用 Card，同构集合用 List 或 Table；高密度编辑与虚拟化用 DataTable。',
+      '- Tree 与 Accordion：层级数据用 Tree，内容分组收纳用 Accordion。',
       '- Descriptions 展示单对象字段集，Table 展示集合；二者不互换。',
       '- Empty 与 Skeleton：确定无数据用 Empty，加载中结构占位用 Skeleton。',
     ].join('\n'),
@@ -84,9 +84,9 @@ const CATEGORY_INFO: Record<
       '按反馈重要程度、持续时间和阻断程度选择组件：全局提示、通知、警告、模态、抽屉、气泡确认、进度与结果页。',
     guidance: [
       '- Message / Notification / Alert：操作反馈用 Message（自动消失），系统通知用 Notification，常驻说明用 Alert。',
-      '- Modal / Drawer / Popover：阻断流程的确认或任务用 Modal；补充大表单 / 详情用 Drawer；轻量上下文内容用 Popover。',
-      '- 破坏性操作先经 Popconfirm 或 Modal 二次确认。',
-      '- Spin 表示紧邻内容的局部处理中；LoadingOverlay 覆盖页面或区块并阻断操作，二者不是可互换的视觉变体。',
+      '- Dialog / Drawer / Popover：阻断流程的确认或任务用 Dialog；补充大表单 / 详情用 Drawer；轻量上下文内容用 Popover。',
+      '- 破坏性操作先经 Popconfirm 或 Dialog 二次确认。',
+      '- Spinner 表示紧邻内容的局部处理中；LoadingOverlay 覆盖页面或区块并阻断操作，二者不是可互换的视觉变体。',
     ].join('\n'),
   },
   charts: {

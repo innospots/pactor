@@ -108,7 +108,7 @@ const related = relatedCategories
     <p class="section-sub">
       共 {sections.length} 个子板块；条目数由构建期资产数据统计，标注「待接入」的板块内容尚未接入。
     </p>
-    <div class="grid">
+    <div class="card-grid">
       {
         sections.map((item) => {
           const count = sectionCount(category.id, item.slug);
@@ -144,7 +144,7 @@ const related = relatedCategories
     featuredItems.length > 0 && (
       <section class="section" id="sec-featured">
         <h2 class="section-title">精选资产</h2>
-        <div class="grid">
+        <div class="card-grid">
           {featuredItems.map((item) => (
             <a
               class="card link-card"

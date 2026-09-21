@@ -2,12 +2,15 @@
 /**
  * 组件详情页 /components/<category>/<slug>（任务 4.5）。
  * getStaticPaths 遍历全部 137 个组件：所有组件可访问；
- * component.button 与 component.chat-message 为完整详情（内容来自
- * assets-data/details/component-details.ts，API 属性经 packages/ui、
- * packages/chat 真实 props 核对），其余组件渲染章节骨架——
+ * component.button、component.chat-message 与第五批 22 个组件
+ * （数据录入 8 / 数据展示 7 / 反馈 7）为完整详情（内容来自
+ * assets-data/details/，API 属性经 packages/ui、packages/chat
+ * 真实 props 核对），其余组件渲染章节骨架——
  * 不适用的章节标注原因，不静默省略、不填充模拟内容。
  */
 import AssetDetail from '../../../templates/AssetDetail.astro';
+import ComponentPreviewSection from '../../../components/previews/ComponentPreviewSection.astro';
+import { isPreviewable } from '../../../components/previews/previewable';
 import { components } from '../../../assets-data/components';
 import { componentDetailContents } from '../../../assets-data/details/component-details';
 import { SITE_NAV, findSection } from '../../../site-nav';
@@ -92,9 +95,12 @@ const metaInfoBody = [
     },
     {
       title: '预览',
-      notApplicable:
-        detail?.previewNote ??
-        '组件运行态预览待接入（后续批次）；接入前本页仅提供元信息与章节骨架。',
+      notApplicable: isPreviewable(component.id)
+        ? undefined
+        : (detail?.previewNote ??
+          '组件运行态预览待接入（后续批次）；接入前本页仅提供元信息与章节骨架。'),
+      body: isPreviewable(component.id) ? ComponentPreviewSection : undefined,
+      bodyProps: { componentId: component.id, note: detail?.previewNote },
     },
     {
       title: '何时用',

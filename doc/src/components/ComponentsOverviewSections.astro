@@ -28,11 +28,11 @@ const COMMON_IDS = [
   'component.button',
   'component.input',
   'component.select',
-  'component.modal',
+  'component.dialog',
   'component.table',
   'component.form',
   'component.chat-message',
-  'component.dropdown',
+  'component.dropdown-menu',
 ];
 const common = COMMON_IDS.map(
   (id) => components.find((c) => c.id === id)!,
@@ -103,7 +103,7 @@ const cardAttrs = (c: ComponentEntry) =>
   <p class="section-sub">
     「常用」为运营选择的代表组件（非使用频次统计），用于快速进入高频组件详情。
   </p>
-  <div class="grid">
+  <div class="card-grid">
     {
       common.map((c) => (
         <a
@@ -127,7 +127,7 @@ const cardAttrs = (c: ComponentEntry) =>
   <p class="section-sub">
     本期新增或更新的组件共 {recent.length} 个（首批评入，全部为本期新增）。
   </p>
-  <div class="grid">
+  <div class="card-grid">
     {
       recent.map((c) => (
         <a
@@ -150,7 +150,7 @@ const cardAttrs = (c: ComponentEntry) =>
   <h2 class="section-title">实验区</h2>
   {
     experimental.length > 0 ? (
-      <div class="grid">
+      <div class="card-grid">
         {experimental.map((c) => (
           <a
             class="card link-card"

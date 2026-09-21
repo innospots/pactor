@@ -251,6 +251,9 @@
   .top-0 {
     top: 0px;
   }
+  .top-1 {
+    top: var(--spacing);
+  }
   .top-1\.5 {
     top: calc(var(--spacing) * 1.5);
   }
@@ -298,6 +301,9 @@
   }
   .bottom-0 {
     bottom: 0px;
+  }
+  .bottom-1 {
+    bottom: var(--spacing);
   }
   .-left-12 {
     left: calc(var(--spacing) * -12);
@@ -919,6 +925,9 @@
   }
   .touch-none {
     touch-action: none;
+  }
+  .resize {
+    resize: both;
   }
   .resize-none {
     resize: none;
@@ -2786,6 +2795,21 @@
   .data-\[vaul-drawer-direction\=top\]\:border-b[data-vaul-drawer-direction="top"] {
     border-bottom-style: var(--tw-border-style);
     border-bottom-width: 1px;
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    .motion-safe\:transition-\[left\,width\] {
+      transition-property: left,width;
+      transition-timing-function: var(--tw-ease, var(--default-transition-timing-function));
+      transition-duration: var(--tw-duration, var(--default-transition-duration));
+    }
+    .motion-safe\:duration-200 {
+      --tw-duration: 200ms;
+      transition-duration: 200ms;
+    }
+    .motion-safe\:ease-out {
+      --tw-ease: var(--ease-out);
+      transition-timing-function: var(--ease-out);
+    }
   }
   @media (width >= 40rem) {
     .sm\:block {
