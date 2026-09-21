@@ -1,6 +1,6 @@
 ---
 title: 表单组件
-description: 表单类 DSL 组件——Form / Input / NumberInput / Select / Textarea / Checkbox / RadioGroup / Switch / Slider / Label / Field / Calendar / DatePicker / InputOTP / Combobox 的 props 契约、FieldRule 校验规则与 DSL 示例
+description: 表单类 DSL 组件——Form / Input / NumberInput / Select / Textarea / Checkbox / RadioGroup / Switch / Slider / Label / Field / Calendar / DatePicker / InputOTP / Combobox / Rate / TimePicker / ColorPicker / Upload / TreeSelect / Cascader / Transfer / Mentions 的 props 契约、FieldRule 校验规则与 DSL 示例
 ---
 
 Form 容器与录入控件。全部录入组件可在 `Form` 内按 `name` 参与值收集与校验（`label` / `rules` 生效，值为字段初始值，优先于 Form 的 `initialValues`），也可独立使用（`value` 为受控值）。
@@ -15,7 +15,7 @@ Form 容器与录入控件。全部录入组件可在 `Form` 内按 `name` 参�
 | 事件 `onSubmit` | — | 校验通过后触发，`event` 为表单 values，同时写入 `${form.<field>}` |
 | 事件 `onValuesChange` | — | 字段变化，`event` 为变化字段单键对象 `{ <field>: <newValue> }` |
 
-Form 内声明 `name` 的 Input / NumberInput / Select 及本页其余录入组件（Textarea / Checkbox / RadioGroup / Switch / Slider / Calendar / DatePicker / InputOTP / Combobox）自动成为表单项（label / rules 生效，值由 Form 托管）。
+Form 内声明 `name` 的 Input / NumberInput / Select 及本页其余录入组件（Textarea / Checkbox / RadioGroup / Switch / Slider / Calendar / DatePicker / InputOTP / Combobox / Rate / TimePicker / ColorPicker / Upload / TreeSelect / Cascader / Transfer / Mentions）自动成为表单项（label / rules 生效，值由 Form 托管）。
 
 ### Input
 
@@ -371,6 +371,227 @@ AI 对话输入框的通用结构构件：外层圆角容器（focus-within 高�
     options:
       - { label: 北京, value: bj }
       - { label: 上海, value: sh }
+```
+
+### Rate
+
+星形评分：`count` 颗星的点击选择；`allowHalf` 时每星分左/右两个点击区，左半得 x.5、右半得整数。
+
+| prop | 类型 | 缺省 | 说明 |
+| --- | --- | --- | --- |
+| `name` | string | — | 字段名；在 Form 内声明 name 即自动成为表单项 |
+| `label` | string | — | 表单项标签 |
+| `rules` | FieldRule[] | — | 校验规则（见[校验规则（FieldRule）](#校验规则fieldrule)） |
+| `value` | number | — | 受控值（独立渲染时生效）；Form 内作为字段初始值 |
+| `count` | number | `5` | 星总数 |
+| `allowHalf` | boolean | — | 允许半星 |
+| `disabled` | boolean | — | 禁用 |
+| 事件 `onChange` | — | — | 评分变化时触发，`${event}` 为 number |
+
+```yaml
+- type: Rate
+  props: { name: score, label: 服务评分, allowHalf: true }
+  events:
+    onChange:
+      action: setState
+      params:
+        score: ${event}
+```
+
+### TimePicker
+
+时间选择：input 风格触发器 + Popover 浮层内的时/分（/秒）列滚动列表；点选后「确定」提交、「此刻」取当前时间，`format: HH:mm` 时无秒列、值无秒。
+
+| prop | 类型 | 缺省 | 说明 |
+| --- | --- | --- | --- |
+| `name` | string | — | 字段名；在 Form 内声明 name 即自动成为表单项 |
+| `label` | string | — | 表单项标签 |
+| `rules` | FieldRule[] | — | 校验规则（见[校验规则（FieldRule）](#校验规则fieldrule)） |
+| `value` | string | — | 受控值（时间字符串，如 `"13:45:00"`）；Form 内作为字段初始值 |
+| `format` | `HH:mm:ss` \| `HH:mm` | `HH:mm:ss` | 输出格式 |
+| `placeholder` | string | — | 占位文案 |
+| `disabled` | boolean | — | 禁用 |
+| 事件 `onChange` | — | — | 提交时触发，`${event}` 为按 `format` 格式化的时间字符串 |
+
+```yaml
+- type: TimePicker
+  props: { name: startTime, label: 开始时间, format: HH:mm }
+```
+
+### ColorPicker
+
+颜色选择：触发器显示色块 + 当前 hex 值；Popover 浮层为 Sketch 风格取色面板——饱和度/明度二维面板（点选或拖拽）、色相滑杆、透明度滑杆、当前色预览、hex 文本输入（Enter 提交并校验格式，3/4 位 hex 自动展开）、R/G/B/A 通道输入（Enter 或失焦提交）与预设色板。拖拽过程实时提交。
+
+| prop | 类型 | 缺省 | 说明 |
+| --- | --- | --- | --- |
+| `name` | string | — | 字段名；在 Form 内声明 name 即自动成为表单项 |
+| `label` | string | — | 表单项标签 |
+| `rules` | FieldRule[] | — | 校验规则（见[校验规则（FieldRule）](#校验规则fieldrule)） |
+| `value` | string | — | 受控值（hex 颜色，支持 3/4/6/8 位，如 `#1677ff`、`#1677ffcc`）；Form 内作为字段初始值 |
+| `presets` | string[] | — | 预设色板（hex 数组） |
+| `placeholder` | string | — | 占位文案 |
+| `disabled` | boolean | — | 禁用 |
+| 事件 `onChange` | — | — | 颜色变化时触发，`${event}` 为 hex 字符串（透明度小于 1 时为 8 位 hex，如 `#1677ffcc`） |
+
+```yaml
+- type: ColorPicker
+  props:
+    name: themeColor
+    label: 主题色
+    presets: ['#1677ff', '#52c41a', '#faad14', '#f5222d']
+```
+
+### Upload
+
+文件选择。纯 UI 组件：只负责文件选择、按 `accept` / `maxSize` / `maxCount` 校验、列表展示与移除，**不发起任何网络上传请求**——不合规文件不进列表并提示忽略数量；实际上传动作在 `onChange` 事件中接动作层完成。
+
+| prop | 类型 | 缺省 | 说明 |
+| --- | --- | --- | --- |
+| `name` | string | — | 字段名；在 Form 内声明 name 即自动成为表单项 |
+| `label` | string | — | 表单项标签 |
+| `rules` | FieldRule[] | — | 校验规则（见[校验规则（FieldRule）](#校验规则fieldrule)） |
+| `value` | `Array<{ name, size, type }>` | — | 受控值（文件元数据数组）；Form 内作为字段初始值 |
+| `multiple` | boolean | — | 允许多选（缺省单选，重复选择覆盖） |
+| `accept` | string | — | 接受的文件类型（同原生 input accept：扩展名 / MIME / `image/*` 等，逗号分隔） |
+| `maxSize` | number | — | 单文件大小上限（字节），超出不进列表 |
+| `maxCount` | number | — | 文件总数上限，超出不进列表 |
+| `drag` | boolean | — | 拖拽区形态（点击或拖入文件选择）；缺省为按钮形态 |
+| `tip` | string | — | 选择区下方的辅助说明文案 |
+| `disabled` | boolean | — | 禁用 |
+| 事件 `onChange` | — | — | 文件列表变化时触发，`${event}` 为可序列化元数据数组 `Array<{ name, size, type }>` |
+
+```yaml
+- type: Upload
+  props:
+    name: attachments
+    label: 附件
+    multiple: true
+    accept: '.png,.jpg,.pdf'
+    maxCount: 5
+    tip: 支持 png / jpg / pdf，最多 5 个
+  events:
+    onChange:
+      action: setState
+      params:
+        attachments: ${event}
+```
+
+### TreeSelect
+
+树形选择：触发器 + Popover 浮层内联树（可展开/收起），单选；`searchable` 时浮层顶部提供过滤输入（按 label 过滤，命中节点的祖先保留展开）。
+
+| prop | 类型 | 缺省 | 说明 |
+| --- | --- | --- | --- |
+| `name` | string | — | 字段名；在 Form 内声明 name 即自动成为表单项 |
+| `label` | string | — | 表单项标签 |
+| `rules` | FieldRule[] | — | 校验规则（见[校验规则（FieldRule）](#校验规则fieldrule)） |
+| `options` | `Array<{ label, value, children? }>`（value: string \| number） | `[]` | 嵌套选项树 |
+| `value` | string \| number | — | 受控值（选中节点 value）；Form 内作为字段初始值 |
+| `placeholder` | string | — | 占位文案 |
+| `searchable` | boolean | — | 浮层顶部显示过滤输入 |
+| `disabled` | boolean | — | 禁用 |
+| 事件 `onChange` | — | — | 选中变化时触发，`${event}` 为选中节点 value |
+
+```yaml
+- type: TreeSelect
+  props:
+    name: dept
+    label: 部门
+    searchable: true
+    options:
+      - label: 研发中心
+        value: rd
+        children:
+          - { label: 前端组, value: rd-fe }
+          - { label: 后端组, value: rd-be }
+      - { label: 设计中心, value: design }
+```
+
+### Cascader
+
+级联选择：触发器 + Popover 浮层多列逐级下钻（点含 children 的节点开下一列，点叶子完成选择）；触发器文本用 ` / ` 连接路径各级 label。
+
+| prop | 类型 | 缺省 | 说明 |
+| --- | --- | --- | --- |
+| `name` | string | — | 字段名；在 Form 内声明 name 即自动成为表单项 |
+| `label` | string | — | 表单项标签 |
+| `rules` | FieldRule[] | — | 校验规则（见[校验规则（FieldRule）](#校验规则fieldrule)） |
+| `options` | `Array<{ label, value, children? }>`（value: string \| number） | `[]` | 嵌套选项 |
+| `value` | `Array<string \| number>` | — | 受控值（路径 value 数组）；Form 内作为字段初始值 |
+| `placeholder` | string | — | 占位文案 |
+| `disabled` | boolean | — | 禁用 |
+| 事件 `onChange` | — | — | 选中叶子时触发，`${event}` 为路径 value 数组（如 `['zhejiang', 'hangzhou']`） |
+
+```yaml
+- type: Cascader
+  props:
+    name: region
+    label: 地区
+    options:
+      - label: 浙江
+        value: zhejiang
+        children:
+          - { label: 杭州, value: hangzhou }
+          - { label: 宁波, value: ningbo }
+      - label: 江苏
+        value: jiangsu
+        children:
+          - { label: 南京, value: nanjing }
+```
+
+### Transfer
+
+穿梭框：左右两列 checkbox 列表 + 中间左右移动按钮；列头 checkbox 全选该列可用项，`disabled: true` 的选项不可勾选/移动。
+
+| prop | 类型 | 缺省 | 说明 |
+| --- | --- | --- | --- |
+| `name` | string | — | 字段名；在 Form 内声明 name 即自动成为表单项 |
+| `label` | string | — | 表单项标签 |
+| `rules` | FieldRule[] | — | 校验规则（见[校验规则（FieldRule）](#校验规则fieldrule)） |
+| `options` | `Array<{ label, value, disabled? }>`（value: string \| number） | `[]` | 全部选项（左列 = 未进目标侧的项，右列 = 目标侧的项） |
+| `value` | `Array<string \| number>` | — | 受控值（目标侧 value 数组）；Form 内作为字段初始值 |
+| `titles` | `[string, string]` | `['列表 1', '列表 2']` | 左右两列标题 |
+| `disabled` | boolean | — | 禁用 |
+| 事件 `onChange` | — | — | 移动变化时触发，`${event}` 为目标侧 value 数组 |
+
+```yaml
+- type: Transfer
+  props:
+    name: members
+    label: 项目成员
+    titles: [全部成员, 已选成员]
+    options:
+      - { label: 张三, value: u1 }
+      - { label: 李四, value: u2 }
+      - { label: 王五, value: u3, disabled: true }
+```
+
+### Mentions
+
+提及输入：textarea 输入 `trigger` 字符后弹候选浮层（按触发字符后的查询串过滤 label / value），点击或 Enter 选中后在光标处插入 `trigger + value + 空格`；↑/↓ 移动高亮，Esc 关闭。
+
+| prop | 类型 | 缺省 | 说明 |
+| --- | --- | --- | --- |
+| `name` | string | — | 字段名；在 Form 内声明 name 即自动成为表单项 |
+| `label` | string | — | 表单项标签 |
+| `rules` | FieldRule[] | — | 校验规则（见[校验规则（FieldRule）](#校验规则fieldrule)） |
+| `options` | `Array<{ label: string, value: string }>` | `[]` | 候选列表 |
+| `trigger` | string | `'@'` | 触发字符 |
+| `rows` | number | — | 文本域行数 |
+| `placeholder` | string | — | 占位文案 |
+| `value` | string | — | 受控值（完整字符串）；Form 内作为字段初始值 |
+| `disabled` | boolean | — | 禁用 |
+| 事件 `onChange` | — | — | 输入变化时触发，`${event}` 为完整字符串 |
+
+```yaml
+- type: Mentions
+  props:
+    name: comment
+    label: 评论
+    placeholder: 输入 @ 提及成员
+    options:
+      - { label: 张三, value: zhangsan }
+      - { label: 李四, value: lisi }
 ```
 
 ### 校验规则（FieldRule）
