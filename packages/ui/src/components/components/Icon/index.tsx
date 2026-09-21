@@ -92,11 +92,15 @@ import {
   ThumbsUp,
   Trash2,
   TriangleAlert,
+  Music,
   Upload,
+  Video,
   User,
   Users,
   X,
   Zap,
+  ZoomIn,
+  ZoomOut,
   type LucideIcon,
 } from 'lucide-react';
 
@@ -229,6 +233,10 @@ export const ICONS: Record<string, LucideIcon> = {
   'ellipsis-vertical': EllipsisVertical,
   'message-circle': MessageCircle,
   'lock-open': LockOpen,
+  'zoom-in': ZoomIn,
+  'zoom-out': ZoomOut,
+  video: Video,
+  music: Music,
 };
 
 /** DSL Icon 尺寸（数字直接作 px） */

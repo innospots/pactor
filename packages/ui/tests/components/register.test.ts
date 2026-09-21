@@ -121,6 +121,18 @@ const EXTENDED_TYPES = [
   'Anchor',
   'BackTop',
   'Affix',
+  // 第七批：媒体与内容类
+  'ImageViewer',
+  'Gallery',
+  'Video',
+  'Audio',
+  'FilePreview',
+  'DocumentPreview',
+  'RichText',
+  'Markdown',
+  'CodeBlock',
+  'DiffViewer',
+  'JSONViewer',
 ];
 
 describe('组件注册入口', () => {

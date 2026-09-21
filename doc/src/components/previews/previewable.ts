@@ -94,6 +94,18 @@ export const PREVIEWABLE_IDS: readonly string[] = [
   'component.column-chart',
   'component.area-chart',
   'component.pie-chart',
+  // 媒体与内容
+  'component.image-viewer',
+  'component.gallery',
+  'component.video',
+  'component.audio',
+  'component.file-preview',
+  'component.document-preview',
+  'component.rich-text',
+  'component.markdown',
+  'component.code-block',
+  'component.diff-viewer',
+  'component.json-viewer',
 ];
 
 export function isPreviewable(id: string): boolean {
