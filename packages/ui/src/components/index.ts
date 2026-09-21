@@ -313,3 +313,27 @@ export { BackTop } from './components/BackTop/index.js';
 export type { BackTopProps } from './components/BackTop/index.js';
 export { Affix } from './components/Affix/index.js';
 export type { AffixProps } from './components/Affix/index.js';
+
+// 媒体与内容类扩展组件（第七批）
+export { ImageViewer, ImageLightbox } from './components/ImageViewer/index.js';
+export type { ImageLightboxProps, ImageViewerProps } from './components/ImageViewer/index.js';
+export { Gallery } from './components/Gallery/index.js';
+export type { GalleryItemData, GalleryProps } from './components/Gallery/index.js';
+export { Video } from './components/Video/index.js';
+export type { VideoProps } from './components/Video/index.js';
+export { Audio } from './components/Audio/index.js';
+export type { AudioProps } from './components/Audio/index.js';
+export { FilePreview, inferKind } from './components/FilePreview/index.js';
+export type { FilePreviewKind, FilePreviewProps } from './components/FilePreview/index.js';
+export { DocumentPreview } from './components/DocumentPreview/index.js';
+export type { DocumentPageData, DocumentPreviewProps } from './components/DocumentPreview/index.js';
+export { RichText } from './components/RichText/index.js';
+export type { RichTextProps } from './components/RichText/index.js';
+export { Markdown } from './components/Markdown/index.js';
+export type { MarkdownProps } from './components/Markdown/index.js';
+export { CodeBlock } from './components/CodeBlock/index.js';
+export type { CodeBlockProps } from './components/CodeBlock/index.js';
+export { DiffViewer, diffLines } from './components/DiffViewer/index.js';
+export type { DiffViewerProps } from './components/DiffViewer/index.js';
+export { JSONViewer } from './components/JSONViewer/index.js';
+export type { JSONViewerProps } from './components/JSONViewer/index.js';

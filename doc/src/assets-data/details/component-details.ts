@@ -13,12 +13,16 @@
  * - 第六批 8 个组件（通用 2 / 布局 2 / 导航 4：Tag / Status / Space /
  *   Container / Steps / Anchor / BackTop / Affix）：API 属性与结构提炼自
  *   packages/ui 对应适配器，见同目录 basic-details.ts。
+ * - 第七批 11 个组件（媒体与内容）：API 属性与结构提炼自 packages/ui
+ *   对应适配器（Markdown / CodeBlock 复用 @pactor-app/markdown），
+ *   见同目录 media-details.ts。
  */
 
 import { basicDetailContents } from './basic-details.ts';
 import { dataEntryDetailContents } from './data-entry-details.ts';
 import { dataDisplayDetailContents } from './data-display-details.ts';
 import { feedbackDetailContents } from './feedback-details.ts';
+import { mediaDetailContents } from './media-details.ts';
 
 /** 变体条目 */
 export interface ComponentVariant {
@@ -168,4 +172,6 @@ export const componentDetailContents: Record<string, ComponentDetailContent> = {
   ...feedbackDetailContents,
   // 第六批 8 个组件（packages/ui 真实实现已核对）
   ...basicDetailContents,
+  // 第七批 11 个组件（packages/ui 真实实现已核对）
+  ...mediaDetailContents,
 };

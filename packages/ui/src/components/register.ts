@@ -7,6 +7,7 @@ import { Alert } from './components/Alert/index.js';
 import { AlertDialog } from './components/AlertDialog/index.js';
 import { Anchor } from './components/Anchor/index.js';
 import { AspectRatio } from './components/AspectRatio/index.js';
+import { Audio } from './components/Audio/index.js';
 import { Avatar } from './components/Avatar/index.js';
 import { BackTop } from './components/BackTop/index.js';
 import { Badge } from './components/Badge/index.js';
@@ -18,6 +19,7 @@ import { Card } from './components/Card/index.js';
 import { Carousel } from './components/Carousel/index.js';
 import { Cascader } from './components/Cascader/index.js';
 import { Checkbox } from './components/Checkbox/index.js';
+import { CodeBlock } from './components/CodeBlock/index.js';
 import { Collapsible } from './components/Collapsible/index.js';
 import { ColorPicker } from './components/ColorPicker/index.js';
 import { Combobox } from './components/Combobox/index.js';
@@ -31,28 +33,35 @@ import { DataTable } from './components/DataTable/index.js';
 import { DatePicker } from './components/DatePicker/index.js';
 import { Descriptions } from './components/Descriptions/index.js';
 import { Dialog } from './components/Dialog/index.js';
+import { DiffViewer } from './components/DiffViewer/index.js';
+import { DocumentPreview } from './components/DocumentPreview/index.js';
 import { Drawer } from './components/Drawer/index.js';
 import { DropdownMenu } from './components/DropdownMenu/index.js';
 import { Empty } from './components/Empty/index.js';
 import { Field } from './components/Field/index.js';
+import { FilePreview } from './components/FilePreview/index.js';
 import { Flex } from './components/Flex/index.js';
 import { Footer } from './components/Footer/index.js';
+import { Gallery } from './components/Gallery/index.js';
 import { Form } from './components/Form/index.js';
 import { Grid } from './components/Grid/index.js';
 import { Header } from './components/Header/index.js';
 import { HoverCard } from './components/HoverCard/index.js';
 import { Icon } from './components/Icon/index.js';
 import { Image } from './components/Image/index.js';
+import { ImageViewer } from './components/ImageViewer/index.js';
 import { Input } from './components/Input/index.js';
 import { InputGroup } from './components/InputGroup/index.js';
 import { InputOTP } from './components/InputOTP/index.js';
 import { Item } from './components/Item/index.js';
+import { JSONViewer } from './components/JSONViewer/index.js';
 import { Kbd } from './components/Kbd/index.js';
 import { Label } from './components/Label/index.js';
 import { Layout } from './components/Layout/index.js';
 import { Link } from './components/Link/index.js';
 import { List } from './components/List/index.js';
 import { LoadingOverlay } from './components/LoadingOverlay/index.js';
+import { Markdown } from './components/Markdown/index.js';
 import { Mentions } from './components/Mentions/index.js';
 import { Menu } from './components/Menu/index.js';
 import { Menubar } from './components/Menubar/index.js';
@@ -70,6 +79,7 @@ import { RadioGroup } from './components/RadioGroup/index.js';
 import { Rate } from './components/Rate/index.js';
 import { Resizable } from './components/Resizable/index.js';
 import { Result } from './components/Result/index.js';
+import { RichText } from './components/RichText/index.js';
 import { ScrollArea } from './components/ScrollArea/index.js';
 import { Segmented } from './components/Segmented/index.js';
 import { Select } from './components/Select/index.js';
@@ -102,6 +112,7 @@ import { Tree } from './components/Tree/index.js';
 import { TreeSelect } from './components/TreeSelect/index.js';
 import { Typography } from './components/Typography/index.js';
 import { Upload } from './components/Upload/index.js';
+import { Video } from './components/Video/index.js';
 import { Watermark } from './components/Watermark/index.js';
 
 /**
@@ -222,6 +233,18 @@ export const builtinComponents = {
   Anchor,
   BackTop,
   Affix,
+  // 媒体与内容类扩展组件（第七批）
+  ImageViewer,
+  Gallery,
+  Video,
+  Audio,
+  FilePreview,
+  DocumentPreview,
+  RichText,
+  Markdown,
+  CodeBlock,
+  DiffViewer,
+  JSONViewer,
 } as const;
 
 /** 把全部 V1 内置组件按 DSL 类型名注册到给定 ComponentRegistry */
