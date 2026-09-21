@@ -76,10 +76,11 @@ describe('chrome DSL 渲染层（spec: chat-chrome-dsl）', () => {
       { services: { transport: createManualDriver().transport, store } },
     );
 
-    // DSL 路径标记：chrome 容器存在，建议按钮经宿主 Button 渲染
+    // DSL 路径标记：chrome 容器存在，建议经 ui Suggestion 组件渲染（chips 形态）
     expect(document.querySelector('.pactor-chat-chrome')).not.toBeNull();
+    expect(document.querySelector('.pactor-chat-empty__suggestions')?.getAttribute('data-slot')).toBe('suggestion');
     const suggestion = screen.getByRole('button', { name: '今天天气怎么样' });
-    expect(suggestion.className).toContain('pactor-chat-empty__suggestion');
+    expect(suggestion.getAttribute('data-slot')).toBe('suggestion-item');
 
     fireEvent.click(suggestion);
 

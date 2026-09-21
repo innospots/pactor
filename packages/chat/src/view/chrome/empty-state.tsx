@@ -16,8 +16,9 @@ function suggestionPrompt(suggestion: ChatSuggestion): string {
 /**
  * 空态区 chrome 片段（spec: chat-chrome-dsl / chat-empty-state）：
  * 问候语（Typography，className 复用 chat 皮肤类保住 display 衬线
- * 字体栈）+ 副标题（Text secondary）+ 建议按钮组（Button，
- * chat.sendSuggestion 内建动作接回 ChatView 发送路径）。
+ * 字体栈）+ 副标题（Text secondary）+ 建议 chips（ui Suggestion 组件，
+ * onSelect 经 chat.sendSuggestion 内建动作接回 ChatView 发送路径；
+ * 设计规范的建议 chips 形态，替换原 Button 组）。
  * 外层 pactor-chat-empty 容器与居中组布局留在 chat 侧（EmptyState）。
  */
 export function buildEmptyStateFragment(props: {
@@ -47,33 +48,27 @@ export function buildEmptyStateFragment(props: {
   }
   if (props.suggestions && props.suggestions.length > 0) {
     children.push({
-      type: 'Flex',
+      type: 'Suggestion',
       props: {
-        gap: 'small',
+        items: props.suggestions.map((suggestion) => ({
+          label: suggestionLabel(suggestion),
+          value: suggestionPrompt(suggestion),
+        })),
         justify: 'center',
         className: 'pactor-chat-empty__suggestions',
       },
-      children: props.suggestions.map((suggestion) => ({
-        type: 'Button',
-        props: {
-          text: suggestionLabel(suggestion),
-          variant: 'default',
-          size: 'middle',
-          className: 'pactor-chat-empty__suggestion',
-        },
-        events: {
-          onClick: [
-            {
-              action: 'chat.sendSuggestion',
-              params: { text: suggestionPrompt(suggestion) },
-            },
-          ],
-        },
-      })),
+      events: {
+        onSelect: [
+          {
+            action: 'chat.sendSuggestion',
+            params: { text: '${event}' },
+          },
+        ],
+      },
     });
   }
   return {
-    requires: ['Flex', 'Typography', 'Text', 'Button'],
+    requires: ['Flex', 'Typography', 'Text', 'Suggestion'],
     node: {
       type: 'Flex',
       props: { direction: 'vertical', align: 'center', gap: 'middle' },

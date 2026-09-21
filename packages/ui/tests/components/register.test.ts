@@ -133,6 +133,22 @@ const EXTENDED_TYPES = [
   'CodeBlock',
   'DiffViewer',
   'JSONViewer',
+  // 第八批：AI 与会话类
+  'Bubble',
+  'Sender',
+  'Thinking',
+  'AgentStatus',
+  'StreamingText',
+  'Suggestion',
+  'Prompt',
+  'Welcome',
+  'Citation',
+  'Attachment',
+  'ToolCall',
+  'ChatMessage',
+  'MessageList',
+  'Composer',
+  'ConversationList',
 ];
 
 describe('组件注册入口', () => {

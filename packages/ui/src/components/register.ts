@@ -115,6 +115,23 @@ import { Upload } from './components/Upload/index.js';
 import { Video } from './components/Video/index.js';
 import { Watermark } from './components/Watermark/index.js';
 
+// AI 与会话类扩展组件（components/chat 子目录）
+import { AgentStatus } from './components/chat/AgentStatus/index.js';
+import { Attachment } from './components/chat/Attachment/index.js';
+import { Bubble } from './components/chat/Bubble/index.js';
+import { ChatMessage } from './components/chat/ChatMessage/index.js';
+import { Citation } from './components/chat/Citation/index.js';
+import { Composer } from './components/chat/Composer/index.js';
+import { ConversationList } from './components/chat/ConversationList/index.js';
+import { MessageList } from './components/chat/MessageList/index.js';
+import { Prompt } from './components/chat/Prompt/index.js';
+import { Sender } from './components/chat/Sender/index.js';
+import { StreamingText } from './components/chat/StreamingText/index.js';
+import { Suggestion } from './components/chat/Suggestion/index.js';
+import { Thinking } from './components/chat/Thinking/index.js';
+import { ToolCall } from './components/chat/ToolCall/index.js';
+import { Welcome } from './components/chat/Welcome/index.js';
+
 /**
  * 内置组件表：DSL 类型名 → 组件适配器。
  * 类型名集合即 spec: builtin-components 的内置组件清单；
@@ -245,6 +262,22 @@ export const builtinComponents = {
   CodeBlock,
   DiffViewer,
   JSONViewer,
+  // AI 与会话类扩展组件（第八批：components/chat 子目录）
+  Bubble,
+  Sender,
+  Thinking,
+  AgentStatus,
+  StreamingText,
+  Suggestion,
+  Prompt,
+  Welcome,
+  Citation,
+  Attachment,
+  ToolCall,
+  ChatMessage,
+  MessageList,
+  Composer,
+  ConversationList,
 } as const;
 
 /** 把全部 V1 内置组件按 DSL 类型名注册到给定 ComponentRegistry */

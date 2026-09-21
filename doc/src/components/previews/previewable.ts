@@ -1,8 +1,7 @@
 /**
  * 可预览组件清单（单一来源）：详情页「预览」章节据此决定渲染
  * 运行态预览岛还是 previewNote 说明。组件 id 与 ComponentPreview.tsx
- * 注册表保持一致；component.chat-message 为消息模型（由会话视图呈现），
- * 不提供独立预览。
+ * 注册表保持一致。
  */
 export const PREVIEWABLE_IDS: readonly string[] = [
   'component.button',
@@ -106,6 +105,22 @@ export const PREVIEWABLE_IDS: readonly string[] = [
   'component.code-block',
   'component.diff-viewer',
   'component.json-viewer',
+  // AI 与会话
+  'component.bubble',
+  'component.sender',
+  'component.thinking',
+  'component.agent-status',
+  'component.streaming-text',
+  'component.suggestion',
+  'component.prompt',
+  'component.welcome',
+  'component.citation',
+  'component.attachment',
+  'component.tool-call',
+  'component.chat-message',
+  'component.message-list',
+  'component.composer',
+  'component.conversation-list',
 ];
 
 export function isPreviewable(id: string): boolean {
