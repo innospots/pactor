@@ -13,11 +13,19 @@ import {
 } from '@pactor-app/runtime';
 import { createComponentRegistry } from '@pactor-app/ui/components';
 
-export default function DslPreview({ node }: { node: DslNode }): ReactElement {
+export default function DslPreview({
+  node,
+  state,
+}: {
+  node: DslNode;
+  /** 初始 state（受控组件演示：表达式 ${state.x} 绑定 + setState 回写） */
+  state?: Record<string, unknown>;
+}): ReactElement {
   const context = useMemo(() => {
-    const ctx = createRuntimeContext({ components: createComponentRegistry() });
+    const ctx = createRuntimeContext({ components: createComponentRegistry(), state });
     registerBuiltinActions(ctx.actions);
     return ctx;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
   return <DslRenderer context={context} node={node} />;
 }

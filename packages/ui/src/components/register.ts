@@ -2,10 +2,13 @@ import { Registry } from '@pactor-app/core';
 import type { ComponentRegistry } from '@pactor-app/runtime';
 
 import { Accordion } from './components/Accordion/index.js';
+import { Affix } from './components/Affix/index.js';
 import { Alert } from './components/Alert/index.js';
 import { AlertDialog } from './components/AlertDialog/index.js';
+import { Anchor } from './components/Anchor/index.js';
 import { AspectRatio } from './components/AspectRatio/index.js';
 import { Avatar } from './components/Avatar/index.js';
+import { BackTop } from './components/BackTop/index.js';
 import { Badge } from './components/Badge/index.js';
 import { Breadcrumb } from './components/Breadcrumb/index.js';
 import { Button } from './components/Button/index.js';
@@ -21,6 +24,7 @@ import { Combobox } from './components/Combobox/index.js';
 import { Command } from './components/Command/index.js';
 import { Chart } from './components/Chart/index.js';
 import { ChatInput } from './components/ChatInput/index.js';
+import { Container } from './components/Container/index.js';
 import { Content } from './components/Content/index.js';
 import { ContextMenu } from './components/ContextMenu/index.js';
 import { DataTable } from './components/DataTable/index.js';
@@ -76,11 +80,15 @@ import { Sider } from './components/Sider/index.js';
 import { Skeleton } from './components/Skeleton/index.js';
 import { Slider } from './components/Slider/index.js';
 import { Sonner } from './components/Sonner/index.js';
+import { Space } from './components/Space/index.js';
 import { Spinner } from './components/Spinner/index.js';
 import { Statistic } from './components/Statistic/index.js';
+import { Status } from './components/Status/index.js';
+import { Steps } from './components/Steps/index.js';
 import { Switch } from './components/Switch/index.js';
 import { Table } from './components/Table/index.js';
 import { Tabs } from './components/Tabs/index.js';
+import { Tag } from './components/Tag/index.js';
 import { Text } from './components/Text/index.js';
 import { Textarea } from './components/Textarea/index.js';
 import { TimePicker } from './components/TimePicker/index.js';
@@ -205,6 +213,15 @@ export const builtinComponents = {
   LoadingOverlay,
   Watermark,
   Tour,
+  // 基础补齐类扩展组件（第六批：通用 / 布局 / 导航）
+  Tag,
+  Status,
+  Space,
+  Container,
+  Steps,
+  Anchor,
+  BackTop,
+  Affix,
 } as const;
 
 /** 把全部 V1 内置组件按 DSL 类型名注册到给定 ComponentRegistry */

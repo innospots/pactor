@@ -112,6 +112,15 @@ const EXTENDED_TYPES = [
   'LoadingOverlay',
   'Watermark',
   'Tour',
+  // 第六批：基础补齐类（通用 / 布局 / 导航）
+  'Tag',
+  'Status',
+  'Space',
+  'Container',
+  'Steps',
+  'Anchor',
+  'BackTop',
+  'Affix',
 ];
 
 describe('组件注册入口', () => {

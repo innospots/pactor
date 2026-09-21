@@ -186,6 +186,10 @@ describe('NavigationMenu', () => {
     });
 
     expectIconBeforeLabel(screen.getByText('概览'), '概览');
+    // 直链为横向布局（覆盖 vendored NavigationMenuLink 的 flex-col）：图标与文字不换行
+    const overviewLink = screen.getByText('概览').closest('a')!;
+    expect(overviewLink.className).toContain('flex-row');
+    expect(overviewLink.className).not.toContain('flex-col');
 
     fireEvent.click(screen.getByText('产品'));
     const child = await screen.findByText('分析');
