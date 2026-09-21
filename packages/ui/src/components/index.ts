@@ -245,3 +245,53 @@ export type {
   TablePaginationInfo,
   TableProps,
 } from './components/Table/index.js';
+
+// 业务刚需类扩展组件（第五批：数据录入）
+export { Rate } from './components/Rate/index.js';
+export type { RateProps } from './components/Rate/index.js';
+export { TimePicker } from './components/TimePicker/index.js';
+export type { TimePickerProps } from './components/TimePicker/index.js';
+export { ColorPicker } from './components/ColorPicker/index.js';
+export type { ColorPickerProps } from './components/ColorPicker/index.js';
+export { Upload } from './components/Upload/index.js';
+export type { UploadFileMeta, UploadProps } from './components/Upload/index.js';
+export { TreeSelect } from './components/TreeSelect/index.js';
+export type { TreeSelectOption, TreeSelectProps } from './components/TreeSelect/index.js';
+export { Cascader } from './components/Cascader/index.js';
+export type { CascaderOption, CascaderProps } from './components/Cascader/index.js';
+export { Transfer } from './components/Transfer/index.js';
+export type { TransferOption, TransferProps } from './components/Transfer/index.js';
+export { Mentions } from './components/Mentions/index.js';
+export type { MentionOption, MentionsProps } from './components/Mentions/index.js';
+
+// 业务刚需类扩展组件（第五批：数据展示）
+export { List } from './components/List/index.js';
+export type { ListItemData, ListProps } from './components/List/index.js';
+export { Tree } from './components/Tree/index.js';
+export type { TreeNodeData, TreeProps } from './components/Tree/index.js';
+export { Descriptions } from './components/Descriptions/index.js';
+export type { DescriptionsItemData, DescriptionsProps } from './components/Descriptions/index.js';
+export { Timeline } from './components/Timeline/index.js';
+export type { TimelineItemData, TimelineProps } from './components/Timeline/index.js';
+export { Image } from './components/Image/index.js';
+export type { ImageProps } from './components/Image/index.js';
+export { QRCode } from './components/QRCode/index.js';
+export type { QRCodeProps } from './components/QRCode/index.js';
+export { Segmented } from './components/Segmented/index.js';
+export type { SegmentedOption, SegmentedProps } from './components/Segmented/index.js';
+
+// 业务刚需类扩展组件（第五批：反馈）
+export { Message } from './components/Message/index.js';
+export type { MessageProps } from './components/Message/index.js';
+export { Notification } from './components/Notification/index.js';
+export type { NotificationProps } from './components/Notification/index.js';
+export { Popconfirm } from './components/Popconfirm/index.js';
+export type { PopconfirmProps } from './components/Popconfirm/index.js';
+export { Result } from './components/Result/index.js';
+export type { ResultProps, ResultStatus } from './components/Result/index.js';
+export { LoadingOverlay } from './components/LoadingOverlay/index.js';
+export type { LoadingOverlayProps } from './components/LoadingOverlay/index.js';
+export { Watermark } from './components/Watermark/index.js';
+export type { WatermarkProps } from './components/Watermark/index.js';
+export { Tour } from './components/Tour/index.js';
+export type { TourProps, TourStep } from './components/Tour/index.js';

@@ -13,8 +13,10 @@ import { ButtonGroup } from './components/ButtonGroup/index.js';
 import { Calendar } from './components/Calendar/index.js';
 import { Card } from './components/Card/index.js';
 import { Carousel } from './components/Carousel/index.js';
+import { Cascader } from './components/Cascader/index.js';
 import { Checkbox } from './components/Checkbox/index.js';
 import { Collapsible } from './components/Collapsible/index.js';
+import { ColorPicker } from './components/ColorPicker/index.js';
 import { Combobox } from './components/Combobox/index.js';
 import { Command } from './components/Command/index.js';
 import { Chart } from './components/Chart/index.js';
@@ -23,6 +25,7 @@ import { Content } from './components/Content/index.js';
 import { ContextMenu } from './components/ContextMenu/index.js';
 import { DataTable } from './components/DataTable/index.js';
 import { DatePicker } from './components/DatePicker/index.js';
+import { Descriptions } from './components/Descriptions/index.js';
 import { Dialog } from './components/Dialog/index.js';
 import { Drawer } from './components/Drawer/index.js';
 import { DropdownMenu } from './components/DropdownMenu/index.js';
@@ -35,6 +38,7 @@ import { Grid } from './components/Grid/index.js';
 import { Header } from './components/Header/index.js';
 import { HoverCard } from './components/HoverCard/index.js';
 import { Icon } from './components/Icon/index.js';
+import { Image } from './components/Image/index.js';
 import { Input } from './components/Input/index.js';
 import { InputGroup } from './components/InputGroup/index.js';
 import { InputOTP } from './components/InputOTP/index.js';
@@ -43,17 +47,27 @@ import { Kbd } from './components/Kbd/index.js';
 import { Label } from './components/Label/index.js';
 import { Layout } from './components/Layout/index.js';
 import { Link } from './components/Link/index.js';
+import { List } from './components/List/index.js';
+import { LoadingOverlay } from './components/LoadingOverlay/index.js';
+import { Mentions } from './components/Mentions/index.js';
 import { Menu } from './components/Menu/index.js';
 import { Menubar } from './components/Menubar/index.js';
+import { Message } from './components/Message/index.js';
 import { NavigationMenu } from './components/NavigationMenu/index.js';
+import { Notification } from './components/Notification/index.js';
 import { NumberInput } from './components/NumberInput/index.js';
 import { Page } from './components/Page/index.js';
 import { Pagination } from './components/Pagination/index.js';
+import { Popconfirm } from './components/Popconfirm/index.js';
 import { Popover } from './components/Popover/index.js';
 import { Progress } from './components/Progress/index.js';
+import { QRCode } from './components/QRCode/index.js';
 import { RadioGroup } from './components/RadioGroup/index.js';
+import { Rate } from './components/Rate/index.js';
 import { Resizable } from './components/Resizable/index.js';
+import { Result } from './components/Result/index.js';
 import { ScrollArea } from './components/ScrollArea/index.js';
+import { Segmented } from './components/Segmented/index.js';
 import { Select } from './components/Select/index.js';
 import { Separator } from './components/Separator/index.js';
 import { Sheet } from './components/Sheet/index.js';
@@ -69,10 +83,18 @@ import { Table } from './components/Table/index.js';
 import { Tabs } from './components/Tabs/index.js';
 import { Text } from './components/Text/index.js';
 import { Textarea } from './components/Textarea/index.js';
+import { TimePicker } from './components/TimePicker/index.js';
+import { Timeline } from './components/Timeline/index.js';
 import { Toggle } from './components/Toggle/index.js';
 import { ToggleGroup } from './components/ToggleGroup/index.js';
 import { Tooltip } from './components/Tooltip/index.js';
+import { Tour } from './components/Tour/index.js';
+import { Transfer } from './components/Transfer/index.js';
+import { Tree } from './components/Tree/index.js';
+import { TreeSelect } from './components/TreeSelect/index.js';
 import { Typography } from './components/Typography/index.js';
+import { Upload } from './components/Upload/index.js';
+import { Watermark } from './components/Watermark/index.js';
 
 /**
  * 内置组件表：DSL 类型名 → 组件适配器。
@@ -160,6 +182,29 @@ export const builtinComponents = {
   Chart,
   // 图标（lucide 白名单）
   Icon,
+  // 业务刚需类扩展组件（第五批：数据录入 / 数据展示 / 反馈）
+  Rate,
+  TimePicker,
+  ColorPicker,
+  Upload,
+  TreeSelect,
+  Cascader,
+  Transfer,
+  Mentions,
+  List,
+  Tree,
+  Descriptions,
+  Timeline,
+  Image,
+  QRCode,
+  Segmented,
+  Message,
+  Notification,
+  Popconfirm,
+  Result,
+  LoadingOverlay,
+  Watermark,
+  Tour,
 } as const;
 
 /** 把全部 V1 内置组件按 DSL 类型名注册到给定 ComponentRegistry */

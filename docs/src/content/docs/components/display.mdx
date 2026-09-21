@@ -1,11 +1,11 @@
 ---
 title: 展示组件
-description: 展示类 DSL 组件——Text / Typography / Badge / Avatar / Kbd / Skeleton / Spinner / Empty / Statistic / Progress / Icon / AspectRatio / Carousel / Item 的 props 契约与 DSL 示例
+description: 展示类 DSL 组件——Text / Typography / Badge / Avatar / Kbd / Skeleton / Spinner / Empty / Statistic / Progress / Icon / AspectRatio / Carousel / Item / List / Tree / Descriptions / Timeline / Image / QRCode / Segmented 的 props 契约与 DSL 示例
 ---
 
 import IconGrid from '../../../components/IconGrid.astro';
 
-文本、排版、状态与媒体类展示组件：纯渲染、无表单语义，按声明的 props 与表达式求值结果呈现内容。
+文本、排版、状态与媒体类展示组件：多为纯渲染、无表单语义，按声明的 props 与表达式求值结果呈现内容（Segmented 为录入型控件，Form 集成见该小节说明）。
 
 ### Text
 
@@ -238,4 +238,165 @@ lucide 图标。`name` 取自内置常用图标白名单（`ICONS` 导出，keba
     actions:
       - type: Button
         props: { text: 下载, variant: link }
+```
+
+### List
+
+纵向行式列表：每项为「左头像（图片地址或占位文本）— 中标题+描述 — 右附加文本」；items 为空时渲染「暂无数据」空态。
+
+| prop | 类型 | 缺省 | 说明 |
+| --- | --- | --- | --- |
+| `items` | `Array<{ key?, title, description?, avatar?, extra? }>` | `[]` | 列表数据（可含表达式解析后的数组）；`avatar` 为图片地址（http(s): / data: / 路径）或占位文本 |
+| `split` | boolean | `true` | 行间分隔线 |
+| `bordered` | boolean | — | 外边框 |
+
+```yaml
+- type: List
+  props:
+    bordered: true
+    items:
+      - { title: 季度报告.pdf, description: 2.4 MB · 昨天更新, avatar: 文, extra: 已归档 }
+      - { title: 设计稿.png, avatar: /files/preview.png, extra: 待评审 }
+```
+
+### Tree
+
+树形展示：chevron 展开 + 缩进 + 可选勾选框。展开 / 选中 / 勾选均支持受控（对应 props 传入即受控）与非受控（`default*Keys` 初始化内部状态）；勾选为独立勾选（父子不联动），父节点按子孙勾选状态显示半选。
+
+| prop | 类型 | 缺省 | 说明 |
+| --- | --- | --- | --- |
+| `treeData` | `Array<{ key, title, children?, disabled? }>` | `[]` | 树数据（可含表达式解析后的数组） |
+| `defaultExpandedKeys` | string[] | — | 非受控初始展开 keys |
+| `expandedKeys` | string[] | — | 受控展开 keys |
+| `selectedKeys` | string[] | — | 受控选中 keys |
+| `defaultSelectedKeys` | string[] | — | 非受控初始选中 keys |
+| `checkable` | boolean | — | 节点前显示勾选框 |
+| `checkedKeys` | string[] | — | 受控勾选 keys |
+| `defaultCheckedKeys` | string[] | — | 非受控初始勾选 keys |
+| `disabled` | boolean | — | 整树禁用 |
+| 事件 `onSelect` | — | — | 选中节点时触发，`${event}` 为选中 keys 数组 |
+| 事件 `onExpand` | — | — | 展开变化时触发，`${event}` 为展开 keys 数组 |
+| 事件 `onCheck` | — | — | 勾选变化时触发，`${event}` 为勾选 keys 数组 |
+
+```yaml
+- type: Tree
+  props:
+    checkable: true
+    defaultExpandedKeys: [rd]
+    treeData:
+      - key: rd
+        title: 研发中心
+        children:
+          - { key: rd-fe, title: 前端组 }
+          - { key: rd-be, title: 后端组 }
+      - { key: design, title: 设计中心 }
+  events:
+    onSelect:
+      action: setState
+      params:
+        selected: ${event}
+```
+
+### Descriptions
+
+标签—值对栅格；`bordered` 时以边框栅格呈现。
+
+| prop | 类型 | 缺省 | 说明 |
+| --- | --- | --- | --- |
+| `title` | string | — | 标题 |
+| `items` | `Array<{ label, value: string \| number }>` | `[]` | 描述项列表（可含表达式解析后的数组） |
+| `column` | number | `3` | 每行列数 |
+| `bordered` | boolean | — | 带边框样式 |
+
+```yaml
+- type: Descriptions
+  props:
+    title: 订单详情
+    bordered: true
+    column: 2
+    items:
+      - { label: 订单号, value: ${data.order.id} }
+      - { label: 金额, value: ${data.order.amount} }
+      - { label: 状态, value: 已支付 }
+```
+
+### Timeline
+
+竖向时间轴：节点圆点（`color` 覆盖颜色，`icon` 用 [Icon 白名单](#icon)图标替代圆点）+ 内容 + 可选时间；`pending` 在末尾追加「进行中」节点。
+
+| prop | 类型 | 缺省 | 说明 |
+| --- | --- | --- | --- |
+| `items` | `Array<{ content, time?, color?, icon? }>` | `[]` | 节点列表（可含表达式解析后的数组） |
+| `pending` | boolean \| string | — | 末尾追加「进行中」节点：`true` 用默认文案，字符串为自定义文案 |
+
+```yaml
+- type: Timeline
+  props:
+    pending: 等待审核
+    items:
+      - { content: 创建订单, time: '2026-09-18 10:00' }
+      - { content: 支付成功, time: '2026-09-18 10:05', color: green, icon: check-circle }
+```
+
+### Image
+
+图片：加载失败或未提供 `src` 时渲染 `fallback`（缺省为图标 + 灰色占位块）；`preview` 缺省开启，点击经弹层放大查看（居中大图，可关闭）。
+
+| prop | 类型 | 缺省 | 说明 |
+| --- | --- | --- | --- |
+| `src` | string | — | 图片地址 |
+| `alt` | string | — | 替代文本 |
+| `width` | number \| string | — | 宽度（px 数字或 CSS 长度） |
+| `height` | number \| string | — | 高度（px 数字或 CSS 长度） |
+| `fallback` | string | — | 加载失败时显示的内容；缺省为图标 + 灰色占位块 |
+| `preview` | boolean | `true` | 点击弹层放大预览 |
+
+```yaml
+- type: Image
+  props: { src: /banners/cover.png, alt: 封面, width: 200 }
+```
+
+### QRCode
+
+二维码：由编码内容生成内联 SVG；`value` 为空时渲染占位块。
+
+| prop | 类型 | 缺省 | 说明 |
+| --- | --- | --- | --- |
+| `value` | string | — | 编码内容；为空时渲染占位块 |
+| `size` | number | `128` | 尺寸（px） |
+| `color` | string | — | 码体颜色（hex，可带透明度位，如 `#000000` / `#00000080`；非法值回退默认黑色） |
+| `bgColor` | string | — | 背景色（同 `color` 格式；非法值回退默认白色） |
+| `bordered` | boolean | — | 带边框与内边距 |
+
+```yaml
+- type: QRCode
+  props: { value: 'https://example.com/invite/abc', size: 160, bordered: true }
+```
+
+### Segmented
+
+药丸式分段选择器（选中项高亮）。录入型控件：在 Form 内声明 `name` 即自动成为表单项（`label` / `rules` 语义同[表单组件](./form.md)的录入控件）。
+
+| prop | 类型 | 缺省 | 说明 |
+| --- | --- | --- | --- |
+| `name` | string | — | 字段名；在 Form 内声明 name 即自动成为表单项 |
+| `label` | string | — | 表单项标签 |
+| `rules` | FieldRule[] | — | 校验规则（见[校验规则（FieldRule）](./form.md#校验规则fieldrule)） |
+| `options` | `Array<{ label, value, icon?, disabled? }>`（value: string \| number） | `[]` | 选项列表；`icon` 为 [Icon 白名单](#icon)图标名 |
+| `value` | string \| number | — | 受控值（独立渲染时生效）；Form 内作为字段初始值 |
+| `disabled` | boolean | — | 整体禁用 |
+| 事件 `onChange` | — | — | 选中变化时触发，`${event}` 为选中项的 value |
+
+```yaml
+- type: Segmented
+  props:
+    name: viewMode
+    options:
+      - { label: 列表, value: list, icon: list }
+      - { label: 卡片, value: card, icon: layout-grid }
+  events:
+    onChange:
+      action: setState
+      params:
+        viewMode: ${event}
 ```

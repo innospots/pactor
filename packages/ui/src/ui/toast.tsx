@@ -7,16 +7,18 @@ import { cn } from '../lib/utils.js';
 /**
  * shadcn/ui Sonner 等价物（vendored 封装，Base UI Toast 原语）：
  * 模块级共享 ToastManager + Toaster 挂载点 + 命令式 `toast()` API。
- * variant（success/error/info）落在 ToastObject.type 上，经语义令牌
- * 色条区分（与 InteractionProvider 的 message 四态视觉同源）。
+ * variant（success/error/info/warning）落在 ToastObject.type 上，经语义
+ * 令牌色条区分（与 InteractionProvider 的 message 四态视觉同源）。
  */
-export type ToastVariant = 'success' | 'error' | 'info';
+export type ToastVariant = 'success' | 'error' | 'info' | 'warning';
 
 export interface ToastOptions {
   /** 辅助说明文案（Sonner 风格 description） */
   description?: unknown;
   /** 语义类型，缺省 info */
   variant?: ToastVariant;
+  /** 自动关闭时长（ms），透传 ToastObject.timeout；0 表示不自动关闭 */
+  duration?: number;
 }
 
 /** 模块级共享 ToastManager：Toaster 挂载点与命令式 API 共用同一实例 */
@@ -28,14 +30,16 @@ export function toast(message: unknown, options: ToastOptions = {}): string {
     title: message as ReactNode,
     description: options.description as ReactNode,
     type: options.variant ?? 'info',
+    timeout: options.duration,
   });
 }
 
-/** variant → 语义色条 class（读 --success/--destructive/--info 令牌） */
+/** variant → 语义色条 class（读 --success/--destructive/--info/--warning 令牌） */
 const toastVariantClass: Record<ToastVariant, string> = {
   success: 'border-l-4 border-l-success',
   error: 'border-l-4 border-l-destructive',
   info: 'border-l-4 border-l-info',
+  warning: 'border-l-4 border-l-warning',
 };
 
 function ToasterViewport({ className }: { className?: string }) {
