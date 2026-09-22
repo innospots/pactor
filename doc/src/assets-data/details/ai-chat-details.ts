@@ -10,6 +10,21 @@ import type { ComponentDetailContent } from './component-details.ts';
 
 export const aiChatDetailContents: Record<string, ComponentDetailContent> = {
   'component.bubble': {
+    dsl: {
+      "type": "Bubble",
+      "props": {
+        "align": "end",
+        "variant": "tinted"
+      },
+      "children": [
+        {
+          "type": "Text",
+          "props": {
+            "text": "帮我生成一份月报"
+          }
+        }
+      ]
+    },
     whenToUse: [
       '**何时使用**',
       '',
@@ -38,6 +53,16 @@ export const aiChatDetailContents: Record<string, ComponentDetailContent> = {
     examplesDont: ['用 Bubble 做普通卡片（应使用 Card）。'],
   },
   'component.sender': {
+    dsl: {
+      "type": "Sender",
+      "props": {
+        "name": "Pactor 助手",
+        "avatarText": "P",
+        "role": "AI 助手",
+        "time": "10:24",
+        "align": "start"
+      }
+    },
     whenToUse: ['**何时使用**', '', '- 表示消息发送方和角色信息：头像 + 名称 + 角色 + 时间。', '', '**何时不用**', '', '- 完整消息体：使用 ChatMessage（内部已含 Sender）。'].join('\n'),
     previewNote:
       '静态结构：flex 行（align=end 时 flex-row-reverse）= Avatar（size-7，fallback 取 name 首字符）+ 名称（font-medium）+ 角色 / 时间（text-xs muted）。',
@@ -59,6 +84,13 @@ export const aiChatDetailContents: Record<string, ComponentDetailContent> = {
     examplesDont: ['把 Sender 当评论头部用（非会话场景用 Descriptions / Card 头）。'],
   },
   'component.thinking': {
+    dsl: {
+      "type": "Thinking",
+      "props": {
+        "content": "正在拆解任务：读取数据 → 汇总指标 → 生成图表。",
+        "status": "thinking"
+      }
+    },
     whenToUse: ['**何时使用**', '', '- 表达推理或处理中状态：AI 思考过程的可折叠呈现。', '', '**何时不用**', '', '- 工具调用的参数与结果：使用 ToolCall。', '- 简单的运行状态：使用 AgentStatus。'].join('\n'),
     previewNote:
       '静态结构：卡片（border bg-muted/50）= 头部按钮（brain 图标 thinking 态脉冲 + 标题（缺省「思考中…/思考完成」）+ chevron）+ 可折叠内容区（whitespace-pre-wrap muted）。展开态非受控（defaultExpanded，缺省 thinking 展开 / done 折叠）或受控（expanded + onToggle）。',
@@ -80,6 +112,14 @@ export const aiChatDetailContents: Record<string, ComponentDetailContent> = {
     examplesDont: ['把 thinking 当普通折叠面板用（应使用 Accordion / Collapsible）。'],
   },
   'component.agent-status': {
+    dsl: {
+      "type": "AgentStatus",
+      "props": {
+        "status": "running",
+        "text": "正在执行数据分析",
+        "elapsed": 12
+      }
+    },
     whenToUse: ['**何时使用**', '', '- 表示智能体的运行和等待状态：执行过程行（含耗时）。', '', '**何时不用**', '', '- 业务状态（审核 / 发布）：使用通用分类 Status。'].join('\n'),
     previewNote:
       '静态结构：flex 行 = 状态图标（running → loader-circle 旋转 text-info；waiting → clock text-warning；done → circle-check text-success；error → circle-x text-destructive）+ 文本 + 可选「已用时 Xs」。',
@@ -99,6 +139,13 @@ export const aiChatDetailContents: Record<string, ComponentDetailContent> = {
     examplesDont: ['用 AgentStatus 表达订单状态（应使用 Status）。'],
   },
   'component.streaming-text': {
+    dsl: {
+      "type": "StreamingText",
+      "props": {
+        "content": "已为您完成分析。",
+        "streaming": true
+      }
+    },
     whenToUse: ['**何时使用**', '', '- 渐进展示生成中的文本：流式回答、打字机回放。', '', '**何时不用**', '', '- 完整 markdown 排版：StreamingText 是纯文本，格式化内容用 Markdown。'].join('\n'),
     previewNote:
       '静态结构：<span data-slot="streaming-text">（whitespace-pre-wrap）+ 闪烁光标（▍ text-primary animate-pulse，motion-reduce 静止）。两种模式：数据源推送（content 增长 + streaming 光标）与打字机（typing 自揭示完整 content，speed 字符 / 24ms，揭完光标消失）。',
@@ -118,6 +165,31 @@ export const aiChatDetailContents: Record<string, ComponentDetailContent> = {
     examplesDont: ['对流式的 markdown 内容用 StreamingText（应用 Markdown 渲染完整段）。'],
   },
   'component.suggestion': {
+    dsl: {
+      "type": "Suggestion",
+      "props": {
+        "justify": "start",
+        "items": [
+          {
+            "label": "生成月报",
+            "value": "generate-monthly-report"
+          },
+          {
+            "label": "分析销售趋势",
+            "icon": "chart"
+          },
+          "总结会议纪要"
+        ]
+      },
+      "events": {
+        "onSelect": {
+          "action": "setState",
+          "params": {
+            "prompt": "${event}"
+          }
+        }
+      }
+    },
     whenToUse: ['**何时使用**', '', '- 提供追问、补全或下一步建议：回答后的引导 chips。', '', '**何时不用**', '', '- 起始任务入口：使用 Welcome / Prompt（卡片式更醒目）。'].join('\n'),
     previewNote:
       '静态结构：flex-wrap chips 组——rounded-full border 小按钮（可选前缀图标），点击经 onSelect 传出 value（对象项缺省取 label）。',
@@ -136,6 +208,15 @@ export const aiChatDetailContents: Record<string, ComponentDetailContent> = {
     examplesDont: ['用 Suggestion 做主导航（应使用 Menu / Tabs）。'],
   },
   'component.prompt': {
+    dsl: {
+      "type": "Prompt",
+      "props": {
+        "title": "生成月报",
+        "description": "汇总本月销售、库存与客服数据",
+        "icon": "chart",
+        "value": "generate-monthly-report"
+      }
+    },
     whenToUse: ['**何时使用**', '', '- 展示可复用提示词或任务入口：提示词库、常用任务卡。', '', '**何时不用**', '', '- 轻量追问：使用 Suggestion。', '- 会话空状态整体：使用 Welcome。'].join('\n'),
     previewNote:
       '静态结构：卡片按钮（border p-3 hover:border-primary）= 主色前缀图标 + 标题（font-medium）+ 描述（text-xs muted）；点击经 onSelect 传出 value（缺省取 title）。',
@@ -157,6 +238,24 @@ export const aiChatDetailContents: Record<string, ComponentDetailContent> = {
     examplesDont: ['把 Prompt 当内容卡片展示信息（它是操作入口）。'],
   },
   'component.welcome': {
+    dsl: {
+      "type": "Welcome",
+      "props": {
+        "title": "有什么可以帮你？",
+        "description": "我可以分析数据、生成报表与起草文案",
+        "prompts": [
+          {
+            "title": "生成月报",
+            "icon": "chart",
+            "value": "generate-monthly-report"
+          },
+          {
+            "title": "总结会议纪要",
+            "icon": "file"
+          }
+        ]
+      }
+    },
     whenToUse: ['**何时使用**', '', '- 展示会话空状态、能力和起始任务：新会话落地页。', '', '**何时不用**', '', '- 非会话空状态：使用 Empty / Result。'].join('\n'),
     previewNote:
       '静态结构：居中 hero（主色大图标 + text-xl 主标题 + muted 副标题）+ 起始任务卡片栅格（grid-cols-1 sm:grid-cols-2，复用 Prompt）；点击卡片经 onSelect 传出 value。',
@@ -177,6 +276,22 @@ export const aiChatDetailContents: Record<string, ComponentDetailContent> = {
     examplesDont: ['在消息流中间插入 Welcome（仅用于空状态）。'],
   },
   'component.citation': {
+    dsl: {
+      "type": "Citation",
+      "props": {
+        "items": [
+          {
+            "title": "2026 年 Q3 销售数据",
+            "url": "https://example.com/sales-q3"
+          },
+          {
+            "title": "市场分析报告",
+            "snippet": "华东区环比增长 12.4%…"
+          }
+        ],
+        "start": 1
+      }
+    },
     whenToUse: ['**何时使用**', '', '- 标识回答中的来源与引用范围：RAG 回答的出处标记。', '', '**何时不用**', '', '- 普通外链：使用 Link。', '- 长参考文献列表：用 List / Table。'].join('\n'),
     previewNote:
       '静态结构：行内 [n] 编号组（align-super，编号从 start 起）；每个编号经 vendored HoverCard 悬浮展开来源卡（标题 / line-clamp-3 片段 / 链接新窗口打开）。',
@@ -194,6 +309,35 @@ export const aiChatDetailContents: Record<string, ComponentDetailContent> = {
     examplesDont: ['用 Citation 做脚注长文（应保持简短来源卡）。'],
   },
   'component.attachment': {
+    dsl: {
+      "type": "Attachment",
+      "props": {
+        "items": [
+          {
+            "id": "a1",
+            "name": "销售数据.xlsx",
+            "fileSize": 128000,
+            "fileType": "xlsx",
+            "status": "done"
+          },
+          {
+            "id": "a2",
+            "name": "会议纪要.pdf",
+            "fileType": "pdf",
+            "status": "uploading",
+            "progress": 60
+          }
+        ]
+      },
+      "events": {
+        "onRemove": {
+          "action": "setState",
+          "params": {
+            "removed": "${event}"
+          }
+        }
+      }
+    },
     whenToUse: ['**何时使用**', '', '- 展示、上传和管理会话附件：发送前附件列表、消息附件呈现。', '', '**何时不用**', '', '- 完整文件预览：使用 FilePreview。', '- 上传选择器：使用 Upload。'].join('\n'),
     previewNote:
       '静态结构：flex-wrap chip 组（w-56 border 卡片）= 类别图标（复用 FilePreview 的 inferKind）+ 名称 truncate + 大小 + 状态（uploading → loader 旋转 + 进度条；error → 「上传失败」+ 重试按钮）+ 移除按钮；onRemove / onRetry 传出 id（无 id 传下标）。上传与存储由调用方负责。',
@@ -213,6 +357,19 @@ export const aiChatDetailContents: Record<string, ComponentDetailContent> = {
     examplesDont: ['用 Attachment 做网盘文件列表（应使用 List / Table）。'],
   },
   'component.tool-call': {
+    dsl: {
+      "type": "ToolCall",
+      "props": {
+        "name": "querySalesData",
+        "params": {
+          "period": "2026-Q3",
+          "region": "华东"
+        },
+        "status": "done",
+        "result": "返回 128 条记录",
+        "durationMs": 842
+      }
+    },
     whenToUse: ['**何时使用**', '', '- 展示工具调用、参数、进度和结果：Agent 执行轨迹。', '', '**何时不用**', '', '- 推理过程：使用 Thinking。', '- 运行状态一句话：使用 AgentStatus。'].join('\n'),
     previewNote:
       '静态结构：卡片 = 头部按钮（terminal 图标 + 名称 truncate + 状态图标（running 旋转）+ 耗时秒 + chevron）+ 可折叠体（参数 JSON 缩进 pre / 结果 pre）；缺省 running 展开、done / error 折叠。',
@@ -234,6 +391,36 @@ export const aiChatDetailContents: Record<string, ComponentDetailContent> = {
     examplesDont: ['把 ToolCall 当日志控制台（应收敛为关键调用）。'],
   },
   'component.chat-message': {
+    dsl: {
+      "type": "ChatMessage",
+      "props": {
+        "role": "assistant",
+        "status": "completed",
+        "agent": {
+          "name": "Pactor 助手",
+          "icon": "sparkles"
+        },
+        "time": "10:24",
+        "parts": [
+          {
+            "type": "text",
+            "content": "本月华东区销售额环比增长 12.4%。"
+          },
+          {
+            "type": "markdown",
+            "content": "**重点指标**\n\n- 新客转化率：8.2%\n- 复购率：41.5%"
+          }
+        ]
+      },
+      "events": {
+        "onAction": {
+          "action": "setState",
+          "params": {
+            "action": "${event}"
+          }
+        }
+      }
+    },
     whenToUse: ['**何时使用**', '', '- 展示用户、助手或系统消息：会话回放、嵌入式问答、对话式表单。', '', '**何时不用**', '', '- 全局操作反馈：使用反馈分类 Message（二者职责不同）。', '- 完整会话产品（流式 transport / 消息操作闭环 / artifact）：使用 @pactor-app/chat。'].join('\n'),
     previewNote:
       '静态结构：列（user 右对齐）= Sender（头像 / 名称 / 时间，showSender 可关）+ 有序 parts 渲染——text（user 主色气泡 / assistant muted 气泡）、markdown（ghost 气泡 + Markdown）、thinking（Thinking 卡）、tool-call（ToolCall 卡）、tool-result（pre）、status（muted 行）、error（destructive 行）——+ streaming 末尾光标 + 操作行（completed / error 时展示，onAction 传出 name）。parts 与 chat 的 ChatPart 结构对齐（dsl / artifact 段由 chat 产品层承接）。',
@@ -267,6 +454,34 @@ export const aiChatDetailContents: Record<string, ComponentDetailContent> = {
     ],
   },
   'component.message-list': {
+    dsl: {
+      "type": "MessageList",
+      "props": {
+        "autoScroll": true,
+        "messages": [
+          {
+            "id": "m1",
+            "role": "user",
+            "parts": [
+              {
+                "type": "text",
+                "content": "帮我生成月报"
+              }
+            ]
+          },
+          {
+            "id": "m2",
+            "role": "assistant",
+            "parts": [
+              {
+                "type": "text",
+                "content": "已生成，点击下方卡片查看。"
+              }
+            ]
+          }
+        ]
+      }
+    },
     whenToUse: ['**何时使用**', '', '- 组织连续消息流和滚动定位：会话区消息容器。', '', '**何时不用**', '', '- 单条消息：直接使用 ChatMessage。'].join('\n'),
     previewNote:
       '静态结构：滚动列（overflow-y-auto gap-4，高度由外层约束）逐条渲染 ChatMessage；messages 变化自动滚到底部（autoScroll 可关）；onAction 统一上抛为 { id, action }。',
@@ -285,6 +500,28 @@ export const aiChatDetailContents: Record<string, ComponentDetailContent> = {
     examplesDont: ['不约束高度直接放长消息流（页面整体滚动体验差）。'],
   },
   'component.composer': {
+    dsl: {
+      "type": "Composer",
+      "props": {
+        "value": "${state.draft}",
+        "placeholder": "输入消息，Enter 发送",
+        "rows": 3
+      },
+      "events": {
+        "onChange": {
+          "action": "setState",
+          "params": {
+            "draft": "${event}"
+          }
+        },
+        "onSubmit": {
+          "action": "setState",
+          "params": {
+            "draft": ""
+          }
+        }
+      }
+    },
     whenToUse: ['**何时使用**', '', '- 输入提示词、附件和发送操作：会话输入区。', '', '**何时不用**', '', '- 只要输入框结构（自定义工具栏槽）：使用 ChatInput。', '- 完整会话产品输入（transport / 提及）：使用 @pactor-app/chat 的 Composer。'].join('\n'),
     previewNote:
       '静态结构：列 = 附件区（Attachment，attachments 非空时渲染，onRemoveAttachment / onRetryAttachment 透出）+ 输入区（ChatInput：自适应高度、Enter 发送 / Shift+Enter 换行 / IME 保护、非受控发送后自动清空）；loading 禁用发送。',
@@ -308,6 +545,34 @@ export const aiChatDetailContents: Record<string, ComponentDetailContent> = {
     examplesDont: ['在 Composer 里塞业务提交逻辑（应走 service / action）。'],
   },
   'component.conversation-list': {
+    dsl: {
+      "type": "ConversationList",
+      "props": {
+        "searchable": true,
+        "activeId": "c-01",
+        "items": [
+          {
+            "id": "c-01",
+            "title": "Q3 经营分析",
+            "description": "最后消息：已生成月报",
+            "time": "10:24"
+          },
+          {
+            "id": "c-02",
+            "title": "会议纪要整理",
+            "time": "昨天"
+          }
+        ]
+      },
+      "events": {
+        "onSelect": {
+          "action": "setState",
+          "params": {
+            "activeConversation": "${event}"
+          }
+        }
+      }
+    },
     whenToUse: ['**何时使用**', '', '- 浏览、搜索和管理历史会话：会话侧栏。', '', '**何时不用**', '', '- 通用导航菜单：使用 Menu。'].join('\n'),
     previewNote:
       '静态结构：列 = 可选搜索框（searchable，按 title / description 过滤）+ 会话行（title truncate + description + time，激活 bg-accent，悬浮删除按钮 onDelete 阻止冒泡）；激活态非受控或受控（activeId + onSelect）；空结果显示「无匹配会话」。会话的存储与加载由调用方负责。',

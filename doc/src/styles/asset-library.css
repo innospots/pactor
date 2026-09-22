@@ -998,3 +998,61 @@ h1 {
   line-height: 1.7;
   color: var(--muted-text);
 }
+
+/* ===== DSL 结构（详情页 JSON 调用结构 + 复制） ===== */
+.dsl-structure {
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--panel);
+  overflow: hidden;
+}
+
+.dsl-structure-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 7px 12px;
+  border-bottom: 1px solid var(--line2);
+  background: var(--hover);
+}
+
+.dsl-structure-label {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  color: var(--subtle);
+  text-transform: uppercase;
+}
+
+.dsl-copy-btn {
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: var(--panel);
+  padding: 3px 10px;
+  font-size: 12px;
+  color: var(--muted-text);
+  cursor: pointer;
+  transition: color 0.15s, border-color 0.15s, background 0.15s;
+}
+
+.dsl-copy-btn:hover {
+  color: var(--brand);
+  border-color: var(--brand);
+  background: var(--brand-50);
+}
+
+.dsl-json {
+  margin: 0;
+  padding: 14px 16px;
+  max-height: 420px;
+  overflow: auto;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 12px;
+  line-height: 1.75;
+  color: #334155;
+  background: #fbfcfe;
+}
+
+.dsl-json code {
+  font-family: inherit;
+}
