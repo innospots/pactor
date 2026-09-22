@@ -2,10 +2,10 @@
 /**
  * 页面级组合组件契约（spec: shadcn-extended-components / 页面级组合组件）：
  * Sidebar 布局渲染与 collapsible 折叠、DataTable 排序/筛选/分页与
- * onSort/onPageChange 事件值、Chart 四种类型渲染，以及三者的通用 props。
+ * onSort/onPageChange 事件值，以及二者的通用 props。
  */
-import { act, fireEvent, screen } from '@testing-library/react';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { fireEvent, screen } from '@testing-library/react';
+import { describe, expect, it, vi } from 'vitest';
 
 import {
   COMMON_PROPS_PROBE,
@@ -241,140 +241,5 @@ describe('DataTable', () => {
   it('通用 props 作用于根节点', () => {
     const { container } = renderDataTable({ ...COMMON_PROPS });
     expectCommonProps(container.querySelector('[data-slot=data-table]'));
-  });
-});
-
-describe('Chart', () => {
-  // jsdom 下 getBoundingClientRect 恒返回 0，recharts ResponsiveContainer
-  // 初始尺寸取自它；仅给 responsive-container mock 固定尺寸（其余元素返回 0，
-  // 避免 Legend 测量出超大尺寸把绘图区挤没），使图表真实渲染出 SVG 系列元素
-  beforeEach(() => {
-    vi.spyOn(HTMLElement.prototype, 'getBoundingClientRect').mockImplementation(
-      function (this: HTMLElement) {
-        const sized = this.classList?.contains('recharts-responsive-container');
-        const width = sized ? 600 : 0;
-        const height = sized ? 300 : 0;
-        return {
-          width,
-          height,
-          top: 0,
-          left: 0,
-          right: width,
-          bottom: height,
-          x: 0,
-          y: 0,
-          toJSON: () => ({}),
-        } as DOMRect;
-      },
-    );
-  });
-
-  const DATA = [
-    { month: '一月', amount: 120, profit: 30 },
-    { month: '二月', amount: 200, profit: 80 },
-    { month: '三月', amount: 150, profit: 45 },
-  ];
-
-  it('bar：渲染柱状图（数据经表达式注入），系列取 chart 令牌色', async () => {
-    const { container, context } = renderDsl(
-      {
-        type: 'Chart',
-        props: {
-          chartType: 'bar',
-          data: '${data.sales}',
-          xKey: 'month',
-          yKeys: ['amount'],
-        },
-      },
-      {
-        dataSources: {
-          sales: { type: 'static', value: DATA, autoLoad: true },
-        },
-      },
-    );
-
-    const root = container.querySelector('[data-slot=chart]')!;
-    expect(root.getAttribute('data-chart-type')).toBe('bar');
-    expect(container.querySelector('svg.recharts-surface')).not.toBeNull();
-
-    // 未经 PageRuntime 时手动触发 autoLoad
-    await act(async () => {
-      await context.data.init();
-    });
-
-    // 数据源异步加载，等待系列渲染
-    await vi.waitFor(() => {
-      expect(
-        container.querySelectorAll('.recharts-bar-rectangle path').length,
-      ).toBeGreaterThan(0);
-    });
-    expect(container.querySelector('svg')!.innerHTML).toContain(
-      'var(--chart-1)',
-    );
-  });
-
-  it('line / area：渲染对应系列元素；多 yKeys 时渲染 Legend', () => {
-    const { container } = renderDsl({
-      type: 'Flex',
-      children: [
-        {
-          type: 'Chart',
-          props: {
-            chartType: 'line',
-            data: DATA,
-            xKey: 'month',
-            yKeys: ['amount', 'profit'],
-          },
-        },
-        {
-          type: 'Chart',
-          props: {
-            chartType: 'area',
-            data: DATA,
-            xKey: 'month',
-            yKeys: ['amount'],
-          },
-        },
-      ],
-    });
-
-    expect(
-      container.querySelectorAll('.recharts-line-curve').length,
-    ).toBeGreaterThan(0);
-    expect(
-      container.querySelectorAll('.recharts-area-area').length,
-    ).toBeGreaterThan(0);
-    // 多系列 line 图渲染图例
-    expect(container.querySelector('.recharts-legend-wrapper')).not.toBeNull();
-  });
-
-  it('pie：以 xKey 为 name、yKeys[0] 为 value 渲染切片', () => {
-    const { container } = renderDsl({
-      type: 'Chart',
-      props: {
-        chartType: 'pie',
-        data: DATA,
-        xKey: 'month',
-        yKeys: ['amount'],
-      },
-    });
-
-    expect(
-      container.querySelectorAll('.recharts-pie-sector').length,
-    ).toBeGreaterThan(0);
-  });
-
-  it('通用 props 作用于根节点', () => {
-    const { container } = renderDsl({
-      type: 'Chart',
-      props: {
-        chartType: 'bar',
-        data: DATA,
-        xKey: 'month',
-        yKeys: ['amount'],
-        ...COMMON_PROPS,
-      },
-    });
-    expectCommonProps(container.querySelector('[data-slot=chart]'));
   });
 });

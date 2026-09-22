@@ -1,7 +1,7 @@
 import type { CSSProperties } from 'react';
 
-import { cn } from '../../../../lib/utils.js';
-import { Icon } from '../../Icon/index.js';
+import { cn } from '../../../lib/utils.js';
+import { Icon } from '../../components/Icon/index.js';
 
 /** 智能体状态 */
 export type AgentStatusType = 'running' | 'waiting' | 'done' | 'error';

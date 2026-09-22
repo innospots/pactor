@@ -1,8 +1,8 @@
 import type { CSSProperties } from 'react';
 
-import { cn } from '../../../../lib/utils.js';
-import { Icon } from '../../Icon/index.js';
-import { Markdown } from '../../Markdown/index.js';
+import { cn } from '../../../lib/utils.js';
+import { Icon } from '../../components/Icon/index.js';
+import { Markdown } from '../../components/Markdown/index.js';
 import { Bubble } from '../Bubble/index.js';
 import { Sender } from '../Sender/index.js';
 import { StreamingText } from '../StreamingText/index.js';

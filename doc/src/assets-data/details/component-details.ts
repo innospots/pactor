@@ -16,7 +16,7 @@
  * - 第七批 11 个组件（媒体与内容）：API 属性与结构提炼自 packages/ui
  *   对应适配器（Markdown / CodeBlock 复用 @pactor-app/markdown），
  *   见同目录 media-details.ts。
- * - 第八批 15 个组件（AI 与会话，packages/ui components/chat 子目录）：
+ * - 第八批 15 个组件（AI 与会话，packages/ui chat 子目录）：
  *   见同目录 ai-chat-details.ts；其中 component.chat-message 以 ui 承接版
  *   覆盖下方早期（chat 消息模型）条目。
  * - 第九批 51 个组件（通用 7 / 布局 7 / 导航 6 / 数据录入 11 / 数据展示 8 /
@@ -36,6 +36,7 @@ import { navigationDetailContents } from './navigation-details.ts';
 import { dataEntryDetailContents } from './data-entry-details.ts';
 import { dataDisplayDetailContents } from './data-display-details.ts';
 import { feedbackDetailContents } from './feedback-details.ts';
+import { chartDetailContents } from './chart-details.ts';
 import { mediaDetailContents } from './media-details.ts';
 
 /** 变体条目 */
@@ -209,6 +210,9 @@ export const componentDetailContents: Record<string, ComponentDetailContent> = {
   // 第八批 15 个组件（packages/ui 真实实现已核对；
   // component.chat-message 以 ui 承接版覆盖上方 chat 消息模型条目）
   ...aiChatDetailContents,
+  // 图表组件集（packages/ui src/components/chart 目录，echarts 渲染；
+  // 旧 recharts Chart 已移除，图表能力统一由本组件集提供）
+  ...chartDetailContents,
   // 第九批 51 个组件（通用 / 布局 / 导航新文件；数据录入 / 数据展示 / 反馈
   // 已追加至各自分类文件）
   ...generalDetailContents,

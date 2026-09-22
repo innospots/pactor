@@ -1,6 +1,6 @@
 import { useEffect, useState, type CSSProperties } from 'react';
 
-import { cn } from '../../../../lib/utils.js';
+import { cn } from '../../../lib/utils.js';
 
 export interface StreamingTextProps {
   /** 文本内容（流式场景由数据源持续追加） */

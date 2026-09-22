@@ -1,6 +1,6 @@
 import type { CSSProperties, ReactNode } from 'react';
 
-import { Bubble as ShadcnBubble, BubbleContent } from '../../../../ui/bubble.js';
+import { Bubble as ShadcnBubble, BubbleContent } from '../../../ui/bubble.js';
 
 /** DSL Bubble 变体（对齐 vendored bubble 七态） */
 export type BubbleVariant =

@@ -180,8 +180,6 @@ export type {
   DataTableSort,
   DataTableSortOrder,
 } from './components/DataTable/index.js';
-export { Chart } from './components/Chart/index.js';
-export type { ChartProps, ChartType } from './components/Chart/index.js';
 
 // 布局组件（页面级自由组合，见 spec: layout-components）
 export { Layout } from './components/Layout/index.js';
@@ -338,40 +336,78 @@ export type { DiffViewerProps } from './components/DiffViewer/index.js';
 export { JSONViewer } from './components/JSONViewer/index.js';
 export type { JSONViewerProps } from './components/JSONViewer/index.js';
 
-// AI 与会话类扩展组件（第八批：components/chat 子目录）
-export { Bubble } from './components/chat/Bubble/index.js';
-export type { BubbleProps, BubbleVariant } from './components/chat/Bubble/index.js';
-export { Sender } from './components/chat/Sender/index.js';
-export type { SenderProps } from './components/chat/Sender/index.js';
-export { Thinking } from './components/chat/Thinking/index.js';
-export type { ThinkingProps, ThinkingStatus } from './components/chat/Thinking/index.js';
-export { AgentStatus } from './components/chat/AgentStatus/index.js';
-export type { AgentStatusProps, AgentStatusType } from './components/chat/AgentStatus/index.js';
-export { StreamingText } from './components/chat/StreamingText/index.js';
-export type { StreamingTextProps } from './components/chat/StreamingText/index.js';
-export { Suggestion } from './components/chat/Suggestion/index.js';
-export type { SuggestionItem, SuggestionProps } from './components/chat/Suggestion/index.js';
-export { Prompt } from './components/chat/Prompt/index.js';
-export type { PromptProps } from './components/chat/Prompt/index.js';
-export { Welcome } from './components/chat/Welcome/index.js';
-export type { WelcomePromptItem, WelcomeProps } from './components/chat/Welcome/index.js';
-export { Citation } from './components/chat/Citation/index.js';
-export type { CitationItem, CitationProps } from './components/chat/Citation/index.js';
-export { Attachment } from './components/chat/Attachment/index.js';
-export type { AttachmentItemData, AttachmentProps } from './components/chat/Attachment/index.js';
-export { ToolCall } from './components/chat/ToolCall/index.js';
-export type { ToolCallProps, ToolCallStatus } from './components/chat/ToolCall/index.js';
-export { ChatMessage } from './components/chat/ChatMessage/index.js';
+// AI 与会话类扩展组件（第八批：chat 子目录）
+export { Bubble } from './chat/Bubble/index.js';
+export type { BubbleProps, BubbleVariant } from './chat/Bubble/index.js';
+export { Sender } from './chat/Sender/index.js';
+export type { SenderProps } from './chat/Sender/index.js';
+export { Thinking } from './chat/Thinking/index.js';
+export type { ThinkingProps, ThinkingStatus } from './chat/Thinking/index.js';
+export { AgentStatus } from './chat/AgentStatus/index.js';
+export type { AgentStatusProps, AgentStatusType } from './chat/AgentStatus/index.js';
+export { StreamingText } from './chat/StreamingText/index.js';
+export type { StreamingTextProps } from './chat/StreamingText/index.js';
+export { Suggestion } from './chat/Suggestion/index.js';
+export type { SuggestionItem, SuggestionProps } from './chat/Suggestion/index.js';
+export { Prompt } from './chat/Prompt/index.js';
+export type { PromptProps } from './chat/Prompt/index.js';
+export { Welcome } from './chat/Welcome/index.js';
+export type { WelcomePromptItem, WelcomeProps } from './chat/Welcome/index.js';
+export { Citation } from './chat/Citation/index.js';
+export type { CitationItem, CitationProps } from './chat/Citation/index.js';
+export { Attachment } from './chat/Attachment/index.js';
+export type { AttachmentItemData, AttachmentProps } from './chat/Attachment/index.js';
+export { ToolCall } from './chat/ToolCall/index.js';
+export type { ToolCallProps, ToolCallStatus } from './chat/ToolCall/index.js';
+export { ChatMessage } from './chat/ChatMessage/index.js';
 export type {
   ChatMessageActionItem,
   ChatMessageAgent,
   ChatMessagePart,
   ChatMessageProps,
   ChatMessageStatus,
-} from './components/chat/ChatMessage/index.js';
-export { MessageList } from './components/chat/MessageList/index.js';
-export type { MessageListItem, MessageListProps } from './components/chat/MessageList/index.js';
-export { Composer } from './components/chat/Composer/index.js';
-export type { ComposerProps } from './components/chat/Composer/index.js';
-export { ConversationList } from './components/chat/ConversationList/index.js';
-export type { ConversationItemData, ConversationListProps } from './components/chat/ConversationList/index.js';
+} from './chat/ChatMessage/index.js';
+export { MessageList } from './chat/MessageList/index.js';
+export type { MessageListItem, MessageListProps } from './chat/MessageList/index.js';
+export { Composer } from './chat/Composer/index.js';
+export type { ComposerProps } from './chat/Composer/index.js';
+export { ConversationList } from './chat/ConversationList/index.js';
+export type { ConversationItemData, ConversationListProps } from './chat/ConversationList/index.js';
+
+// 图表组件集（第九批：src/components/chart 目录，echarts 渲染）
+export { MetricCard } from './chart/MetricCard/index.js';
+export type { MetricCardProps } from './chart/MetricCard/index.js';
+export { LineChart } from './chart/LineChart/index.js';
+export type { LineChartProps } from './chart/LineChart/index.js';
+export { ColumnChart } from './chart/ColumnChart/index.js';
+export type { ColumnChartProps } from './chart/ColumnChart/index.js';
+export { BarChart } from './chart/BarChart/index.js';
+export type { BarChartProps } from './chart/BarChart/index.js';
+export { AreaChart } from './chart/AreaChart/index.js';
+export type { AreaChartProps } from './chart/AreaChart/index.js';
+export { PieChart } from './chart/PieChart/index.js';
+export type { PieChartProps } from './chart/PieChart/index.js';
+export { DonutChart } from './chart/DonutChart/index.js';
+export type { DonutChartProps } from './chart/DonutChart/index.js';
+export { ScatterChart } from './chart/ScatterChart/index.js';
+export type { ScatterChartProps } from './chart/ScatterChart/index.js';
+export { BubbleChart } from './chart/BubbleChart/index.js';
+export type { BubbleChartProps } from './chart/BubbleChart/index.js';
+export { RadarChart } from './chart/RadarChart/index.js';
+export type { RadarChartProps } from './chart/RadarChart/index.js';
+export { FunnelChart } from './chart/FunnelChart/index.js';
+export type { FunnelChartProps } from './chart/FunnelChart/index.js';
+export { GaugeChart } from './chart/GaugeChart/index.js';
+export type { GaugeChartProps } from './chart/GaugeChart/index.js';
+export { Heatmap } from './chart/Heatmap/index.js';
+export type { HeatmapProps } from './chart/Heatmap/index.js';
+export { TreeChart } from './chart/TreeChart/index.js';
+export type { TreeChartProps } from './chart/TreeChart/index.js';
+export { SankeyChart } from './chart/SankeyChart/index.js';
+export type { SankeyChartProps } from './chart/SankeyChart/index.js';
+export { MapChart } from './chart/MapChart/index.js';
+export type { MapChartProps } from './chart/MapChart/index.js';
+export { ComposedChart } from './chart/ComposedChart/index.js';
+export type { ComposedChartProps, ComposedSeriesItem } from './chart/ComposedChart/index.js';
+export { EChartBase } from './chart/EChartBase/index.js';
+export type { ChartSelectPayload, EChartBaseProps } from './chart/EChartBase/index.js';

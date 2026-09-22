@@ -24,7 +24,6 @@ import { Collapsible } from './components/Collapsible/index.js';
 import { ColorPicker } from './components/ColorPicker/index.js';
 import { Combobox } from './components/Combobox/index.js';
 import { Command } from './components/Command/index.js';
-import { Chart } from './components/Chart/index.js';
 import { ChatInput } from './components/ChatInput/index.js';
 import { Container } from './components/Container/index.js';
 import { Content } from './components/Content/index.js';
@@ -115,22 +114,41 @@ import { Upload } from './components/Upload/index.js';
 import { Video } from './components/Video/index.js';
 import { Watermark } from './components/Watermark/index.js';
 
-// AI 与会话类扩展组件（components/chat 子目录）
-import { AgentStatus } from './components/chat/AgentStatus/index.js';
-import { Attachment } from './components/chat/Attachment/index.js';
-import { Bubble } from './components/chat/Bubble/index.js';
-import { ChatMessage } from './components/chat/ChatMessage/index.js';
-import { Citation } from './components/chat/Citation/index.js';
-import { Composer } from './components/chat/Composer/index.js';
-import { ConversationList } from './components/chat/ConversationList/index.js';
-import { MessageList } from './components/chat/MessageList/index.js';
-import { Prompt } from './components/chat/Prompt/index.js';
-import { Sender } from './components/chat/Sender/index.js';
-import { StreamingText } from './components/chat/StreamingText/index.js';
-import { Suggestion } from './components/chat/Suggestion/index.js';
-import { Thinking } from './components/chat/Thinking/index.js';
-import { ToolCall } from './components/chat/ToolCall/index.js';
-import { Welcome } from './components/chat/Welcome/index.js';
+// AI 与会话类扩展组件（chat 子目录）
+import { AgentStatus } from './chat/AgentStatus/index.js';
+import { Attachment } from './chat/Attachment/index.js';
+import { Bubble } from './chat/Bubble/index.js';
+import { ChatMessage } from './chat/ChatMessage/index.js';
+import { Citation } from './chat/Citation/index.js';
+import { Composer } from './chat/Composer/index.js';
+import { ConversationList } from './chat/ConversationList/index.js';
+import { MessageList } from './chat/MessageList/index.js';
+import { Prompt } from './chat/Prompt/index.js';
+import { Sender } from './chat/Sender/index.js';
+import { StreamingText } from './chat/StreamingText/index.js';
+import { Suggestion } from './chat/Suggestion/index.js';
+import { Thinking } from './chat/Thinking/index.js';
+import { ToolCall } from './chat/ToolCall/index.js';
+import { Welcome } from './chat/Welcome/index.js';
+
+// 图表组件集（src/components/chart 目录，echarts 渲染）
+import { AreaChart } from './chart/AreaChart/index.js';
+import { BarChart } from './chart/BarChart/index.js';
+import { BubbleChart } from './chart/BubbleChart/index.js';
+import { ColumnChart } from './chart/ColumnChart/index.js';
+import { ComposedChart } from './chart/ComposedChart/index.js';
+import { DonutChart } from './chart/DonutChart/index.js';
+import { FunnelChart } from './chart/FunnelChart/index.js';
+import { GaugeChart } from './chart/GaugeChart/index.js';
+import { Heatmap } from './chart/Heatmap/index.js';
+import { LineChart } from './chart/LineChart/index.js';
+import { MapChart } from './chart/MapChart/index.js';
+import { MetricCard } from './chart/MetricCard/index.js';
+import { PieChart } from './chart/PieChart/index.js';
+import { RadarChart } from './chart/RadarChart/index.js';
+import { SankeyChart } from './chart/SankeyChart/index.js';
+import { ScatterChart } from './chart/ScatterChart/index.js';
+import { TreeChart } from './chart/TreeChart/index.js';
 
 /**
  * 内置组件表：DSL 类型名 → 组件适配器。
@@ -215,7 +233,6 @@ export const builtinComponents = {
   // 页面级组合类扩展组件（第四批）
   Sidebar,
   DataTable,
-  Chart,
   // 图标（lucide 白名单）
   Icon,
   // 业务刚需类扩展组件（第五批：数据录入 / 数据展示 / 反馈）
@@ -262,7 +279,7 @@ export const builtinComponents = {
   CodeBlock,
   DiffViewer,
   JSONViewer,
-  // AI 与会话类扩展组件（第八批：components/chat 子目录）
+  // AI 与会话类扩展组件（第八批：chat 子目录）
   Bubble,
   Sender,
   Thinking,
@@ -278,6 +295,25 @@ export const builtinComponents = {
   MessageList,
   Composer,
   ConversationList,
+  // 图表组件集（src/components/chart 目录，echarts 渲染；
+  // 交互事件经 echarts click → onSelect，DSL 用 events.onSelect + ${event}）
+  MetricCard,
+  LineChart,
+  ColumnChart,
+  BarChart,
+  AreaChart,
+  PieChart,
+  DonutChart,
+  ScatterChart,
+  BubbleChart,
+  RadarChart,
+  FunnelChart,
+  GaugeChart,
+  Heatmap,
+  TreeChart,
+  SankeyChart,
+  MapChart,
+  ComposedChart,
 } as const;
 
 /** 把全部 V1 内置组件按 DSL 类型名注册到给定 ComponentRegistry */

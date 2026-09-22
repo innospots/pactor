@@ -8,12 +8,10 @@ import type { DslNode } from '@pactor-app/core';
 import {
   Alert,
   Button,
-  Chart,
   Drawer,
   Progress,
   Skeleton,
   Spinner,
-  Statistic,
 } from '@pactor-app/ui/components';
 import DslPreview from './DslPreview';
 
@@ -90,52 +88,6 @@ function SpinPreview() {
   );
 }
 
-function MetricCardPreview() {
-  return (
-    <div style={{ ...rowStyle, alignItems: 'stretch' }}>
-      <div style={{ ...blockStyle, minWidth: 180 }}>
-        <Statistic title="本月销售额" value={128640.5} precision={2} suffix="元" />
-      </div>
-      <div style={{ ...blockStyle, minWidth: 180 }}>
-        <Statistic title="活跃用户" value={8932} suffix="人" />
-      </div>
-    </div>
-  );
-}
-
-const LINE_DATA = [
-  { month: '1月', visits: 320 },
-  { month: '2月', visits: 452 },
-  { month: '3月', visits: 398 },
-  { month: '4月', visits: 560 },
-  { month: '5月', visits: 480 },
-  { month: '6月', visits: 612 },
-];
-
-function LineChartPreview() {
-  return <Chart chartType="line" data={LINE_DATA} xKey="month" yKeys={['visits']} />;
-}
-
-function ColumnChartPreview() {
-  return <Chart chartType="bar" data={LINE_DATA} xKey="month" yKeys={['visits']} />;
-}
-
-function AreaChartPreview() {
-  return <Chart chartType="area" data={LINE_DATA} xKey="month" yKeys={['visits']} />;
-}
-
-const PIE_DATA = [
-  { channel: '直接访问', count: 420 },
-  { channel: '搜索引擎', count: 315 },
-  { channel: '社交媒体', count: 238 },
-  { channel: '外部链接', count: 146 },
-  { channel: '邮件推广', count: 92 },
-];
-
-function PieChartPreview() {
-  return <Chart chartType="pie" data={PIE_DATA} xKey="channel" yKeys={['count']} />;
-}
-
 const MODAL_NODE: DslNode = {
   type: 'Dialog',
   props: {
@@ -170,11 +122,6 @@ export const PREVIEWS_C: Record<string, () => ReactElement> = {
   'component.progress': ProgressPreview,
   'component.skeleton': SkeletonPreview,
   'component.spinner': SpinPreview,
-  'component.metric-card': MetricCardPreview,
-  'component.line-chart': LineChartPreview,
-  'component.column-chart': ColumnChartPreview,
-  'component.area-chart': AreaChartPreview,
-  'component.pie-chart': PieChartPreview,
   'component.dialog': ModalPreview,
   'component.popover': PopoverPreview,
 };

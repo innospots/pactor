@@ -1,7 +1,7 @@
 import { useState, type CSSProperties } from 'react';
 
-import { cn } from '../../../../lib/utils.js';
-import { Icon } from '../../Icon/index.js';
+import { cn } from '../../../lib/utils.js';
+import { Icon } from '../../components/Icon/index.js';
 
 /** 思考状态：thinking 进行中（图标脉冲动画）、done 已完成 */
 export type ThinkingStatus = 'thinking' | 'done';

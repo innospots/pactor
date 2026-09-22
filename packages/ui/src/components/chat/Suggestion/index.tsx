@@ -1,7 +1,7 @@
 import type { CSSProperties } from 'react';
 
-import { cn } from '../../../../lib/utils.js';
-import { Icon } from '../../Icon/index.js';
+import { cn } from '../../../lib/utils.js';
+import { Icon } from '../../components/Icon/index.js';
 
 /** 建议项：字符串或 { label, value?, icon? }（value 缺省取 label） */
 export type SuggestionItem = string | { label: string; value?: string; icon?: string };

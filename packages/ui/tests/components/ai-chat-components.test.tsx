@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 /**
- * AI 与会话类组件契约（第八批：components/chat 子目录）：
+ * AI 与会话类组件契约（第八批：chat 子目录）：
  * Bubble / Sender / Thinking / AgentStatus / StreamingText / Suggestion /
  * Prompt / Welcome / Citation / Attachment / ToolCall / ChatMessage /
  * MessageList / Composer / ConversationList 的 props 映射、交互行为与通用 props。

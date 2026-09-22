@@ -21,7 +21,7 @@ export const chartComponents: ComponentEntry[] = [
   { id: 'component.funnel-chart', name: '漏斗图', category: 'charts', purpose: '流程阶段转化', maturity: 'stable', change: 'new', integration: 'integrated', description: '建议英文标识：FunnelChart。' },
   { id: 'component.gauge-chart', name: '仪表盘', category: 'charts', purpose: '单指标区间状态', maturity: 'stable', change: 'new', integration: 'integrated', description: '建议英文标识：GaugeChart。' },
   { id: 'component.heatmap', name: '热力图', category: 'charts', purpose: '二维密度与强弱', maturity: 'stable', change: 'new', integration: 'integrated', description: '建议英文标识：Heatmap。' },
-  { id: 'component.treemap', name: '树图', category: 'charts', purpose: '层级构成', maturity: 'stable', change: 'new', integration: 'integrated', description: '建议英文标识：Treemap。' },
+  { id: 'component.tree-chart', name: '树图', category: 'charts', purpose: '层级结构', maturity: 'stable', change: 'new', integration: 'integrated', description: '建议英文标识：TreeChart。' },
   { id: 'component.sankey-chart', name: '桑基图', category: 'charts', purpose: '节点之间的流向与规模', maturity: 'stable', change: 'new', integration: 'integrated', description: '建议英文标识：SankeyChart。' },
   { id: 'component.map-chart', name: '地图', category: 'charts', purpose: '地理分布与区域比较', maturity: 'stable', change: 'new', integration: 'integrated', description: '建议英文标识：MapChart；地理分布与区域比较。' },
   { id: 'component.composed-chart', name: '组合图', category: 'charts', purpose: '多种度量或表达目标组合', maturity: 'stable', change: 'new', integration: 'integrated', description: '建议英文标识：ComposedChart。' },

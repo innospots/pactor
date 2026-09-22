@@ -1,8 +1,8 @@
 import type { CSSProperties } from 'react';
 
-import { cn } from '../../../../lib/utils.js';
-import { inferKind } from '../../FilePreview/index.js';
-import { Icon } from '../../Icon/index.js';
+import { cn } from '../../../lib/utils.js';
+import { inferKind } from '../../components/FilePreview/index.js';
+import { Icon } from '../../components/Icon/index.js';
 
 /** 会话附件项 */
 export interface AttachmentItemData {

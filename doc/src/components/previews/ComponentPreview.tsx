@@ -35,6 +35,7 @@ import { Toaster } from '@pactor-app/ui/ui';
 import { PREVIEWS_A } from './basic-a';
 import { PREVIEWS_B } from './basic-b';
 import { PREVIEWS_C } from './basic-c';
+import { PREVIEWS_CHART } from './chart-a';
 import { PREVIEWS_D } from './basic-d';
 import { PREVIEWS_E } from './basic-e';
 
@@ -446,14 +447,15 @@ const PREVIEWS: Record<string, () => ReactElement> = {
   'component.loading-overlay': LoadingOverlayPreview,
   'component.watermark': WatermarkPreview,
   'component.tour': TourPreview,
-  // 扩展批次：A（通用/布局/导航）、B（数据录入/数据展示）、C（反馈/图表）、
-  // D（媒体与内容）、E（AI 与会话）；
+  // 扩展批次：A（通用/布局/导航）、B（数据录入/数据展示）、C（反馈）、
+  // D（媒体与内容）、E（AI 与会话）、CHART（图表组件集，echarts 渲染）；
   // component.collapse / component.carousel 在 A 与 B 重复定义，以 B 为准
   ...PREVIEWS_A,
   ...PREVIEWS_B,
   ...PREVIEWS_C,
   ...PREVIEWS_D,
   ...PREVIEWS_E,
+  ...PREVIEWS_CHART,
 };
 
 export default function ComponentPreview({ componentId }: { componentId: string }): ReactNode {
