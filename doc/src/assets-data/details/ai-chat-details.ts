@@ -1,6 +1,6 @@
 /**
  * AI 与会话分类完整详情（第八批组件，packages/ui 真实实现已核对）。
- * 15 个组件统一实现于 packages/ui/src/components/components/chat/ 子目录，
+ * 15 个组件统一实现于 packages/ui/src/components/chat/ 子目录，
  * apiProps 均核对自对应 index.tsx；渲染层唯一实现，@pactor-app/chat
  * 产品层（store / transport / 消息状态机）消费本批组件做组合。
  * - component.chat-message：本目录版本为 ui 承接版（覆盖 component-details.ts

@@ -1,7 +1,7 @@
 import type { CSSProperties } from 'react';
 
-import { cn } from '../../../../lib/utils.js';
-import { Avatar } from '../../Avatar/index.js';
+import { cn } from '../../../lib/utils.js';
+import { Avatar } from '../../components/Avatar/index.js';
 
 export interface SenderProps {
   /** 发送方名称 */

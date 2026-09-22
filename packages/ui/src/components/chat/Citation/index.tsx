@@ -1,11 +1,11 @@
 import type { CSSProperties } from 'react';
 
-import { cn } from '../../../../lib/utils.js';
+import { cn } from '../../../lib/utils.js';
 import {
   HoverCard,
   HoverCardContent,
   HoverCardTrigger,
-} from '../../../../ui/hover-card.js';
+} from '../../../ui/hover-card.js';
 
 /** 引用来源项 */
 export interface CitationItem {

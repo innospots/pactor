@@ -1,7 +1,7 @@
 import type { CSSProperties } from 'react';
 
-import { cn } from '../../../../lib/utils.js';
-import { ChatInput } from '../../ChatInput/index.js';
+import { cn } from '../../../lib/utils.js';
+import { ChatInput } from '../../components/ChatInput/index.js';
 import { Attachment, type AttachmentItemData } from '../Attachment/index.js';
 
 export interface ComposerProps {

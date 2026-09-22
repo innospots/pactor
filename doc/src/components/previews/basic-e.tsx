@@ -1,5 +1,5 @@
 /**
- * 组件运行态预览注册表（AI 与会话批）：components/chat 子目录 15 个组件
+ * 组件运行态预览注册表（AI 与会话批）：chat 子目录 15 个组件
  * 的代表形态；Composer 依赖 Renderer 上下文（内部 ChatInput 经
  * useRenderer），以 DslPreview 真实 DSL 渲染。
  */

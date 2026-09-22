@@ -1,6 +1,6 @@
 import { useEffect, useRef, type CSSProperties } from 'react';
 
-import { cn } from '../../../../lib/utils.js';
+import { cn } from '../../../lib/utils.js';
 import { ChatMessage, type ChatMessageProps } from '../ChatMessage/index.js';
 
 /** 消息条目（ChatMessage props + 可选 id，onAction 随事件传出） */

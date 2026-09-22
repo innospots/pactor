@@ -32,7 +32,7 @@ const BUILTIN_TYPES = [
   'Link',
 ];
 
-/** 扩展组件类型名清单（spec: shadcn-extended-components / 扩展组件注册入口，第一批：展示类 + 表单类；第二批：导航类 + 反馈弹层类；第三批：表单类 Calendar/InputOTP/Combobox + 复合类；第四批：页面级组合类 Sidebar/DataTable/Chart；第五批：业务刚需类 数据录入/数据展示/反馈 22 个） */
+/** 扩展组件类型名清单（spec: shadcn-extended-components / 扩展组件注册入口，第一批：展示类 + 表单类；第二批：导航类 + 反馈弹层类；第三批：表单类 Calendar/InputOTP/Combobox + 复合类；第四批：页面级组合类 Sidebar/DataTable；第五批：业务刚需类 数据录入/数据展示/反馈 22 个） */
 const EXTENDED_TYPES = [
   'Badge',
   'Avatar',
@@ -87,7 +87,6 @@ const EXTENDED_TYPES = [
   // 第四批：页面级组合类
   'Sidebar',
   'DataTable',
-  'Chart',
   'Icon',
   // 第五批：业务刚需类（数据录入 / 数据展示 / 反馈）
   'Rate',

@@ -53,7 +53,6 @@ export {
   BubbleReactions,
 } from './bubble.js';
 export { Calendar } from './calendar.js';
-export { ChartContainer, chartColor, CHART_TOKEN_COLORS } from './chart.js';
 export {
   Carousel,
   CarouselContent,
