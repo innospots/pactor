@@ -12,6 +12,14 @@ import type { ComponentDetailContent } from './component-details.ts';
 
 export const feedbackDetailContents: Record<string, ComponentDetailContent> = {
   'component.message': {
+    dsl: {
+      "type": "Message",
+      "props": {
+        "content": "保存成功",
+        "variant": "success",
+        "duration": 3000
+      }
+    },
     whenToUse: [
       '**何时使用**',
       '',
@@ -62,6 +70,15 @@ export const feedbackDetailContents: Record<string, ComponentDetailContent> = {
   },
 
   'component.notification': {
+    dsl: {
+      "type": "Notification",
+      "props": {
+        "title": "版本更新",
+        "description": "v2.4 已发布，包含 12 项改进。",
+        "variant": "info",
+        "duration": 5000
+      }
+    },
     whenToUse: [
       '**何时使用**',
       '',
@@ -111,6 +128,31 @@ export const feedbackDetailContents: Record<string, ComponentDetailContent> = {
   },
 
   'component.popconfirm': {
+    dsl: {
+      "type": "Popconfirm",
+      "props": {
+        "title": "删除该条记录？",
+        "description": "删除后不可恢复。",
+        "danger": true
+      },
+      "children": [
+        {
+          "type": "Button",
+          "props": {
+            "text": "删除",
+            "danger": true
+          }
+        }
+      ],
+      "events": {
+        "onConfirm": {
+          "action": "setState",
+          "params": {
+            "deleted": true
+          }
+        }
+      }
+    },
     whenToUse: [
       '**何时使用**',
       '',
@@ -164,6 +206,29 @@ export const feedbackDetailContents: Record<string, ComponentDetailContent> = {
   },
 
   'component.result': {
+    dsl: {
+      "type": "Result",
+      "props": {
+        "status": "success",
+        "title": "提交成功",
+        "subTitle": "审批流程已发起，预计 2 小时内完成。"
+      },
+      "children": [
+        {
+          "type": "Button",
+          "props": {
+            "text": "返回列表"
+          }
+        },
+        {
+          "type": "Button",
+          "props": {
+            "text": "查看详情",
+            "variant": "primary"
+          }
+        }
+      ]
+    },
     whenToUse: [
       '**何时使用**',
       '',
@@ -216,6 +281,21 @@ export const feedbackDetailContents: Record<string, ComponentDetailContent> = {
   },
 
   'component.loading-overlay': {
+    dsl: {
+      "type": "LoadingOverlay",
+      "props": {
+        "loading": true,
+        "text": "正在加载数据…"
+      },
+      "children": [
+        {
+          "type": "Table",
+          "props": {
+            "title": "数据表格"
+          }
+        }
+      ]
+    },
     whenToUse: [
       '**何时使用**',
       '',
@@ -264,6 +344,26 @@ export const feedbackDetailContents: Record<string, ComponentDetailContent> = {
   },
 
   'component.watermark': {
+    dsl: {
+      "type": "Watermark",
+      "props": {
+        "content": "Pactor 内部资料",
+        "rotate": -22,
+        "gap": [
+          100,
+          100
+        ],
+        "opacity": 0.15
+      },
+      "children": [
+        {
+          "type": "Text",
+          "props": {
+            "text": "被覆盖的正文内容"
+          }
+        }
+      ]
+    },
     whenToUse: [
       '**何时使用**',
       '',
@@ -313,6 +413,24 @@ export const feedbackDetailContents: Record<string, ComponentDetailContent> = {
   },
 
   'component.tour': {
+    dsl: {
+      "type": "Tour",
+      "props": {
+        "open": true,
+        "steps": [
+          {
+            "target": "#top-nav",
+            "title": "全局导航",
+            "content": "在这里切换资产库五大分类。"
+          },
+          {
+            "target": "#sidebar",
+            "title": "侧边导航",
+            "content": "分类内的子菜单与条目数。"
+          }
+        ]
+      }
+    },
     whenToUse: [
       '**何时使用**',
       '',
@@ -360,6 +478,416 @@ export const feedbackDetailContents: Record<string, ComponentDetailContent> = {
       'target 使用 nth-child 等脆弱选择器，页面微调后引导错位（应使用稳定 data 属性）。',
       '超过 7~8 步的长引导一口气弹完（用户流失，应拆分或改帮助文档）。',
       '引导期间要求用户点击被遮罩覆盖的元素（操作被拦截，引导卡死）。',
+    ],
+  },
+
+  'component.alert': {
+    dsl: {
+      "type": "Alert",
+      "props": {
+        "variant": "success",
+        "showIcon": true,
+        "message": "保存成功",
+        "description": "所有更改已同步至云端。"
+      }
+    },
+    whenToUse: [
+      '**何时使用**',
+      '',
+      '- 在内容上下文中持续显示提示：表单顶部、区块内的常驻说明，用户需要时它仍在原地（不自动消失）。',
+      '- 语义明确的四态提示：success / info / warning / error，用图标与语义色区分轻重。',
+      '- 需要标题 + 补充说明的静态提示：message 概括结论，description 展开原因。',
+      '',
+      '**何时不用**',
+      '',
+      '- 操作完成后的瞬时反馈：使用 Message（自动消失，不占版面）。',
+      '- 需要标题 + 正文、停留更久或可关闭的系统通知：使用 Notification。',
+      '- 需要用户确认或处理后才能继续的阻断提示：使用 Dialog；Alert 无交互区。',
+      '- 需要用户主动关闭的强提醒：使用 Notification，Alert 只做就地陈述。',
+    ].join('\n'),
+    previewNote:
+      '静态结构：根节点 <div data-slot="alert" role="alert"> 为两列网格（grid-cols-[0_1fr]，带图标时经 has-[>svg] 让出图标列），border + rounded-lg + 语义色边框与文字（success / warning / info 读语义令牌，error 映射 vendored destructive）；message 渲染标题行（data-slot="alert-title"，font-medium），description 渲染说明行（data-slot="alert-description"，text-muted-foreground）；showIcon 或 icon 提供时前置 16px 图标（variant 映射 check-circle / info / warning / x-circle）。',
+    variants: [
+      { name: 'info 信息（默认）', visual: 'info 图标 + info 语义色边框文字', scene: '中性说明、版本更新提示；variant 缺省即 info' },
+      { name: 'success 成功', visual: 'check-circle 图标 + success 语义色', scene: '操作成功后的就地确认（如「保存成功」）' },
+      { name: 'warning 警告', visual: 'warning 图标 + warning 语义色', scene: '配额将满、配置即将过期等需留意但不阻断的提示' },
+      { name: 'error 错误', visual: 'x-circle 图标 + destructive 语义色', scene: '提交失败、校验不通过等阻断性说明' },
+      { name: '仅标题 / 标题 + 说明', visual: '省略 description 仅一行；或 message + description 两行', scene: '一句话提示用仅标题；需要展开原因时补说明' },
+      { name: '自定义图标', visual: 'icon 指定 Icon 白名单图标名', scene: '语义需更具体时替代默认四态图标（如「锁」「时钟」）' },
+    ],
+    apiProps: [
+      { name: 'message', type: 'string', defaultValue: '—', description: '提示主文案，渲染为 AlertTitle' },
+      { name: 'description', type: 'string', defaultValue: '—', description: '辅助说明文案，渲染为 AlertDescription' },
+      { name: 'variant', type: "'success' | 'info' | 'warning' | 'error'", defaultValue: "'info'", description: '语义类型；error 映射 vendored destructive 变体，其余读语义令牌' },
+      { name: 'showIcon', type: 'boolean', defaultValue: 'false', description: '是否显示图标；true 时按 variant 显示默认图标（check-circle / info / warning / x-circle）' },
+      { name: 'icon', type: 'string', defaultValue: '—', description: '自定义图标名（Icon 白名单，kebab-case / PascalCase 均可）；提供时隐含 showIcon' },
+      { name: 'className / style', type: 'string / CSSProperties', defaultValue: '—', description: '通用：根节点 class 合并 / 内联样式' },
+    ],
+    guidelines: [
+      '- 标题写结论、说明写细节：message 一句话说清结果，description 补充原因或下一步。',
+      '- 语义色含义固定：error 只用于阻断性问题，warning 用于可继续但需留意，避免同页语义漂移。',
+      '- 图标仅强化识别、不替代文案：showIcon 打开时正文不必再写「错误：」之类的冗余前缀。',
+      '- Alert 常驻不自动消失：内容已处理完的提示要及时从数据源移除，避免陈旧提示长期占版。',
+      '- 与 Message / Notification 的分工：操作反馈用 Message（自动消失），系统通知用 Notification，常驻说明用 Alert。',
+    ].join('\n'),
+    examplesDo: [
+      '表单顶部常驻校验失败说明：variant=error、message「提交失败」、description 列出未通过字段。',
+      '配额提醒：variant=warning、message「本月 API 调用已达 90%」，常驻到配额恢复。',
+      '页面内版本公告：variant=info、message + description 说明变更内容与影响范围。',
+    ],
+    examplesDont: [
+      '用 Alert 做「保存成功」这类瞬时反馈（Alert 会一直占着版面，应使用 Message）。',
+      'error 与 warning 混用表达同一含义，削弱语义色的预警效果。',
+      '把需要用户确认的操作写进 Alert（Alert 无按钮与交互，应使用 Popconfirm / Dialog）。',
+    ],
+  },
+
+  'component.dialog': {
+    dsl: {
+      "type": "Dialog",
+      "props": {
+        "title": "编辑成员",
+        "description": "修改后将立即生效",
+        "trigger": { "type": "Button", "props": { "text": "打开对话框", "variant": "primary" } }
+      },
+      "children": [
+        { "type": "Text", "props": { "text": "在这里放置表单或其他内容子树；关闭（X / 遮罩 / Escape）由组件内部状态自管理。" } }
+      ]
+    },
+    whenToUse: [
+      '**何时使用**',
+      '',
+      '- 阻断当前流程以确认或完成任务：删除确认、提交前复核等必须先处理完才能继续的操作。',
+      '- 承载需要专注的小型表单或决策：信息量与交互控件有限，一屏内可完成。',
+      '- 需要明确的「取消 / 确认」二元出口，且弹层期间背景内容不可操作。',
+      '',
+      '**何时不用**',
+      '',
+      '- 只需就近的轻量「是 / 否」确认：使用 Popconfirm（不打断页面上下文）。',
+      '- 在保留页面上下文的同时展示大表单 / 长详情：使用 Drawer（侧滑，不完全遮挡内容）。',
+      '- 纯信息补充、可随时忽略：使用 Popover（不阻断，点击外部即关）。',
+      '- 破坏性操作未经确认就直接执行：破坏性操作必须先经 Dialog 或 Popconfirm 二次确认。',
+    ].join('\n'),
+    previewNote:
+      '静态结构：经 Base UI Dialog 原语渲染——trigger 提供时（非受控用法）以 <span data-slot="dialog-trigger-wrap"> 包装 DSL 子树接入 DialogTrigger，点击打开；弹层经 Portal 挂到 body：遮罩（data-slot="dialog-overlay"，fixed inset-0 z-50、半透明覆盖色）+ 内容面板（data-slot="dialog-content"，fixed 居中、max-w-lg、rounded-lg + 边框 + 阴影，右上角内置 X 关闭按钮，data-slot="dialog-close"）；面板内 title / description 渲染标题区（data-slot="dialog-header" 下的 dialog-title / dialog-description，二者均缺省时不渲染），children 紧随其后。X / 遮罩 / Escape 任一途径关闭都走 onOpenChange(false)：非受控时内部状态自管理，受控时只回调 onClose。',
+    variants: [
+      { name: '非受控（trigger 触发）', visual: 'trigger DSL 子树（通常 Button）点击打开，关闭由内部状态自管理', scene: '触发器与弹层同处的常规用法' },
+      { name: '受控 open', visual: 'open 绑定表达式，关闭时经 onClose 写回', scene: '需与页面状态联动（提交成功、路由变化）时关闭弹层' },
+      { name: '仅标题', visual: '省略 description，标题区只有一行', scene: '后果自明的确认（如「确认放弃编辑？」）' },
+      { name: '标题 + 说明', visual: 'dialog-title + dialog-description 两行', scene: '需要补充后果说明或操作前提' },
+      { name: '无标题区（仅内容）', visual: 'title / description 均缺省，不渲染 header', scene: '内容自带标题的纯内容弹层（如预览、代码片段）' },
+    ],
+    apiProps: [
+      { name: 'title', type: 'string', defaultValue: '—', description: '对话框标题，渲染为 DialogTitle' },
+      { name: 'description', type: 'string', defaultValue: '—', description: '辅助说明，渲染为 DialogDescription（与 title 同时缺省时不渲染标题区）' },
+      { name: 'open', type: 'boolean', defaultValue: '—', description: '受控开关（可绑 ${state.x} 表达式）；缺省时由 trigger 自管理内部状态' },
+      { name: 'onClose', type: '() => void', defaultValue: '—', description: '关闭事件（X / 遮罩 / Escape 任一途径关闭时触发；Renderer 绑定 events.onClose）' },
+      { name: 'trigger', type: 'DslNode', defaultValue: '—', description: '触发元素（DSL 子树，非受控用法下点击打开）' },
+      { name: 'children', type: 'ReactNode', defaultValue: '—', description: '内容（DSL 子树，经 Renderer children 机制渲染）' },
+      { name: 'className / style', type: 'string / CSSProperties', defaultValue: '—', description: '通用：弹层内容根节点 class 合并 / 内联样式' },
+    ],
+    guidelines: [
+      '- 破坏性操作必须在 Dialog（或 Popconfirm）中二次确认，确认按钮文案写动词（「删除」）而非默认「确定」。',
+      '- 标题写问题（「删除这 3 条记录？」）、说明写后果（「删除后不可恢复」）；正文承载表单时保持一屏内可完成。',
+      '- 关闭途径（X / 遮罩 / Escape）都会触发 onClose：受控用法必须在此把 open 写回 false，否则弹层关不掉。',
+      '- 同一时刻只保留一个 Dialog：不要在 Dialog 内再叠 Dialog，多步流程改为分步或改用 Drawer。',
+      '- 弹层期间背景不可操作：不要把必须参照背景内容才能完成的任务放进 Dialog。',
+    ].join('\n'),
+    examplesDo: [
+      '删除确认：title「删除该成员？」、description 说明后果，trigger 为行内「删除」按钮。',
+      '提交前复核：弹层内放表单子树，提交成功后经 onClose 关闭并刷新列表。',
+      '受控用法：open 绑定表达式、events.onClose 触发 setState 写回 false，供业务在提交成功时主动关闭。',
+    ],
+    examplesDont: [
+      '用 Dialog 承载需要大量滚动与填写的大表单（应使用 Drawer）。',
+      '受控用法只绑 open 而不处理 onClose，导致 X 与 Escape 关不掉。',
+      '在 Dialog 内再叠一层 Dialog 做二次确认（层级与焦点混乱，应先关闭再确认）。',
+    ],
+  },
+
+  'component.drawer': {
+    dsl: {
+      "type": "Drawer",
+      "props": {
+        "open": true,
+        "title": "订单详情",
+        "placement": "right"
+      },
+      "events": {
+        "onClose": {
+          "action": "setState",
+          "params": {
+            "drawerOpen": false
+          }
+        }
+      },
+      "children": [
+        {
+          "type": "Text",
+          "props": {
+            "text": "抽屉内容：订单号、金额、收货地址等详情字段。"
+          }
+        }
+      ]
+    },
+    whenToUse: [
+      '**何时使用**',
+      '',
+      '- 在保留页面上下文的同时展示扩展任务：查看 / 编辑详情、填写较长的表单、批量操作的参数面板。',
+      '- 内容量大需要纵向滚动，或希望用户仍能瞥见背后的列表。',
+      '- 需要从固定方向滑出的面板：右侧（默认）详情表单、左侧导航 / 目录、上下次要面板。',
+      '',
+      '**何时不用**',
+      '',
+      '- 必须阻断当前流程、确认后才能继续的操作：使用 Dialog（居中模态，注意力更集中）。',
+      '- 只需就近的轻量确认：使用 Popconfirm；只需上下文补充内容：使用 Popover。',
+      '- 页面级常驻的导航 / 目录：使用布局组件，Drawer 是临时面板。',
+    ].join('\n'),
+    previewNote:
+      '静态结构：经 vaul 原语渲染——根节点为受控 Drawer（open 缺省按 false 处理），弹层经 Portal 挂到 body：遮罩（data-slot="drawer-overlay"，fixed inset-0 z-50、半透明覆盖色）+ 抽屉面板（data-slot="drawer-content"，fixed z-50、bg-popover，按 placement 映射 vaul direction 定位：right / left 贴边全高、宽 3/4 且 sm 以上最大 sm，top / bottom 贴边全宽、max-h-[80vh]），bottom 方向额外渲染顶部拖拽把手（h-2 圆条）；title 提供时渲染头部（data-slot="drawer-header" > data-slot="drawer-title"），其后为内容容器（flex-1 overflow-auto p-4）承载 children。遮罩 / Escape / 拖拽关闭经 onOpenChange(false) 触发 onClose。',
+    variants: [
+      { name: 'right 右侧（默认）', visual: '右侧贴边全高滑出，宽 3/4（sm 以上最大 sm）', scene: '详情查看、编辑表单等最常见用法' },
+      { name: 'left 左侧', visual: '左侧贴边全高滑出', scene: '导航、目录、过滤器面板' },
+      { name: 'top 顶部', visual: '顶部贴边全宽滑出，max-h-[80vh]', scene: '顶部工具面板、全局筛选' },
+      { name: 'bottom 底部', visual: '底部贴边全宽滑出、max-h-[80vh]、带拖拽把手', scene: '移动端友好（可拖拽关闭）、快捷操作面板' },
+      { name: '仅标题 / 无标题', visual: 'title 缺省时不渲染头部，内容直接铺满', scene: '内容自带标题或纯容器场景' },
+    ],
+    apiProps: [
+      { name: 'title', type: 'string', defaultValue: '—', description: '抽屉标题，渲染为 DrawerTitle；缺省时不渲染头部' },
+      { name: 'open', type: 'boolean', defaultValue: 'false', description: '受控开关（可绑 ${state.x} 表达式）；缺省按 false 处理，组件无 trigger 属性' },
+      { name: 'placement', type: "'left' | 'right' | 'top' | 'bottom'", defaultValue: "'right'", description: '滑出方向，映射 vaul direction' },
+      { name: 'onClose', type: '() => void', defaultValue: '—', description: '关闭事件（遮罩 / Escape / 拖拽关闭时触发，仅关闭回调；Renderer 绑定 events.onClose）' },
+      { name: 'children', type: 'ReactNode', defaultValue: '—', description: '内容（DSL 子树，经 Renderer children 机制渲染，置于 flex-1 overflow-auto p-4 容器内）' },
+      { name: 'className / style', type: 'string / CSSProperties', defaultValue: '—', description: '通用：抽屉内容根节点 class 合并 / 内联样式' },
+    ],
+    guidelines: [
+      '- Drawer 无 trigger 属性：始终受控，open 绑状态表达式并在 onClose 写回 false，否则用户关不掉。',
+      '- 方向按任务选：详情 / 表单用 right（默认，符合阅读与操作顺序），导航用 left，移动端次要面板用 bottom。',
+      '- 内容容器已自带滚动（flex-1 overflow-auto）：长表单直接纵向排布，不要再嵌套滚动容器。',
+      '- 抽屉宽度固定（right / left 为 3/4、sm 以上最大 sm）：放不下的宽表改用整页路由或 Dialog 承载。',
+      '- 与 Dialog 的分工：需要用户停下来先处理完用 Dialog；边看列表边补详情用 Drawer。',
+    ].join('\n'),
+    examplesDo: [
+      '列表行「查看详情」：placement=right、title 为对象名，内容纵向排布字段说明。',
+      '后台配置面板：placement=left 放导航与过滤器，不遮挡主内容区。',
+      '移动端快捷操作：placement=bottom（带拖拽把手），下滑即可关闭。',
+    ],
+    examplesDont: [
+      '用 Drawer 承载必须立即处理的确认（应使用 Dialog，居中模态更能拉回注意力）。',
+      '声明了 open 却不处理 onClose，抽屉只能靠刷新页面消失。',
+      '在抽屉内再嵌入抽屉或 Dialog 做多层叠加（层级混乱，应先关闭再进入）。',
+    ],
+  },
+
+  'component.popover': {
+    dsl: {
+      "type": "Popover",
+      "props": {
+        "content": { "type": "Text", "props": { "text": "浮层内容：可放任意 DSL 子树，点击外部关闭。" } }
+      },
+      "children": [{ "type": "Button", "props": { "text": "打开浮层", "variant": "default" } }]
+    },
+    whenToUse: [
+      '**何时使用**',
+      '',
+      '- 在触发对象附近展示补充内容：字段说明、术语解释、快捷设置面板、附带的小表单片段。',
+      '- 内容可含交互元素（链接、按钮、少量控件），且需要点击外部才关闭的场景。',
+      '- 内容比 Tooltip 长、比 Dialog 轻：无需阻断当前流程。',
+      '',
+      '**何时不用**',
+      '',
+      '- 纯短文本说明或不可见标签的补充：使用 Tooltip（hover 触发，更轻且不可交互）。',
+      '- 需要用户确认后继续的操作：使用 Popconfirm；需要阻断流程：使用 Dialog。',
+      '- 承载大表单或长详情：使用 Drawer / Dialog，固定宽度的浮层放不下。',
+    ].join('\n'),
+    previewNote:
+      '静态结构：经 Base UI Popover 原语渲染——children（触发元素）以 <span data-slot="popover-trigger-wrap"> 包装接入 PopoverTrigger，DSL 子树渲染其中，点击切换浮层；浮层经 Portal + Positioner 定位（side=bottom、align=center、sideOffset=4，默认吸附触发元素下方居中），内容面板 data-slot="popover-content"（w-72、rounded-md + 边框 + 阴影、p-4，data-open / data-closed 驱动淡入缩放动画）；content 为 DSL 子树对象时经 renderChildren 渲染，为字符串时直接渲染文本。点击外部、按 Escape 或再次点击触发元素即关闭。',
+    variants: [
+      { name: 'DSL 子树内容', visual: 'content 传 DslNode 对象，经 Renderer 渲染', scene: '需要结构化内容或交互控件' },
+      { name: '纯文本内容', visual: 'content 传字符串，直接渲染文本', scene: '一段补充说明或术语定义' },
+      { name: 'Button 触发', visual: 'children 为 Button 子树（span 包装接入 Trigger）', scene: '「打开浮层」式的显式入口' },
+      { name: '文字链 / 图标触发', visual: 'children 为 Link / Icon 等轻量元素', scene: '字段说明、术语解释的就近锚点' },
+    ],
+    apiProps: [
+      { name: 'content', type: 'DslNode | string', defaultValue: '—', description: '浮层内容：DSL 子树对象（经 renderChildren 渲染）或纯文本' },
+      { name: 'children', type: 'ReactNode', defaultValue: '—', description: '触发元素（DSL 子树，经 Renderer children 机制渲染，外层以 span 包装接入 Trigger）' },
+      { name: 'className / style', type: 'string / CSSProperties', defaultValue: '—', description: '通用：浮层内容根节点 class 合并 / 内联样式' },
+    ],
+    guidelines: [
+      '- 触发元素由 children 提供（Button / 文字链 / 图标）：Popover 自身不提供触发样式，需要显式可点击的锚点。',
+      '- 浮层宽度固定：只放少量字段或一段说明，超出内容改用 Drawer / Dialog。',
+      '- 需要确认的内容不要塞进 Popover：确认语义用 Popconfirm，阻断语义用 Dialog。',
+      '- 浮层随点击外部关闭：不要用它承载必须被看到或必须留存的信息。',
+      '- 与 Tooltip 的边界：Tooltip 只做 hover 级短说明、不可交互；含交互元素的内容一律用 Popover。',
+    ].join('\n'),
+    examplesDo: [
+      '字段旁的「?」图标触发：content 为 Text，说明该字段的口径与取值范围。',
+      '快捷设置面板：content 传 DslNode 子树（少量开关 / 输入），点击外部即收起。',
+      '表格单元格内文字链触发：展示该条记录的补充备注。',
+    ],
+    examplesDont: [
+      '用 Popover 承载需要确认的删除操作（应使用 Popconfirm）。',
+      'content 塞入长表单或大段图文（固定宽度放不下，应使用 Drawer / Dialog）。',
+      '用 Popover 替代 Tooltip 做纯 hover 提示（hover 场景应使用 Tooltip）。',
+    ],
+  },
+
+  'component.progress': {
+    dsl: {
+      "type": "Progress",
+      "props": {
+        "value": 70
+      }
+    },
+    whenToUse: [
+      '**何时使用**',
+      '',
+      '- 展示任务完成程度：上传 / 下载、导入导出、批量处理的百分比反馈。',
+      '- 有明确总量与已完成量、进度可计算的可控任务，用户据此判断还需等待多久。',
+      '- 无法估算进度时用不确定态（value 缺省 / null）表示「处理中但无完成度」。',
+      '',
+      '**何时不用**',
+      '',
+      '- 只需表示「紧邻内容正在处理」：使用 Spinner（局部指示，不算完成度）。',
+      '- 需要覆盖页面或区块并阻断操作：使用 LoadingOverlay（Spinner + 遮罩）。',
+      '- 结构已知的加载占位：使用 Skeleton（比进度条更贴近最终版式）。',
+      '- 表达评分 / 指标占比等静态数值：使用 Statistic 或图表，Progress 的语义是任务进度。',
+    ].join('\n'),
+    previewNote:
+      '静态结构：根节点 <div data-slot="progress">（relative w-full）内为轨道 + 指示条——轨道（data-slot="progress-track"，h-2 全宽、rounded-full、bg-(--progress-track) 令牌底色、overflow-hidden）内是指示条（data-slot="progress-indicator"，h-full、bg-(--progress-indicator) 令牌前景色，宽度由 Base UI 按 value 百分比设置并带 width 过渡）。value 经适配器钳制到 0~100；undefined / null / 非有限数透传为不确定态，不显示固定比例。',
+    variants: [
+      { name: '进行中（0 < value < 100）', visual: '指示条按比例填充', scene: '上传 / 导入等可估算进度的任务' },
+      { name: '已完成（value = 100）', visual: '指示条铺满轨道', scene: '任务收尾的完成态展示' },
+      { name: '不确定态（value 缺省 / null）', visual: '透传 Base UI 不确定态，不显示固定比例', scene: '处理中但总量未知、无法计算百分比' },
+      { name: '边界值钳制', visual: '越界值按 0 / 100 展示', scene: '计算误差导致越界时的兜底（如完成数大于总数）' },
+    ],
+    apiProps: [
+      { name: 'value', type: 'number | null', defaultValue: '—', description: '百分比（0-100，可为表达式解析后的数字）；undefined / null 为不确定态；越界值钳制到 0~100' },
+      { name: 'className / style', type: 'string / CSSProperties', defaultValue: '—', description: '通用：根节点 class 合并 / 内联样式' },
+    ],
+    guidelines: [
+      '- 有总量就传 value（按已完成 / 总量计算百分比）；无法估算时用不确定态或改用 Spinner，不要造假进度。',
+      '- 进度须真实反映任务状态：绑定数据源的完成量，任务结束（成功或失败）都要停止推进并切换为 Result / Alert 反馈。',
+      '- 长任务在进度条旁给出文字说明（「已处理 120 / 300」）与可取消入口，只有条形容器用户无法判断还剩多久。',
+      '- 与 Spinner / LoadingOverlay 的分工：进度条表达完成程度，Spinner 表达局部处理中，LoadingOverlay 覆盖区块并阻断操作。',
+      '- 配色沿用令牌（--progress-track / --progress-indicator），不要用 Progress 表达评分或指标占比。',
+    ].join('\n'),
+    examplesDo: [
+      '文件上传：value 绑定已上传字节百分比，完成后切换为 Result / Alert 反馈结果。',
+      '批量导入：value = 已完成数 / 总数，旁侧附「已处理 120 / 300」文案与取消入口。',
+      '无法估算时：不传 value（不确定态），配合文案「正在准备数据…」。',
+    ],
+    examplesDont: [
+      '用定时器推进假进度（进度必须真实反映任务状态）。',
+      '首屏结构已知的加载也用 Progress（应使用 Skeleton）。',
+      '用 Progress 表达评分或完成度指标（应使用 Statistic 或图表）。',
+    ],
+  },
+
+  'component.skeleton': {
+    dsl: {
+      "type": "Skeleton",
+      "props": {
+        "shape": "line",
+        "width": "60%"
+      }
+    },
+    whenToUse: [
+      '**何时使用**',
+      '',
+      '- 结构已知时的加载占位：首屏卡片、列表行、详情区，占位形状与最终内容一致以抑制布局跳动。',
+      '- 需要预告「这里将出现什么」：头像圆 + 文本行的组合比转圈更能说明版式。',
+      '- 内容结构固定、加载耗时不确定的区块（字段固定的详情、行数固定的列表）。',
+      '',
+      '**何时不用**',
+      '',
+      '- 局部按钮 / 行内的处理中指示：使用 Spinner，骨架表达的是「这里将出现什么」而非「正在处理」。',
+      '- 需要阻断区块交互的加载：使用 LoadingOverlay（遮罩 + Spinner）。',
+      '- 确定无数据：使用 Empty——骨架屏会让用户以为还在加载。',
+      '- 已知极快的局部刷新（骨架只闪一瞬）：直接留白或不做占位，闪烁比空窗更差。',
+    ].join('\n'),
+    previewNote:
+      '静态结构：根节点 <div data-slot="skeleton">（animate-pulse rounded-md bg-muted，纯 CSS 脉冲）；按 shape 叠加默认尺寸：line 映射 h-4 w-full（文本行）、circle 映射 rounded-full（默认 40×40，头像）、rect 映射 h-24 w-full（矩形块）；width / height 覆盖默认尺寸（数字转 px，字符串按 CSS 长度原样下发）。复杂骨架由多个 Skeleton 自行拼装（如 circle 头像 + 多条 line 文本 + rect 块）。',
+    variants: [
+      { name: 'line 文本行（默认）', visual: 'h-4 全宽圆角条', scene: '段落、标题行占位' },
+      { name: 'circle 圆形', visual: 'rounded-full，默认 40×40', scene: '头像、图标占位' },
+      { name: 'rect 矩形', visual: 'h-24 全宽圆角块', scene: '图片、图表、卡片封面占位' },
+      { name: '自定义尺寸', visual: 'width / height 覆盖默认值（数字或 CSS 长度）', scene: '与真实内容尺寸对齐，避免加载完成后版式跳动' },
+      { name: '组合骨架', visual: '多个 Skeleton 拼装（头像 + 文本行 + 矩形块）', scene: '卡片 / 列表行的整块占位' },
+    ],
+    apiProps: [
+      { name: 'shape', type: "'line' | 'circle' | 'rect'", defaultValue: "'line'", description: '形状；分别映射 h-4 w-full / rounded-full（默认 40×40）/ h-24 w-full 默认尺寸' },
+      { name: 'width', type: 'number | string', defaultValue: '—', description: '宽度（px 或 CSS 长度），覆盖 shape 默认值' },
+      { name: 'height', type: 'number | string', defaultValue: '—', description: '高度（px 或 CSS 长度），覆盖 shape 默认值' },
+      { name: 'className / style', type: 'string / CSSProperties', defaultValue: '—', description: '通用：根节点 class 合并 / 内联样式' },
+    ],
+    guidelines: [
+      '- 骨架形状与最终内容对齐（行列数、圆角、尺寸）：加载完成后布局不跳动，这是它优于 Spinner 的核心。',
+      '- 只在结构已知时使用：无法预估内容结构就改用 Spinner / LoadingOverlay，猜错的骨架会误导用户。',
+      '- 加载很快的局部刷新不要用骨架：一闪而过的灰块会被感知为页面抖动。',
+      '- 组合多个 Skeleton 时按真实版式排布（间距、对齐），并保持与数据态一致的行数上限。',
+      '- 数据加载失败要切换到 Empty / Result，不要让骨架无限脉冲。',
+    ].join('\n'),
+    examplesDo: [
+      '列表首屏：每行渲染 circle（头像）+ 两条 line（主副标题），行数与分页大小一致。',
+      '详情卡片：rect 占位图表区 + 多行 line 占位字段，形状与最终字段一一对应。',
+      '个人资料卡：circle 40×40 头像 + width 「60%」的姓名行 + width 「40%」的副标题行。',
+    ],
+    examplesDont: [
+      '确定无数据仍显示 Skeleton（用户以为还在加载，应使用 Empty）。',
+      '加载已知极快的局部刷新也用骨架（闪烁比留白更差）。',
+      '骨架形状与真实内容差异过大，加载完成后版式大幅跳变。',
+    ],
+  },
+
+  'component.spinner': {
+    dsl: {
+      "type": "Spinner",
+      "props": {
+        "size": "default"
+      }
+    },
+    whenToUse: [
+      '**何时使用**',
+      '',
+      '- 紧邻内容的局部处理中指示：按钮内、输入框后、行内的加载图标，只表示「这里在处理」。',
+      '- 加载位置与范围明确（就在图标旁），无需遮挡任何内容、也不阻断周围交互。',
+      '- 作为无包裹内容时的独立加载指示：LoadingOverlay 无 children 时同样退化为 Spinner + 文案。',
+      '',
+      '**何时不用**',
+      '',
+      '- 需要覆盖页面或区块并阻断操作：使用 LoadingOverlay，二者不是可互换的视觉变体。',
+      '- 结构已知的加载占位：使用 Skeleton（减少布局跳动）。',
+      '- 有明确进度的长任务：使用 Progress（Spinner 不表达完成度）。',
+      '- 全局页面级加载 / 路由切换：Spinner 只做局部指示，不替代路由级加载方案。',
+    ].join('\n'),
+    previewNote:
+      '静态结构：渲染为单个旋转图标 <svg data-slot="spinner" role="status" aria-label="Loading">（lucide Loader2Icon，animate-spin 纯 CSS 旋转，无原语依赖）；size 映射尺寸类：sm → size-3（12px）、default → size-4（16px）、lg → size-6（24px）。颜色继承当前文本色（currentColor），会随所在容器自动适配；无内建文案，需要说明时由调用方在旁侧渲染文本。',
+    variants: [
+      { name: 'sm 小', visual: 'size-3（12px）旋转图标', scene: '按钮内、行内等紧凑位置' },
+      { name: 'default 默认', visual: 'size-4（16px）旋转图标', scene: '常规局部加载指示；size 缺省即 default' },
+      { name: 'lg 大', visual: 'size-6（24px）旋转图标', scene: '区块中央、加载遮罩内的加载指示' },
+    ],
+    apiProps: [
+      { name: 'size', type: "'sm' | 'default' | 'lg'", defaultValue: "'default'", description: '尺寸，映射 size-3 / size-4 / size-6' },
+      { name: 'className / style', type: 'string / CSSProperties', defaultValue: '—', description: '通用：根节点 class 合并 / 内联样式' },
+    ],
+    guidelines: [
+      '- Spinner 是局部指示器：不阻断交互、不遮挡内容；需要阻断时用 LoadingOverlay。',
+      '- 颜色继承 currentColor：放在按钮或弱化文案中会自动适配，不要写死颜色而破坏主题。',
+      '- 只表示「处理中」不表示进度：能估算完成度时改用 Progress。',
+      '- 长时间处理要配文案（「正在保存…」）或超时提示，只有转圈用户无法判断是否卡死。',
+      '- 同一屏内避免多个 Spinner 同时旋转（按钮内与区块遮罩同时出现），会制造「整页都在等」的错觉。',
+    ].join('\n'),
+    examplesDo: [
+      '按钮内加载：内联 size=sm 的 Spinner + 文案「提交中」，按钮置 disabled。',
+      '区块中央加载：size=lg 居中渲染，配合一行「正在加载数据…」。',
+      '输入框后置校验中：size=sm 紧贴输入框右侧，不遮蔽输入内容。',
+    ],
+    examplesDont: [
+      '用 Spinner 覆盖内容区块充当加载层（不阻断也不遮挡，应使用 LoadingOverlay）。',
+      '有明确百分比的长任务用 Spinner（应使用 Progress）。',
+      '首屏结构已知的加载用 Spinner 代替骨架（版式跳动更明显）。',
     ],
   },
 };

@@ -11,6 +11,22 @@ import type { ComponentDetailContent } from './component-details.ts';
 
 export const basicDetailContents: Record<string, ComponentDetailContent> = {
   'component.tag': {
+    dsl: {
+      "type": "Tag",
+      "props": {
+        "text": "已发布",
+        "color": "success",
+        "closable": true
+      },
+      "events": {
+        "onClose": {
+          "action": "setState",
+          "params": {
+            "published": false
+          }
+        }
+      }
+    },
     whenToUse: [
       '**何时使用**',
       '',
@@ -57,6 +73,13 @@ export const basicDetailContents: Record<string, ComponentDetailContent> = {
     ],
   },
   'component.status': {
+    dsl: {
+      "type": "Status",
+      "props": {
+        "status": "processing",
+        "text": "同步中"
+      }
+    },
     whenToUse: [
       '**何时使用**',
       '',
@@ -99,6 +122,28 @@ export const basicDetailContents: Record<string, ComponentDetailContent> = {
     ],
   },
   'component.space': {
+    dsl: {
+      "type": "Space",
+      "props": {
+        "direction": "horizontal",
+        "size": "middle"
+      },
+      "children": [
+        {
+          "type": "Button",
+          "props": {
+            "text": "取消"
+          }
+        },
+        {
+          "type": "Button",
+          "props": {
+            "text": "保存",
+            "variant": "primary"
+          }
+        }
+      ]
+    },
     whenToUse: [
       '**何时使用**',
       '',
@@ -141,6 +186,20 @@ export const basicDetailContents: Record<string, ComponentDetailContent> = {
     ],
   },
   'component.container': {
+    dsl: {
+      "type": "Container",
+      "props": {
+        "size": "lg"
+      },
+      "children": [
+        {
+          "type": "Text",
+          "props": {
+            "text": "页面内容区"
+          }
+        }
+      ]
+    },
     whenToUse: [
       '**何时使用**',
       '',
@@ -182,6 +241,23 @@ export const basicDetailContents: Record<string, ComponentDetailContent> = {
     ],
   },
   'component.steps': {
+    dsl: {
+      "type": "Steps",
+      "props": {
+        "items": [
+          {
+            "title": "提交申请"
+          },
+          {
+            "title": "审核中"
+          },
+          {
+            "title": "完成"
+          }
+        ],
+        "current": 1
+      }
+    },
     whenToUse: [
       '**何时使用**',
       '',
@@ -224,6 +300,22 @@ export const basicDetailContents: Record<string, ComponentDetailContent> = {
     ],
   },
   'component.anchor': {
+    dsl: {
+      "type": "Anchor",
+      "props": {
+        "items": [
+          {
+            "href": "#sec-basic",
+            "title": "基础信息"
+          },
+          {
+            "href": "#sec-log",
+            "title": "操作日志"
+          }
+        ],
+        "offsetTop": 72
+      }
+    },
     whenToUse: [
       '**何时使用**',
       '',
@@ -267,6 +359,12 @@ export const basicDetailContents: Record<string, ComponentDetailContent> = {
     ],
   },
   'component.back-top': {
+    dsl: {
+      "type": "BackTop",
+      "props": {
+        "visibilityHeight": 400
+      }
+    },
     whenToUse: [
       '**何时使用**',
       '',
@@ -305,6 +403,20 @@ export const basicDetailContents: Record<string, ComponentDetailContent> = {
     ],
   },
   'component.affix': {
+    dsl: {
+      "type": "Affix",
+      "props": {
+        "offsetTop": 72
+      },
+      "children": [
+        {
+          "type": "Button",
+          "props": {
+            "text": "吸顶操作区"
+          }
+        }
+      ]
+    },
     whenToUse: [
       '**何时使用**',
       '',

@@ -11,6 +11,14 @@ import type { ComponentDetailContent } from './component-details.ts';
 
 export const mediaDetailContents: Record<string, ComponentDetailContent> = {
   'component.image-viewer': {
+    dsl: {
+      "type": "ImageViewer",
+      "props": {
+        "src": "https://example.com/diagram.png",
+        "alt": "架构图",
+        "preview": true
+      }
+    },
     whenToUse: [
       '**何时使用**',
       '',
@@ -50,6 +58,24 @@ export const mediaDetailContents: Record<string, ComponentDetailContent> = {
     ],
   },
   'component.gallery': {
+    dsl: {
+      "type": "Gallery",
+      "props": {
+        "columns": 3,
+        "items": [
+          {
+            "src": "https://example.com/photo-1.png",
+            "alt": "照片 1",
+            "caption": "办公区"
+          },
+          {
+            "src": "https://example.com/photo-2.png",
+            "alt": "照片 2",
+            "caption": "会议室"
+          }
+        ]
+      }
+    },
     whenToUse: [
       '**何时使用**',
       '',
@@ -89,6 +115,15 @@ export const mediaDetailContents: Record<string, ComponentDetailContent> = {
     ],
   },
   'component.video': {
+    dsl: {
+      "type": "Video",
+      "props": {
+        "src": "https://example.com/intro.mp4",
+        "poster": "https://example.com/intro-poster.png",
+        "controls": true,
+        "loop": true
+      }
+    },
     whenToUse: [
       '**何时使用**',
       '',
@@ -131,6 +166,13 @@ export const mediaDetailContents: Record<string, ComponentDetailContent> = {
     ],
   },
   'component.audio': {
+    dsl: {
+      "type": "Audio",
+      "props": {
+        "src": "https://example.com/meeting-notes.mp3",
+        "controls": true
+      }
+    },
     whenToUse: [
       '**何时使用**',
       '',
@@ -168,6 +210,15 @@ export const mediaDetailContents: Record<string, ComponentDetailContent> = {
     ],
   },
   'component.file-preview': {
+    dsl: {
+      "type": "FilePreview",
+      "props": {
+        "name": "月度经营分析.pdf",
+        "fileSize": 2485760,
+        "fileType": "application/pdf",
+        "src": "https://example.com/monthly.pdf"
+      }
+    },
     whenToUse: [
       '**何时使用**',
       '',
@@ -211,6 +262,20 @@ export const mediaDetailContents: Record<string, ComponentDetailContent> = {
     ],
   },
   'component.document-preview': {
+    dsl: {
+      "type": "DocumentPreview",
+      "props": {
+        "pages": [
+          {
+            "content": "第一页：项目背景与目标"
+          },
+          {
+            "content": "第二页：实施计划"
+          }
+        ],
+        "currentPage": 1
+      }
+    },
     whenToUse: [
       '**何时使用**',
       '',
@@ -251,6 +316,12 @@ export const mediaDetailContents: Record<string, ComponentDetailContent> = {
     ],
   },
   'component.rich-text': {
+    dsl: {
+      "type": "RichText",
+      "props": {
+        "html": "<p>富文本正文，<strong>加粗</strong>与<a href=\"#\">链接</a>。</p>"
+      }
+    },
     whenToUse: [
       '**何时使用**',
       '',
@@ -286,6 +357,12 @@ export const mediaDetailContents: Record<string, ComponentDetailContent> = {
     ],
   },
   'component.markdown': {
+    dsl: {
+      "type": "Markdown",
+      "props": {
+        "content": "# 文档标题\n\n正文段落，支持 **加粗** 与 [链接](https://example.com)。"
+      }
+    },
     whenToUse: [
       '**何时使用**',
       '',
@@ -322,6 +399,14 @@ export const mediaDetailContents: Record<string, ComponentDetailContent> = {
     ],
   },
   'component.code-block': {
+    dsl: {
+      "type": "CodeBlock",
+      "props": {
+        "code": "export const hello = () => console.log(\"hello\");",
+        "language": "ts",
+        "copyable": true
+      }
+    },
     whenToUse: [
       '**何时使用**',
       '',
@@ -360,6 +445,16 @@ export const mediaDetailContents: Record<string, ComponentDetailContent> = {
     ],
   },
   'component.diff-viewer': {
+    dsl: {
+      "type": "DiffViewer",
+      "props": {
+        "oldText": "const title = \"旧版本\";",
+        "newText": "const title = \"新版本\";",
+        "split": true,
+        "oldTitle": "上一版",
+        "newTitle": "当前版"
+      }
+    },
     whenToUse: [
       '**何时使用**',
       '',
@@ -399,6 +494,25 @@ export const mediaDetailContents: Record<string, ComponentDetailContent> = {
     ],
   },
   'component.json-viewer': {
+    dsl: {
+      "type": "JSONViewer",
+      "props": {
+        "data": {
+          "code": 0,
+          "data": {
+            "total": 128,
+            "items": [
+              {
+                "id": 1,
+                "name": "示例"
+              }
+            ]
+          }
+        },
+        "expandedDepth": 2,
+        "copyable": true
+      }
+    },
     whenToUse: [
       '**何时使用**',
       '',

@@ -10,6 +10,7 @@
  */
 import AssetDetail from '../../../templates/AssetDetail.astro';
 import ComponentPreviewSection from '../../../components/previews/ComponentPreviewSection.astro';
+import DslStructureSection from '../../../components/DslStructureSection.astro';
 import { isPreviewable } from '../../../components/previews/previewable';
 import { components } from '../../../assets-data/components';
 import { componentDetailContents } from '../../../assets-data/details/component-details';
@@ -101,6 +102,14 @@ const metaInfoBody = [
           '组件运行态预览待接入（后续批次）；接入前本页仅提供元信息与章节骨架。'),
       body: isPreviewable(component.id) ? ComponentPreviewSection : undefined,
       bodyProps: { componentId: component.id, note: detail?.previewNote },
+    },
+    {
+      title: 'DSL 结构',
+      notApplicable: detail?.dsl
+        ? undefined
+        : 'DSL 调用结构待资产接入（后续批次）；接入前请参考「API 属性」章节与运行时 DSL 文档。',
+      body: detail?.dsl ? DslStructureSection : undefined,
+      bodyProps: detail?.dsl ? { json: JSON.stringify(detail.dsl, null, 2) } : undefined,
     },
     {
       title: '何时用',

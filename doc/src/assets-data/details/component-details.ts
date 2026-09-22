@@ -19,10 +19,20 @@
  * - 第八批 15 个组件（AI 与会话，packages/ui components/chat 子目录）：
  *   见同目录 ai-chat-details.ts；其中 component.chat-message 以 ui 承接版
  *   覆盖下方早期（chat 消息模型）条目。
+ * - 第九批 51 个组件（通用 7 / 布局 7 / 导航 6 / 数据录入 11 / 数据展示 8 /
+ *   反馈 7）：API 属性与 DSL 结构核对自 packages/ui 对应适配器及
+ *   previews/basic-a|b|c.tsx，见同目录 general-details.ts /
+ *   layout-details.ts / navigation-details.ts，并追加至
+ *   data-entry-details.ts / data-display-details.ts / feedback-details.ts。
  */
+
+import type { DslNode } from '@pactor-app/core';
 
 import { aiChatDetailContents } from './ai-chat-details.ts';
 import { basicDetailContents } from './basic-details.ts';
+import { generalDetailContents } from './general-details.ts';
+import { layoutDetailContents } from './layout-details.ts';
+import { navigationDetailContents } from './navigation-details.ts';
 import { dataEntryDetailContents } from './data-entry-details.ts';
 import { dataDisplayDetailContents } from './data-display-details.ts';
 import { feedbackDetailContents } from './feedback-details.ts';
@@ -53,6 +63,8 @@ export interface ComponentDetailContent {
   previewNote: string;
   variants: ComponentVariant[];
   apiProps: ComponentApiProp[];
+  /** DSL 调用结构（DslNode 示例，构建期 JSON 序列化后展示于「DSL 结构」章节） */
+  dsl?: DslNode;
   /** 使用规范要点（markdown） */
   guidelines: string;
   /** 正例 */
@@ -63,6 +75,22 @@ export interface ComponentDetailContent {
 
 export const componentDetailContents: Record<string, ComponentDetailContent> = {
   'component.button': {
+    dsl: {
+      "type": "Button",
+      "props": {
+        "text": "提交订单",
+        "variant": "primary",
+        "size": "large"
+      },
+      "events": {
+        "onClick": {
+          "action": "setState",
+          "params": {
+            "submitted": true
+          }
+        }
+      }
+    },
     whenToUse: [
       '**何时使用**',
       '',
@@ -181,4 +209,9 @@ export const componentDetailContents: Record<string, ComponentDetailContent> = {
   // 第八批 15 个组件（packages/ui 真实实现已核对；
   // component.chat-message 以 ui 承接版覆盖上方 chat 消息模型条目）
   ...aiChatDetailContents,
+  // 第九批 51 个组件（通用 / 布局 / 导航新文件；数据录入 / 数据展示 / 反馈
+  // 已追加至各自分类文件）
+  ...generalDetailContents,
+  ...layoutDetailContents,
+  ...navigationDetailContents,
 };
