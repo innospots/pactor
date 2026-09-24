@@ -71,6 +71,7 @@ export default defineConfig({
             { label: '@pactor-app/app', slug: 'packages/app' },
             { label: '@pactor-app/vite-plugin', slug: 'packages/vite-plugin' },
             { label: '@pactor-app/cli', slug: 'packages/cli' },
+            { label: 'create-pactor-app', slug: 'packages/create-app' },
             { label: '@pactor-app/skill', slug: 'pactor-skill' },
           ],
         },
