@@ -1,0 +1,30 @@
+{
+  "name": "__APP_NAME__",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev -p 9011",
+    "build": "next build",
+    "start": "next start -p 9011",
+    "lint": "eslint"
+  },
+  "dependencies": {
+    "@pactor-app/core": "^1.20.0",
+    "@pactor-app/runtime": "^1.20.0",
+    "@pactor-app/ui": "^1.20.0",
+    "next": "16.3.5",
+    "pactor-app": "^1.20.0",
+    "react": "19.2.8",
+    "react-dom": "19.2.8"
+  },
+  "devDependencies": {
+    "@tailwindcss/postcss": "^4",
+    "@types/node": "^20",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "eslint": "^9",
+    "eslint-config-next": "16.3.5",
+    "tailwindcss": "^4",
+    "typescript": "^5"
+  }
+}

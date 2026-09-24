@@ -1,0 +1,48 @@
+{
+  "name": "create-pactor-app",
+  "version": "1.20.0",
+  "description": "Create a Pactor app from starter templates (pnpm create pactor-app)",
+  "keywords": [
+    "pactor",
+    "create",
+    "scaffold",
+    "starter",
+    "server-driven-ui"
+  ],
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/426-330/pactor.git",
+    "directory": "packages/create-app"
+  },
+  "homepage": "https://github.com/426-330/pactor/tree/main/packages/create-app",
+  "bugs": "https://github.com/426-330/pactor/issues",
+  "type": "module",
+  "bin": {
+    "create-pactor-app": "./dist/cli.js"
+  },
+  "main": "./dist/cli.js",
+  "sideEffects": false,
+  "engines": {
+    "node": ">=18"
+  },
+  "files": [
+    "dist",
+    "templates"
+  ],
+  "scripts": {
+    "build": "tsup",
+    "sync-templates": "node scripts/sync-templates.mjs",
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit",
+    "prepublishOnly": "pnpm build"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "devDependencies": {
+    "tsup": "^8.3.5",
+    "typescript": "^5.6.3",
+    "vitest": "^2.1.9"
+  }
+}
