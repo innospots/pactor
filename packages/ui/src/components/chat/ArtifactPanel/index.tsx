@@ -1,12 +1,12 @@
-import type { Registry } from '@pactor-app/core';
-import { useEffect, useState, type CSSProperties, type ReactNode } from 'react';
+import type { Registry } from "@pactor-app/core";
+import { useEffect, useState, type CSSProperties, type ReactNode } from "react";
 
-import { cn } from '../../../lib/utils.js';
-import { Button } from '../../components/Button/index.js';
-import { CodeBlock } from '../../components/CodeBlock/index.js';
-import { DropdownMenu } from '../../components/DropdownMenu/index.js';
-import { Icon } from '../../components/Icon/index.js';
-import { Markdown } from '../../components/Markdown/index.js';
+import { cn } from "../../../lib/utils.js";
+import { Button } from "../../components/Button/index.js";
+import { CodeBlock } from "../../components/CodeBlock/index.js";
+import { DropdownMenu } from "../../components/DropdownMenu/index.js";
+import { Icon } from "../../components/Icon/index.js";
+import { Markdown } from "../../components/Markdown/index.js";
 import {
   buildArtifactTree,
   isImageArtifact,
@@ -14,12 +14,12 @@ import {
   resolveArtifactIconName,
   type ArtifactTreeNode,
   type ChatPageArtifact,
-} from './artifact.js';
-import { downloadArtifact } from './download.js';
+} from "./artifact.js";
+import { downloadArtifact } from "./download.js";
 import {
   ArtifactDslContent,
   useArtifactPreviewRuntime,
-} from './dsl-preview.js';
+} from "./dsl-preview.js";
 
 /**
  * 自定义产物查看器：键为扩展名（小写不带点，如 'png' / 'md'）或 kind
@@ -127,7 +127,10 @@ function ArtifactTreeRow({
         className="flex w-full cursor-pointer items-center gap-2 rounded-md px-2 py-1.5 text-left text-sm hover:bg-accent"
         onClick={() => setOpen((value) => !value)}
       >
-        <span className="inline-flex transition-transform data-[open=true]:rotate-90" data-open={open}>
+        <span
+          className="inline-flex transition-transform data-[open=true]:rotate-90"
+          data-open={open}
+        >
           <Icon name="chevron-right" size={12} />
         </span>
         <Icon name="folder" size={13} />
@@ -151,7 +154,7 @@ function ArtifactTreeRow({
 function ArtifactImageContent({ artifact }: { artifact: ChatPageArtifact }) {
   const raw = String(artifact.content).trim();
   const src =
-    raw.startsWith('<svg') || raw.startsWith('<?xml')
+    raw.startsWith("<svg") || raw.startsWith("<?xml")
       ? `data:image/svg+xml;utf8,${encodeURIComponent(raw)}`
       : raw;
   return (
@@ -172,8 +175,7 @@ function ArtifactContent({
   viewers?: ArtifactViewers;
 }): ReactNode {
   const ext = resolveArtifactFileType(artifact);
-  const custom =
-    (ext ? viewers?.[ext] : undefined) ?? viewers?.[artifact.kind];
+  const custom = (ext ? viewers?.[ext] : undefined) ?? viewers?.[artifact.kind];
   if (custom) {
     return <>{custom(artifact)}</>;
   }
@@ -181,10 +183,10 @@ function ArtifactContent({
     return <ArtifactImageContent artifact={artifact} />;
   }
   switch (artifact.kind) {
-    case 'markdown':
+    case "markdown":
       return <Markdown content={String(artifact.content)} />;
 
-    case 'code':
+    case "code":
       return (
         <CodeBlock
           code={String(artifact.content)}
@@ -192,7 +194,7 @@ function ArtifactContent({
         />
       );
 
-    case 'text':
+    case "text":
       return (
         <pre
           data-slot="artifact-panel-text"
@@ -202,8 +204,10 @@ function ArtifactContent({
         </pre>
       );
 
-    case 'dsl':
-      return <ArtifactDslContent content={artifact.content} runtime={runtime} />;
+    case "dsl":
+      return (
+        <ArtifactDslContent content={artifact.content} runtime={runtime} />
+      );
 
     default:
       return null;
@@ -226,8 +230,8 @@ export function ArtifactPanel({
   artifacts,
   activeArtifactId,
   onSelectArtifact,
-  title = '产物',
-  emptyText = '暂无产物',
+  title = "产物",
+  emptyText = "暂无产物",
   onClose,
   onDownload,
   safeRegistry,
@@ -240,21 +244,20 @@ export function ArtifactPanel({
 
   // 产物目录列表视图：header 左端切换钮在 内容 / 列表 间切换；
   // 激活产物变化（新产物打开 / 下拉切换）自动回内容视图
-  const [view, setView] = useState<'content' | 'list'>('content');
+  const [view, setView] = useState<"content" | "list">("content");
   const activeId = activeArtifactId ?? artifact?.id;
   useEffect(() => {
-    setView('content');
+    setView("content");
   }, [activeId]);
   const hasArtifacts = artifacts !== undefined && artifacts.length > 0;
 
-  const headerTitle =
-    view === 'list' ? '产物目录' : (artifact?.title ?? title);
+  const headerTitle = view === "list" ? "产物目录" : (artifact?.title ?? title);
 
   return (
     <aside
       data-slot="artifact-panel"
       data-kind={artifact?.kind}
-      className={cn('flex h-full min-w-0 flex-col', className)}
+      className={cn("flex h-full min-w-0 flex-col", className)}
       style={style}
     >
       <div className="flex shrink-0 items-center gap-1 border-b border-border px-2 py-2.5">
@@ -262,8 +265,10 @@ export function ArtifactPanel({
           <Button
             icon="list"
             variant="text"
-            tooltip={view === 'list' ? '返回内容' : '产物目录'}
-            onClick={() => setView((value) => (value === 'list' ? 'content' : 'list'))}
+            tooltip={view === "list" ? "返回内容" : "产物目录"}
+            onClick={() =>
+              setView((value) => (value === "list" ? "content" : "list"))
+            }
           />
         ) : null}
         {hasArtifacts ? (
@@ -279,7 +284,7 @@ export function ArtifactPanel({
               data-slot="artifact-panel-menu-trigger"
               className="flex min-w-0 cursor-pointer items-center gap-1 rounded-md px-1.5 py-1 text-sm font-medium hover:bg-accent"
             >
-              {view !== 'list' && artifact ? (
+              {view !== "list" && artifact ? (
                 <ArtifactKindIcon artifact={artifact} />
               ) : null}
               <span className="truncate">{headerTitle}</span>
@@ -291,7 +296,7 @@ export function ArtifactPanel({
             {headerTitle}
           </span>
         )}
-        {view !== 'list' && artifact ? (
+        {view !== "list" && artifact ? (
           <span className="shrink-0 rounded-md bg-accent px-1.5 py-0.5 text-xs text-muted-foreground">
             {artifact.kind}
           </span>
@@ -302,8 +307,11 @@ export function ArtifactPanel({
             icon="download"
             variant="text"
             tooltip="下载产物"
+            className="px-2"
             onClick={() =>
-              onDownload ? onDownload(artifact) : void downloadArtifact(artifact)
+              onDownload
+                ? onDownload(artifact)
+                : void downloadArtifact(artifact)
             }
           />
         ) : null}
@@ -311,11 +319,12 @@ export function ArtifactPanel({
           icon="x"
           variant="text"
           tooltip="收起产物区"
+          className="px-2"
           onClick={() => onClose?.()}
         />
       </div>
-      <div className="min-h-0 flex-1 overflow-auto p-4">
-        {view === 'list' && artifacts !== undefined ? (
+      <div className="scrollbar-subtle min-h-0 flex-1 overflow-auto p-4">
+        {view === "list" && artifacts !== undefined ? (
           <ArtifactListView
             nodes={buildArtifactTree(artifacts)}
             activeId={activeId}

@@ -39,6 +39,8 @@ function baseProps(): Record<string, unknown> {
     artifacts: [
       { id: 'a1', kind: 'markdown', title: '报告.md', content: '# 报告' },
     ],
+    // 产物栏缺省不展示（组件约定），多数用例需要面板在场 → 非受控初始展开
+    defaultArtifactOpen: true,
   };
 }
 
@@ -92,13 +94,15 @@ describe('ChatPage', () => {
     expect(tip.closest('[data-side]')?.getAttribute('data-side')).toBe('right');
   });
 
-  it('产物区开关：非受控点击隐藏 / 受控仅经 onArtifactOpenChange 上报', async () => {
-    // 非受控：点击对话区头部开关后产物区消失
+  it('产物区开关：非受控点击隐藏 / 受控仅经 onArtifactOpenChange 上报；图标随展开态切换', async () => {
+    // 非受控：展开时图标为 panel-right-close，点击后产物区消失、图标变 panel-right-open
     const { container } = renderChatPage();
+    expect(container.querySelector('.lucide-panel-right-close')).not.toBeNull();
     fireEvent.click(
-      container.querySelector('.lucide-panel-right-open')!.closest('button')!,
+      container.querySelector('.lucide-panel-right-close')!.closest('button')!,
     );
     expect(container.querySelector('[data-slot=chat-page-artifact]')).toBeNull();
+    expect(container.querySelector('.lucide-panel-right-open')).not.toBeNull();
 
     // 受控：仅上报，不自行关闭
     const { container: c2, context } = renderChatPage(
@@ -106,10 +110,25 @@ describe('ChatPage', () => {
       { onArtifactOpenChange: { action: 'setState', params: { open: '${event}' } } },
     );
     fireEvent.click(
-      c2.querySelector('.lucide-panel-right-open')!.closest('button')!,
+      c2.querySelector('.lucide-panel-right-close')!.closest('button')!,
     );
     await expectEventState(context, 'open', false);
     expect(c2.querySelector('[data-slot=chat-page-artifact]')).not.toBeNull();
+  });
+
+  it('对话区头部右侧操作可自定义：替换缺省产物开关，点击经事件传出', async () => {
+    const { container, context } = renderChatPage(
+      { conversationHeaderAction: { icon: 'star', tooltip: '收藏会话' } },
+      { onConversationHeaderAction: { action: 'setState', params: { starred: true } } },
+    );
+
+    // 缺省产物开关被替换
+    expect(container.querySelector('.lucide-panel-right-open')).toBeNull();
+    expect(container.querySelector('.lucide-panel-right-close')).toBeNull();
+    fireEvent.click(
+      container.querySelector('.lucide-star')!.closest('button')!,
+    );
+    await expectEventState(context, 'starred', true);
   });
 
   it('发送：Welcome prompt 选择经 onSend 传出文本', async () => {
@@ -200,6 +219,28 @@ describe('ChatPage', () => {
     fireEvent.click(screen.getByText('空间 (14)').closest('button')!);
     await expectEventState(context, 'footerCollapsed', true);
     expect(screen.getByText('设计团队')).toBeTruthy();
+  });
+
+  it('点击「已生成 n 个产物」段打开产物区（受控经 onArtifactOpenChange 上报）', async () => {
+    const { context } = renderChatPage(
+      {
+        messages: [
+          {
+            id: 'm1',
+            role: 'assistant',
+            parts: [
+              { type: 'markdown', content: '结论' },
+              { type: 'artifacts', count: 1 },
+            ],
+          },
+        ],
+        artifactOpen: false,
+      },
+      { onArtifactOpenChange: { action: 'setState', params: { open: '${event}' } } },
+    );
+
+    fireEvent.click(screen.getByText('已生成 1 个产物'));
+    await expectEventState(context, 'open', true);
   });
 
   it('导航与会话事件：onMenuSelect / onSelectConversation 传出 key / id', async () => {

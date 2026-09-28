@@ -343,6 +343,7 @@ describe('ChatPage 产物区集成', () => {
             MD_ARTIFACT,
             { id: 'b2', kind: 'text', title: '便签.txt', content: 'hello' },
           ],
+          defaultArtifactOpen: true,
         },
         events: {
           onSelectArtifact: { action: 'setState', params: { picked: '${event}' } },

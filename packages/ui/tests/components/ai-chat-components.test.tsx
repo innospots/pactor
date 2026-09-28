@@ -274,6 +274,19 @@ describe('ToolCall', () => {
     expect(screen.getByText('42')).toBeTruthy();
     expectCommonProps(container.querySelector('[data-slot=tool-call]'));
   });
+
+  it('无参数且无结果时不可展开：无 chevron、头部非按钮', () => {
+    renderDsl({
+      type: 'ToolCall',
+      props: { name: 'search_docs', status: 'done' },
+    });
+
+    const trigger = document.querySelector('[data-slot=tool-call-trigger]')!;
+    expect(trigger.tagName).not.toBe('BUTTON');
+    expect(trigger.querySelector('.lucide-chevron-right')).toBeNull();
+    expect(trigger.querySelector('.lucide-chevron-down')).toBeNull();
+    expect(document.querySelector('[data-slot=tool-call-body]')).toBeNull();
+  });
 });
 
 describe('ChatMessage', () => {
@@ -284,6 +297,7 @@ describe('ChatMessage', () => {
         role: 'assistant',
         agent: { name: '小 P' },
         time: '10:24',
+        showSender: true,
         parts: [
           { type: 'thinking', content: '先检索再回答' },
           { type: 'markdown', content: '**结论**：已完成' },
@@ -303,7 +317,11 @@ describe('ChatMessage', () => {
     expect(screen.getByText('结论').tagName).toBe('STRONG');
     expect(screen.getByText('search')).toBeTruthy();
     expect(screen.getByText('已生成')).toBeTruthy();
-    expect(screen.getByText('重试')).toBeTruthy();
+    // 操作按钮图标化：无文字 label，仅图标 + Tooltip（label 进 aria-label）
+    const retry = document.querySelector('[data-slot=chat-message-action][data-action=retry]')!;
+    expect(retry.textContent).toBe('');
+    expect(retry.getAttribute('aria-label')).toBe('重试');
+    expect(retry.querySelector('[data-slot=icon]')).not.toBeNull();
   });
 
   it('streaming 态渲染光标；操作经 onAction 传出 name', async () => {
@@ -318,8 +336,30 @@ describe('ChatMessage', () => {
       events: { onAction: { action: 'setState', params: { acted: '${event}' } } },
     });
 
-    fireEvent.click(screen.getByText('copy'));
+    fireEvent.click(document.querySelector('[data-slot=chat-message-action][data-action=copy]')!);
     await expectEventState(context, 'acted', 'copy');
+  });
+
+  it('system 消息居中弱提示：无 Sender、无气泡，12px 浅色文字', () => {
+    const { container } = renderDsl({
+      type: 'ChatMessage',
+      props: {
+        role: 'system',
+        time: '10:24',
+        parts: [{ type: 'text', content: '会话已开启' }],
+      },
+    });
+
+    const root = container.querySelector('[data-slot=chat-message]')!;
+    expect(root.className).toContain('items-center');
+    // 不渲染 Sender / 气泡
+    expect(container.querySelector('[data-slot=sender]')).toBeNull();
+    expect(container.querySelector('[data-slot=bubble]')).toBeNull();
+    const part = container.querySelector('[data-slot=chat-message-system-part]')!;
+    expect(part.textContent).toBe('会话已开启');
+    expect(part.className).toContain('text-center');
+    expect(part.className).toContain('text-xs');
+    expect(part.className).toContain('text-muted-foreground');
   });
 
   it('streaming 光标；通用 props', () => {
@@ -354,8 +394,38 @@ describe('MessageList', () => {
     expect(screen.getByText('问题')).toBeTruthy();
     expect(screen.getByText('回答')).toBeTruthy();
 
-    fireEvent.click(screen.getByText('retry'));
+    fireEvent.click(document.querySelector('[data-slot=chat-message-action][data-action=retry]')!);
     await expectEventState(context, 'acted', { id: 'm2', action: 'retry' });
+  });
+
+  it('artifacts 段（产物计数）点击经 onOpenArtifacts 传出 { id }；未提供时纯展示', async () => {
+    const { context } = renderDsl({
+      type: 'MessageList',
+      props: {
+        messages: [
+          {
+            id: 'm1',
+            role: 'assistant',
+            parts: [{ type: 'artifacts', count: 2 }],
+          },
+        ],
+      },
+      events: { onOpenArtifacts: { action: 'setState', params: { clicked: '${event}' } } },
+    });
+
+    const el = screen.getByText('已生成 2 个产物');
+    expect(el.closest('button')).not.toBeNull();
+    fireEvent.click(el);
+    await expectEventState(context, 'clicked', { id: 'm1' });
+
+    // 未提供 onOpenArtifacts：纯展示，不可点击
+    renderDsl({
+      type: 'ChatMessage',
+      props: { role: 'assistant', parts: [{ type: 'artifacts', count: 1 }] },
+    });
+    const plain = screen.getAllByText('已生成 1 个产物').pop()!;
+    expect(plain.closest('button')).toBeNull();
+    expect(plain.closest('[data-slot=chat-message-artifacts]')).not.toBeNull();
   });
 
   it('通用 props', () => {

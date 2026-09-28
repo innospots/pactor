@@ -205,6 +205,9 @@
   }
 }
 @layer utilities {
+  .\@container {
+    container-type: inline-size;
+  }
   .pointer-events-none {
     pointer-events: none;
   }
@@ -564,6 +567,36 @@
   .aspect-square {
     aspect-ratio: 1 / 1;
   }
+  .scrollbar-subtle {
+    scrollbar-width: thin;
+    scrollbar-color: var(--muted-foreground) transparent;
+    @supports (color: color-mix(in lab, red, red)) {
+      scrollbar-color: color-mix(in oklch, var(--muted-foreground) 30%, transparent) transparent;
+    }
+    &::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    &::-webkit-scrollbar-track {
+      background: transparent;
+    }
+    &::-webkit-scrollbar-thumb {
+      background: var(--muted-foreground);
+      @supports (color: color-mix(in lab, red, red)) {
+        background: color-mix(in oklch, var(--muted-foreground) 25%, transparent);
+      }
+      border-radius: 999px;
+    }
+    &::-webkit-scrollbar-thumb:hover {
+      background: var(--muted-foreground);
+      @supports (color: color-mix(in lab, red, red)) {
+        background: color-mix(in oklch, var(--muted-foreground) 45%, transparent);
+      }
+    }
+    &::-webkit-scrollbar-corner {
+      background: transparent;
+    }
+  }
   .size-1\.5 {
     width: calc(var(--spacing) * 1.5);
     height: calc(var(--spacing) * 1.5);
@@ -720,6 +753,9 @@
   .max-h-\[32rem\] {
     max-height: 32rem;
   }
+  .max-h-\[40\%\] {
+    max-height: 40%;
+  }
   .max-h-\[70vh\] {
     max-height: 70vh;
   }
@@ -827,6 +863,9 @@
   }
   .w-\[52px\] {
     width: 52px;
+  }
+  .w-\[61\.8cqw\] {
+    width: 61.8cqw;
   }
   .w-\[100px\] {
     width: 100px;

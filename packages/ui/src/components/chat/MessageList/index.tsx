@@ -15,6 +15,8 @@ export interface MessageListProps {
   autoScroll?: boolean;
   /** 消息操作事件，传出 { id, action }（Renderer 绑定 events.onAction） */
   onAction?: (event: { id?: string; action: string }) => void;
+  /** artifacts 段（「已生成 n 个产物」）点击事件，传出 { id } */
+  onOpenArtifacts?: (event: { id?: string }) => void;
   /** 通用：根节点 class（与内置样式合并；高度由外层或 style 约束） */
   className?: string;
   /** 通用：根节点内联样式 */
@@ -26,7 +28,7 @@ export interface MessageListProps {
  * 逐条渲染 ChatMessage，消息变化自动滚到底部（autoScroll 可关）；
  * 高度由外层容器约束（组件本身只提供滚动语义）。
  */
-export function MessageList({ messages = [], autoScroll = true, onAction, className, style }: MessageListProps) {
+export function MessageList({ messages = [], autoScroll = true, onAction, onOpenArtifacts, className, style }: MessageListProps) {
   const listRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -49,6 +51,7 @@ export function MessageList({ messages = [], autoScroll = true, onAction, classN
           key={message.id ?? index}
           {...message}
           onAction={(action) => onAction?.({ id: message.id, action })}
+          onOpenArtifacts={onOpenArtifacts ? () => onOpenArtifacts({ id: message.id }) : undefined}
         />
       ))}
     </div>
