@@ -140,7 +140,7 @@ export function ChatMessage({
           align={isUser ? 'end' : 'start'}
         />
       ) : null}
-      <div className={cn('flex min-w-0 flex-col gap-2', isUser ? 'items-end' : 'w-full max-w-full')}>
+      <div className={cn('flex min-w-0 w-full max-w-full flex-col gap-2', isUser && 'items-end')}>
         {parts.map((part, index) => (
           <PartView key={index} part={part} role={role} />
         ))}
