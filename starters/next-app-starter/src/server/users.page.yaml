@@ -1,0 +1,85 @@
+# 用户列表页 DSL：由 /api/pages/users 懒加载下发（见 src/server/sitemap.ts）。
+# 数据来自 /api/users（接口侧鉴权，需登录且具备 user:view 权限）。
+dsl: "1.0"
+page:
+  id: users
+  title: 用户列表
+  permission: user:view
+
+state:
+  keyword: ""
+  role: ""
+
+dataSources:
+  users:
+    type: http
+    autoLoad: true
+    request:
+      method: GET
+      url: http://localhost:9011/api/users
+      params:
+        keyword: ${state.keyword}
+        role: ${state.role}
+
+body:
+  type: Page
+  props: { title: 用户列表 }
+  children:
+    - type: Card
+      props: { title: 筛选 }
+      children:
+        - type: Form
+          props: { layout: inline }
+          events:
+            onSubmit:
+              - action: setState
+                params:
+                  keyword: ${event.keyword}
+                  role: ${event.role}
+              - action: reload
+                params: { dataSource: users }
+          children:
+            - type: Input
+              props: { name: keyword, label: 关键词, placeholder: 姓名 / 用户名 }
+            - type: Select
+              props:
+                name: role
+                label: 角色
+                placeholder: 请选择角色
+                options:
+                  - { label: 管理员, value: admin }
+                  - { label: 成员, value: member }
+                  - { label: 访客, value: guest }
+            - type: Button
+              props: { text: 查询, variant: primary, submit: true }
+    - type: Card
+      props: { title: 用户数据 }
+      children:
+        - type: Table
+          props:
+            dataSource: ${data.users}
+            loading: ${dataStatus.users.loading}
+            rowKey: id
+            pagination: { pageSize: 5 }
+            columns:
+              - { title: 姓名, dataIndex: name }
+              - { title: 用户名, dataIndex: username }
+              - title: 角色
+                dataIndex: role
+                cell:
+                  type: Badge
+                  props:
+                    text: ${row.role}
+                    variant: secondary
+              - { title: 邮箱, dataIndex: email }
+              - { title: 创建时间, dataIndex: createdAt }
+              - title: 操作
+                cell:
+                  type: Button
+                  props: { text: 查看, variant: primary, size: small }
+                  events:
+                    onClick:
+                      - action: message
+                        params:
+                          messageType: info
+                          text: 用户 ${row.name}（${row.username}）

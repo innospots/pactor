@@ -114,7 +114,9 @@ export interface MarkdownRendererProps {
 
 /**
  * Markdown 渲染器：标题 / 列表 / 表格（GFM）/ 代码块 / 引用 / 链接 / 图片 /
- * 数学公式（KaTeX）。容器带基础 class `@pactor-app/markdown`，样式由宿主主题决定。
+ * 数学公式（KaTeX）。容器带基础 class `pactor-markdown`；内置排版样式见
+ * 包根 `styles.css`（`import '@pactor-app/markdown/styles.css'`），令牌化
+ * 设计可被宿主主题覆盖。
  * 技术选型参考 DeepTutor web：react-markdown + remark-gfm + remark-math +
  * rehype-katex + react-syntax-highlighter（Light 构建）。
  *

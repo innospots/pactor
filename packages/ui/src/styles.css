@@ -32,6 +32,8 @@
 
 @import 'tailwindcss';
 @import 'tw-animate-css';
+/* @pactor-app/markdown 内置排版（.pactor-markdown 作用域，令牌回退到本表语义变量） */
+@import '@pactor-app/markdown/styles.css';
 
 /* 语义令牌 → 工具类桥接（运行时解析 var()，支持暗色覆盖与宿主换肤） */
 @theme inline {

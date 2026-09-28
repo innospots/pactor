@@ -116,9 +116,11 @@ import { Watermark } from './components/Watermark/index.js';
 
 // AI 与会话类扩展组件（chat 子目录）
 import { AgentStatus } from './chat/AgentStatus/index.js';
+import { ArtifactPanel } from './chat/ArtifactPanel/index.js';
 import { Attachment } from './chat/Attachment/index.js';
 import { Bubble } from './chat/Bubble/index.js';
 import { ChatMessage } from './chat/ChatMessage/index.js';
+import { ChatPage } from './chat/ChatPage/index.js';
 import { Citation } from './chat/Citation/index.js';
 import { Composer } from './chat/Composer/index.js';
 import { ConversationList } from './chat/ConversationList/index.js';
@@ -292,6 +294,8 @@ export const builtinComponents = {
   Attachment,
   ToolCall,
   ChatMessage,
+  ChatPage,
+  ArtifactPanel,
   MessageList,
   Composer,
   ConversationList,

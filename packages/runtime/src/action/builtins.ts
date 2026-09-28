@@ -73,6 +73,37 @@ export function registerBuiltinActions(registry: ActionRegistry): void {
     }
   });
 
+  // 服务层调用桥（request 仅覆盖 HTTP 出口）：params.service 服务名，
+  // params.params 入参（表达式求值后传入），返回值为动作结果 data
+  register('service.call', async (action, ctx) => {
+    const name = action.params?.['service'];
+    if (typeof name !== 'string' || name === '') {
+      return {
+        ok: false,
+        error: new Error('[@pactor-app/runtime] service.call 缺少 params.service'),
+      };
+    }
+    const handler = ctx.context.services.get(name);
+    if (!handler) {
+      return {
+        ok: false,
+        error: new Error(`[@pactor-app/runtime] service 未注册: ${name}`),
+      };
+    }
+    try {
+      const callParams = action.params?.['params'];
+      const data = await handler(
+        isRecord(callParams) ? callParams : {},
+      );
+      return { ok: true, data };
+    } catch (cause) {
+      return {
+        ok: false,
+        error: cause instanceof Error ? cause : new Error(String(cause)),
+      };
+    }
+  });
+
   // 串行：任一失败即中断并返回该失败（skipped 视为成功继续）
   register('sequence', async (action, ctx) => {
     for (const child of asActions(action.params?.['actions'])) {

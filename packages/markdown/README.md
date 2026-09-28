@@ -26,7 +26,17 @@ import { MarkdownRenderer } from '@pactor-app/markdown';
 <MarkdownRenderer content={'### 标题\n\n- 列表项\n\n| 表 | 格 |\n| - | - |\n| 1 | 2 |'} />;
 ```
 
-支持：标题 / 段落 / 粗体 / 斜体 / 有序与无序列表 / GFM 表格与删除线 / 围栏代码块（`<pre><code class="language-xxx">`，供后续语法高亮扩展）与行内代码 / 引用 / 链接 / 图片。容器带基础 class `@pactor-app/markdown`，样式由宿主主题决定。
+支持：标题 / 段落 / 粗体 / 斜体 / 有序与无序列表 / GFM 表格与删除线 / 围栏代码块（`<pre><code class="language-xxx">`，供后续语法高亮扩展）与行内代码 / 引用 / 链接 / 图片。容器带基础 class `pactor-markdown`。
+
+## 内置样式
+
+包内置一套可读性优先的排版样式（标题层级、表格斑马纹、代码块、引用、任务列表、KaTeX 溢出动滚等），引入即可生效：
+
+```ts
+import '@pactor-app/markdown/styles.css';
+```
+
+样式全部作用域在 `.pactor-markdown` 容器内：颜色 / 圆角经 `--pactor-markdown-*` 令牌解析，优先跟随 shadcn 语义令牌（`--foreground` / `--border` / `--primary` 等，暗色主题自动适配），无宿主主题时回退 GitHub 风格配色（跟随系统明暗）。宿主可重定义令牌或以更高优先级规则覆盖（如 `@pactor-app/chat` 的消息流主题）。启用 `math` 时仍需自行引入 `katex/dist/katex.min.css`。
 
 ## DSL 使用
 

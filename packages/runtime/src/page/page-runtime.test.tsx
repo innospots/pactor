@@ -97,6 +97,7 @@ describe('初始化链路', () => {
       'request',
       'resetState',
       'sequence',
+      'service.call',
       'setState',
     ]);
   });

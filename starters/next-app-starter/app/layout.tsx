@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { PactorApp } from "@/pactor/App";
 import "@pactor-app/ui/styles.css";
 import "./globals.css";
+import "./theme.css";
 
 export const metadata: Metadata = {
   title: "Pactor 动态页面 Starter",
@@ -10,10 +11,7 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
-    <html
-      lang="zh-CN"
-      className={`h-full antialiased`}
-    >
+    <html lang="zh-CN" className={`h-full antialiased`}>
       <body className="min-h-full flex flex-col">
         {/*
          * PactorApp 挂在 Next layout 而非 page：App Router 导航时 page 会

@@ -222,7 +222,7 @@ function MenuEntry({
         collapsed && 'justify-center px-0',
         selected
           ? 'bg-(--menu-active-background) font-medium text-(--menu-active-foreground)'
-          : 'cursor-pointer text-muted-foreground hover:bg-(--menu-hover-background)/50 hover:text-foreground',
+          : 'cursor-pointer text-foreground hover:bg-(--menu-hover-background)/50',
         item.disabled && 'cursor-not-allowed opacity-50 hover:bg-transparent hover:text-muted-foreground',
       )}
       style={mode === 'inline' && depth > 0 && !collapsed ? { paddingLeft: 12 + depth * 16 } : undefined}

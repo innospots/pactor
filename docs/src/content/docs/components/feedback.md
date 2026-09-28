@@ -191,6 +191,7 @@ description: 反馈与弹层类 DSL 组件——Alert / Dialog / AlertDialog / D
 | prop | 类型 | 缺省 | 说明 |
 | --- | --- | --- | --- |
 | `content` | string | — | 提示文案（纯文本） |
+| `side` | 'top' \| 'right' \| 'bottom' \| 'left' | 'top' | 浮层朝向（如图标栏 hover 时用 `right` 展示在图标右侧） |
 | children | DslNode[] | — | 触发元素（DSL 子树，经 Renderer children 机制渲染） |
 
 `className` / `style` 挂在提示浮层根节点（非触发元素）。

@@ -1,4 +1,8 @@
+import { readFileSync } from "node:fs";
+import { join } from "node:path";
+
 import type { PageDsl } from "@pactor-app/core";
+import { parseDocument } from "yaml";
 
 import type { LayoutDsl, SitemapResource } from "pactor-app";
 
@@ -358,7 +362,15 @@ const monthlyDetailPage: PageDsl = {
 };
 
 /** 懒加载页（pageDsl 不下发，客户端经 loadPage 按需获取） */
+const usersPage: PageDsl = parseDocument(
+  readFileSync(join(process.cwd(), "src/server/users.page.yaml"), "utf8"),
+).toJS() as PageDsl;
+
 const lazyPages: Record<string, { version: number; pageDsl: PageDsl }> = {
+  users: {
+    version: 1,
+    pageDsl: usersPage,
+  },
   monthly: {
     version: 7,
     pageDsl: {
@@ -432,12 +444,17 @@ function canViewReports(user: DemoUser | null): boolean {
   return user !== null && user.permissions.includes("report:view");
 }
 
+function canViewUsers(user: DemoUser | null): boolean {
+  return user !== null && user.permissions.includes("user:view");
+}
+
 /**
  * 按会话构建 sitemap：同一 URL，不同用户拿到不同内容。
  * 匿名 → 仅 public 页；guest → + 首页；admin → + 报表组。
  */
 export function buildSitemap(user: DemoUser | null): SitemapResource {
   const reports = canViewReports(user);
+  const users = canViewUsers(user);
 
   const pages: SitemapResource["pages"] = [
     { id: "login", path: "/login", title: "登录", version: 1, pageDsl: loginPage },
@@ -451,6 +468,10 @@ export function buildSitemap(user: DemoUser | null): SitemapResource {
   ];
   if (user) {
     pages.push({ id: "home", path: "/", title: "首页", version: 3, pageDsl: homePage });
+  }
+  if (users) {
+    // 懒加载：pageDsl 由 src/server/users.page.yaml 经 /api/pages/users 下发
+    pages.push({ id: "users", path: "/users", title: "用户列表", version: 1 });
   }
   if (reports) {
     // 懒加载：不下发 pageDsl，仅 id / path / version（monthly@7）
@@ -488,13 +509,25 @@ export function buildSitemap(user: DemoUser | null): SitemapResource {
     // path / title 缺省继承自 pages[]，仅导航元数据（icon / order / layout）
     menus.push({ id: "home", type: "page", pageId: "home", title: "首页", icon: "home", layout: "admin", order: 1 });
   }
+  if (users) {
+    menus.push({
+      id: "users",
+      type: "page",
+      pageId: "users",
+      title: "用户列表",
+      icon: "users",
+      layout: "admin",
+      permission: "user:view",
+      order: 2,
+    });
+  }
   if (reports) {
     menus.push({
       id: "reports",
       type: "group",
       title: "报表",
       icon: "chart",
-      order: 2,
+      order: 3,
       children: [
         {
           id: "monthly",
@@ -522,14 +555,14 @@ export function buildSitemap(user: DemoUser | null): SitemapResource {
       title: "帮助",
       path: "https://github.com/",
       external: true,
-      order: 3,
+      order: 4,
     });
   }
 
   return {
     id: "site",
     resourceType: "sitemap",
-    version: 12,
+    version: 13,
     dslVersion: "1.0",
     updatedAt: new Date().toISOString(),
     app: { name: "动态页面 Starter" },
@@ -552,6 +585,9 @@ export function getLazyPage(
     return null;
   }
   if (pageId === "monthly" && !canViewReports(user)) {
+    return null;
+  }
+  if (pageId === "users" && !canViewUsers(user)) {
     return null;
   }
   return entry;
