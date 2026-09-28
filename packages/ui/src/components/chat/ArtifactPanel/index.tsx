@@ -257,7 +257,7 @@ export function ArtifactPanel({
       className={cn('flex h-full min-w-0 flex-col', className)}
       style={style}
     >
-      <div className="flex shrink-0 items-center gap-1 border-b border-border px-2 py-2">
+      <div className="flex shrink-0 items-center gap-1 border-b border-border px-2 py-2.5">
         {hasArtifacts ? (
           <Button
             icon="list"
