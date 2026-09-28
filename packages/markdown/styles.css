@@ -1,0 +1,261 @@
+/**
+ * @pactor-app/markdown 内置排版样式：可读性优先的 Markdown 主题。
+ *
+ * 使用：import '@pactor-app/markdown/styles.css';
+ *
+ * 主题约定：
+ * - 全部规则作用域在 .pactor-markdown 容器内，不污染全局；
+ * - 颜色 / 圆角经 --pactor-markdown-* 令牌解析，优先引用 shadcn 语义
+ *   令牌（--foreground / --muted-foreground / --border / --muted /
+ *   --primary / --radius），宿主（如 @pactor-app/ui 主题、暗色
+ *   [data-pactor-theme='dark']）接入后自动跟随；
+ * - 无宿主主题时回退到 GitHub 风格浅色 / 暗色（light-dark() 跟随系统）；
+ * - 宿主可用更高优先级规则或重定义 --pactor-markdown-* 令牌覆盖
+ *   （如 @pactor-app/chat 的 .pactor-chat-view .pactor-markdown 主题）。
+ */
+
+.pactor-markdown {
+  --pactor-markdown-fg: var(--foreground, light-dark(#1f2328, #e6edf3));
+  --pactor-markdown-muted-fg: var(--muted-foreground, light-dark(#59636e, #9198a1));
+  --pactor-markdown-border: var(--border, light-dark(#d1d9e0, #3d444d));
+  --pactor-markdown-muted-bg: var(--muted, light-dark(#f6f8fa, #262c36));
+  --pactor-markdown-code-bg: var(--muted, light-dark(#eff1f3, #2a3139));
+  --pactor-markdown-link: var(--primary, light-dark(#0969da, #4493f8));
+  --pactor-markdown-quote-border: var(--border, light-dark(#d1d9e0, #3d444d));
+  --pactor-markdown-radius: var(--radius, 6px);
+
+  color: var(--pactor-markdown-fg);
+  line-height: 1.75;
+  overflow-wrap: break-word;
+}
+
+/* 首尾元素去外边距，便于嵌入气泡 / 卡片等容器 */
+.pactor-markdown > :first-child {
+  margin-top: 0;
+}
+
+.pactor-markdown > :last-child {
+  margin-bottom: 0;
+}
+
+/* ---------- 标题 ---------- */
+
+.pactor-markdown h1,
+.pactor-markdown h2,
+.pactor-markdown h3,
+.pactor-markdown h4,
+.pactor-markdown h5,
+.pactor-markdown h6 {
+  margin: 1.4em 0 0.6em;
+  font-weight: 600;
+  line-height: 1.35;
+}
+
+.pactor-markdown h1 {
+  font-size: 1.5em;
+  padding-bottom: 0.3em;
+  border-bottom: 1px solid var(--pactor-markdown-border);
+}
+
+.pactor-markdown h2 {
+  font-size: 1.3em;
+  padding-bottom: 0.25em;
+  border-bottom: 1px solid var(--pactor-markdown-border);
+}
+
+.pactor-markdown h3 {
+  font-size: 1.15em;
+}
+
+.pactor-markdown h4 {
+  font-size: 1.05em;
+}
+
+.pactor-markdown h5,
+.pactor-markdown h6 {
+  font-size: 1em;
+}
+
+.pactor-markdown h6 {
+  color: var(--pactor-markdown-muted-fg);
+}
+
+/* ---------- 段落与列表 ---------- */
+
+.pactor-markdown p {
+  margin: 0.75em 0;
+}
+
+.pactor-markdown ul,
+.pactor-markdown ol {
+  margin: 0.75em 0;
+  padding-left: 1.6em;
+}
+
+/* 显式声明项目符号：宿主带 Tailwind preflight 等 reset（list-style: none）时
+ * 依然保持列表语义可读 */
+.pactor-markdown ul {
+  list-style: disc;
+}
+
+.pactor-markdown ul ul {
+  list-style: circle;
+}
+
+.pactor-markdown ul ul ul {
+  list-style: square;
+}
+
+.pactor-markdown ol {
+  list-style: decimal;
+}
+
+.pactor-markdown li::marker {
+  color: var(--pactor-markdown-muted-fg);
+}
+
+.pactor-markdown li + li {
+  margin-top: 0.3em;
+}
+
+.pactor-markdown li > ul,
+.pactor-markdown li > ol {
+  margin: 0.3em 0;
+}
+
+/* GFM 任务列表 */
+.pactor-markdown li input[type='checkbox'] {
+  margin: 0 0.45em 0 0;
+  vertical-align: -0.1em;
+}
+
+.pactor-markdown li:has(> input[type='checkbox']:first-child) {
+  list-style: none;
+  margin-left: -1.6em;
+}
+
+/* ---------- 引用 / 分割线 ---------- */
+
+.pactor-markdown blockquote {
+  margin: 0.75em 0;
+  padding: 0.4em 1em;
+  border-left: 3px solid var(--pactor-markdown-quote-border);
+  border-radius: 0 var(--pactor-markdown-radius) var(--pactor-markdown-radius) 0;
+  background: var(--pactor-markdown-muted-bg);
+  color: var(--pactor-markdown-muted-fg);
+}
+
+.pactor-markdown blockquote > :first-child {
+  margin-top: 0;
+}
+
+.pactor-markdown blockquote > :last-child {
+  margin-bottom: 0;
+}
+
+.pactor-markdown hr {
+  margin: 1.5em 0;
+  border: 0;
+  border-top: 1px solid var(--pactor-markdown-border);
+}
+
+/* ---------- 链接 / 强调 ---------- */
+
+.pactor-markdown a {
+  color: var(--pactor-markdown-link);
+  text-decoration: none;
+}
+
+.pactor-markdown a:hover {
+  text-decoration: underline;
+}
+
+.pactor-markdown strong {
+  font-weight: 600;
+}
+
+.pactor-markdown mark {
+  padding: 0 0.2em;
+  border-radius: 3px;
+}
+
+/* ---------- 代码 ---------- */
+
+.pactor-markdown code,
+.pactor-markdown pre {
+  font-family: ui-monospace, 'SF Mono', SFMono-Regular, Menlo, Consolas,
+    'Liberation Mono', monospace;
+}
+
+/* 行内代码 */
+.pactor-markdown :not(pre) > code {
+  padding: 0.15em 0.4em;
+  border-radius: 4px;
+  background: var(--pactor-markdown-code-bg);
+  font-size: 0.875em;
+}
+
+/* 围栏代码块（含高亮后的 pre） */
+.pactor-markdown pre {
+  margin: 0.85em 0;
+  padding: 12px 14px;
+  border: 1px solid var(--pactor-markdown-border);
+  border-radius: var(--pactor-markdown-radius);
+  background: var(--pactor-markdown-muted-bg);
+  font-size: 0.875em;
+  line-height: 1.6;
+  overflow-x: auto;
+}
+
+.pactor-markdown pre > code {
+  padding: 0;
+  border: 0;
+  background: transparent;
+  font-size: inherit;
+}
+
+/* ---------- 表格（GFM） ---------- */
+
+.pactor-markdown table {
+  display: block;
+  width: max-content;
+  max-width: 100%;
+  margin: 0.85em 0;
+  border-collapse: collapse;
+  overflow-x: auto;
+  font-size: 0.925em;
+}
+
+.pactor-markdown th,
+.pactor-markdown td {
+  padding: 6px 14px;
+  border: 1px solid var(--pactor-markdown-border);
+}
+
+.pactor-markdown th {
+  background: var(--pactor-markdown-muted-bg);
+  font-weight: 600;
+}
+
+.pactor-markdown tr:nth-child(even) td {
+  background: var(--pactor-markdown-muted-bg);
+}
+
+/* ---------- 图片 / 数学公式 ---------- */
+
+.pactor-markdown img {
+  max-width: 100%;
+  border-radius: var(--pactor-markdown-radius);
+  box-sizing: border-box;
+}
+
+.pactor-markdown .katex {
+  font-size: 1.05em;
+}
+
+.pactor-markdown .katex-display {
+  margin: 0.85em 0;
+  padding: 4px 0;
+  overflow-x: auto;
+  overflow-y: hidden;
+}

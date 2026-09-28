@@ -373,6 +373,23 @@ export { Composer } from './chat/Composer/index.js';
 export type { ComposerProps } from './chat/Composer/index.js';
 export { ConversationList } from './chat/ConversationList/index.js';
 export type { ConversationItemData, ConversationListProps } from './chat/ConversationList/index.js';
+export { ArtifactPanel } from './chat/ArtifactPanel/index.js';
+export type {
+  ArtifactPanelProps,
+  ArtifactViewer,
+  ArtifactViewers,
+} from './chat/ArtifactPanel/index.js';
+export { buildArtifactTree } from './chat/ArtifactPanel/artifact.js';
+export type {
+  ArtifactTreeNode,
+  ChatPageArtifact,
+} from './chat/ArtifactPanel/artifact.js';
+export { ChatPage } from './chat/ChatPage/index.js';
+export type {
+  ChatPageBrand,
+  ChatPageMenuItem,
+  ChatPageProps,
+} from './chat/ChatPage/index.js';
 
 // 图表组件集（第九批：src/components/chart 目录，echarts 渲染）
 export { MetricCard } from './chart/MetricCard/index.js';

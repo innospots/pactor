@@ -825,8 +825,14 @@
   .w-80 {
     width: calc(var(--spacing) * 80);
   }
+  .w-\[52px\] {
+    width: 52px;
+  }
   .w-\[100px\] {
     width: 100px;
+  }
+  .w-\[264px\] {
+    width: 264px;
   }
   .w-auto {
     width: auto;
@@ -1622,6 +1628,9 @@
   }
   .py-2 {
     padding-block: calc(var(--spacing) * 2);
+  }
+  .py-2\.5 {
+    padding-block: calc(var(--spacing) * 2.5);
   }
   .py-3 {
     padding-block: calc(var(--spacing) * 3);
@@ -2733,6 +2742,9 @@
   .data-\[active\=true\]\:border-ring[data-active="true"] {
     border-color: var(--ring);
   }
+  .data-\[active\=true\]\:bg-accent[data-active="true"] {
+    background-color: var(--accent);
+  }
   .data-\[active\=true\]\:bg-sidebar-accent[data-active="true"] {
     background-color: var(--sidebar-accent);
   }
@@ -2767,6 +2779,9 @@
   }
   .data-\[instant\]\:transition-none[data-instant] {
     transition-property: none;
+  }
+  .data-\[open\=true\]\:rotate-90[data-open="true"] {
+    rotate: 90deg;
   }
   .data-\[orientation\=horizontal\]\:h-px[data-orientation="horizontal"] {
     height: 1px;
@@ -3647,6 +3662,180 @@
   syntax: "*";
   inherits: false;
   initial-value: 0;
+}
+.pactor-markdown {
+  --pactor-markdown-fg: var(--foreground, light-dark(#1f2328, #e6edf3));
+  --pactor-markdown-muted-fg: var(--muted-foreground, light-dark(#59636e, #9198a1));
+  --pactor-markdown-border: var(--border, light-dark(#d1d9e0, #3d444d));
+  --pactor-markdown-muted-bg: var(--muted, light-dark(#f6f8fa, #262c36));
+  --pactor-markdown-code-bg: var(--muted, light-dark(#eff1f3, #2a3139));
+  --pactor-markdown-link: var(--primary, light-dark(#0969da, #4493f8));
+  --pactor-markdown-quote-border: var(--border, light-dark(#d1d9e0, #3d444d));
+  --pactor-markdown-radius: var(--radius, 6px);
+  color: var(--pactor-markdown-fg);
+  line-height: 1.75;
+  overflow-wrap: break-word;
+}
+.pactor-markdown > :first-child {
+  margin-top: 0;
+}
+.pactor-markdown > :last-child {
+  margin-bottom: 0;
+}
+.pactor-markdown h1, .pactor-markdown h2, .pactor-markdown h3, .pactor-markdown h4, .pactor-markdown h5, .pactor-markdown h6 {
+  margin: 1.4em 0 0.6em;
+  font-weight: 600;
+  line-height: 1.35;
+}
+.pactor-markdown h1 {
+  font-size: 1.5em;
+  padding-bottom: 0.3em;
+  border-bottom: 1px solid var(--pactor-markdown-border);
+}
+.pactor-markdown h2 {
+  font-size: 1.3em;
+  padding-bottom: 0.25em;
+  border-bottom: 1px solid var(--pactor-markdown-border);
+}
+.pactor-markdown h3 {
+  font-size: 1.15em;
+}
+.pactor-markdown h4 {
+  font-size: 1.05em;
+}
+.pactor-markdown h5, .pactor-markdown h6 {
+  font-size: 1em;
+}
+.pactor-markdown h6 {
+  color: var(--pactor-markdown-muted-fg);
+}
+.pactor-markdown p {
+  margin: 0.75em 0;
+}
+.pactor-markdown ul, .pactor-markdown ol {
+  margin: 0.75em 0;
+  padding-left: 1.6em;
+}
+.pactor-markdown ul {
+  list-style: disc;
+}
+.pactor-markdown ul ul {
+  list-style: circle;
+}
+.pactor-markdown ul ul ul {
+  list-style: square;
+}
+.pactor-markdown ol {
+  list-style: decimal;
+}
+.pactor-markdown li::marker {
+  color: var(--pactor-markdown-muted-fg);
+}
+.pactor-markdown li + li {
+  margin-top: 0.3em;
+}
+.pactor-markdown li > ul, .pactor-markdown li > ol {
+  margin: 0.3em 0;
+}
+.pactor-markdown li input[type='checkbox'] {
+  margin: 0 0.45em 0 0;
+  vertical-align: -0.1em;
+}
+.pactor-markdown li:has(> input[type='checkbox']:first-child) {
+  list-style: none;
+  margin-left: -1.6em;
+}
+.pactor-markdown blockquote {
+  margin: 0.75em 0;
+  padding: 0.4em 1em;
+  border-left: 3px solid var(--pactor-markdown-quote-border);
+  border-radius: 0 var(--pactor-markdown-radius) var(--pactor-markdown-radius) 0;
+  background: var(--pactor-markdown-muted-bg);
+  color: var(--pactor-markdown-muted-fg);
+}
+.pactor-markdown blockquote > :first-child {
+  margin-top: 0;
+}
+.pactor-markdown blockquote > :last-child {
+  margin-bottom: 0;
+}
+.pactor-markdown hr {
+  margin: 1.5em 0;
+  border: 0;
+  border-top: 1px solid var(--pactor-markdown-border);
+}
+.pactor-markdown a {
+  color: var(--pactor-markdown-link);
+  text-decoration: none;
+}
+.pactor-markdown a:hover {
+  text-decoration: underline;
+}
+.pactor-markdown strong {
+  font-weight: 600;
+}
+.pactor-markdown mark {
+  padding: 0 0.2em;
+  border-radius: 3px;
+}
+.pactor-markdown code, .pactor-markdown pre {
+  font-family: ui-monospace, 'SF Mono', SFMono-Regular, Menlo, Consolas, 'Liberation Mono', monospace;
+}
+.pactor-markdown :not(pre) > code {
+  padding: 0.15em 0.4em;
+  border-radius: 4px;
+  background: var(--pactor-markdown-code-bg);
+  font-size: 0.875em;
+}
+.pactor-markdown pre {
+  margin: 0.85em 0;
+  padding: 12px 14px;
+  border: 1px solid var(--pactor-markdown-border);
+  border-radius: var(--pactor-markdown-radius);
+  background: var(--pactor-markdown-muted-bg);
+  font-size: 0.875em;
+  line-height: 1.6;
+  overflow-x: auto;
+}
+.pactor-markdown pre > code {
+  padding: 0;
+  border: 0;
+  background: transparent;
+  font-size: inherit;
+}
+.pactor-markdown table {
+  display: block;
+  width: max-content;
+  max-width: 100%;
+  margin: 0.85em 0;
+  border-collapse: collapse;
+  overflow-x: auto;
+  font-size: 0.925em;
+}
+.pactor-markdown th, .pactor-markdown td {
+  padding: 6px 14px;
+  border: 1px solid var(--pactor-markdown-border);
+}
+.pactor-markdown th {
+  background: var(--pactor-markdown-muted-bg);
+  font-weight: 600;
+}
+.pactor-markdown tr:nth-child(even) td {
+  background: var(--pactor-markdown-muted-bg);
+}
+.pactor-markdown img {
+  max-width: 100%;
+  border-radius: var(--pactor-markdown-radius);
+  box-sizing: border-box;
+}
+.pactor-markdown .katex {
+  font-size: 1.05em;
+}
+.pactor-markdown .katex-display {
+  margin: 0.85em 0;
+  padding: 4px 0;
+  overflow-x: auto;
+  overflow-y: hidden;
 }
 :root {
   color-scheme: light;

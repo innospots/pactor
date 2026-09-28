@@ -125,6 +125,23 @@ describe('Tooltip', () => {
     await screen.findByText('提示');
     expectCommonProps(document.querySelector('[data-slot=tooltip-content]'));
   });
+
+  it('side 控制浮层朝向（right → data-side=right）', async () => {
+    renderDsl({
+      type: 'Tooltip',
+      props: { content: '新建任务', side: 'right' },
+      children: [{ type: 'Button', props: { icon: 'plus' } }],
+    });
+
+    fireEvent.focus(document.querySelector('[data-slot=tooltip-trigger-wrap]')!);
+    await screen.findByText('新建任务');
+    expect(
+      document
+        .querySelector('[data-slot=tooltip-content]')
+        ?.closest('[data-side]')
+        ?.getAttribute('data-side'),
+    ).toBe('right');
+  });
 });
 
 describe('HoverCard', () => {

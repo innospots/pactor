@@ -1,8 +1,9 @@
 import type { ActionConfig } from '@pactor-app/core';
+import { Registry } from '@pactor-app/core';
 import { describe, expect, it, vi } from 'vitest';
 
 import { createRuntimeContext } from '../context/context.js';
-import type { RuntimeContext } from '../context/context.js';
+import type { RuntimeContext, ServiceHandler } from '../context/context.js';
 import { registerBuiltinActions } from './builtins.js';
 import { ActionEngine } from './engine.js';
 
@@ -282,6 +283,60 @@ describe('内置动作 request', () => {
 
     expect(result.ok).toBe(false);
     expect(result.error?.message).toBe('500');
+  });
+});
+
+describe('内置动作 service.call', () => {
+  it('调用已注册服务并返回结果，params 表达式已求值', async () => {
+    const handler = vi.fn(async (params: Record<string, unknown>) => ({
+      echo: params['id'],
+    }));
+    const services = new Registry<ServiceHandler>('ServiceRegistry');
+    services.register('customer.detail', handler);
+    const { engine } = setup({ state: { id: '7' }, services });
+
+    const result = await engine.execute({
+      action: 'service.call',
+      params: {
+        service: 'customer.detail',
+        params: { id: '${state.id}' },
+      },
+    });
+
+    expect(result.ok).toBe(true);
+    expect(result.data).toEqual({ echo: '7' });
+    expect(handler).toHaveBeenCalledWith({ id: '7' });
+  });
+
+  it('缺少 service 名 / 服务未注册时受控失败', async () => {
+    const { engine } = setup();
+
+    const missing = await engine.execute({ action: 'service.call', params: {} });
+    expect(missing.ok).toBe(false);
+    expect(missing.error?.message).toContain('缺少 params.service');
+
+    const unregistered = await engine.execute({
+      action: 'service.call',
+      params: { service: 'noop' },
+    });
+    expect(unregistered.ok).toBe(false);
+    expect(unregistered.error?.message).toContain('service 未注册: noop');
+  });
+
+  it('服务抛错收敛为受控失败，不抛出', async () => {
+    const services = new Registry<ServiceHandler>('ServiceRegistry');
+    services.register('broken', async () => {
+      throw new Error('boom');
+    });
+    const { engine } = setup({ services });
+
+    const result = await engine.execute({
+      action: 'service.call',
+      params: { service: 'broken' },
+    });
+
+    expect(result.ok).toBe(false);
+    expect(result.error?.message).toBe('boom');
   });
 });
 
