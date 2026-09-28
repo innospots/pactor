@@ -68,7 +68,7 @@ const store = {
             content:
               "**结论：存在高风险话术。**\n\n- 「限时免费领鸡蛋」属于典型引流钩子\n- 「专家义诊」无资质背书，建议删除\n- 群接龙付款环节缺少退款说明\n\n详细分析已生成到产物区。",
           },
-          { type: "status", text: "已生成 1 个产物" },
+          { type: "artifacts", count: 1 },
         ],
         actions: [
           { name: "copy", label: "复制" },
@@ -112,7 +112,7 @@ function buildReply(text: string): ChatMessageData {
         type: "markdown",
         content: `已收到「${text}」。\n\n我整理了一份初稿并放入右侧产物区，你可以继续补充要求，我会迭代更新。`,
       },
-      { type: "status", text: "已生成 1 个产物" },
+      { type: "artifacts", count: 1 },
     ],
     actions: [
       { name: "copy", label: "复制" },
@@ -196,7 +196,7 @@ const chatPage: PageDsl = {
     activeConversationId: "c1",
     activeMenu: "",
     activeArtifactId: "",
-    showArtifact: true,
+    showArtifact: false,
     sending: false,
   },
   dataSources: {

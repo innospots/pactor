@@ -26,11 +26,80 @@ export interface DslValidationResult {
   warnings: DslValidationError[];
 }
 
-const ajv = new Ajv({ allErrors: true, strict: false });
-ajv.addSchema(actionConfigSchema);
-ajv.addSchema(dslSourceRefSchema);
-ajv.addSchema(dslNodeSchema);
-ajv.addSchema(pageDslSchema);
+/**
+ * Ajv 实例（首次使用时惰性初始化）：
+ * 禁代码生成的运行时（Cloudflare Workers / workerd 等）中 Ajv 校验器
+ * 经代码生成编译，addSchema / getSchema 均抛 EvalError——命中后降级为
+ * 跳过 Schema 校验（仅告警一次），DSL 校验由开发期 Node 环境承担。
+ * （惰性化同时避免模块加载即付出编译成本；模块级直接初始化会在
+ * 该类环境的 import 阶段就抛错，把引用页面整体打挂。）
+ */
+let ajv: Ajv | null | undefined;
+/** 是否已就「跳过校验」告警过 */
+let codegenUnavailableWarned = false;
+
+function isCodeGenerationError(error: unknown): boolean {
+  return (
+    error instanceof EvalError ||
+    (error instanceof Error && /Code generation from strings/.test(error.message))
+  );
+}
+
+/** 取 Ajv 实例；禁代码生成环境返回 null（调用方降级跳过校验） */
+function getAjv(): Ajv | null {
+  if (ajv !== undefined) {
+    return ajv;
+  }
+  try {
+    const instance = new Ajv({ allErrors: true, strict: false });
+    instance.addSchema(actionConfigSchema);
+    instance.addSchema(dslSourceRefSchema);
+    instance.addSchema(dslNodeSchema);
+    instance.addSchema(pageDslSchema);
+    ajv = instance;
+  } catch (error) {
+    if (isCodeGenerationError(error)) {
+      warnCodegenUnavailable();
+      ajv = null;
+    } else {
+      throw error;
+    }
+  }
+  return ajv;
+}
+
+function warnCodegenUnavailable(): void {
+  if (!codegenUnavailableWarned) {
+    codegenUnavailableWarned = true;
+    // 不经 console 直接引用（包 tsconfig 无 DOM lib，DTS 构建报错）
+    (
+      globalThis as { console?: { warn: (message: string) => void } }
+    ).console?.warn(
+      '[@pactor-app/schema] 当前运行时禁止代码生成（如 Cloudflare Workers），DSL Schema 校验已跳过',
+    );
+  }
+}
+
+/** 取已编译校验器；禁代码生成环境返回 undefined（调用方降级跳过校验） */
+function getCompiledValidator(schemaId: string): ValidateFunction | undefined {
+  const instance = getAjv();
+  if (!instance) {
+    return undefined;
+  }
+  try {
+    const validate = instance.getSchema(schemaId);
+    if (!validate) {
+      throw new Error(`schema not registered: ${schemaId}`);
+    }
+    return validate;
+  } catch (error) {
+    if (isCodeGenerationError(error)) {
+      warnCodegenUnavailable();
+      return undefined;
+    }
+    throw error;
+  }
+}
 
 function toStructuredErrors(errors: ErrorObject[]): DslValidationError[] {
   return errors.map((error) => {
@@ -50,20 +119,16 @@ function toStructuredErrors(errors: ErrorObject[]): DslValidationError[] {
   });
 }
 
-function getValidator(): ValidateFunction {
-  const validate = ajv.getSchema(PAGE_DSL_SCHEMA_ID);
-  if (!validate) {
-    throw new Error(`schema not registered: ${PAGE_DSL_SCHEMA_ID}`);
-  }
-  return validate;
-}
-
 /**
  * 校验 Page DSL 文档是否符合根结构 Schema。
  * 校验通过时 errors 为空数组；warnings 为提示级信息（不阻断校验）。
+ * 禁代码生成的运行时（如 Cloudflare Workers）跳过 Schema 校验，仅保留 warnings。
  */
 export function validatePageDsl(document: unknown): DslValidationResult {
-  const validate = getValidator();
+  const validate = getCompiledValidator(PAGE_DSL_SCHEMA_ID);
+  if (!validate) {
+    return { valid: true, errors: [], warnings: collectWarnings(document) };
+  }
   const valid = validate(document) as boolean;
   return {
     valid,
@@ -92,11 +157,12 @@ function collectWarnings(document: unknown): DslValidationError[] {
 
 /**
  * 校验单个 DslNode（如远端动态加载的子树），返回结构化错误列表（空数组为通过）。
+ * 禁代码生成的运行时空数组返回（跳过校验）。
  */
 export function validateDslNode(value: unknown): DslValidationError[] {
-  const validate = ajv.getSchema(DSL_NODE_SCHEMA_ID);
+  const validate = getCompiledValidator(DSL_NODE_SCHEMA_ID);
   if (!validate) {
-    throw new Error(`schema not registered: ${DSL_NODE_SCHEMA_ID}`);
+    return [];
   }
   const valid = validate(value) as boolean;
   return valid ? [] : toStructuredErrors(validate.errors ?? []);
@@ -104,9 +170,9 @@ export function validateDslNode(value: unknown): DslValidationError[] {
 
 /** 校验单个 DslSourceRef（children 数组中的引用元素） */
 export function validateDslSourceRef(value: unknown): DslValidationError[] {
-  const validate = ajv.getSchema(DSL_SOURCE_REF_SCHEMA_ID);
+  const validate = getCompiledValidator(DSL_SOURCE_REF_SCHEMA_ID);
   if (!validate) {
-    throw new Error(`schema not registered: ${DSL_SOURCE_REF_SCHEMA_ID}`);
+    return [];
   }
   const valid = validate(value) as boolean;
   return valid ? [] : toStructuredErrors(validate.errors ?? []);

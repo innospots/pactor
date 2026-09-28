@@ -26,8 +26,9 @@ export interface ThinkingProps {
 }
 
 /**
- * Thinking 适配器（shadcn kit）：推理 / 处理中状态卡片——
- * 头部（brain 图标 + 标题 + chevron）可折叠，进行中图标脉冲；
+ * Thinking 适配器（shadcn kit）：推理 / 处理中状态——
+ * 无边框无底色：头部（brain 图标 + 标题 + chevron 紧随其后）可折叠，
+ * 进行中图标脉冲；展开后内容仅以浅色文字呈现。
  * 展开态非受控（defaultExpanded）或受控（expanded + onToggle）。
  */
 export function Thinking({
@@ -55,28 +56,30 @@ export function Thinking({
     <div
       data-slot="thinking"
       data-status={status}
-      className={cn('w-full overflow-hidden rounded-md border border-border bg-muted/50', className)}
+      className={cn('w-full', className)}
       style={style}
     >
       <button
         type="button"
         data-slot="thinking-trigger"
         aria-expanded={isExpanded}
-        className="flex w-full items-center gap-2 px-3 py-2 text-left text-sm"
+        className="flex w-full cursor-pointer items-center gap-2 py-1 text-left text-sm"
         onClick={toggle}
       >
         <span className={cn('text-muted-foreground', status === 'thinking' && 'animate-pulse motion-reduce:animate-none')}>
           <Icon name="brain" size="sm" />
         </span>
-        <span data-slot="thinking-title" className="flex-1 text-muted-foreground">
+        <span data-slot="thinking-title" className="text-muted-foreground">
           {resolvedTitle}
         </span>
-        <Icon name={isExpanded ? 'chevron-down' : 'chevron-right'} size="sm" />
+        <span className="text-muted-foreground">
+          <Icon name={isExpanded ? 'chevron-down' : 'chevron-right'} size="sm" />
+        </span>
       </button>
       {isExpanded && content ? (
         <div
           data-slot="thinking-content"
-          className="border-t border-border px-3 py-2 text-sm whitespace-pre-wrap text-muted-foreground"
+          className="py-1 pl-6 text-sm whitespace-pre-wrap text-muted-foreground"
         >
           {content}
         </div>

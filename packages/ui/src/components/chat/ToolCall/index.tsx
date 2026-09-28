@@ -42,49 +42,70 @@ function renderValue(value: unknown): string {
 }
 
 /**
- * ToolCall 适配器（shadcn kit）：工具调用卡片——头部（terminal 图标 +
- * 名称 + 状态 + 耗时 + chevron）可折叠，展开展示参数（JSON 缩进）与结果；
- * 缺省 running 展开、done / error 折叠。
+ * ToolCall 适配器（shadcn kit）：工具调用——无边框无底色：头部
+ * （terminal 图标 + 名称 + 状态 + 耗时 + chevron 紧随其后）可折叠，
+ * 展开后参数 / 结果仅以浅色文字呈现；缺省 running 展开、done / error 折叠。
  */
 export function ToolCall({ name, params, status = 'done', result, durationMs, defaultExpanded, className, style }: ToolCallProps) {
   const [expanded, setExpanded] = useState(defaultExpanded ?? status === 'running');
   const meta = statusIcon[status];
   const paramsText = renderValue(params);
+  // 无参数且无结果时不可展开：头部纯展示，不渲染 chevron、不响应点击
+  const hasDetail = Boolean(paramsText) || Boolean(result);
+
+  const headerInner = (
+    <>
+      <span className="shrink-0 text-muted-foreground">
+        <Icon name="terminal" size="sm" />
+      </span>
+      <span data-slot="tool-call-name" className="min-w-0 truncate font-medium">
+        {name ?? '工具调用'}
+      </span>
+      <span className={cn('shrink-0', meta.className, meta.spin && 'animate-spin motion-reduce:animate-none')}>
+        <Icon name={meta.icon} size="sm" />
+      </span>
+      {durationMs !== undefined ? (
+        <span className="shrink-0 text-xs text-muted-foreground">{(durationMs / 1000).toFixed(1)}s</span>
+      ) : null}
+      {hasDetail ? (
+        <span className="shrink-0 text-muted-foreground">
+          <Icon name={expanded ? 'chevron-down' : 'chevron-right'} size="sm" />
+        </span>
+      ) : null}
+    </>
+  );
 
   return (
     <div
       data-slot="tool-call"
       data-status={status}
-      className={cn('w-full overflow-hidden rounded-md border border-border', className)}
+      className={cn('w-full', className)}
       style={style}
     >
-      <button
-        type="button"
-        data-slot="tool-call-trigger"
-        aria-expanded={expanded}
-        className="flex w-full items-center gap-2 px-3 py-2 text-left text-sm"
-        onClick={() => setExpanded((value) => !value)}
-      >
-        <span className="shrink-0 text-muted-foreground">
-          <Icon name="terminal" size="sm" />
-        </span>
-        <span data-slot="tool-call-name" className="min-w-0 flex-1 truncate font-medium">
-          {name ?? '工具调用'}
-        </span>
-        <span className={cn('shrink-0', meta.className, meta.spin && 'animate-spin motion-reduce:animate-none')}>
-          <Icon name={meta.icon} size="sm" />
-        </span>
-        {durationMs !== undefined ? (
-          <span className="shrink-0 text-xs text-muted-foreground">{(durationMs / 1000).toFixed(1)}s</span>
-        ) : null}
-        <Icon name={expanded ? 'chevron-down' : 'chevron-right'} size="sm" />
-      </button>
-      {expanded ? (
-        <div data-slot="tool-call-body" className="flex flex-col gap-2 border-t border-border px-3 py-2">
+      {hasDetail ? (
+        <button
+          type="button"
+          data-slot="tool-call-trigger"
+          aria-expanded={expanded}
+          className="flex w-full cursor-pointer items-center gap-2 py-1 text-left text-sm"
+          onClick={() => setExpanded((value) => !value)}
+        >
+          {headerInner}
+        </button>
+      ) : (
+        <div
+          data-slot="tool-call-trigger"
+          className="flex w-full items-center gap-2 py-1 text-left text-sm"
+        >
+          {headerInner}
+        </div>
+      )}
+      {hasDetail && expanded ? (
+        <div data-slot="tool-call-body" className="flex flex-col gap-2 py-1 pl-6">
           {paramsText ? (
             <div>
               <div className="text-xs font-medium text-muted-foreground">参数</div>
-              <pre data-slot="tool-call-params" className="mt-1 overflow-x-auto rounded-sm bg-muted p-2 text-xs whitespace-pre-wrap">
+              <pre data-slot="tool-call-params" className="mt-1 overflow-x-auto text-xs whitespace-pre-wrap text-muted-foreground">
                 {paramsText}
               </pre>
             </div>
@@ -92,7 +113,7 @@ export function ToolCall({ name, params, status = 'done', result, durationMs, de
           {result ? (
             <div>
               <div className="text-xs font-medium text-muted-foreground">结果</div>
-              <pre data-slot="tool-call-result" className="mt-1 overflow-x-auto rounded-sm bg-muted p-2 text-xs whitespace-pre-wrap">
+              <pre data-slot="tool-call-result" className="mt-1 overflow-x-auto text-xs whitespace-pre-wrap text-muted-foreground">
                 {result}
               </pre>
             </div>

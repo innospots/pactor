@@ -79,6 +79,14 @@ export interface ChatPageProps {
   onFooterSectionToggle?: (collapsed: boolean) => void;
   /** 对话区头部标题（通常为当前会话标题） */
   conversationTitle?: string;
+  /**
+   * 对话区头部右侧自定义操作（图标 + 提示）；提供时替换缺省的产物区
+   * 开关钮，点击经 onConversationHeaderAction 传出（产物区开关可经
+   * 受控 artifactOpen + onArtifactOpenChange 自行接线）
+   */
+  conversationHeaderAction?: { icon?: string; label?: string; tooltip?: string };
+  /** 对话区头部右侧自定义操作点击事件 */
+  onConversationHeaderAction?: () => void;
   messages?: MessageListItem[];
   /** 发送中（禁用 Composer 发送钮，由调用方完成后复位） */
   sending?: boolean;
@@ -113,7 +121,7 @@ export interface ChatPageProps {
   onDownloadArtifact?: (artifact: ChatPageArtifact) => void;
   /** 产物区受控开关（提供即受控，配合 onArtifactOpenChange 闭环） */
   artifactOpen?: boolean;
-  /** 非受控初始开关，缺省 true */
+  /** 非受控初始开关，缺省 false（产物栏不默认展示） */
   defaultArtifactOpen?: boolean;
   /** 产物区开关变化事件，传出 boolean */
   onArtifactOpenChange?: (open: boolean) => void;
@@ -126,8 +134,8 @@ export interface ChatPageProps {
 /**
  * ChatPage 对话工作页（shadcn kit）：四区整页布局——
  * 最左图标栏（railItems 独立定义，仅图标，hover 右侧 Tooltip 展示
- * 菜单名；不传则整栏隐藏）、展开菜单区（品牌 + 图标文字导航 +
- * 可折叠的会话列表与底部分组）、中间对话区（头部 / Welcome /
+ * 菜单名；不传则整栏隐藏）、展开菜单区（品牌 + 图标文字导航固定于顶部，
+ * 可折叠的会话列表与底部分组各占独立滚动区，内容短时下方留空）、中间对话区（头部 / Welcome /
  * MessageList / Composer）、最右产物区（ArtifactPanel：内建产物预览、
  * 目录树与下载，可显隐；展示时经 Resizable 拖拽调节与对话区的宽度）。
  * 数据与行为全部经 props / events 进出，
@@ -159,6 +167,8 @@ export function ChatPage({
   defaultFooterSectionCollapsed = false,
   onFooterSectionToggle,
   conversationTitle,
+  conversationHeaderAction,
+  onConversationHeaderAction,
   messages = [],
   sending,
   composerPlaceholder,
@@ -175,7 +185,7 @@ export function ChatPage({
   artifactViewers,
   onDownloadArtifact,
   artifactOpen,
-  defaultArtifactOpen = true,
+  defaultArtifactOpen = false,
   onArtifactOpenChange,
   className,
   style,
@@ -234,35 +244,55 @@ export function ChatPage({
         className="flex shrink-0 items-center justify-between border-b border-border px-4 py-2.5"
       >
         <Text text={conversationTitle} strong />
-        <Tooltip content={artifactTitle} side="bottom">
-          <Button
-            icon="panel-right-open"
-            variant="text"
-            onClick={() => setOpen(!open)}
-          />
-        </Tooltip>
+        {conversationHeaderAction ? (
+          <Tooltip content={conversationHeaderAction.tooltip ?? conversationHeaderAction.label} side="bottom">
+            <Button
+              text={conversationHeaderAction.label}
+              icon={conversationHeaderAction.icon}
+              variant="text"
+              onClick={() => onConversationHeaderAction?.()}
+            />
+          </Tooltip>
+        ) : (
+          <Tooltip content={open ? '收起产物区' : artifactTitle} side="bottom">
+            <Button
+              icon={open ? 'panel-right-close' : 'panel-right-open'}
+              variant="text"
+              onClick={() => setOpen(!open)}
+            />
+          </Tooltip>
+        )}
       </div>
-      {messages.length === 0 ? (
-        <Welcome
-          title={welcome?.title}
-          description={welcome?.description}
-          prompts={welcome?.prompts}
-          style={{ flex: 1 }}
-          onSelect={(value) => onSend?.(value)}
+      {/* 内容列宽相对主区域（cqw）：产物栏关闭时对话列占主区域 61.8%（居中），
+          产物栏拖宽时分栏收窄、对话列逐渐撑满分栏（max-w-full 封顶） */}
+      <div
+        data-slot="chat-page-conversation-body"
+        className="mx-auto flex min-h-0 w-[61.8cqw] max-w-full flex-1 flex-col"
+      >
+        {messages.length === 0 ? (
+          <Welcome
+            title={welcome?.title}
+            description={welcome?.description}
+            prompts={welcome?.prompts}
+            style={{ flex: 1 }}
+            onSelect={(value) => onSend?.(value)}
+          />
+        ) : (
+          <MessageList
+            messages={messages}
+            className="scrollbar-subtle"
+            style={{ flex: 1, minHeight: 0, padding: 16 }}
+            onAction={onMessageAction}
+            onOpenArtifacts={() => setOpen(true)}
+          />
+        )}
+        <Composer
+          placeholder={composerPlaceholder}
+          loading={sending}
+          style={{ padding: 16, flexShrink: 0 }}
+          onSubmit={(text) => onSend?.(text)}
         />
-      ) : (
-        <MessageList
-          messages={messages}
-          style={{ flex: 1, minHeight: 0, padding: 16 }}
-          onAction={onMessageAction}
-        />
-      )}
-      <Composer
-        placeholder={composerPlaceholder}
-        loading={sending}
-        style={{ padding: 16, borderTop: '1px solid var(--border)', flexShrink: 0 }}
-        onSubmit={(text) => onSend?.(text)}
-      />
+      </div>
     </div>
   );
 
@@ -311,13 +341,13 @@ export function ChatPage({
           {railFooterItems.map(railButton)}
         </div>
       ) : null}
-      {/* 展开菜单区：品牌 + 图标文字导航 + 会话列表 */}
+      {/* 展开菜单区：品牌 + 图标文字导航（固定）+ 会话 / 底部分组（各自独立滚动） */}
       <div
         data-slot="chat-page-menu"
-        className="flex h-full w-[264px] shrink-0 flex-col gap-2 overflow-auto border-r border-border px-2 py-3"
+        className="flex h-full w-[264px] shrink-0 flex-col gap-2 overflow-hidden border-r border-border px-2 py-3"
       >
         {brand ? (
-          <div className="flex items-center justify-between px-2">
+          <div className="flex shrink-0 items-center justify-between px-2">
             <div className="flex flex-col gap-0.5">
               <Text text={brand.title} strong size="large" />
               {brand.version !== undefined ? (
@@ -334,17 +364,21 @@ export function ChatPage({
             ) : null}
           </div>
         ) : null}
-        <Menu
-          items={menuItems}
-          selectedKey={activeMenuKey}
-          onSelect={(key) => onMenuSelect?.(key)}
-        />
+        {/* 导航菜单：高度充裕时不滚动；页面高度不足时上限 40% 并内部滚动，
+            把空间让给会话 / 底部分组 */}
+        <div className="scrollbar-subtle max-h-[40%] min-h-0 shrink-0 overflow-y-auto">
+          <Menu
+            items={menuItems}
+            selectedKey={activeMenuKey}
+            onSelect={(key) => onMenuSelect?.(key)}
+          />
+        </div>
         {conversationSectionTitle !== undefined ? (
           <button
             type="button"
             data-slot="chat-page-section-toggle"
             aria-expanded={!convCollapsed}
-            className="flex w-full cursor-pointer items-center justify-between px-2 pt-2"
+            className="flex w-full shrink-0 cursor-pointer items-center justify-between px-2 pt-2"
             onClick={toggleConvSection}
           >
             <Text
@@ -357,16 +391,18 @@ export function ChatPage({
           </button>
         ) : null}
         {!convCollapsed ? (
-          <ConversationList
-            items={conversations}
-            activeId={activeConversationId}
-            onSelect={(id) => onSelectConversation?.(id)}
-            onDelete={(id) => onDeleteConversation?.(id)}
-          />
-        ) : null}
-        {!convCollapsed && moreLabel !== undefined ? (
-          <div className="flex justify-end">
-            <Button text={`${moreLabel} >>`} variant="link" size="small" onClick={() => onMore?.()} />
+          <div data-slot="chat-page-section-body" className="scrollbar-subtle flex min-h-0 flex-1 flex-col overflow-y-auto">
+            <ConversationList
+              items={conversations}
+              activeId={activeConversationId}
+              onSelect={(id) => onSelectConversation?.(id)}
+              onDelete={(id) => onDeleteConversation?.(id)}
+            />
+            {moreLabel !== undefined ? (
+              <div className="flex justify-end">
+                <Button text={`${moreLabel} >>`} variant="link" size="small" onClick={() => onMore?.()} />
+              </div>
+            ) : null}
           </div>
         ) : null}
         {footerSectionTitle !== undefined ? (
@@ -374,7 +410,7 @@ export function ChatPage({
             type="button"
             data-slot="chat-page-section-toggle"
             aria-expanded={!footerCollapsed}
-            className="flex w-full cursor-pointer items-center justify-between px-2 pt-2"
+            className="flex w-full shrink-0 cursor-pointer items-center justify-between px-2 pt-2"
             onClick={toggleFooterSection}
           >
             <Text text={footerSectionTitle} type="secondary" className="text-sm" strong />
@@ -382,19 +418,22 @@ export function ChatPage({
           </button>
         ) : null}
         {!footerCollapsed && footerItems.length > 0 ? (
-          <Menu
-            items={footerItems}
-            onSelect={(key) => onMenuSelect?.(key)}
-          />
+          <div data-slot="chat-page-section-body" className="scrollbar-subtle min-h-0 flex-1 overflow-y-auto">
+            <Menu
+              items={footerItems}
+              onSelect={(key) => onMenuSelect?.(key)}
+            />
+          </div>
         ) : null}
       </div>
-      {/* 主区域：对话区 + 产物区（产物区可显隐；展示时拖拽调宽） */}
-      <div className="h-full min-w-0 flex-1">
+      {/* 主区域：对话区 + 产物区（产物区可显隐；展示时拖拽调宽）。
+          @container 使对话内容列的 61.8cqw 相对主区域解析 */}
+      <div className="@container h-full min-w-0 flex-1">
         {open ? (
           <PanelGroup orientation="horizontal" style={{ width: '100%', height: '100%' }}>
             <Panel defaultSize="62%">{chatArea}</Panel>
             <ResizableHandle withHandle />
-            <Panel defaultSize="38%" minSize="320px" maxSize="760px">
+            <Panel defaultSize="38%" minSize="380px" maxSize="760px">
               {artifactPanel}
             </Panel>
           </PanelGroup>
