@@ -1,9 +1,9 @@
 ---
-title: 快速开始
-description: 面向框架使用者——安装、最小接入、createPactorApplication 参数与 UI 自定义覆盖点
+title: 手动安装
+description: 在已有工程中手动接入 Pactor——安装、最小接入、createPactorApplication 参数与 UI 自定义覆盖点
 ---
 
-Pactor 是一套基于 YAML/JSON DSL 的 Server-Driven UI 前端运行时框架：页面用 YAML 描述，浏览器里的公共 Runtime 负责渲染，业务页面无需随前端代码一起打包。本页带你 5 分钟跑起一个应用。
+Pactor 是一套基于 YAML/JSON DSL 的 Server-Driven UI 前端运行时框架：页面用 YAML 描述，浏览器里的公共 Runtime 负责渲染，业务页面无需随前端代码一起打包。新项目建议从模板生成（见[快速开始](/guides/getting-started/)）；本页面向**已有工程的手动接入**，并列出 `createPactorApplication` 的全部参数与自定义覆盖点。
 
 ## 环境要求
 
