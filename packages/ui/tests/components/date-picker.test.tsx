@@ -87,10 +87,13 @@ function dayCell(panel: Element, day: string) {
   return within(panel as HTMLElement).getAllByText(day)[0].closest('td')!;
 }
 
-/** 面板内带端点选中样式的 td 列表 */
+/** 面板内带端点选中样式的可见 td 列表（range 双面板不渲染邻月补齐格，
+ * 残留的 rdp-outside 占位格虽带 modifier 类但不可见，不计入） */
 function endpointCells(panel: Element) {
-  return Array.from(panel.querySelectorAll('td')).filter((td) =>
-    td.className.includes('calendar-selected-background'),
+  return Array.from(panel.querySelectorAll('td')).filter(
+    (td) =>
+      td.className.includes('calendar-selected-background') &&
+      !td.className.includes('rdp-outside'),
   );
 }
 

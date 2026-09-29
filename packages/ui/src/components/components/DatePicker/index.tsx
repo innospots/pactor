@@ -360,6 +360,9 @@ export function DatePicker(props: DatePickerProps) {
           modifiers={rangeModifiers}
           modifiersClassNames={rangeModifierClassNames}
           locale={dfLocale}
+          // 双面板不渲染邻月补齐格：邻月在对侧面板完整可见，
+          // 且选中态 modifier 按日期匹配，会重复高亮到补齐格上
+          showOutsideDays={false}
         />
       </div>
       <div data-slot="datepicker-end-panel">
@@ -371,6 +374,7 @@ export function DatePicker(props: DatePickerProps) {
           modifiers={rangeModifiers}
           modifiersClassNames={rangeModifierClassNames}
           locale={dfLocale}
+          showOutsideDays={false}
         />
       </div>
     </div>
