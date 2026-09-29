@@ -17,7 +17,7 @@ export const DEMO_ACCOUNTS: (DemoUser & { password: string })[] = [
     password: "pactor123",
     name: "演示管理员",
     roles: ["admin"],
-    permissions: ["report:view"],
+    permissions: ["report:view", "user:view"],
   },
   {
     id: "u-2",

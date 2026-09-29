@@ -4,7 +4,7 @@ import { Empty } from '../../components/Empty/index.js';
 import { echarts } from '../echarts-modules.js';
 import { EChartBase, type ChartSelectPayload } from '../EChartBase/index.js';
 import { buildMapOption } from '../lib/option-builders.js';
-import { getChartTheme } from '../lib/theme.js';
+import { useChartTheme } from '../lib/use-chart-theme.js';
 
 /**
  * MapChart 适配器（chart/ 组件集，echarts）：地图，
@@ -67,6 +67,7 @@ export function MapChart({
   className,
   style,
 }: MapChartProps) {
+  const theme = useChartTheme();
   const [loadState, setLoadState] = useState<LoadState>(() =>
     geoJson || !geoJsonUrl || hasRegisteredMap(mapName) ? 'idle' : 'loading',
   );
@@ -144,7 +145,7 @@ export function MapChart({
     );
   }
 
-  const option = buildMapOption({ mapName, data, nameKey, valueKey, title }, getChartTheme());
+  const option = buildMapOption({ mapName, data, nameKey, valueKey, title }, theme);
   return (
     <EChartBase
       slot="map-chart"

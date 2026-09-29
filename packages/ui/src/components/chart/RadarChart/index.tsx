@@ -2,7 +2,7 @@ import type { CSSProperties } from 'react';
 
 import { EChartBase, type ChartSelectPayload } from '../EChartBase/index.js';
 import { buildRadarOption } from '../lib/option-builders.js';
-import { getChartTheme } from '../lib/theme.js';
+import { useChartTheme } from '../lib/use-chart-theme.js';
 
 /**
  * RadarChart 适配器（chart/ 组件集，echarts）：雷达图，
@@ -42,7 +42,7 @@ export function RadarChart({
 }: RadarChartProps) {
   const option = buildRadarOption(
     { data, indicatorKey, yKeys, colors, title },
-    getChartTheme(),
+    useChartTheme(),
   );
   return (
     <EChartBase

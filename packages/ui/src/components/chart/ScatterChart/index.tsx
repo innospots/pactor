@@ -2,7 +2,7 @@ import type { CSSProperties } from 'react';
 
 import { EChartBase, type ChartSelectPayload } from '../EChartBase/index.js';
 import { buildScatterOption } from '../lib/option-builders.js';
-import { getChartTheme } from '../lib/theme.js';
+import { useChartTheme } from '../lib/use-chart-theme.js';
 
 /**
  * ScatterChart 适配器（chart/ 组件集，echarts）：散点图，
@@ -45,7 +45,7 @@ export function ScatterChart({
 }: ScatterChartProps) {
   const option = buildScatterOption(
     { data, xKey, yKey, seriesKey, colors, title },
-    getChartTheme(),
+    useChartTheme(),
   );
   return (
     <EChartBase

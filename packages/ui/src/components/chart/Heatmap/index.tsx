@@ -2,7 +2,7 @@ import type { CSSProperties } from 'react';
 
 import { EChartBase, type ChartSelectPayload } from '../EChartBase/index.js';
 import { buildHeatmapOption } from '../lib/option-builders.js';
-import { getChartTheme } from '../lib/theme.js';
+import { useChartTheme } from '../lib/use-chart-theme.js';
 
 /**
  * Heatmap 适配器（chart/ 组件集，echarts）：热力图，
@@ -42,7 +42,7 @@ export function Heatmap({
 }: HeatmapProps) {
   const option = buildHeatmapOption(
     { data, xKey, yKey, valueKey, title },
-    getChartTheme(),
+    useChartTheme(),
   );
   return (
     <EChartBase

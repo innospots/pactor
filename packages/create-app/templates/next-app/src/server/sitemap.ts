@@ -1,4 +1,8 @@
-import type { PageDsl } from "@pactor-app/core";
+import { readFileSync } from "node:fs";
+import { join } from "node:path";
+
+import type { PageDsl, PermissionConfig } from "@pactor-app/core";
+import { parseDocument } from "yaml";
 
 import type { LayoutDsl, SitemapResource } from "pactor-app";
 
@@ -8,551 +12,143 @@ import type { DemoUser } from "./accounts";
  * Mock sitemap 数据源（design/dynamic-page.md 方案 B 示例实现）。
  * 真实项目由后端接口返回同构对象——端点按会话裁剪：
  * 匿名 → public 页（登录/注册）；登录后 → 该角色可见的 menus / pages / permissions。
+ *
+ * 入口数据（元数据 / layouts / pages / menus 全量）在 yaml/sitemap.yaml，
+ * 页面 DSL 在 yaml/pages/<id>.page.yaml；本文件只负责：加载 YAML、
+ * 按会话裁剪可见性（public / permission / 需登录）、注入会话动态字段
+ * （updatedAt / user / permissions）。
  */
 
-/**
- * 服务端下发的接口地址：DSL 中直接引用后端绝对地址（跨域），
- * 客户端 httpHooks 自动改写进项目内代理前缀。登录 / 登出即普通 HTTP
- * 调用，DSL 用内置 request 动作表达，无需客户端注册服务。
- */
-const apiBase = "http://localhost:9011";
+/* ---------------- YAML DSL 文件加载（src/server/yaml/，启动时读入内存） ---------------- */
 
-/* ---------------- 布局（DSL 定义，PageOutlet 为页面内容出口） ---------------- */
-/* 布局 body 内 ${data.session.*} 由客户端注入的 session dataSource 提供
- *（user / app / menus）；${route.params.pathname} 为当前路径（客户端注入）。 */
+const YAML_DIR = join(process.cwd(), "src/server/yaml");
 
-const layouts: Record<string, LayoutDsl> = {
-  admin: {
-    dsl: "1.0",
-    body: {
-      type: "Flex",
-      props: { gap:0, direction: "horizontal", style: { height: "100vh" } },
-      children: [
-        {
-          type: "Flex",
-          props: {
-            direction: "vertical",
-            style: {
-              width: 224,
-              flexShrink: 0,
-              borderRight: "1px solid var(--border)",
-            },
-          },
-          children: [
-            {
-              type: "Flex",
-              props: {
-                style: {
-                  padding: "16px 16px",
-                  fontWeight: 600,
-                  borderBottom: "1px solid var(--border)",
-                },
-              },
-              children: [
-                { type: "Text", props: { text: "${data.session.app.name}" } },
-              ],
-            },
-            {
-              type: "SitemapMenu",
-              props: {
-                items: "${data.session.menus}",
-                collapsible: true,
-              },
-              events: {
-                onSelect: [
-                  { action: "navigate", params: { to: "${event}" } },
-                ],
-              },
-            },
-          ],
-        },
-        {
-          type: "Flex",
-          props: { direction: "vertical", style: { flex: 1, minWidth: 0 } },
-          children: [
-            {
-              type: "Flex",
-              props: {
-                justify: "end",
-                align: "center",
-                style: {
-                  padding: "10px 20px",
-                  borderBottom: "1px solid var(--border)",
-                },
-              },
-              children: [
-                {
-                  type: "DropdownMenu",
-                  props: {
-                    items: [
-                      {
-                        label: "个人设置",
-                        value: "settings",
-                        icon: "settings",
-                      },
-                      { label: "退出登录", value: "logout", icon: "log-out" },
-                    ],
-                  },
-                  events: {
-                    onSelect: [
-                      {
-                        action: "if",
-                        params: {
-                          condition: "${event == 'logout'}",
-                          then: [
-                            {
-                              action: "request",
-                              params: {
-                                method: "POST",
-                                url: `${apiBase}/api/auth/logout`,
-                              },
-                            },
-                            {
-                              action: "app.reload",
-                              params: { to: "/login" },
-                            },
-                          ],
-                          else: [
-                            {
-                              action: "message",
-                              params: { text: "演示环境未实现个人设置" },
-                            },
-                          ],
-                        },
-                      },
-                    ],
-                  },
-                  children: [
-                    {
-                      type: "Button",
-                      props: {
-                        text: "${data.session.user.name}",
-                        variant: "text",
-                      },
-                    },
-                  ],
-                },
-              ],
-            },
-            {
-              type: "Flex",
-              props: {
-                direction: "vertical",
-                style: { flex: 1, minHeight: 0, overflow: "auto" },
-              },
-              children: [{ type: "PageOutlet" }],
-            },
-          ],
-        },
-      ],
-    },
-  },
-  login: {
-    dsl: "1.0",
-    body: {
-      type: "Flex",
-      props: {
-        direction: "vertical",
-        justify: "center",
-        align: "center",
-        style: { minHeight: "100vh", padding: 24 },
-      },
-      children: [
-        {
-          type: "Flex",
-          props: {
-            direction: "vertical",
-            style: {
-              width: 380,
-              padding: 24,
-              border: "1px solid var(--border)",
-              borderRadius: 12,
-            },
-          },
-          children: [{ type: "PageOutlet" }],
-        },
-      ],
-    },
-  },
-  blank: { dsl: "1.0", body: { type: "PageOutlet" } },
-};
+/** 解析 YAML 文件；语法错误时 fail-fast（parseDocument 默认静默容错，结构会悄悄残缺） */
+function loadYaml<T>(file: string): T {
+  const doc = parseDocument(readFileSync(join(YAML_DIR, file), "utf8"));
+  if (doc.errors.length > 0) {
+    throw new Error(
+      `${file} 解析失败：${doc.errors.map((e) => e.message.split("\n")[0]).join("；")}`,
+    );
+  }
+  return doc.toJS() as T;
+}
 
-/* ---------------- 页面 DSL（内联页） ---------------- */
+/** sitemap.yaml 中的页面声明：可见性标记（public / permission）+ DSL 加载方式（lazy） */
+interface PageEntry {
+  id: string;
+  path: string;
+  title: string;
+  version: number;
+  public?: boolean;
+  permission?: string;
+  /** 不随 sitemap 内联 pageDsl，客户端经 /api/pages/{id} 懒加载 */
+  lazy?: boolean;
+}
 
-const loginPage: PageDsl = {
-  dsl: "1.0",
-  page: { id: "login", title: "登录" },
-  state: { submitting: false },
-  body: {
-    type: "Form",
-    events: {
-      onSubmit: [
-        { action: "setState", params: { submitting: true } },
-        {
-          id: "loginResult",
-          action: "request",
-          params: {
-            method: "POST",
-            url: `${apiBase}/api/auth/login`,
-            body: {
-              username: "${event.username}",
-              password: "${event.password}",
-            },
-          },
-        },
-        { action: "setState", params: { submitting: false } },
-        {
-          action: "if",
-          params: {
-            condition: "${actions.loginResult.token}",
-            then: [
-              // 登录成功整页重载：sitemap 端点按已登录会话重新裁剪内容
-              { action: "app.reload", params: { to: "/" } },
-            ],
-            else: [
-              {
-                action: "message",
-                params: {
-                  messageType: "error",
-                  text: "登录失败：用户名或密码错误",
-                },
-              },
-            ],
-          },
-        },
-      ],
-    },
-    children: [
-      {
-        type: "Alert",
-        props: {
-          variant: "info",
-          message: "演示账号 admin / pactor123，guest / guest123",
-          description:
-            "admin 可见「报表」菜单（report:view）；guest 仅可见首页。登录后 sitemap 按角色重新下发。",
-          style: { marginBottom: 16 },
-        },
-      },
-      {
-        type: "Input",
-        props: {
-          name: "username",
-          label: "用户名",
-          placeholder: "请输入用户名",
-          rules: [{ required: true, message: "请输入用户名" }],
-        },
-      },
-      {
-        type: "Input",
-        props: {
-          name: "password",
-          label: "密码",
-          type: "password",
-          placeholder: "请输入密码",
-          rules: [{ required: true, message: "请输入密码" }],
-        },
-      },
-      {
-        type: "Flex",
-        props: { justify: "end" },
-        children: [
-          {
-            type: "Button",
-            props: {
-              text: "登 录",
-              variant: "primary",
-              submit: true,
-              loading: "${state.submitting}",
-            },
-          },
-        ],
-      },
-    ],
-  },
-};
+interface SitemapFile {
+  id: string;
+  resourceType: "sitemap";
+  version: number;
+  dslVersion: string;
+  app: { name: string };
+  layout: string;
+  auth: { loginPath: string };
+  layouts: Record<string, LayoutDsl>;
+  pages: PageEntry[];
+  menus: SitemapResource["menus"];
+}
 
-const registerPage: PageDsl = {
-  dsl: "1.0",
-  page: { id: "register", title: "注册" },
-  body: {
-    type: "Page",
-    props: { title: "注册" },
-    children: [
-      {
-        type: "Alert",
-        props: {
-          variant: "warning",
-          message: "演示环境不开放注册",
-          description: "请使用登录页的演示账号体验不同角色的菜单差异。",
-          style: { marginBottom: 16 },
-        },
-      },
-      {
-        type: "Button",
-        props: { text: "返回登录", variant: "primary" },
-        events: {
-          onClick: [{ action: "navigate", params: { to: "/login" } }],
-        },
-      },
-    ],
-  },
-};
+const site = loadYaml<SitemapFile>("sitemap.yaml");
 
-const homePage: PageDsl = {
-  dsl: "1.0",
-  page: { id: "home", title: "首页" },
-  body: {
-    type: "Page",
-    props: { title: "首页" },
-    children: [
-      {
-        type: "Alert",
-        props: {
-          variant: "info",
-          message: "欢迎回来，${data.session.user.name}！",
-          description:
-            "本页与外壳布局均由 sitemap 对象下发（design/dynamic-page.md）；菜单随角色裁剪。",
-          style: { marginBottom: 16 },
-        },
-      },
-      {
-        type: "Button",
-        props: { text: "查看月报（需 report:view）" },
-        events: {
-          onClick: [
-            { action: "navigate", params: { to: "/reports/monthly" } },
-          ],
-        },
-      },
-    ],
-  },
-};
+/** 页面 DSL：按 id 约定从 pages/<id>.page.yaml 加载；lazy 页不在此内联 */
+const pageDsls = new Map(
+  site.pages.filter((p) => !p.lazy).map((p) => [p.id, loadYaml<PageDsl>(`pages/${p.id}.page.yaml`)]),
+);
+const lazyPageDsls = new Map(
+  site.pages.filter((p) => p.lazy).map((p) => [p.id, loadYaml<PageDsl>(`pages/${p.id}.page.yaml`)]),
+);
 
-const monthlyDetailPage: PageDsl = {
-  dsl: "1.0",
-  page: { id: "monthly-detail", title: "月报详情" },
-  body: {
-    type: "Page",
-    props: { title: "月报详情" },
-    children: [
-      {
-        type: "Alert",
-        props: {
-          variant: "info",
-          message: "路径参数演示：id = ${route.params.id}",
-          description: "隐藏页（不出现在菜单），经列表页跳转进入。",
-          style: { marginBottom: 16 },
-        },
-      },
-      {
-        type: "Button",
-        props: { text: "返回月报" },
-        events: {
-          onClick: [
-            { action: "navigate", params: { to: "/reports/monthly" } },
-          ],
-        },
-      },
-    ],
-  },
-};
+/* ---------------- 会话裁剪 ---------------- */
 
-/** 懒加载页（pageDsl 不下发，客户端经 loadPage 按需获取） */
-const lazyPages: Record<string, { version: number; pageDsl: PageDsl }> = {
-  monthly: {
-    version: 7,
-    pageDsl: {
-      dsl: "1.0",
-      page: { id: "monthly", title: "月报" },
-      body: {
-        type: "Page",
-        props: { title: "本月经营月报" },
-        children: [
-          {
-            type: "Flex",
-            props: { gap: 16, style: { marginBottom: 16 } },
-            children: [
-              {
-                type: "Card",
-                props: { title: "营收" },
-                children: [
-                  {
-                    type: "Statistic",
-                    props: { title: "本月（万元）", value: 128.6 },
-                  },
-                ],
-              },
-              {
-                type: "Card",
-                props: { title: "新增客户" },
-                children: [
-                  { type: "Statistic", props: { title: "本月（家）", value: 342 } },
-                ],
-              },
-              {
-                type: "Card",
-                props: { title: "转化率" },
-                children: [
-                  { type: "Statistic", props: { title: "本月（%）", value: 23.8 } },
-                ],
-              },
-            ],
-          },
-          {
-            type: "Alert",
-            props: {
-              variant: "success",
-              message: "本页 DSL 由 /api/pages/monthly 懒加载下发",
-              description:
-                "sitemap 中该页仅声明 id / path / version（monthly@7），点击进入时才请求页面 DSL。",
-              style: { marginBottom: 16 },
-            },
-          },
-          {
-            type: "Button",
-            props: { text: "查看详情（隐藏页 + 路径参数）" },
-            events: {
-              onClick: [
-                {
-                  action: "navigate",
-                  params: { to: "/reports/monthly/2026-09" },
-                },
-              ],
-            },
-          },
-        ],
-      },
-    },
-  },
-};
+type Visibility = { public?: boolean; permission?: PermissionConfig };
 
-/* ---------------- 页面 / 菜单定义 ---------------- */
+/** PermissionConfig 归一化为权限码数组（string / string[] / { code } 三种形态） */
+function permissionCodes(permission: PermissionConfig): string[] {
+  const code =
+    typeof permission === "object" && !Array.isArray(permission)
+      ? permission.code
+      : permission;
+  return Array.isArray(code) ? code : [code];
+}
 
-function canViewReports(user: DemoUser | null): boolean {
-  return user !== null && user.permissions.includes("report:view");
+/** 可见性：public 匿名可见；permission 命中任一权限码；无标记需登录 */
+function canSee(entry: Visibility, user: DemoUser | null): boolean {
+  if (entry.public) return true;
+  if (!user) return false;
+  if (entry.permission) {
+    return permissionCodes(entry.permission).some((c) =>
+      user.permissions.includes(c),
+    );
+  }
+  return true;
+}
+
+/** 菜单按会话过滤；group 无可见子项时整组隐藏 */
+function filterMenus(
+  menus: SitemapResource["menus"],
+  user: DemoUser | null,
+): SitemapResource["menus"] {
+  const out: SitemapResource["menus"] = [];
+  for (const item of menus) {
+    if (!canSee(item, user)) continue;
+    if (item.type === "group") {
+      const children = filterMenus(item.children ?? [], user);
+      if (children.length === 0) continue;
+      out.push({ ...item, children });
+    } else {
+      out.push(item);
+    }
+  }
+  return out;
 }
 
 /**
  * 按会话构建 sitemap：同一 URL，不同用户拿到不同内容。
- * 匿名 → 仅 public 页；guest → + 首页；admin → + 报表组。
+ * 匿名 → 仅 public 页；guest → + 首页；admin → + 用户列表 / 报表组。
  */
 export function buildSitemap(user: DemoUser | null): SitemapResource {
-  const reports = canViewReports(user);
+  const pages: SitemapResource["pages"] = site.pages
+    .filter((p) => canSee(p, user))
+    .map((p) => ({
+      id: p.id,
+      path: p.path,
+      title: p.title,
+      version: p.version,
+      // 懒加载页不下发 pageDsl，仅 id / path / version，经 /api/pages/{id} 按需获取
+      ...(p.lazy ? {} : { pageDsl: pageDsls.get(p.id) }),
+    }));
 
-  const pages: SitemapResource["pages"] = [
-    { id: "login", path: "/login", title: "登录", version: 1, pageDsl: loginPage },
-    {
-      id: "register",
-      path: "/register",
-      title: "注册",
-      version: 1,
-      pageDsl: registerPage,
-    },
-  ];
-  if (user) {
-    pages.push({ id: "home", path: "/", title: "首页", version: 3, pageDsl: homePage });
-  }
-  if (reports) {
-    // 懒加载：不下发 pageDsl，仅 id / path / version（monthly@7）
-    pages.push({ id: "monthly", path: "/reports/monthly", title: "月报", version: 7 });
-    pages.push({
-      id: "monthly-detail",
-      path: "/reports/monthly/:id",
-      title: "月报详情",
-      version: 2,
-      pageDsl: monthlyDetailPage,
-    });
-  }
-
-  const menus: SitemapResource["menus"] = [
-    {
-      id: "login",
-      type: "page",
-      pageId: "login",
-      title: "登录",
-      layout: "login",
-      public: true,
-      hidden: true,
-    },
-    {
-      id: "register",
-      type: "page",
-      pageId: "register",
-      title: "注册",
-      layout: "login",
-      public: true,
-      hidden: true,
-    },
-  ];
-  if (user) {
-    // path / title 缺省继承自 pages[]，仅导航元数据（icon / order / layout）
-    menus.push({ id: "home", type: "page", pageId: "home", title: "首页", icon: "home", layout: "admin", order: 1 });
-  }
-  if (reports) {
-    menus.push({
-      id: "reports",
-      type: "group",
-      title: "报表",
-      icon: "chart",
-      order: 2,
-      children: [
-        {
-          id: "monthly",
-          type: "page",
-          pageId: "monthly",
-          title: "报表中心",
-          icon: "chart",
-          layout: "admin",
-          permission: "report:view",
-        },
-        {
-          id: "monthly-detail",
-          type: "page",
-          pageId: "monthly-detail",
-          title: "月报详情",
-          layout: "admin",
-          hidden: true,
-          activeMenu: "monthly",
-        },
-      ],
-    });
-    menus.push({
-      id: "help",
-      type: "link",
-      title: "帮助",
-      path: "https://github.com/",
-      external: true,
-      order: 3,
-    });
-  }
-
+  // sitemap.yaml 原样透传，仅覆盖会话相关部分：pages / menus 按可见性过滤，
+  // updatedAt / user / permissions 按会话注入
   return {
-    id: "site",
-    resourceType: "sitemap",
-    version: 12,
-    dslVersion: "1.0",
+    ...site,
     updatedAt: new Date().toISOString(),
-    app: { name: "动态页面 Starter" },
     ...(user ? { user: { ...user }, permissions: user.permissions } : {}),
-    layout: "admin",
-    auth: { loginPath: "/login" },
-    layouts,
     pages,
-    menus,
+    menus: filterMenus(site.menus, user),
   };
 }
 
-/** 懒加载页：校验会话与角色（前端权限只控制 UI，接口必须鉴权） */
+/** 懒加载页：校验会话与可见性（前端权限只控制 UI，接口必须鉴权） */
 export function getLazyPage(
   pageId: string,
   user: DemoUser | null,
 ): { version: number; pageDsl: PageDsl } | null {
-  const entry = lazyPages[pageId];
-  if (!entry) {
+  const entry = site.pages.find((p) => p.id === pageId);
+  const pageDsl = lazyPageDsls.get(pageId);
+  if (!entry?.lazy || !pageDsl || !canSee(entry, user)) {
     return null;
   }
-  if (pageId === "monthly" && !canViewReports(user)) {
-    return null;
-  }
-  return entry;
+  return { version: entry.version, pageDsl };
 }

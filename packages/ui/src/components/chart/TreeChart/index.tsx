@@ -2,7 +2,7 @@ import type { CSSProperties } from 'react';
 
 import { EChartBase, type ChartSelectPayload } from '../EChartBase/index.js';
 import { buildTreeOption } from '../lib/option-builders.js';
-import { getChartTheme } from '../lib/theme.js';
+import { useChartTheme } from '../lib/use-chart-theme.js';
 
 /**
  * TreeChart 适配器（chart/ 组件集，echarts）：树图，
@@ -44,7 +44,7 @@ export function TreeChart({
 }: TreeChartProps) {
   const option = buildTreeOption(
     { data, title, orient, edgeShape, initialTreeDepth },
-    getChartTheme(),
+    useChartTheme(),
   );
   return (
     <EChartBase

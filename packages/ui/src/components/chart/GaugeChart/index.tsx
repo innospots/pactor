@@ -2,7 +2,7 @@ import type { CSSProperties } from 'react';
 
 import { EChartBase, type ChartSelectPayload } from '../EChartBase/index.js';
 import { buildGaugeOption } from '../lib/option-builders.js';
-import { getChartTheme } from '../lib/theme.js';
+import { useChartTheme } from '../lib/use-chart-theme.js';
 
 /**
  * GaugeChart 适配器（chart/ 组件集，echarts）：仪表盘，
@@ -45,7 +45,7 @@ export function GaugeChart({
 }: GaugeChartProps) {
   const option = buildGaugeOption(
     { value, min, max, thresholds, unit, title },
-    getChartTheme(),
+    useChartTheme(),
   );
   return (
     <EChartBase

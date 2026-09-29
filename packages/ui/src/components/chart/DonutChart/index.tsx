@@ -2,7 +2,7 @@ import type { CSSProperties } from 'react';
 
 import { EChartBase, type ChartSelectPayload } from '../EChartBase/index.js';
 import { buildDonutOption } from '../lib/option-builders.js';
-import { getChartTheme } from '../lib/theme.js';
+import { useChartTheme } from '../lib/use-chart-theme.js';
 
 /**
  * DonutChart 适配器（chart/ 组件集，echarts）：环形图，
@@ -68,7 +68,7 @@ export function DonutChart({
       colors,
       title,
     },
-    getChartTheme(),
+    useChartTheme(),
   );
   return (
     <EChartBase

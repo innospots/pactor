@@ -2,7 +2,7 @@ import type { CSSProperties } from 'react';
 
 import { EChartBase, type ChartSelectPayload } from '../EChartBase/index.js';
 import { buildBarOption } from '../lib/option-builders.js';
-import { getChartTheme } from '../lib/theme.js';
+import { useChartTheme } from '../lib/use-chart-theme.js';
 
 /**
  * BarChart 适配器（chart/ 组件集，echarts）：横向条形图，
@@ -45,7 +45,7 @@ export function BarChart({
 }: BarChartProps) {
   const option = buildBarOption(
     { data, yKey, yKeys: xKeys, stacked, colors, title },
-    getChartTheme(),
+    useChartTheme(),
   );
   return (
     <EChartBase

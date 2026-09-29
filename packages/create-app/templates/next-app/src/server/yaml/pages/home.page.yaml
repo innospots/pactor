@@ -1,0 +1,23 @@
+# 首页 DSL：内联在 sitemap 中下发（需登录）。
+# ${data.session.user.name} 由客户端注入的 session dataSource 提供。
+dsl: "1.0"
+page:
+  id: home
+  title: 首页
+
+body:
+  type: Page
+  props: { title: 首页 }
+  children:
+    - type: Alert
+      props:
+        variant: info
+        message: 欢迎回来，${data.session.user.name}！
+        description: 本页与外壳布局均由 sitemap 对象下发（design/dynamic-page.md）；菜单随角色裁剪。
+        style: { marginBottom: 16 }
+    - type: Button
+      props: { text: 查看月报（需 report:view） }
+      events:
+        onClick:
+          - action: navigate
+            params: { to: /reports/monthly }

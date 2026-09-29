@@ -2,7 +2,7 @@ import type { CSSProperties } from 'react';
 
 import { EChartBase, type ChartSelectPayload } from '../EChartBase/index.js';
 import { buildLineOption } from '../lib/option-builders.js';
-import { getChartTheme } from '../lib/theme.js';
+import { useChartTheme } from '../lib/use-chart-theme.js';
 
 /**
  * LineChart 适配器（chart/ 组件集，echarts）：连续趋势折线，
@@ -51,7 +51,7 @@ export function LineChart({
 }: LineChartProps) {
   const option = buildLineOption(
     { data, xKey, yKeys, smooth, showArea, stacked, colors, title },
-    getChartTheme(),
+    useChartTheme(),
   );
   return (
     <EChartBase
