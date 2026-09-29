@@ -44,6 +44,8 @@ src/
     cors.ts                # CORS 头（演示放开跨源，含预检响应）
     sitemap.ts             # mock sitemap 数据源（layouts / pages / menus 按角色裁剪；
                            # 登录 / 登出在 DSL 中用内置 request 动作表达）
+    yaml/                  # DSL 文件：sitemap.yaml（入口元数据 + 布局 + 页面/菜单全量声明）
+      pages/               # 页面 DSL（每页一个 *.page.yaml，按 id 约定加载）
 ```
 
 `App.tsx` 全部内容即：
@@ -57,7 +59,6 @@ const httpHooks = createHttpHooks();
   pathname={pathname}
   query={query}
   navigate={(to) => router.push(to)}
-  pageEndpoint={pageEndpoint}
   httpAdapter={httpHooks}
 />
 ```
@@ -77,8 +78,8 @@ const httpHooks = createHttpHooks();
    - `menus`：导航 / 路由树（`pageId` 引用页面、`layout` 引用布局、
      `public` 免登录；`path` / `title` 缺省从引用页面继承）
    - `auth.loginPath`：未登录重定向目标
-3. 懒加载页：实现 `GET {pageEndpoint}/{id}` 返回 PageResource envelope
-   （缺省 `/api/pages/{id}`，可在 `config.ts` 调整）。
+3. 懒加载页：实现 `GET /api/pages/{id}` 返回 PageResource envelope
+   （路径为框架缺省；需自定义时给 `SitemapApp` 传 `pageEndpoint` prop）。
 4. 登录 / 登出等接口调用直接在 DSL 中用内置 `request` 动作表达（参考
    `src/server/sitemap.ts` 的登录页 / 布局 DSL，URL 指向你的真实接口）；
    有客户端服务层时可用内置 `service.call` 动作桥接，`session.context`
@@ -87,7 +88,7 @@ const httpHooks = createHttpHooks();
 ## 跨域与 HTTP 钩子
 
 模板的外部接口以 `apiBaseUrl`（`src/pactor/config.ts`，缺省
-`http://localhost:9011`）为基准：`sitemapSources` / `pageEndpoint`
+`http://localhost:9011`）为基准：`sitemapSources`
 只写相对路径，由 `SitemapApp` 的 `baseUrl` 补全为外部绝对地址。
 **假定服务端已开通 CORS，浏览器直连，无需项目内代理**——本模板的
 mock API 已在路由层放开跨源（`src/server/cors.ts`：Allow-Origin 回显

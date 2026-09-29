@@ -3,10 +3,22 @@
 import type { PageDsl } from "@pactor-app/core";
 import { PactorPage } from "@pactor-app/app";
 
+import { WorkspaceSwitcher } from "./workspace-switcher";
+
 /**
  * 对话页：页面结构由 DSL 描述，根组件为 @pactor-app/ui 内置的 ChatPage
  * （四区布局：图标栏 / 展开菜单区 / 对话区 / 可拖拽产物区），数据与行为
  * 全部经 props / events 绑定；会话、消息、产物经 service 模拟服务端下发。
+ *
+ * 聊天框能力对齐 CreditWeaveAI/chat（@pactor-app/chat 示例）：
+ * - 模型选择 chip（Composer 工具栏右端，受控闭环 model ↔ onModelChange）
+ * - '@' 智能体提及 / '+' 上下文菜单弹层，选中项为输入区上方 chips
+ *   （受控 contextItems ↔ onContextItemsChange，发送后清空）
+ * - 附件入口（附件钮 / 粘贴 / 拖拽 → onAttachFiles；File 对象无法穿越
+ *   DSL 表达式求值，经自定义动作 chat.attachFiles 读原始事件伪上传）
+ * - composerFooter：工作空间切换器（自定义组件 WorkspaceSwitcher）
+ * - composerBottom：「内容由 AI 生成，仅供参考」弱提示
+ * - 消息操作条：copy / retry / regenerate / edit（修改并重发）/ quote（引用回复）
  */
 
 interface ChatMessageData {
@@ -16,7 +28,7 @@ interface ChatMessageData {
   agent?: { name: string };
   status?: string;
   parts: Array<Record<string, unknown>>;
-  actions?: Array<{ name: string; label?: string }>;
+  actions?: Array<{ name: string; label?: string; icon?: string }>;
 }
 
 interface ArtifactData {
@@ -34,9 +46,65 @@ interface ConversationData {
   time?: string;
 }
 
+interface AttachmentData {
+  id: string;
+  name: string;
+  fileSize?: number;
+  fileType?: string;
+  status?: string;
+}
+
+interface ContextItemData {
+  id: string;
+  label: string;
+  trigger?: string;
+}
+
 const delay = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
 let seq = 100;
+let attachmentSeq = 0;
+
+/** 助手消息操作条（对齐 CreditWeaveAI chat.page.yaml 的 messageActions） */
+const MESSAGE_ACTIONS = [
+  { name: "copy", label: "复制" },
+  { name: "retry", label: "重试" },
+  { name: "regenerate", label: "重新生成" },
+  { name: "edit", label: "修改并重发" },
+  { name: "quote", label: "引用回复", icon: "quote" },
+];
+
+/** '@' 提及的 mock 智能体（迁移自 CreditWeaveAI/chat mock-data） */
+const MOCK_AGENTS = [
+  { id: "helper", name: "小助手", description: "通用问答与总结" },
+  { id: "coder", name: "代码专家", description: "代码生成与审查" },
+  { id: "translator", name: "翻译官", description: "中英互译与润色" },
+];
+
+/** '+' 菜单的上下文候选（历史会话 / 记忆 / 人设的扁平合并） */
+const MOCK_CONTEXT_ENTRIES = [
+  { id: "h1", name: "历史：上次的对话", description: "关于报表需求的讨论" },
+  { id: "h2", name: "历史：周报整理", description: "周一例会的纪要整理" },
+  { id: "h3", name: "历史：产品评审", description: "新功能评审记录" },
+  { id: "m1", name: "记忆：偏好设置", description: "回答尽量简洁，先给结论" },
+  { id: "m2", name: "记忆：项目背景", description: "当前在做对话页示例" },
+  { id: "m3", name: "记忆：常用口径", description: "数据口径以月度报表为准" },
+  { id: "p1", name: "人设：严谨分析师", description: "重数据、给依据" },
+  { id: "p2", name: "人设：敏捷教练", description: "引导式提问" },
+  { id: "p3", name: "人设：资深架构师", description: "关注扩展性与取舍" },
+  { id: "p4", name: "人设：文案助手", description: "口吻活泼的营销文案" },
+];
+
+/** 把 File 读成附件数据（伪上传：无网络，仅元信息用于展示） */
+function readAsAttachment(file: File): Promise<AttachmentData> {
+  return Promise.resolve({
+    id: `att-${++attachmentSeq}`,
+    name: file.name,
+    fileSize: file.size,
+    fileType: file.type || "application/octet-stream",
+    status: "done",
+  });
+}
 
 const store = {
   conversations: [
@@ -70,10 +138,7 @@ const store = {
           },
           { type: "artifacts", count: 1 },
         ],
-        actions: [
-          { name: "copy", label: "复制" },
-          { name: "retry", label: "重新生成" },
-        ],
+        actions: MESSAGE_ACTIONS,
       },
     ] as ChatMessageData[],
   } as Record<string, ChatMessageData[]>,
@@ -98,7 +163,30 @@ const store = {
   } as Record<string, ArtifactData[]>,
 };
 
-function buildReply(text: string): ChatMessageData {
+interface ReplyOptions {
+  model?: string;
+  contexts?: ContextItemData[];
+  workspace?: string;
+  attachments?: AttachmentData[];
+}
+
+function buildReply(text: string, opts: ReplyOptions = {}): ChatMessageData {
+  // 让模型切换 / 上下文 chips / 工作空间 / 附件的效果在回复中可感知
+  // （对齐 CreditWeaveAI mock-ai 的 notes 行）
+  const notes: string[] = [];
+  if (opts.model) {
+    notes.push(`当前模型：\`${opts.model}\``);
+  }
+  if (opts.contexts && opts.contexts.length > 0) {
+    notes.push(`引用上下文：${opts.contexts.map((item) => item.label).join("、")}`);
+  }
+  if (opts.workspace) {
+    notes.push(`工作空间：${opts.workspace}`);
+  }
+  if (opts.attachments && opts.attachments.length > 0) {
+    notes.push(`附件：${opts.attachments.map((item) => item.name).join("、")}`);
+  }
+  const noteLine = notes.length > 0 ? `> ${notes.join(" · ")}\n\n` : "";
   return {
     id: `m${++seq}`,
     role: "assistant",
@@ -110,14 +198,11 @@ function buildReply(text: string): ChatMessageData {
       { type: "tool-call", name: "generate_artifact", status: "done", durationMs: 900 },
       {
         type: "markdown",
-        content: `已收到「${text}」。\n\n我整理了一份初稿并放入右侧产物区，你可以继续补充要求，我会迭代更新。`,
+        content: `${noteLine}已收到「${text}」。\n\n我整理了一份初稿并放入右侧产物区，你可以继续补充要求，我会迭代更新。`,
       },
       { type: "artifacts", count: 1 },
     ],
-    actions: [
-      { name: "copy", label: "复制" },
-      { name: "retry", label: "重新生成" },
-    ],
+    actions: MESSAGE_ACTIONS,
   };
 }
 
@@ -143,6 +228,15 @@ const chatServices = {
   "chat.send": async (params: Record<string, unknown>) => {
     const conversationId = String(params["conversationId"]);
     const text = String(params["text"] ?? "");
+    const contexts = (params["contexts"] as ContextItemData[] | undefined) ?? [];
+    const attachments =
+      (params["attachments"] as AttachmentData[] | undefined) ?? [];
+    const replyOptions: ReplyOptions = {
+      model: params["model"] ? String(params["model"]) : undefined,
+      contexts,
+      workspace: params["workspace"] ? String(params["workspace"]) : undefined,
+      attachments,
+    };
     store.messages[conversationId] ??= [];
     store.messages[conversationId].push({
       id: `m${++seq}`,
@@ -151,7 +245,7 @@ const chatServices = {
       parts: [{ type: "text", content: text }],
     });
     await delay(400);
-    store.messages[conversationId].push(buildReply(text));
+    store.messages[conversationId].push(buildReply(text, replyOptions));
     const title = `${text.slice(0, 12) || "未命名"}-方案.md`;
     store.artifacts[conversationId] ??= [];
     store.artifacts[conversationId].push({
@@ -161,6 +255,11 @@ const chatServices = {
       content: `# ${title.replace(/\.md$/, "")}\n\n围绕「${text}」生成的初稿：\n\n- 目标与背景\n- 执行步骤\n- 风险与预案\n\n> 继续对话可迭代此文档。`,
     });
     return { ok: true };
+  },
+  "chat.removeAttachment": async (params: Record<string, unknown>) => {
+    const id = params["id"];
+    const attachments = (params["attachments"] as AttachmentData[] | undefined) ?? [];
+    return attachments.filter((item) => item.id !== id);
   },
   "chat.newConversation": async () => {
     await delay(100);
@@ -183,6 +282,24 @@ const chatServices = {
   },
 };
 
+/**
+ * 自定义动作：onAttachFiles 的 File[] 无法穿越 DSL 表达式求值
+ * （resolveDeep 只保留 plain object），这里从原始事件作用域取 File，
+ * 伪上传后返回可序列化附件列表，交由后续 setState 写回。
+ */
+const chatActions = {
+  "chat.attachFiles": async (
+    _action: unknown,
+    ctx: { scope: Record<string, unknown> },
+  ) => {
+    const files = (ctx.scope["event"] as File[] | undefined) ?? [];
+    const state = (ctx.scope["state"] as Record<string, unknown> | undefined) ?? {};
+    const current = (state["attachments"] as AttachmentData[] | undefined) ?? [];
+    const added = await Promise.all(files.map(readAsAttachment));
+    return { ok: true, data: [...current, ...added] };
+  },
+};
+
 const chatPage: PageDsl = {
   dsl: "1.0",
   meta: { version: "1.0", author: "platform-team" },
@@ -198,6 +315,11 @@ const chatPage: PageDsl = {
     activeArtifactId: "",
     showArtifact: false,
     sending: false,
+    // 聊天框受控闭环状态（对齐 CreditWeaveAI chat.page.yaml）
+    model: "demo-mock",
+    contextItems: [] as ContextItemData[],
+    attachments: [] as AttachmentData[],
+    workspace: "",
   },
   dataSources: {
     conversations: {
@@ -225,7 +347,8 @@ const chatPage: PageDsl = {
     },
   },
   actions: {
-    // 发送消息（ChatPage onSend：Composer 提交 / Welcome prompt 选择均传出文本）
+    // 发送消息（ChatPage onSend：Composer 提交 / Welcome prompt 选择均传出文本）；
+    // 模型 / 上下文 chips / 工作空间 / 附件随参数一并下发，发送后清空 chips 与附件
     sendMessage: [
       { action: "setState", params: { sending: true } },
       {
@@ -235,10 +358,17 @@ const chatPage: PageDsl = {
           params: {
             conversationId: "${state.activeConversationId}",
             text: "${event}",
+            model: "${state.model}",
+            contexts: "${state.contextItems}",
+            workspace: "${state.workspace}",
+            attachments: "${state.attachments}",
           },
         },
       },
-      { action: "setState", params: { sending: false } },
+      {
+        action: "setState",
+        params: { sending: false, contextItems: [], attachments: [] },
+      },
       { action: "reload" },
     ],
     // 新建任务：创建空会话并切换
@@ -297,16 +427,67 @@ const chatPage: PageDsl = {
         conversations: "${data.conversations}",
         activeConversationId: "${state.activeConversationId}",
         moreLabel: "查看更多",
-        footerSectionTitle: "空间 (14)",
-        footerItems: [
-          { key: "space-default", label: "默认空间", icon: "house" },
-          { key: "space-design", label: "设计团队", icon: "users" },
-          { key: "space-frontend", label: "前端小组", icon: "code" },
-        ],
+        // footerSectionTitle: "空间 (14)",
+        // footerItems: [
+        //   { key: "space-default", label: "默认空间", icon: "house" },
+        //   { key: "space-design", label: "设计团队", icon: "users" },
+        //   { key: "space-frontend", label: "前端小组", icon: "code" },
+        // ],
         conversationTitle: "${data.conversation.title}",
         messages: "${data.messages}",
         sending: "${state.sending}",
         composerPlaceholder: "输入消息，Enter 发送…",
+        // 模型选择 chip（Composer 工具栏右端，发送钮之前）
+        models: [
+          { value: "demo-mock", label: "demo-mock" },
+          { value: "demo-fast", label: "demo-fast" },
+          { value: "demo-pro", label: "demo-pro" },
+        ],
+        model: "${state.model}",
+        // 上下文数据源：'@' 智能体提及 / '+' 上下文菜单
+        contexts: [
+          {
+            trigger: "@",
+            label: "智能体",
+            items: MOCK_AGENTS.map((agent) => ({
+              id: agent.id,
+              label: agent.name,
+            })),
+          },
+          {
+            trigger: "+",
+            label: "上下文",
+            items: MOCK_CONTEXT_ENTRIES.map((entry) => ({
+              id: entry.id,
+              label: entry.name,
+            })),
+          },
+        ],
+        contextItems: "${state.contextItems}",
+        // 附件入口（附件钮 / 粘贴 / 拖拽 → onAttachFiles 伪上传）
+        attachments: "${state.attachments}",
+        // Composer footer 槽：工作空间切换器（自定义组件）
+        composerFooter: {
+          type: "WorkspaceSwitcher",
+          props: {
+            value: "${state.workspace}",
+            options: [
+              { label: "默认工作空间", value: "默认工作空间" },
+              { label: "设计团队空间", value: "设计团队空间" },
+              { label: "前端研发空间", value: "前端研发空间" },
+            ],
+          },
+          events: {
+            onChange: [
+              { action: "setState", params: { workspace: "${event}" } },
+            ],
+          },
+        },
+        // Composer 下方弱提示行
+        composerBottom: {
+          type: "Text",
+          props: { type: "secondary", size: "small", text: "内容由 AI 生成，仅供参考" },
+        },
         welcome: {
           description: "可以问答、写作、分析，也可以让我生成可在右侧预览的产物",
           prompts: [
@@ -373,6 +554,36 @@ const chatPage: PageDsl = {
             params: { messageType: "info", text: "消息操作：${event.action}" },
           },
         ],
+        onModelChange: [
+          { action: "setState", params: { model: "${event}" } },
+        ],
+        onContextItemsChange: [
+          { action: "setState", params: { contextItems: "${event}" } },
+        ],
+        onAttachFiles: [
+          { id: "attached", action: "chat.attachFiles" },
+          {
+            action: "setState",
+            params: { attachments: "${actions.attached}" },
+          },
+        ],
+        onRemoveAttachment: [
+          {
+            id: "remaining",
+            action: "service.call",
+            params: {
+              service: "chat.removeAttachment",
+              params: {
+                id: "${event}",
+                attachments: "${state.attachments}",
+              },
+            },
+          },
+          {
+            action: "setState",
+            params: { attachments: "${actions.remaining}" },
+          },
+        ],
         onSelectArtifact: [
           { action: "setState", params: { activeArtifactId: "${event}" } },
         ],
@@ -385,5 +596,12 @@ const chatPage: PageDsl = {
 };
 
 export function ChatClient() {
-  return <PactorPage pageDsl={chatPage} services={chatServices} />;
+  return (
+    <PactorPage
+      pageDsl={chatPage}
+      services={chatServices}
+      components={{ WorkspaceSwitcher }}
+      actions={chatActions}
+    />
+  );
 }

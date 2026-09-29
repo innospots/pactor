@@ -5,11 +5,9 @@ packages:
   - 'docs'
   - 'doc'
 
-allowBuilds:
-  '@parcel/watcher': set this to true or false
-  esbuild: set this to true or false
-  unrs-resolver: set this to true or false
-  workerd: set this to true or false
+# 允许运行构建脚本的原生依赖（esbuild 安装脚本会校验/下载平台二进制）
+onlyBuiltDependencies:
+  - esbuild
 
 ignoredBuiltDependencies:
   - sharp

@@ -25,6 +25,19 @@ function renderDsl(node: DslNode, options: CreateRuntimeContextOptions = {}): Re
   return renderDslWith(createComponentRegistry(), node, options);
 }
 
+/** 向行内提及输入区（contenteditable）追加文本并把光标置于末尾，触发 input */
+function typeIntoMentionField(field: HTMLElement, text: string): void {
+  const node = document.createTextNode(text);
+  field.appendChild(node);
+  const range = document.createRange();
+  range.setStart(node, text.length);
+  range.collapse(true);
+  const selection = window.getSelection()!;
+  selection.removeAllRanges();
+  selection.addRange(range);
+  fireEvent.input(field);
+}
+
 describe('Bubble', () => {
   it('align / variant 映射；渲染 DSL 子树；通用 props', () => {
     const { container } = renderDsl({
@@ -463,6 +476,160 @@ describe('Composer', () => {
 
     expect(container.querySelector('[data-slot=attachment]')).toBeNull();
     expectCommonProps(container.querySelector('[data-slot=composer]'));
+  });
+
+  it('模型选择 chip：展示当前模型，弹层选中经 onModelChange 传出 value', async () => {
+    const { context } = renderDsl({
+      type: 'Composer',
+      props: {
+        models: [
+          { value: 'demo-mock', label: 'demo-mock' },
+          { value: 'demo-pro', label: 'demo-pro' },
+        ],
+        model: 'demo-mock',
+      },
+      events: {
+        onModelChange: { action: 'setState', params: { model: '${event}' } },
+      },
+    });
+
+    const chip = screen.getByRole('button', { name: '选择模型' });
+    expect(chip.textContent).toContain('demo-mock');
+    fireEvent.click(chip);
+    fireEvent.click(screen.getByRole('option', { name: 'demo-pro' }));
+    await expectEventState(context, 'model', 'demo-pro');
+    // 选中后弹层关闭
+    expect(document.querySelector('[data-slot=composer-model-popover]')).toBeNull();
+  });
+
+  it("'+' 按钮弹层：选中在输入区插入行内提及块；发送后由调用方清空", async () => {
+    const { context } = renderDsl(
+      {
+        type: 'Composer',
+        props: {
+          placeholder: '输入消息',
+          contexts: [
+            {
+              trigger: '+',
+              label: '上下文',
+              items: [{ id: 'm1', label: '记忆：偏好设置' }],
+            },
+          ],
+          contextItems: '${state.chips}',
+        },
+        events: {
+          onContextItemsChange: { action: 'setState', params: { chips: '${event}' } },
+          // 发送后清空 chips 由调用方在 onSubmit 闭环里处理（组件不擅自清空受控数据）
+          onSubmit: [
+            { action: 'setState', params: { sent: '${event}' } },
+            { action: 'setState', params: { chips: [] } },
+          ],
+        },
+      },
+      { state: { chips: [] } },
+    );
+
+    fireEvent.click(screen.getByRole('button', { name: '添加上下文' }));
+    const popover = document.querySelector('[data-slot=composer-context-popover]')!;
+    expect(popover.textContent).toContain('上下文');
+    fireEvent.click(screen.getByText('记忆：偏好设置'));
+
+    // 行内提及块插入输入区（contenteditable，无独立 chips 行）
+    const field = document.querySelector('[data-slot=mention-input]')!;
+    expect(field.querySelector('[data-mention-chip]')!.textContent).toContain('记忆：偏好设置');
+    await expectEventState(context, 'chips', [
+      { id: 'm1', label: '记忆：偏好设置', trigger: '+' },
+    ]);
+
+    // 发送：块序列化为 trigger+label；发送后输入区与 chips 清空
+    typeIntoMentionField(field as HTMLElement, '你好');
+    fireEvent.keyDown(field, { key: 'Enter' });
+    await expectEventState(context, 'sent', '+记忆：偏好设置 你好');
+    await expectEventState(context, 'chips', []);
+    expect(field.querySelector('[data-mention-chip]')).toBeNull();
+  });
+
+  it("'@' 行内提及：词边界触发光标处菜单并过滤，回车选中替换为行内块，退格整体删除", async () => {
+    const { context } = renderDsl(
+      {
+        type: 'Composer',
+        props: {
+          placeholder: '输入消息',
+          contexts: [
+            {
+              trigger: '@',
+              label: '智能体',
+              items: [
+                { id: 'helper', label: '小助手' },
+                { id: 'coder', label: '代码专家' },
+              ],
+            },
+          ],
+          contextItems: '${state.chips}',
+        },
+        events: {
+          onContextItemsChange: { action: 'setState', params: { chips: '${event}' } },
+          onChange: { action: 'setState', params: { text: '${event}' } },
+        },
+      },
+      { state: { chips: [] } },
+    );
+
+    const field = document.querySelector('[data-slot=mention-input]') as HTMLElement;
+    // 非词边界的 @ 不触发
+    typeIntoMentionField(field, '邮件 a@b');
+    expect(document.querySelector('[data-slot=mention-menu]')).toBeNull();
+
+    // 词边界 @：菜单在光标处打开并按 query 过滤（只留「小助手」）
+    typeIntoMentionField(field, ' @小');
+    const menu = document.querySelector('[data-slot=mention-menu]')!;
+    expect(menu.textContent).toContain('智能体');
+    expect(menu.textContent).toContain('小助手');
+    expect(menu.textContent).not.toContain('代码专家');
+
+    // ↑/↓ 移动候选（仅一项保持 0），回车选中：'@小' 替换为行内提及块
+    fireEvent.keyDown(field, { key: 'ArrowDown' });
+    fireEvent.keyDown(field, { key: 'ArrowUp' });
+    fireEvent.keyDown(field, { key: 'Enter' });
+    const chip = field.querySelector('[data-mention-chip]')!;
+    expect(chip.textContent).toContain('小助手');
+    // 行内块样式：浅色背景 + 圆角 + 图标
+    expect(chip.className).toContain('bg-muted');
+    expect(chip.className).toContain('rounded-md');
+    expect(chip.querySelector('svg')).not.toBeNull();
+    // 菜单关闭；块列表与序列化文本同步（块 → trigger+label）
+    expect(document.querySelector('[data-slot=mention-menu]')).toBeNull();
+    await expectEventState(context, 'chips', [
+      { id: 'helper', label: '小助手', trigger: '@' },
+    ]);
+    await expectEventState(context, 'text', '邮件 a@b @小助手 ');
+
+    // 退格整体删除：光标紧贴块后（尾随文本节点 0 偏移）
+    const caretNode = chip.nextSibling as Text;
+    const range = document.createRange();
+    range.setStart(caretNode, 0);
+    range.collapse(true);
+    const selection = window.getSelection()!;
+    selection.removeAllRanges();
+    selection.addRange(range);
+    fireEvent.keyDown(field, { key: 'Backspace' });
+    expect(field.querySelector('[data-mention-chip]')).toBeNull();
+    await expectEventState(context, 'chips', []);
+  });
+
+  it('footer 槽渲染 DSL 子树；提供 onAttachFiles 时渲染附件钮', () => {
+    renderDsl({
+      type: 'Composer',
+      props: {
+        footer: { type: 'Text', props: { text: '底部槽内容' } },
+      },
+      events: {
+        onAttachFiles: { action: 'setState', params: { files: 'attached' } },
+      },
+    });
+
+    expect(screen.getByText('底部槽内容')).toBeTruthy();
+    expect(screen.getByRole('button', { name: '添加附件' })).toBeTruthy();
   });
 });
 

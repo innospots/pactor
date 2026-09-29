@@ -4,9 +4,11 @@
   "private": true,
   "scripts": {
     "dev": "next dev -p 9011",
-    "build": "next build",
+    "build": "node scripts/build.mjs production",
     "start": "next start -p 9011",
-    "lint": "eslint"
+    "lint": "eslint",
+    "build:dev": "node scripts/build.mjs development",
+    "build:test": "node scripts/build.mjs test"
   },
   "dependencies": {
     "@pactor-app/core": "link:../../packages/core",

@@ -10,7 +10,6 @@ popstate 前进后退）接管全部路由：
 <SitemapApp
   sources={sitemapSources}    // sitemap 接口（相对路径）
   baseUrl={apiBaseUrl}        // 外部接口基准地址（相对路径补全）
-  pageEndpoint={pageEndpoint} // 懒加载页面端点
   httpAdapter={httpHooks}     // 框架 createHttpHooks：跨域改写 + 响应拆包
 />
 ```
@@ -38,7 +37,7 @@ src/
   main.tsx               # React 入口（导入 @pactor-app/ui/styles.css，必需）
   pactor/
     App.tsx              # SitemapApp 装配（纯前端模式：零路由配置；HTTP 钩子用框架 createHttpHooks）
-    config.ts            # sitemapSources / apiBaseUrl / pageEndpoint
+    config.ts            # sitemapSources / apiBaseUrl
 vite.config.ts           # react 插件（无代理：接口服务端已开通 CORS，直连）
 ```
 
@@ -61,7 +60,7 @@ vite.config.ts           # react 插件（无代理：接口服务端已开通 C
 
 外部接口以 `apiBaseUrl`（`src/pactor/config.ts`，缺省
 `http://localhost:9011`，即 next-app-starter 的 dev server）为基准：
-`sitemapSources` / `pageEndpoint` 只写相对路径，由 `baseUrl` 补全为
+`sitemapSources` 只写相对路径，由 `baseUrl` 补全为
 外部绝对地址。**假定服务端已开通 CORS，浏览器直连，无需项目内代理**——
 接口方（next-app-starter）已在路由层放开跨源并支持凭据
 （Allow-Origin 回显 + Allow-Credentials + 预检响应），cookie 会话跨源
@@ -85,8 +84,8 @@ vite.config.ts           # react 插件（无代理：接口服务端已开通 C
    - `menus`：导航 / 路由树（`pageId` 引用页面、`layout` 引用布局、
      `public` 免登录；`path` / `title` 缺省从引用页面继承）
    - `auth.loginPath`：未登录重定向目标
-3. 懒加载页：实现 `GET {pageEndpoint}/{id}` 返回 PageResource envelope
-   （缺省 `/api/pages/{id}`）。
+3. 懒加载页：实现 `GET /api/pages/{id}` 返回 PageResource envelope
+   （路径为框架缺省；需自定义时给 `SitemapApp` 传 `pageEndpoint` prop）。
 4. 登录 / 登出等接口调用直接在 DSL 中用内置 `request` 动作表达（URL
    指向你的真实接口）；有客户端服务层时可用内置 `service.call` 动作
    桥接，`session.context` 会话桥由框架内置，均无需自行注册。

@@ -273,6 +273,9 @@
   .top-2 {
     top: calc(var(--spacing) * 2);
   }
+  .top-3 {
+    top: calc(var(--spacing) * 3);
+  }
   .top-3\.5 {
     top: calc(var(--spacing) * 3.5);
   }
@@ -327,6 +330,9 @@
   .bottom-10 {
     bottom: calc(var(--spacing) * 10);
   }
+  .bottom-full {
+    bottom: 100%;
+  }
   .-left-12 {
     left: calc(var(--spacing) * -12);
   }
@@ -351,6 +357,9 @@
   .left-\[50\%\] {
     left: 50%;
   }
+  .left-auto {
+    left: auto;
+  }
   .isolate {
     isolation: isolate;
   }
@@ -359,6 +368,9 @@
   }
   .z-20 {
     z-index: 20;
+  }
+  .z-40 {
+    z-index: 40;
   }
   .z-50 {
     z-index: 50;
@@ -407,6 +419,9 @@
   }
   .-mx-1 {
     margin-inline: calc(var(--spacing) * -1);
+  }
+  .mx-0\.5 {
+    margin-inline: calc(var(--spacing) * 0.5);
   }
   .mx-1 {
     margin-inline: var(--spacing);
@@ -464,6 +479,9 @@
   }
   .mb-1 {
     margin-bottom: var(--spacing);
+  }
+  .mb-2 {
+    margin-bottom: calc(var(--spacing) * 2);
   }
   .mb-3 {
     margin-bottom: calc(var(--spacing) * 3);
@@ -1605,6 +1623,9 @@
   .p-1 {
     padding: var(--spacing);
   }
+  .p-1\.5 {
+    padding: calc(var(--spacing) * 1.5);
+  }
   .p-2 {
     padding: calc(var(--spacing) * 2);
   }
@@ -2007,6 +2028,12 @@
   }
   .ring-ring {
     --tw-ring-color: var(--ring);
+  }
+  .ring-ring\/50 {
+    --tw-ring-color: var(--ring);
+    @supports (color: color-mix(in lab, red, red)) {
+      --tw-ring-color: color-mix(in oklab, var(--ring) 50%, transparent);
+    }
   }
   .ring-sidebar-ring {
     --tw-ring-color: var(--sidebar-ring);
