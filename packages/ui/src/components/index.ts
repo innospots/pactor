@@ -370,7 +370,12 @@ export type {
 export { MessageList } from './chat/MessageList/index.js';
 export type { MessageListItem, MessageListProps } from './chat/MessageList/index.js';
 export { Composer } from './chat/Composer/index.js';
-export type { ComposerProps } from './chat/Composer/index.js';
+export type {
+  ComposerContextItem,
+  ComposerContextSource,
+  ComposerModelOption,
+  ComposerProps,
+} from './chat/Composer/index.js';
 export { ConversationList } from './chat/ConversationList/index.js';
 export type { ConversationItemData, ConversationListProps } from './chat/ConversationList/index.js';
 export { ArtifactPanel } from './chat/ArtifactPanel/index.js';

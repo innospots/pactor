@@ -1,0 +1,23 @@
+# 注册页 DSL：内联在 sitemap 中下发（public 页，匿名可见）。
+# 演示环境不开放注册，仅作多 public 页示例。
+dsl: "1.0"
+page:
+  id: register
+  title: 注册
+
+body:
+  type: Page
+  props: { title: 注册 }
+  children:
+    - type: Alert
+      props:
+        variant: warning
+        message: 演示环境不开放注册
+        description: 请使用登录页的演示账号体验不同角色的菜单差异。
+        style: { marginBottom: 16 }
+    - type: Button
+      props: { text: 返回登录, variant: primary }
+      events:
+        onClick:
+          - action: navigate
+            params: { to: /login }

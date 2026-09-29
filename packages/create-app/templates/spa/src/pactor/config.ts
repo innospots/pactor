@@ -5,14 +5,10 @@
  * 取第一个源。
  *
  * 本模板不自带后端：接口复用 next-app-starter 的 mock API
- * （apiBaseUrl 指向其 dev server，已开通 CORS）。sources / pageEndpoint
- * 只写相对路径，由 apiBaseUrl 补全为外部绝对地址，浏览器直连，
- * 无需项目内代理。
+ * （apiBaseUrl 指向其 dev server，已开通 CORS）。sources 只写相对路径，
+ * 由 apiBaseUrl 补全为外部绝对地址，浏览器直连，无需项目内代理。
  */
 export const sitemapSources: string[] = ["/api/sitemap"];
 
 /** 外部接口基准地址（SitemapApp baseUrl）：相对接口路径以此为基准补全 */
 export const apiBaseUrl = "http://localhost:9011";
-
-/** 懒加载页面端点（pages[].pageDsl 缺省时按 id 获取） */
-export const pageEndpoint = (pageId: string): string => `/api/pages/${pageId}`;

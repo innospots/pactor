@@ -79,7 +79,7 @@ function PartView({
     return (
       <div
         data-slot="chat-message-system-part"
-        className="w-full text-center text-muted-foreground"
+        className="w-full text-center text-xs text-muted-foreground"
       >
         {part.type === 'markdown' ? (
           <Markdown content={part.content} />
@@ -99,7 +99,7 @@ function PartView({
     case 'markdown':
       return (
         <Bubble align={role === 'user' ? 'end' : 'start'} variant={role === 'user' ? 'default' : 'ghost'}>
-          <Markdown content={part.content} className="text-sm" />
+          <Markdown content={part.content} />
         </Bubble>
       );
     case 'thinking':

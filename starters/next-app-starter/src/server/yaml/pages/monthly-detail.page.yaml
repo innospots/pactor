@@ -1,0 +1,23 @@
+# 月报详情页 DSL：内联在 sitemap 中下发（需 report:view）。
+# 隐藏页（不出现在菜单），经列表页跳转进入；${route.params.id} 演示路径参数。
+dsl: "1.0"
+page:
+  id: monthly-detail
+  title: 月报详情
+
+body:
+  type: Page
+  props: { title: 月报详情 }
+  children:
+    - type: Alert
+      props:
+        variant: info
+        message: 路径参数演示：id = ${route.params.id}
+        description: 隐藏页（不出现在菜单），经列表页跳转进入。
+        style: { marginBottom: 16 }
+    - type: Button
+      props: { text: 返回月报 }
+      events:
+        onClick:
+          - action: navigate
+            params: { to: /reports/monthly }

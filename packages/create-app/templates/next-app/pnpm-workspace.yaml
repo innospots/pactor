@@ -1,0 +1,7 @@
+# 模板独立安装（pnpm install）时批准运行构建脚本的原生依赖：
+# sharp（Next.js 图片优化可选依赖）与 unrs-resolver（eslint-config-next
+# 依赖链上的原生解析器）。显式批准而非 ignoredBuiltDependencies 静默，
+# 避免 strict-dep-builds / CI 环境下报 ERR_PNPM_IGNORED_BUILDS
+onlyBuiltDependencies:
+  - sharp
+  - unrs-resolver

@@ -1,5 +1,6 @@
-import type { Registry } from '@pactor-app/core';
-import { useState, type CSSProperties } from 'react';
+import type { DslNode, Registry } from '@pactor-app/core';
+import { useRenderer } from '@pactor-app/runtime';
+import { isValidElement, useState, type CSSProperties, type ReactNode } from 'react';
 
 import { cn } from '../../../lib/utils.js';
 import {
@@ -14,7 +15,13 @@ import { Text } from '../../components/Text/index.js';
 import { Tooltip } from '../../components/Tooltip/index.js';
 import { ArtifactPanel, type ArtifactViewers } from '../ArtifactPanel/index.js';
 import type { ChatPageArtifact } from '../ArtifactPanel/artifact.js';
-import { Composer } from '../Composer/index.js';
+import type { AttachmentItemData } from '../Attachment/index.js';
+import {
+  Composer,
+  type ComposerContextItem,
+  type ComposerContextSource,
+  type ComposerModelOption,
+} from '../Composer/index.js';
 import { ConversationList, type ConversationItemData } from '../ConversationList/index.js';
 import { MessageList, type MessageListItem } from '../MessageList/index.js';
 import { Welcome, type WelcomePromptItem } from '../Welcome/index.js';
@@ -101,6 +108,30 @@ export interface ChatPageProps {
   onSend?: (text: string) => void;
   /** 消息操作事件，传出 { id, action } */
   onMessageAction?: (event: { id?: string; action: string }) => void;
+  /** 模型选项（非空时 Composer 工具栏右端渲染模型选择 chip） */
+  models?: ComposerModelOption[];
+  /** 当前选中模型 value（可绑 `${state.x}` 受控闭环） */
+  model?: string;
+  /** 模型切换事件，传出 value */
+  onModelChange?: (value: string) => void;
+  /** 上下文数据源（行内提及：输入触发符在光标处弹菜单，选中替换为行内提及块；'+' 源另有工具栏按钮弹层） */
+  contexts?: ComposerContextSource[];
+  /** 行内提及块列表（受控，与输入区同步，可绑 `${state.x}`） */
+  contextItems?: ComposerContextItem[];
+  /** chips 变更事件（选中追加 / 移除），传出新数组；发送后的清空由调用方在 onSend 闭环里处理 */
+  onContextItemsChange?: (items: ComposerContextItem[]) => void;
+  /** 附件列表（受控，展示在输入区上方） */
+  attachments?: AttachmentItemData[];
+  /** 附件选择入口（提供时启用附件钮与粘贴 / 拖拽文件），传出原始 File[] */
+  onAttachFiles?: (files: File[]) => void;
+  /** 附件移除事件，传出 id */
+  onRemoveAttachment?: (id: string | number) => void;
+  /** 附件重试事件，传出 id */
+  onRetryAttachment?: (id: string | number) => void;
+  /** Composer footer 槽（渲染在输入框内工具栏下方，以分隔线相隔） */
+  composerFooter?: DslNode | ReactNode;
+  /** Composer 下方自定义内容槽（渲染在输入框之外正下方，如免责声明弱提示行） */
+  composerBottom?: DslNode | ReactNode;
   /** 产物区标题，缺省「产物」 */
   artifactTitle?: string;
   /**
@@ -136,7 +167,11 @@ export interface ChatPageProps {
  * 最左图标栏（railItems 独立定义，仅图标，hover 右侧 Tooltip 展示
  * 菜单名；不传则整栏隐藏）、展开菜单区（品牌 + 图标文字导航固定于顶部，
  * 可折叠的会话列表与底部分组各占独立滚动区，内容短时下方留空）、中间对话区（头部 / Welcome /
- * MessageList / Composer）、最右产物区（ArtifactPanel：内建产物预览、
+ * MessageList / Composer——Composer 支持模型选择 chip（models/model）、
+ * 行内提及（contexts：输入触发符在光标处弹菜单，选中替换为行内提及块，
+ * 退格整体删除；受控 contextItems）、附件
+ * 入口（onAttachFiles + 受控 attachments）与 composerFooter /
+ * composerBottom 槽位）、最右产物区（ArtifactPanel：内建产物预览、
  * 目录树与下载，可显隐；展示时经 Resizable 拖拽调节与对话区的宽度）。
  * 数据与行为全部经 props / events 进出，
  * 本组件不持有业务状态（产物区开关与分区折叠缺省非受控，均可经
@@ -175,6 +210,18 @@ export function ChatPage({
   welcome,
   onSend,
   onMessageAction,
+  models,
+  model,
+  onModelChange,
+  contexts,
+  contextItems,
+  onContextItemsChange,
+  attachments,
+  onAttachFiles,
+  onRemoveAttachment,
+  onRetryAttachment,
+  composerFooter,
+  composerBottom,
   artifactTitle = '产物',
   artifacts = [],
   activeArtifactId,
@@ -197,6 +244,13 @@ export function ChatPage({
     if (!controlled) setInnerOpen(next);
     onArtifactOpenChange?.(next);
   };
+
+  const { renderChildren } = useRenderer();
+  // 槽位渲染：React 元素直接渲染，其余按 DslNode 走 Renderer
+  const renderSlot = (slot: DslNode | ReactNode): ReactNode =>
+    isValidElement(slot) || typeof slot !== 'object' || slot === null
+      ? slot
+      : renderChildren([slot as DslNode]);
 
   // 分区折叠：受控 prop 优先，缺省内部维护（同 artifactOpen 模式）
   const convCollControlled = conversationSectionCollapsed !== undefined;
@@ -289,9 +343,25 @@ export function ChatPage({
         <Composer
           placeholder={composerPlaceholder}
           loading={sending}
-          style={{ padding: 16, flexShrink: 0 }}
+          models={models}
+          model={model}
+          contexts={contexts}
+          contextItems={contextItems}
+          attachments={attachments}
+          footer={composerFooter}
+          style={{ padding: 16, paddingBottom: composerBottom ? 8 : 16, flexShrink: 0 }}
+          onModelChange={onModelChange}
+          onContextItemsChange={onContextItemsChange}
+          onAttachFiles={onAttachFiles}
+          onRemoveAttachment={onRemoveAttachment}
+          onRetryAttachment={onRetryAttachment}
           onSubmit={(text) => onSend?.(text)}
         />
+        {composerBottom ? (
+          <div data-slot="chat-page-composer-bottom" className="shrink-0 px-4 pb-2 text-center">
+            {renderSlot(composerBottom)}
+          </div>
+        ) : null}
       </div>
     </div>
   );

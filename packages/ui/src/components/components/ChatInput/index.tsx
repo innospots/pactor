@@ -2,11 +2,13 @@ import type { DslNode } from '@pactor-app/core';
 import { useRenderer } from '@pactor-app/runtime';
 import { ArrowUp } from 'lucide-react';
 import {
+  isValidElement,
   useRef,
   useState,
   type CSSProperties,
   type CompositionEvent,
   type KeyboardEvent,
+  type ReactNode,
 } from 'react';
 
 import { cn } from '../../../lib/utils.js';
@@ -25,14 +27,21 @@ export interface ChatInputProps {
    * hideSend 且左右槽均未提供时工具栏行整体零渲染
    */
   hideSend?: boolean;
-  /** 工具栏左端槽（DslNode 子树，经 Renderer children 机制渲染） */
-  toolbarStart?: DslNode;
+  /** 工具栏左端槽（DslNode 子树经 Renderer 渲染；React 宿主可直接传元素） */
+  toolbarStart?: DslNode | ReactNode;
   /** 工具栏右端槽（发送钮之前） */
-  toolbarEnd?: DslNode;
+  toolbarEnd?: DslNode | ReactNode;
   /** 顶部区槽（提供时渲染在 textarea 上方，与 footer 对称；附件卡片、上下文 chips 等输入上下文展示） */
-  header?: DslNode;
+  header?: DslNode | ReactNode;
   /** 底部区槽（提供时渲染，与工具栏以分隔线相隔） */
-  footer?: DslNode;
+  footer?: DslNode | ReactNode;
+  /**
+   * 自定义输入区（提供时替换内建 textarea）：调用方自持编辑面
+   * （如 contenteditable 行内提及输入区）；此时文本仍经受控
+   * value 驱动（canSubmit / 发送钮禁用逻辑），Enter 发送由自定义
+   * 输入区自行处理（内建 textarea 的键盘语义不生效）
+   */
+  field?: ReactNode;
   /** 输入事件，传出 string 值 */
   onChange?: (value: string) => void;
   /** 发送事件（点击发送钮或 Enter），传出当前文本 */
@@ -67,6 +76,7 @@ export function ChatInput({
   toolbarEnd,
   header,
   footer,
+  field,
   onChange,
   onSubmit,
   className,
@@ -77,6 +87,14 @@ export function ChatInput({
   const [draft, setDraft] = useState('');
   const text = controlled ? value : draft;
   const canSubmit = !disabled && text.trim() !== '';
+  // 自定义输入区（field）模式：编辑面由调用方自持，此处不维护草稿
+  const customField = field !== undefined && field !== null;
+
+  // 槽位渲染：React 元素直接渲染，其余按 DslNode 走 Renderer
+  const renderSlot = (slot: DslNode | ReactNode): ReactNode =>
+    isValidElement(slot) || typeof slot !== 'object' || slot === null
+      ? slot
+      : renderChildren([slot as DslNode]);
 
   // IME 合成守卫（chat Composer 同语义）：合成中 Enter 不发送
   const composingRef = useRef(false);
@@ -124,24 +142,28 @@ export function ChatInput({
       style={style}
     >
       {header ? (
-        <div className="px-3 pt-3">{renderChildren([header])}</div>
+        <div className="px-3 pt-3">{renderSlot(header)}</div>
       ) : null}
-      <ShadcnTextarea
-        value={text}
-        placeholder={placeholder}
-        disabled={disabled}
-        rows={rows}
-        onChange={(event) => handleChange(event.target.value)}
-        onKeyDown={handleKeyDown}
-        onCompositionStart={handleComposition}
-        onCompositionEnd={handleComposition}
-        className="min-h-[60px] resize-none border-0 px-4 pt-3 pb-1 shadow-none focus-visible:border-transparent focus-visible:ring-0"
-      />
+      {customField ? (
+        field
+      ) : (
+        <ShadcnTextarea
+          value={text}
+          placeholder={placeholder}
+          disabled={disabled}
+          rows={rows}
+          onChange={(event) => handleChange(event.target.value)}
+          onKeyDown={handleKeyDown}
+          onCompositionStart={handleComposition}
+          onCompositionEnd={handleComposition}
+          className="min-h-[60px] resize-none border-0 px-4 pt-3 pb-1 shadow-none focus-visible:border-transparent focus-visible:ring-0"
+        />
+      )}
       {toolbarStart || toolbarEnd || !hideSend ? (
         <div className="flex items-center gap-1 px-2 pb-2">
-          {toolbarStart ? renderChildren([toolbarStart]) : null}
+          {toolbarStart ? renderSlot(toolbarStart) : null}
           <span className="flex-1" />
-          {toolbarEnd ? renderChildren([toolbarEnd]) : null}
+          {toolbarEnd ? renderSlot(toolbarEnd) : null}
           {hideSend ? null : (
             <ShadcnButton
               type="button"
@@ -158,7 +180,7 @@ export function ChatInput({
       ) : null}
       {footer ? (
         <div className="border-t border-border px-3 py-2">
-          {renderChildren([footer])}
+          {renderSlot(footer)}
         </div>
       ) : null}
     </div>

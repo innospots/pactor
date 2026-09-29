@@ -1,0 +1,77 @@
+/**
+ * WorkspaceSwitcher（chat 页 composerFooter 自定义组件）样式：
+ * 迁移自 CreditWeaveAI/chat app.css 的 .workspace-* 规则——
+ * 下拉弹层结构样式；颜色走 @pactor-app/ui 语义令牌（深浅色自适应）。
+ */
+
+.workspace-popover {
+  width: 280px;
+  padding: 8px;
+}
+
+/* 搜索框：紧凑高度、去边框与聚焦环、淡背景 */
+.workspace-popover [data-slot='input-group'] {
+  height: 32px;
+  min-height: 32px;
+  border: none;
+  box-shadow: none;
+  background: var(--muted);
+  font-size: 13px;
+}
+
+.workspace-popover [data-slot='input-group']:focus-within {
+  border: none;
+  box-shadow: none;
+}
+
+.workspace-popover [data-slot='input-group'] input {
+  height: 32px;
+  font-size: 13px;
+}
+
+/* 工作空间列表：最大高度 390px，超出自滚动 */
+.workspace-list {
+  max-height: 390px;
+  overflow-y: auto;
+  margin-top: 4px;
+}
+
+.workspace-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 6px 8px;
+  border: none;
+  border-radius: 6px;
+  background: none;
+  font-size: 14px;
+  color: var(--foreground);
+  cursor: pointer;
+  text-align: left;
+  margin-bottom: 4px;
+}
+
+.workspace-item:hover {
+  background: var(--accent);
+}
+
+.workspace-item-label {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.workspace-item-clear {
+  margin-top: 4px;
+  color: var(--muted-foreground);
+}
+
+.workspace-empty {
+  padding: 16px 0;
+  text-align: center;
+  font-size: 13px;
+  color: var(--muted-foreground);
+}
