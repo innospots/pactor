@@ -2,7 +2,7 @@ import type { CSSProperties } from 'react';
 
 import { EChartBase, type ChartSelectPayload } from '../EChartBase/index.js';
 import { buildColumnOption } from '../lib/option-builders.js';
-import { getChartTheme } from '../lib/theme.js';
+import { useChartTheme } from '../lib/use-chart-theme.js';
 
 /**
  * ColumnChart 适配器（chart/ 组件集，echarts）：垂直柱状图，
@@ -45,7 +45,7 @@ export function ColumnChart({
 }: ColumnChartProps) {
   const option = buildColumnOption(
     { data, xKey, yKeys, stacked, colors, title },
-    getChartTheme(),
+    useChartTheme(),
   );
   return (
     <EChartBase

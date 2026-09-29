@@ -2,7 +2,7 @@ import type { CSSProperties } from 'react';
 
 import { EChartBase, type ChartSelectPayload } from '../EChartBase/index.js';
 import { buildComposedOption, type ComposedSeriesItem } from '../lib/option-builders.js';
-import { getChartTheme } from '../lib/theme.js';
+import { useChartTheme } from '../lib/use-chart-theme.js';
 
 export type { ComposedSeriesItem } from '../lib/option-builders.js';
 
@@ -44,7 +44,7 @@ export function ComposedChart({
 }: ComposedChartProps) {
   const option = buildComposedOption(
     { data, xKey, series, colors, title },
-    getChartTheme(),
+    useChartTheme(),
   );
   return (
     <EChartBase

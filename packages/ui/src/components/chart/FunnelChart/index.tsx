@@ -2,7 +2,7 @@ import type { CSSProperties } from 'react';
 
 import { EChartBase, type ChartSelectPayload } from '../EChartBase/index.js';
 import { buildFunnelOption } from '../lib/option-builders.js';
-import { getChartTheme } from '../lib/theme.js';
+import { useChartTheme } from '../lib/use-chart-theme.js';
 
 /**
  * FunnelChart 适配器（chart/ 组件集，echarts）：漏斗图，
@@ -45,7 +45,7 @@ export function FunnelChart({
 }: FunnelChartProps) {
   const option = buildFunnelOption(
     { data, nameKey, valueKey, sort, colors, title },
-    getChartTheme(),
+    useChartTheme(),
   );
   return (
     <EChartBase

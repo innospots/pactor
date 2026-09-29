@@ -41,7 +41,7 @@ const FALLBACK_THEME: ChartTheme = {
 
 let cached: ChartTheme | null = null;
 
-/** 解析当前皮肤令牌为图表主题（结果缓存，主题切换需重新挂载图表生效） */
+/** 解析当前皮肤令牌为图表主题（结果缓存，经 subscribeChartTheme 订阅换肤失效） */
 export function getChartTheme(): ChartTheme {
   if (cached) return cached;
   if (typeof document === 'undefined') return FALLBACK_THEME;
@@ -72,4 +72,77 @@ export function getChartTheme(): ChartTheme {
 /** 清空主题缓存（测试或皮肤热切换后使用） */
 export function resetChartTheme(): void {
   cached = null;
+}
+
+/**
+ * 换肤通知事件名：宿主经非 DOM 途径换肤（如 CSSStyleSheet /
+ * adoptedStyleSheets API 替换令牌）时可 dispatch 该事件强制图表刷新；
+ * 常规换肤路径（data-pactor-theme 属性切换、style 注入、link 替换）
+ * 由订阅机制的 MutationObserver / load 监听自动覆盖，无需手动派发。
+ */
+export const CHART_SKIN_CHANGE_EVENT = 'pactor:skin-change';
+
+type ChartThemeListener = () => void;
+
+const listeners = new Set<ChartThemeListener>();
+let observer: MutationObserver | null = null;
+let scheduled = false;
+
+function scheduleNotify(): void {
+  if (scheduled) return;
+  scheduled = true;
+  const enqueue =
+    typeof requestAnimationFrame === 'function'
+      ? requestAnimationFrame
+      : (cb: () => void) => setTimeout(cb, 0);
+  enqueue(() => {
+    scheduled = false;
+    resetChartTheme();
+    for (const listener of [...listeners]) {
+      listener();
+    }
+  });
+}
+
+/** link / style 加载完成（捕获阶段，load 不冒泡）：外链皮肤表此刻才真正生效 */
+function handleResourceLoad(event: Event): void {
+  const target = event.target;
+  if (target instanceof HTMLLinkElement || target instanceof HTMLStyleElement) {
+    scheduleNotify();
+  }
+}
+
+/**
+ * 订阅皮肤变更（useChartTheme 的 store 侧）：首个订阅者挂载时开始监听
+ * documentElement 属性（data-pactor-theme / style / class 切换）、
+ * document.head 子树（style 注入 upsert、皮肤 link 增删、href 变更）、
+ * 样式表 load 事件与 CHART_SKIN_CHANGE_EVENT；末个订阅者卸载后停止。
+ * 通知经 rAF 合帧，连发变更（预览拖拽取色）只触发一轮重渲染。
+ */
+export function subscribeChartTheme(listener: ChartThemeListener): () => void {
+  if (typeof document === 'undefined' || typeof MutationObserver === 'undefined') {
+    return () => {};
+  }
+  listeners.add(listener);
+  if (!observer) {
+    observer = new MutationObserver(scheduleNotify);
+    observer.observe(document.documentElement, { attributes: true });
+    observer.observe(document.head, {
+      attributes: true,
+      childList: true,
+      characterData: true,
+      subtree: true,
+    });
+    document.addEventListener('load', handleResourceLoad, true);
+    window.addEventListener(CHART_SKIN_CHANGE_EVENT, scheduleNotify);
+  }
+  return () => {
+    listeners.delete(listener);
+    if (listeners.size === 0 && observer) {
+      observer.disconnect();
+      observer = null;
+      document.removeEventListener('load', handleResourceLoad, true);
+      window.removeEventListener(CHART_SKIN_CHANGE_EVENT, scheduleNotify);
+    }
+  };
 }

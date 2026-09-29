@@ -2,7 +2,7 @@ import type { CSSProperties } from 'react';
 
 import { EChartBase, type ChartSelectPayload } from '../EChartBase/index.js';
 import { buildSankeyOption } from '../lib/option-builders.js';
-import { getChartTheme } from '../lib/theme.js';
+import { useChartTheme } from '../lib/use-chart-theme.js';
 
 /**
  * SankeyChart 适配器（chart/ 组件集，echarts）：桑基图，
@@ -34,7 +34,7 @@ export function SankeyChart({
   className,
   style,
 }: SankeyChartProps) {
-  const option = buildSankeyOption({ nodes, links, title }, getChartTheme());
+  const option = buildSankeyOption({ nodes, links, title }, useChartTheme());
   return (
     <EChartBase
       slot="sankey-chart"

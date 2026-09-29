@@ -2,7 +2,7 @@ import type { CSSProperties } from 'react';
 
 import { EChartBase, type ChartSelectPayload } from '../EChartBase/index.js';
 import { buildAreaOption } from '../lib/option-builders.js';
-import { getChartTheme } from '../lib/theme.js';
+import { useChartTheme } from '../lib/use-chart-theme.js';
 
 /**
  * AreaChart 适配器（chart/ 组件集，echarts）：面积图，
@@ -48,7 +48,7 @@ export function AreaChart({
 }: AreaChartProps) {
   const option = buildAreaOption(
     { data, xKey, yKeys, stacked, fillOpacity, colors, title },
-    getChartTheme(),
+    useChartTheme(),
   );
   return (
     <EChartBase

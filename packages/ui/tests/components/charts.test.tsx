@@ -9,7 +9,7 @@
  */
 import './setup.js';
 
-import { cleanup, render, screen } from '@testing-library/react';
+import { cleanup, render, screen, waitFor } from '@testing-library/react';
 import type { DslNode } from '@pactor-app/core';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
@@ -66,6 +66,10 @@ import {
   MapChart,
   MetricCard,
 } from '../../src/components/index.js';
+import {
+  CHART_SKIN_CHANGE_EVENT,
+  resetChartTheme,
+} from '../../src/components/chart/lib/theme.js';
 import { expectEventState, renderDsl } from './helpers.js';
 
 afterEach(() => {
@@ -74,6 +78,9 @@ afterEach(() => {
   fake.clickHandlers.length = 0;
   fake.registered.clear();
   fake.setThrowOnInit(false);
+  document.documentElement.removeAttribute('data-pactor-theme');
+  document.documentElement.style.removeProperty('--chart-1');
+  resetChartTheme();
 });
 
 describe('EChartBase 生命周期（mock echarts）', () => {
@@ -234,5 +241,56 @@ describe('DSL 集成（注册表渲染 + 事件）', () => {
     renderDsl({ type: 'MetricCard', props: { title: '活跃用户', value: 1024, trend: 5.2 } } as DslNode);
     expect(screen.getByText('活跃用户')).not.toBeNull();
     expect(document.querySelector('[data-slot=metric-card-trend]')).not.toBeNull();
+  });
+});
+
+/** 最近一轮 setOption 的 option 载荷 */
+function lastOption(instance: (typeof fake.instances)[number]) {
+  return instance.setOption.mock.calls.at(-1)![0] as { color?: string[] };
+}
+
+describe('皮肤切换跟随（useChartTheme）', () => {
+  it('皮肤令牌变化（令牌覆写）后以新主题重建 option', async () => {
+    render(<LineChart data={[{ m: '一月', v: 1 }]} xKey="m" yKeys={['v']} />);
+    const instance = fake.instances[0]!;
+    expect(lastOption(instance).color?.[0]).not.toBe('rgb(9, 8, 7)');
+
+    document.documentElement.style.setProperty('--chart-1', 'rgb(9, 8, 7)');
+    await waitFor(() => expect(lastOption(instance).color?.[0]).toBe('rgb(9, 8, 7)'));
+  });
+
+  it('data-pactor-theme 明暗切换触发 option 重建', async () => {
+    render(<LineChart data={[{ m: '一月', v: 1 }]} xKey="m" yKeys={['v']} />);
+    const instance = fake.instances[0]!;
+    const calls = instance.setOption.mock.calls.length;
+
+    document.documentElement.setAttribute('data-pactor-theme', 'dark');
+    await waitFor(() =>
+      expect(instance.setOption.mock.calls.length).toBeGreaterThan(calls),
+    );
+  });
+
+  it('宿主 dispatch pactor:skin-change 事件强制刷新', async () => {
+    render(<LineChart data={[{ m: '一月', v: 1 }]} xKey="m" yKeys={['v']} />);
+    const instance = fake.instances[0]!;
+    const calls = instance.setOption.mock.calls.length;
+
+    window.dispatchEvent(new Event(CHART_SKIN_CHANGE_EVENT));
+    await waitFor(() =>
+      expect(instance.setOption.mock.calls.length).toBeGreaterThan(calls),
+    );
+  });
+
+  it('卸载后停止监听（末个订阅者移除 observer）', async () => {
+    const { unmount } = render(
+      <LineChart data={[{ m: '一月', v: 1 }]} xKey="m" yKeys={['v']} />,
+    );
+    const instance = fake.instances[0]!;
+    unmount();
+    const calls = instance.setOption.mock.calls.length;
+
+    document.documentElement.setAttribute('data-pactor-theme', 'dark');
+    await new Promise((resolve) => setTimeout(resolve, 50));
+    expect(instance.setOption.mock.calls.length).toBe(calls);
   });
 });

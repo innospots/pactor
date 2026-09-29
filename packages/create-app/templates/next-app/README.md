@@ -44,6 +44,8 @@ src/
     cors.ts                # CORS 头（演示放开跨源，含预检响应）
     sitemap.ts             # mock sitemap 数据源（layouts / pages / menus 按角色裁剪；
                            # 登录 / 登出在 DSL 中用内置 request 动作表达）
+    yaml/                  # DSL 文件：sitemap.yaml（入口元数据 + 布局 + 页面/菜单全量声明）
+      pages/               # 页面 DSL（每页一个 *.page.yaml，按 id 约定加载）
 ```
 
 `App.tsx` 全部内容即：

@@ -153,6 +153,11 @@ document.documentElement.removeAttribute('data-pactor-theme');
 | `--sidebar` 系列（`-foreground` / `-primary` / `-primary-foreground` / `-accent` / `-accent-foreground` / `-border` / `-ring`） | 侧栏表面与其上元素 |
 | `--sidebar-width` / `--sidebar-width-icon` | 侧栏展开宽度（默认 `16rem`）/ 折叠后 icon rail 宽度（默认 `3rem`）；Theme Studio 生成的皮肤可覆盖 |
 
+> 图表（echarts）组件在渲染期读取上述 token 的具体颜色值，并自动跟随换肤：
+> 明暗切换（`data-pactor-theme`）、皮肤 CSS 热替换（`<style>` 注入或皮肤 `<link>` 增删）
+> 都会触发图表以新色板重建，无需重新挂载；经 CSSStyleSheet API 等非 DOM 途径换肤时，
+> 可 dispatch `window` 事件 `pactor:skin-change` 强制刷新。
+
 ### 形状与阴影 token
 
 | token | 默认值 | 说明 |
