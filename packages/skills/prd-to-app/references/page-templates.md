@@ -108,13 +108,13 @@ body:
       props:
         items:
           - { key: overview, label: 概览 }
-          - { key: audit, label: 审计信息 }
+          - { key: changes, label: 变更记录 }
       children: []   # 各 Tab 内容按线框图分区填充
 ```
 
 要点：
 
-- 路径参数（`/providers/:code`）经 `${route.params.code}` 拼进 url
+- 路径参数（`/projects/:code`）经 `${route.params.code}` 拼进 url
 - 头部操作（启用/停用、编辑、删除）按线框图摆放在标题行右侧，点击后确认弹窗 + 操作成功 message + reload
 
 ## 表单页（新增/编辑：校验 + 提交闭环）

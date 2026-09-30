@@ -1,7 +1,7 @@
 ---
 name: prd-to-app
 description: |
-  Use when generating a complete pactor (pactor-app) project from product documents / markdown wireframes — pages described in YAML DSL (*.page.yaml). Triggers: 根据 PRD / 产品文档 / 线框图 (wireframe) 创建 / 生成管理后台或 Web 应用原型; turning a prd-diagram-style directory (module README + per-page ASCII wireframe markdown) into a runnable Next.js + pactor project like nexmux-ui, including sitemap.yaml, page yaml, http dataSources, mock API routes, theme/skin alignment with the original product, and browser acceptance.
+  Use when generating a complete pactor (pactor-app) project from product documents / markdown wireframes — pages described in YAML DSL (*.page.yaml). Triggers: 根据 PRD / 产品文档 / 线框图 (wireframe) 创建 / 生成管理后台或 Web 应用原型; turning a PRD directory (overview README + per-page ASCII wireframe markdown) into a runnable Next.js + pactor project, including sitemap.yaml, page yaml, http dataSources, mock API routes, theme/skin alignment with the original product, and browser acceptance.
 version: 1.0.0
 ---
 
@@ -11,9 +11,9 @@ version: 1.0.0
 
 ## 输入要求
 
-- PRD/线框图目录：总览 README（模块 × 页面 × 优先级表格）+ 分页线框图 markdown（ASCII 线框 + 区域说明 + 交互描述）。参考样例：`product-design/nexmux/prd-diagram`
-- 原产品代码仓（可选但强烈建议）：用于提取设计令牌、自定义 CSS、交互行为。参考样例：`model-console`
-- 目标目录：空目录或目标仓库。参考产出：`nexmux-ui`
+- PRD/线框图目录：总览 README（模块 × 页面 × 优先级表格）+ 分页线框图 markdown（ASCII 线框 + 区域说明 + 交互描述）
+- 原产品代码仓（可选但强烈建议）：用于提取设计令牌、自定义 CSS、交互行为
+- 目标目录：空目录或目标仓库
 
 输入格式与样例不同时，先归纳其「模块 → 页面 → 区域 → 交互」的等价结构，再套用本流程，不要因格式差异中止。
 
@@ -35,7 +35,7 @@ version: 1.0.0
 
 ### 2. 脚手架
 
-- 确定工程名称：**用户未明确指定时，根据原型目录 README 中的产品名生成英文名**（kebab-case）：取 README 主标题/产品名（如「Model Console 产品原型线框图」→ `model-console`），中文名先译为简洁英文；派生出的名称在创建前向用户确认一次
+- 确定工程名称：**用户未明确指定时，根据原型目录 README 中的产品名生成英文名**（kebab-case）：取 README 主标题/产品名（如「订单管理系统产品原型线框图」→ `order-console`），中文名先译为简洁英文；派生出的名称在创建前向用户确认一次
 - `pnpm create pactor-app <name>`（next-app 模板）创建项目，`pnpm install` + 启动 dev server 验证模板可运行
 - 按 `references/project-structure.md` 建立 `src/server/yaml/`（sitemap.yaml + 按模块分目录的页面 yaml）与 `app/api/` 路由（sitemap / public/pages/[id] / data/[...path]）
 

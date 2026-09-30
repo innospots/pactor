@@ -22,7 +22,7 @@
 │       ├── sitemap.ts          ➕ 递归收集 yaml/ 模块子目录建 id→路径索引、按会话裁剪（只加过滤，不拼接业务字段）
 │       └── yaml/
 │           ├── sitemap.yaml    ✅ 布局 DSL：app / auth / layouts / pages / menus
-│           └── <模块>/         ➕ 页面按 PRD 模块分目录存放（如 route/ provider/ audit/）
+│           └── <模块>/         ➕ 页面按 PRD 模块分目录存放（如 user/ order/ project/）
 │               └── <id>.yaml      每页一个文件，页面 id = 文件名（不含 .yaml）
 └── package.json
 ```
@@ -45,19 +45,19 @@ pages:
   - { id: login, path: /login, title: 登录, version: 1, public: true }
   - { id: dashboard, path: /, title: 仪表盘, version: 1, lazy: true }
   # 每个 PRD 页面一条：id kebab-case、path 与线框图「页面路径」一致、lazy: true
-  - { id: provider-list, path: /providers, title: 供应商, version: 1, lazy: true }
-  - { id: provider-detail, path: /providers/:code, title: 供应商详情, version: 1, lazy: true }
+  - { id: project-list, path: /projects, title: 项目, version: 1, lazy: true }
+  - { id: project-detail, path: /projects/:code, title: 项目详情, version: 1, lazy: true }
 
 menus:
   # 菜单分组与 PRD 模块树一一对应；详情/编辑页 hidden: true + activeMenu 指向列表项
   - id: assets
     type: group
-    title: 模型资产
+    title: 资源管理
     icon: database
     order: 2
     children:
-      - { id: providers, type: page, pageId: provider-list, title: 供应商, icon: cloud }
-      - { id: provider-detail, type: page, pageId: provider-detail, title: 供应商详情, hidden: true, activeMenu: providers }
+      - { id: projects, type: page, pageId: project-list, title: 项目, icon: folder }
+      - { id: project-detail, type: page, pageId: project-detail, title: 项目详情, hidden: true, activeMenu: projects }
 
 layouts:
   admin:
@@ -70,10 +70,10 @@ layouts:
 
 ## 约定
 
-- 页面按 PRD 模块树分目录：`yaml/<模块>/<id>.yaml`（如 `yaml/route/route-list.yaml`）；模块目录名用 kebab-case 英文域（route / provider / audit / model / ops / client / debug 式划分）
+- 页面按 PRD 模块树分目录：`yaml/<模块>/<id>.yaml`（如 `yaml/user/user-list.yaml`）；模块目录名用 kebab-case 英文域，按 PRD 模块树划分（如 user / order / report）
 - 页面 id kebab-case，= 文件名（不含 `.yaml`）；`pages:` 注册、`menus:` 引用、文件名三者一致
 - 模板自带的 `yaml/pages/*.page.yaml` 平铺写法仅适合页面极少的 demo；模块 ≥2 或页面 >5 时一律按模块分目录（模板目录可整体替换）
-- 列表/详情/编辑成组路径：`/providers`、`/providers/:code`、`/providers/:code/edit`、`/providers/new`
+- 列表/详情/编辑成组路径：`/projects`、`/projects/:code`、`/projects/:code/edit`、`/projects/new`
 - 详情/编辑页不进菜单（`hidden: true`），用 `activeMenu` 保持列表菜单高亮
 - 菜单图标用 pactor Icon 白名单 kebab-case 名
 - 登录/注册页 `public: true` + `layout: login`；其余默认需登录
