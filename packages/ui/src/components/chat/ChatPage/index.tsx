@@ -1,6 +1,6 @@
 import type { DslNode, Registry } from '@pactor-app/core';
 import { useRenderer } from '@pactor-app/runtime';
-import { isValidElement, useState, type CSSProperties, type ReactNode } from 'react';
+import { isValidElement, useEffect, useState, type CSSProperties, type ReactNode } from 'react';
 
 import { cn } from '../../../lib/utils.js';
 import {
@@ -32,6 +32,21 @@ export interface ChatPageMenuItem {
   label: string;
   /** 图标名（Icon 白名单） */
   icon?: string;
+}
+
+/** 对话图标栏项：点击 toggle 展示当前对话的附加内容（产物 / 执行步骤等） */
+export interface ConversationRailItem {
+  key: string;
+  /** 提示文案（hover tooltip） */
+  label?: string;
+  /** 图标名（Icon 白名单） */
+  icon?: string;
+  /** 呈现形态：popover（图标栏旁悬浮弹框，缺省）/ panel（产物栏式右侧固定宽栏） */
+  display?: 'panel' | 'popover';
+  /** 附加内容（React 元素或 DslNode；缺省时点击仅触发状态事件，不渲染内容层） */
+  content?: DslNode | ReactNode;
+  /** 隐藏该项（如按当前会话有无对应内容动态显隐）；隐藏时激活态一并失效 */
+  hidden?: boolean;
 }
 
 /** 品牌区（展开菜单区标题 / 版本） */
@@ -87,13 +102,23 @@ export interface ChatPageProps {
   /** 对话区头部标题（通常为当前会话标题） */
   conversationTitle?: string;
   /**
-   * 对话区头部右侧自定义操作（图标 + 提示）；提供时替换缺省的产物区
-   * 开关钮，点击经 onConversationHeaderAction 传出（产物区开关可经
-   * 受控 artifactOpen + onArtifactOpenChange 自行接线）
+   * 对话区头部右侧自定义操作（图标 + 提示）；提供才渲染（未配置时
+   * header 不渲染任何按钮），点击经 onConversationHeaderAction 传出
    */
   conversationHeaderAction?: { icon?: string; label?: string; tooltip?: string };
   /** 对话区头部右侧自定义操作点击事件 */
   onConversationHeaderAction?: () => void;
+  /**
+   * 对话图标栏附加项（header 下方、对话区右缘纵向排列，产物内置项
+   * 之后按序展示）；点击 toggle 展示对应附加内容
+   */
+  conversationRailItems?: ConversationRailItem[];
+  /** 隐藏图标栏内置产物入口（缺省 false：产物开关为图标栏首项） */
+  hideArtifactRailItem?: boolean;
+  /** 图标栏激活项 key（提供即受控，配合 onConversationRailChange 闭环；null 为全部收起） */
+  activeConversationRailKey?: string | null;
+  /** 图标栏激活项变化事件，传出 key 或 null */
+  onConversationRailChange?: (key: string | null) => void;
   messages?: MessageListItem[];
   /** 发送中（禁用 Composer 发送钮，由调用方完成后复位） */
   sending?: boolean;
@@ -171,11 +196,14 @@ export interface ChatPageProps {
  * 行内提及（contexts：输入触发符在光标处弹菜单，选中替换为行内提及块，
  * 退格整体删除；受控 contextItems）、附件
  * 入口（onAttachFiles + 受控 attachments）与 composerFooter /
- * composerBottom 槽位）、最右产物区（ArtifactPanel：内建产物预览、
+ * composerBottom 槽位）、对话图标栏（header 下方、对话区右缘纵向
+ * 图标列：内置产物入口 + conversationRailItems 附加项，点击 toggle
+ * 展示附加内容——popover 悬浮弹框或 panel 右侧分栏，与产物区互斥）、
+ * 最右产物区（ArtifactPanel：内建产物预览、
  * 目录树与下载，可显隐；展示时经 Resizable 拖拽调节与对话区的宽度）。
  * 数据与行为全部经 props / events 进出，
- * 本组件不持有业务状态（产物区开关与分区折叠缺省非受控，均可经
- * 受控 prop + change 事件闭环）。
+ * 本组件不持有业务状态（产物区开关、图标栏激活项与分区折叠缺省非受控，
+ * 均可经受控 prop + change 事件闭环）。
  */
 export function ChatPage({
   brand,
@@ -204,6 +232,10 @@ export function ChatPage({
   conversationTitle,
   conversationHeaderAction,
   onConversationHeaderAction,
+  conversationRailItems = [],
+  hideArtifactRailItem = false,
+  activeConversationRailKey,
+  onConversationRailChange,
   messages = [],
   sending,
   composerPlaceholder,
@@ -244,6 +276,72 @@ export function ChatPage({
     if (!controlled) setInnerOpen(next);
     onArtifactOpenChange?.(next);
   };
+
+  // 对话图标栏激活项：受控 prop 优先，缺省内部维护（同 artifactOpen 模式）
+  const railControlled = activeConversationRailKey !== undefined;
+  const [activeRailInner, setActiveRailInner] = useState<string | null>(null);
+  const activeRailKey = railControlled ? activeConversationRailKey : activeRailInner;
+  const setActiveRailKey = (next: string | null): void => {
+    if (!railControlled) setActiveRailInner(next);
+    onConversationRailChange?.(next);
+  };
+  // hidden 项不渲染，且不参与激活（隐藏即收起其内容层）
+  const visibleRailItems = conversationRailItems.filter((item) => item.hidden !== true);
+  const activeRailItem = visibleRailItems.find(
+    (item) => item.key === activeRailKey,
+  );
+  // 无 content 的项仅作入口：激活只触发 change 事件，不渲染内容层
+  const activePanelItem =
+    activeRailItem?.display === 'panel' && activeRailItem.content !== undefined
+      ? activeRailItem
+      : undefined;
+  const activePopoverItem =
+    activeRailItem !== undefined &&
+    activeRailItem.display !== 'panel' &&
+    activeRailItem.content !== undefined
+      ? activeRailItem
+      : undefined;
+
+  const toggleRailItem = (item: ConversationRailItem): void => {
+    const next = activeRailKey === item.key ? null : item.key;
+    // panel 与产物区互斥：激活 panel 项时关闭产物区（受控宿主经 change 事件闭环）
+    if (next !== null && item.display === 'panel') {
+      setOpen(false);
+    }
+    setActiveRailKey(next);
+  };
+
+  const toggleArtifact = (): void => {
+    // 打开产物区时关闭激活的 panel 项（互斥）
+    if (!open && activePanelItem) {
+      setActiveRailKey(null);
+    }
+    setOpen(!open);
+  };
+
+  // popover 关闭交互：Esc / 点击弹层外部（图标栏自身点击由 toggle 处理）
+  useEffect(() => {
+    if (!activePopoverItem) return;
+    const onKeyDown = (event: KeyboardEvent): void => {
+      if (event.key === 'Escape') setActiveRailKey(null);
+    };
+    const onPointerDown = (event: MouseEvent): void => {
+      const target = event.target as HTMLElement;
+      if (
+        target.closest('[data-slot=chat-page-rail-popover]') ||
+        target.closest('[data-slot=chat-page-conv-rail]')
+      ) {
+        return;
+      }
+      setActiveRailKey(null);
+    };
+    document.addEventListener('keydown', onKeyDown);
+    document.addEventListener('mousedown', onPointerDown);
+    return () => {
+      document.removeEventListener('keydown', onKeyDown);
+      document.removeEventListener('mousedown', onPointerDown);
+    };
+  });
 
   const { renderChildren } = useRenderer();
   // 槽位渲染：React 元素直接渲染，其余按 DslNode 走 Renderer
@@ -292,9 +390,71 @@ export function ChatPage({
     </Tooltip>
   );
 
+  // 对话图标栏按钮：激活态底色高亮；label 缺省时免 Tooltip
+  const convRailButton = (
+    item: ConversationRailItem,
+    active: boolean,
+    onClick: () => void,
+  ) => {
+    const button = (
+      <Button
+        icon={item.icon}
+        variant="text"
+        className={cn(active ? 'bg-accent text-accent-foreground' : undefined, 'px-2')}
+        onClick={onClick}
+      />
+    );
+    return item.label !== undefined ? (
+      <Tooltip key={item.key} content={item.label} side="left">
+        {button}
+      </Tooltip>
+    ) : (
+      <span key={item.key}>{button}</span>
+    );
+  };
+
+  // 对话图标栏：产物内置项（可隐藏）+ conversationRailItems（hidden 项过滤）；
+  // 均为空时整栏隐藏
+  const convRailVisible = !hideArtifactRailItem || visibleRailItems.length > 0;
+  const convRail = convRailVisible ? (
+    <div
+      data-slot="chat-page-conv-rail"
+      className="relative flex w-(--pactor-chat-rail-width) shrink-0 flex-col items-center gap-1 px-1 py-2"
+    >
+      {!hideArtifactRailItem
+        ? convRailButton(
+            {
+              key: 'artifact',
+              icon: open ? 'panel-right-close' : 'package',
+              label: open ? '收起产物区' : artifactTitle,
+            },
+            open,
+            toggleArtifact,
+          )
+        : null}
+      {visibleRailItems.map((item) =>
+        convRailButton(item, activeRailKey === item.key, () => toggleRailItem(item)),
+      )}
+      {activePopoverItem ? (
+        <div
+          data-slot="chat-page-rail-popover"
+          className="absolute right-full top-0 z-10 mr-2 overflow-auto rounded-lg border border-border bg-popover shadow-md"
+          style={{
+            width: 'var(--pactor-chat-rail-popover-width)',
+            maxWidth: 'calc(100cqw - 2rem)',
+            maxHeight: 'calc(100% - 1rem)',
+          }}
+        >
+          {renderSlot(activePopoverItem.content)}
+        </div>
+      ) : null}
+    </div>
+  ) : null;
+
   const chatArea = (
     <div data-slot="chat-page-conversation" className="flex h-full min-w-0 flex-1 flex-col">
       <div
+        data-slot="chat-page-conversation-header"
         className="flex shrink-0 items-center justify-between border-b border-border px-4 py-2.5"
       >
         <Text text={conversationTitle} strong />
@@ -307,22 +467,15 @@ export function ChatPage({
               onClick={() => onConversationHeaderAction?.()}
             />
           </Tooltip>
-        ) : (
-          <Tooltip content={open ? '收起产物区' : artifactTitle} side="bottom">
-            <Button
-              icon={open ? 'panel-right-close' : 'panel-right-open'}
-              variant="text"
-              onClick={() => setOpen(!open)}
-            />
-          </Tooltip>
-        )}
+        ) : null}
       </div>
-      {/* 内容列宽相对主区域（cqw）：产物栏关闭时对话列占主区域 61.8%（居中），
-          产物栏拖宽时分栏收窄、对话列逐渐撑满分栏（max-w-full 封顶） */}
-      <div
-        data-slot="chat-page-conversation-body"
-        className="mx-auto flex min-h-0 w-[61.8cqw] max-w-full flex-1 flex-col"
-      >
+      <div className="flex min-h-0 flex-1">
+        {/* 内容列宽相对主区域（cqw）：产物栏关闭时对话列占主区域 61.8%（居中），
+            产物栏拖宽时分栏收窄、对话列逐渐撑满分栏（max-w-full 封顶） */}
+        <div
+          data-slot="chat-page-conversation-body"
+          className="mx-auto flex min-h-0 w-[61.8cqw] max-w-full flex-col"
+        >
         {messages.length === 0 ? (
           <Welcome
             title={welcome?.title}
@@ -362,6 +515,8 @@ export function ChatPage({
             {renderSlot(composerBottom)}
           </div>
         ) : null}
+        </div>
+        {convRail}
       </div>
     </div>
   );
@@ -496,15 +651,24 @@ export function ChatPage({
           </div>
         ) : null}
       </div>
-      {/* 主区域：对话区 + 产物区（产物区可显隐；展示时拖拽调宽）。
-          @container 使对话内容列的 61.8cqw 相对主区域解析 */}
+      {/* 主区域：对话区 + 右侧分栏（产物区或 panel 形态附加内容，互斥；
+          展示时拖拽调宽）。@container 使对话内容列的 61.8cqw 相对主区域解析 */}
       <div className="@container h-full min-w-0 flex-1">
-        {open ? (
+        {open || activePanelItem ? (
           <PanelGroup orientation="horizontal" style={{ width: '100%', height: '100%' }}>
             <Panel defaultSize="62%">{chatArea}</Panel>
             <ResizableHandle withHandle />
             <Panel defaultSize="38%" minSize="380px" maxSize="760px">
-              {artifactPanel}
+              {activePanelItem ? (
+                <div
+                  data-slot="chat-page-rail-panel"
+                  className="flex h-full min-w-0 flex-col border-l border-border bg-muted"
+                >
+                  {renderSlot(activePanelItem.content)}
+                </div>
+              ) : (
+                artifactPanel
+              )}
             </Panel>
           </PanelGroup>
         ) : (

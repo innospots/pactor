@@ -4,6 +4,7 @@ import type { PageDsl } from "@pactor-app/core";
 import { PactorPage } from "@pactor-app/app";
 
 import { WorkspaceSwitcher } from "./workspace-switcher";
+import { StepsPanel, type StepItemData } from "./steps-panel";
 
 /**
  * 对话页：页面结构由 DSL 描述，根组件为 @pactor-app/ui 内置的 ChatPage
@@ -19,6 +20,10 @@ import { WorkspaceSwitcher } from "./workspace-switcher";
  * - composerFooter：工作空间切换器（自定义组件 WorkspaceSwitcher）
  * - composerBottom：「内容由 AI 生成，仅供参考」弱提示
  * - 消息操作条：copy / retry / regenerate / edit（修改并重发）/ quote（引用回复）
+ * - 对话图标栏（conversationRailItems）：「执行步骤」popover 浮层（自定义组件
+ *   StepsPanel，绑定 chat.steps 数据源）；产物按钮 / 步骤按钮均按当前会话
+ *   有无对应内容动态显隐（hideArtifactRailItem / item.hidden）——
+ *   c1 产物+步骤、c2 仅产物、c3 仅步骤、c4 无右侧按钮
  */
 
 interface ChatMessageData {
@@ -141,6 +146,61 @@ const store = {
         actions: MESSAGE_ACTIONS,
       },
     ] as ChatMessageData[],
+    c2: [
+      {
+        id: "m21",
+        role: "user",
+        time: "10:12",
+        parts: [
+          { type: "text", content: "请创作一个完整的AI短视频：主题「城市夜跑」，时长 30 秒" },
+        ],
+      },
+      {
+        id: "m22",
+        role: "assistant",
+        time: "10:14",
+        agent: { name: "小 P" },
+        status: "completed",
+        parts: [
+          { type: "thinking", content: "先确定视频结构与风格基调，再拆解为可执行的生成流水线…" },
+          { type: "tool-call", name: "write_script", status: "done", durationMs: 2100 },
+          { type: "tool-call", name: "design_storyboard", status: "done", durationMs: 3400 },
+          { type: "tool-call", name: "search_footage", status: "running" },
+          {
+            type: "markdown",
+            content:
+              "剧本与分镜已完成并放入产物区，可点击右侧 **产物** 图标预览。正在继续检索素材。\n\n**视频结构（30s）**\n\n1. 开场：城市夜景空镜（3s）\n2. 主体：跑者穿梭街景（20s）\n3. 收尾：远眺城市天际线（7s）",
+          },
+          { type: "artifacts", count: 2 },
+        ],
+        actions: MESSAGE_ACTIONS,
+      },
+    ] as ChatMessageData[],
+    c3: [
+      {
+        id: "m31",
+        role: "user",
+        time: "昨天 16:40",
+        parts: [{ type: "text", content: "workbuddy 中的连接器有什么" }],
+      },
+      {
+        id: "m32",
+        role: "assistant",
+        time: "昨天 16:41",
+        agent: { name: "小 P" },
+        status: "completed",
+        parts: [
+          { type: "thinking", content: "检索连接器目录，按类别整理能力清单…" },
+          { type: "tool-call", name: "list_connectors", status: "done", durationMs: 1600 },
+          {
+            type: "markdown",
+            content:
+              "workbuddy 目前内置三类连接器：\n\n- **文档类**：飞书文档、Notion、语雀\n- **数据类**：MySQL、PostgreSQL、飞书多维表格\n- **协作类**：飞书消息、邮件、Webhook\n\n检索过程可点击右侧 **执行步骤** 图标查看。",
+          },
+        ],
+        actions: MESSAGE_ACTIONS,
+      },
+    ] as ChatMessageData[],
   } as Record<string, ChatMessageData[]>,
   artifacts: {
     c1: [
@@ -160,7 +220,36 @@ const store = {
           "export function extractDialogue(script: string) {\n  return script\n    .split('\\n')\n    .filter((line) => line.includes('：'))\n    .map((line) => {\n      const [role, ...rest] = line.split('：');\n      return { role: role.trim(), text: rest.join('：').trim() };\n    });\n}\n",
       },
     ] as ArtifactData[],
+    c2: [
+      {
+        id: "c2/script.md",
+        title: "城市夜跑-剧本.md",
+        kind: "markdown",
+        content:
+          "# 《城市夜跑》短视频剧本（30s）\n\n## 第一幕：开场（0-3s）\n\n城市夜景空镜，霓虹与车流，环境音渐入。\n\n## 第二幕：主体（3-23s）\n\n跑者自街角入画，穿梭于路灯与橱窗之间；脚步节奏与配乐鼓点对齐。\n\n## 第三幕：收尾（23-30s）\n\n跑者停下，远眺城市天际线，logo 淡入。\n\n> 配乐建议：120 BPM 电子乐，结尾渐弱。",
+      },
+      {
+        id: "c2/storyboard.md",
+        title: "城市夜跑-分镜表.md",
+        kind: "markdown",
+        content:
+          "# 分镜表（8 镜）\n\n| 镜号 | 画面 | 运镜 | 时长 |\n| --- | --- | --- | --- |\n| 1 | 夜景航拍 | 推进 | 3s |\n| 2 | 街角入画 | 固定 | 3s |\n| 3 | 脚步特写 | 跟拍 | 4s |\n| 4 | 橱窗倒影 | 横移 | 4s |\n| 5 | 天桥俯拍 | 拉升 | 3s |\n| 6 | 跑者背影 | 跟拍 | 3s |\n| 7 | 停步喘息 | 固定 | 3s |\n| 8 | 天际线远景 | 渐隐 | 7s |",
+      },
+    ] as ArtifactData[],
   } as Record<string, ArtifactData[]>,
+  // 执行步骤：c1 风险审查 / c3 连接器检索；c2、c4 等会话无步骤（图标隐藏）
+  steps: {
+    c1: [
+      { title: "剧本结构拆解", description: "按引流 / 信任 / 转化三段拆解剧本", status: "done", duration: "1.1s" },
+      { title: "话术特征比对", description: "比对 200+ 条保健品诈骗话术特征库", status: "done", duration: "2.6s" },
+      { title: "风险评级与建议", description: "输出风险评级报告与修改建议", status: "done", duration: "0.9s" },
+    ] as StepItemData[],
+    c3: [
+      { title: "需求理解", description: "确认查询范围：workbuddy 内置连接器", status: "done", duration: "0.4s" },
+      { title: "连接器目录检索", description: "按文档 / 数据 / 协作三类检索连接器目录", status: "done", duration: "1.6s" },
+      { title: "能力清单整理", description: "汇总各连接器的能力与接入方式", status: "done", duration: "0.7s" },
+    ] as StepItemData[],
+  } as Record<string, StepItemData[]>,
 };
 
 interface ReplyOptions {
@@ -225,6 +314,10 @@ const chatServices = {
     // 富产物模型直接下发（id / kind / title / content），面板内建预览与目录树
     return [...(store.artifacts[String(params["conversationId"])] ?? [])];
   },
+  "chat.steps": async (params: Record<string, unknown>) => {
+    await delay(100);
+    return [...(store.steps[String(params["conversationId"])] ?? [])];
+  },
   "chat.send": async (params: Record<string, unknown>) => {
     const conversationId = String(params["conversationId"]);
     const text = String(params["text"] ?? "");
@@ -267,6 +360,7 @@ const chatServices = {
     store.conversations.unshift({ id, title: "新任务", time: "刚刚" });
     store.messages[id] = [];
     store.artifacts[id] = [];
+    store.steps[id] = [];
     return { id };
   },
   "chat.deleteConversation": async (params: Record<string, unknown>) => {
@@ -276,6 +370,7 @@ const chatServices = {
     store.conversations = store.conversations.filter((c) => c.id !== id);
     delete store.messages[id];
     delete store.artifacts[id];
+    delete store.steps[id];
     return {
       activeId: id === activeId ? (store.conversations[0]?.id ?? "") : activeId,
     };
@@ -345,6 +440,12 @@ const chatPage: PageDsl = {
       autoLoad: true,
       params: { conversationId: "${state.activeConversationId}" },
     },
+    steps: {
+      type: "service",
+      service: "chat.steps",
+      autoLoad: true,
+      params: { conversationId: "${state.activeConversationId}" },
+    },
   },
   actions: {
     // 发送消息（ChatPage onSend：Composer 提交 / Welcome prompt 选择均传出文本）；
@@ -380,15 +481,24 @@ const chatPage: PageDsl = {
       },
       {
         action: "setState",
-        params: { activeConversationId: "${actions.created.id}", activeArtifactId: "" },
+        params: {
+          activeConversationId: "${actions.created.id}",
+          activeArtifactId: "",
+          showArtifact: false,
+        },
       },
       { action: "reload" },
     ],
-    // 切换会话（onSelectConversation 传出会话 id）
+    // 切换会话（onSelectConversation 传出会话 id）；
+    // 无产物的会话隐藏产物按钮，切换时收起产物区避免空面板残留
     selectConversation: [
       {
         action: "setState",
-        params: { activeConversationId: "${event}", activeArtifactId: "" },
+        params: {
+          activeConversationId: "${event}",
+          activeArtifactId: "",
+          showArtifact: false,
+        },
       },
       { action: "reload" },
     ],
@@ -501,6 +611,23 @@ const chatPage: PageDsl = {
         artifacts: "${data.artifacts}",
         activeArtifactId: "${state.activeArtifactId}",
         artifactOpen: "${state.showArtifact}",
+        // 仅当前会话有产物时展示产物按钮（图标栏内置首项）
+        hideArtifactRailItem: "${!data.artifacts || data.artifacts.length === 0}",
+        // 对话图标栏附加项：执行步骤（popover 浮层，toggle 展示）；
+        // 当前会话无步骤时隐藏（hidden 绑表达式动态显隐）
+        conversationRailItems: [
+          {
+            key: "steps",
+            label: "执行步骤",
+            icon: "list",
+            display: "popover",
+            hidden: "${!data.steps || data.steps.length === 0}",
+            content: {
+              type: "StepsPanel",
+              props: { steps: "${data.steps}" },
+            },
+          },
+        ],
       },
       events: {
         onMenuSelect: [
@@ -543,6 +670,7 @@ const chatPage: PageDsl = {
             params: {
               activeConversationId: "${actions.removed.activeId}",
               activeArtifactId: "",
+              showArtifact: false,
             },
           },
           { action: "reload" },
@@ -600,7 +728,7 @@ export function ChatClient() {
     <PactorPage
       pageDsl={chatPage}
       services={chatServices}
-      components={{ WorkspaceSwitcher }}
+      components={{ WorkspaceSwitcher, StepsPanel }}
       actions={chatActions}
     />
   );

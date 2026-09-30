@@ -95,14 +95,14 @@ describe('ChatPage', () => {
   });
 
   it('产物区开关：非受控点击隐藏 / 受控仅经 onArtifactOpenChange 上报；图标随展开态切换', async () => {
-    // 非受控：展开时图标为 panel-right-close，点击后产物区消失、图标变 panel-right-open
+    // 非受控：展开时图标为 panel-right-close，点击后产物区消失、图标变 package
     const { container } = renderChatPage();
     expect(container.querySelector('.lucide-panel-right-close')).not.toBeNull();
     fireEvent.click(
       container.querySelector('.lucide-panel-right-close')!.closest('button')!,
     );
     expect(container.querySelector('[data-slot=chat-page-artifact]')).toBeNull();
-    expect(container.querySelector('.lucide-panel-right-open')).not.toBeNull();
+    expect(container.querySelector('.lucide-package')).not.toBeNull();
 
     // 受控：仅上报，不自行关闭
     const { container: c2, context } = renderChatPage(
@@ -116,15 +116,22 @@ describe('ChatPage', () => {
     expect(c2.querySelector('[data-slot=chat-page-artifact]')).not.toBeNull();
   });
 
-  it('对话区头部右侧操作可自定义：替换缺省产物开关，点击经事件传出', async () => {
+  it('对话区头部右侧操作：仅配置时渲染，点击经事件传出', async () => {
+    // 未配置：header 不渲染任何按钮（缺省产物开关已迁移至对话图标栏）
+    const { container: c0 } = renderChatPage();
+    expect(
+      c0.querySelector('[data-slot=chat-page-conversation-header] button'),
+    ).toBeNull();
+
     const { container, context } = renderChatPage(
       { conversationHeaderAction: { icon: 'star', tooltip: '收藏会话' } },
       { onConversationHeaderAction: { action: 'setState', params: { starred: true } } },
     );
 
-    // 缺省产物开关被替换
-    expect(container.querySelector('.lucide-panel-right-open')).toBeNull();
-    expect(container.querySelector('.lucide-panel-right-close')).toBeNull();
+    // header 渲染自定义操作（产物图标只存在于图标栏，不在 header）
+    const header = container.querySelector('[data-slot=chat-page-conversation-header]')!;
+    expect(header.querySelector('.lucide-star')).not.toBeNull();
+    expect(header.querySelector('.lucide-package')).toBeNull();
     fireEvent.click(
       container.querySelector('.lucide-star')!.closest('button')!,
     );
@@ -256,5 +263,124 @@ describe('ChatPage', () => {
       document.querySelector('[data-slot=conversation-list-item]')!,
     );
     await expectEventState(context, 'conv', 'c1');
+  });
+});
+
+describe('ChatPage 对话图标栏（conversation rail）', () => {
+  const RAIL_ITEMS = [
+    { key: 'steps', label: '执行步骤', icon: 'brain', content: { type: 'Text', props: { text: '步骤面板' } } },
+    { key: 'info', label: '会话信息', icon: 'star', display: 'panel', content: { type: 'Text', props: { text: '信息侧栏' } } },
+  ];
+
+  it('默认渲染：首项为产物入口；hideArtifactRailItem 且无附加项时整栏隐藏', () => {
+    const { container } = renderChatPage({ defaultArtifactOpen: false });
+    const rail = container.querySelector('[data-slot=chat-page-conv-rail]')!;
+    expect(rail).not.toBeNull();
+    expect(rail.querySelector('button .lucide-package')).not.toBeNull();
+
+    const { container: c2 } = renderChatPage({
+      defaultArtifactOpen: false,
+      hideArtifactRailItem: true,
+    });
+    expect(c2.querySelector('[data-slot=chat-page-conv-rail]')).toBeNull();
+  });
+
+  it('hidden 项：不渲染；全部隐藏且产物入口也隐藏时整栏隐藏', () => {
+    const { container } = renderChatPage({
+      defaultArtifactOpen: false,
+      conversationRailItems: [
+        { key: 'steps', label: '执行步骤', icon: 'brain', hidden: true },
+        { key: 'info', label: '会话信息', icon: 'star' },
+      ],
+    });
+    const rail = container.querySelector('[data-slot=chat-page-conv-rail]')!;
+    expect(rail.querySelector('.lucide-brain')).toBeNull();
+    expect(rail.querySelector('.lucide-star')).not.toBeNull();
+
+    const { container: c2 } = renderChatPage({
+      defaultArtifactOpen: false,
+      hideArtifactRailItem: true,
+      conversationRailItems: [{ key: 'steps', icon: 'brain', hidden: true }],
+    });
+    expect(c2.querySelector('[data-slot=chat-page-conv-rail]')).toBeNull();
+  });
+
+  it('popover 项：点击 toggle 弹层，再次点击 / Esc / 外点关闭；DSL content 经渲染', () => {
+    const { container } = renderChatPage({
+      defaultArtifactOpen: false,
+      conversationRailItems: RAIL_ITEMS,
+    });
+    const rail = container.querySelector('[data-slot=chat-page-conv-rail]')!;
+    const stepsButton = rail.querySelector('.lucide-brain')!.closest('button')!;
+
+    fireEvent.click(stepsButton);
+    expect(container.querySelector('[data-slot=chat-page-rail-popover]')).not.toBeNull();
+    expect(screen.getByText('步骤面板')).not.toBeNull();
+
+    // 再次点击收起
+    fireEvent.click(stepsButton);
+    expect(container.querySelector('[data-slot=chat-page-rail-popover]')).toBeNull();
+
+    // Esc 关闭
+    fireEvent.click(stepsButton);
+    fireEvent.keyDown(document, { key: 'Escape' });
+    expect(container.querySelector('[data-slot=chat-page-rail-popover]')).toBeNull();
+
+    // 外点关闭
+    fireEvent.click(stepsButton);
+    fireEvent.mouseDown(document.body);
+    expect(container.querySelector('[data-slot=chat-page-rail-popover]')).toBeNull();
+  });
+
+  it('panel 项：内容渲染进右侧分栏，与产物区互斥', () => {
+    const { container } = renderChatPage({
+      conversationRailItems: RAIL_ITEMS,
+      // 产物区初始展开（baseProps defaultArtifactOpen: true）
+    });
+    expect(container.querySelector('[data-slot=chat-page-artifact]')).not.toBeNull();
+
+    const rail = container.querySelector('[data-slot=chat-page-conv-rail]')!;
+    fireEvent.click(rail.querySelector('.lucide-star')!.closest('button')!);
+
+    // 产物区关闭，panel 项内容展示
+    expect(container.querySelector('[data-slot=chat-page-artifact]')).toBeNull();
+    expect(container.querySelector('[data-slot=chat-page-rail-panel]')).not.toBeNull();
+    expect(screen.getByText('信息侧栏')).not.toBeNull();
+
+    // 打开产物区 → panel 项关闭
+    fireEvent.click(rail.querySelector('.lucide-package')!.closest('button')!);
+    expect(container.querySelector('[data-slot=chat-page-rail-panel]')).toBeNull();
+    expect(container.querySelector('[data-slot=chat-page-artifact]')).not.toBeNull();
+  });
+
+  it('受控激活项：仅经 onConversationRailChange 上报，不自行变更', async () => {
+    const { container, context } = renderChatPage(
+      {
+        defaultArtifactOpen: false,
+        conversationRailItems: RAIL_ITEMS,
+        activeConversationRailKey: null,
+      },
+      { onConversationRailChange: { action: 'setState', params: { rail: '${event}' } } },
+    );
+    const rail = container.querySelector('[data-slot=chat-page-conv-rail]')!;
+    fireEvent.click(rail.querySelector('.lucide-brain')!.closest('button')!);
+    await expectEventState(context, 'rail', 'steps');
+    // 受控 null：弹层不出现
+    expect(container.querySelector('[data-slot=chat-page-rail-popover]')).toBeNull();
+  });
+
+  it('无 content 项：激活仅触发事件，不渲染内容层', async () => {
+    const { container, context } = renderChatPage(
+      {
+        defaultArtifactOpen: false,
+        conversationRailItems: [{ key: 'noop', label: '空入口', icon: 'star' }],
+      },
+      { onConversationRailChange: { action: 'setState', params: { rail: '${event}' } } },
+    );
+    const rail = container.querySelector('[data-slot=chat-page-conv-rail]')!;
+    fireEvent.click(rail.querySelector('.lucide-star')!.closest('button')!);
+    await expectEventState(context, 'rail', 'noop');
+    expect(container.querySelector('[data-slot=chat-page-rail-popover]')).toBeNull();
+    expect(container.querySelector('[data-slot=chat-page-rail-panel]')).toBeNull();
   });
 });

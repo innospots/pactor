@@ -176,6 +176,11 @@
   --flex-gap-md: calc(var(--flex-gap) * 1.33);
   --flex-gap-lg: calc(var(--flex-gap) * 2);
   --grid-gap: 16px;
+
+  /* ChatPage 对话图标栏（conversation rail）：栏宽与 popover 弹层宽度
+     （皮肤可按比例精调；布局令牌无明暗差异，暗色块无需重复声明） */
+  --pactor-chat-rail-width: 40px;
+  --pactor-chat-rail-popover-width: 320px;
 }
 
 /* 暗色皮肤：全仓约定的属性开关（挂在根或任意容器上） */
