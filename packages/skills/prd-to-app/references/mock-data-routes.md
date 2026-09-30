@@ -4,10 +4,10 @@
 
 ## 命名约定
 
-- **单段路径**：`/api/data/providers`、`/api/data/audit-operators`——列表/选项类一律单段 kebab-case
-- **禁止** `/api/data/audit/operators` 这种两段写法：`[...path]` 会把第二段当详情 id 解析（`audit/detail?id=operators`），踩过的坑
+- **单段路径**：`/api/data/projects`、`/api/data/project-members`——列表/选项类一律单段 kebab-case
+- **禁止** `/api/data/project/members` 这种两段写法：`[...path]` 会把第二段当详情 id 解析（`project/detail?id=members`），踩过的坑
 - 详情：`/api/data/<resource>/<code|id>`；子资源：`/api/data/<resource>/<code>/<sub>`
-- 数据源 url 与页面 id 语义对应：`provider-list` 页 → `/api/data/providers`
+- 数据源 url 与页面 id 语义对应：`project-list` 页 → `/api/data/projects`
 
 ## 路由模板
 
@@ -20,13 +20,13 @@
 
 /** 单段路径 → mock handler */
 const ROUTE_TABLE: Record<string, (params: Record<string, unknown>) => unknown> = {
-  providers: (params) => filterProviders(params),   // mock 函数就近定义或放 src/server/mocks/
-  "audit-operators": () => AUDIT_OPERATORS,
+  projects: (params) => filterProjects(params),   // mock 函数就近定义或放 src/server/mocks/
+  "project-members": () => PROJECT_MEMBERS,
 };
 
 /** 详情：<resource>/<id> */
 const DETAIL_TABLE: Record<string, (id: string) => unknown> = {
-  providers: (code) => PROVIDERS.find((p) => p.code === code) ?? null,
+  projects: (code) => PROJECTS.find((p) => p.code === code) ?? null,
 };
 
 export async function GET(
