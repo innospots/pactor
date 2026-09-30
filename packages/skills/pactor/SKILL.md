@@ -54,7 +54,7 @@ Activate this skill when the user works with **Pactor** — any `@pactor-app/*` 
 | `packages/cli` | `@pactor-app/cli` | DSL validation, inspection, scaffolding |
 | `packages/app` | `@pactor-app/app` | One-stop composition (`createPactorApplication`) |
 | `packages/pactor` | `pactor-app` | Meta package — depends on all modules, re-exports `@pactor-app/app` |
-| `packages/skill` | `@pactor-app/skill` | This agent skill |
+| `packages/skills` | `@pactor-app/skills` | Agent skills collection (this skill lives at `pactor/`) |
 
 ## Dependency rules
 
@@ -370,4 +370,4 @@ pnpm pactor create my-app
 
 ## How to use this skill
 
-This skill is maintained as `packages/skill/SKILL.md` together with `references/dsl-authoring.md`. AI agents can copy or link the whole `packages/skill` directory into their skill directory to provide contextual guidance when reading or editing Pactor projects.
+This skill is maintained as `packages/skills/pactor/SKILL.md` together with `references/dsl-authoring.md`. AI agents can copy or link the whole `packages/skills/pactor` directory into their skill directory to provide contextual guidance when reading or editing Pactor projects.
