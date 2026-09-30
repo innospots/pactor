@@ -394,6 +394,7 @@ export type {
   ChatPageBrand,
   ChatPageMenuItem,
   ChatPageProps,
+  ConversationRailItem,
 } from './chat/ChatPage/index.js';
 
 // 图表组件集（第九批：src/components/chart 目录，echarts 渲染）

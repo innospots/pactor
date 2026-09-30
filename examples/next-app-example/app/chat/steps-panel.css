@@ -1,0 +1,107 @@
+/**
+ * StepsPanel（chat 页对话图标栏 popover 自定义组件）样式：
+ * 纵向时间线（图标 + 连接线）；颜色走 @pactor-app/ui 语义令牌
+ * （深浅色自适应）。
+ */
+
+.steps-panel {
+  padding: 12px 14px;
+  color: var(--foreground);
+}
+
+.steps-panel-title {
+  font-size: 13px;
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+
+.steps-panel-empty {
+  padding: 16px 0;
+  text-align: center;
+  font-size: 13px;
+  color: var(--muted-foreground);
+}
+
+.steps-panel-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.steps-panel-item {
+  position: relative;
+  display: flex;
+  gap: 8px;
+  padding: 6px 0;
+}
+
+/* 步骤之间的连接线（对齐 16px 图标中心） */
+.steps-panel-item:not(:last-child)::before {
+  content: "";
+  position: absolute;
+  left: 7.5px;
+  top: 28px;
+  bottom: -4px;
+  width: 1px;
+  background: var(--border);
+}
+
+.steps-panel-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 20px;
+  flex-shrink: 0;
+}
+
+.steps-panel-item-done .steps-panel-icon,
+.steps-panel-item-running .steps-panel-icon {
+  color: var(--primary);
+}
+
+.steps-panel-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--muted-foreground);
+  opacity: 0.5;
+}
+
+.steps-panel-body {
+  flex: 1;
+  min-width: 0;
+}
+
+.steps-panel-step-title {
+  font-size: 13px;
+  line-height: 20px;
+}
+
+.steps-panel-item-pending .steps-panel-step-title {
+  color: var(--muted-foreground);
+}
+
+.steps-panel-desc {
+  font-size: 12px;
+  line-height: 18px;
+  color: var(--muted-foreground);
+  margin-top: 2px;
+}
+
+.steps-panel-duration {
+  flex-shrink: 0;
+  font-size: 12px;
+  line-height: 20px;
+  color: var(--muted-foreground);
+}
+
+.steps-panel-spin {
+  animation: steps-panel-rotate 1s linear infinite;
+}
+
+@keyframes steps-panel-rotate {
+  to {
+    transform: rotate(360deg);
+  }
+}

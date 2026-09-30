@@ -315,6 +315,9 @@
   .right-10 {
     right: calc(var(--spacing) * 10);
   }
+  .right-full {
+    right: 100%;
+  }
   .-bottom-12 {
     bottom: calc(var(--spacing) * -12);
   }
@@ -476,6 +479,9 @@
   }
   .-mr-0\.5 {
     margin-right: calc(var(--spacing) * -0.5);
+  }
+  .mr-2 {
+    margin-right: calc(var(--spacing) * 2);
   }
   .mb-1 {
     margin-bottom: var(--spacing);
@@ -806,6 +812,9 @@
   }
   .w-\(--anchor-width\) {
     width: var(--anchor-width);
+  }
+  .w-\(--pactor-chat-rail-width\) {
+    width: var(--pactor-chat-rail-width);
   }
   .w-\(--sidebar-width\) {
     width: var(--sidebar-width);
@@ -1898,6 +1907,9 @@
   }
   .text-\(--menu-active-foreground\) {
     color: var(--menu-active-foreground);
+  }
+  .text-accent-foreground {
+    color: var(--accent-foreground);
   }
   .text-card-foreground {
     color: var(--card-foreground);
@@ -3984,6 +3996,8 @@
   --flex-gap-md: calc(var(--flex-gap) * 1.33);
   --flex-gap-lg: calc(var(--flex-gap) * 2);
   --grid-gap: 16px;
+  --pactor-chat-rail-width: 40px;
+  --pactor-chat-rail-popover-width: 320px;
 }
 [data-pactor-theme='dark'] {
   color-scheme: dark;
