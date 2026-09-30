@@ -3,7 +3,7 @@ title: pactor-app（meta）
 description: Pactor 聚合安装包——一次安装全部 @pactor-app/* 模块，入口转发 @pactor-app/app 的一站式 API
 ---
 
-`pactor-app` 是聚合安装包（meta package）：`npm install pactor-app` 一次带入全部 `@pactor-app/*` 模块（`@pactor-app/skill` 除外），入口直接转发 `@pactor-app/app` 的一站式 API，适合想快速拿到完整框架的使用者。
+`pactor-app` 是聚合安装包（meta package）：`npm install pactor-app` 一次带入全部 `@pactor-app/*` 模块（`@pactor-app/skills` 除外），入口直接转发 `@pactor-app/app` 的一站式 API，适合想快速拿到完整框架的使用者。
 
 ```bash
 pnpm add pactor-app
