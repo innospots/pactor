@@ -2,7 +2,7 @@
 name: prd-to-app
 description: |
   Use when generating a complete pactor (pactor-app) project from product documents / markdown wireframes — pages described in YAML DSL (*.page.yaml). Triggers: 根据 PRD / 产品文档 / 线框图 (wireframe) 创建 / 生成管理后台或 Web 应用原型; turning a PRD directory (overview README + per-page ASCII wireframe markdown) into a runnable Next.js + pactor project, including sitemap.yaml, page yaml, http dataSources, mock API routes, theme/skin alignment with the original product, and browser acceptance.
-version: 1.0.0
+version: 1.1.0
 ---
 
 # PRD → YAML 页面应用生成
