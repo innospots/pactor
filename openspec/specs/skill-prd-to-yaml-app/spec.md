@@ -2,17 +2,17 @@
 
 ## Purpose
 
-PRD/线框图驱动的 YAML 页面应用生成技能（packages/skills/prd-to-yaml-app）：输入解析、项目脚手架、按模块分目录的 YAML 页面生成（dataSources 一律 type: http）、mock 服务、样式/功能与原产品一致、浏览器逐页验收。
+PRD/线框图驱动的 YAML 页面应用生成技能（packages/skills/prd-to-app）：输入解析、项目脚手架、按模块分目录的 YAML 页面生成（dataSources 一律 type: http）、mock 服务、样式/功能与原产品一致、浏览器逐页验收。
 
 ## Requirements
 
 ### Requirement: Skill 目录与入口
 
-仓库 SHALL 在 `packages/skills/prd-to-yaml-app/` 提供符合 Agent Skill 规范的 `SKILL.md`（含 frontmatter `name` / `description`，description 明确触发场景），并附 `references/` 目录承载细节材料，SKILL.md 正文只保留流程主干与引用索引。
+仓库 SHALL 在 `packages/skills/prd-to-app/` 提供符合 Agent Skill 规范的 `SKILL.md`（含 frontmatter `name` / `description`，description 明确触发场景），并附 `references/` 目录承载细节材料，SKILL.md 正文只保留流程主干与引用索引。
 
 #### Scenario: 技能被发现与加载
 
-- **WHEN** Agent 的技能目录（如 `~/.kimi-code/skills/` 或项目级 skills 目录）包含 `packages/skills/prd-to-yaml-app/`
+- **WHEN** Agent 的技能目录（如 `~/.kimi-code/skills/` 或项目级 skills 目录）包含 `packages/skills/prd-to-app/`
 - **THEN** Agent 能识别 skill 名称与触发条件，加载 SKILL.md 后获得完整执行流程与 references 索引
 
 #### Scenario: 触发场景描述准确
@@ -36,12 +36,12 @@ Skill SHALL 定义从 PRD/线框图目录解析出「模块 → 页面清单」�
 
 ### Requirement: 项目脚手架与目录约定
 
-Skill SHALL 约定用 `pnpm create pactor-app`（next-app 模板）创建目标项目，并约定目录结构：`src/server/yaml/sitemap.yaml` 为布局 DSL（app 信息、布局、菜单、页面注册），各页面 DSL 按模块分目录存放（`src/server/yaml/<模块>/<id>.yaml`，页面 id = 文件名），`app/api/sitemap/route.ts` 返回入口数据，懒加载页面端点为 `app/api/public/pages/[id]/route.ts`（返回页面 envelope，且在 `src/pactor/config.ts` 显式配置 `pageEndpoint` 指向该路径），`app/api/data/[...path]/route.ts` 承载 mock 数据路由表。
+Skill SHALL 约定以包内 `template/` 模板工程（可运行参考实现：完整接线 + 公共页面 + 两个参考模块）整体复制作为新项目起点，并约定目录结构：`src/server/yaml/sitemap.yaml` 为布局 DSL（app 信息、布局、菜单、页面注册），各页面 DSL 按模块分目录存放（`src/server/yaml/<模块>/<id>.yaml`，页面 id = 文件名），`app/api/sitemap/route.ts` 返回入口数据，懒加载页面端点为 `app/api/public/pages/[id]/route.ts`（返回页面 envelope，且在 `src/pactor/config.ts` 显式配置 `pageEndpoint` 指向该路径），`app/api/data/[...path]/route.ts` 承载 mock 数据路由表。
 
 #### Scenario: 创建项目骨架
 
-- **WHEN** 在空目录按 skill 执行脚手架步骤
-- **THEN** 生成 next-app 模板项目并安装依赖，且按约定建立 `src/server/yaml/`（sitemap.yaml + 按模块分目录的页面 yaml，yaml/<模块>/<id>.yaml）与 `app/api/` 三个路由文件
+- **WHEN** 按 skill 执行脚手架步骤
+- **THEN** 复制 template/ 为起点、安装依赖，且目录结构符合约定： `src/server/yaml/`（sitemap.yaml + 按模块分目录的页面 yaml，yaml/<模块>/<id>.yaml）与 `app/api/` 三个路由文件
 
 #### Scenario: 未指定工程名称时从 README 派生
 
@@ -50,7 +50,7 @@ Skill SHALL 约定用 `pnpm create pactor-app`（next-app 模板）创建目标�
 
 ### Requirement: YAML 页面生成规则
 
-Skill SHALL 规定每个 PRD 页面翻译为一个 `<id>.yaml`（按模块分目录存放 `yaml/<模块>/<id>.yaml`，页面 id = 文件名）：页面组件从线框图区域映射到 pactor 组件（表格/筛选区/卡片/表单/Tab 等），所有 dataSources 一律 `type: http` 指向 `/api/data/...`，过滤/操作类交互经 events + actions 闭环，文案与线框图保持一致。
+Skill SHALL 规定每个 PRD 页面翻译为一个 `<id>.yaml`（按模块分目录存放 `yaml/<模块>/<id>.yaml`，页面 id = 文件名）：页面组件从线框图区域映射到 pactor 组件（表格/筛选区/卡片/表单/Tab 等），所有 dataSources 一律 `type: http` 指向 `/api/data/...`，过滤/操作类交互经 events + actions 闭环，文案与线框图保持一致；布局、样式、尺寸、间距以 `template/` 模板工程同类页面为准，不逐像素还原线框图。
 
 #### Scenario: 页面翻译为页面 yaml
 
@@ -62,6 +62,25 @@ Skill SHALL 规定每个 PRD 页面翻译为一个 `<id>.yaml`（按模块分目
 - **WHEN** 页面需要列表/详情/选项等数据
 - **THEN** 一律声明 http 数据源指向 `/api/data/<domain>-<entity>` 风格路径，并在 mock 路由表中注册对应 handler，便于后续替换为真实服务端接口
 
+### Requirement: 表单与列表操作列规范
+
+Skill SHALL 规定：所有表单（独立表单页、页面内嵌配置面板、弹窗/抽屉表单、搜索栏筛选区）一律用 `Form` 组件包裹，字段经 `props.name` 绑定，校验用字段级 `rules`，提交用 `submit: true` 按钮触发 `onSubmit`，回填联动用 `form.setValues` 动作；禁止散放字段组件 + setState 攒草稿 + `if` 动作手写校验。表格操作列按钮样式统一 `Button variant: link`；「编辑」与「新建」SHALL 指向同一个表单，仅以是否预填数据区分。
+
+#### Scenario: 表单一律 Form 包裹
+
+- **WHEN** 生成任何含「字段 + 校验 + 提交」结构的页面区域（含树/列表右侧的编辑面板、弹窗表单）
+- **THEN** 该区域由 `Form` 包裹，字段 `name` 绑定、`rules` 就地校验、`submit: true` 提交、回填经 `form.setValues`，无散放字段手写校验
+
+#### Scenario: 搜索栏为 inline 表单
+
+- **WHEN** 列表页含「关键词/下拉筛选 + 查询/重置」的搜索栏
+- **THEN** 搜索栏用 `Form layout: inline` 实现，onSubmit 中 setState + reload；即点即生效的快筛（ChipFilter）不受此约束
+
+#### Scenario: 操作列样式统一且编辑复用新建表单
+
+- **WHEN** 列表页表格含操作列
+- **THEN** 操作列按钮统一 `Button variant: link`；「编辑」打开与「新建」相同的表单（同一路由页或同一弹窗），编辑态以行数据预填（路由页 `initialValues` / 弹窗 `form.setValues`）
+
 ### Requirement: 布局、主题与验收
 
 Skill SHALL 约定：sitemap.yaml 定义管理后台布局与菜单（与 PRD 模块树一致）；最后以浏览器逐页验收（路由可达、数据渲染、交互闭环、无控制台报错）。
@@ -71,10 +90,15 @@ Skill SHALL 约定：sitemap.yaml 定义管理后台布局与菜单（与 PRD �
 - **WHEN** 生成 sitemap.yaml
 - **THEN** 菜单分组与条目覆盖 PRD 页面清单中的全部页面，路由路径与页面 id 一一对应
 
+#### Scenario: 菜单图标层级规则
+
+- **WHEN** 为菜单项配置图标
+- **THEN** 仅一级菜单（目录 group 与「首页」这类独立页面项）配置图标（pactor Icon 白名单 kebab-case 名），二级及以下菜单项不配图标
+
 #### Scenario: 逐页浏览器验收
 
 - **WHEN** 全部页面生成完毕
-- **THEN** 启动 dev server，用浏览器逐页打开验证：页面渲染符合线框图、http 数据源返回数据、筛选/跳转等交互可用、控制台无报错
+- **THEN** 启动 dev server，用浏览器逐页打开验证：页面区域结构/字段/文案符合线框图（布局尺寸以模板工程为准）、http 数据源返回数据、筛选/跳转等交互可用、控制台无报错
 
 ### Requirement: 样式与原产品一致
 

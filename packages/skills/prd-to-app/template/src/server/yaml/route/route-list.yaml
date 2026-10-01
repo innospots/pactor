@@ -1,0 +1,1793 @@
+dsl: "1.0"
+page:
+  id: route-list
+  title: 路由
+  name: routeList
+  description: 模型路由 / 路由：对外请求路径、协议与模型调度策略（卡片式列表）
+state:
+  statusChip: all
+  typeChip: all
+  tagChips: []
+dataSources:
+  routes:
+    type: http
+    autoLoad: true
+    request:
+      method: GET
+      url: /api/data/routes
+      params:
+        status: ${state.statusChip}
+        type: ${state.typeChip}
+        tags: ${state.tagChips}
+body:
+  type: Page
+  children:
+    - type: Breadcrumb
+      props:
+        items:
+          - label: 模型路由
+          - label: 路由
+    - type: Flex
+      props:
+        align: baseline
+        gap: middle
+      children:
+        - type: Typography
+          props:
+            variant: h3
+            text: 路由
+        - type: Typography
+          props:
+            variant: muted
+            text: 定义对外请求路径、协议与模型调度策略。
+    - type: Card
+      children:
+        - type: Flex
+          props:
+            align: center
+            gap: small
+            style:
+              flexWrap: wrap
+          children:
+            - type: Text
+              props:
+                text: 状态
+                strong: true
+                className: w-10
+            - type: ChipFilter
+              props:
+                mode: single
+                value: ${state.statusChip}
+                items: ${data.routes.filters.status}
+              events:
+                onChange:
+                  - action: setState
+                    params:
+                      statusChip: ${event}
+                  - action: reload
+                    params:
+                      dataSource: routes
+        - type: Flex
+          props:
+            align: center
+            gap: small
+            style:
+              flexWrap: wrap
+            className: mt-2
+          children:
+            - type: Text
+              props:
+                text: 类型
+                strong: true
+                className: w-10
+            - type: ChipFilter
+              props:
+                mode: single
+                value: ${state.typeChip}
+                items: ${data.routes.filters.type}
+              events:
+                onChange:
+                  - action: setState
+                    params:
+                      typeChip: ${event}
+                  - action: reload
+                    params:
+                      dataSource: routes
+        - type: Flex
+          props:
+            align: center
+            gap: small
+            style:
+              flexWrap: wrap
+            className: mt-2
+          children:
+            - type: Text
+              props:
+                text: 标签
+                strong: true
+                className: w-10
+            - type: ChipFilter
+              props:
+                mode: multi
+                value: ${state.tagChips}
+                items: ${data.routes.filters.tags}
+              events:
+                onChange:
+                  - action: setState
+                    params:
+                      tagChips: ${event}
+                  - action: reload
+                    params:
+                      dataSource: routes
+    - type: Grid
+      props:
+        columns: 3
+        gap: 16
+      children:
+        - type: Card
+          props:
+            className: border-dashed h-full bg-(--muted) border-2
+              border-[color-mix(in_srgb,var(--foreground)_30%,transparent)]
+              [&_[data-slot=card-content]]:h-full
+          children:
+            - type: Flex
+              props:
+                direction: vertical
+                gap: large
+                align: stretch
+                justify: space-between
+                className: h-full
+              children:
+                - type: Flex
+                  props:
+                    align: center
+                    gap: middle
+                  children:
+                    - type: Flex
+                      props:
+                        align: center
+                        justify: center
+                        className: size-10 shrink-0 rounded-full bg-primary
+                      children:
+                        - type: Icon
+                          props:
+                            name: plus
+                            size: 28
+                            color: var(--primary-foreground)
+                    - type: Flex
+                      props:
+                        direction: vertical
+                        gap: 2
+                      children:
+                        - type: Text
+                          props:
+                            text: 新建路由
+                            strong: true
+                            className: text-base
+                        - type: Text
+                          props:
+                            text: 在单一页面完成入口与调度策略配置
+                            type: secondary
+                            className: text-sm
+                - type: Flex
+                  props:
+                    align: center
+                    gap: middle
+                  children:
+                    - type: Button
+                      props:
+                        text: 新建路由
+                        icon: plus
+                        variant: primary
+                        style:
+                          flex: 1
+                      events:
+                        onClick:
+                          - action: navigate
+                            params:
+                              to: /routes/new
+        - type: RouteCardLink
+          when: ${data.routes.items[0] != null}
+          props:
+            href: /routes/${data.routes.items[0].code}
+          children:
+            - type: Card
+              props:
+                className: h-full model-card relative
+              children:
+                - type: Flex
+                  props:
+                    align: center
+                    gap: middle
+                  children:
+                    - type: Badge
+                      props:
+                        text: ${data.routes.items[0].typeLabel}
+                        variant: outline
+                    - type: Flex
+                      props:
+                        direction: vertical
+                        gap: 0
+                        style:
+                          alignItems: flex-start
+                      children:
+                        - type: Button
+                          props:
+                            text: ${data.routes.items[0].name}
+                            variant: link
+                            className: p-0 font-semibold text-base
+                          events:
+                            onClick:
+                              - action: navigate
+                                params:
+                                  to: /routes/${data.routes.items[0].code}
+                        - type: Text
+                          props:
+                            text: ${data.routes.items[0].code}
+                            type: secondary
+                            className: text-sm
+                    - type: Badge
+                      when: ${data.routes.items[0].status == 'draft'}
+                      props:
+                        text: 草稿
+                        variant: secondary
+                - type: Flex
+                  props:
+                    align: center
+                    gap: 2
+                    className: absolute right-3 top-3 model-card-actions
+                  children:
+                    - type: Tooltip
+                      props:
+                        content: "${data.routes.items[0].status == 'enabled' ? '停用' : '启用'}"
+                      children:
+                        - type: Button
+                          props:
+                            variant: text
+                            size: small
+                            className: size-6 p-0
+                          children:
+                            - type: StatusToggleIcon
+                              props:
+                                enabled: ${data.routes.items[0].status == 'enabled'}
+                          events:
+                            onClick:
+                              - id: statusCfm
+                                action: overlay.open
+                                params:
+                                  overlay:
+                                    type: modal
+                                    title: "${data.routes.items[0].status == 'enabled' ? '确认停用 Route' : '确认启用
+                                      Route'}"
+                                    width: 480
+                                    content:
+                                      type: Flex
+                                      props:
+                                        direction: vertical
+                                        gap: middle
+                                      children:
+                                        - type: Text
+                                          props:
+                                            size: small
+                                            text: "${data.routes.items[0].status == 'enabled' ? '停用后，Runtime
+                                              不再匹配该路由，客户端通过该入口的调用将失败。' :
+                                              '启用后，Runtime
+                                              将按入口配置与路由策略匹配并调度该路由。'}"
+                                        - type: Flex
+                                          props:
+                                            direction: vertical
+                                            gap: small
+                                          children:
+                                            - type: Text
+                                              props:
+                                                text: 影响范围：
+                                                strong: true
+                                            - type: Text
+                                              props:
+                                                text: · 关联模型：${data.routes.items[0].models.length} 个（启用
+                                                  ${data.routes.items[0].enabledModelCount}
+                                                  个）
+                                                type: secondary
+                                            - type: Text
+                                              props:
+                                                text: · 请求入口：${data.routes.items[0].path} · ${data.routes.items[0].protocol}
+                                                type: secondary
+                                        - type: Text
+                                          when: ${data.routes.items[0].status == 'enabled' &&
+                                            data.routes.items[0].enabledModelCount
+                                            > 0}
+                                          props:
+                                            size: small
+                                            text: ⚠ 存在启用模型时，建议先完成流量切换再停用。
+                                            type: warning
+                                        - type: Flex
+                                          props:
+                                            justify: end
+                                            gap: middle
+                                          children:
+                                            - type: Button
+                                              props:
+                                                text: 取消
+                                              events:
+                                                onClick:
+                                                  - action: overlay.close
+                                            - type: Button
+                                              props:
+                                                text: "${data.routes.items[0].status == 'enabled' ? '确认停用' : '确认启用'}"
+                                                variant: primary
+                                                danger: ${data.routes.items[0].status == 'enabled'}
+                                              events:
+                                                onClick:
+                                                  - action: overlay.close
+                                                    params:
+                                                      payload:
+                                                        ok: true
+                              - action: if
+                                params:
+                                  condition: ${actions.statusCfm.ok}
+                                  then:
+                                    - action: message
+                                      params:
+                                        messageType: success
+                                        text: "${data.routes.items[0].status == 'enabled' ? '已停用' : '已启用'}（演示：静态页面不落库）"
+                    - type: Tooltip
+                      props:
+                        content: 编辑
+                      children:
+                        - type: Button
+                          props:
+                            icon: pencil
+                            variant: text
+                            size: small
+                            className: size-6 p-0
+                          events:
+                            onClick:
+                              - action: navigate
+                                params:
+                                  to: /routes/${data.routes.items[0].code}/edit
+                - type: Text
+                  props:
+                    text: ${data.routes.items[0].entrySummary}
+                    type: secondary
+                - type: Flex
+                  props:
+                    align: center
+                    gap: small
+                    style:
+                      flexWrap: wrap
+                  children:
+                    - type: Badge
+                      when: ${data.routes.items[0].tags[0] != null}
+                      props:
+                        text: ${data.routes.items[0].tags[0]}
+                        variant: outline
+                    - type: Badge
+                      when: ${data.routes.items[0].tags[1] != null}
+                      props:
+                        text: ${data.routes.items[0].tags[1]}
+                        variant: outline
+                    - type: Badge
+                      when: ${data.routes.items[0].tags[2] != null}
+                      props:
+                        text: ${data.routes.items[0].tags[2]}
+                        variant: outline
+                    - type: Badge
+                      when: ${data.routes.items[0].tags[3] != null}
+                      props:
+                        text: ${data.routes.items[0].tags[3]}
+                        variant: outline
+                    - type: Text
+                      when: ${data.routes.items[0].tags.length == 0}
+                      props:
+                        text: —
+                        type: secondary
+                - type: Text
+                  props:
+                    text: ${data.routes.items[0].policySummary}
+                    type: secondary
+                    className: text-sm
+        - type: RouteCardLink
+          when: ${data.routes.items[1] != null}
+          props:
+            href: /routes/${data.routes.items[1].code}
+          children:
+            - type: Card
+              props:
+                className: h-full model-card relative
+              children:
+                - type: Flex
+                  props:
+                    align: center
+                    gap: middle
+                  children:
+                    - type: Badge
+                      props:
+                        text: ${data.routes.items[1].typeLabel}
+                        variant: outline
+                    - type: Flex
+                      props:
+                        direction: vertical
+                        gap: 0
+                        style:
+                          alignItems: flex-start
+                      children:
+                        - type: Button
+                          props:
+                            text: ${data.routes.items[1].name}
+                            variant: link
+                            className: p-0 font-semibold text-base
+                          events:
+                            onClick:
+                              - action: navigate
+                                params:
+                                  to: /routes/${data.routes.items[1].code}
+                        - type: Text
+                          props:
+                            text: ${data.routes.items[1].code}
+                            type: secondary
+                            className: text-sm
+                    - type: Badge
+                      when: ${data.routes.items[1].status == 'draft'}
+                      props:
+                        text: 草稿
+                        variant: secondary
+                - type: Flex
+                  props:
+                    align: center
+                    gap: 2
+                    className: absolute right-3 top-3 model-card-actions
+                  children:
+                    - type: Tooltip
+                      props:
+                        content: "${data.routes.items[1].status == 'enabled' ? '停用' : '启用'}"
+                      children:
+                        - type: Button
+                          props:
+                            variant: text
+                            size: small
+                            className: size-6 p-0
+                          children:
+                            - type: StatusToggleIcon
+                              props:
+                                enabled: ${data.routes.items[1].status == 'enabled'}
+                          events:
+                            onClick:
+                              - id: statusCfm
+                                action: overlay.open
+                                params:
+                                  overlay:
+                                    type: modal
+                                    title: "${data.routes.items[1].status == 'enabled' ? '确认停用 Route' : '确认启用
+                                      Route'}"
+                                    width: 480
+                                    content:
+                                      type: Flex
+                                      props:
+                                        direction: vertical
+                                        gap: middle
+                                      children:
+                                        - type: Text
+                                          props:
+                                            size: small
+                                            text: "${data.routes.items[1].status == 'enabled' ? '停用后，Runtime
+                                              不再匹配该路由，客户端通过该入口的调用将失败。' :
+                                              '启用后，Runtime
+                                              将按入口配置与路由策略匹配并调度该路由。'}"
+                                        - type: Flex
+                                          props:
+                                            direction: vertical
+                                            gap: small
+                                          children:
+                                            - type: Text
+                                              props:
+                                                text: 影响范围：
+                                                strong: true
+                                            - type: Text
+                                              props:
+                                                text: · 关联模型：${data.routes.items[1].models.length} 个（启用
+                                                  ${data.routes.items[1].enabledModelCount}
+                                                  个）
+                                                type: secondary
+                                            - type: Text
+                                              props:
+                                                text: · 请求入口：${data.routes.items[1].path} · ${data.routes.items[1].protocol}
+                                                type: secondary
+                                        - type: Text
+                                          when: ${data.routes.items[1].status == 'enabled' &&
+                                            data.routes.items[1].enabledModelCount
+                                            > 0}
+                                          props:
+                                            size: small
+                                            text: ⚠ 存在启用模型时，建议先完成流量切换再停用。
+                                            type: warning
+                                        - type: Flex
+                                          props:
+                                            justify: end
+                                            gap: middle
+                                          children:
+                                            - type: Button
+                                              props:
+                                                text: 取消
+                                              events:
+                                                onClick:
+                                                  - action: overlay.close
+                                            - type: Button
+                                              props:
+                                                text: "${data.routes.items[1].status == 'enabled' ? '确认停用' : '确认启用'}"
+                                                variant: primary
+                                                danger: ${data.routes.items[1].status == 'enabled'}
+                                              events:
+                                                onClick:
+                                                  - action: overlay.close
+                                                    params:
+                                                      payload:
+                                                        ok: true
+                              - action: if
+                                params:
+                                  condition: ${actions.statusCfm.ok}
+                                  then:
+                                    - action: message
+                                      params:
+                                        messageType: success
+                                        text: "${data.routes.items[1].status == 'enabled' ? '已停用' : '已启用'}（演示：静态页面不落库）"
+                    - type: Tooltip
+                      props:
+                        content: 编辑
+                      children:
+                        - type: Button
+                          props:
+                            icon: pencil
+                            variant: text
+                            size: small
+                            className: size-6 p-0
+                          events:
+                            onClick:
+                              - action: navigate
+                                params:
+                                  to: /routes/${data.routes.items[1].code}/edit
+                - type: Text
+                  props:
+                    text: ${data.routes.items[1].entrySummary}
+                    type: secondary
+                - type: Flex
+                  props:
+                    align: center
+                    gap: small
+                    style:
+                      flexWrap: wrap
+                  children:
+                    - type: Badge
+                      when: ${data.routes.items[1].tags[0] != null}
+                      props:
+                        text: ${data.routes.items[1].tags[0]}
+                        variant: outline
+                    - type: Badge
+                      when: ${data.routes.items[1].tags[1] != null}
+                      props:
+                        text: ${data.routes.items[1].tags[1]}
+                        variant: outline
+                    - type: Badge
+                      when: ${data.routes.items[1].tags[2] != null}
+                      props:
+                        text: ${data.routes.items[1].tags[2]}
+                        variant: outline
+                    - type: Badge
+                      when: ${data.routes.items[1].tags[3] != null}
+                      props:
+                        text: ${data.routes.items[1].tags[3]}
+                        variant: outline
+                    - type: Text
+                      when: ${data.routes.items[1].tags.length == 0}
+                      props:
+                        text: —
+                        type: secondary
+                - type: Text
+                  props:
+                    text: ${data.routes.items[1].policySummary}
+                    type: secondary
+                    className: text-sm
+        - type: RouteCardLink
+          when: ${data.routes.items[2] != null}
+          props:
+            href: /routes/${data.routes.items[2].code}
+          children:
+            - type: Card
+              props:
+                className: h-full model-card relative
+              children:
+                - type: Flex
+                  props:
+                    align: center
+                    gap: middle
+                  children:
+                    - type: Badge
+                      props:
+                        text: ${data.routes.items[2].typeLabel}
+                        variant: outline
+                    - type: Flex
+                      props:
+                        direction: vertical
+                        gap: 0
+                        style:
+                          alignItems: flex-start
+                      children:
+                        - type: Button
+                          props:
+                            text: ${data.routes.items[2].name}
+                            variant: link
+                            className: p-0 font-semibold text-base
+                          events:
+                            onClick:
+                              - action: navigate
+                                params:
+                                  to: /routes/${data.routes.items[2].code}
+                        - type: Text
+                          props:
+                            text: ${data.routes.items[2].code}
+                            type: secondary
+                            className: text-sm
+                    - type: Badge
+                      when: ${data.routes.items[2].status == 'draft'}
+                      props:
+                        text: 草稿
+                        variant: secondary
+                - type: Flex
+                  props:
+                    align: center
+                    gap: 2
+                    className: absolute right-3 top-3 model-card-actions
+                  children:
+                    - type: Tooltip
+                      props:
+                        content: "${data.routes.items[2].status == 'enabled' ? '停用' : '启用'}"
+                      children:
+                        - type: Button
+                          props:
+                            variant: text
+                            size: small
+                            className: size-6 p-0
+                          children:
+                            - type: StatusToggleIcon
+                              props:
+                                enabled: ${data.routes.items[2].status == 'enabled'}
+                          events:
+                            onClick:
+                              - id: statusCfm
+                                action: overlay.open
+                                params:
+                                  overlay:
+                                    type: modal
+                                    title: "${data.routes.items[2].status == 'enabled' ? '确认停用 Route' : '确认启用
+                                      Route'}"
+                                    width: 480
+                                    content:
+                                      type: Flex
+                                      props:
+                                        direction: vertical
+                                        gap: middle
+                                      children:
+                                        - type: Text
+                                          props:
+                                            size: small
+                                            text: "${data.routes.items[2].status == 'enabled' ? '停用后，Runtime
+                                              不再匹配该路由，客户端通过该入口的调用将失败。' :
+                                              '启用后，Runtime
+                                              将按入口配置与路由策略匹配并调度该路由。'}"
+                                        - type: Flex
+                                          props:
+                                            direction: vertical
+                                            gap: small
+                                          children:
+                                            - type: Text
+                                              props:
+                                                text: 影响范围：
+                                                strong: true
+                                            - type: Text
+                                              props:
+                                                text: · 关联模型：${data.routes.items[2].models.length} 个（启用
+                                                  ${data.routes.items[2].enabledModelCount}
+                                                  个）
+                                                type: secondary
+                                            - type: Text
+                                              props:
+                                                text: · 请求入口：${data.routes.items[2].path} · ${data.routes.items[2].protocol}
+                                                type: secondary
+                                        - type: Text
+                                          when: ${data.routes.items[2].status == 'enabled' &&
+                                            data.routes.items[2].enabledModelCount
+                                            > 0}
+                                          props:
+                                            size: small
+                                            text: ⚠ 存在启用模型时，建议先完成流量切换再停用。
+                                            type: warning
+                                        - type: Flex
+                                          props:
+                                            justify: end
+                                            gap: middle
+                                          children:
+                                            - type: Button
+                                              props:
+                                                text: 取消
+                                              events:
+                                                onClick:
+                                                  - action: overlay.close
+                                            - type: Button
+                                              props:
+                                                text: "${data.routes.items[2].status == 'enabled' ? '确认停用' : '确认启用'}"
+                                                variant: primary
+                                                danger: ${data.routes.items[2].status == 'enabled'}
+                                              events:
+                                                onClick:
+                                                  - action: overlay.close
+                                                    params:
+                                                      payload:
+                                                        ok: true
+                              - action: if
+                                params:
+                                  condition: ${actions.statusCfm.ok}
+                                  then:
+                                    - action: message
+                                      params:
+                                        messageType: success
+                                        text: "${data.routes.items[2].status == 'enabled' ? '已停用' : '已启用'}（演示：静态页面不落库）"
+                    - type: Tooltip
+                      props:
+                        content: 编辑
+                      children:
+                        - type: Button
+                          props:
+                            icon: pencil
+                            variant: text
+                            size: small
+                            className: size-6 p-0
+                          events:
+                            onClick:
+                              - action: navigate
+                                params:
+                                  to: /routes/${data.routes.items[2].code}/edit
+                - type: Text
+                  props:
+                    text: ${data.routes.items[2].entrySummary}
+                    type: secondary
+                - type: Flex
+                  props:
+                    align: center
+                    gap: small
+                    style:
+                      flexWrap: wrap
+                  children:
+                    - type: Badge
+                      when: ${data.routes.items[2].tags[0] != null}
+                      props:
+                        text: ${data.routes.items[2].tags[0]}
+                        variant: outline
+                    - type: Badge
+                      when: ${data.routes.items[2].tags[1] != null}
+                      props:
+                        text: ${data.routes.items[2].tags[1]}
+                        variant: outline
+                    - type: Badge
+                      when: ${data.routes.items[2].tags[2] != null}
+                      props:
+                        text: ${data.routes.items[2].tags[2]}
+                        variant: outline
+                    - type: Badge
+                      when: ${data.routes.items[2].tags[3] != null}
+                      props:
+                        text: ${data.routes.items[2].tags[3]}
+                        variant: outline
+                    - type: Text
+                      when: ${data.routes.items[2].tags.length == 0}
+                      props:
+                        text: —
+                        type: secondary
+                - type: Text
+                  props:
+                    text: ${data.routes.items[2].policySummary}
+                    type: secondary
+                    className: text-sm
+        - type: RouteCardLink
+          when: ${data.routes.items[3] != null}
+          props:
+            href: /routes/${data.routes.items[3].code}
+          children:
+            - type: Card
+              props:
+                className: h-full model-card relative
+              children:
+                - type: Flex
+                  props:
+                    align: center
+                    gap: middle
+                  children:
+                    - type: Badge
+                      props:
+                        text: ${data.routes.items[3].typeLabel}
+                        variant: outline
+                    - type: Flex
+                      props:
+                        direction: vertical
+                        gap: 0
+                        style:
+                          alignItems: flex-start
+                      children:
+                        - type: Button
+                          props:
+                            text: ${data.routes.items[3].name}
+                            variant: link
+                            className: p-0 font-semibold text-base
+                          events:
+                            onClick:
+                              - action: navigate
+                                params:
+                                  to: /routes/${data.routes.items[3].code}
+                        - type: Text
+                          props:
+                            text: ${data.routes.items[3].code}
+                            type: secondary
+                            className: text-sm
+                    - type: Badge
+                      when: ${data.routes.items[3].status == 'draft'}
+                      props:
+                        text: 草稿
+                        variant: secondary
+                - type: Flex
+                  props:
+                    align: center
+                    gap: 2
+                    className: absolute right-3 top-3 model-card-actions
+                  children:
+                    - type: Tooltip
+                      props:
+                        content: "${data.routes.items[3].status == 'enabled' ? '停用' : '启用'}"
+                      children:
+                        - type: Button
+                          props:
+                            variant: text
+                            size: small
+                            className: size-6 p-0
+                          children:
+                            - type: StatusToggleIcon
+                              props:
+                                enabled: ${data.routes.items[3].status == 'enabled'}
+                          events:
+                            onClick:
+                              - id: statusCfm
+                                action: overlay.open
+                                params:
+                                  overlay:
+                                    type: modal
+                                    title: "${data.routes.items[3].status == 'enabled' ? '确认停用 Route' : '确认启用
+                                      Route'}"
+                                    width: 480
+                                    content:
+                                      type: Flex
+                                      props:
+                                        direction: vertical
+                                        gap: middle
+                                      children:
+                                        - type: Text
+                                          props:
+                                            size: small
+                                            text: "${data.routes.items[3].status == 'enabled' ? '停用后，Runtime
+                                              不再匹配该路由，客户端通过该入口的调用将失败。' :
+                                              '启用后，Runtime
+                                              将按入口配置与路由策略匹配并调度该路由。'}"
+                                        - type: Flex
+                                          props:
+                                            direction: vertical
+                                            gap: small
+                                          children:
+                                            - type: Text
+                                              props:
+                                                text: 影响范围：
+                                                strong: true
+                                            - type: Text
+                                              props:
+                                                text: · 关联模型：${data.routes.items[3].models.length} 个（启用
+                                                  ${data.routes.items[3].enabledModelCount}
+                                                  个）
+                                                type: secondary
+                                            - type: Text
+                                              props:
+                                                text: · 请求入口：${data.routes.items[3].path} · ${data.routes.items[3].protocol}
+                                                type: secondary
+                                        - type: Text
+                                          when: ${data.routes.items[3].status == 'enabled' &&
+                                            data.routes.items[3].enabledModelCount
+                                            > 0}
+                                          props:
+                                            size: small
+                                            text: ⚠ 存在启用模型时，建议先完成流量切换再停用。
+                                            type: warning
+                                        - type: Flex
+                                          props:
+                                            justify: end
+                                            gap: middle
+                                          children:
+                                            - type: Button
+                                              props:
+                                                text: 取消
+                                              events:
+                                                onClick:
+                                                  - action: overlay.close
+                                            - type: Button
+                                              props:
+                                                text: "${data.routes.items[3].status == 'enabled' ? '确认停用' : '确认启用'}"
+                                                variant: primary
+                                                danger: ${data.routes.items[3].status == 'enabled'}
+                                              events:
+                                                onClick:
+                                                  - action: overlay.close
+                                                    params:
+                                                      payload:
+                                                        ok: true
+                              - action: if
+                                params:
+                                  condition: ${actions.statusCfm.ok}
+                                  then:
+                                    - action: message
+                                      params:
+                                        messageType: success
+                                        text: "${data.routes.items[3].status == 'enabled' ? '已停用' : '已启用'}（演示：静态页面不落库）"
+                    - type: Tooltip
+                      props:
+                        content: 编辑
+                      children:
+                        - type: Button
+                          props:
+                            icon: pencil
+                            variant: text
+                            size: small
+                            className: size-6 p-0
+                          events:
+                            onClick:
+                              - action: navigate
+                                params:
+                                  to: /routes/${data.routes.items[3].code}/edit
+                - type: Text
+                  props:
+                    text: ${data.routes.items[3].entrySummary}
+                    type: secondary
+                - type: Flex
+                  props:
+                    align: center
+                    gap: small
+                    style:
+                      flexWrap: wrap
+                  children:
+                    - type: Badge
+                      when: ${data.routes.items[3].tags[0] != null}
+                      props:
+                        text: ${data.routes.items[3].tags[0]}
+                        variant: outline
+                    - type: Badge
+                      when: ${data.routes.items[3].tags[1] != null}
+                      props:
+                        text: ${data.routes.items[3].tags[1]}
+                        variant: outline
+                    - type: Badge
+                      when: ${data.routes.items[3].tags[2] != null}
+                      props:
+                        text: ${data.routes.items[3].tags[2]}
+                        variant: outline
+                    - type: Badge
+                      when: ${data.routes.items[3].tags[3] != null}
+                      props:
+                        text: ${data.routes.items[3].tags[3]}
+                        variant: outline
+                    - type: Text
+                      when: ${data.routes.items[3].tags.length == 0}
+                      props:
+                        text: —
+                        type: secondary
+                - type: Text
+                  props:
+                    text: ${data.routes.items[3].policySummary}
+                    type: secondary
+                    className: text-sm
+        - type: RouteCardLink
+          when: ${data.routes.items[4] != null}
+          props:
+            href: /routes/${data.routes.items[4].code}
+          children:
+            - type: Card
+              props:
+                className: h-full model-card relative
+              children:
+                - type: Flex
+                  props:
+                    align: center
+                    gap: middle
+                  children:
+                    - type: Badge
+                      props:
+                        text: ${data.routes.items[4].typeLabel}
+                        variant: outline
+                    - type: Flex
+                      props:
+                        direction: vertical
+                        gap: 0
+                        style:
+                          alignItems: flex-start
+                      children:
+                        - type: Button
+                          props:
+                            text: ${data.routes.items[4].name}
+                            variant: link
+                            className: p-0 font-semibold text-base
+                          events:
+                            onClick:
+                              - action: navigate
+                                params:
+                                  to: /routes/${data.routes.items[4].code}
+                        - type: Text
+                          props:
+                            text: ${data.routes.items[4].code}
+                            type: secondary
+                            className: text-sm
+                    - type: Badge
+                      when: ${data.routes.items[4].status == 'draft'}
+                      props:
+                        text: 草稿
+                        variant: secondary
+                - type: Flex
+                  props:
+                    align: center
+                    gap: 2
+                    className: absolute right-3 top-3 model-card-actions
+                  children:
+                    - type: Tooltip
+                      props:
+                        content: "${data.routes.items[4].status == 'enabled' ? '停用' : '启用'}"
+                      children:
+                        - type: Button
+                          props:
+                            variant: text
+                            size: small
+                            className: size-6 p-0
+                          children:
+                            - type: StatusToggleIcon
+                              props:
+                                enabled: ${data.routes.items[4].status == 'enabled'}
+                          events:
+                            onClick:
+                              - id: statusCfm
+                                action: overlay.open
+                                params:
+                                  overlay:
+                                    type: modal
+                                    title: "${data.routes.items[4].status == 'enabled' ? '确认停用 Route' : '确认启用
+                                      Route'}"
+                                    width: 480
+                                    content:
+                                      type: Flex
+                                      props:
+                                        direction: vertical
+                                        gap: middle
+                                      children:
+                                        - type: Text
+                                          props:
+                                            size: small
+                                            text: "${data.routes.items[4].status == 'enabled' ? '停用后，Runtime
+                                              不再匹配该路由，客户端通过该入口的调用将失败。' :
+                                              '启用后，Runtime
+                                              将按入口配置与路由策略匹配并调度该路由。'}"
+                                        - type: Flex
+                                          props:
+                                            direction: vertical
+                                            gap: small
+                                          children:
+                                            - type: Text
+                                              props:
+                                                text: 影响范围：
+                                                strong: true
+                                            - type: Text
+                                              props:
+                                                text: · 关联模型：${data.routes.items[4].models.length} 个（启用
+                                                  ${data.routes.items[4].enabledModelCount}
+                                                  个）
+                                                type: secondary
+                                            - type: Text
+                                              props:
+                                                text: · 请求入口：${data.routes.items[4].path} · ${data.routes.items[4].protocol}
+                                                type: secondary
+                                        - type: Text
+                                          when: ${data.routes.items[4].status == 'enabled' &&
+                                            data.routes.items[4].enabledModelCount
+                                            > 0}
+                                          props:
+                                            size: small
+                                            text: ⚠ 存在启用模型时，建议先完成流量切换再停用。
+                                            type: warning
+                                        - type: Flex
+                                          props:
+                                            justify: end
+                                            gap: middle
+                                          children:
+                                            - type: Button
+                                              props:
+                                                text: 取消
+                                              events:
+                                                onClick:
+                                                  - action: overlay.close
+                                            - type: Button
+                                              props:
+                                                text: "${data.routes.items[4].status == 'enabled' ? '确认停用' : '确认启用'}"
+                                                variant: primary
+                                                danger: ${data.routes.items[4].status == 'enabled'}
+                                              events:
+                                                onClick:
+                                                  - action: overlay.close
+                                                    params:
+                                                      payload:
+                                                        ok: true
+                              - action: if
+                                params:
+                                  condition: ${actions.statusCfm.ok}
+                                  then:
+                                    - action: message
+                                      params:
+                                        messageType: success
+                                        text: "${data.routes.items[4].status == 'enabled' ? '已停用' : '已启用'}（演示：静态页面不落库）"
+                    - type: Tooltip
+                      props:
+                        content: 编辑
+                      children:
+                        - type: Button
+                          props:
+                            icon: pencil
+                            variant: text
+                            size: small
+                            className: size-6 p-0
+                          events:
+                            onClick:
+                              - action: navigate
+                                params:
+                                  to: /routes/${data.routes.items[4].code}/edit
+                - type: Text
+                  props:
+                    text: ${data.routes.items[4].entrySummary}
+                    type: secondary
+                - type: Flex
+                  props:
+                    align: center
+                    gap: small
+                    style:
+                      flexWrap: wrap
+                  children:
+                    - type: Badge
+                      when: ${data.routes.items[4].tags[0] != null}
+                      props:
+                        text: ${data.routes.items[4].tags[0]}
+                        variant: outline
+                    - type: Badge
+                      when: ${data.routes.items[4].tags[1] != null}
+                      props:
+                        text: ${data.routes.items[4].tags[1]}
+                        variant: outline
+                    - type: Badge
+                      when: ${data.routes.items[4].tags[2] != null}
+                      props:
+                        text: ${data.routes.items[4].tags[2]}
+                        variant: outline
+                    - type: Badge
+                      when: ${data.routes.items[4].tags[3] != null}
+                      props:
+                        text: ${data.routes.items[4].tags[3]}
+                        variant: outline
+                    - type: Text
+                      when: ${data.routes.items[4].tags.length == 0}
+                      props:
+                        text: —
+                        type: secondary
+                - type: Text
+                  props:
+                    text: ${data.routes.items[4].policySummary}
+                    type: secondary
+                    className: text-sm
+        - type: RouteCardLink
+          when: ${data.routes.items[5] != null}
+          props:
+            href: /routes/${data.routes.items[5].code}
+          children:
+            - type: Card
+              props:
+                className: h-full model-card relative
+              children:
+                - type: Flex
+                  props:
+                    align: center
+                    gap: middle
+                  children:
+                    - type: Badge
+                      props:
+                        text: ${data.routes.items[5].typeLabel}
+                        variant: outline
+                    - type: Flex
+                      props:
+                        direction: vertical
+                        gap: 0
+                        style:
+                          alignItems: flex-start
+                      children:
+                        - type: Button
+                          props:
+                            text: ${data.routes.items[5].name}
+                            variant: link
+                            className: p-0 font-semibold text-base
+                          events:
+                            onClick:
+                              - action: navigate
+                                params:
+                                  to: /routes/${data.routes.items[5].code}
+                        - type: Text
+                          props:
+                            text: ${data.routes.items[5].code}
+                            type: secondary
+                            className: text-sm
+                    - type: Badge
+                      when: ${data.routes.items[5].status == 'draft'}
+                      props:
+                        text: 草稿
+                        variant: secondary
+                - type: Flex
+                  props:
+                    align: center
+                    gap: 2
+                    className: absolute right-3 top-3 model-card-actions
+                  children:
+                    - type: Tooltip
+                      props:
+                        content: "${data.routes.items[5].status == 'enabled' ? '停用' : '启用'}"
+                      children:
+                        - type: Button
+                          props:
+                            variant: text
+                            size: small
+                            className: size-6 p-0
+                          children:
+                            - type: StatusToggleIcon
+                              props:
+                                enabled: ${data.routes.items[5].status == 'enabled'}
+                          events:
+                            onClick:
+                              - id: statusCfm
+                                action: overlay.open
+                                params:
+                                  overlay:
+                                    type: modal
+                                    title: "${data.routes.items[5].status == 'enabled' ? '确认停用 Route' : '确认启用
+                                      Route'}"
+                                    width: 480
+                                    content:
+                                      type: Flex
+                                      props:
+                                        direction: vertical
+                                        gap: middle
+                                      children:
+                                        - type: Text
+                                          props:
+                                            size: small
+                                            text: "${data.routes.items[5].status == 'enabled' ? '停用后，Runtime
+                                              不再匹配该路由，客户端通过该入口的调用将失败。' :
+                                              '启用后，Runtime
+                                              将按入口配置与路由策略匹配并调度该路由。'}"
+                                        - type: Flex
+                                          props:
+                                            direction: vertical
+                                            gap: small
+                                          children:
+                                            - type: Text
+                                              props:
+                                                text: 影响范围：
+                                                strong: true
+                                            - type: Text
+                                              props:
+                                                text: · 关联模型：${data.routes.items[5].models.length} 个（启用
+                                                  ${data.routes.items[5].enabledModelCount}
+                                                  个）
+                                                type: secondary
+                                            - type: Text
+                                              props:
+                                                text: · 请求入口：${data.routes.items[5].path} · ${data.routes.items[5].protocol}
+                                                type: secondary
+                                        - type: Text
+                                          when: ${data.routes.items[5].status == 'enabled' &&
+                                            data.routes.items[5].enabledModelCount
+                                            > 0}
+                                          props:
+                                            size: small
+                                            text: ⚠ 存在启用模型时，建议先完成流量切换再停用。
+                                            type: warning
+                                        - type: Flex
+                                          props:
+                                            justify: end
+                                            gap: middle
+                                          children:
+                                            - type: Button
+                                              props:
+                                                text: 取消
+                                              events:
+                                                onClick:
+                                                  - action: overlay.close
+                                            - type: Button
+                                              props:
+                                                text: "${data.routes.items[5].status == 'enabled' ? '确认停用' : '确认启用'}"
+                                                variant: primary
+                                                danger: ${data.routes.items[5].status == 'enabled'}
+                                              events:
+                                                onClick:
+                                                  - action: overlay.close
+                                                    params:
+                                                      payload:
+                                                        ok: true
+                              - action: if
+                                params:
+                                  condition: ${actions.statusCfm.ok}
+                                  then:
+                                    - action: message
+                                      params:
+                                        messageType: success
+                                        text: "${data.routes.items[5].status == 'enabled' ? '已停用' : '已启用'}（演示：静态页面不落库）"
+                    - type: Tooltip
+                      props:
+                        content: 编辑
+                      children:
+                        - type: Button
+                          props:
+                            icon: pencil
+                            variant: text
+                            size: small
+                            className: size-6 p-0
+                          events:
+                            onClick:
+                              - action: navigate
+                                params:
+                                  to: /routes/${data.routes.items[5].code}/edit
+                - type: Text
+                  props:
+                    text: ${data.routes.items[5].entrySummary}
+                    type: secondary
+                - type: Flex
+                  props:
+                    align: center
+                    gap: small
+                    style:
+                      flexWrap: wrap
+                  children:
+                    - type: Badge
+                      when: ${data.routes.items[5].tags[0] != null}
+                      props:
+                        text: ${data.routes.items[5].tags[0]}
+                        variant: outline
+                    - type: Badge
+                      when: ${data.routes.items[5].tags[1] != null}
+                      props:
+                        text: ${data.routes.items[5].tags[1]}
+                        variant: outline
+                    - type: Badge
+                      when: ${data.routes.items[5].tags[2] != null}
+                      props:
+                        text: ${data.routes.items[5].tags[2]}
+                        variant: outline
+                    - type: Badge
+                      when: ${data.routes.items[5].tags[3] != null}
+                      props:
+                        text: ${data.routes.items[5].tags[3]}
+                        variant: outline
+                    - type: Text
+                      when: ${data.routes.items[5].tags.length == 0}
+                      props:
+                        text: —
+                        type: secondary
+                - type: Text
+                  props:
+                    text: ${data.routes.items[5].policySummary}
+                    type: secondary
+                    className: text-sm
+        - type: RouteCardLink
+          when: ${data.routes.items[6] != null}
+          props:
+            href: /routes/${data.routes.items[6].code}
+          children:
+            - type: Card
+              props:
+                className: h-full model-card relative
+              children:
+                - type: Flex
+                  props:
+                    align: center
+                    gap: middle
+                  children:
+                    - type: Badge
+                      props:
+                        text: ${data.routes.items[6].typeLabel}
+                        variant: outline
+                    - type: Flex
+                      props:
+                        direction: vertical
+                        gap: 0
+                        style:
+                          alignItems: flex-start
+                      children:
+                        - type: Button
+                          props:
+                            text: ${data.routes.items[6].name}
+                            variant: link
+                            className: p-0 font-semibold text-base
+                          events:
+                            onClick:
+                              - action: navigate
+                                params:
+                                  to: /routes/${data.routes.items[6].code}
+                        - type: Text
+                          props:
+                            text: ${data.routes.items[6].code}
+                            type: secondary
+                            className: text-sm
+                    - type: Badge
+                      when: ${data.routes.items[6].status == 'draft'}
+                      props:
+                        text: 草稿
+                        variant: secondary
+                - type: Flex
+                  props:
+                    align: center
+                    gap: 2
+                    className: absolute right-3 top-3 model-card-actions
+                  children:
+                    - type: Tooltip
+                      props:
+                        content: "${data.routes.items[6].status == 'enabled' ? '停用' : '启用'}"
+                      children:
+                        - type: Button
+                          props:
+                            variant: text
+                            size: small
+                            className: size-6 p-0
+                          children:
+                            - type: StatusToggleIcon
+                              props:
+                                enabled: ${data.routes.items[6].status == 'enabled'}
+                          events:
+                            onClick:
+                              - id: statusCfm
+                                action: overlay.open
+                                params:
+                                  overlay:
+                                    type: modal
+                                    title: "${data.routes.items[6].status == 'enabled' ? '确认停用 Route' : '确认启用
+                                      Route'}"
+                                    width: 480
+                                    content:
+                                      type: Flex
+                                      props:
+                                        direction: vertical
+                                        gap: middle
+                                      children:
+                                        - type: Text
+                                          props:
+                                            size: small
+                                            text: "${data.routes.items[6].status == 'enabled' ? '停用后，Runtime
+                                              不再匹配该路由，客户端通过该入口的调用将失败。' :
+                                              '启用后，Runtime
+                                              将按入口配置与路由策略匹配并调度该路由。'}"
+                                        - type: Flex
+                                          props:
+                                            direction: vertical
+                                            gap: small
+                                          children:
+                                            - type: Text
+                                              props:
+                                                text: 影响范围：
+                                                strong: true
+                                            - type: Text
+                                              props:
+                                                text: · 关联模型：${data.routes.items[6].models.length} 个（启用
+                                                  ${data.routes.items[6].enabledModelCount}
+                                                  个）
+                                                type: secondary
+                                            - type: Text
+                                              props:
+                                                text: · 请求入口：${data.routes.items[6].path} · ${data.routes.items[6].protocol}
+                                                type: secondary
+                                        - type: Text
+                                          when: ${data.routes.items[6].status == 'enabled' &&
+                                            data.routes.items[6].enabledModelCount
+                                            > 0}
+                                          props:
+                                            size: small
+                                            text: ⚠ 存在启用模型时，建议先完成流量切换再停用。
+                                            type: warning
+                                        - type: Flex
+                                          props:
+                                            justify: end
+                                            gap: middle
+                                          children:
+                                            - type: Button
+                                              props:
+                                                text: 取消
+                                              events:
+                                                onClick:
+                                                  - action: overlay.close
+                                            - type: Button
+                                              props:
+                                                text: "${data.routes.items[6].status == 'enabled' ? '确认停用' : '确认启用'}"
+                                                variant: primary
+                                                danger: ${data.routes.items[6].status == 'enabled'}
+                                              events:
+                                                onClick:
+                                                  - action: overlay.close
+                                                    params:
+                                                      payload:
+                                                        ok: true
+                              - action: if
+                                params:
+                                  condition: ${actions.statusCfm.ok}
+                                  then:
+                                    - action: message
+                                      params:
+                                        messageType: success
+                                        text: "${data.routes.items[6].status == 'enabled' ? '已停用' : '已启用'}（演示：静态页面不落库）"
+                    - type: Tooltip
+                      props:
+                        content: 编辑
+                      children:
+                        - type: Button
+                          props:
+                            icon: pencil
+                            variant: text
+                            size: small
+                            className: size-6 p-0
+                          events:
+                            onClick:
+                              - action: navigate
+                                params:
+                                  to: /routes/${data.routes.items[6].code}/edit
+                - type: Text
+                  props:
+                    text: ${data.routes.items[6].entrySummary}
+                    type: secondary
+                - type: Flex
+                  props:
+                    align: center
+                    gap: small
+                    style:
+                      flexWrap: wrap
+                  children:
+                    - type: Badge
+                      when: ${data.routes.items[6].tags[0] != null}
+                      props:
+                        text: ${data.routes.items[6].tags[0]}
+                        variant: outline
+                    - type: Badge
+                      when: ${data.routes.items[6].tags[1] != null}
+                      props:
+                        text: ${data.routes.items[6].tags[1]}
+                        variant: outline
+                    - type: Badge
+                      when: ${data.routes.items[6].tags[2] != null}
+                      props:
+                        text: ${data.routes.items[6].tags[2]}
+                        variant: outline
+                    - type: Badge
+                      when: ${data.routes.items[6].tags[3] != null}
+                      props:
+                        text: ${data.routes.items[6].tags[3]}
+                        variant: outline
+                    - type: Text
+                      when: ${data.routes.items[6].tags.length == 0}
+                      props:
+                        text: —
+                        type: secondary
+                - type: Text
+                  props:
+                    text: ${data.routes.items[6].policySummary}
+                    type: secondary
+                    className: text-sm
+        - type: RouteCardLink
+          when: ${data.routes.items[7] != null}
+          props:
+            href: /routes/${data.routes.items[7].code}
+          children:
+            - type: Card
+              props:
+                className: h-full model-card relative
+              children:
+                - type: Flex
+                  props:
+                    align: center
+                    gap: middle
+                  children:
+                    - type: Badge
+                      props:
+                        text: ${data.routes.items[7].typeLabel}
+                        variant: outline
+                    - type: Flex
+                      props:
+                        direction: vertical
+                        gap: 0
+                        style:
+                          alignItems: flex-start
+                      children:
+                        - type: Button
+                          props:
+                            text: ${data.routes.items[7].name}
+                            variant: link
+                            className: p-0 font-semibold text-base
+                          events:
+                            onClick:
+                              - action: navigate
+                                params:
+                                  to: /routes/${data.routes.items[7].code}
+                        - type: Text
+                          props:
+                            text: ${data.routes.items[7].code}
+                            type: secondary
+                            className: text-sm
+                    - type: Badge
+                      when: ${data.routes.items[7].status == 'draft'}
+                      props:
+                        text: 草稿
+                        variant: secondary
+                - type: Flex
+                  props:
+                    align: center
+                    gap: 2
+                    className: absolute right-3 top-3 model-card-actions
+                  children:
+                    - type: Tooltip
+                      props:
+                        content: "${data.routes.items[7].status == 'enabled' ? '停用' : '启用'}"
+                      children:
+                        - type: Button
+                          props:
+                            variant: text
+                            size: small
+                            className: size-6 p-0
+                          children:
+                            - type: StatusToggleIcon
+                              props:
+                                enabled: ${data.routes.items[7].status == 'enabled'}
+                          events:
+                            onClick:
+                              - id: statusCfm
+                                action: overlay.open
+                                params:
+                                  overlay:
+                                    type: modal
+                                    title: "${data.routes.items[7].status == 'enabled' ? '确认停用 Route' : '确认启用
+                                      Route'}"
+                                    width: 480
+                                    content:
+                                      type: Flex
+                                      props:
+                                        direction: vertical
+                                        gap: middle
+                                      children:
+                                        - type: Text
+                                          props:
+                                            size: small
+                                            text: "${data.routes.items[7].status == 'enabled' ? '停用后，Runtime
+                                              不再匹配该路由，客户端通过该入口的调用将失败。' :
+                                              '启用后，Runtime
+                                              将按入口配置与路由策略匹配并调度该路由。'}"
+                                        - type: Flex
+                                          props:
+                                            direction: vertical
+                                            gap: small
+                                          children:
+                                            - type: Text
+                                              props:
+                                                text: 影响范围：
+                                                strong: true
+                                            - type: Text
+                                              props:
+                                                text: · 关联模型：${data.routes.items[7].models.length} 个（启用
+                                                  ${data.routes.items[7].enabledModelCount}
+                                                  个）
+                                                type: secondary
+                                            - type: Text
+                                              props:
+                                                text: · 请求入口：${data.routes.items[7].path} · ${data.routes.items[7].protocol}
+                                                type: secondary
+                                        - type: Text
+                                          when: ${data.routes.items[7].status == 'enabled' &&
+                                            data.routes.items[7].enabledModelCount
+                                            > 0}
+                                          props:
+                                            size: small
+                                            text: ⚠ 存在启用模型时，建议先完成流量切换再停用。
+                                            type: warning
+                                        - type: Flex
+                                          props:
+                                            justify: end
+                                            gap: middle
+                                          children:
+                                            - type: Button
+                                              props:
+                                                text: 取消
+                                              events:
+                                                onClick:
+                                                  - action: overlay.close
+                                            - type: Button
+                                              props:
+                                                text: "${data.routes.items[7].status == 'enabled' ? '确认停用' : '确认启用'}"
+                                                variant: primary
+                                                danger: ${data.routes.items[7].status == 'enabled'}
+                                              events:
+                                                onClick:
+                                                  - action: overlay.close
+                                                    params:
+                                                      payload:
+                                                        ok: true
+                              - action: if
+                                params:
+                                  condition: ${actions.statusCfm.ok}
+                                  then:
+                                    - action: message
+                                      params:
+                                        messageType: success
+                                        text: "${data.routes.items[7].status == 'enabled' ? '已停用' : '已启用'}（演示：静态页面不落库）"
+                    - type: Tooltip
+                      props:
+                        content: 编辑
+                      children:
+                        - type: Button
+                          props:
+                            icon: pencil
+                            variant: text
+                            size: small
+                            className: size-6 p-0
+                          events:
+                            onClick:
+                              - action: navigate
+                                params:
+                                  to: /routes/${data.routes.items[7].code}/edit
+                - type: Text
+                  props:
+                    text: ${data.routes.items[7].entrySummary}
+                    type: secondary
+                - type: Flex
+                  props:
+                    align: center
+                    gap: small
+                    style:
+                      flexWrap: wrap
+                  children:
+                    - type: Badge
+                      when: ${data.routes.items[7].tags[0] != null}
+                      props:
+                        text: ${data.routes.items[7].tags[0]}
+                        variant: outline
+                    - type: Badge
+                      when: ${data.routes.items[7].tags[1] != null}
+                      props:
+                        text: ${data.routes.items[7].tags[1]}
+                        variant: outline
+                    - type: Badge
+                      when: ${data.routes.items[7].tags[2] != null}
+                      props:
+                        text: ${data.routes.items[7].tags[2]}
+                        variant: outline
+                    - type: Badge
+                      when: ${data.routes.items[7].tags[3] != null}
+                      props:
+                        text: ${data.routes.items[7].tags[3]}
+                        variant: outline
+                    - type: Text
+                      when: ${data.routes.items[7].tags.length == 0}
+                      props:
+                        text: —
+                        type: secondary
+                - type: Text
+                  props:
+                    text: ${data.routes.items[7].policySummary}
+                    type: secondary
+                    className: text-sm
+    - type: Empty
+      when: ${data.routes.items != null && data.routes.items.length == 0}
+      props:
+        title: 无匹配路由
+        description: 调整状态、类型或标签筛选后重试；也可以新建一条路由
