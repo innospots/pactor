@@ -11,7 +11,7 @@ DSL 的 `type` 引用 Component Registry 注册名。`@pactor-app/ui`（shadcn k
 
 - 事件回调传 DSL 语义值（如 `Switch.onChange` 传 boolean、`Pagination.onChange` 传页码 number、`DataTable.onSort` 传 `{ key, order }`），动作内以 `${event}` 读取；各表以「事件 `onXxx`」行列出，说明列注明 `${event}` 载荷类型；
 - props 内嵌的 DSL 子树（如 Table columns 的 `cell`、Accordion items 的 `children`、DataTable columns 的 `children`）经 Renderer children 机制渲染，可继续声明任意组件与事件；
-- DSL 只暴露受限的框架级 props，适配器负责映射到底层原语（Base UI / recharts 等），不透传底层库的自由组合 API。
+- DSL 只暴露受限的框架级 props，适配器负责映射到底层原语（Base UI / echarts 等），不透传底层库的自由组合 API。
 
 ## 组件索引
 
@@ -62,7 +62,7 @@ DSL 的 `type` 引用 Component Registry 注册名。`@pactor-app/ui`（shadcn k
 | [Combobox](/components/form/#combobox) | 表单 |
 | [Table](/components/data/#table) | 数据 |
 | [DataTable](/components/data/#datatable) | 数据 |
-| [Chart](/components/data/#chart) | 数据 |
+| [图表组件集](/components/data/#图表组件集) | 数据 |
 | [Menu](/components/navigation/#menu) | 导航 |
 | [Link](/components/navigation/#link) | 导航 |
 | [Breadcrumb](/components/navigation/#breadcrumb) | 导航 |
