@@ -134,6 +134,8 @@ export const TOKEN_GROUPS: TokenGroup[] = [
       { name: '--pagination-active-radius', type: 'length', description: 'Pagination 当前页圆角', defaultValue: 'calc(var(--radius) * 0.8)' },
       { name: '--sidebar-width', type: 'length', description: 'Sidebar 展开宽度（桌面端）', defaultValue: '16rem', slider: { min: 12, max: 24, step: 0.5 } },
       { name: '--sidebar-width-icon', type: 'length', description: 'Sidebar 折叠后的 icon rail 宽度', defaultValue: '3rem', slider: { min: 2, max: 5, step: 0.25 } },
+      { name: '--pactor-chat-rail-width', type: 'length', description: 'AI 会话侧栏（chat rail）展开宽度', defaultValue: '40px', slider: { min: 32, max: 64, step: 2 } },
+      { name: '--pactor-chat-rail-popover-width', type: 'length', description: '会话侧栏弹出层宽度', defaultValue: '320px', slider: { min: 240, max: 420, step: 8 } },
     ],
   },
   {

@@ -4,10 +4,10 @@ import { describe, expect, it } from "vitest";
 
 import { ChatClient } from "./chat-client";
 
-/** 对话区头部的产物开关（关闭态 panel-right-open / 展开态 panel-right-close 图标按钮） */
+/** 对话区会话栏的产物开关（关闭态 package / 展开态 panel-right-close 图标按钮） */
 function artifactToggle(container: HTMLElement): HTMLElement {
   const icon = container.querySelector(
-    ".lucide-panel-right-open, .lucide-panel-right-close",
+    ".lucide-panel-right-close, .lucide-package",
   )!;
   return icon.closest("button")! as HTMLElement;
 }
@@ -93,7 +93,8 @@ describe("ChatClient（对话页）", () => {
 
     // 展开后对话区重挂载，开关需重新查询
     await user.click(artifactToggle(container));
-    expect(screen.queryByText("extract_dialogue.ts")).toBeNull();
+    // 面板收起：产物内容消失，仅剩会话栏开关按钮的产物标题标签（1 处）
+    expect(screen.getAllByText("extract_dialogue.ts").length).toBe(1);
   });
 
   it("发送消息：用户消息上屏，助手回复并生成新产物", async () => {
