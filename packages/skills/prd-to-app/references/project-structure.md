@@ -56,7 +56,7 @@ menus:
     icon: database
     order: 2
     children:
-      - { id: projects, type: page, pageId: project-list, title: 项目, icon: folder }
+      - { id: projects, type: page, pageId: project-list, title: 项目 }
       - { id: project-detail, type: page, pageId: project-detail, title: 项目详情, hidden: true, activeMenu: projects }
 
 layouts:
@@ -75,7 +75,7 @@ layouts:
 - 模板自带的 `yaml/pages/*.page.yaml` 平铺写法仅适合页面极少的 demo；模块 ≥2 或页面 >5 时一律按模块分目录（模板目录可整体替换）
 - 列表/详情/编辑成组路径：`/projects`、`/projects/:code`、`/projects/:code/edit`、`/projects/new`
 - 详情/编辑页不进菜单（`hidden: true`），用 `activeMenu` 保持列表菜单高亮
-- 菜单图标用 pactor Icon 白名单 kebab-case 名
+- 菜单图标仅一级菜单配置（目录 group 与「首页」这类独立页面项都要配），用 pactor Icon 白名单 kebab-case 名；二级及以下菜单项一律不配图标
 - 登录/注册页 `public: true` + `layout: login`；其余默认需登录
 - `src/server/sitemap.ts` 只按会话过滤（public/permission），不要在代码里拼接业务字段——数据归 yaml
 - 懒加载页面端点放 `app/api/public/pages/[id]/route.ts`；框架缺省请求 `/api/pages/{id}`，因此**必须**在 `src/pactor/config.ts` 显式配置并传给 SitemapApp，否则客户端请求错路径：

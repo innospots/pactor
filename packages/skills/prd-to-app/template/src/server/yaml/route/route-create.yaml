@@ -1,0 +1,511 @@
+dsl: "1.0"
+page:
+  id: route-create
+  title: 新增路由
+  name: routeForm
+  description: 创建或修改 Route：基本信息、入口配置与模型路由策略
+body:
+  type: Page
+  children:
+    - type: Breadcrumb
+      props:
+        items:
+          - label: 模型路由
+          - label: 路由
+            href: /routes
+          - label: 新增路由
+    - type: Card
+      children:
+        - type: Flex
+          props:
+            direction: vertical
+            gap: small
+          children:
+            - type: Typography
+              props:
+                variant: h3
+                text: 新建路由
+            - type: Typography
+              props:
+                variant: muted
+                text: 在单一页面完成路由配置：基本信息、请求路径、协议格式与模型调度策略。不使用画布，不配置降级。
+    - type: Form
+      props:
+        layout: vertical
+        initialValues:
+          type: pool
+          protocol: OpenAI / Chat Completions
+          operation: chat.completions
+          strategy: WEIGHTED
+          healthFilter: on
+      events:
+        onSubmit:
+          - action: message
+            params:
+              messageType: success
+              text: 路由「${event.name}」已创建并启用（演示）
+          - action: navigate
+            params:
+              to: /routes
+      children:
+        - type: Flex
+          props:
+            direction: vertical
+            gap: middle
+          children:
+            - type: Card
+              props:
+                title: ① 基本信息
+              children:
+                - type: Grid
+                  props:
+                    columns: 2
+                    gap: 16
+                  children:
+                    - type: Field
+                      props:
+                        label: 路由名称
+                        required: true
+                      children:
+                        - type: Input
+                          props:
+                            name: name
+                            className: w-full
+                            placeholder: 展示名，如 推理模型默认路由
+                            rules:
+                              - required: true
+                                message: 请输入路由名称
+                    - type: Field
+                      children:
+                        - type: Flex
+                          props:
+                            justify: space-between
+                            align: center
+                            className: w-full mb-3.5
+                          children:
+                            - type: Flex
+                              props:
+                                align: center
+                                className: gap-0.5
+                              children:
+                                - type: Text
+                                  props:
+                                    text: "*"
+                                    className: text-destructive text-sm leading-none
+                                - type: Label
+                                  props:
+                                    text: 路由标识
+                            - type: Text
+                              props:
+                                text: 路由标识 创建后不可修改
+                                type: secondary
+                                className: text-xs leading-none
+                        - type: Input
+                          props:
+                            name: code
+                            className: w-full
+                            placeholder: 小写 + 数字 + 连字符，如 reasoning-default
+                            disabled: false
+                            rules:
+                              - required: true
+                                message: 请输入路由标识
+                    - type: Field
+                      props:
+                        label: 类型
+                        required: true
+                      children:
+                        - type: RadioGroup
+                          props:
+                            name: type
+                            direction: horizontal
+                            options:
+                              - label: 单模型
+                                value: single
+                              - label: 多模型池
+                                value: pool
+                              - label: 条件路由
+                                value: conditional
+                            className: mt-2
+                    - type: Field
+                      props:
+                        label: 逻辑模型 Alias
+                      children:
+                        - type: Input
+                          props:
+                            name: alias
+                            className: w-full
+                            placeholder: 对外暴露的模型名，如 reasoning
+                    - type: Field
+                      props:
+                        label: 标签
+                      children:
+                        - type: Input
+                          props:
+                            name: tags
+                            className: w-full
+                            placeholder: 逗号分隔：reasoning, premium
+                    - type: Field
+                      props:
+                        label: 描述
+                      children:
+                        - type: Textarea
+                          props:
+                            name: description
+                            className: w-full
+                            rows: 3
+            - type: Card
+              props:
+                title: ② 入口配置
+              children:
+                - type: Grid
+                  props:
+                    columns: 2
+                    gap: 16
+                  children:
+                    - type: Field
+                      props:
+                        label: 请求路径
+                        required: true
+                      children:
+                        - type: Input
+                          props:
+                            name: path
+                            className: w-full
+                            placeholder: /v1/chat/completions
+                            rules:
+                              - required: true
+                                message: 请输入请求路径
+                    - type: Field
+                      props:
+                        label: 协议格式
+                        required: true
+                      children:
+                        - type: Select
+                          props:
+                            name: protocol
+                            className: w-full [&>span]:w-full [&_[data-slot=select-trigger]]:w-full
+                            options:
+                              - label: OpenAI / Chat Completions
+                                value: OpenAI / Chat Completions
+                              - label: OpenAI / Responses
+                                value: OpenAI / Responses
+                              - label: Anthropic / Messages
+                                value: Anthropic / Messages
+                              - label: OpenAI / Embeddings
+                                value: OpenAI / Embeddings
+                            rules:
+                              - required: true
+                                message: 请选择协议格式
+                    - type: Field
+                      props:
+                        label: Ingress Operation
+                      children:
+                        - type: Input
+                          props:
+                            name: operation
+                            className: w-full
+                            disabled: true
+                        - type: Button
+                          props:
+                            text: 查看协议说明
+                            icon: eye
+                            size: small
+                            variant: link
+                            className: p-0 h-auto mt-1
+                          events:
+                            onClick:
+                              - id: schemaView
+                                action: overlay.open
+                                params:
+                                  overlay:
+                                    type: modal
+                                    title: 协议说明
+                                    width: 560
+                                    content:
+                                      type: Flex
+                                      props:
+                                        direction: vertical
+                                        gap: middle
+                                      children:
+                                        - type: Alert
+                                          props:
+                                            showIcon: true
+                                            variant: info
+                                            message: Ingress Protocol 描述对外请求格式，与 Model「提供商」Tab 中的上游协议无关。
+                                        - type: Text
+                                          props:
+                                            text: '{ "model": "reasoning", "messages": [{ "role": "user", "content": "..."
+                                              }] }'
+                                            className: font-mono text-sm
+            - type: Card
+              props:
+                title: ③ 模型与路由策略
+              children:
+                - type: Flex
+                  props:
+                    justify: space-between
+                    align: center
+                  children:
+                    - type: Text
+                      props:
+                        text: 配置模型列表与调度策略；C / M 留空继承 Model「提供商」配置
+                        type: secondary
+                        className: text-sm
+                    - type: Button
+                      props:
+                        text: 添加模型
+                        icon: plus
+                        variant: primary
+                        size: small
+                      events:
+                        onClick:
+                          - id: modelResult
+                            action: overlay.open
+                            params:
+                              overlay:
+                                type: modal
+                                title: 添加模型
+                                width: 560
+                                content:
+                                  type: Form
+                                  props:
+                                    name: routeModel
+                                    initialValues:
+                                      status: enabled
+                                  events:
+                                    onSubmit:
+                                      - action: overlay.close
+                                        params:
+                                          payload:
+                                            ok: true
+                                  children:
+                                    - type: Flex
+                                      props:
+                                        direction: vertical
+                                        gap: middle
+                                        align: stretch
+                                      children:
+                                        - type: Grid
+                                          props:
+                                            columns: 2
+                                            gap: 16
+                                            className: "[&>[data-slot=grid-item]:first-child]:col-span-full"
+                                          children:
+                                            - type: Field
+                                              props:
+                                                label: Model
+                                                required: true
+                                              children:
+                                                - type: Select
+                                                  props:
+                                                    name: model
+                                                    className: w-full [&>span]:w-full [&_[data-slot=select-trigger]]:w-full
+                                                    options:
+                                                      - label: GPT-5（gpt-5）
+                                                        value: gpt-5
+                                                      - label: Qwen3.5 Flash（qwen3.5-flash）
+                                                        value: qwen3.5-flash
+                                                      - label: Qwen3-VL Plus（qwen3-vl-plus）
+                                                        value: qwen3-vl-plus
+                                                      - label: Gemini 3 Flash（gemini-3-flash）
+                                                        value: gemini-3-flash
+                                                    rules:
+                                                      - required: true
+                                                        message: 请选择 Model
+                                            - type: Field
+                                              props:
+                                                label: 权重
+                                              children:
+                                                - type: NumberInput
+                                                  props:
+                                                    name: weight
+                                                    className: w-full
+                                                    min: 0
+                                                    precision: 0
+                                                    placeholder: "50"
+                                            - type: Field
+                                              props:
+                                                label: 优先级
+                                              children:
+                                                - type: Select
+                                                  props:
+                                                    name: priority
+                                                    className: w-full [&>span]:w-full [&_[data-slot=select-trigger]]:w-full
+                                                    options:
+                                                      - label: P0
+                                                        value: P0
+                                                      - label: P1
+                                                        value: P1
+                                                      - label: P2
+                                                        value: P2
+                                            - type: Field
+                                              props:
+                                                label: 供应成本倍率 C
+                                              children:
+                                                - type: NumberInput
+                                                  props:
+                                                    name: costRate
+                                                    className: w-full
+                                                    min: 0
+                                                    step: 0.1
+                                                    placeholder: 留空继承 Model 提供商配置
+                                            - type: Field
+                                              props:
+                                                label: 用户计费倍率 M
+                                              children:
+                                                - type: NumberInput
+                                                  props:
+                                                    name: billingRate
+                                                    className: w-full
+                                                    min: 0
+                                                    step: 0.1
+                                                    placeholder: 留空继承
+                                            - type: Field
+                                              props:
+                                                label: 状态
+                                              children:
+                                                - type: RadioGroup
+                                                  props:
+                                                    name: status
+                                                    direction: horizontal
+                                                    options:
+                                                      - label: 启用
+                                                        value: enabled
+                                                      - label: 停用
+                                                        value: disabled
+                                        - type: Flex
+                                          props:
+                                            justify: end
+                                            gap: middle
+                                          children:
+                                            - type: Button
+                                              props:
+                                                text: 取消
+                                              events:
+                                                onClick:
+                                                  - action: overlay.close
+                                            - type: Button
+                                              props:
+                                                text: 确认添加
+                                                variant: primary
+                                                submit: true
+                          - action: if
+                            params:
+                              condition: ${actions.modelResult.ok}
+                              then:
+                                - action: message
+                                  params:
+                                    messageType: success
+                                    text: 模型已添加（演示：不落库）
+                - type: Grid
+                  props:
+                    columns: 2
+                    gap: 16
+                    className: mt-4 [&>[data-slot=grid-item]:first-child]:col-span-full
+                  children:
+                    - type: Field
+                      props:
+                        label: 模型路由策略
+                        required: true
+                      children:
+                        - type: Select
+                          props:
+                            name: strategy
+                            className: w-full [&>span]:w-full [&_[data-slot=select-trigger]]:w-full
+                            options:
+                              - label: 加权轮询 (WEIGHTED)
+                                value: WEIGHTED
+                              - label: 哈希分配 (HASH)
+                                value: HASH
+                              - label: 优先级 (PRIORITY)
+                                value: PRIORITY
+                              - label: 轮询 (ROUND_ROBIN)
+                                value: ROUND_ROBIN
+                              - label: 随机 (RANDOM)
+                                value: RANDOM
+                              - label: 固定 (FIXED)
+                                value: FIXED
+                            rules:
+                              - required: true
+                                message: 请选择模型路由策略
+                    - type: Field
+                      props:
+                        label: 粘性 Session
+                      children:
+                        - type: RadioGroup
+                          props:
+                            name: stickySession
+                            direction: horizontal
+                            options:
+                              - label: 开启
+                                value: on
+                              - label: 关闭
+                                value: off
+                            className: mt-2
+                    - type: Field
+                      props:
+                        label: 健康过滤
+                      children:
+                        - type: RadioGroup
+                          props:
+                            name: healthFilter
+                            direction: horizontal
+                            options:
+                              - label: 仅调度 HEALTHY 实例
+                                value: on
+                              - label: 关闭
+                                value: off
+                            className: mt-2
+                - type: Text
+                  props:
+                    text: 尚未添加模型；保存草稿允许 0 条，启用前至少 1 条启用模型。
+                    type: secondary
+                    className: text-sm mt-4
+        - type: Flex
+          props:
+            justify: end
+            className: mt-4
+          children:
+            - type: Flex
+              props:
+                align: center
+                gap: middle
+              children:
+                - type: Button
+                  props:
+                    text: 取消
+                    icon: x
+                  events:
+                    onClick:
+                      - action: navigate
+                        params:
+                          to: /routes
+                - type: Button
+                  props:
+                    text: 模拟调用
+                    icon: zap
+                  events:
+                    onClick:
+                      - action: message
+                        params:
+                          messageType: info
+                          text: 模拟调用：用当前未保存配置演算命中模型与策略（演示）
+                - type: Button
+                  props:
+                    text: 保存草稿
+                    icon: save
+                  events:
+                    onClick:
+                      - action: message
+                        params:
+                          messageType: success
+                          text: 草稿已保存（演示：静态页面不落库）
+                      - action: navigate
+                        params:
+                          to: /routes
+                - type: Button
+                  props:
+                    text: 保存并启用
+                    icon: check-circle
+                    variant: primary
+                    submit: true

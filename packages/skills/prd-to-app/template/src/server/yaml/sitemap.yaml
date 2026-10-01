@@ -1,0 +1,250 @@
+# Sitemap 入口数据：元数据 + 布局 + 页面 + 菜单全量。
+# 本文件是会话无关的超集；可见性由 src/server/sitemap.ts 按会话裁剪：
+#   public: true   → 匿名可见（登录页）
+#   permission: x  → 需登录且具备对应权限
+#   无标记         → 需登录
+# 页面 DSL 按模块分目录存放（yaml/<模块>/<id>.yaml，页面 id = 文件名），
+# 由 sitemap.ts 递归收集建索引；lazy: true 不随 sitemap 内联下发，
+# 客户端经 /api/public/pages/{id} 懒加载。
+# updatedAt / user / permissions 为会话动态字段，由服务端在响应时注入。
+
+id: site
+resourceType: sitemap
+version: 1
+dslVersion: "1.0"
+app: { name: Pactor Console }
+auth: { loginPath: /login }
+
+pages:
+  - { id: login, path: /login, title: 登录, version: 1, public: true }
+  - { id: dashboard, path: /, title: 仪表盘, version: 1, lazy: true }
+  # 模块一：模型资产 / 供应商（卡片式列表 + 详情 + 新增/编辑）
+  - {
+      id: provider-list,
+      path: /providers,
+      title: 供应商,
+      version: 1,
+      lazy: true,
+    }
+  - {
+      id: provider-create,
+      path: /providers/new,
+      title: 新增 Provider,
+      version: 1,
+      lazy: true,
+    }
+  - {
+      id: provider-detail,
+      path: /providers/:code,
+      title: Provider 详情,
+      version: 1,
+      lazy: true,
+    }
+  - {
+      id: provider-edit,
+      path: /providers/:code/edit,
+      title: 编辑 Provider,
+      version: 1,
+      lazy: true,
+    }
+  # 模块二：模型路由 / 路由（卡片式列表 + 单页纵向详情 + 单页表单）
+  - { id: route-list, path: /routes, title: 路由, version: 1, lazy: true }
+  - {
+      id: route-create,
+      path: /routes/new,
+      title: 新增路由,
+      version: 1,
+      lazy: true,
+    }
+  - {
+      id: route-detail,
+      path: /routes/:code,
+      title: 路由详情,
+      version: 1,
+      lazy: true,
+    }
+  - {
+      id: route-edit,
+      path: /routes/:code/edit,
+      title: 编辑路由,
+      version: 1,
+      lazy: true,
+    }
+
+menus:
+  - {
+      id: login,
+      type: page,
+      pageId: login,
+      title: 登录,
+      layout: login,
+      public: true,
+      hidden: true,
+    }
+  - {
+      id: home,
+      type: page,
+      pageId: dashboard,
+      title: 首页,
+      icon: home,
+      layout: admin,
+      order: 1,
+    }
+  - id: assets
+    type: group
+    title: 模型资产
+    icon: package
+    order: 2
+    children:
+      - {
+          id: providers,
+          type: page,
+          pageId: provider-list,
+          title: 供应商,
+          layout: admin,
+        }
+  - id: routing
+    type: group
+    title: 模型路由
+    icon: share
+    order: 3
+    children:
+      - {
+          id: routes,
+          type: page,
+          pageId: route-list,
+          title: 路由,
+          layout: admin,
+        }
+  # 隐藏页（不出现在菜单，经列表页跳转进入；activeMenu 保持所属菜单高亮）
+  - {
+      id: provider-create,
+      type: page,
+      pageId: provider-create,
+      layout: admin,
+      hidden: true,
+      activeMenu: providers,
+    }
+  - {
+      id: provider-detail,
+      type: page,
+      pageId: provider-detail,
+      layout: admin,
+      hidden: true,
+      activeMenu: providers,
+    }
+  - {
+      id: provider-edit,
+      type: page,
+      pageId: provider-edit,
+      layout: admin,
+      hidden: true,
+      activeMenu: providers,
+    }
+  - {
+      id: route-create,
+      type: page,
+      pageId: route-create,
+      layout: admin,
+      hidden: true,
+      activeMenu: routes,
+    }
+  - {
+      id: route-detail,
+      type: page,
+      pageId: route-detail,
+      layout: admin,
+      hidden: true,
+      activeMenu: routes,
+    }
+  - {
+      id: route-edit,
+      type: page,
+      pageId: route-edit,
+      layout: admin,
+      hidden: true,
+      activeMenu: routes,
+    }
+
+# 布局 DSL（PageOutlet 为页面内容出口）。
+# 布局 body 内 ${data.session.*} 由客户端注入的 session dataSource 提供
+#（user / app / menus）。登录 / 登出是普通 HTTP 调用，DSL 用内置 request
+# 动作表达（跨域绝对地址，客户端 httpHooks 自动改写进项目内代理前缀）。
+layouts:
+  # 管理端外壳：Sidebar（品牌 + SitemapMenu 导航）> Header（ThemeSwitcher
+  # 换肤 + 语言 + 用户菜单）+ Content（PageOutlet 页面出口）
+  admin:
+    dsl: "1.0"
+    body:
+      type: Layout
+      props: { className: shell-root }
+      children:
+        - type: Sidebar
+          props:
+            className: shell-main
+            brand: { title: Pactor Console, logo: /next.svg }
+            collapsible: true
+            content:
+              type: SitemapMenu
+              props:
+                items: ${data.session.menus}
+                collapsible: true
+                className: shell-menu
+              events:
+                onSelect:
+                  - action: navigate
+                    params: { to: "${event}" }
+          children:
+            - type: Header
+              props:
+                className: shell-header
+                locales:
+                  - { label: 中文, value: zh-CN }
+                  - { label: English, value: en-US }
+                user:
+                  name: ${data.session.user.name}
+                  items:
+                    - { label: 个人中心, value: profile, icon: user }
+                    - { label: 退出登录, value: logout, icon: log-out }
+              events:
+                onUserSelect:
+                  - action: if
+                    params:
+                      condition: ${event == 'logout'}
+                      then:
+                        - action: request
+                          params:
+                            method: POST
+                            url: http://localhost:9011/api/auth/logout
+                        - action: app.reload
+                          params: { to: /login }
+                      else:
+                        - action: message
+                          params:
+                            messageType: info
+                            text: 打开个人中心（演示）
+                onLocaleChange:
+                  - action: message
+                    params:
+                      messageType: info
+                      text: 语言切换为 ${event}（演示：应用层桥接后整页生效）
+              children:
+                - type: ThemeSwitcher
+            - type: Content
+              props: { className: shell-content }
+              children:
+                - type: PageOutlet
+  # 登录页外壳：login-page 全屏渐变容器，样式见 app/login.css
+  login:
+    dsl: "1.0"
+    body:
+      type: Flex
+      props:
+        className: login-page
+      children:
+        - type: PageOutlet
+  # 裸布局：无外壳，页面铺满
+  blank:
+    dsl: "1.0"
+    body:
+      type: PageOutlet

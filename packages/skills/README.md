@@ -19,7 +19,7 @@ pnpm add -D @pactor-app/skills
 
 ## Usage
 
-Each skill is a self-contained directory (`SKILL.md` + optional `references/`). Copy or symlink the skill directory you need into your agent's skill directory (the `references/` subfolder must come along — `SKILL.md` points to it):
+Each skill is a self-contained directory (`SKILL.md` + optional `references/` and `template/`). Copy or symlink the skill directory you need into your agent's skill directory (the `references/` subfolder must come along — `SKILL.md` points to it; `prd-to-app` additionally needs its `template/` starter project):
 
 ```bash
 # 例如 Claude Code：~/.claude/skills/<skill-name>/
