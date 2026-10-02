@@ -127,6 +127,7 @@ import { ConversationList } from './chat/ConversationList/index.js';
 import { MessageList } from './chat/MessageList/index.js';
 import { Prompt } from './chat/Prompt/index.js';
 import { Sender } from './chat/Sender/index.js';
+import { StepsPanel } from './chat/StepsPanel/index.js';
 import { StreamingText } from './chat/StreamingText/index.js';
 import { Suggestion } from './chat/Suggestion/index.js';
 import { Thinking } from './chat/Thinking/index.js';
@@ -151,6 +152,9 @@ import { RadarChart } from './chart/RadarChart/index.js';
 import { SankeyChart } from './chart/SankeyChart/index.js';
 import { ScatterChart } from './chart/ScatterChart/index.js';
 import { TreeChart } from './chart/TreeChart/index.js';
+
+// 业务组件（business 子目录）
+import { Login } from './business/Login/index.js';
 
 /**
  * 内置组件表：DSL 类型名 → 组件适配器。
@@ -299,6 +303,7 @@ export const builtinComponents = {
   MessageList,
   Composer,
   ConversationList,
+  StepsPanel,
   // 图表组件集（src/components/chart 目录，echarts 渲染；
   // 交互事件经 echarts click → onSelect，DSL 用 events.onSelect + ${event}）
   MetricCard,
@@ -318,6 +323,8 @@ export const builtinComponents = {
   SankeyChart,
   MapChart,
   ComposedChart,
+  // 业务组件（business 子目录）
+  Login,
 } as const;
 
 /** 把全部 V1 内置组件按 DSL 类型名注册到给定 ComponentRegistry */
