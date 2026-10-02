@@ -2,9 +2,9 @@
 
 import type { PageDsl } from "@pactor-app/core";
 import { PactorPage } from "@pactor-app/app";
+import type { StepsPanelItemData } from "@pactor-app/ui/components";
 
 import { WorkspaceSwitcher } from "./workspace-switcher";
-import { StepsPanel, type StepItemData } from "./steps-panel";
 
 /**
  * 对话页：页面结构由 DSL 描述，根组件为 @pactor-app/ui 内置的 ChatPage
@@ -20,8 +20,8 @@ import { StepsPanel, type StepItemData } from "./steps-panel";
  * - composerFooter：工作空间切换器（自定义组件 WorkspaceSwitcher）
  * - composerBottom：「内容由 AI 生成，仅供参考」弱提示
  * - 消息操作条：copy / retry / regenerate / edit（修改并重发）/ quote（引用回复）
- * - 对话图标栏（conversationRailItems）：「执行步骤」popover 浮层（自定义组件
- *   StepsPanel，绑定 chat.steps 数据源）；产物按钮 / 步骤按钮均按当前会话
+ * - 对话图标栏（conversationRailItems）：「执行步骤」popover 浮层（ui 内置
+ *   StepsPanel 组件，绑定 chat.steps 数据源）；产物按钮 / 步骤按钮均按当前会话
  *   有无对应内容动态显隐（hideArtifactRailItem / item.hidden）——
  *   c1 产物+步骤、c2 仅产物、c3 仅步骤、c4 无右侧按钮
  */
@@ -243,13 +243,13 @@ const store = {
       { title: "剧本结构拆解", description: "按引流 / 信任 / 转化三段拆解剧本", status: "done", duration: "1.1s" },
       { title: "话术特征比对", description: "比对 200+ 条保健品诈骗话术特征库", status: "done", duration: "2.6s" },
       { title: "风险评级与建议", description: "输出风险评级报告与修改建议", status: "done", duration: "0.9s" },
-    ] as StepItemData[],
+    ] as StepsPanelItemData[],
     c3: [
       { title: "需求理解", description: "确认查询范围：workbuddy 内置连接器", status: "done", duration: "0.4s" },
       { title: "连接器目录检索", description: "按文档 / 数据 / 协作三类检索连接器目录", status: "done", duration: "1.6s" },
       { title: "能力清单整理", description: "汇总各连接器的能力与接入方式", status: "done", duration: "0.7s" },
-    ] as StepItemData[],
-  } as Record<string, StepItemData[]>,
+    ] as StepsPanelItemData[],
+  } as Record<string, StepsPanelItemData[]>,
 };
 
 interface ReplyOptions {
@@ -728,7 +728,7 @@ export function ChatClient() {
     <PactorPage
       pageDsl={chatPage}
       services={chatServices}
-      components={{ WorkspaceSwitcher, StepsPanel }}
+      components={{ WorkspaceSwitcher }}
       actions={chatActions}
     />
   );

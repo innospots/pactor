@@ -378,6 +378,8 @@ export type {
 } from './chat/Composer/index.js';
 export { ConversationList } from './chat/ConversationList/index.js';
 export type { ConversationItemData, ConversationListProps } from './chat/ConversationList/index.js';
+export { StepsPanel } from './chat/StepsPanel/index.js';
+export type { StepsPanelItemData, StepsPanelProps } from './chat/StepsPanel/index.js';
 export { ArtifactPanel } from './chat/ArtifactPanel/index.js';
 export type {
   ArtifactPanelProps,
@@ -434,3 +436,7 @@ export { ComposedChart } from './chart/ComposedChart/index.js';
 export type { ComposedChartProps, ComposedSeriesItem } from './chart/ComposedChart/index.js';
 export { EChartBase } from './chart/EChartBase/index.js';
 export type { ChartSelectPayload, EChartBaseProps } from './chart/EChartBase/index.js';
+
+// 业务组件（business 子目录）
+export { Login } from './business/Login/index.js';
+export type { LoginBrandInfo, LoginLink, LoginProps, LoginVariant } from './business/Login/index.js';

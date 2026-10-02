@@ -11,11 +11,11 @@ describe("LoginClient（嵌入模式登录页）", () => {
     window.localStorage.clear();
   });
 
-  it("渲染登录卡片与表单（用户名 / 密码 / 登录按钮）", async () => {
+  it("渲染登录组件与表单（品牌区 / 用户名 / 密码 / 登录按钮）", async () => {
     render(<LoginClient />);
 
-    // 卡片标题与演示账号提示
-    expect(await screen.findByText("Pactor 登录111")).toBeTruthy();
+    // 品牌区与演示账号提示
+    expect(await screen.findAllByText("Pactor")).not.toHaveLength(0);
     expect(screen.getByText("演示账号 admin / pactor123")).toBeTruthy();
     // 表单字段与提交按钮
     expect(screen.getByLabelText("用户名")).toBeTruthy();
