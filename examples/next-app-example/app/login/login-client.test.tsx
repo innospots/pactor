@@ -78,4 +78,37 @@ describe("LoginClient（嵌入模式登录页）", () => {
       { timeout: 3000 },
     );
   });
+
+  it("右上角下拉框切换登录页样式（backdrop → 切回默认）", async () => {
+    const user = userEvent.setup();
+    render(<LoginClient />);
+
+    const select = await screen.findByRole("combobox", {
+      name: "结构模式切换",
+    });
+    // 默认居中（页面 DSL 的 layout 基线；异步挂载经 waitFor 等待落地）
+    await waitFor(() =>
+      expect(
+        document.querySelector('[data-layout="centered"]'),
+      ).not.toBeNull(),
+    );
+
+    await user.selectOptions(select, "backdrop");
+    await waitFor(() =>
+      expect(document.querySelector('[data-layout="backdrop"]')).not.toBeNull(),
+    );
+    expect(
+      document.querySelector('[data-layout="centered"]'),
+    ).toBeNull();
+
+    await user.selectOptions(select, "");
+    await waitFor(() =>
+      expect(document.querySelector('[data-layout="backdrop"]')).toBeNull(),
+    );
+    await waitFor(() =>
+      expect(
+        document.querySelector('[data-layout="centered"]'),
+      ).not.toBeNull(),
+    );
+  });
 });

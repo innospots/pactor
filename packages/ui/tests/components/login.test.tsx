@@ -13,7 +13,7 @@ const brand = {
 };
 
 describe('Login 业务组件', () => {
-  it('默认 split-card 布局：品牌区 + 认证卡片 + 用户名字段 + 密码字段', () => {
+  it('默认 split + 认证卡片：品牌区 + 用户名字段 + 密码字段', () => {
     const { container } = renderDsl({
       type: 'Login',
       props: { brand },
@@ -21,7 +21,7 @@ describe('Login 业务组件', () => {
 
     const root = container.querySelector('[data-slot=login]');
     expect(root).not.toBeNull();
-    expect(root!.getAttribute('data-layout')).toBe('split-card');
+    expect(root!.getAttribute('data-layout')).toBe('split');
     // 分栏布局渲染两处品牌标识（桌面品牌区 + 窄屏收缩行）
     expect(screen.getAllByText('Pactor Console').length).toBe(2);
     expect(screen.getByText('统一管理后台')).toBeTruthy();
@@ -32,28 +32,56 @@ describe('Login 业务组件', () => {
     expect(screen.getByRole('button', { name: '登 录' })).toBeTruthy();
   });
 
-  it.each([
-    'split',
-    'split-card',
-    'split-card-float',
-    'split-wide',
-    'centered-card',
-    'centered-plain',
-    'brand-card',
-    'overlap',
-    'backdrop',
-    'reverse-split',
-  ])('layout=%s 渲染对应 data-layout', (layout) => {
-    const { container } = renderDsl({ type: 'Login', props: { layout } });
-    expect(
-      container.querySelector('[data-slot=login]')!.getAttribute('data-layout'),
-    ).toBe(layout);
+  it.each(['split', 'centered', 'brand-card', 'overlap', 'backdrop'])(
+    'layout=%s 渲染对应 data-layout',
+    (layout) => {
+      const { container } = renderDsl({ type: 'Login', props: { layout } });
+      expect(
+        container.querySelector('[data-slot=login]')!.getAttribute('data-layout'),
+      ).toBe(layout);
+    },
+  );
+
+  it('authVariant：plain 无卡片容器，float 大尺寸悬浮卡片（440px + shadow-xl）', () => {
+    const plain = renderDsl({
+      type: 'Login',
+      props: { layout: 'centered', authVariant: 'plain' },
+    });
+    expect(plain.container.querySelector('[data-slot=card]')).toBeNull();
+    plain.unmount();
+
+    const float = renderDsl({
+      type: 'Login',
+      props: { layout: 'centered', authVariant: 'float' },
+    });
+    const card = float.container.querySelector('[data-slot=card]');
+    expect(card).not.toBeNull();
+    expect(card!.className).toContain('max-w-[440px]');
+    expect(card!.className).toContain('shadow-xl');
+  });
+
+  it('brandRatio 写入分栏比例 CSS 变量，brandSide=right 品牌面板在右', () => {
+    const { container, unmount } = renderDsl({
+      type: 'Login',
+      props: { brandRatio: 0.6 },
+    });
+    const root = container.querySelector('[data-slot=login]') as HTMLElement;
+    expect(root.style.getPropertyValue('--login-grid')).toContain('0.6fr');
+    unmount();
+
+    const right = renderDsl({
+      type: 'Login',
+      props: { brandSide: 'right', authVariant: 'plain', brand: { name: 'A', title: '概念展示' } },
+    });
+    const panel = right.container.querySelector('.order-last');
+    expect(panel).not.toBeNull();
+    expect(panel!.querySelector('[data-slot=login-default-illustration]')).not.toBeNull();
   });
 
   it('居中布局不渲染分栏品牌区（无插画与品牌描述）', () => {
     const { container } = renderDsl({
       type: 'Login',
-      props: { layout: 'centered-card', brand },
+      props: { layout: 'centered', brand },
     });
     expect(screen.queryByText('面向管理员的一站式控制台')).toBeNull();
     expect(container.querySelector('img[src="/brand.webp"]')).toBeNull();
@@ -96,31 +124,22 @@ describe('Login 业务组件', () => {
     expect(container.querySelectorAll('[data-slot=card]').length).toBe(2);
   });
 
-  it('reverse-split 布局品牌面板在右（order-last）、表单在左', () => {
-    const { container } = renderDsl({
-      type: 'Login',
-      props: { layout: 'reverse-split', brand: { name: 'A', title: '概念展示' } },
-    });
-    const panel = container.querySelector('.order-last');
-    expect(panel).not.toBeNull();
-    expect(panel!.querySelector('[data-slot=login-default-illustration]')).not.toBeNull();
-  });
-
-  it('默认渲染背景装饰（圆斑/圆环/点阵/流线），深浅色自适应', () => {
+  it('默认渲染背景装饰，decor=false 关闭，brandPanelBackground=false 去品牌面板渐变', () => {
     const { container, unmount } = renderDsl({ type: 'Login', props: {} });
     expect(container.querySelector('[data-slot=login-bg-decor]')).not.toBeNull();
     unmount();
 
-    const centered = renderDsl({ type: 'Login', props: { layout: 'centered-card' } });
-    expect(
-      centered.container.querySelector('[data-slot=login-bg-decor]'),
-    ).not.toBeNull();
-    centered.unmount();
+    const noDecor = renderDsl({ type: 'Login', props: { decor: false } });
+    expect(noDecor.container.querySelector('[data-slot=login-bg-decor]')).toBeNull();
+    noDecor.unmount();
 
-    const backdrop = renderDsl({ type: 'Login', props: { layout: 'backdrop' } });
-    expect(
-      backdrop.container.querySelector('[data-slot=login-bg-decor]'),
-    ).not.toBeNull();
+    const noPanelBg = renderDsl({
+      type: 'Login',
+      props: { brandPanelBackground: false },
+    });
+    const panel = noPanelBg.container.querySelector('.md\\:flex');
+    expect(panel).not.toBeNull();
+    expect(panel!.className).not.toContain('bg-muted');
   });
 
   it('文案 props 覆盖 i18n 缺省', () => {

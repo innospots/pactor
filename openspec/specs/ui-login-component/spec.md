@@ -22,21 +22,26 @@
 
 ### Requirement: 布局类型
 
-组件 SHALL 支持 `layout` prop，覆盖《登录页产品结构设计》中除扫码（10）外的全部十种结构：`split`（01）、`split-card`（02/09，默认）、`split-card-float`（03）、`split-wide`（04）、`centered-card`（05）、`centered-plain`（07）、`brand-card`（06）、`overlap`（08）、`backdrop`（11）、`reverse-split`（12）；窄屏下分栏布局降为单列，认证内容优先，overlap 布局取消卡片重叠。
+组件 SHALL 支持 `layout` prop 表达结构模式，取值 `split`（默认，左右分栏）、`centered`（居中认证区）、`brand-card`（品牌区为独立卡片）、`overlap`（品牌卡片与登录卡片局部叠加）、`backdrop`（整页渐变品牌背景 + 悬浮认证卡片）；分栏比例、品牌方向、认证区卡片样式等修饰 SHALL 由独立配置属性表达，不作为 layout 枚举：`brandSide`（left/right，仅 split）、`brandRatio`（品牌区占比 0–1，默认 0.5，仅 split）、`authVariant`（plain/card/float，split 与 centered 生效）、`brandPanelBackground`（品牌面板渐变背景开关）、`decor`（背景装饰开关）。窄屏下分栏布局降为单列，认证内容优先，overlap 布局取消卡片重叠。
 
 #### Scenario: 默认布局
 
 - **WHEN** 未配置 `layout`
-- **THEN** 按 `split-card` 渲染：左侧品牌区 + 右侧认证卡片
+- **THEN** 按 `split` + 默认修饰渲染：左侧品牌区（50%）+ 右侧常规认证卡片
 
-#### Scenario: 十种布局可选
+#### Scenario: 结构模式可选
 
-- **WHEN** `layout` 取十个枚举值之一
-- **THEN** 按对应结构渲染品牌区与认证区的容器关系（分栏比例 / 卡片有无 / 叠加 / 反向分栏 / 整页渐变背景），根节点 `data-layout` 等于所配置值
+- **WHEN** `layout` 取五个枚举值之一
+- **THEN** 按对应容器关系渲染（分栏 / 居中 / 品牌卡片 / 叠加 / 整页渐变背景），根节点 `data-layout` 等于所配置值
+
+#### Scenario: 修饰属性正交组合
+
+- **WHEN** `layout: split` 且配置 `brandSide: right`、`brandRatio: 0.6`、`authVariant: float`
+- **THEN** 品牌面板位于右侧且占 60% 分栏，认证区渲染 440px 大留白强阴影悬浮卡片
 
 #### Scenario: 居中布局无品牌区
 
-- **WHEN** `layout` 为 `centered-card` 或 `centered-plain`
+- **WHEN** `layout` 为 `centered`
 - **THEN** 认证区居中展示，不渲染分栏品牌区
 
 #### Scenario: 窄屏降级

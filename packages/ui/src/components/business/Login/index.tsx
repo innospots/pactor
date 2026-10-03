@@ -9,30 +9,15 @@ import { Input } from '../../components/Input/index.js';
 import { Link } from '../../components/Link/index.js';
 
 /**
- * 布局类型（对应《登录页产品结构设计》的编号）：
- * - `split`（01）左品牌区 + 右侧纯表单，约 50/50
- * - `split-card`（02/09，默认）左品牌区 + 右侧认证卡片
- * - `split-card-float`（03）左品牌区 + 右侧大尺寸悬浮卡片
- * - `split-wide`（04）左品牌大区（55–60%）+ 右侧极简表单
- * - `centered-card`（05）全屏背景 + 居中登录卡片
- * - `centered-plain`（07）全屏淡色背景 + 居中纯表单
- * - `brand-card`（06）左品牌卡片 + 右侧纯表单
- * - `overlap`（08）品牌卡片 + 登录卡片局部叠加（窄屏取消重叠）
- * - `backdrop`（11）渐变品牌背景 + 悬浮认证卡片
- * - `reverse-split`（12）左极简表单 + 右概念展示
+ * 结构模式（对应《登录页产品结构设计》的容器关系）：
+ * - `split`（默认，01–04、12）左右分栏：比例、方向、认证区容器均可配置
+ * - `centered`（05/07）居中认证区
+ * - `brand-card`（06）品牌区为独立卡片 + 右侧裸表单
+ * - `overlap`（08）品牌卡片与登录卡片局部叠加
+ * - `backdrop`（11）整页渐变品牌背景 + 悬浮认证卡片
  * （10 扫码登录不在组件范围内）
  */
-export type LoginVariant =
-  | 'split'
-  | 'split-card'
-  | 'split-card-float'
-  | 'split-wide'
-  | 'centered-card'
-  | 'centered-plain'
-  | 'brand-card'
-  | 'overlap'
-  | 'backdrop'
-  | 'reverse-split';
+export type LoginVariant = 'split' | 'centered' | 'brand-card' | 'overlap' | 'backdrop';
 
 export interface LoginBrandInfo {
   /** Logo 图片地址 */
@@ -54,8 +39,22 @@ export interface LoginLink {
 }
 
 export interface LoginProps {
-  /** 布局类型，默认 split-card；取值见 LoginVariant（覆盖设计文档 01–09、11、12 十种结构） */
+  /** 结构模式，默认 split */
   layout?: LoginVariant;
+  /** 品牌区方向（仅 split），默认 left；right 即文档 12「左表单 + 右概念展示」 */
+  brandSide?: 'left' | 'right';
+  /** 品牌区分栏占比 0–1（仅 split），默认 0.5；0.6 即文档 04 的品牌大区 */
+  brandRatio?: number;
+  /**
+   * 认证区容器（split / centered 生效）：
+   * `plain` 裸表单（320–380px）；`card` 常规卡片（默认，400px）；
+   * `float` 大尺寸悬浮卡片（440px + 大留白 + 强阴影，即文档 03）
+   */
+  authVariant?: 'plain' | 'card' | 'float';
+  /** split 品牌面板是否带渐变背景，默认 true */
+  brandPanelBackground?: boolean;
+  /** 是否渲染默认背景装饰（圆斑/圆环/点阵/流线），默认 true */
+  decor?: boolean;
   /** 品牌区配置；居中布局下仅展示 logo+name（配置了才渲染） */
   brand?: LoginBrandInfo;
   /** 认证区标题 */
@@ -156,12 +155,17 @@ function BgDecor({ className }: { className?: string }) {
 /**
  * Login 登录业务组件（business 目录）：
  * 品牌区 + 认证区 + 辅助入口 + 页脚的整页组合，内部复用 Form/Input/Button。
+ * 结构模式（layout）与修饰配置（方向/比例/卡片样式/背景/装饰）正交组合；
  * 样式全部走语义令牌（深浅色/换肤自适应）；文案缺省走 i18n（pactor.login.*），
- * 同名 props 优先。组件不内置登录请求。默认带渐变背景与品牌插画，
- * 可经 brand.illustration / className 覆盖。
+ * 同名 props 优先。组件不内置登录请求。
  */
 export function Login({
-  layout = 'split-card',
+  layout = 'split',
+  brandSide = 'left',
+  brandRatio = 0.5,
+  authVariant = 'card',
+  brandPanelBackground = true,
+  decor = true,
   brand,
   title,
   subtitle,
@@ -266,7 +270,7 @@ export function Login({
     </>
   );
 
-  /** 认证区容器：plain 裸表单（320–380px）；card 常规卡片；float 大尺寸悬浮卡片（03） */
+  /** 认证区容器：plain 裸表单（320–380px）；card 常规卡片（400px）；float 大尺寸悬浮卡片（03） */
   const authBox = (variant: 'plain' | 'card' | 'float') => {
     if (variant === 'plain') {
       return <div className="w-full max-w-[360px]">{authContent}</div>;
@@ -283,16 +287,16 @@ export function Login({
     <footer className="p-4 text-center text-xs text-muted-foreground">{footer}</footer>
   ) : null;
 
-  /** 整幅品牌面板（分栏布局左/右侧，窄屏隐藏，由窄屏品牌行替代）；含背景装饰 */
+  /** 整幅品牌面板（分栏布局左/右侧，窄屏隐藏，由窄屏品牌行替代）；背景与装饰可配 */
   const brandPanel = (extraClass?: string, withIdentity = true) => (
     <div
       className={cn(
         'relative hidden flex-col overflow-hidden p-10 md:flex',
-        BRAND_PANEL_BG,
+        brandPanelBackground && BRAND_PANEL_BG,
         extraClass,
       )}
     >
-      <BgDecor />
+      {decor ? <BgDecor /> : null}
       <div className="relative flex h-full flex-col justify-between">
         {withIdentity ? brandIdentity : null}
         {brandVisual}
@@ -301,17 +305,19 @@ export function Login({
     </div>
   );
 
-  /** 认证列：窄屏品牌行 + 居中认证区 + 页脚 */
-  const authColumn = (variant: 'plain' | 'card' | 'float') => (
+  /** 认证列：窄屏品牌行 + 居中认证区 + 页脚；identityAlways 时品牌行全尺寸展示（反向分栏） */
+  const authColumn = (variant: 'plain' | 'card' | 'float', identityAlways = false) => (
     <div className="flex min-h-svh flex-col bg-linear-to-b from-primary/5 via-background to-background dark:from-primary/10">
-      {brandIdentity ? <div className="p-6 md:hidden">{brandIdentity}</div> : null}
+      {brandIdentity ? (
+        <div className={cn('p-6', !identityAlways && 'md:hidden')}>{brandIdentity}</div>
+      ) : null}
       <div className="flex flex-1 items-center justify-center p-6">{authBox(variant)}</div>
       {footerBar}
     </div>
   );
 
-  // ── 居中布局（05 / 07）：默认页面渐变背景 + 背景装饰，品牌区仅 logo+name 紧凑标识 ──
-  if (layout === 'centered-card' || layout === 'centered-plain') {
+  // ── centered（05 / 07）：默认页面渐变背景 + 背景装饰，品牌区仅 logo+name 紧凑标识 ──
+  if (layout === 'centered') {
     return (
       <div
         data-slot="login"
@@ -322,10 +328,10 @@ export function Login({
         )}
         style={style}
       >
-        <BgDecor />
+        {decor ? <BgDecor /> : null}
         <div className="relative flex flex-1 flex-col items-center justify-center gap-6 p-6">
           {brandIdentity}
-          {authBox(layout === 'centered-card' ? 'card' : 'plain')}
+          {authBox(authVariant)}
         </div>
         {footerBar}
       </div>
@@ -344,7 +350,7 @@ export function Login({
         )}
         style={style}
       >
-        <BgDecor />
+        {decor ? <BgDecor /> : null}
         <div className="relative flex flex-1 flex-col items-center gap-6 md:flex-row md:gap-10">
           <Card className={cn('w-full md:w-[45%]', BRAND_PANEL_BG)}>
             <div className="flex flex-col gap-6">
@@ -359,7 +365,7 @@ export function Login({
     );
   }
 
-  // ── 08 品牌卡片 + 登录卡片叠加：双卡局部相压，窄屏取消重叠上下排列 ──
+  // ── 08 品牌卡片 + 登录卡片叠加：登录卡垂直居中于品牌卡（上下露出一致），窄屏取消重叠 ──
   if (layout === 'overlap') {
     return (
       <div
@@ -371,7 +377,7 @@ export function Login({
         )}
         style={style}
       >
-        <BgDecor />
+        {decor ? <BgDecor /> : null}
         <div className="relative flex flex-1 flex-col items-center justify-center gap-6 md:flex-row md:items-center md:gap-0">
           <Card className={cn('w-full md:w-[52%]', BRAND_PANEL_BG)}>
             <div className="flex flex-col gap-6">
@@ -379,7 +385,6 @@ export function Login({
               {brandVisual}
             </div>
           </Card>
-          {/* 垂直居中于品牌卡：上下露出高度一致；-ml-24 保持局部重叠 */}
           <div className="z-10 w-full max-w-[400px] md:-ml-24">
             <Card className="p-2 shadow-xl md:p-4">{authContent}</Card>
           </div>
@@ -401,7 +406,7 @@ export function Login({
         )}
         style={style}
       >
-        <BgDecor />
+        {decor ? <BgDecor /> : null}
         <div className="relative hidden flex-col justify-between p-10 md:flex">
           {brandIdentity}
           {brandVisual}
@@ -418,46 +423,34 @@ export function Login({
     );
   }
 
-  // ── 12 左极简表单 + 右概念展示：认证区在阅读起点，右侧承担品牌视觉 ──
-  if (layout === 'reverse-split') {
-    return (
-      <div
-        data-slot="login"
-        data-layout={layout}
-        className={cn('grid min-h-svh w-full bg-background md:grid-cols-2', className)}
-        style={style}
-      >
-        <div className="flex min-h-svh flex-col">
-          {brandIdentity ? <div className="p-6">{brandIdentity}</div> : null}
-          <div className="flex flex-1 items-center justify-center p-6">{authBox('plain')}</div>
-          {footerBar}
-        </div>
-        {brandPanel('order-last', false)}
-      </div>
-    );
-  }
-
-  // ── 分栏布局（01 / 02·09 / 03 / 04）──
-  const splitConfig: Record<
-    string,
-    { grid: string; auth: 'plain' | 'card' | 'float' }
-  > = {
-    split: { grid: 'md:grid-cols-2', auth: 'plain' },
-    'split-card': { grid: 'md:grid-cols-2', auth: 'card' },
-    'split-card-float': { grid: 'md:grid-cols-2', auth: 'float' },
-    'split-wide': { grid: 'md:grid-cols-[3fr_2fr]', auth: 'plain' },
-  };
-  const config = splitConfig[layout] ?? splitConfig['split-card'];
+  // ── split（01–04、12）：方向 / 比例 / 认证区容器 / 面板背景均可配 ──
+  const ratio = Math.min(Math.max(brandRatio, 0.2), 0.8);
+  const rootStyle = {
+    '--login-grid': `minmax(0, ${ratio}fr) minmax(0, ${1 - ratio}fr)`,
+    ...style,
+  } as CSSProperties;
 
   return (
     <div
       data-slot="login"
       data-layout={layout}
-      className={cn('grid min-h-svh w-full bg-background', config.grid, className)}
-      style={style}
+      className={cn(
+        'grid min-h-svh w-full bg-background md:[grid-template-columns:var(--login-grid)]',
+        className,
+      )}
+      style={rootStyle}
     >
-      {brandPanel()}
-      {authColumn(config.auth)}
+      {brandSide === 'left' ? (
+        <>
+          {brandPanel()}
+          {authColumn(authVariant)}
+        </>
+      ) : (
+        <>
+          {authColumn(authVariant, true)}
+          {brandPanel('order-last', false)}
+        </>
+      )}
     </div>
   );
 }
