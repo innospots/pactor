@@ -3391,11 +3391,11 @@
     .md\:w-\[52\%\] {
       width: 52%;
     }
+    .md\:\[grid-template-columns\:var\(--login-grid\)\] {
+      grid-template-columns: var(--login-grid);
+    }
     .md\:grid-cols-2 {
       grid-template-columns: repeat(2, minmax(0, 1fr));
-    }
-    .md\:grid-cols-\[3fr_2fr\] {
-      grid-template-columns: 3fr 2fr;
     }
     .md\:flex-row {
       flex-direction: row;
