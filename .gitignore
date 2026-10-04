@@ -8,3 +8,4 @@ coverage/
 .dev.vars
 .wrangler
 /.idea/
+.cursor

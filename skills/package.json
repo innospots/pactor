@@ -1,6 +1,6 @@
 {
   "name": "@pactor-app/skills",
-  "version": "1.24.0",
+  "version": "1.25.0",
   "description": "Agent skills for rapidly building pactor Server-Driven UI applications",
   "keywords": [
     "pactor",
@@ -14,12 +14,21 @@
   "repository": {
     "type": "git",
     "url": "git+https://github.com/426-330/pactor.git",
-    "directory": "packages/skills"
+    "directory": "skills"
   },
-  "homepage": "https://github.com/426-330/pactor/tree/main/packages/skills",
+  "homepage": "https://github.com/426-330/pactor/tree/main/skills",
   "bugs": "https://github.com/426-330/pactor/issues",
   "type": "module",
-  "scripts": {},
+  "files": [
+    "README.md",
+    "pactor-dsl",
+    "pactor-project",
+    "pactor-prd",
+    "scripts"
+  ],
+  "scripts": {
+    "validate": "node scripts/validate-skills.mjs"
+  },
   "publishConfig": {
     "access": "public"
   }

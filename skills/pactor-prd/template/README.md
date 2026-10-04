@@ -1,4 +1,4 @@
-# prd-to-app 模板工程
+# pactor-prd 模板工程
 
 可运行的参考实现：Next.js + pactor，页面全部 YAML DSL 描述（`src/server/yaml/`），数据一律 http 数据源 + mock 路由（`app/api/data/[...path]`）。
 
