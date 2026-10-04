@@ -2,6 +2,7 @@ packages:
   - 'packages/*'
   - 'examples/*'
   - 'tools/*'
+  - 'skills'
   - 'docs'
   - 'doc'
 
@@ -12,3 +13,9 @@ onlyBuiltDependencies:
 ignoredBuiltDependencies:
   - sharp
   - unrs-resolver
+
+allowBuilds:
+  '@parcel/watcher': set this to true or false
+  esbuild: set this to true or false
+  unrs-resolver: set this to true or false
+  workerd: set this to true or false

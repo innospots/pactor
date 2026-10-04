@@ -1,18 +1,18 @@
 ---
-name: pactor
+name: pactor-dsl
 description: |
-  Use when working with Pactor — any @pactor-app/* package or the pactor-app meta package. Especially when writing, generating, editing, or debugging Pactor DSL files (*.page.yaml: pages, state, dataSources, components, events, actions, expressions); also when bootstrapping a Pactor app (createPactorApplication, StaticDslLoader), registering custom components/actions/services, building AI chat pages (Chat, ChatShell), configuring themes/layouts/routing/resources/permissions, or using @pactor-app/vite-plugin / @pactor-app/cli (pactor validate).
-version: 1.9.0
+  Use for Pactor DSL and runtime wiring inside an existing app (skill id pactor-dsl). Triggers: write/edit *.page.yaml, add N pages with module folders and sitemap/menus, state, dataSources, events, actions, expressions, custom components/actions/services, themes, permissions, Chat/ChatShell, vite-plugin, pactor validate. NOT for empty-repo scaffold (use pactor-project) or full PRD-to-repo generation (use pactor-prd).
+version: 2.0.0
 ---
 
 # pactor-app
 
 ## When to activate
 
-Activate this skill when the user works with **Pactor** — any `@pactor-app/*` package or the `pactor-app` meta package:
+Activate when the user works with **Pactor DSL or runtime APIs** in a project that already exists:
 
-- Building or extending a Pactor application
-- Using `createPactorApplication`, `@pactor-app/app`, or `StaticDslLoader`
+- Adding or changing **one or many** YAML pages and their **directory + sitemap/menu** relationships
+- Using `createPactorApplication`, `@pactor-app/app`, or `StaticDslLoader` **inside an existing codebase** (new repo → **`pactor-project`** first)
 - Writing YAML/JSON DSL pages, components, events, or actions
 - Creating or registering custom components / actions / services
 - Building AI chat pages (`Chat`, `ChatShell`, `ChatServicesProvider`)
@@ -25,7 +25,7 @@ Activate this skill when the user works with **Pactor** — any `@pactor-app/*` 
 ## What you can do with this skill
 
 - Explain Pactor architecture, package boundaries, and dependency rules
-- Guide a user from zero to a running Server-Driven UI app
+- **Batch-create pages** from a page inventory: file paths (`yaml/<module>/<id>.yaml` vs `yaml/pages/*.page.yaml`), `sitemap.yaml` `pages`/`menus`, or `StaticDslLoader.pages` — see `references/page-catalog-and-layout.md`
 - Register custom components, actions, services, and capabilities
 - Design data flow, expressions, events, and action orchestration
 - Configure themes/skins, layouts, routing, resources, and permissions
@@ -54,7 +54,7 @@ Activate this skill when the user works with **Pactor** — any `@pactor-app/*` 
 | `packages/cli` | `@pactor-app/cli` | DSL validation, inspection, scaffolding |
 | `packages/app` | `@pactor-app/app` | One-stop composition (`createPactorApplication`) |
 | `packages/pactor` | `pactor-app` | Meta package — depends on all modules, re-exports `@pactor-app/app` |
-| `packages/skills` | `@pactor-app/skills` | Agent skills collection (this skill lives at `pactor/`) |
+| `skills/` | `@pactor-app/skills` | Agent skills collection (this skill lives at `skills/pactor-dsl/`) |
 
 ## Dependency rules
 
@@ -143,14 +143,18 @@ Notable behaviors:
 
 Component contracts and per-component props: see the docs site (`docs/src/content/docs/components/`).
 
-## Workflow: authoring DSL pages
+## Workflow: add or edit pages (single or many)
 
-When the user asks to build / generate / edit a Pactor DSL file (`*.page.yaml`):
+When the user asks for **N pages** or a **module tree**:
 
-1. Start from the page skeleton below — never invent the top-level shape.
-2. Declare `state` and `dataSources` first, then compose the `body` tree from registered component `type`s only.
-3. Wire interactions via `events` → standard actions; expressions `${...}` read the scope chain.
-4. Validate before delivering: `npx pactor validate <file>` (from `@pactor-app/cli`; inside this monorepo: `node packages/cli/dist/cli.js validate <file>`). Note: the validator checks schema shape only, not component props semantics — use the reference for correct props.
+1. Read `references/page-catalog-and-layout.md` — pick layout **A** (flat `pages/*.page.yaml`) or **B** (`<module>/<id>.yaml`) to match the project; output a **page inventory table** (id, path, file, menu, hidden).
+2. Create **one YAML file per row**; register all ids in `sitemap.yaml` (SitemapApp) or `StaticDslLoader` + `bootstrap.menus`.
+3. Per file: use the skeleton below — never invent the top-level shape; declare `state` / `dataSources`, then `body`; wire `events` → actions.
+4. Validate: `npx pactor validate '<glob>'` (`@pactor-app/cli`). Monorepo: `node packages/cli/dist/cli.js validate <file>`. Schema only — props见 `references/dsl-authoring.md`.
+
+When editing a **single** existing page, skip step 1 unless menus/paths change.
+
+## Workflow: authoring DSL pages (single-file skeleton)
 
 ```yaml
 dsl: '1.0'                      # required, DSL spec version
@@ -181,7 +185,7 @@ Facts that are NOT guessable and must be followed:
 - `navigate` takes `to`; `message` takes `text` + `messageType` (a `type` key in action `params` disables expression evaluation).
 - Query linkage = `onSubmit: [setState, reload]`; the data source's `params` referencing `${state.x}` pick up new values on reload.
 
-**Full DSL grammar, action catalog, expression/scopes tables, and copy-paste recipes: read `references/dsl-authoring.md` bundled next to this SKILL.md — read it before writing any non-trivial page.** In the monorepo, per-component props live in `docs/src/content/docs/components/` and the exhaustive DSL reference in `docs/src/content/docs/reference/dsl.md`.
+**Full DSL grammar, action catalog, expression/scopes tables, and copy-paste recipes: read `references/dsl-authoring.md`.** Page count, folders, and sitemap: **`references/page-catalog-and-layout.md`**. Component props: bundled dsl-authoring + [Pactor docs](https://github.com/426-330/pactor/tree/main/docs/src/content/docs/components) when online.
 
 ## Workflow: custom component
 
@@ -355,19 +359,15 @@ pnpm pactor create my-app
 - **Do not** put a `type` key in action `params` (see the events workflow pitfall).
 - **Do not** expect DslNode slots (sidebar / toolbar / inspector / …) to render outside a page runtime; in pure React hosts pass ReactNode instead.
 
-## References
+## References (bundled — works from npm install)
 
-- **DSL authoring reference (bundled)**: `references/dsl-authoring.md` — full page grammar, dataSources, expressions/scopes, action catalog, recipes, common mistakes. Read it before writing DSL.
-- Framework design specification: `docs/src/content/docs/framework-design.md`
-- Quick start: `docs/src/content/docs/guides/getting-started.md`
-- @pactor-app/app docs: `docs/src/content/docs/packages/app.md`
-- @pactor-app/chat docs: `docs/src/content/docs/packages/chat.md`
-- Component reference: `docs/src/content/docs/components/`
-- Example projects:
-  - `examples/vite-starter` — minimal starter
-  - `examples/admin` — shadcn admin dashboard with skin settings
-  - `examples/chat` — AI chat workspace (pactor-app assembly)
+- **Page inventory & directories**: `references/page-catalog-and-layout.md`
+- **DSL grammar & recipes**: `references/dsl-authoring.md`
+- **New repository**: sibling `pactor-project` (`../pactor-project/SKILL.md`)
+- **PRD full-site generation**: sibling `pactor-prd` (`../pactor-prd/SKILL.md`)
+
+Online (optional): [getting started](https://github.com/426-330/pactor/blob/main/docs/src/content/docs/guides/getting-started.md), [DSL reference](https://github.com/426-330/pactor/blob/main/docs/src/content/docs/reference/dsl.md), [framework design](https://github.com/426-330/pactor/blob/main/docs/src/content/docs/framework-design.md).
 
 ## How to use this skill
 
-This skill is maintained as `packages/skills/pactor/SKILL.md` together with `references/dsl-authoring.md`. AI agents can copy or link the whole `packages/skills/pactor` directory into their skill directory to provide contextual guidance when reading or editing Pactor projects.
+This skill is maintained as `skills/pactor-dsl/SKILL.md` together with `references/dsl-authoring.md`. AI agents can copy or link the whole `skills/pactor-dsl` directory into their skill directory to provide contextual guidance when reading or editing Pactor projects.

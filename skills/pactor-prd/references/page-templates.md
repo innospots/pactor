@@ -1,6 +1,6 @@
 # 页面 YAML 模板
 
-三类常用页面模板。占位符：`{{kebab-id}}` 页面 id、`{{页面标题}}`、`{{模块名}}`、`{{resource}}` 数据接口名（单段，见 mock-data-routes.md）。DSL 语法细节以 pactor skill 与 packages/ui 当前导出为准。
+三类常用页面模板。占位符：`{{kebab-id}}` 页面 id、`{{页面标题}}`、`{{模块名}}`、`{{resource}}` 数据接口名（单段，见 mock-data-routes.md）。DSL 语法细节以 `pactor-dsl` skill 与 packages/ui 当前导出为准。
 
 ## 列表页（筛选 + 表格/卡片 + 操作列）
 
