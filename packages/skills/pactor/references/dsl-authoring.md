@@ -165,7 +165,7 @@ Global scope keys:
 | `actions` | results of named actions (by `id`) | `${actions.editResult.success}` |
 | `locale` / `t` | current locale / translate fn | `${t('menu.home')}` |
 
-Local scope keys (only where produced): `event` (event payload), `row` / `rowIndex` (Table `cell` templates), `parent` (parent page snapshot inside overlays).
+Local scope keys (only where produced): `event` (event payload), `row` / `rowIndex` (Table `cell` templates and `For` item templates), `parent` (parent page snapshot inside overlays).
 
 ## 6. Events and actions
 

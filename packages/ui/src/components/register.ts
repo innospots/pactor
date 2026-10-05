@@ -43,6 +43,7 @@ import { Flex } from './components/Flex/index.js';
 import { Footer } from './components/Footer/index.js';
 import { Gallery } from './components/Gallery/index.js';
 import { Form } from './components/Form/index.js';
+import { For } from './components/For/index.js';
 import { Grid } from './components/Grid/index.js';
 import { Header } from './components/Header/index.js';
 import { HoverCard } from './components/HoverCard/index.js';
@@ -164,6 +165,8 @@ import { Login } from './business/Login/index.js';
 export const builtinComponents = {
   Page,
   Grid,
+  // 循环渲染：行模板（原始 DSL children）由 For 逐项渲染并注入 { row, rowIndex } 作用域
+  For: { component: For, withScope: true },
   Flex,
   Card,
   Button,
