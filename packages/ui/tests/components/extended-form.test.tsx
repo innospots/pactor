@@ -390,6 +390,26 @@ describe('NumberInput', () => {
     await expectEventState(context, 'qty', 5);
   });
 
+  it('小数步进按 step 推导精度，不出现浮点尾差', async () => {
+    const { container, context } = renderDsl(
+      {
+        type: 'NumberInput',
+        props: { step: 0.1, value: '${state.qty}' },
+        events: {
+          onChange: { action: 'setState', params: { qty: '${event}' } },
+        },
+      },
+      { state: { qty: 0.1 } },
+    );
+
+    fireEvent.click(screen.getByRole('button', { name: '增加' }));
+    await expectEventState(context, 'qty', 0.2);
+    fireEvent.click(screen.getByRole('button', { name: '增加' }));
+    await expectEventState(context, 'qty', 0.3);
+
+    expect((container.querySelector('input') as HTMLInputElement).value).toBe('0.3');
+  });
+
   it('通用 props 作用于根节点（独立渲染）', () => {
     const { container } = renderDsl({
       type: 'NumberInput',
