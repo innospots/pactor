@@ -2,17 +2,17 @@
 
 ## Purpose
 
-PRD/线框图驱动的 YAML 页面应用生成技能（packages/skills/prd-to-app）：输入解析、项目脚手架、按模块分目录的 YAML 页面生成（dataSources 一律 type: http）、mock 服务、样式/功能与原产品一致、浏览器逐页验收。
+PRD/线框图驱动的 YAML 页面应用生成技能（skills/pactor-prd，skill id `pactor-prd`）：输入解析、项目脚手架、按模块分目录的 YAML 页面生成（dataSources 一律 type: http）、mock 服务、样式/功能与原产品一致、浏览器逐页验收。
 
 ## Requirements
 
 ### Requirement: Skill 目录与入口
 
-仓库 SHALL 在 `packages/skills/prd-to-app/` 提供符合 Agent Skill 规范的 `SKILL.md`（含 frontmatter `name` / `description`，description 明确触发场景），并附 `references/` 目录承载细节材料，SKILL.md 正文只保留流程主干与引用索引。
+仓库 SHALL 在 `skills/pactor-prd/` 提供符合 Agent Skill 规范的 `SKILL.md`（含 frontmatter `name` / `description`，description 明确触发场景），并附 `references/` 目录承载细节材料，SKILL.md 正文只保留流程主干与引用索引。
 
 #### Scenario: 技能被发现与加载
 
-- **WHEN** Agent 的技能目录（如 `~/.kimi-code/skills/` 或项目级 skills 目录）包含 `packages/skills/prd-to-app/`
+- **WHEN** Agent 的技能目录（如 `~/.kimi-code/skills/` 或项目级 skills 目录）包含 `skills/pactor-prd/`
 - **THEN** Agent 能识别 skill 名称与触发条件，加载 SKILL.md 后获得完整执行流程与 references 索引
 
 #### Scenario: 触发场景描述准确

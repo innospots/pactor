@@ -72,7 +72,7 @@ layouts:
 
 - 页面按 PRD 模块树分目录：`yaml/<模块>/<id>.yaml`（如 `yaml/user/user-list.yaml`）；模块目录名用 kebab-case 英文域，按 PRD 模块树划分（如 user / order / report）
 - 页面 id kebab-case，= 文件名（不含 `.yaml`）；`pages:` 注册、`menus:` 引用、文件名三者一致
-- 模板自带的 `yaml/pages/*.page.yaml` 平铺写法仅适合页面极少的 demo；模块 ≥2 或页面 >5 时一律按模块分目录（模板目录可整体替换）
+- 模板自带的 `yaml/pages/*.page.yaml` 平铺写法仅适合页面极少的 demo；模块 ≥2 或页面 >5 时一律按模块分目录（模板目录可整体替换）。批量建文件与清单对齐见 **`page-inventory-and-files.md`**；与官方脚手架平铺模式对比见 **`pactor-dsl/references/page-catalog-and-layout.md`**
 - 列表/详情/编辑成组路径：`/projects`、`/projects/:code`、`/projects/:code/edit`、`/projects/new`
 - 详情/编辑页不进菜单（`hidden: true`），用 `activeMenu` 保持列表菜单高亮
 - 菜单图标仅一级菜单配置（目录 group 与「首页」这类独立页面项都要配），用 pactor Icon 白名单 kebab-case 名；二级及以下菜单项一律不配图标
