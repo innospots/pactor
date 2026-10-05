@@ -13,6 +13,8 @@ export interface FieldProps {
   label?: string;
   /** 必填标记（label 前渲染红色 `*`；仅视觉标记，校验仍由 Form rules 承担） */
   required?: boolean;
+  /** label 行右侧的提示文字（如「创建后不可修改」），右对齐小字弱化展示 */
+  labelHint?: string;
   /** 辅助说明文案 */
   description?: string;
   /** 错误文案（声明式展示，如校验失败信息） */
@@ -26,6 +28,9 @@ export interface FieldProps {
   /** label 节点 class / style（必填星号随 label 节点） */
   labelClassName?: string;
   labelStyle?: CSSProperties;
+  /** label 行右侧提示节点 class / style */
+  labelHintClassName?: string;
+  labelHintStyle?: CSSProperties;
   /** 控件容器（label 下方）class / style；缺省有 label 时容器自带 mt-2 */
   controlClassName?: string;
   controlStyle?: CSSProperties;
@@ -39,14 +44,16 @@ export interface FieldProps {
 
 /**
  * Field 适配器（shadcn kit）：通用表单项容器（Base UI Field 封装，
- * 上下结构：label 在上、控件容器在下）；label / description / error 为
- * 框架级 props，error 声明式强制展示；`required` 在 label 前渲染必填星号
- * （对齐 antd Form.Item required 语义）；label 与控件容器之间默认 mt-2，
- * 四个节点（label / 控件容器 / description / error）均可独立加样式。
+ * 上下结构：label 在上、控件容器在下）；label / labelHint / description /
+ * error 为框架级 props，error 声明式强制展示；`required` 在 label 前渲染
+ * 必填星号（对齐 antd Form.Item required 语义）；`labelHint` 与 label 同行
+ * 右对齐（弱化为小字）；label 与控件容器之间默认 mt-2，五个节点
+ * （label / labelHint / 控件容器 / description / error）均可独立加样式。
  */
 export function Field({
   label,
   required,
+  labelHint,
   description,
   error,
   children,
@@ -54,6 +61,8 @@ export function Field({
   style,
   labelClassName,
   labelStyle,
+  labelHintClassName,
+  labelHintStyle,
   controlClassName,
   controlStyle,
   descriptionClassName,
@@ -63,19 +72,37 @@ export function Field({
 }: FieldProps) {
   return (
     <ShadcnField className={className} style={style}>
-      {label ? (
-        <FieldLabel className={labelClassName} style={labelStyle}>
-          {required ? (
-            <span aria-hidden className="text-destructive">
-              *{' '}
+      {label || labelHint ? (
+        <div className="flex w-full items-center justify-between gap-2">
+          {label ? (
+            <FieldLabel className={labelClassName} style={labelStyle}>
+              {required ? (
+                <span aria-hidden className="text-destructive">
+                  *{' '}
+                </span>
+              ) : null}
+              {label}
+            </FieldLabel>
+          ) : (
+            <span />
+          )}
+          {labelHint ? (
+            <span
+              data-slot="field-label-hint"
+              className={cn(
+                'shrink-0 text-xs leading-none text-muted-foreground',
+                labelHintClassName,
+              )}
+              style={labelHintStyle}
+            >
+              {labelHint}
             </span>
           ) : null}
-          {label}
-        </FieldLabel>
+        </div>
       ) : null}
       <div
         data-slot="field-control"
-        className={cn(label ? 'mt-2' : undefined, controlClassName)}
+        className={cn(label || labelHint ? 'mt-2' : undefined, controlClassName)}
         style={controlStyle}
       >
         {children}

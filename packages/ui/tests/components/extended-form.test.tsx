@@ -450,6 +450,33 @@ describe('Field', () => {
     expect(asterisk?.className).toContain('text-destructive');
   });
 
+  it('labelHint 在 label 行右侧渲染提示文字', () => {
+    const { container } = renderDsl({
+      type: 'Field',
+      props: { label: 'Provider Code', required: true, labelHint: '创建后不可修改' },
+      children: [{ type: 'Input', props: { name: 'code' } }],
+    });
+
+    const label = container.querySelector('[data-slot=field-label]');
+    expect(label?.textContent).toBe('* Provider Code');
+    const hint = container.querySelector('[data-slot=field-label-hint]');
+    expect(hint?.textContent).toBe('创建后不可修改');
+    // 同一行 flex 两端排布
+    expect(hint?.parentElement?.className).toContain('justify-between');
+  });
+
+  it('仅 labelHint（无 label）也渲染提示行', () => {
+    const { container } = renderDsl({
+      type: 'Field',
+      props: { labelHint: '留空表示不修改' },
+      children: [{ type: 'Input', props: { name: 'apiKey' } }],
+    });
+
+    expect(
+      container.querySelector('[data-slot=field-label-hint]')?.textContent,
+    ).toBe('留空表示不修改');
+  });
+
   it('Input / Select 的 controlClassName 挂控件本体（Form 内不挂 form-item）', () => {
     const { container } = renderDsl({
       type: 'Form',

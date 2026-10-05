@@ -239,9 +239,11 @@ AI 对话输入框的通用结构构件：外层圆角容器（focus-within 高�
 | --- | --- | --- | --- |
 | `label` | string | — | 表单项标签 |
 | `required` | boolean | — | 必填标记（label 前渲染红色 `*`；仅视觉标记，校验仍由 Form rules 承担） |
+| `labelHint` | string | — | label 行右侧提示文字（右对齐小字弱化展示，如「创建后不可修改」） |
 | `description` | string | — | 辅助说明文案 |
 | `error` | string | — | 错误文案（声明式展示，如校验失败信息） |
 | `labelClassName` / `labelStyle` | string / CSSProperties | — | label 节点样式（必填星号随 label 节点） |
+| `labelHintClassName` / `labelHintStyle` | string / CSSProperties | — | label 行右侧提示节点样式 |
 | `controlClassName` / `controlStyle` | string / CSSProperties | — | 控件容器样式（label 下方，即 children 包裹节点） |
 | `descriptionClassName` / `descriptionStyle` | string / CSSProperties | — | 辅助说明节点样式 |
 | `errorClassName` / `errorStyle` | string / CSSProperties | — | 错误节点样式 |
