@@ -1,74 +1,236 @@
 # Pactor
 
-Dynamic Application Runtime — 基于 YAML/JSON DSL 的企业级 Server-Driven UI 与 AI-Native 前端运行时框架。
+**Dynamic Application Runtime** — 企业级 **Server-Driven UI（服务端驱动界面）** 与 **AI-Native** 前端运行时。
 
-架构设计见 [框架设计规范](docs/src/content/docs/framework-design.md)，也可通过文档站浏览（`pnpm docs:dev`）。
+用 YAML/JSON 写页面，浏览器里一套公共 Runtime 负责渲染、数据、权限和交互；**换页面往往不用重新打包前端**，适合后台、运营台、可配置工作台和 AI 对话类产品。
 
-## 命名约定
+- 环境：Node.js ≥ 18，pnpm ≥ 9（npm / yarn 亦可）
+- 详细文档：克隆后执行 `pnpm docs:dev` → http://localhost:4334，或阅读 [框架设计](docs/src/content/docs/framework-design.md)
 
-框架名为 **pactor**，npm 上使用 `@pactor-app/*` scope 发布各模块（如 `@pactor-app/core`、`@pactor-app/schema`、`@pactor-app/expression`），另有聚合安装包 `pactor-app`（meta package，依赖全部模块、入口转发 `@pactor-app/app`）。设计文档中的 `@company/dsl-*` 为文档占位命名。目录名保持简短（`packages/core`），与包名分离。
+---
 
-## 工程结构
+## 这是什么？
+
+传统做法里，每个列表页、表单页都要写 React 组件并打进同一个 bundle。Pactor 把**页面结构**抽成 DSL（`*.page.yaml`），把**能力**留在前端注册（组件库、接口、动作），两者通过协议对接：
 
 ```text
-packages/
-  core/        @pactor-app/core        DSL 核心协议类型 + 通用 Registry（零依赖）
-  schema/      @pactor-app/schema      JSON Schema + Ajv 校验器
-  expression/  @pactor-app/expression  受控表达式引擎（无 eval）
-  runtime/     @pactor-app/runtime     Runtime 引擎 + React Renderer
-  permission/  @pactor-app/permission  权限 Store + 四层守卫
-  resource/    @pactor-app/resource    DSL 资源加载 + 缓存 + 版本控制
-  router/      @pactor-app/router      菜单注册 + 动态路由 + 导航桥接
-  ui/          @pactor-app/ui          内置默认 UI 实现（shadcn 风格：vendored shadcn/ui + 契约/交互核心/布局三层 + 预建样式表）
-  app/         @pactor-app/app         一站式集成（createPactorApplication）
-  pactor/      pactor-app          聚合安装包（meta）：依赖全部模块，入口转发 @pactor-app/app
-examples/
-  vite-starter/ example-vite-starter 最小上手示例（vite-plugin 工作流，端口 5499）
-  admin/       example-admin      管理后台示例（StaticDslLoader + 内存 mock，端口 5199）
-  chat/        example-chat       @pactor-app/chat 对话示例（mock AI 流式 transport，端口 5399）
-tools/
-  theme-studio/ theme-studio     皮肤工作室（可视化主题编辑 + 组件画廊预览 + 皮肤 CSS 下载，端口 5710，不发布）
-docs/          pactor-docs        Astro Starlight 文档站
+  你写的 YAML 页面          前端一次集成的 Runtime
+  (可来自 Git / 接口)  →    (React + 内置 UI + 路由 + 权限)
+         │                           │
+         └──── 表达式、事件、数据源 ────┘
 ```
 
-依赖方向严格单向：`core ← schema ← expression ← runtime ← {permission, resource, router, ui} ← app`。
+**你负责**：搭一次应用壳、注册业务组件/服务、提供菜单与页面 DSL（或 sitemap API）。  
+**框架负责**：解析 DSL、拉数、表达式、按钮事件、菜单路由、权限显隐、主题布局。
 
-## 常用命令
+DSL 里不能塞任意 JavaScript（无 `eval`），保证服务端下发的页面在安全、可校验的边界内运行。
+
+---
+
+## 适合做什么？
+
+| 场景 | 为什么用 Pactor |
+| --- | --- |
+| **管理后台 / 运营后台** | 列表、表单、详情多且相似；改字段、改按钮常只需改 YAML |
+| **多租户 / 多环境界面差异** | 同一套 Runtime，不同客户下发不同菜单与页面 |
+| **低代码、配置化工作台** | 页面当资源版本管理，与「发版改一个按钮」解耦 |
+| **AI 助手 / Copilot 界面** | 内置 Chat 工作区，消息里可嵌 Markdown + DSL 片段 |
+| **原型与 POC** | 脚手架 + mock API，先跑通交互再接真实后端 |
+
+不适合：强依赖复杂客户端状态机、大量自定义 Canvas/WebGL、完全离线单页游戏类应用（仍可用 React 逃生舱写个别页面）。
+
+---
+
+## 三分钟上手
+
+**推荐**：用官方脚手架生成可运行工程（含示例页面与 mock 接口）。
 
 ```bash
-pnpm install        # 安装依赖
-pnpm build          # 构建全部包（ESM + CJS + d.ts）与文档站
-pnpm test           # 运行全部测试（含根级跨包冒烟测试）
-pnpm typecheck      # 全部包 TypeScript 检查
-pnpm docs:dev       # 启动文档站（Astro Starlight，端口 4334）
-pnpm docs:build     # 构建文档站
+pnpm create pactor-app my-app -t next-app   # 全栈 Next.js，dev :9011
+cd my-app && pnpm install && pnpm dev
 ```
 
-## 启动示例
+浏览器打开 http://localhost:9011 ，演示登录 **`admin` / `pactor123`**（访客：`guest` / `guest123`）。
+
+改页面：编辑 `src/server/yaml/pages/*.page.yaml` 和 `sitemap.yaml` 里的菜单，保存后刷新即可看到效果（无需改 React 业务代码）。
+
+其他模板：
 
 ```bash
-pnpm --filter example-vite-starter dev   # 最小上手示例（vite-plugin 工作流），http://localhost:5499
-pnpm --filter example-admin dev          # 管理后台示例（含皮肤设置），http://localhost:5199
-pnpm --filter example-chat dev           # @pactor-app/chat 对话示例，http://localhost:5399
-pnpm --filter theme-studio dev           # 皮肤工作室（主题编辑 + 画廊预览 + 皮肤下载），http://localhost:5710
+pnpm create pactor-app my-app -t spa   # 纯前端 Vite，dev :9012（需另起 :9011 的 API，见模板 README）
 ```
 
-> 示例引用 workspace 包的 dist 产物：改包代码后需先 `pnpm build`，示例才能看到效果。
-> admin 示例演示账号：`admin` / `pactor123`。
+完整说明：[快速开始指南](docs/src/content/docs/guides/getting-started.md)。
 
-> 注意：Astro 内容集合不会热收录**新增**的文档文件（修改已有文件会热更新）。
-> 新增 `docs/src/content/docs/**` 页面后需重启 `pnpm docs:dev`，
-> 否则侧边栏会报 `The slug "..." does not exist`。
+---
 
-## 特性
+## 三种常见用法
 
-- **Server-Driven UI**：页面用 YAML/JSON DSL 描述，由浏览器 Runtime 动态渲染
-- **AI-Native**：支持 Markdown + DSL 的 AI Chat 交互
-- **国际化**：内置轻量 i18n 支持，DSL 可使用 `${t('key')}` 表达式
-- **权限控制**：页面/菜单/组件/动作四层守卫
-- **主题换肤**：CSS 变量令牌覆盖 + 内置暗色皮肤（`data-pactor-theme`）
+| 方式 | 一句话 | 何时选 |
+| --- | --- | --- |
+| **① 脚手架工程** | `pnpm create pactor-app`，sitemap 驱动导航与懒加载页面 | 新项目、要登录/菜单/多页后台 |
+| **② 嵌入现有 Vite** | `createPactorApplication` + `StaticDslLoader` + `*.page.yaml` | 单页或少量静态 DSL、原型 |
+| **③ 对接后端 API** | 只挂载 Runtime，`api.baseURL` 指向你的服务 | 生产：页面与菜单由后端下发 |
 
-## 环境要求
+### ② 嵌入 Vite（精简示例）
 
-- Node.js >= 18
-- pnpm >= 9
+```bash
+pnpm add @pactor-app/app @pactor-app/ui @pactor-app/resource react react-dom
+pnpm add -D @pactor-app/vite-plugin
+```
+
+```ts
+// vite.config.ts
+import react from '@vitejs/plugin-react';
+import pactor from '@pactor-app/vite-plugin';
+export default defineConfig({ plugins: [react(), pactor()] });
+```
+
+```tsx
+// main.tsx — 详见 examples/vite-starter
+import { createPactorApplication } from '@pactor-app/app';
+import { StaticDslLoader } from '@pactor-app/resource';
+import '@pactor-app/ui/styles.css';
+import homePage from './pages/home.page.yaml';
+
+createPactorApplication({
+  appId: 'my-app',
+  loader: new StaticDslLoader({
+    bootstrap: {
+      app: { name: 'My App' },
+      menus: [{ id: 'home', type: 'page', title: 'Home', path: '/', pageId: 'home' }],
+      layout: { type: 'blank' },
+    },
+    pages: { home: homePage },
+  }),
+}).mount('#root');
+```
+
+页面最小骨架：
+
+```yaml
+dsl: '1.0'
+page: { id: home, title: Home }
+body:
+  type: Page
+  props: { title: Hello }
+  children:
+    - type: Button
+      props: { text: 点我 }
+      events:
+        onClick:
+          - action: message
+            params: { text: 来自 DSL, messageType: success }
+```
+
+校验：`npx pactor validate 'src/**/*.page.yaml'` · 字段手册：[DSL 参考](docs/src/content/docs/reference/dsl.md)
+
+### ③ 对接服务端
+
+```tsx
+createPactorApplication({
+  appId: 'my-app',
+  api: { baseURL: '/api/runtime' },
+}).mount('#root');
+```
+
+后端需提供 `bootstrap`（应用、用户、权限、菜单、布局）与 `pages/{id}`（页面 DSL），协议见 [@pactor-app/resource](docs/src/content/docs/packages/resource.md)。全栈参考 next-app 模板中的 `SitemapApp`。
+
+安装聚合包亦可：`pnpm add pactor-app`（meta 包，转发 `@pactor-app/app`）。
+
+---
+
+## 核心能力
+
+- **Server-Driven UI** — 页面 YAML/JSON 描述，Runtime 动态渲染
+- **数据与联动** — `state`、`dataSources`（static / service / http）、`${表达式}`、事件 → 标准动作（`setState`、`reload`、`navigate` 等）
+- **权限** — 页面 / 菜单 / 组件 / 动作四层守卫（前端控 UI，接口仍需后端鉴权）
+- **主题** — CSS 变量换肤，暗色 `data-pactor-theme="dark"`
+- **国际化** — DSL 内 `${t('key')}`
+- **AI** — `@pactor-app/chat`：流式对话、`Chat` / `ChatShell` DSL 组件
+
+---
+
+## 文档与学习路径
+
+| 我想… | 去看 |
+| --- | --- |
+| 从 0 搭工程 | [guides/getting-started.md](docs/src/content/docs/guides/getting-started.md) |
+| 已有项目接入 | [guides/manual-setup.md](docs/src/content/docs/guides/manual-setup.md) |
+| 写页面、查组件 props | [reference/dsl.md](docs/src/content/docs/reference/dsl.md) · [components/](docs/src/content/docs/components/) |
+| 数据从哪来、怎么刷新 | [guides/data-flow.md](docs/src/content/docs/guides/data-flow.md) |
+| 表单与按钮联动 | [guides/events.md](docs/src/content/docs/guides/events.md) |
+| 自定义 React 组件 | [guides/custom-components.md](docs/src/content/docs/guides/custom-components.md) |
+| AI 对话页 | [packages/chat.md](docs/src/content/docs/packages/chat.md) |
+| Agent 写 DSL / 搭脚手架 / PRD 生成 | 仓库根目录 [`skills/`](skills/)（`pactor-dsl`、`pactor-project`、`pactor-prd`） |
+
+本地文档站：`pnpm docs:dev`（:4334）。新增 `docs/src/content/docs/**` 文件后需重启 dev，否则侧边栏 slug 报错。
+
+---
+
+## 在本仓库开发（贡献者）
+
+```bash
+git clone https://github.com/426-330/pactor.git && cd pactor
+pnpm install && pnpm build    # 示例依赖各包 dist
+pnpm test && pnpm typecheck
+```
+
+**跑示例**
+
+```bash
+pnpm --filter example-vite-starter dev   # :5499 最小 YAML 示例
+pnpm --filter example-admin dev          # :5199 后台 + 换肤（admin / pactor123）
+pnpm --filter example-chat dev           # :5399 AI 对话
+pnpm --filter theme-studio dev           # :5710 主题工作室
+```
+
+改 `packages/*` 源码后请先 `pnpm build`，示例才会用到新构建产物。
+
+### 仓库结构（简图）
+
+```text
+packages/     @pactor-app/* 运行时与工具（core → runtime → app / ui / chat …）
+skills/       @pactor-app/skills — Agent 技能（DSL / 脚手架 / PRD 生成）
+starters/     pnpm create pactor-app 的模板源码
+examples/     仓库内联调示例
+docs/         用户文档站（Starlight）
+doc/          UI 资产库（pnpm asset:dev → :4336）
+tools/        内部工具（如 theme-studio）
+```
+
+主要 npm 包：`@pactor-app/app`（入口 `createPactorApplication`）、`@pactor-app/ui`（内置组件 + `styles.css`）、`pactor-app`（meta 全量依赖）、`create-pactor-app`（脚手架）、`@pactor-app/cli`（`pactor validate`）。
+
+依赖方向：`core ← schema ← expression ← runtime ← {permission, resource, router, ui, …} ← app`。  
+目录名与包名分离；`@company/dsl-*` 仅文档占位。完整模块表见 [工程结构说明](docs/src/content/docs/framework-design.md) 或下文展开。
+
+<details>
+<summary>展开：packages 模块一览</summary>
+
+| 目录 | npm 包 | 说明 |
+| --- | --- | --- |
+| `core` | `@pactor-app/core` | DSL 协议、Registry 接口 |
+| `schema` | `@pactor-app/schema` | JSON Schema 校验 |
+| `expression` | `@pactor-app/expression` | 安全表达式引擎 |
+| `runtime` | `@pactor-app/runtime` | 页面 Runtime、React 渲染 |
+| `permission` | `@pactor-app/permission` | 权限 Store |
+| `resource` | `@pactor-app/resource` | DSL 加载与缓存 |
+| `router` | `@pactor-app/router` | 菜单与路由 |
+| `ui` | `@pactor-app/ui` | 默认 UI 组件库 |
+| `markdown` | `@pactor-app/markdown` | Markdown + DSL 片段 |
+| `chat` | `@pactor-app/chat` | AI 对话能力 |
+| `vite-plugin` | `@pactor-app/vite-plugin` | YAML 导入与 HMR |
+| `cli` | `@pactor-app/cli` | CLI |
+| `app` | `@pactor-app/app` | 应用装配 |
+| `pactor` | `pactor-app` | Meta 包 |
+| `create-app` | `create-pactor-app` | 脚手架 |
+
+</details>
+
+Agent 技能在仓库根目录 [`skills/`](skills/)（npm 包名仍为 `@pactor-app/skills`），不在 `packages/` 下。
+
+---
+
+## License
+
+MIT
