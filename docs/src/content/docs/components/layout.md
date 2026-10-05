@@ -144,6 +144,35 @@ flex 容器；直接子节点含 `Sider` 时横向、否则纵向（`component` 
 | `columns` | number（默认 1） | 列数 |
 | `gap` | number | 栏间距 |
 
+### For
+
+数据驱动的循环渲染：对 `items` 逐项渲染 children 模板（DSL 子树），行作用域注入 `${row}` / `${rowIndex}`（与 Table cell 模板一致）。以 withScope 注册。
+
+| prop | 类型 | 说明 |
+| --- | --- | --- |
+| `items` | unknown[] | 循环数据源（表达式解析后的数组，如 `${data.providers.items}`）；非数组不渲染 |
+| `keyField` | string | 行唯一键字段（React key）；缺省按下标 |
+| `columns` | number | 网格列数。设置后由 For 承担网格容器（结构与 Grid 一致：`data-slot="grid"` + 每行 `grid-item` 包装）——Grid 按 React children 逐个包装单元格，循环体作为其子节点会被整体当成一格，故网格列表必须用此模式而非嵌套 Grid |
+| `gap` | number | 网格栏间距（px）；缺省应用 `--grid-gap` 令牌 |
+| `before` | DslNode[] | 网格首格内容（DSL 子树），如列表页的「新建」静态卡 |
+
+```yaml
+- type: For
+  props:
+    items: ${data.providers.items}
+    keyField: code
+    columns: 3
+    gap: 16
+    before:
+      - type: Card
+        children: [{ type: Text, props: { text: 新建 } }]
+  children:
+    - type: Card
+      children:
+        - type: Text
+          props: { text: ${row.displayName} }
+```
+
 ### Flex
 
 | prop | 类型 | 说明 |

@@ -10,6 +10,8 @@ export { Page } from './components/Page/index.js';
 export type { PageProps } from './components/Page/index.js';
 export { Grid } from './components/Grid/index.js';
 export type { GridProps } from './components/Grid/index.js';
+export { For } from './components/For/index.js';
+export type { ForProps } from './components/For/index.js';
 export { Flex } from './components/Flex/index.js';
 export type { FlexProps } from './components/Flex/index.js';
 export { Card } from './components/Card/index.js';

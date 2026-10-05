@@ -2,7 +2,7 @@
 name: pactor
 description: |
   Use when working with Pactor — any @pactor-app/* package or the pactor-app meta package. Especially when writing, generating, editing, or debugging Pactor DSL files (*.page.yaml: pages, state, dataSources, components, events, actions, expressions); also when bootstrapping a Pactor app (createPactorApplication, StaticDslLoader), registering custom components/actions/services, building AI chat pages (Chat, ChatShell), configuring themes/layouts/routing/resources/permissions, or using @pactor-app/vite-plugin / @pactor-app/cli (pactor validate).
-version: 1.9.0
+version: 1.10.0
 ---
 
 # pactor-app
@@ -125,7 +125,7 @@ For YAML imports add `@pactor-app/vite-plugin` to `vite.config.ts` and declare `
 
 The built-in shadcn-style UI (`@pactor-app/ui`) registers these DSL component types — reference them by `type` in pages:
 
-- **Page & layout**: `Page`, `Layout` / `Header` / `Sider` / `Content` / `Footer`, `Grid`, `Flex`, `Card`, `Sidebar`
+- **Page & layout**: `Page`, `Layout` / `Header` / `Sider` / `Content` / `Footer`, `Grid`, `Flex`, `Card`, `Sidebar`, `For`（数据驱动循环渲染，行作用域 `${row}`/`${rowIndex}`）
 - **Basic**: `Button`, `Alert`, `Statistic`, `Menu`, `Link`, `Text`, `Typography`, `Icon`
 - **Data**: `Table`, `Tabs`, `DataTable`, `Chart`
 - **Form**: `Form`, `Input`, `NumberInput`, `Select`, `Textarea`, `Checkbox`, `RadioGroup`, `Switch`, `Slider`, `Label`, `Field`, `ChatInput`, `DatePicker`
