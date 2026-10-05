@@ -50,6 +50,15 @@ function applyPrecision(value: number, precision?: number): number {
   return Math.round(value * factor) / factor;
 }
 
+function decimalPlaces(value: number): number {
+  if (!Number.isFinite(value)) return 0;
+  const str = String(value);
+  const eIndex = str.indexOf('e-');
+  if (eIndex !== -1) return Number(str.slice(eIndex + 2));
+  const dot = str.indexOf('.');
+  return dot === -1 ? 0 : str.length - dot - 1;
+}
+
 function toDisplayText(value: number | undefined): string {
   return typeof value === 'number' && Number.isFinite(value) ? String(value) : '';
 }
@@ -124,10 +133,15 @@ export function NumberInput({
     onChange?.(next);
   };
 
-  // 步进：基于当前已提交值（空值以 0 为基准）按 step 增减，钳制 + 精度规整
+  // 步进：基于当前已提交值（空值以 0 为基准）按 step 增减，钳制 + 精度规整；
+  // 未声明 precision 时按 step 与当前值的小数位数推导，消除 0.1+0.2 一类浮点误差
   const stepBy = (direction: 1 | -1) => {
     const base = externalValue ?? 0;
-    const next = applyPrecision(clamp(base + direction * step, min, max), precision);
+    const effectivePrecision =
+      typeof precision === 'number'
+        ? precision
+        : Math.max(decimalPlaces(step), decimalPlaces(base));
+    const next = applyPrecision(clamp(base + direction * step, min, max), effectivePrecision);
     setText(toDisplayText(next));
     commit(next);
   };

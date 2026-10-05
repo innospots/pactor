@@ -1,6 +1,6 @@
 {
   "name": "@pactor-app/skills",
-  "version": "1.26.0",
+  "version": "1.27.0",
   "description": "Agent skills for rapidly building pactor Server-Driven UI applications",
   "keywords": [
     "pactor",
