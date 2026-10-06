@@ -194,12 +194,21 @@ function ShadcnDrawerView({
   children?: ReactNode;
 }) {
   const { t } = useI18n();
+  // 显式 width 时同步内联 maxWidth：DrawerContent 自带的
+  // data-[vaul-drawer-direction=right]:sm:max-w-sm（384px）在 CSS 源序上
+  // 优先于 sm:max-w-none，仅靠 class 无法解除上限，内联样式才可确定生效
   const panelStyle =
-    entry.width === undefined ? undefined : { width: toCssWidth(entry.width) };
+    entry.width === undefined
+      ? undefined
+      : { width: toCssWidth(entry.width), maxWidth: toCssWidth(entry.width) };
 
   return (
     <Drawer
       direction="right"
+      // modal={false}：vaul modal 会给 body 挂 pointer-events:none，抽屉内
+      // Select/DatePicker 等 portal 弹层（挂在 body 下）随之不可点击；
+      // 非 modal 时遮罩仍覆盖全屏，点击关闭改由遮罩 onClick 承担
+      modal={false}
       open
       onOpenChange={(open: boolean) => {
         if (!open) {
@@ -212,6 +221,7 @@ function ShadcnDrawerView({
         // 显式 width 时解除默认 sm:max-w-sm 上限，与 modal width 语义一致
         className={cn(entry.width !== undefined && 'sm:max-w-none')}
         style={panelStyle}
+        overlayProps={{ onClick: onCancel }}
       >
         <DrawerHeader
           data-slot="drawer-header"

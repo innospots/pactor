@@ -1,6 +1,6 @@
 {
   "name": "@pactor-app/cli",
-  "version": "1.27.0",
+  "version": "1.33.0",
   "description": "Pactor CLI: local DSL toolchain (validate / inspect / lint / schema / build / create)",
   "keywords": [
     "pactor",
@@ -40,9 +40,9 @@
     "access": "public"
   },
   "dependencies": {
-    "@pactor-app/core": "workspace:*",
-    "@pactor-app/expression": "workspace:*",
-    "@pactor-app/schema": "workspace:*",
+    "@pactor-app/core": "1.33.0",
+    "@pactor-app/expression": "1.33.0",
+    "@pactor-app/schema": "1.33.0",
     "yaml": "^2.9.0"
   }
 }

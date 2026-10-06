@@ -231,9 +231,9 @@ describe('RadioGroup', () => {
     expect(group?.className).not.toContain('grid');
   });
 
-  it('点击 label 文本选中对应选项', async () => {
+  it('点击选项文字选中对应选项', async () => {
     const user = userEvent.setup();
-    const { container, context } = renderDsl({
+    const { context } = renderDsl({
       type: 'RadioGroup',
       props: {
         options: [
@@ -246,11 +246,7 @@ describe('RadioGroup', () => {
       },
     });
 
-    const label = [...container.querySelectorAll('label')].find(
-      (el) => el.textContent === '小',
-    );
-    expect(label).toBeTruthy();
-    await user.click(label!);
+    await user.click(screen.getByText('小'));
     await expectEventState(context, 'size', 's');
   });
 });
@@ -565,7 +561,7 @@ describe('表单类通用 props（Form 内）', () => {
 });
 
 describe('Field 布局与节点样式', () => {
-  it('有 label 时控件容器默认 mt-2；无 label 时不加', () => {
+  it('控件容器不再带 mt-2（label 与控件间距由 Field 容器 flex-col gap-2 承担）', () => {
     const withLabel = renderDsl({
       type: 'Field',
       props: { label: '邮箱' },
@@ -573,7 +569,7 @@ describe('Field 布局与节点样式', () => {
     });
     expect(
       withLabel.container.querySelector('[data-slot=field-control]')?.className,
-    ).toContain('mt-2');
+    ).not.toContain('mt-2');
 
     const noLabel = renderDsl({
       type: 'Field',
@@ -609,7 +605,7 @@ describe('Field 布局与节点样式', () => {
 
     const control = container.querySelector('[data-slot=field-control]') as HTMLElement;
     expect(control.className).toContain('ctrl-cls');
-    expect(control.className).toContain('mt-2');
+    expect(control.className).not.toContain('mt-2');
     expect(control.style.width).toBe('320px');
 
     expect(

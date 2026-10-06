@@ -38,14 +38,16 @@ export function useFormContext(): FormContextValue | null {
   return useContext(FormReactContext);
 }
 
-/** 表单项排布 class（按 Form layout 生成；label/控件/错误的间距由 gap 承担） */
+/** 表单项排布 class（按 Form layout 生成；label/控件/错误的间距由 gap 承担；
+ *  统一 min-h-9（36px）并垂直居中，无 label 行的项（如裸按钮）与有 label 的
+ *  项在行内保持同高同基线） */
 export function formItemClass(layout: FormContextValue['layout']): string {
   switch (layout) {
     case 'horizontal':
-      return 'mb-4 flex items-baseline gap-2';
+      return 'mb-2 flex min-h-9 items-center gap-2';
     case 'inline':
-      return 'flex items-center gap-2';
+      return 'flex min-h-9 items-center gap-2';
     default:
-      return 'mb-4 flex flex-col gap-1.5';
+      return 'mb-2 flex min-h-9 flex-col justify-center gap-1.5';
   }
 }
