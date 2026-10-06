@@ -92,24 +92,32 @@ export function RadioGroup({
       style={inForm ? undefined : style}
     >
       {options.map((option, index) => {
-        const optionId = `${controlId}-${index}`;
-        const optionDisabled = disabled || option.disabled;
+        const textId = `${controlId}-${index}`;
+        const optionDisabled = disabled === true || option.disabled === true;
         return (
           <span key={String(option.value)} className="inline-flex items-center gap-2">
             <RadioGroupItem
-              id={optionId}
               value={option.value}
               disabled={option.disabled}
+              aria-labelledby={textId}
             />
-            <label
-              htmlFor={optionId}
+            {/* Base UI Radio.Root 渲染 span（忽略 id prop），label htmlFor 无法
+                关联，可访问名经 aria-labelledby 挂到文字上，文字点击选中由
+                onClick 承担 */}
+            <span
+              id={textId}
               className={cn(
                 'text-sm leading-none font-medium',
                 optionDisabled ? 'cursor-not-allowed opacity-50' : 'cursor-pointer',
               )}
+              onClick={() => {
+                if (!optionDisabled) {
+                  handleChange(option.value);
+                }
+              }}
             >
               {option.label}
-            </label>
+            </span>
           </span>
         );
       })}

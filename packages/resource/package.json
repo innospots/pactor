@@ -1,6 +1,6 @@
 {
   "name": "@pactor-app/resource",
-  "version": "1.27.0",
+  "version": "1.33.0",
   "description": "Pactor resource: DSL resource envelope, HTTP/Static loaders, memory cache with versioning and ETag",
   "keywords": [
     "pactor",
@@ -52,6 +52,6 @@
     "access": "public"
   },
   "dependencies": {
-    "@pactor-app/core": "workspace:*"
+    "@pactor-app/core": "1.33.0"
   }
 }

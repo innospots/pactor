@@ -29,8 +29,8 @@ version: 1.3.0
 2. **布局与间距以样板页为准**：新建工程时以 `template/` 同类页为准；**增量时以目标工程内同模块/同类型页**为准。线框图只提取结构与功能，不逐像素还原 ASCII
 3. **样式与原产品一致**：主题令牌（含深浅色）、自定义 CSS（如登录页）、换肤入口全部移植对齐，见 `references/theme-and-style.md`
 4. **功能与原产品一致**：线框图描述的筛选/搜索/跳转/弹窗/提交等交互必须经 events/actions 闭环可用，禁止只画静态骨架；错误分支（校验失败提示等）也要实现
-5. **表单一律用 `Form` 组件**：凡是一组「字段 + 校验 + 提交」的表单——独立表单页、页面内嵌的配置面板（如树/列表右侧的编辑表单）、弹窗/抽屉表单、**搜索栏（关键词 + 查询/重置 的筛选区，用 `Form layout: inline`）**——都必须用 `Form` 包裹，字段经 `props.name` 绑定，校验用字段级 `rules`（required + message），提交用 `submit: true` 的 Button 触发 `onSubmit`；**禁止**散放 `Input`/`Select` + `setState` 攒草稿 + `if` 动作手写校验。回填联动（如点击列表/树节点填充表单）用 `form.setValues` 动作，不要绑 `${state.x}` 到字段 value；即点即生效的 ChipFilter 快筛行没有提交语义，不属于表单
-6. **列表页操作列规范**：操作列按钮样式统一 `Button variant: link`；「编辑」与「新建」指向同一个表单（同一路由页或同一弹窗），唯一区别是编辑以行数据预填（路由页 `initialValues: ${data.detail}`，弹窗/内嵌面板 `form.setValues`）
+5. **表单一律用 `Form` 组件**：凡是一组「字段 + 校验 + 提交」的表单——独立表单页、页面内嵌的配置面板（如树/列表右侧的编辑表单）、弹窗/抽屉表单、**搜索栏（关键词 + 查询/重置 的筛选区，用 `Form layout: inline`）**——都必须用 `Form` 包裹，字段经 `props.name` 绑定，校验用字段级 `rules`（required + message），提交用 `submit: true` 的 Button 触发 `onSubmit`；**禁止**散放 `Input`/`Select` + `setState` 攒草稿 + `if` 动作手写校验。上下结构的字段一律用 `Field` 包裹：label、必填星号（`required: true`）、行右提示（`labelHint`）由 `Field` 渲染，控件上只留 `name`/`rules` 等（`Form layout: inline` 的搜索栏除外，label 直接挂控件）；禁止手写 `Text("*") + Label` 拼标签。回填联动（如点击列表/树节点填充表单）用 `form.setValues` 动作，不要绑 `${state.x}` 到字段 value；即点即生效的 ChipFilter 快筛行没有提交语义，不属于表单
+6. **列表页操作列规范**：操作列按钮样式统一 `Button variant: link`；「编辑」与「新建」指向同一个表单（同一路由页或同一弹窗），唯一区别是编辑以行数据预填（路由页 `initialValues: ${data.detail}`，弹窗/内嵌面板 `form.setValues`）；**数据列表页（搜索 + 表格 + 新建/编辑）整体结构默认套用 `references/page-templates.md` 的「数据列表标准模型」**
 7. **文案以线框图为准**：标题、按钮、空态文案逐字取自线框图/PRD
 8. DSL 语法细节（组件 props、表达式、动作）以 `pactor-dsl` skill 与 packages/ui 当前导出为准，本 skill 只约定流程与产出物
 
@@ -93,7 +93,7 @@ version: 1.3.0
 | `references/incremental-wireframe-delta.md` | **已有工程**：线框图 add/update/deprecate、改 sitemap/mock/样式 |
 | `references/project-structure.md` | 阶段 2：目录结构约定与 sitemap.yaml 骨架 |
 | `references/component-mapping.md` | 阶段 3：线框图区域 → pactor 组件映射 |
-| `references/page-templates.md` | 阶段 3：列表/详情/表单页 yaml 模板 |
+| `references/page-templates.md` | 阶段 3：列表/详情/表单页 yaml 模板；数据列表页默认用「数据列表标准模型」（搜索 Form + 表格 + 抽屉新建/编辑） |
 | `references/mock-data-routes.md` | 阶段 4：mock 路由表模板与命名约定 |
 | `references/theme-and-style.md` | 阶段 5：主题令牌提取、皮肤、自定义 CSS、换肤 |
 | `references/acceptance-checklist.md` | 阶段 6：验收清单与结果输出格式 |

@@ -317,6 +317,28 @@ describe('Drawer', () => {
     await expectEventState(context, 'drawerClosed', true);
   });
 
+  it('缺省禁止按住面板拖拽关闭（draggable 未开启）', async () => {
+    const { context } = renderDsl({
+      type: 'Drawer',
+      props: { open: true, title: '面板' },
+      events: {
+        onClose: { action: 'setState', params: { drawerClosed: true } },
+      },
+      children: [{ type: 'Text', props: { text: 'x' } }],
+    });
+
+    await screen.findByText('面板');
+    const content = document.querySelector('[data-slot=drawer-content]')!;
+    fireEvent.pointerDown(content, { clientX: 300, clientY: 300 });
+    fireEvent.pointerMove(document, { clientX: 80, clientY: 300 });
+    fireEvent.pointerUp(document, { clientX: 80, clientY: 300 });
+
+    // 拖拽不触发关闭（vaul handleOnly：仅把手可拖）
+    await new Promise((resolve) => setTimeout(resolve, 300));
+    expect(context.state.get('drawerClosed')).toBeUndefined();
+    expect(screen.getByText('面板')).toBeTruthy();
+  });
+
   it('通用 props 作用于抽屉内容根节点', async () => {
     renderDsl({
       type: 'Drawer',

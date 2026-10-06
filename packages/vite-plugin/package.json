@@ -1,6 +1,6 @@
 {
   "name": "@pactor-app/vite-plugin",
-  "version": "1.27.0",
+  "version": "1.33.0",
   "description": "Pactor Vite plugin: import .page.yaml / .fragment.yaml DSL files as JS modules with build-time validation and HMR",
   "keywords": [
     "pactor",
@@ -51,8 +51,8 @@
     "access": "public"
   },
   "dependencies": {
-    "@pactor-app/core": "workspace:*",
-    "@pactor-app/schema": "workspace:*",
+    "@pactor-app/core": "1.33.0",
+    "@pactor-app/schema": "1.33.0",
     "yaml": "^2.9.0"
   },
   "peerDependencies": {

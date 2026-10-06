@@ -76,30 +76,11 @@ body:
                               - required: true
                                 message: 请输入路由名称
                     - type: Field
+                      props:
+                        label: 路由标识
+                        required: true
+                        labelHint: 路由标识 创建后不可修改
                       children:
-                        - type: Flex
-                          props:
-                            justify: space-between
-                            align: center
-                            className: w-full mb-3.5
-                          children:
-                            - type: Flex
-                              props:
-                                align: center
-                                className: gap-0.5
-                              children:
-                                - type: Text
-                                  props:
-                                    text: "*"
-                                    className: text-destructive text-sm leading-none
-                                - type: Label
-                                  props:
-                                    text: 路由标识
-                            - type: Text
-                              props:
-                                text: 路由标识 创建后不可修改
-                                type: secondary
-                                className: text-xs leading-none
                         - type: Input
                           props:
                             name: code

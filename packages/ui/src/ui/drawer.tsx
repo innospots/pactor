@@ -49,11 +49,26 @@ function DrawerOverlay({
 function DrawerContent({
   className,
   children,
+  overlayProps,
   ...props
-}: React.ComponentProps<typeof DrawerPrimitive.Content>) {
+}: React.ComponentProps<typeof DrawerPrimitive.Content> & {
+  /** 透传给遮罩（modal={false} 时由遮罩 onClick 承担点击关闭） */
+  overlayProps?: React.ComponentProps<'div'>;
+}) {
   return (
     <DrawerPortal data-slot="drawer-portal">
-      <DrawerOverlay />
+      {/* 自绘遮罩：vaul Overlay 在 modal={false} 时不渲染（见 vaul 源码），
+          而 modal 抽屉会给 body 挂 pointer-events:none 使抽屉内 portal
+          弹层（Select 等）不可点击，故统一 modal={false} + 自绘全屏遮罩，
+          遮罩拦截背景点击、弹层正常可用 */}
+      <div
+        data-slot="drawer-overlay"
+        {...overlayProps}
+        className={cn(
+          'fixed inset-0 z-50 bg-(--overlay-background)',
+          overlayProps?.className,
+        )}
+      />
       <DrawerPrimitive.Content
         data-slot="drawer-content"
         className={cn(

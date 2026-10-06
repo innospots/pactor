@@ -91,30 +91,11 @@ body:
                     className: "[&>[data-slot=grid-item]:last-child]:col-span-full"
                   children:
                     - type: Field
+                      props:
+                        label: Provider Code
+                        required: true
+                        labelHint: Provider Code 创建后不可修改
                       children:
-                        - type: Flex
-                          props:
-                            justify: space-between
-                            align: center
-                            className: w-full mb-3.5
-                          children:
-                            - type: Flex
-                              props:
-                                align: center
-                                className: gap-0.5
-                              children:
-                                - type: Text
-                                  props:
-                                    text: "*"
-                                    className: text-destructive text-sm leading-none
-                                - type: Label
-                                  props:
-                                    text: Provider Code
-                            - type: Text
-                              props:
-                                text: Provider Code 创建后不可修改
-                                type: secondary
-                                className: text-xs leading-none
                         - type: Input
                           props:
                             name: code
@@ -243,31 +224,12 @@ body:
                             className: w-full
                             placeholder: 如 us-east、cn-beijing
                     - type: Field
+                      props:
+                        label: API Key
+                        required: true
+                        labelHint: "当前状态：${data.detail.keyStatus == 'configured' ? '● 已配置（' +
+                          data.detail.maskedKey + '）' : '● 未配置'}"
                       children:
-                        - type: Flex
-                          props:
-                            justify: space-between
-                            align: center
-                            className: w-full mb-3.5
-                          children:
-                            - type: Flex
-                              props:
-                                align: center
-                                className: gap-0.5
-                              children:
-                                - type: Text
-                                  props:
-                                    text: "*"
-                                    className: text-destructive text-sm leading-none
-                                - type: Label
-                                  props:
-                                    text: API Key
-                            - type: Text
-                              props:
-                                text: "当前状态：${data.detail.keyStatus == 'configured' ? '● 已配置（' +
-                                  data.detail.maskedKey + '）' : '● 未配置'}"
-                                type: secondary
-                                className: text-xs leading-none
                         - type: Input
                           props:
                             name: apiKey

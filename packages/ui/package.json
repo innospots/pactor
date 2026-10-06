@@ -1,6 +1,6 @@
 {
   "name": "@pactor-app/ui",
-  "version": "1.27.0",
+  "version": "1.33.0",
   "description": "Pactor UI kit (shadcn): the single built-in UI kit — vendored shadcn/ui components (Base UI primitives + cva + tailwind-merge + lucide-react), props contracts, interaction core (OverlayManager / UiBridge) and layouts, with build-time Tailwind v4 prebuilt styles.css (zero consumer-side Tailwind config)",
   "keywords": [
     "pactor",
@@ -99,11 +99,11 @@
   },
   "dependencies": {
     "@base-ui/react": "^1.7.0",
-    "@pactor-app/core": "workspace:*",
-    "@pactor-app/markdown": "workspace:*",
-    "@pactor-app/permission": "workspace:*",
-    "@pactor-app/router": "workspace:*",
-    "@pactor-app/runtime": "workspace:*",
+    "@pactor-app/core": "1.33.0",
+    "@pactor-app/markdown": "1.33.0",
+    "@pactor-app/permission": "1.33.0",
+    "@pactor-app/router": "1.33.0",
+    "@pactor-app/runtime": "1.33.0",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "cmdk": "^1.1.1",

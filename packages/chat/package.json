@@ -1,6 +1,6 @@
 {
   "name": "@pactor-app/chat",
-  "version": "1.27.0",
+  "version": "1.33.0",
   "description": "Pactor chat: AI message rendering protocol (message model, streaming reducer, safe registry, capability action) and chat runtime view (ChatView / MessageBubble / PartRenderer / Composer / chat layout)",
   "keywords": [
     "pactor",
@@ -55,11 +55,11 @@
     "access": "public"
   },
   "dependencies": {
-    "@pactor-app/core": "workspace:*",
-    "@pactor-app/markdown": "workspace:*",
-    "@pactor-app/permission": "workspace:*",
-    "@pactor-app/runtime": "workspace:*",
-    "@pactor-app/ui": "workspace:*"
+    "@pactor-app/core": "1.33.0",
+    "@pactor-app/markdown": "1.33.0",
+    "@pactor-app/permission": "1.33.0",
+    "@pactor-app/runtime": "1.33.0",
+    "@pactor-app/ui": "1.33.0"
   },
   "peerDependencies": {
     "react": ">=18"

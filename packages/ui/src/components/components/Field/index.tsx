@@ -31,7 +31,7 @@ export interface FieldProps {
   /** label 行右侧提示节点 class / style */
   labelHintClassName?: string;
   labelHintStyle?: CSSProperties;
-  /** 控件容器（label 下方）class / style；缺省有 label 时容器自带 mt-2 */
+  /** 控件容器（label 下方）class / style（label 与控件间距由 Field 容器 gap 承担） */
   controlClassName?: string;
   controlStyle?: CSSProperties;
   /** 辅助说明节点 class / style */
@@ -47,8 +47,9 @@ export interface FieldProps {
  * 上下结构：label 在上、控件容器在下）；label / labelHint / description /
  * error 为框架级 props，error 声明式强制展示；`required` 在 label 前渲染
  * 必填星号（对齐 antd Form.Item required 语义）；`labelHint` 与 label 同行
- * 右对齐（弱化为小字）；label 与控件容器之间默认 mt-2，五个节点
- * （label / labelHint / 控件容器 / description / error）均可独立加样式。
+ * 右对齐（弱化为小字）；label 与控件容器间距由 Field 容器 flex-col gap-2
+ * 承担，五个节点（label / labelHint / 控件容器 / description / error）
+ * 均可独立加样式。
  */
 export function Field({
   label,
@@ -73,7 +74,7 @@ export function Field({
   return (
     <ShadcnField className={className} style={style}>
       {label || labelHint ? (
-        <div className="flex w-full items-center justify-between gap-2">
+        <div className="flex min-h-3.5 w-full items-center justify-between gap-2">
           {label ? (
             <FieldLabel className={labelClassName} style={labelStyle}>
               {required ? (
@@ -102,7 +103,7 @@ export function Field({
       ) : null}
       <div
         data-slot="field-control"
-        className={cn(label || labelHint ? 'mt-2' : undefined, controlClassName)}
+        className={cn(controlClassName)}
         style={controlStyle}
       >
         {children}

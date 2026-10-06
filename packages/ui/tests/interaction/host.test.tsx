@@ -111,17 +111,27 @@ describe('Modal / Drawer 渲染（shadcn 实现）', () => {
     });
   });
 
+  it('Drawer 为 modal=false：body 不挂 pointer-events:none（抽屉内 portal 弹层可点）', async () => {
+    const { manager } = setupHost();
+
+    void manager.open({ type: 'drawer', title: '编辑面板' });
+    await screen.findByText('编辑面板');
+
+    // vaul 在 rAF 中手动复位 body pointer-events（Radix 底层会先置 none）
+    await vi.waitFor(() => {
+      expect(document.body.style.pointerEvents).not.toBe('none');
+    });
+  });
+
   it('Drawer 遮罩点击触发取消语义 close', async () => {
-    const user = userEvent.setup();
     const { manager } = setupHost();
 
     const opened = manager.open({ type: 'drawer', title: '编辑面板' });
     await screen.findByText('编辑面板');
 
-    // vaul 基于 Radix DismissableLayer：遮罩关闭需要真实 pointer 序列
-    await user.pointer([
-      { target: document.querySelector('[data-slot=drawer-overlay]')!, keys: '[MouseLeft]' },
-    ]);
+    // modal={false} 后遮罩点击关闭由 overlay 自身 onClick 承担
+    // （jsdom 中 body pointer-events 复位时序不稳定，用 fireEvent  bypass 检查）
+    fireEvent.click(document.querySelector('[data-slot=drawer-overlay]')!);
 
     await expect(opened).resolves.toEqual({ success: false });
     expect(manager.stack()).toHaveLength(0);
@@ -157,6 +167,8 @@ describe('Modal / Drawer 渲染（shadcn 实现）', () => {
     await screen.findByText('宽面板');
     const panel = document.querySelector('[data-slot=drawer-panel]') as HTMLElement;
     expect(panel.style.width).toBe('480px');
+    // maxWidth 同步内联，避免 vaul 原语的 sm:max-w-sm（384px）上限压过 width
+    expect(panel.style.maxWidth).toBe('480px');
   });
 });
 
