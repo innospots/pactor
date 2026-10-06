@@ -27,6 +27,8 @@ const ROUTE_TABLE: Record<string, string> = {
   costs: "cost.list",
   audit: "audit.list",
   "audit-operators": "audit.operators",
+  "data-list": "dataList.list",
+  "ops/data-list-save": "dataList.save",
   "ops/model-usage": "ops.modelUsage",
   "ops/provider-usage": "ops.providerUsage",
   "ops/client-usage": "ops.clientUsage",
@@ -43,6 +45,7 @@ const DETAIL_TABLE: Record<string, string> = {
   "call-logs": "callLog.detail",
   costs: "cost.detail",
   audit: "audit.detail",
+  "data-list": "dataList.detail",
 };
 
 const SUB_TABLE: Record<string, string> = {
@@ -109,6 +112,45 @@ export async function GET(
   }
 
   const result = await pactorServices[resolved.service](params);
+  return Response.json(result ?? null, {
+    headers: { "cache-control": "no-store", ...corsHeaders(request) },
+  });
+}
+
+/** 写操作（ops 前缀的保存类接口，如骨架示例的新建/编辑提交） */
+export async function POST(
+  request: Request,
+  context: RouteContext<"/api/data/[...parts]">,
+) {
+  const store = await cookies();
+  const user = findUserBySession(store.get(SESSION_COOKIE)?.value);
+  if (!user) {
+    return Response.json(
+      { error: "未登录" },
+      { status: 401, headers: corsHeaders(request) },
+    );
+  }
+
+  const { parts } = await context.params;
+  if (parts[0] !== "ops") {
+    return Response.json(
+      { error: "仅 ops 接口支持 POST" },
+      { status: 405, headers: corsHeaders(request) },
+    );
+  }
+  const resolved = resolveService(parts);
+  if (!resolved) {
+    return Response.json(
+      { error: `未知数据接口: /api/data/${parts.join("/")}` },
+      { status: 404, headers: corsHeaders(request) },
+    );
+  }
+
+  const body = (await request.json().catch(() => ({}))) as Record<
+    string,
+    unknown
+  >;
+  const result = await pactorServices[resolved.service](body);
   return Response.json(result ?? null, {
     headers: { "cache-control": "no-store", ...corsHeaders(request) },
   });

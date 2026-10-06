@@ -49,6 +49,14 @@ pages:
     }
   # 模块二：模型路由 / 路由（卡片式列表 + 单页纵向详情 + 单页表单）
   - { id: route-list, path: /routes, title: 路由, version: 1, lazy: true }
+  # 页面骨架：数据列表标准模型（搜索 + 表格 + 抽屉新建/编辑），可复制生成业务列表页
+  - {
+      id: data-list,
+      path: /models/data-list,
+      title: 数据列表,
+      version: 1,
+      lazy: true,
+    }
   - {
       id: route-create,
       path: /routes/new,
@@ -114,6 +122,19 @@ menus:
           type: page,
           pageId: route-list,
           title: 路由,
+          layout: admin,
+        }
+  - id: skeletons
+    type: group
+    title: 页面骨架
+    icon: folder
+    order: 4
+    children:
+      - {
+          id: data-list,
+          type: page,
+          pageId: data-list,
+          title: 数据列表,
           layout: admin,
         }
   # 隐藏页（不出现在菜单，经列表页跳转进入；activeMenu 保持所属菜单高亮）
