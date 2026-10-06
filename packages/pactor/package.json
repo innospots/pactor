@@ -1,6 +1,6 @@
 {
   "name": "pactor-app",
-  "version": "1.33.0",
+  "version": "1.34.0",
   "description": "Pactor meta package: installs the full Server-Driven UI + AI-Native runtime stack (@pactor-app/*) and re-exports the one-stop application API (createPactorApplication)",
   "keywords": [
     "pactor",
@@ -51,19 +51,19 @@
     "access": "public"
   },
   "dependencies": {
-    "@pactor-app/app": "1.33.0",
-    "@pactor-app/chat": "1.33.0",
-    "@pactor-app/cli": "1.33.0",
-    "@pactor-app/core": "1.33.0",
-    "@pactor-app/expression": "1.33.0",
-    "@pactor-app/markdown": "1.33.0",
-    "@pactor-app/permission": "1.33.0",
-    "@pactor-app/resource": "1.33.0",
-    "@pactor-app/router": "1.33.0",
-    "@pactor-app/runtime": "1.33.0",
-    "@pactor-app/schema": "1.33.0",
-    "@pactor-app/ui": "1.33.0",
-    "@pactor-app/vite-plugin": "1.33.0"
+    "@pactor-app/app": "1.34.0",
+    "@pactor-app/chat": "1.34.0",
+    "@pactor-app/cli": "1.34.0",
+    "@pactor-app/core": "1.34.0",
+    "@pactor-app/expression": "1.34.0",
+    "@pactor-app/markdown": "1.34.0",
+    "@pactor-app/permission": "1.34.0",
+    "@pactor-app/resource": "1.34.0",
+    "@pactor-app/router": "1.34.0",
+    "@pactor-app/runtime": "1.34.0",
+    "@pactor-app/schema": "1.34.0",
+    "@pactor-app/ui": "1.34.0",
+    "@pactor-app/vite-plugin": "1.34.0"
   },
   "peerDependencies": {
     "react": ">=18",
