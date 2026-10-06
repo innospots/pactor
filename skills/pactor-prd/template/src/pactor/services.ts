@@ -29,6 +29,11 @@ import { getCallLog, queryCallLogs } from "./mocks/call-logs-mock";
 import { getCost, queryCosts } from "./mocks/costs-mock";
 import { getAudit, listAuditOperators, queryAudits } from "./mocks/audit-mock";
 import {
+  getDataListItem,
+  queryDataList,
+  saveDataListItem,
+} from "./mocks/data-list-mock";
+import {
   queryAvailability,
   queryClientUsage,
   queryModelUsage,
@@ -182,4 +187,14 @@ export const pactorServices: Record<string, ServiceHandler> = {
     queryClientUsage({ start: opt(params.start), end: opt(params.end) }),
   "ops.availability": (params) =>
     queryAvailability({ start: opt(params.start), end: opt(params.end) }),
+
+  // 数据列表骨架示例（yaml/models/data-list.yaml）；生成业务列表页时成组复制改名
+  "dataList.list": (params) =>
+    queryDataList({
+      keyword: str(params.keyword),
+      status: str(params.status) || "all",
+    }),
+  "dataList.detail": (params) => getDataListItem(str(params.code)),
+  "dataList.save": (params) =>
+    saveDataListItem(params as Parameters<typeof saveDataListItem>[0]),
 };

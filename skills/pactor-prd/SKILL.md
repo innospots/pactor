@@ -30,7 +30,7 @@ version: 1.3.0
 3. **样式与原产品一致**：主题令牌（含深浅色）、自定义 CSS（如登录页）、换肤入口全部移植对齐，见 `references/theme-and-style.md`
 4. **功能与原产品一致**：线框图描述的筛选/搜索/跳转/弹窗/提交等交互必须经 events/actions 闭环可用，禁止只画静态骨架；错误分支（校验失败提示等）也要实现
 5. **表单一律用 `Form` 组件**：凡是一组「字段 + 校验 + 提交」的表单——独立表单页、页面内嵌的配置面板（如树/列表右侧的编辑表单）、弹窗/抽屉表单、**搜索栏（关键词 + 查询/重置 的筛选区，用 `Form layout: inline`）**——都必须用 `Form` 包裹，字段经 `props.name` 绑定，校验用字段级 `rules`（required + message），提交用 `submit: true` 的 Button 触发 `onSubmit`；**禁止**散放 `Input`/`Select` + `setState` 攒草稿 + `if` 动作手写校验。上下结构的字段一律用 `Field` 包裹：label、必填星号（`required: true`）、行右提示（`labelHint`）由 `Field` 渲染，控件上只留 `name`/`rules` 等（`Form layout: inline` 的搜索栏除外，label 直接挂控件）；禁止手写 `Text("*") + Label` 拼标签。回填联动（如点击列表/树节点填充表单）用 `form.setValues` 动作，不要绑 `${state.x}` 到字段 value；即点即生效的 ChipFilter 快筛行没有提交语义，不属于表单
-6. **列表页操作列规范**：操作列按钮样式统一 `Button variant: link`；「编辑」与「新建」指向同一个表单（同一路由页或同一弹窗），唯一区别是编辑以行数据预填（路由页 `initialValues: ${data.detail}`，弹窗/内嵌面板 `form.setValues`）；**数据列表页（搜索 + 表格 + 新建/编辑）整体结构默认套用 `references/page-templates.md` 的「数据列表标准模型」**
+6. **列表页操作列规范**：操作列按钮样式统一 `Button variant: link`；「编辑」与「新建」指向同一个表单（同一路由页或同一弹窗），唯一区别是编辑以行数据预填（路由页 `initialValues: ${data.detail}`，弹窗/内嵌面板 `form.setValues`）；**数据列表页（搜索 + 表格 + 新建/编辑）以 `template/src/server/yaml/models/data-list.yaml` 为标准骨架生成**（结构与要点见 `references/page-templates.md`「数据列表标准模型」）
 7. **文案以线框图为准**：标题、按钮、空态文案逐字取自线框图/PRD
 8. DSL 语法细节（组件 props、表达式、动作）以 `pactor-dsl` skill 与 packages/ui 当前导出为准，本 skill 只约定流程与产出物
 
@@ -57,7 +57,7 @@ version: 1.3.0
 - **整体复制 `template/`** 为新项目起点；不要用 `pnpm create pactor-app` 替代
 - 工程名：README 产品名 → kebab-case 英文名，创建前确认一次
 - `pnpm install` + dev 验证；核对 `references/project-structure.md`
-- 参考模块 provider/route 作样板；**全站生成完成后删除**参考模块及 mock
+- 参考模块 provider/route 作样板；`yaml/models/` 是页面骨架目录（按模块目录结构存放，已注册 sitemap、菜单「页面骨架」分组可直接预览），生成时复制到目标模块目录改字段与文案；**全站生成完成后删除**参考模块、models/ 及对应 mock
 
 **增量**
 
@@ -69,7 +69,7 @@ version: 1.3.0
 - **新建工程**：清单一行 = 一个文件 `yaml/<模块>/<page-id>.yaml`（或工程既定 A/B 规则）；`mkdir` 模块目录；N = P0/P1 行数
 - **增量**：仅 **add** 新建文件；**update** 改已有 yaml；**deprecate** 删文件并改 sitemap（须用户确认）
 - 校验见 `page-inventory-and-files.md`（全量）或 `incremental-wireframe-delta.md`（增量）
-- 按 `references/component-mapping.md` 映射组件；按 `references/page-templates.md` 选列表/详情/表单模板；表单一律 `Form` 包裹
+- 按 `references/component-mapping.md` 映射组件；按 `references/page-templates.md` 选列表/详情/表单模板（**数据列表页直接复制 `yaml/models/data-list.yaml` 替换占位符**）；表单一律 `Form` 包裹
 - 同步更新 `sitemap.yaml` 的 `pages` + `menus`（hidden 详情/编辑带 `activeMenu`）
 - 每页 dataSources 全部 `type: http`；交互 events + actions 闭环
 

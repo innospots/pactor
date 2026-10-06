@@ -9,14 +9,14 @@ importers:
   .:
     dependencies:
       '@pactor-app/core':
-        specifier: ^1.27.0
-        version: 1.27.0
+        specifier: ^1.33.0
+        version: 1.33.0
       '@pactor-app/runtime':
-        specifier: ^1.27.0
-        version: 1.27.0(react@19.2.8)
+        specifier: ^1.33.0
+        version: 1.33.0(react@19.2.8)
       '@pactor-app/ui':
-        specifier: ^1.27.0
-        version: 1.27.0(@date-fns/tz@1.5.0)(@types/react-dom@19.3.0(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.2.8(react@19.2.8))(react-router-dom@7.18.4(react-dom@19.2.8(react@19.2.8))(react@19.2.8))(react@19.2.8)
+        specifier: ^1.33.0
+        version: 1.33.0(@date-fns/tz@1.5.0)(@types/react-dom@19.3.0(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.2.8(react@19.2.8))(react-router-dom@7.18.4(react-dom@19.2.8(react@19.2.8))(react@19.2.8))(react@19.2.8)
       lucide-react:
         specifier: 1.45.0
         version: 1.45.0(react@19.2.8)
@@ -24,8 +24,8 @@ importers:
         specifier: 16.3.5
         version: 16.3.5(@babel/core@7.29.7)(@types/node@20.19.43)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
       pactor-app:
-        specifier: ^1.27.0
-        version: 1.27.0(@date-fns/tz@1.5.0)(@types/react-dom@19.3.0(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.2.8(react@19.2.8))(react-router-dom@7.18.4(react-dom@19.2.8(react@19.2.8))(react@19.2.8))(react@19.2.8)(vite@8.3.1(@types/node@20.19.43)(jiti@2.7.0)(yaml@2.9.1))
+        specifier: ^1.33.0
+        version: 1.33.0(@date-fns/tz@1.5.0)(@types/react-dom@19.3.0(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.2.8(react@19.2.8))(react-router-dom@7.18.4(react-dom@19.2.8(react@19.2.8))(react@19.2.8))(react@19.2.8)(vite@8.3.1(@types/node@20.19.43)(jiti@2.7.0)(yaml@2.9.1))
       react:
         specifier: 19.2.8
         version: 19.2.8
@@ -501,73 +501,73 @@ packages:
   '@oxc-project/types@0.151.0':
     resolution: {integrity: sha512-J1yXrIlNDZVzE3ada310xeAw7nH8yCAyLPuUIsjKatFPmfn5bS1oW+cM+QsGOtVWd5nhSpbwZWx/rue+r5Z+PA==}
 
-  '@pactor-app/app@1.27.0':
-    resolution: {integrity: sha512-c7Ig/Azmjduh3ATzn2ruJVilNwwljN7RR7hPa4+LwD4v35dqH2sobz6yrORckh+7ztd7A3DVo83zlVH95bHE4Q==}
+  '@pactor-app/app@1.33.0':
+    resolution: {integrity: sha512-/T3AnTgV3J9gvtwP48uSqp951GJFVt09758RyU3BQMnw3ZJXnLaqfUNMiZ6UlXkd8x32Cfpq3SqbJQRVB1fYlg==}
     engines: {node: '>=18'}
     peerDependencies:
       react: '>=18'
       react-dom: '>=18'
       react-router-dom: '>=6'
 
-  '@pactor-app/chat@1.27.0':
-    resolution: {integrity: sha512-CAgreyhMczlmNFuLD+P8FnjnnilwNkr/UwEDDrWh1HsnGqAIAiQAHC2gW9IWDTCVvyoV1p8BoIIaEi7NxvwQNQ==}
+  '@pactor-app/chat@1.33.0':
+    resolution: {integrity: sha512-tj3pOA8JXXDzC0jVHr1MQduAuYExP76M0AAsba55mqQ7N64fb2zJDUzMPxYiuv8z9bMr8acKpuOGi/a2tO5hEQ==}
     engines: {node: '>=18'}
     peerDependencies:
       react: '>=18'
 
-  '@pactor-app/cli@1.27.0':
-    resolution: {integrity: sha512-K0towebCS4sp5SbzF7RdjSBlnZOtHY4BI9ao5dOVD4RvNAlie5vw28/xHvbUGww4X0L3uydc1+xyR05IEE8vPQ==}
+  '@pactor-app/cli@1.33.0':
+    resolution: {integrity: sha512-x8+DLqH93Vd0Lkd2zc4stuuc+z0kp++sEnaV49LIktccKBTXNIe6q1BaF8vIX14HrPtSpTtuiMnnlwNR2Nsx/A==}
     engines: {node: '>=18'}
     hasBin: true
 
-  '@pactor-app/core@1.27.0':
-    resolution: {integrity: sha512-VjjJwwrG37j7xMD5tANubb6FRki9pGSpdjJwGM37zB2KedHYMbzt84ZSvd8xn417+pUxB+AvwsP/wg8IV3vcuA==}
+  '@pactor-app/core@1.33.0':
+    resolution: {integrity: sha512-XTdm/f7Xom1ifPKwhpvy8WR5cVyLstAtrNAOWcJhs4AdOwYkmuk1MeznRp66Yl9bTJyzhJCEVhsZ7telb0HS6Q==}
     engines: {node: '>=18'}
 
-  '@pactor-app/expression@1.27.0':
-    resolution: {integrity: sha512-228qrxEfmdD9uAIvv7UGSOxT692MGlu6SiDGrZpUS5tPEoLyeBsoI61+XCeaXu7KSVXcigMzPDoTDEw9oiRcqQ==}
+  '@pactor-app/expression@1.33.0':
+    resolution: {integrity: sha512-0Z3JUf3NLpEfHUhvzUunmEEZ3B+hEHTz+ATF4RpDVbBVnjmQBdwNcXw1/ybt1I9sJ3eDPOQQtejonsrCX0VzQA==}
     engines: {node: '>=18'}
 
-  '@pactor-app/markdown@1.27.0':
-    resolution: {integrity: sha512-YpD/wGdcwGeiTk6HGchEFHy9D7GH11X4IQujDuJWrwj9PAeJtqCOh2BTJZHE+xcujYwQuVWwgUOF1GzGu3rjcQ==}
+  '@pactor-app/markdown@1.33.0':
+    resolution: {integrity: sha512-C6u8wZKD4ayRZND4k6HbTz7SDiqb+Pwxwu9xYgYVwRBDugLWVBIfZGSZNThoXcJRumcP5EEsQKeIuNkXbt541g==}
     engines: {node: '>=18'}
     peerDependencies:
       react: '>=18'
 
-  '@pactor-app/permission@1.27.0':
-    resolution: {integrity: sha512-fO/BA5/FcnMPqLUdRS+a7CeQS3OmWnw0Wg2tChOGMkoqWTq6OS3Ee628tAVTDVtxpeA+reNaXYZFAKr6V7TATA==}
+  '@pactor-app/permission@1.33.0':
+    resolution: {integrity: sha512-CYfW3pfqI6bml5woxTtvlFE/l5ZBeQZe+x1mJigy3dc9gThMVdPKSc9b541RP6Km93tKOz2LK8HOhoE4SlvaxQ==}
     engines: {node: '>=18'}
 
-  '@pactor-app/resource@1.27.0':
-    resolution: {integrity: sha512-peVCWyJ7xUjFNdOBsKJWlkmjv2MQnhtii1wgOtIJEBF+5cPIjr4T6f0GuTvmw0MbtA7ppS3Mf7mJf1uzVksHSw==}
+  '@pactor-app/resource@1.33.0':
+    resolution: {integrity: sha512-ezcM72IFOvHdlUCnQmLiJenVX0Ij/B51hJB87nisJbrDmj3HfPKFoDr1UcRgU5aSlR/yt9Dp/TGTIF4Em7sesQ==}
     engines: {node: '>=18'}
 
-  '@pactor-app/router@1.27.0':
-    resolution: {integrity: sha512-+591RqB/BgVXPZodr1t0OK9Jfx6+olNx4YVdCnAHdBmQmir6G03U0J3HknTaPYGVBDSJkXgOgM7lGcSuLq3Lxg==}
+  '@pactor-app/router@1.33.0':
+    resolution: {integrity: sha512-vhtyczWSzJTe/7rcAK4LsKIdwWEP2vT21fpyNkYzcjIUOXVe2SHmPDu7bmQdW5yB5hQz0IQPkyeLI9HI4xJrcw==}
     engines: {node: '>=18'}
     peerDependencies:
       react: '>=18'
       react-router-dom: '>=6'
 
-  '@pactor-app/runtime@1.27.0':
-    resolution: {integrity: sha512-SkTUFcQfXoOj2ldazZH/YECX0/XpTZAQ3jSSaanAK3bIP4QRWhAecARhcO9YQUrAaeFRuZMNS7VFaZr/vy5r8w==}
+  '@pactor-app/runtime@1.33.0':
+    resolution: {integrity: sha512-JZOTgoo0jeSG5+gp1bpD1Rey4ZDCwBo2IQ6w6tp5SFI9LOOsXxdg8hy2wpX1fQAuS6iO2AtVRIIWbNesghIeTg==}
     engines: {node: '>=18'}
     peerDependencies:
       react: '>=18'
 
-  '@pactor-app/schema@1.27.0':
-    resolution: {integrity: sha512-ICzNoh/p0fTrOeCgA+smdYNt6CMwd8w7QbFoM1LauaiFjisue7YfAHslB+TUcEEWv/jTND0/5PMXHr0s7AvpgQ==}
+  '@pactor-app/schema@1.33.0':
+    resolution: {integrity: sha512-2J7uvpwUUcwFB01I+xc0w18B9LWMqyL9l1B6Kog5sU/oWsn4pFcQ/bncBKYpW3UW4FVGFz5AVeyN4Rd+uPIcWQ==}
     engines: {node: '>=18'}
 
-  '@pactor-app/ui@1.27.0':
-    resolution: {integrity: sha512-hu+/2TzvkJwGXJLJpOIO3SBtqtRmMTy0znrSi/Oj+JDHQEWpFUzYHYepWSgN5WQABoEG2A9DUchDya+yXe8P1Q==}
+  '@pactor-app/ui@1.33.0':
+    resolution: {integrity: sha512-mhpWWkRfKraQaPQPN1ZuTFQdb4tf/WwWdfa3ULqFf6u+lp+8b1FrsW7cNY7lbElN46e+BgobR2fG+Yy9LurJ3w==}
     engines: {node: '>=18'}
     peerDependencies:
       react: '>=18'
       react-dom: '>=18'
 
-  '@pactor-app/vite-plugin@1.27.0':
-    resolution: {integrity: sha512-+YOSrbnDU0JzF4QFG1YzqywbURGHUzIu8arqd9vClGE34RDADDHFt/LJRK3wOIAl7Cz6QTuz8Yjctn2VszMuPQ==}
+  '@pactor-app/vite-plugin@1.33.0':
+    resolution: {integrity: sha512-9bNPV95H7h0/DVv5Vc431mLUkuRGX9nnwRdhoUGdcSPkReGJrTH2866i4t8w0ODtUpZ3rD9AexgatpNBlw8NvA==}
     engines: {node: '>=18'}
     peerDependencies:
       vite: '>=5'
@@ -2529,8 +2529,8 @@ packages:
     resolution: {integrity: sha512-R4nPAVTAU0B9D35/Gk3uJf/7XYbQcyohSKdvAxIRSNghFl4e71hVoGnBNQz9cWaXxO2I10KTC+3jMdvvoKw6dQ==}
     engines: {node: '>=6'}
 
-  pactor-app@1.27.0:
-    resolution: {integrity: sha512-0rapzSaI0+bAUAgzLCR4fIsX2b+DtKgUhW4EY9JfQL72FpgcpLobYtc6BnwvIVYWU1trXOV3dO13VgiEHZIC4w==}
+  pactor-app@1.33.0:
+    resolution: {integrity: sha512-BJxBNIG40chRob0veFRAXTKkplnIipZOP4MkKJ52Udn3wYQ9srey2sAr0/S+LtjRSL0P+/rjWeTuqyoJOeVlrQ==}
     engines: {node: '>=18'}
     peerDependencies:
       react: '>=18'
@@ -3613,16 +3613,16 @@ snapshots:
 
   '@oxc-project/types@0.151.0': {}
 
-  '@pactor-app/app@1.27.0(@date-fns/tz@1.5.0)(@types/react-dom@19.3.0(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.2.8(react@19.2.8))(react-router-dom@7.18.4(react-dom@19.2.8(react@19.2.8))(react@19.2.8))(react@19.2.8)':
+  '@pactor-app/app@1.33.0(@date-fns/tz@1.5.0)(@types/react-dom@19.3.0(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.2.8(react@19.2.8))(react-router-dom@7.18.4(react-dom@19.2.8(react@19.2.8))(react@19.2.8))(react@19.2.8)':
     dependencies:
-      '@pactor-app/core': 1.27.0
-      '@pactor-app/expression': 1.27.0
-      '@pactor-app/permission': 1.27.0
-      '@pactor-app/resource': 1.27.0
-      '@pactor-app/router': 1.27.0(react-router-dom@7.18.4(react-dom@19.2.8(react@19.2.8))(react@19.2.8))(react@19.2.8)
-      '@pactor-app/runtime': 1.27.0(react@19.2.8)
-      '@pactor-app/schema': 1.27.0
-      '@pactor-app/ui': 1.27.0(@date-fns/tz@1.5.0)(@types/react-dom@19.3.0(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.2.8(react@19.2.8))(react-router-dom@7.18.4(react-dom@19.2.8(react@19.2.8))(react@19.2.8))(react@19.2.8)
+      '@pactor-app/core': 1.33.0
+      '@pactor-app/expression': 1.33.0
+      '@pactor-app/permission': 1.33.0
+      '@pactor-app/resource': 1.33.0
+      '@pactor-app/router': 1.33.0(react-router-dom@7.18.4(react-dom@19.2.8(react@19.2.8))(react@19.2.8))(react@19.2.8)
+      '@pactor-app/runtime': 1.33.0(react@19.2.8)
+      '@pactor-app/schema': 1.33.0
+      '@pactor-app/ui': 1.33.0(@date-fns/tz@1.5.0)(@types/react-dom@19.3.0(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.2.8(react@19.2.8))(react-router-dom@7.18.4(react-dom@19.2.8(react@19.2.8))(react@19.2.8))(react@19.2.8)
       react: 19.2.8
       react-dom: 19.2.8(react@19.2.8)
       react-router-dom: 7.18.4(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
@@ -3632,13 +3632,13 @@ snapshots:
       - '@types/react-dom'
       - supports-color
 
-  '@pactor-app/chat@1.27.0(@date-fns/tz@1.5.0)(@types/react-dom@19.3.0(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.2.8(react@19.2.8))(react-router-dom@7.18.4(react-dom@19.2.8(react@19.2.8))(react@19.2.8))(react@19.2.8)':
+  '@pactor-app/chat@1.33.0(@date-fns/tz@1.5.0)(@types/react-dom@19.3.0(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.2.8(react@19.2.8))(react-router-dom@7.18.4(react-dom@19.2.8(react@19.2.8))(react@19.2.8))(react@19.2.8)':
     dependencies:
-      '@pactor-app/core': 1.27.0
-      '@pactor-app/markdown': 1.27.0(@types/react@19.3.0)(react@19.2.8)
-      '@pactor-app/permission': 1.27.0
-      '@pactor-app/runtime': 1.27.0(react@19.2.8)
-      '@pactor-app/ui': 1.27.0(@date-fns/tz@1.5.0)(@types/react-dom@19.3.0(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.2.8(react@19.2.8))(react-router-dom@7.18.4(react-dom@19.2.8(react@19.2.8))(react@19.2.8))(react@19.2.8)
+      '@pactor-app/core': 1.33.0
+      '@pactor-app/markdown': 1.33.0(@types/react@19.3.0)(react@19.2.8)
+      '@pactor-app/permission': 1.33.0
+      '@pactor-app/runtime': 1.33.0(react@19.2.8)
+      '@pactor-app/ui': 1.33.0(@date-fns/tz@1.5.0)(@types/react-dom@19.3.0(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.2.8(react@19.2.8))(react-router-dom@7.18.4(react-dom@19.2.8(react@19.2.8))(react@19.2.8))(react@19.2.8)
       react: 19.2.8
     transitivePeerDependencies:
       - '@date-fns/tz'
@@ -3648,22 +3648,22 @@ snapshots:
       - react-router-dom
       - supports-color
 
-  '@pactor-app/cli@1.27.0':
+  '@pactor-app/cli@1.33.0':
     dependencies:
-      '@pactor-app/core': 1.27.0
-      '@pactor-app/expression': 1.27.0
-      '@pactor-app/schema': 1.27.0
+      '@pactor-app/core': 1.33.0
+      '@pactor-app/expression': 1.33.0
+      '@pactor-app/schema': 1.33.0
       yaml: 2.9.1
 
-  '@pactor-app/core@1.27.0': {}
+  '@pactor-app/core@1.33.0': {}
 
-  '@pactor-app/expression@1.27.0':
+  '@pactor-app/expression@1.33.0':
     dependencies:
-      '@pactor-app/core': 1.27.0
+      '@pactor-app/core': 1.33.0
 
-  '@pactor-app/markdown@1.27.0(@types/react@19.3.0)(react@19.2.8)':
+  '@pactor-app/markdown@1.33.0(@types/react@19.3.0)(react@19.2.8)':
     dependencies:
-      '@pactor-app/core': 1.27.0
+      '@pactor-app/core': 1.33.0
       katex: 0.18.9
       react: 19.2.8
       react-markdown: 10.1.0(@types/react@19.3.0)(react@19.2.8)
@@ -3675,41 +3675,41 @@ snapshots:
       - '@types/react'
       - supports-color
 
-  '@pactor-app/permission@1.27.0':
+  '@pactor-app/permission@1.33.0':
     dependencies:
-      '@pactor-app/core': 1.27.0
+      '@pactor-app/core': 1.33.0
 
-  '@pactor-app/resource@1.27.0':
+  '@pactor-app/resource@1.33.0':
     dependencies:
-      '@pactor-app/core': 1.27.0
+      '@pactor-app/core': 1.33.0
 
-  '@pactor-app/router@1.27.0(react-router-dom@7.18.4(react-dom@19.2.8(react@19.2.8))(react@19.2.8))(react@19.2.8)':
+  '@pactor-app/router@1.33.0(react-router-dom@7.18.4(react-dom@19.2.8(react@19.2.8))(react@19.2.8))(react@19.2.8)':
     dependencies:
-      '@pactor-app/core': 1.27.0
-      '@pactor-app/permission': 1.27.0
+      '@pactor-app/core': 1.33.0
+      '@pactor-app/permission': 1.33.0
       react: 19.2.8
       react-router-dom: 7.18.4(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
 
-  '@pactor-app/runtime@1.27.0(react@19.2.8)':
+  '@pactor-app/runtime@1.33.0(react@19.2.8)':
     dependencies:
-      '@pactor-app/core': 1.27.0
-      '@pactor-app/expression': 1.27.0
-      '@pactor-app/schema': 1.27.0
+      '@pactor-app/core': 1.33.0
+      '@pactor-app/expression': 1.33.0
+      '@pactor-app/schema': 1.33.0
       react: 19.2.8
 
-  '@pactor-app/schema@1.27.0':
+  '@pactor-app/schema@1.33.0':
     dependencies:
-      '@pactor-app/core': 1.27.0
+      '@pactor-app/core': 1.33.0
       ajv: 8.20.0
 
-  '@pactor-app/ui@1.27.0(@date-fns/tz@1.5.0)(@types/react-dom@19.3.0(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.2.8(react@19.2.8))(react-router-dom@7.18.4(react-dom@19.2.8(react@19.2.8))(react@19.2.8))(react@19.2.8)':
+  '@pactor-app/ui@1.33.0(@date-fns/tz@1.5.0)(@types/react-dom@19.3.0(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.2.8(react@19.2.8))(react-router-dom@7.18.4(react-dom@19.2.8(react@19.2.8))(react@19.2.8))(react@19.2.8)':
     dependencies:
       '@base-ui/react': 1.8.0(@date-fns/tz@1.5.0)(@types/react@19.3.0)(date-fns@4.4.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
-      '@pactor-app/core': 1.27.0
-      '@pactor-app/markdown': 1.27.0(@types/react@19.3.0)(react@19.2.8)
-      '@pactor-app/permission': 1.27.0
-      '@pactor-app/router': 1.27.0(react-router-dom@7.18.4(react-dom@19.2.8(react@19.2.8))(react@19.2.8))(react@19.2.8)
-      '@pactor-app/runtime': 1.27.0(react@19.2.8)
+      '@pactor-app/core': 1.33.0
+      '@pactor-app/markdown': 1.33.0(@types/react@19.3.0)(react@19.2.8)
+      '@pactor-app/permission': 1.33.0
+      '@pactor-app/router': 1.33.0(react-router-dom@7.18.4(react-dom@19.2.8(react@19.2.8))(react@19.2.8))(react@19.2.8)
+      '@pactor-app/runtime': 1.33.0(react@19.2.8)
       class-variance-authority: 0.7.1
       clsx: 2.1.1
       cmdk: 1.1.1(@types/react-dom@19.3.0(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
@@ -3734,10 +3734,10 @@ snapshots:
       - react-router-dom
       - supports-color
 
-  '@pactor-app/vite-plugin@1.27.0(vite@8.3.1(@types/node@20.19.43)(jiti@2.7.0)(yaml@2.9.1))':
+  '@pactor-app/vite-plugin@1.33.0(vite@8.3.1(@types/node@20.19.43)(jiti@2.7.0)(yaml@2.9.1))':
     dependencies:
-      '@pactor-app/core': 1.27.0
-      '@pactor-app/schema': 1.27.0
+      '@pactor-app/core': 1.33.0
+      '@pactor-app/schema': 1.33.0
       vite: 8.3.1(@types/node@20.19.43)(jiti@2.7.0)(yaml@2.9.1)
       yaml: 2.9.1
 
@@ -5996,21 +5996,21 @@ snapshots:
 
   p-try@2.2.0: {}
 
-  pactor-app@1.27.0(@date-fns/tz@1.5.0)(@types/react-dom@19.3.0(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.2.8(react@19.2.8))(react-router-dom@7.18.4(react-dom@19.2.8(react@19.2.8))(react@19.2.8))(react@19.2.8)(vite@8.3.1(@types/node@20.19.43)(jiti@2.7.0)(yaml@2.9.1)):
+  pactor-app@1.33.0(@date-fns/tz@1.5.0)(@types/react-dom@19.3.0(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.2.8(react@19.2.8))(react-router-dom@7.18.4(react-dom@19.2.8(react@19.2.8))(react@19.2.8))(react@19.2.8)(vite@8.3.1(@types/node@20.19.43)(jiti@2.7.0)(yaml@2.9.1)):
     dependencies:
-      '@pactor-app/app': 1.27.0(@date-fns/tz@1.5.0)(@types/react-dom@19.3.0(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.2.8(react@19.2.8))(react-router-dom@7.18.4(react-dom@19.2.8(react@19.2.8))(react@19.2.8))(react@19.2.8)
-      '@pactor-app/chat': 1.27.0(@date-fns/tz@1.5.0)(@types/react-dom@19.3.0(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.2.8(react@19.2.8))(react-router-dom@7.18.4(react-dom@19.2.8(react@19.2.8))(react@19.2.8))(react@19.2.8)
-      '@pactor-app/cli': 1.27.0
-      '@pactor-app/core': 1.27.0
-      '@pactor-app/expression': 1.27.0
-      '@pactor-app/markdown': 1.27.0(@types/react@19.3.0)(react@19.2.8)
-      '@pactor-app/permission': 1.27.0
-      '@pactor-app/resource': 1.27.0
-      '@pactor-app/router': 1.27.0(react-router-dom@7.18.4(react-dom@19.2.8(react@19.2.8))(react@19.2.8))(react@19.2.8)
-      '@pactor-app/runtime': 1.27.0(react@19.2.8)
-      '@pactor-app/schema': 1.27.0
-      '@pactor-app/ui': 1.27.0(@date-fns/tz@1.5.0)(@types/react-dom@19.3.0(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.2.8(react@19.2.8))(react-router-dom@7.18.4(react-dom@19.2.8(react@19.2.8))(react@19.2.8))(react@19.2.8)
-      '@pactor-app/vite-plugin': 1.27.0(vite@8.3.1(@types/node@20.19.43)(jiti@2.7.0)(yaml@2.9.1))
+      '@pactor-app/app': 1.33.0(@date-fns/tz@1.5.0)(@types/react-dom@19.3.0(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.2.8(react@19.2.8))(react-router-dom@7.18.4(react-dom@19.2.8(react@19.2.8))(react@19.2.8))(react@19.2.8)
+      '@pactor-app/chat': 1.33.0(@date-fns/tz@1.5.0)(@types/react-dom@19.3.0(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.2.8(react@19.2.8))(react-router-dom@7.18.4(react-dom@19.2.8(react@19.2.8))(react@19.2.8))(react@19.2.8)
+      '@pactor-app/cli': 1.33.0
+      '@pactor-app/core': 1.33.0
+      '@pactor-app/expression': 1.33.0
+      '@pactor-app/markdown': 1.33.0(@types/react@19.3.0)(react@19.2.8)
+      '@pactor-app/permission': 1.33.0
+      '@pactor-app/resource': 1.33.0
+      '@pactor-app/router': 1.33.0(react-router-dom@7.18.4(react-dom@19.2.8(react@19.2.8))(react@19.2.8))(react@19.2.8)
+      '@pactor-app/runtime': 1.33.0(react@19.2.8)
+      '@pactor-app/schema': 1.33.0
+      '@pactor-app/ui': 1.33.0(@date-fns/tz@1.5.0)(@types/react-dom@19.3.0(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.2.8(react@19.2.8))(react-router-dom@7.18.4(react-dom@19.2.8(react@19.2.8))(react@19.2.8))(react@19.2.8)
+      '@pactor-app/vite-plugin': 1.33.0(vite@8.3.1(@types/node@20.19.43)(jiti@2.7.0)(yaml@2.9.1))
       react: 19.2.8
       react-dom: 19.2.8(react@19.2.8)
       react-router-dom: 7.18.4(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
