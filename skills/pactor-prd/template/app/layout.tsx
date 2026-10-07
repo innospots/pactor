@@ -3,12 +3,10 @@ import { Geist, Geist_Mono } from "next/font/google";
 import { PactorApp } from "@/pactor/App";
 // 顺序约定：globals（本项目 tailwind 工具类 + 皮肤无关的外壳规则）→
 // ui 预建样式（同层冲突时 ui 胜出，保证其内部 base/响应式变体排序生效，
-// 如 Sidebar 的 hidden md:block）→ login.css（登录页视觉，须在 ui 之后，
-// 经 data-slot 钩子压过组件默认样式）。主题令牌由 public/skins/<skin>.css
+// 如 Sidebar 的 hidden md:block）。主题令牌由 public/skins/<skin>.css
 // 经下方内联脚本在首屏注入（link 后加载者胜出）。
 import "./globals.css";
 import "@pactor-app/ui/styles.css";
-import "./login.css";
 
 export const metadata: Metadata = {
   title: "Pactor Console",

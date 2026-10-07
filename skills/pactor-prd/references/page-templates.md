@@ -338,6 +338,53 @@ body:
 - **条件显隐**：`onValuesChange` 把字段值镜像到 state（`"${event.x != null ? event.x : state.x}"` 保持其他字段变化时原值），再用 `when` 控制显隐；编辑时关键字段 `disabled: ${state.editingId != ''}`
 - 空 `editingId` 时 mock 的 detail 接口须返回空对象而非 404
 
+## 登录页（Login 业务组件）
+
+登录页一律用 DSL `type: Login` 业务组件，禁止手写 Card+Form+自定义 CSS。**样板即模板工程的 `template/src/server/yaml/common/login.yaml`**（可直接运行预览），核心结构：
+
+```yaml
+body:
+  type: Login
+  props:
+    layout: split            # split(默认) / centered / brand-card / overlap / backdrop
+    authVariant: card        # 认证区容器：plain 裸表单 / card 常规卡片 / float 大悬浮卡片
+    brand:                   # 品牌区（文案取自 PRD；illustration 缺省内置插画，传 "" 隐藏）
+      name: {{产品名}}
+      title: {{品牌主标题}}
+      description: {{品牌说明}}
+    title: 登录
+    subtitle: {{副标题}}
+    submitText: 登 录
+    # registerLink / forgotLink / footer 按需添加（href 跳转或 onRegisterClick/onForgotClick 事件）
+  events:
+    onSubmit:                # values 经 ${event.username} / ${event.password} 读取
+      - id: loginResult
+        action: request
+        params:
+          method: POST
+          url: {{登录接口地址}}
+          body: { username: ${event.username}, password: ${event.password} }
+      - action: if
+        params:
+          condition: ${actions.loginResult == null || actions.loginResult.token == null}
+          then:
+            - action: message
+              params: { messageType: error, text: 用户名或密码错误 }
+      - action: if
+        params:
+          condition: ${actions.loginResult != null && actions.loginResult.token != null}
+          then:
+            - action: app.reload
+              params: { to: / }
+```
+
+要点：
+
+- **布局是产品决策**：原型未明确布局时必须向用户提问（5 种 `layout` + `brandSide`/`brandRatio`/`authVariant` 等修饰），用户不答默认 `split` + `card`；原型可判定则不提问
+- 页面布局（sitemap `layouts`）用纯 PageOutlet 外壳（模板为 `login` 布局），组件自带整页渐变、背景装饰与品牌面板，不要再套自定义背景容器
+- 可配置项权威定义见 `openspec/specs/ui-login-component` 与组件源码（`packages/ui/src/components/business/Login/`）；未配置的可选元素不渲染
+- 校验失败由组件内部 Form rules 就地提示；登录失败/成功分支在 DSL 动作链用 `if` + `message` 实现
+
 ## 列表页（轻量变体：新建/编辑跳独立表单页）
 
 ```yaml
