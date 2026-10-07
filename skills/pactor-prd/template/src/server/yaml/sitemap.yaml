@@ -255,15 +255,11 @@ layouts:
               props: { className: shell-content }
               children:
                 - type: PageOutlet
-  # 登录页外壳：login-page 全屏渐变容器，样式见 app/login.css
+  # 登录页外壳：纯页面出口（登录页由 Login 业务组件自带整页品牌视觉与背景装饰）
   login:
     dsl: "1.0"
     body:
-      type: Flex
-      props:
-        className: login-page
-      children:
-        - type: PageOutlet
+      type: PageOutlet
   # 裸布局：无外壳，页面铺满
   blank:
     dsl: "1.0"
