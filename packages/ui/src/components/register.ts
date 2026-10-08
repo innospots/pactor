@@ -19,6 +19,8 @@ import { Card } from './components/Card/index.js';
 import { Carousel } from './components/Carousel/index.js';
 import { Cascader } from './components/Cascader/index.js';
 import { Checkbox } from './components/Checkbox/index.js';
+import { ChipFilter } from './components/ChipFilter/index.js';
+import { ChipNode } from './components/ChipNode/index.js';
 import { CodeBlock } from './components/CodeBlock/index.js';
 import { Collapsible } from './components/Collapsible/index.js';
 import { ColorPicker } from './components/ColorPicker/index.js';
@@ -200,6 +202,8 @@ export const builtinComponents = {
   // 表单类扩展组件
   Textarea,
   Checkbox,
+  ChipFilter,
+  ChipNode,
   RadioGroup,
   Switch,
   Slider,

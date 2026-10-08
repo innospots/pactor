@@ -1,23 +1,68 @@
 # 提炼自「筛选 F1 — Form inline 表单筛选」：占位已清洗、示例数据已注入，可直接渲染。
 # 人工提炼入库、落盘维护；构建期只读取，不做推导。
 title: 筛选 F1 — Form inline 表单筛选
+# 内容较少：iframe 用小尺寸，内容在预览视口居中
+height: 220
+center: true
+state:
+  filterExpanded: false
 body:
-  type: Flex
+  type: Form
   props:
-    direction: column
-    gap: 16
+    layout: inline
   children:
-    - type: Form
+    - type: Input
       props:
-        layout: inline
-      children:
-        - type: Field
-          children:
-            - type: Input
-        - type: Button
-          props:
-            text: 查询
-            htmlType: submit
-        - type: Button
-          props:
-            text: 重置
+        name: fieldA
+        label: 标签A
+        placeholder: 请输入
+    - type: Select
+      props:
+        name: fieldB
+        label: 标签B
+        value: all
+        options:
+          - { label: 全部, value: all }
+          - { label: 选项一, value: one }
+          - { label: 选项二, value: two }
+    - type: Input
+      props:
+        name: fieldC
+        label: 标签C
+        placeholder: 请输入
+    # 折叠区字段（「更多」展开后显示，可再收起）
+    - type: Input
+      when: "${state.filterExpanded}"
+      props:
+        name: fieldD
+        label: 标签D
+        placeholder: 请输入
+    - type: Select
+      when: "${state.filterExpanded}"
+      props:
+        name: fieldE
+        label: 标签E
+        placeholder: 请选择
+        options:
+          - { label: 全部, value: all }
+          - { label: 启用, value: enabled }
+          - { label: 停用, value: disabled }
+    - type: Button
+      props:
+        text: 查询
+        variant: primary
+        submit: true
+    - type: Button
+      props:
+        text: 重置
+    # 「更多 / 收起」链接触发折叠区（文档 F1 规则：展开后显示完整行，可再收起）
+    - type: Button
+      props:
+        text: "${state.filterExpanded ? '收起' : '更多'}"
+        variant: link
+        icon: "${state.filterExpanded ? 'chevron-up' : 'chevron-down'}"
+      events:
+        onClick:
+          action: setState
+          params:
+            filterExpanded: "${!state.filterExpanded}"

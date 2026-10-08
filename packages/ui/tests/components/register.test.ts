@@ -45,6 +45,8 @@ const EXTENDED_TYPES = [
   'Progress',
   'Textarea',
   'Checkbox',
+  'ChipFilter',
+  'ChipNode',
   'RadioGroup',
   'Switch',
   'Slider',

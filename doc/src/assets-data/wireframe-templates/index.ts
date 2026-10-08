@@ -43,6 +43,10 @@ export interface WireframePreview {
   state: Record<string, unknown>;
   /** 可直接渲染的 DSL 节点 */
   node: unknown;
+  /** iframe 高度（px，缺省 560）；内容较少的示例用更小值 */
+  height?: number;
+  /** 内容在预览视口居中展示（内容较少的示例用，缺省 false） */
+  center?: boolean;
 }
 
 /** 详情页正文流内容块：说明 HTML / 运行态预览（iframe）/ 结构 Tab */
@@ -124,6 +128,8 @@ function loadPreviews(dir: string): Map<string, WireframePreview> {
           ? (doc.state as Record<string, unknown>)
           : {},
       node: doc?.body ?? null,
+      height: typeof doc?.height === 'number' ? doc.height : undefined,
+      center: doc?.center === true,
     });
   }
   return map;

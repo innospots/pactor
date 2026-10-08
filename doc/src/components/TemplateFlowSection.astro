@@ -23,6 +23,7 @@ const { slug, blocks } = Astro.props;
       return <div class="note-md" set:html={b.html} />;
     }
     if (b.kind === "preview") {
+      const frameHeight = b.preview.height ?? 560;
       return (
         <div class="tpl-preview">
           <div class="tpl-preview-bar">
@@ -38,6 +39,7 @@ const { slug, blocks } = Astro.props;
           </div>
           <iframe
             class="tpl-preview-frame"
+            style={`height: ${frameHeight}px; margin-bottom: ${-frameHeight * 0.2}px;`}
             src={`/templates/wireframe/preview/${slug}/${b.preview.name}`}
             loading="lazy"
             title={b.preview.title}
