@@ -30,7 +30,7 @@ src/server/yaml/
 3. **一次更新 sitemap**：
    - `pages`：清单中每一页一条（含 hidden 的详情/编辑）
    - `menus`：仅「进导航」的页进 group；hidden 页带 `activeMenu`
-4. **mock 批量注册**：按 `references/mock-data-routes.md`，每个 http 数据源在 `app/api/data/[...parts]/route.ts` 路由表增加一项；`src/pactor/mocks/` 按域拆分文件。
+4. **数据源声明**：按 `references/data-api.md` 命名约定，每个 http 数据源在 yaml 内直接声明最终接口路径（转发层纯转发，**无需注册**）；无后端时页面按空态渲染。
 5. **交叉检查**（生成后必做）：
 
 ```text
@@ -53,7 +53,7 @@ src/server/yaml/
 
 ## 参考模块（模板内）
 
-复制 `pactor-prd/template/` 后，保留 `yaml/provider/`、`yaml/route/` 作写法样本；新模块 **照同样目录深度** 新增；全站生成完成后删除参考模块及其 mock 路由项。
+复制 `pactor-prd/template/` 后，保留 `yaml/provider/`、`yaml/route/` 作写法样本；新模块 **照同样目录深度** 新增；全站生成完成后删除参考模块。
 
 ## 已有工程（增量）
 

@@ -8,7 +8,7 @@
 
 - `src/server/yaml/sitemap.yaml`（或等价 sitemap 源）
 - 页面 yaml 目录（**模式 B** `yaml/<模块>/<id>.yaml` 或 **模式 A** `yaml/pages/*.page.yaml` — 见 `pactor-dsl/references/page-catalog-and-layout.md`）
-- PRD 风格 mock：`app/api/data/[...parts]/route.ts` + `src/pactor/mocks/`（若工程仍用 `type: service`，增量页 **仍须 http**，并迁移或仅对新页遵守红线）
+- 数据接口层：`app/api/d/[...parts]/route.ts` 纯转发（路径即契约、无服务层接口时返回空数据，见 `data-api.md`）；**无 mock 层**（若工程仍用 `type: service`，增量页 **仍须 http**，并迁移或仅对新页遵守红线）
 
 不满足时：先 **`pactor-project`** 或 **新建工程 `pactor-prd` 模式** 搭壳，再回来做增量。
 
@@ -41,12 +41,12 @@
 
 | 变更 | 动作 |
 | --- | --- |
-| **add 页面** | `mkdir` 模块目录；新建 yaml；`sitemap.yaml` 增加 `pages` + `menus`；mock 路由表 + mocks 文件 |
+| **add 页面** | `mkdir` 模块目录；新建 yaml；`sitemap.yaml` 增加 `pages` + `menus`；dataSources 直接声明最终接口路径（无需注册） |
 | **update 页面** | 改对应 yaml（结构/字段/交互/文案）；若 path 或 id 变则同步 `sitemap.yaml`、检查 `router.push` / 菜单 `pageId` |
-| **update 仅文案/字段** | 只改 yaml；mock 字段变更时改 `mocks/*` 与路由返回形状 |
-| **add 数据源** | yaml 内 `dataSources` + `app/api/data/...` 注册 + mock handler |
-| **样式** | 仅当线框图要求新页面级样式时改 `globals.css` / `login.css` / 皮肤；见 `theme-and-style.md` |
-| **deprecate** | 删 yaml；从 `pages`/`menus` 移除；删 mock 路由项；全局搜 `pageId` / 路径引用 |
+| **update 仅文案/字段** | 只改 yaml |
+| **add 数据源** | yaml 内 `dataSources` 声明即可（路径即契约，转发层无需注册） |
+| **样式** | 仅当线框图要求新页面级样式时改 `globals.css` / 皮肤；见 `theme-and-style.md` |
+| **deprecate** | 删 yaml；从 `pages`/`menus` 移除；全局搜 `pageId` / 路径引用 |
 
 **禁止**：为增量在仓库根再复制一份 `template/` 覆盖工程。
 
@@ -56,7 +56,6 @@
 | --- | --- | --- |
 | 脚手架 | 复制 `template/` | **跳过**；仅摸底 |
 | 页面 | 全量清单 N 文件 | 仅 **delta** 行对应文件 |
-| mock | 全表扩展 | 只加/改涉及接口 |
 | 样式 | 全站移植 | 仅受影响页面/令牌 |
 | 验收 | 全站清单 | **变更页全量验** + **抽 1～2 条旧页回归**（见 acceptance-checklist） |
 
@@ -65,7 +64,7 @@
 ```text
 对每个 add：存在 yaml 且 sitemap.pages 含 id 且 menus 正确
 对每个 update：page.id 未变（除非走 rename 流程）且 validate 通过
-mock：变更页涉及的所有 http 路径在 Network 200
+数据接口：变更页涉及的所有 http 路径在 Network 200（无后端时为空数据 {}，页面按空态渲染）
 ```
 
 `npx pactor validate` 仅覆盖改动的 yaml 路径。
@@ -73,4 +72,4 @@ mock：变更页涉及的所有 http 路径在 Network 200
 ## 5. 与 `pactor-dsl` 的分工
 
 - **单页小改**、无线框图、只改 DSL 语法：可用 **`pactor-dsl`**。
-- **线框图驱动**、含 mock/sitemap/多页联动：用 **本增量流程**（仍属 `pactor-prd`）。
+- **线框图驱动**、含 数据接口/sitemap/多页联动：用 **本增量流程**（仍属 `pactor-prd`）。

@@ -45,5 +45,5 @@
 
 - **dev server 不会因 yaml 改动热重载**（yaml 在服务端模块加载时读取）：改 `src/server/yaml/**` 后重启 dev server 再验
 - **端口冲突**：启动前 `lsof -nP -iTCP:<port> -sTCP:LISTEN`，已有 dev server 直接复用
-- **两段数据路径被当详情解析**：选项类接口用单段路径（`/api/data/project-members` 而非 `project/members`）
+- **两段数据路径被当详情解析**：选项类接口用单段路径（`/api/d/project-members` 而非 `project/members`）
 - **toast 消失快误判未触发**：验证错误提示时在操作后立即截图/读 DOM

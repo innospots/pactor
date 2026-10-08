@@ -14,7 +14,7 @@ dataSources:
     autoLoad: true
     request:
       method: GET
-      url: /api/data/routes
+      url: /api/d/routes
       params:
         status: ${state.statusChip}
         type: ${state.typeChip}

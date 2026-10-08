@@ -12,12 +12,12 @@ dataSources:
     autoLoad: true
     request:
       method: GET
-      url: /api/data/providers/${route.params.code}
+      url: /api/d/providers/${route.params.code}
   upstream:
     type: http
     request:
       method: GET
-      url: /api/data/providers/${route.params.code}/pull-models
+      url: /api/d/providers/${route.params.code}/pull-models
 body:
   type: Page
   children:

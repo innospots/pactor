@@ -21,7 +21,7 @@ dataSources:
     autoLoad: true
     request:
       method: GET
-      url: /api/data/data-list
+      url: /api/d/data-list
       params:
         keyword: ${state.keyword}
         status: ${state.status}
@@ -30,7 +30,7 @@ dataSources:
     autoLoad: false
     request:
       method: GET
-      url: /api/data/data-list/${state.editingId}
+      url: /api/d/data-list/${state.editingId}
 body:
   type: Page
   children:
@@ -68,7 +68,7 @@ body:
                 params:
                   editingId: ""
                   fType: ""
-              - action: reload # 清空 editing 数据（editingId 为空 → mock 返回空对象）
+              - action: reload # 清空 editing 数据（editingId 为空 → 空对象）
                 params:
                   dataSource: editing
               - action: overlay.open # 锚点 &entityDrawer 在此定义，表格行内用 *entityDrawer 引用
@@ -93,7 +93,7 @@ body:
                           - action: request
                             params:
                               method: POST
-                              url: /api/data/ops/data-list-save
+                              url: /api/d/ops/data-list-save
                               body:
                                 id: ${state.editingId}
                                 name: ${event.name}

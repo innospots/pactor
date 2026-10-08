@@ -10,7 +10,7 @@
 │   │   ├── sitemap/route.ts           ✅ 返回 sitemap 入口数据（由 src/server/sitemap.ts 组装）
 │   │   ├── public/pages/[id]/route.ts ➕ 懒加载页面端点，返回单页 envelope（id/resourceType/version/dslVersion/schema/updatedAt）
 │   │   ├── auth/ · users/             ✅ 模板自带（演示账号，按需保留）
-│   │   └── data/[...path]/route.ts    ➕ mock 数据统一入口（见 mock-data-routes.md）
+│   │   └── d/[...parts]/route.ts      ➕ 数据统一入口（纯转发 → $NEXT_PUBLIC_API_BASE_URL；无后端返回空数据，见 data-api.md）
 │   ├── globals.css             ✅ 全局样式（皮肤导入处）
 │   ├── layout.tsx              ✅ 根布局（自定义页面 CSS 在这里挂载）
 │   └── theme.css               ✅ 主题令牌（样式移植的主战场）
