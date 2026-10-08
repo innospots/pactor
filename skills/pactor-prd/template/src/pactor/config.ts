@@ -19,10 +19,18 @@ export const pageEndpoint = (pageId: string) =>
   `/api/public/pages/${pageId}`;
 
 /**
- * 外部接口基准地址（SitemapApp baseUrl）。
+ * 客户端接口基准地址（SitemapApp baseUrl）。
+ * 数据接口全部同源经转发层（app/api/d/[...parts]）调用，故为空字符串
+ * （相对路径由浏览器按同源解析）。
+ */
+export const apiBaseUrl = "";
+
+/**
+ * 服务端接口基准地址（转发层的目标地址，仅服务端路由使用）。
  * 由 next.config.js 的 API_BASE_URLS 按构建环境（APP_ENV：
  * build / build:dev / build:test → production / development / test）
- * 解析，经 env 配置内联进客户端包；缺省回退本地开发地址。
+ * 解析并内联；缺省回退本地开发占位（不存在 → 转发层回退空数据）。
+ * 所有需要服务端接口地址的位置统一从这里导入。
  */
-export const apiBaseUrl =
-  process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:9011";
+export const serverBaseUrl =
+  process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:9011/backend";

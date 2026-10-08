@@ -15,7 +15,7 @@ dataSources:
     autoLoad: true
     request:
       method: GET
-      url: /api/data/dashboard
+      url: /api/d/dashboard
       params:
         start: ${state.range.start}
         end: ${state.range.end}

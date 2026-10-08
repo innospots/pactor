@@ -1,12 +1,12 @@
 # 页面 YAML 模板
 
-常用页面模板。占位符：`{{kebab-id}}` 页面 id、`{{页面标题}}`、`{{模块名}}`、`{{resource}}` 数据接口名（单段，见 mock-data-routes.md）、`{{实体名}}` 业务实体中文名。DSL 语法细节以 `pactor-dsl` skill 与 packages/ui 当前导出为准。
+常用页面模板。占位符：`{{kebab-id}}` 页面 id、`{{页面标题}}`、`{{模块名}}`、`{{resource}}` 数据接口名（单段，见 data-api.md）、`{{实体名}}` 业务实体中文名。DSL 语法细节以 `pactor-dsl` skill 与 packages/ui 当前导出为准。
 
 **数据列表页（搜索 + 表格 + 新建/编辑）默认套用「数据列表标准模型」**；仅当新建/编辑是独立路由表单页时才用轻量变体。
 
 ## 数据列表标准模型（搜索 Form + 表格 + 抽屉新建/编辑）
 
-从成熟实现提取的完整闭环：搜索过滤、新建/编辑共用抽屉表单（分区 + 条件显隐 + 预填）、操作列 link 按钮。**完整可拷贝的骨架文件：`template/src/server/yaml/models/data-list.yaml`**（已注册进模板 sitemap 的可运行示例，菜单「页面骨架 / 数据列表」直接预览；复制后替换页面信息、字段、接口名与文案即可，配套 mock 为 `template/src/pactor/mocks/data-list-mock.ts`）。结构照抄，字段按线框图替换：
+从成熟实现提取的完整闭环：搜索过滤、新建/编辑共用抽屉表单（分区 + 条件显隐 + 预填）、操作列 link 按钮。**完整可拷贝的骨架文件：`template/src/server/yaml/models/data-list.yaml`**（已注册进模板 sitemap 的可运行示例，菜单「页面骨架 / 数据列表」直接预览；复制后替换页面信息、字段、接口名与文案即可）。结构照抄，字段按线框图替换：
 
 ```yaml
 dsl: "1.0"
@@ -27,7 +27,7 @@ dataSources:
     autoLoad: true
     request:
       method: GET
-      url: /api/data/{{resource}}
+      url: /api/d/{{resource}}
       params:
         keyword: ${state.keyword}
         status: ${state.status}
@@ -36,7 +36,7 @@ dataSources:
     autoLoad: false
     request:
       method: GET
-      url: /api/data/{{resource}}/${state.editingId}
+      url: /api/d/{{resource}}/${state.editingId}
 body:
   type: Page
   children:
@@ -99,7 +99,7 @@ body:
                           - action: request
                             params:
                               method: POST
-                              url: /api/data/ops/{{resource}}-save
+                              url: /api/d/ops/{{resource}}-save
                               body:
                                 id: ${state.editingId}
                                 name: ${event.name}
@@ -332,11 +332,11 @@ body:
 - **新建/编辑共用同一抽屉**：YAML 锚点 `&entityDrawer` 在「新建」按钮的 `overlay.open` 中定义（必须先出现），表格行内 `*entityDrawer` 引用；`title` 用 `${state.editingId == '' ? ... }` 三元切换；唯一区别是编辑以 `initialValues: ${data.editing}` 预填
 - **抽屉宽度 720**（`overlay.open type: drawer` 的 `width` 生效）；抽屉内分区**不用 Card**：`Text(strong) 标题 → Separator → 字段组`，多个分区重复此结构
 - **搜索栏按钮对齐**：查询/重置放进 `Field`，其 `label` 用不间断空格 U+00A0（直接敲 `" "` 普通空格可能被压缩），与左侧控件基线对齐
-- **Form 不能嵌套**（渲染原生 `<form>`，submit 冒泡）：抽屉内只用一个 Form；主从多值（如字典项）的子项编辑在**同一 Form** 内做「子 Table + 行下展开表单」，`onSubmit` 用 `if` 动作按 state 分流提交目标（子项保存走独立 ops 接口 + `reload editing`）；表达式不支持数组方法/箭头函数，子项草稿必须走 mock 接口不能前端拼
+- **Form 不能嵌套**（渲染原生 `<form>`，submit 冒泡）：抽屉内只用一个 Form；主从多值（如字典项）的子项编辑在**同一 Form** 内做「子 Table + 行下展开表单」，`onSubmit` 用 `if` 动作按 state 分流提交目标（子项保存走独立 ops 接口 + `reload editing`）；表达式不支持数组方法/箭头函数，子项草稿必须走服务端接口不能前端拼
 - **编辑预填链路**：`setState(editingId + 显隐镜像)` → `reload editing` → `overlay.open`；镜像值取自行数据（`${row.type}`），不要等 editing 接口
 - **overlay.open 阻塞到关闭**，关闭后 `reload list`；新建按钮同理（先重置 state 再 reload editing 清空）
 - **条件显隐**：`onValuesChange` 把字段值镜像到 state（`"${event.x != null ? event.x : state.x}"` 保持其他字段变化时原值），再用 `when` 控制显隐；编辑时关键字段 `disabled: ${state.editingId != ''}`
-- 空 `editingId` 时 mock 的 detail 接口须返回空对象而非 404
+- 空 `editingId` 时后端 detail 接口须返回空对象而非 404（转发层本身对 404 也回退空对象，但真实后端仍建议遵守该约定）
 
 ## 登录页（Login 业务组件）
 
@@ -404,7 +404,7 @@ dataSources:
     autoLoad: true
     request:
       method: GET
-      url: /api/data/{{resource}}
+      url: /api/d/{{resource}}
       params:
         keyword: ${state.keyword}
         status: ${state.status}
@@ -507,7 +507,7 @@ dataSources:
     autoLoad: true
     request:
       method: GET
-      url: /api/data/{{resource}}/${route.params.code}   # 路径参数经 route 注入
+      url: /api/d/{{resource}}/${route.params.code}   # 路径参数经 route 注入
 body:
   type: Page
   children:
@@ -551,7 +551,7 @@ dataSources:
     autoLoad: true
     request:
       method: GET
-      url: /api/data/{{resource}}/${route.params.code}
+      url: /api/d/{{resource}}/${route.params.code}
 body:
   type: Page
   children:
@@ -580,9 +580,9 @@ body:
         onSubmit:
           - action: setState
             params: { submitting: true }
-          - action: http.post            # mock 阶段可指向 /api/data/{{resource}}
+          - action: http.post            # 指向 /api/d/{{resource}}（无后端时转发层返回 { ok: true }）
             params:
-              url: /api/data/{{resource}}
+              url: /api/d/{{resource}}
               body: ${event}
           - action: message
             params: { messageType: success, text: 保存成功 }

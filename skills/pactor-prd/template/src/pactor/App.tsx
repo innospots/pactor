@@ -15,8 +15,9 @@ import { pactorComponents } from "./components";
  * @pactor-app/app 内置；此处只提供：sitemap 源、宿主路由
  * （pathname / navigate）、HTTP 钩子，以及页面 DSL 依赖的运行时支撑层——
  * 自定义组件（components/）与调试台自定义动作（actions.ts）。
- * 页面数据全部走 http 数据源（/api/data/*，mock 实现见 services.ts +
- * mocks/，服务端路由 app/api/data/[...parts]/route.ts 复用同一套包装层）。
+ * 页面数据全部走 http 数据源（/api/d/*），经转发层
+ *（app/api/d/[...parts]/route.ts）原样转发到 serverBaseUrl（见 config.ts）；
+ * 没有服务层接口时转发层返回空数据，页面按空态渲染。
  *
  * 登录 / 登出是普通 HTTP 调用，由 DSL 中的内置 request 动作直接表达
  *（见 src/server/yaml/ 的登录页 / 布局 DSL），无需客户端注册服务。

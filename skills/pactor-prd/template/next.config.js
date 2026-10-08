@@ -9,8 +9,8 @@
  * - 构建环境可设 NEXT_PUBLIC_API_BASE_URL 显式覆盖（域名不符合约定时）。
  */
 const API_BASE_URLS = {
-  /** 本地开发：dev 端口 9011 */
-  development: 'http://localhost:9011',
+  /** 本地开发：无服务层接口（转发命中前端兜底 → 返回空数据）；接本地后端时改为其地址 */
+  development: 'http://localhost:9011/backend',
   /** 测试环境：替换为实际测试环境 API 域名 */
   test: 'https://api-test.example.com',
   /** 生产环境：替换为实际生产 API 域名 */

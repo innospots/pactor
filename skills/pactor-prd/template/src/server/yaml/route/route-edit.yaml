@@ -10,7 +10,7 @@ dataSources:
     autoLoad: true
     request:
       method: GET
-      url: /api/data/routes/${route.params.code}
+      url: /api/d/routes/${route.params.code}
 body:
   type: Page
   children:

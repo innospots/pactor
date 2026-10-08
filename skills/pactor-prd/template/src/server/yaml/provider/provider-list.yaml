@@ -14,7 +14,7 @@ dataSources:
     autoLoad: true
     request:
       method: GET
-      url: /api/data/providers
+      url: /api/d/providers
       params:
         keyword: ${state.keyword}
         status: ${state.statusChip}
