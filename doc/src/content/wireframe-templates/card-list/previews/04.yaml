@@ -1,0 +1,38 @@
+# 提炼自「2.8 插件列表示例（上中下 + 平铺）」：占位已清洗、示例数据已注入，可直接渲染。
+# 人工提炼入库、落盘维护；构建期只读取，不做推导。
+title: 2.8 插件列表示例（上中下 + 平铺）
+body:
+  type: Flex
+  props:
+    direction: column
+    gap: 16
+  children:
+    - type: Card
+      children:
+        - type: Flex
+          children:
+            - type: Text
+              props:
+                text: Logo
+                type: secondary
+            - type: Text
+              props:
+                text: Typography
+                type: secondary
+            - type: Text
+              props:
+                text: Tag
+                type: secondary
+            - type: Text
+              props:
+                text: Button
+                type: secondary
+        - type: Typography
+        - type: Flex
+          props:
+            className: card-footer
+          children:
+            - type: Text
+              props:
+                text: Button
+                type: secondary

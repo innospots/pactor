@@ -50,12 +50,12 @@
     "access": "public"
   },
   "dependencies": {
-    "@pactor-app/core": "1.34.0"
+    "@pactor-app/core": "workspace:*"
   },
   "devDependencies": {
     "@types/react": "^19.2.18",
-    "@pactor-app/expression": "1.34.0",
-    "@pactor-app/runtime": "1.34.0",
+    "@pactor-app/expression": "workspace:*",
+    "@pactor-app/runtime": "workspace:*",
     "react": "^19.2.8"
   }
 }

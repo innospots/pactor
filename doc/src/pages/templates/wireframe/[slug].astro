@@ -1,0 +1,47 @@
+---
+/**
+ * 线框模板详情页 /templates/wireframe/<slug>。
+ * 复用组件详情页 AssetDetail 骨架（面包屑 + 页头 + 固定章节），
+ * 章节按模板文档的 ## 分组生成：每个布局章节内「预览 + 结构（DSL/yaml Tab）」
+ * 放在一起展示；不渲染元信息/变体/API 属性章节，ASCII 线框不展示。
+ * 面包屑右端「复制此页」复制该模板 markdown 源码原文。
+ */
+import AssetDetail from '../../../templates/AssetDetail.astro';
+import CopyButton from '../../../components/CopyButton';
+import TemplateFlowSection from '../../../components/TemplateFlowSection.astro';
+import { wireframeTemplates } from '../../../assets-data/wireframe-templates';
+
+export function getStaticPaths() {
+  return wireframeTemplates.map((t) => ({
+    params: { slug: t.slug },
+    props: { slug: t.slug },
+  }));
+}
+
+const { slug } = Astro.props as { slug: string };
+const tpl = wireframeTemplates.find((t) => t.slug === slug)!;
+const currentPath = `/templates/wireframe/${tpl.slug}`;
+---
+
+<AssetDetail
+  title={tpl.title}
+  description={tpl.summary}
+  category="templates"
+  currentPath={currentPath}
+  parent={{ name: '线框模板', href: '/templates/wireframe' }}
+  status={{ maturity: 'stable', integration: 'integrated' }}
+  meta={[]}
+  sections={tpl.sections.map((s) => ({
+    title: s.title,
+    body: TemplateFlowSection,
+    bodyProps: { slug: tpl.slug, blocks: s.blocks },
+  }))}
+>
+  <CopyButton
+    slot="breadcrumb-extra"
+    text={tpl.rawSource}
+    label="复制此页"
+    appendSource={false}
+    client:visible
+  />
+</AssetDetail>

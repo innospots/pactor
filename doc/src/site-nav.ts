@@ -94,6 +94,7 @@ export const SITE_NAV: SiteNavCategory[] = [
     routePrefix: 'templates',
     items: [
       overview(),
+      { slug: 'wireframe', name: '线框模板' },
       { slug: 'skeleton', name: '页面骨架' },
       { slug: 'charts', name: '图表' },
       { slug: 'lists', name: '列表' },

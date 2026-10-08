@@ -1,0 +1,71 @@
+# 提炼自「结构 S1 — 筛选与表格各自独立」：占位已清洗、示例数据已注入，可直接渲染。
+# 人工提炼入库、落盘维护；构建期只读取，不做推导。
+title: 结构 S1 — 筛选与表格各自独立
+state:
+  xxx: ""
+body:
+  type: Page
+  children:
+    - type: Card
+      children:
+        - type: Form
+          props:
+            name: filter
+            layout: inline
+          children:
+            - type: Input
+              props:
+                name: keyword
+                label: 关键词
+                placeholder: 输入关键词
+            - type: Select
+              props:
+                name: status
+                label: 状态
+                placeholder: 选择状态
+                options:
+                  - label: 全部
+                    value: all
+                  - label: 启用
+                    value: enabled
+                  - label: 停用
+                    value: disabled
+            - type: Button
+              props:
+                text: 查询
+                variant: primary
+                submit: true
+            - type: Button
+              props:
+                text: 重置
+    - type: Card
+      children:
+        - type: Table
+          props:
+            dataSource:
+              - id: 1
+                name: 示例数据 A
+                owner: 张三
+                status: 启用
+              - id: 2
+                name: 示例数据 B
+                owner: 李四
+                status: 停用
+              - id: 3
+                name: 示例数据 C
+                owner: 王五
+                status: 启用
+            columns:
+              - title: 名称
+                dataIndex: name
+              - title: 负责人
+                dataIndex: owner
+              - title: 状态
+                dataIndex: status
+    - type: Pagination
+      props:
+        total: 128
+        pageSize: 10
+        align: right
+        showTotal: true
+        pageSizeOptions: [10, 20, 50]

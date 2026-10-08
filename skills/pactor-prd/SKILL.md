@@ -2,7 +2,7 @@
 name: pactor-prd
 description: |
   Use when PRD or markdown wireframes drive Pactor YAML pages (skill id pactor-prd). Greenfield: copy template/ into a new repo. Incremental: in an existing Pactor project, add or update pages from new/changed wireframe files (DSL, sitemap, menus, data API, styles). Triggers: pactor-prd, prd-to-app, 线框图增量, 已有项目加页面, PRD 更新页面.
-version: 1.4.0
+version: 1.5.0
 ---
 
 # PRD → YAML 页面应用生成
@@ -17,6 +17,7 @@ version: 1.4.0
 ## 输入要求
 
 - PRD/线框图：总览 README（模块 × 页面 × 优先级）+ 分页线框 markdown（ASCII + 区域 + 交互）
+- **接口文档/说明（可选）**：API 路径、方法、参数、返回结构；存在时页面 dataSources 直接对接文档接口，不再走 `/api/d/...` 约定
 - **增量**：可只提供 **变更的线框图文件** 列表（或 PRD 目录 + 标明 diff 范围）
 - 原产品代码仓（可选）：抽设计令牌、自定义 CSS、交互
 - 目标：空目录（新建工程）或已有工程根目录（增量）
@@ -25,7 +26,7 @@ version: 1.4.0
 
 ## 红线（必须遵守）
 
-1. **dataSources 一律 `type: http`**，指向 `/api/d/...`，不写 `type: service`，便于后续替换真实接口
+1. **dataSources 一律 `type: http`，不写 `type: service`**；**PRD 含接口文档/说明时，url 取文档中的接口地址**（方法、路径、返回形状对齐，见「1. 输入解析」）；无接口文档时指向 `/api/d/...`（转发层空数据回退，后续按 `references/data-api.md` 接真实接口）
 2. **布局与间距以样板页为准**：新建工程时以 `template/` 同类页为准；**增量时以目标工程内同模块/同类型页**为准。线框图只提取结构与功能，不逐像素还原 ASCII
 3. **样式与原产品一致**：主题令牌（含深浅色）、自定义 CSS、换肤入口全部移植对齐，见 `references/theme-and-style.md`
 4. **功能与原产品一致**：线框图描述的筛选/搜索/跳转/弹窗/提交等交互必须经 events/actions 闭环可用，禁止只画静态骨架；错误分支（校验失败提示等）也要实现
@@ -48,6 +49,7 @@ version: 1.4.0
 
 - 读 README / 变更线框图：模块树、页面 id（kebab-case）、path、菜单、P0/P1/P2
 - 逐页读线框：页面类型、区域、字段、交互
+- **接口文档解析**：PRD 含接口文档/说明时，提取「资源 → 路径 / 方法 / 返回形状」接口清单，页面 dataSources 以该清单为准；无接口文档则按 `references/data-api.md` 命名约定写 `/api/d/...`
 - **新建工程**：输出全量 **页面清单表**（`references/page-inventory-and-files.md`）
 - **增量**：扫描工程现状清单 + 输出 **delta 表**（add / update / deprecate，`references/incremental-wireframe-delta.md`）；P2 不建文件
 
@@ -72,7 +74,7 @@ version: 1.4.0
 - 校验见 `page-inventory-and-files.md`（全量）或 `incremental-wireframe-delta.md`（增量）
 - 按 `references/component-mapping.md` 映射组件；按 `references/page-templates.md` 选列表/详情/表单模板（**数据列表页直接复制 `yaml/models/data-list.yaml` 替换占位符**）；表单一律 `Form` 包裹
 - 同步更新 `sitemap.yaml` 的 `pages` + `menus`（hidden 详情/编辑带 `activeMenu`）
-- 每页 dataSources 全部 `type: http`，url 按 `references/data-api.md` 命名约定直接写最终接口路径（无后端时转发层返回空数据，无需 mock）；交互 events + actions 闭环
+- 每页 dataSources 全部 `type: http`：**有接口文档 → url 取文档接口地址**；无 → 按 `references/data-api.md` 命名约定写 `/api/d/...`（转发层空数据回退，无需 mock）；交互 events + actions 闭环
 
 ### 4. 样式移植
 

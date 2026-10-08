@@ -39,6 +39,9 @@ export interface MenuProps {
    * 点击展开/收起（不触发 onSelect），右端 chevron 指示
    */
   collapsible?: boolean;
+  /** 强制图标轨形态（仅图标，label/badge 隐藏，hover 经 RailTooltip 展示）；
+   *  缺省跟随所在 Sidebar 的折叠态；右轨等脱离 Sidebar 的场景用它 */
+  collapsed?: boolean;
   /** 初始展开的目录 key（与 selectedKey 祖先链合并；展开状态非受控） */
   defaultExpandedKeys?: string[];
   /** 选中变化事件，传出选中项 key */
@@ -85,13 +88,15 @@ export function Menu({
   mode = 'inline',
   selectedKey,
   collapsible = false,
+  collapsed: collapsedProp,
   defaultExpandedKeys,
   onSelect,
   className,
   style,
 }: MenuProps) {
   const drawer = useSidebarDrawer();
-  const collapsed = mode === 'inline' && drawer?.collapsed === true;
+  const collapsed =
+    collapsedProp ?? (mode === 'inline' && drawer?.collapsed === true);
   // icon rail 与 horizontal 不受 collapsible 影响（子菜单静态展开平铺）
   const collapsibleOn = collapsible && mode === 'inline' && !collapsed;
 

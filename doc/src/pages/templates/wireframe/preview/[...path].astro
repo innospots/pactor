@@ -1,0 +1,68 @@
+---
+/**
+ * 线框模板独立预览页 /templates/wireframe/preview/<slug>/<name>：
+ * 无站点外壳的裸页面，整视口渲染落盘的提炼 DSL（previews/NN.yaml），
+ * 供模板详情页以 iframe 嵌入（外壳布局的 fixed/100dvh 在 iframe 内自然生效）。
+ */
+import '@pactor-app/ui/styles.css';
+import TemplateDslPreview from '../../../../components/previews/TemplateDslPreview';
+import { wireframeTemplates, findWireframePreview } from '../../../../assets-data/wireframe-templates';
+import type { DslNode } from '@pactor-app/core';
+
+export function getStaticPaths() {
+  return wireframeTemplates.flatMap((t) =>
+    t.previews.map((p) => ({
+      params: { path: `${t.slug}/${p.name}` },
+    })),
+  );
+}
+
+const [slug, name] = Astro.params.path.split('/');
+const found = findWireframePreview(slug, name);
+if (!found) throw new Error(`预览不存在：${Astro.params.path}`);
+const { preview } = found;
+---
+
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{preview.title}</title>
+    <style is:global>
+      html,
+      body {
+        margin: 0;
+        height: 100%;
+      }
+      /* 外壳样式类（与模板工程 app/globals.css 对齐）：外层锁定视口并裁切，
+         Sidebar 占满剩余高度，Content 自身滚动 */
+      .shell-root {
+        height: 100dvh;
+        overflow: hidden;
+      }
+      .shell-root .shell-main {
+        flex: 1;
+        min-height: 0;
+        position: relative;
+      }
+      .shell-content {
+        overflow-y: auto;
+        overscroll-behavior: contain;
+      }
+      /* 预览页内 Sidebar 的 fixed 轨道约束在其容器内（通栏 Header 在上方时不重叠） */
+      .shell-main [data-slot='sidebar-container'] {
+        position: absolute;
+        height: 100%;
+      }
+    </style>
+  </head>
+  <body>
+    <TemplateDslPreview
+      node={preview.node as DslNode}
+      state={preview.state}
+      bare
+      client:only="react"
+    />
+  </body>
+</html>

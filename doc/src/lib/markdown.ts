@@ -1,7 +1,8 @@
 /**
  * 极简安全 Markdown 子集渲染器（用于使用指引等短文本）。
- * 仅支持：段落、`##`/`###` 标题、`-` 无序列表、GFM 风格管道表格
+ * 仅支持：段落、`##`/`###`/`####` 标题、`-` 无序列表、GFM 风格管道表格
  * （首行表头 + 分隔行触发，单元格内容全部转义并支持行内格式）、
+ * ``` 围栏代码块（等宽原样、横向滚动）、`>` 引用、
  * 行内 `code`、**加粗**、[链接](url)。全部输入先经 HTML 转义再排版，不输出原始 HTML。
  * 富内容请直接以 Astro 片段传入组件，不走本渲染器。
  */
@@ -21,7 +22,9 @@ function inline(s: string): string {
     .replace(
       /\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)/g,
       '<a href="$2" target="_blank" rel="noreferrer">$1</a>',
-    );
+    )
+    // 站内相对链接（如 ../prd-diagram/xx.md）渲染为纯文本
+    .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1');
 }
 
 /** 管道表格分隔行：| --- | :---: | ---: | */
@@ -54,6 +57,18 @@ export function renderMarkdown(src: string): string {
   for (let i = 0; i < lines.length; i++) {
     const raw = lines[i];
     const line = raw.trim();
+    // ``` 围栏代码块：原样等宽输出（ASCII 线框等），不解析内部内容
+    if (line.startsWith('```')) {
+      flushList();
+      const buf: string[] = [];
+      i++;
+      while (i < lines.length && !lines[i].trim().startsWith('```')) {
+        buf.push(lines[i]);
+        i++;
+      }
+      out.push(`<pre class="md-pre"><code>${escapeHtml(buf.join('\n'))}</code></pre>`);
+      continue;
+    }
     // GFM 管道表格：当前行与下一行构成「表头 + 分隔行」时触发
     if (
       line.startsWith('|') &&
@@ -83,16 +98,24 @@ export function renderMarkdown(src: string): string {
       );
       continue;
     }
-    if (line === '') {
+    if (line === '' || line === '---') {
       flushList();
       continue;
     }
-    if (line.startsWith('### ')) {
+    if (line.startsWith('#### ')) {
+      flushList();
+      out.push(`<h5>${inline(line.slice(5))}</h5>`);
+    } else if (line.startsWith('### ')) {
       flushList();
       out.push(`<h4>${inline(line.slice(4))}</h4>`);
     } else if (line.startsWith('## ')) {
       flushList();
       out.push(`<h3>${inline(line.slice(3))}</h3>`);
+    } else if (line.startsWith('> ')) {
+      flushList();
+      out.push(`<blockquote><p>${inline(line.slice(2))}</p></blockquote>`);
+    } else if (line === '>') {
+      flushList();
     } else if (line.startsWith('- ')) {
       list.push(line.slice(2));
     } else {

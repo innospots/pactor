@@ -1,0 +1,44 @@
+---
+/**
+ * 线框模板集合页 /templates/wireframe。
+ * 条目由内容目录 doc/src/content/wireframe-templates/*.md 构建期收集：
+ * 放入 markdown 即自动出现于此列表，无需修改导航或路由。
+ */
+import AssetLibraryLayout from '../../../layouts/AssetLibraryLayout.astro';
+import { wireframeTemplates } from '../../../assets-data/wireframe-templates';
+
+const currentPath = '/templates/wireframe';
+---
+
+<AssetLibraryLayout
+  title="线框模板"
+  description="页面结构模式线框与 DSL 骨架"
+  category="templates"
+  currentPath={currentPath}
+>
+  <div class="breadcrumb">
+    <span class="breadcrumb-trail">资产库 / <a href="/templates/overview">模板</a> / 线框模板</span>
+  </div>
+  <div class="page-head">
+    <div class="page-head-main">
+      <h1>线框模板</h1>
+      <div class="page-desc">
+        页面结构模式参考：每篇含运行态预览与对应 DSL/yaml 结构。共
+        {wireframeTemplates.length} 篇。
+      </div>
+    </div>
+  </div>
+  <div class="card-grid">
+    {
+      wireframeTemplates.map((t) => (
+        <a class="card link-card" href={`${currentPath}/${t.slug}`}>
+          <div class="card-body">
+            <div class="card-title">{t.title}</div>
+            {t.summary && <div class="card-desc">{t.summary}</div>}
+            <div class="card-desc">{t.patternCount} 个结构模式 · {t.previews.length} 个预览</div>
+          </div>
+        </a>
+      ))
+    }
+  </div>
+</AssetLibraryLayout>

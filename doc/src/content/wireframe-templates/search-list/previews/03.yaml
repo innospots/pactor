@@ -1,0 +1,23 @@
+# 提炼自「筛选 F1 — Form inline 表单筛选」：占位已清洗、示例数据已注入，可直接渲染。
+# 人工提炼入库、落盘维护；构建期只读取，不做推导。
+title: 筛选 F1 — Form inline 表单筛选
+body:
+  type: Flex
+  props:
+    direction: column
+    gap: 16
+  children:
+    - type: Form
+      props:
+        layout: inline
+      children:
+        - type: Field
+          children:
+            - type: Input
+        - type: Button
+          props:
+            text: 查询
+            htmlType: submit
+        - type: Button
+          props:
+            text: 重置

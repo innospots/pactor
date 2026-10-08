@@ -1,0 +1,27 @@
+# 提炼自「L2 — 单列宽卡片」：占位已清洗、示例数据已注入，可直接渲染。
+# 人工提炼入库、落盘维护；构建期只读取，不做推导。
+title: L2 — 单列宽卡片
+body:
+  type: Flex
+  props:
+    direction: column
+    gap: 16
+  children:
+    - type: Grid
+      props:
+        columns: 1
+      children:
+        - type: Card
+          children:
+            - type: Flex
+              props:
+                direction: vertical
+                gap: 8
+              children:
+                - type: Text
+                  props:
+                    text: 卡片标题
+                - type: Text
+                  props:
+                    text: 卡片内容描述
+                    type: secondary

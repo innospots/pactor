@@ -1,0 +1,55 @@
+# 提炼自「L1 — 响应式网格（默认）」：占位已清洗、示例数据已注入，可直接渲染。
+# 人工提炼入库、落盘维护；构建期只读取，不做推导。
+title: L1 — 响应式网格（默认）
+body:
+  type: Page
+  children:
+    - type: Form
+      children:
+        - type: Input
+          props:
+            name: keyword
+            label: 关键词
+            placeholder: 输入关键词
+        - type: Select
+          props:
+            name: status
+            label: 状态
+            placeholder: 选择状态
+            options:
+              - label: 全部
+                value: all
+              - label: 启用
+                value: enabled
+              - label: 停用
+                value: disabled
+        - type: Button
+          props:
+            text: 查询
+            variant: primary
+            submit: true
+        - type: Button
+          props:
+            text: 重置
+    - type: Grid
+      props:
+        columns:
+          xs: 1
+          sm: 2
+          lg: 3
+          xl: 4
+      children:
+        - type: Card
+          children:
+            - type: Flex
+              props:
+                direction: vertical
+                gap: 8
+              children:
+                - type: Text
+                  props:
+                    text: 卡片标题
+                - type: Text
+                  props:
+                    text: 卡片内容描述
+                    type: secondary

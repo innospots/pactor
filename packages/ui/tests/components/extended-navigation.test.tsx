@@ -73,7 +73,7 @@ describe('Pagination', () => {
     });
 
     expect(screen.getByText('2').getAttribute('aria-current')).toBe('page');
-    fireEvent.click(screen.getByLabelText('Go to next page'));
+    fireEvent.click(screen.getByLabelText('下一页'));
     await expectEventState(context, 'page', 3);
   });
 

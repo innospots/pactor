@@ -1,0 +1,44 @@
+# 提炼版：顶栏主导航（无持久侧栏），Header 通栏：品牌 + 横向菜单 + 语言切换 + 用户。
+title: 布局 C — 顶栏主导航（无持久侧栏）
+body:
+  type: Layout
+  props:
+    className: shell-root
+  children:
+    - type: Header
+      props:
+        className: shell-header
+        logo: /logo.svg
+        title: Pactor Console
+        menu:
+          - { key: home, label: 首页 }
+          - { key: providers, label: 供应商 }
+          - { key: routes, label: 路由 }
+        locales:
+          - { label: 中文, value: zh-CN }
+          - { label: English, value: en-US }
+        dropdown:
+          label: 默认工作空间
+          position: right
+          items:
+            - { label: 默认工作空间, value: default, selected: true }
+            - { label: 平台运营, value: ops }
+            - { label: 用户研究, value: research }
+        user:
+          name: 管理员
+          items:
+            - { label: 个人设置, value: settings, icon: settings }
+            - { separator: true }
+            - { label: 登出, value: logout, icon: log-out }
+    - type: Content
+      props:
+        className: shell-content
+      children:
+        - type: Flex
+          props:
+            justify: center
+            align: center
+            style: { min-height: 240px }
+          children:
+            - type: Text
+              props: { text: 页面内容出口, type: secondary }

@@ -215,6 +215,16 @@ export interface TemplateEntry extends AssetBase {
   category: string;
   /** 引用组件 id 列表 */
   componentRefs?: string[];
+  /** 路由段（内容驱动模板的详情页路由） */
+  slug?: string;
+  /** 一句话摘要（集合页卡片） */
+  summary?: string;
+  /** 菜单/列表排序 */
+  order?: number;
+  /** 内容溯源路径 */
+  sourceRef?: string;
+  /** 结构模式数量（卡片展示） */
+  patternCount?: number;
 }
 
 // ===== 素材 =====

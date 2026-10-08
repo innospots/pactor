@@ -1,0 +1,98 @@
+# 提炼版：布局 A1 通栏顶栏 + 右侧图标轨 + 悬浮面板（浮层不挤压主内容）。
+title: 展开形态 D-浮层 — 悬浮侧滑层（不挤压主内容）
+body:
+  type: Layout
+  props:
+    className: shell-root
+  children:
+    - type: Header
+      props:
+        className: shell-header
+        logo: /logo.svg
+        title: Pactor Console
+        locales:
+          - { label: 中文, value: zh-CN }
+          - { label: English, value: en-US }
+        dropdown:
+          label: 默认工作空间
+          position: right
+          items:
+            - { label: 默认工作空间, value: default, selected: true }
+            - { label: 平台运营, value: ops }
+            - { label: 用户研究, value: research }
+        user:
+          name: 管理员
+          items:
+            - { label: 个人设置, value: settings, icon: settings }
+            - { separator: true }
+            - { label: 登出, value: logout, icon: log-out }
+    - type: Flex
+      props:
+        style: { flex: 1, min-height: 0, position: relative }
+      children:
+        - type: Sidebar
+          props:
+            className: shell-main
+            collapsible: true
+            content:
+              type: SitemapMenu
+              props:
+                collapsible: true
+                items:
+                  - { key: home, label: 首页, icon: home }
+                  - key: assets
+                    label: 模型资产
+                    icon: package
+                    children:
+                      - { key: providers, label: 供应商 }
+                  - key: routing
+                    label: 模型路由
+                    icon: share
+                    children:
+                      - { key: routes, label: 路由 }
+          children:
+            - type: Content
+              props:
+                className: shell-content
+                style: { position: relative }
+              children:
+                - type: Flex
+                  props:
+                    justify: center
+                    align: center
+                    style: { min-height: 240px }
+                  children:
+                    - type: Text
+                      props: { text: 页面内容出口, type: secondary }
+        - type: Card
+          props:
+            style:
+              position: absolute
+              right: 48px
+              top: 0
+              bottom: 0
+              width: 260px
+              border-radius: 0
+              box-shadow: -8px 0 24px rgba(0,0,0,0.08)
+              z-index: 10
+          children:
+            - type: Flex
+              props: { direction: vertical, gap: 4 }
+              children:
+                - type: Text
+                  props: { text: 上下文面板, type: title }
+                - type: Text
+                  props:
+                    text: 浮层形态：悬浮于内容之上，不改变主内容宽度
+                    type: secondary
+        - type: Menu
+          props:
+            collapsed: true
+            style:
+              width: 48px
+              padding: 8px 0
+              border-left: 1px solid var(--border)
+            items:
+              - { key: context, icon: message-square, label: 上下文 }
+              - { key: docs, icon: file-text, label: 文档 }
+              - { key: settings, icon: settings, label: 设置 }
