@@ -29,6 +29,27 @@ const { preview } = found;
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>{preview.title}</title>
+    <script is:inline>
+      // 与站点外壳同源同步深色模式：载入时读 localStorage/系统偏好，
+      // 运行时经 storage 事件跟随外壳切换（iframe 无需重载）
+      (function () {
+        function apply(t) {
+          var el = document.documentElement;
+          el.dataset.theme = t;
+          el.dataset.pactorTheme = t;
+        }
+        var t = localStorage.getItem('doc-theme');
+        if (t !== 'dark' && t !== 'light') {
+          t = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+        }
+        apply(t);
+        window.addEventListener('storage', function (e) {
+          if (e.key === 'doc-theme' && (e.newValue === 'dark' || e.newValue === 'light')) {
+            apply(e.newValue);
+          }
+        });
+      })();
+    </script>
     <style is:global>
       html,
       body {
@@ -55,14 +76,34 @@ const { preview } = found;
         position: absolute;
         height: 100%;
       }
+      /* 内容较少的示例：在预览视口居中（preview yaml 声明 center: true） */
+      .preview-center {
+        min-height: 100dvh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 24px;
+        box-sizing: border-box;
+      }
     </style>
   </head>
   <body>
-    <TemplateDslPreview
-      node={preview.node as DslNode}
-      state={preview.state}
-      bare
-      client:only="react"
-    />
+    {preview.center ? (
+      <div class="preview-center">
+        <TemplateDslPreview
+          node={preview.node as DslNode}
+          state={preview.state}
+          bare
+          client:only="react"
+        />
+      </div>
+    ) : (
+      <TemplateDslPreview
+        node={preview.node as DslNode}
+        state={preview.state}
+        bare
+        client:only="react"
+      />
+    )}
   </body>
 </html>

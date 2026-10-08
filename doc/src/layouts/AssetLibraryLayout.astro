@@ -55,6 +55,19 @@ const builtAtText = formatBuiltAt(buildInfo.builtAt);
     <meta name="generator" content={Astro.generator} />
     {description && <meta name="description" content={description} />}
     <title>{title} · {SITE_NAME}</title>
+    <script is:inline>
+      // 深色模式初始化（首绘前执行避免闪烁）：localStorage 优先，缺省跟随系统；
+      // data-theme 驱动站点样式，data-pactor-theme 驱动 @pactor-app/ui 组件令牌
+      (function () {
+        var t = localStorage.getItem('doc-theme');
+        if (t !== 'dark' && t !== 'light') {
+          t = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+        }
+        var el = document.documentElement;
+        el.dataset.theme = t;
+        el.dataset.pactorTheme = t;
+      })();
+    </script>
   </head>
   <body>
     <TopNav />
