@@ -78,7 +78,7 @@ describe('Sidebar 壳能力', () => {
     expect(topbar.textContent).toContain('品牌 X');
   });
 
-  it('collapsible 折叠为 icon rail：宽度收窄、items 仅图标、footer 与品牌内容隐藏、onCollapse 传出', async () => {
+  it('collapsible 折叠为 icon rail：宽度收窄、items 仅图标、footer 保留但隐藏文字/图标、onCollapse 传出', async () => {
     const onCollapse = vi.fn();
     render(
       <Sidebar
@@ -98,8 +98,10 @@ describe('Sidebar 壳能力', () => {
     const sidebar = document.querySelector('[data-slot=sidebar]')!;
     expect(sidebar.getAttribute('data-state')).toBe('collapsed');
     expect(sidebar.getAttribute('data-collapsible')).toBe('icon');
-    // 品牌标题与 footer 条件渲染（折叠时不渲染）
-    expect(document.querySelector('[data-slot=sidebar-footer]')).toBeNull();
+    // 品牌标题折叠时不渲染；footer 保留（仅展示图标/头像，文字与附属图标经 class 隐藏）
+    const footer = document.querySelector('[data-slot=sidebar-footer]');
+    expect(footer).not.toBeNull();
+    expect(footer!.className).toContain('[&_[data-slot=text]]:hidden');
     expect(screen.queryByText('后台')).toBeNull();
 
     // hover 菜单项经 Tooltip 展示（icon rail 模式下 SidebarMenuButton 内置 tooltip）

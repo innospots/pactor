@@ -51,19 +51,19 @@
     "access": "public"
   },
   "dependencies": {
-    "@pactor-app/app": "1.34.0",
-    "@pactor-app/chat": "1.34.0",
-    "@pactor-app/cli": "1.34.0",
-    "@pactor-app/core": "1.34.0",
-    "@pactor-app/expression": "1.34.0",
-    "@pactor-app/markdown": "1.34.0",
-    "@pactor-app/permission": "1.34.0",
-    "@pactor-app/resource": "1.34.0",
-    "@pactor-app/router": "1.34.0",
-    "@pactor-app/runtime": "1.34.0",
-    "@pactor-app/schema": "1.34.0",
-    "@pactor-app/ui": "1.34.0",
-    "@pactor-app/vite-plugin": "1.34.0"
+    "@pactor-app/app": "workspace:*",
+    "@pactor-app/chat": "workspace:*",
+    "@pactor-app/cli": "workspace:*",
+    "@pactor-app/core": "workspace:*",
+    "@pactor-app/expression": "workspace:*",
+    "@pactor-app/markdown": "workspace:*",
+    "@pactor-app/permission": "workspace:*",
+    "@pactor-app/resource": "workspace:*",
+    "@pactor-app/router": "workspace:*",
+    "@pactor-app/runtime": "workspace:*",
+    "@pactor-app/schema": "workspace:*",
+    "@pactor-app/ui": "workspace:*",
+    "@pactor-app/vite-plugin": "workspace:*"
   },
   "peerDependencies": {
     "react": ">=18",

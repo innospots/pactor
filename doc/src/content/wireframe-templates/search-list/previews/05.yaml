@@ -1,0 +1,28 @@
+# 提炼自「筛选 F3 — 标签筛选（Chip / 标签行）」：占位已清洗、示例数据已注入，可直接渲染。
+# 人工提炼入库、落盘维护；构建期只读取，不做推导。
+title: 筛选 F3 — 标签筛选（Chip / 标签行）
+body:
+  type: Flex
+  props:
+    direction: column
+    gap: 16
+  children:
+    - type: Flex
+      props:
+        direction: vertical
+        gap: 8
+      children:
+        - type: Flex
+          props:
+            gap: 8
+            align: center
+          children:
+            - type: Text
+              props:
+                text: 状态
+                type: secondary
+            - type: Segmented
+              props:
+                options:
+                  - label: 全部
+                    value: ""

@@ -1,4 +1,6 @@
-# 数据接口层（纯转发 + 空数据约定）
+# 数据接口层（接口文档优先 + 纯转发空数据约定）
+
+**接口文档驱动（优先）**：PRD/产品文档含接口文档或接口说明时，页面 dataSources 的 url 直接取文档中的接口地址——方法、参数、返回形状均以文档为准，不再使用下述 `/api/d/...` 命名约定。同源相对路径直接写；跨域绝对地址写完整 URL（`type: http` 原生支持）。转发层与命名约定仅在**无接口文档**时兜底。
 
 页面 DSL 的 http 数据源统一入口：`app/api/d/[...parts]/route.ts`（**纯转发层，不含任何路径映射**）。**路径即契约**：DSL 中的 url（如 `/api/d/providers`）就是服务端接口路径；转发层按相同路径、方法、查询与请求体原样转发到 `$NEXT_PUBLIC_API_BASE_URL/api/d/<parts>`（携带会话 cookie，匿名 401）。
 
@@ -25,7 +27,7 @@
 
 ## 对页面 yaml 的要求
 
-- dataSources 一律 `type: http`，url 按命名约定直接写最终接口路径
+- dataSources 一律 `type: http`；有接口文档时 url 取文档接口地址（方法/返回形状对齐），否则按命名约定写 `/api/d/...` 最终路径
 - 列表接口返回形状约定 `{ items, total, filters? }`；详情接口对空 id 返回空对象而非 404（新建预填链路依赖）
 - 选项类接口（如下拉的操作人列表）用单段路径，页面 `options: ${data.xxx}` 绑定
 - 写操作走 `ops/` 前缀 POST，页面提交闭环（request → message → reload）不依赖返回体内容

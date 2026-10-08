@@ -1,0 +1,62 @@
+# 提炼版：布局 B1（对应 A1：顶栏通栏不变，侧栏默认折叠为左图标轨）。
+title: 布局 B1 — 对应 A1（顶栏不变 + 左图标轨）
+body:
+  type: Layout
+  props:
+    className: shell-root
+  children:
+    - type: Header
+      props:
+        className: shell-header
+        logo: /logo.svg
+        title: Pactor Console
+        locales:
+          - { label: 中文, value: zh-CN }
+          - { label: English, value: en-US }
+        dropdown:
+          label: 默认工作空间
+          position: right
+          items:
+            - { label: 默认工作空间, value: default, selected: true }
+            - { label: 平台运营, value: ops }
+            - { label: 用户研究, value: research }
+        user:
+          name: 管理员
+          items:
+            - { label: 个人设置, value: settings, icon: settings }
+            - { separator: true }
+            - { label: 登出, value: logout, icon: log-out }
+    - type: Sidebar
+      props:
+        className: shell-main
+        collapsible: true
+        defaultCollapsed: true
+        content:
+          type: SitemapMenu
+          props:
+            collapsible: true
+            items:
+              - { key: home, label: 首页, icon: home }
+              - key: assets
+                label: 模型资产
+                icon: package
+                children:
+                  - { key: providers, label: 供应商 }
+              - key: routing
+                label: 模型路由
+                icon: share
+                children:
+                  - { key: routes, label: 路由 }
+      children:
+        - type: Content
+          props:
+            className: shell-content
+          children:
+            - type: Flex
+              props:
+                justify: center
+                align: center
+                style: { min-height: 240px }
+              children:
+                - type: Text
+                  props: { text: 页面内容出口, type: secondary }

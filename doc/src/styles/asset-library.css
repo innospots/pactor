@@ -293,6 +293,14 @@ a {
   color: #8a95a5;
   margin-bottom: 11px;
 }
+
+/* 面包屑右端带附加操作（如「复制此页」）时两端对齐 */
+.breadcrumb.with-extra {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
 .page-head {
   display: flex;
   align-items: flex-start;
@@ -1055,4 +1063,109 @@ h1 {
 
 .dsl-json code {
   font-family: inherit;
+}
+
+/* ===== 线框模板：markdown 预览代码块（等宽、横向滚动） ===== */
+.md-pre {
+  margin: 10px 0;
+  padding: 14px 16px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--hover);
+  overflow-x: auto;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 12px;
+  line-height: 1.6;
+  color: var(--text);
+  white-space: pre;
+}
+
+.md-pre code {
+  font-family: inherit;
+}
+
+/* ===== 线框模板：「结构」章节 Tab ===== */
+.tpl-structure {
+  margin: 10px 0 20px;
+}
+
+.tpl-tabs {
+  display: flex;
+  gap: 4px;
+  margin-bottom: 14px;
+  border-bottom: 1px solid var(--line);
+}
+
+.tpl-tab {
+  border: none;
+  background: none;
+  padding: 7px 14px;
+  font-size: 13px;
+  color: var(--muted-text);
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -1px;
+  transition: color 0.15s, border-color 0.15s;
+}
+
+.tpl-tab:hover {
+  color: var(--text);
+}
+
+.tpl-tab.active {
+  color: var(--brand);
+  border-bottom-color: var(--brand);
+  font-weight: 600;
+}
+
+.tpl-blocks {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+/* ===== 线框模板：iframe 预览（独立页面渲染，天然隔离 fixed/100dvh 外壳） ===== */
+.tpl-preview {
+  margin: 12px 0 20px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  overflow: hidden;
+  background: var(--panel);
+}
+
+.tpl-preview-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 7px 12px;
+  border-bottom: 1px solid var(--line2);
+  background: var(--hover);
+}
+
+.tpl-preview-title {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--muted-text);
+}
+
+.tpl-preview-open {
+  font-size: 12px;
+  color: var(--subtle);
+  text-decoration: none;
+}
+
+.tpl-preview-open:hover {
+  color: var(--brand);
+}
+
+/* iframe 内容视口放大到 125%（>768px 触发桌面布局，外壳侧栏/顶栏完整呈现），
+   再整体缩放 0.8 回预览盒尺寸（视觉高度 = 560 * 0.8 ≈ 450px） */
+.tpl-preview-frame {
+  display: block;
+  width: 125%;
+  height: 560px;
+  border: none;
+  transform: scale(0.8);
+  transform-origin: 0 0;
+  margin-bottom: -112px; /* 抵消缩放后的空白（560 - 560*0.8） */
 }

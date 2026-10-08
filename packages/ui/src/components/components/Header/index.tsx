@@ -14,18 +14,16 @@ import {
   DropdownMenuTrigger,
 } from '../../../ui/dropdown-menu.js';
 import { Icon } from '../Icon/index.js';
+import {
+  renderDropdownItems,
+  type DropdownMenuItemData,
+} from '../DropdownMenu/index.js';
 
 /** 品牌区位置（缺省 'left'） */
 export type HeaderBrandPosition = 'left' | 'right';
 
-/** 通用下拉项 */
-export interface HeaderDropdownItem {
-  label: string;
-  value: string;
-  disabled?: boolean;
-  /** 图标名（Icon 白名单，kebab/Pascal 均可），渲染于文字前 */
-  icon?: string;
-}
+/** 通用下拉项（复用 DropdownMenu 菜单项：支持 icon/trailing/selected/separator/children） */
+export type HeaderDropdownItem = DropdownMenuItemData;
 
 /** 通用下拉区配置 */
 export interface HeaderDropdown {
@@ -44,13 +42,8 @@ export interface HeaderMenuItem {
   children?: HeaderMenuItem[];
 }
 
-/** 用户区菜单项 */
-export interface HeaderUserItem {
-  label: string;
-  value: string;
-  /** 图标名（Icon 白名单，kebab/Pascal 均可），渲染于文字前 */
-  icon?: string;
-}
+/** 用户区菜单项（复用 DropdownMenu 菜单项：支持 icon/trailing/selected/separator/children） */
+export type HeaderUserItem = DropdownMenuItemData;
 
 /** 用户区配置；`items` 缺省或为空时退化为纯展示（无下拉） */
 export interface HeaderUser {
@@ -164,7 +157,7 @@ export function Header({
           data-slot="header-brand-logo"
           src={logo}
           alt={title ?? ''}
-          className="h-8 w-8 shrink-0 object-contain"
+          className="size-6 shrink-0 object-contain"
         />
       )}
       {title !== undefined && (
@@ -226,16 +219,7 @@ function HeaderDropdownArea({
         <ChevronDownIcon className="size-3.5" aria-hidden="true" />
       </DropdownMenuTrigger>
       <DropdownMenuContent>
-        {dropdown.items.map((item) => (
-          <DropdownMenuItem
-            key={item.value}
-            disabled={item.disabled}
-            onClick={() => onSelect?.(item.value)}
-          >
-            {item.icon ? <Icon name={item.icon} size="sm" /> : null}
-            {item.label}
-          </DropdownMenuItem>
-        ))}
+        {renderDropdownItems(dropdown.items, onSelect)}
       </DropdownMenuContent>
     </DropdownMenuRoot>
   );
@@ -355,12 +339,7 @@ function HeaderUserArea({
         {identity}
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
-        {user.items.map((item) => (
-          <DropdownMenuItem key={item.value} onClick={() => onSelect?.(item.value)}>
-            {item.icon ? <Icon name={item.icon} size="sm" /> : null}
-            {item.label}
-          </DropdownMenuItem>
-        ))}
+        {renderDropdownItems(user.items, onSelect)}
       </DropdownMenuContent>
     </DropdownMenuRoot>
   );

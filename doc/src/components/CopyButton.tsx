@@ -12,6 +12,7 @@ export default function CopyButton({
   label = '复制',
   commentStyle = 'auto',
   small = true,
+  appendSource = true,
 }: {
   /** 要复制的原始内容（实际剪贴板内容会追加来源注释） */
   text: string;
@@ -21,6 +22,8 @@ export default function CopyButton({
   commentStyle?: CommentStyle;
   /** 使用 btn small 尺寸（默认 true） */
   small?: boolean;
+  /** 是否在末尾追加来源注释（默认 true；复制 markdown 等不宜追加的内容时置 false） */
+  appendSource?: boolean;
 }) {
   const [state, setState] = useState<CopyState>('idle');
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -34,7 +37,9 @@ export default function CopyButton({
 
   const onClick = async () => {
     if (timer.current) clearTimeout(timer.current);
-    const ok = await copyText(buildCopyText(text, undefined, commentStyle));
+    const ok = await copyText(
+      appendSource ? buildCopyText(text, undefined, commentStyle) : text,
+    );
     setState(ok ? 'copied' : 'failed');
     timer.current = setTimeout(() => setState('idle'), ok ? 1600 : 2400);
   };

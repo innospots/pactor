@@ -1,0 +1,39 @@
+# 提炼自「筛选 F2 — 筛选按钮 + 弹层筛选（Popover / Dropdown Panel）」：占位已清洗、示例数据已注入，可直接渲染。
+# 人工提炼入库、落盘维护；构建期只读取，不做推导。
+title: 筛选 F2 — 筛选按钮 + 弹层筛选（Popover / Dropdown Panel）
+body:
+  type: Flex
+  props:
+    direction: column
+    gap: 16
+  children:
+    - type: Flex
+      children:
+        - type: Input
+        - type: Button
+          props:
+            text: 筛选
+    - type: Card
+      children:
+        - type: Table
+          props:
+            columns:
+              - title: 名称
+                dataIndex: name
+              - title: 负责人
+                dataIndex: owner
+              - title: 状态
+                dataIndex: status
+            dataSource:
+              - id: 1
+                name: 示例数据 A
+                owner: 张三
+                status: 启用
+              - id: 2
+                name: 示例数据 B
+                owner: 李四
+                status: 停用
+              - id: 3
+                name: 示例数据 C
+                owner: 王五
+                status: 启用

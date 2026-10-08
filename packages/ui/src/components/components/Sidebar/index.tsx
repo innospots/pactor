@@ -48,6 +48,8 @@ export interface SidebarProps {
   sidebarFooter?: ReactNode;
   /** 是否渲染折叠触发器：折叠后桌面侧栏收窄为 icon rail（导航仅图标） */
   collapsible?: boolean;
+  /** 初始为折叠态（icon rail）；仅在 collapsible 下有意义 */
+  defaultCollapsed?: boolean;
   /** 折叠状态变化事件，传出 boolean */
   onCollapse?: (collapsed: boolean) => void;
   /** 路由 / 会话切换标识：值变化时移动端抽屉在渲染期关闭 */
@@ -209,6 +211,7 @@ export function Sidebar({
   content,
   sidebarFooter,
   collapsible,
+  defaultCollapsed,
   onCollapse,
   locationKey,
   drawer = true,
@@ -218,7 +221,7 @@ export function Sidebar({
 }: SidebarProps) {
   return (
     <SidebarProvider
-      defaultOpen={true}
+      defaultOpen={!defaultCollapsed}
       className={className}
       style={style}
     >
@@ -274,6 +277,9 @@ function SidebarInner({
   const collapsedEffective = collapsible === true && collapsed && !isMobile;
 
   const brandNode = <BrandNode brand={brand} collapsed={collapsedEffective} />;
+  /** 收起态且品牌带 logo：图标轨顶纵向排列 触发器 + logo（B2 形态） */
+  const collapsedBrandLogo =
+    collapsedEffective && isBrandObject(brand) && brand.logo ? brand.logo : null;
 
   // 侧栏内容：content 槽 > items 导航 > 空
   const sidebarContent =
@@ -288,17 +294,30 @@ function SidebarInner({
       <ShadcnSidebar
         collapsible={collapsible ? 'icon' : 'offcanvas'}
       >
-        {/* 品牌区 + 折叠触发器 */}
+        {/* 品牌区 + 折叠触发器（无品牌区时收起为一行矮条，仅放触发器） */}
         {(brand !== undefined || collapsible) && (
-          <ShadcnSidebarHeader>
+          <ShadcnSidebarHeader
+            className={brand === undefined ? 'h-9' : undefined}
+          >
             <div
               data-slot="sidebar-brand"
               className={cn(
-                'flex h-14 shrink-0 items-center gap-2 px-2',
+                'flex shrink-0 items-center gap-2 px-2',
+                brand !== undefined ? 'h-14' : 'h-9 justify-end w-full',
                 collapsedEffective && 'justify-center px-0',
+                collapsedBrandLogo && 'h-auto flex-col gap-1 py-1.5',
               )}
             >
-              {collapsedEffective ? null : (
+              {collapsedEffective ? (
+                collapsedBrandLogo && isBrandObject(brand) ? (
+                  <img
+                    data-slot="sidebar-brand-logo"
+                    src={brand.logo}
+                    alt={brand.title}
+                    className="size-6 shrink-0"
+                  />
+                ) : null
+              ) : (
                 <div className="flex min-w-0 flex-1 items-center gap-2">
                   {brandNode}
                 </div>
@@ -328,10 +347,16 @@ function SidebarInner({
           {sidebarContent}
         </ShadcnSidebarContent>
 
-        {/* 底部固定区 */}
-        {sidebarFooter !== undefined && sidebarFooter !== null && !collapsedEffective && (
-          <ShadcnSidebarFooter>
-            {sidebarFooter}
+        {/* 底部固定区（DslNode 经 Renderer 渲染，同 content 槽）；
+            收起态保留但仅展示图标/头像（隐藏文字与附属图标、内容居中） */}
+        {sidebarFooter !== undefined && sidebarFooter !== null && (
+          <ShadcnSidebarFooter
+            className={cn(
+              collapsedEffective &&
+                'items-center px-0 [&_[data-slot=flex]]:justify-center [&_[data-slot=icon]]:hidden [&_[data-slot=text]]:hidden',
+            )}
+          >
+            <SidebarContentSlot content={sidebarFooter} />
           </ShadcnSidebarFooter>
         )}
       </ShadcnSidebar>

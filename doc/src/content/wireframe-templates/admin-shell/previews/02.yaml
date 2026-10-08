@@ -1,0 +1,82 @@
+# 提炼版：参考布局 A1（SitemapMenu 可收起子菜单 + 底栏工作空间/用户弹层）。
+title: 布局 A2 — 侧栏顶 Logo + 底栏工作空间与用户
+body:
+  type: Layout
+  props:
+    className: shell-root
+  children:
+    - type: Sidebar
+      props:
+        className: shell-main
+        brand:
+          logo: /logo.svg
+          title: Pactor Console
+        collapsible: true
+        content:
+          type: SitemapMenu
+          props:
+            collapsible: true
+            items:
+              - { key: home, label: 首页, icon: home }
+              - key: assets
+                label: 模型资产
+                icon: package
+                children:
+                  - { key: providers, label: 供应商 }
+              - key: routing
+                label: 模型路由
+                icon: share
+                children:
+                  - { key: routes, label: 路由 }
+        sidebarFooter:
+          type: DropdownMenu
+          props:
+            side: top
+            items:
+              - label: 切换空间
+                value: switch-workspace
+                icon: building-2
+                trailing: 默认工作空间
+                children:
+                  - { label: 默认工作空间, value: default, selected: true }
+                  - { label: 平台运营, value: ops }
+                  - { label: 用户研究, value: research }
+              - { label: 个人设置, value: settings, icon: settings }
+              - { separator: true }
+              - { label: 登出, value: logout, icon: log-out }
+          children:
+            - type: Flex
+              props:
+                align: center
+                gap: 8
+                style: { padding: 6px 8px, border-radius: 6px, cursor: pointer, width: "100%" }
+              children:
+                - type: Avatar
+                  props: { fallback: 管 }
+                - type: Text
+                  props: { text: 管理员, style: { flex: 1 } }
+                - type: Icon
+                  props: { name: chevrons-up-down, size: 14 }
+      children:
+        - type: Content
+          props:
+            className: shell-content
+          children:
+            - type: Flex
+              props:
+                justify: between
+                align: center
+                style: { padding: 12px 16px }
+              children:
+                - type: Text
+                  props: { text: 供应商, type: title }
+                - type: Button
+                  props: { text: + 新建, variant: primary }
+            - type: Flex
+              props:
+                justify: center
+                align: center
+                style: { min-height: 200px }
+              children:
+                - type: Text
+                  props: { text: 页面内容出口, type: secondary }

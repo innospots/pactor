@@ -40,9 +40,9 @@
     "access": "public"
   },
   "dependencies": {
-    "@pactor-app/core": "1.34.0",
-    "@pactor-app/expression": "1.34.0",
-    "@pactor-app/schema": "1.34.0",
+    "@pactor-app/core": "workspace:*",
+    "@pactor-app/expression": "workspace:*",
+    "@pactor-app/schema": "workspace:*",
     "yaml": "^2.9.0"
   }
 }
