@@ -1,0 +1,158 @@
+# 提炼自「布局 P3 — 单列堆叠」：P1 同逻辑顺序窄屏降级，指标 Grid 降为 1 列、W3/W4 纵向排列。
+# 人工提炼入库、落盘维护；构建期只读取，不做推导。
+title: 布局 P3 — 单列堆叠
+height: 720
+body:
+  type: Page
+  children:
+    - type: Flex
+      props: { direction: vertical, gap: 16 }
+      children:
+        - type: Flex
+          props: { justify: space-between, align: center }
+          children:
+            - type: Flex
+              props: { direction: vertical, gap: 4, align: start }
+              children:
+                - type: Text
+                  props: { text: 仪表盘, size: large, strong: true }
+                - type: Text
+                  props:
+                    text: Nexus Console — 系统管理概览
+                    size: small
+                    type: secondary
+            - type: Flex
+              props: { gap: 8, align: center }
+              children:
+                - type: Text
+                  props: { text: 实时 12 RPM · 3k TPM, size: small, type: secondary }
+                - type: Button
+                  props: { text: 刷新, icon: refresh, size: small }
+        - type: Card
+          children:
+            - type: Flex
+              props: { align: center, gap: 8 }
+              children:
+                - type: Text
+                  props: { text: 分析时间范围, className: shrink-0 }
+                - type: DatePicker
+                  props: { mode: range, placeholder: 选择起止日期 }
+        - type: Text
+          props: { text: 核心概览 · 2026-09-22 — 2026-09-28, strong: true }
+        - type: Grid
+          props: { columns: 1, gap: 16 }
+          children:
+            - type: Card
+              children:
+                - type: Flex
+                  props: { direction: vertical, gap: 8 }
+                  children:
+                    - type: Flex
+                      props: { justify: space-between, align: center }
+                      children:
+                        - type: Text
+                          props: { text: 请求量, size: small, type: secondary }
+                        - type: Icon
+                          props: { name: chart-column, size: sm }
+                    - type: Statistic
+                      props: { value: '1,234,567' }
+                    - type: Text
+                      props: { text: 12 位活跃客户端 · 98M Token, size: small, type: secondary }
+            - type: Card
+              children:
+                - type: Flex
+                  props: { direction: vertical, gap: 8 }
+                  children:
+                    - type: Flex
+                      props: { justify: space-between, align: center }
+                      children:
+                        - type: Text
+                          props: { text: 成功率, size: small, type: secondary }
+                        - type: Icon
+                          props: { name: circle-check, size: sm }
+                    - type: Statistic
+                      props: { value: 99.92, suffix: '%' }
+                    - type: Text
+                      props: { text: 较上期 +2.1% ↑, size: small, type: secondary }
+        - type: Card
+          props: { title: 趋势分析 }
+          children:
+            - type: Flex
+              props: { direction: vertical, gap: 8 }
+              children:
+                - type: Flex
+                  props: { justify: space-between, align: center }
+                  children:
+                    - type: Text
+                      props: { text: 观察流量与消费趋势, size: small, type: secondary }
+                    - type: Segmented
+                      props:
+                        value: req
+                        options:
+                          - { label: 请求, value: req }
+                          - { label: Token, value: token }
+                          - { label: 费用, value: cost }
+                          - { label: 延迟, value: latency }
+                - type: AreaChart
+                  props:
+                    xKey: date
+                    yKeys: [requests, tokens]
+                    height: 280
+                    data:
+                      - { date: '09-22', requests: 8200, tokens: 6900 }
+                      - { date: '09-23', requests: 9400, tokens: 8100 }
+                      - { date: '09-24', requests: 8800, tokens: 7600 }
+                      - { date: '09-25', requests: 11200, tokens: 9800 }
+                      - { date: '09-26', requests: 10500, tokens: 9000 }
+                      - { date: '09-27', requests: 6200, tokens: 5400 }
+                      - { date: '09-28', requests: 5800, tokens: 4900 }
+        - type: Card
+          props: { title: 用量构成 · 模型 }
+          children:
+            - type: Flex
+              props: { direction: vertical, gap: 8, align: start }
+              children:
+                - type: Text
+                  props:
+                    text: 按请求量分布，识别主要模型流量来源
+                    size: small
+                    type: secondary
+                    className: w-full
+                - type: Flex
+                  props: { align: center, gap: 8, className: w-full }
+                  children:
+                    - type: Text
+                      props: { text: gpt-4o, size: small, style: { width: 110 } }
+                    - type: Progress
+                      props: { value: 42, style: { flex: 1 } }
+                    - type: Text
+                      props: { text: 42%, size: small, style: { width: 40 } }
+                - type: Flex
+                  props: { align: center, gap: 8, className: w-full }
+                  children:
+                    - type: Text
+                      props: { text: claude-3, size: small, style: { width: 110 } }
+                    - type: Progress
+                      props: { value: 28, style: { flex: 1 } }
+                    - type: Text
+                      props: { text: 28%, size: small, style: { width: 40 } }
+                - type: Flex
+                  props: { align: center, gap: 8, className: w-full }
+                  children:
+                    - type: Text
+                      props: { text: doubao-pro, size: small, style: { width: 110 } }
+                    - type: Progress
+                      props: { value: 18, style: { flex: 1 } }
+                    - type: Text
+                      props: { text: 18%, size: small, style: { width: 40 } }
+                - type: Flex
+                  props: { align: center, gap: 8, className: w-full }
+                  children:
+                    - type: Text
+                      props: { text: 其他, size: small, style: { width: 110 } }
+                    - type: Progress
+                      props: { value: 12, style: { flex: 1 } }
+                    - type: Text
+                      props: { text: 12%, size: small, style: { width: 40 } }
+                - type: Button
+                  props: { text: 查看全部 →, variant: link }

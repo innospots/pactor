@@ -1,0 +1,136 @@
+# 提炼自「布局 A — 右侧宽滑层（字典类）」：列表页背景 + 480px 宽滑层，滑层内分组表单 + 字典项子表 + 底部操作。
+# 交互：「新建字典类型」/ 行内「编辑」打开滑层；遮罩 / 取消关闭；「保存全部」提交并校验必填项。
+# 人工提炼入库、落盘维护；构建期只读取，不做推导。
+title: 布局 A — 右侧宽滑层（字典类）
+height: 640
+state: { drawerOpen: true }
+body:
+  type: Page
+  children:
+    - type: Flex
+      props: { direction: vertical, gap: 16 }
+      children:
+        - type: Flex
+          props: { justify: space-between, align: center }
+          children:
+            - type: Text
+              props: { text: 数据字典, size: large, strong: true }
+            - type: Button
+              props: { text: 新建字典类型, variant: primary, icon: plus }
+              events:
+                onClick:
+                  - action: setState
+                    params: { drawerOpen: true }
+        - type: Table
+          props:
+            columns:
+              - { title: 类型名称, dataIndex: name }
+              - { title: 编码, dataIndex: code }
+              - title: 状态
+                cell:
+                  type: Status
+                  props:
+                    status: "${row.statusType}"
+                    text: "${row.statusText}"
+              - title: 操作
+                width: 100
+                align: center
+                cell:
+                  type: Button
+                  props: { text: 编辑, variant: link }
+                  events:
+                    onClick:
+                      - action: setState
+                        params: { drawerOpen: true }
+            dataSource:
+              - { id: 1, name: 用户性别, code: gender, statusType: success, statusText: 启用 }
+              - { id: 2, name: 用户状态, code: user-status, statusType: success, statusText: 启用 }
+              - { id: 3, name: 行业分类, code: industry, statusType: default, statusText: 停用 }
+        - type: Drawer
+          props:
+            title: 编辑字典类型
+            open: "${state.drawerOpen}"
+            style: { width: 480, maxWidth: 'none' }
+          events:
+            onClose:
+              - action: setState
+                params: { drawerOpen: false }
+          children:
+            - type: Form
+              events:
+                onSubmit:
+                  - action: message
+                    params: { messageType: success, text: 保存成功 }
+                  - action: setState
+                    params: { drawerOpen: false }
+              children:
+                - type: Flex
+                  props: { direction: vertical, gap: 16 }
+                  children:
+                    - type: Flex
+                      props: { direction: vertical, gap: 8, align: start }
+                      children:
+                        - type: Text
+                          props: { text: 基本信息, strong: true }
+                        - type: Container
+                          props: { className: border-b border-border w-full }
+                    - type: Field
+                      props: { label: 类型名称, required: true }
+                      children:
+                        - type: Input
+                          props:
+                            name: name
+                            value: 用户性别
+                            rules:
+                              - { required: true, message: 请输入类型名称 }
+                    - type: Field
+                      props: { label: 编码, description: 编码创建后不可修改 }
+                      children:
+                        - type: Input
+                          props: { name: code, value: gender, disabled: true }
+                    - type: Field
+                      props: { label: 安全域 }
+                      children:
+                        - type: Select
+                          props:
+                            name: scope
+                            value: 平台域
+                            options:
+                              - { label: 平台域, value: 平台域 }
+                              - { label: 租户域, value: 租户域 }
+                    - type: Flex
+                      props: { direction: vertical, gap: 8, align: start }
+                      children:
+                        - type: Text
+                          props: { text: 字典项, strong: true }
+                        - type: Container
+                          props: { className: border-b border-border w-full }
+                    - type: Table
+                      props:
+                        pagination: false
+                        columns:
+                          - { title: 名称, dataIndex: name }
+                          - { title: 值, dataIndex: value }
+                          - { title: 排序, dataIndex: sort }
+                          - title: 操作
+                            width: 80
+                            align: center
+                            cell:
+                              type: Button
+                              props: { text: 删除, variant: link, danger: true }
+                        dataSource:
+                          - { id: 1, name: 男, value: 1, sort: 1 }
+                          - { id: 2, name: 女, value: 2, sort: 2 }
+                    - type: Button
+                      props: { text: 添加项, variant: dashed, icon: plus }
+                    - type: Flex
+                      props: { justify: end, gap: 8 }
+                      children:
+                        - type: Button
+                          props: { text: 取消 }
+                          events:
+                            onClick:
+                              - action: setState
+                                params: { drawerOpen: false }
+                        - type: Button
+                          props: { text: 保存全部, variant: primary, submit: true }

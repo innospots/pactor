@@ -27,6 +27,8 @@ export interface TabsProps {
   activeKey?: string;
   /** 页签栏样式：default 胶囊（缺省）/ line 下划线 */
   variant?: 'default' | 'line';
+  /** 页签位置：top 顶部（缺省）/ left 左侧竖排（子 Tab 较多或左侧需放摘要时用） */
+  tabPosition?: 'top' | 'left';
   /** 页签切换事件，传出新激活的 key */
   onChange?: (key: string) => void;
   /** 页签内容区 class（TabsContent 根节点，与内置样式合并） */
@@ -48,6 +50,7 @@ export function Tabs({
   items = [],
   activeKey,
   variant,
+  tabPosition = 'top',
   onChange,
   contentClassName,
   contentStyle,
@@ -55,15 +58,27 @@ export function Tabs({
   style,
 }: TabsProps) {
   const { renderChildren } = useRenderer();
+  const vertical = tabPosition === 'left';
   return (
     <ShadcnTabs
       value={activeKey}
       defaultValue={activeKey === undefined ? items[0]?.key : undefined}
       onValueChange={(key) => onChange?.(key)}
-      className={className}
+      orientation={vertical ? 'vertical' : undefined}
+      className={cn(vertical && 'flex-row items-start gap-4', className)}
       style={style}
     >
-      <TabsList variant={variant}>
+      <TabsList
+        variant={variant}
+        className={
+          vertical
+            ? cn(
+                'h-auto w-auto shrink-0 flex-col items-stretch justify-start',
+                variant === 'line' && 'gap-0 border-b-0 border-r pr-2',
+              )
+            : undefined
+        }
+      >
         {items.map((item) => (
           <TabsTrigger key={item.key} value={item.key}>
             {item.label}
@@ -74,7 +89,7 @@ export function Tabs({
         <TabsContent
           key={item.key}
           value={item.key}
-          className={cn(contentClassName, item.className)}
+          className={cn(vertical && 'flex-1', contentClassName, item.className)}
           style={{ ...contentStyle, ...item.style }}
         >
           {renderChildren(item.children)}

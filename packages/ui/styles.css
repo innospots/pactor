@@ -1292,6 +1292,9 @@
   .gap-\(--grid-gap\) {
     gap: var(--grid-gap);
   }
+  .gap-0 {
+    gap: 0px;
+  }
   .gap-0\.5 {
     gap: calc(var(--spacing) * 0.5);
   }

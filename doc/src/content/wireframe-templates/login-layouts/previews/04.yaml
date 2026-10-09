@@ -1,0 +1,13 @@
+# 提炼自「布局 overlap — 叠压」：登录卡左移与品牌卡局部叠加，层次更强。
+# 人工提炼入库、落盘维护；构建期只读取，不做推导。
+title: 布局 overlap — 叠压
+height: 560
+body:
+  type: Login
+  props:
+    layout: overlap
+    brand:
+      name: Pactor
+      title: 动态页面引擎
+      description: 用 YAML 描述页面，运行时渲染为生产级界面
+    title: 欢迎回来

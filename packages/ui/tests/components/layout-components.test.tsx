@@ -409,3 +409,27 @@ describe('Menu', () => {
     });
   });
 });
+
+describe('Grid 子项跨列', () => {
+  it('子节点 props.style 的 gridColumn/gridRow 提升到 grid-item 包裹容器', () => {
+    const { container } = renderDsl({
+      type: 'Grid',
+      props: {
+        columns: 2,
+        gap: 16,
+      },
+      children: [
+        { type: 'Text', props: { text: '甲' } },
+        {
+          type: 'Text',
+          props: { text: '乙', style: { gridColumn: '1 / -1' } },
+        },
+      ],
+    });
+
+    const items = container.querySelectorAll('[data-slot=grid-item]');
+    expect(items).toHaveLength(2);
+    expect((items[0] as HTMLElement).style.gridColumn).toBe('');
+    expect((items[1] as HTMLElement).style.gridColumn).toBe('1 / -1');
+  });
+});

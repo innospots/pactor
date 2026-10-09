@@ -157,6 +157,7 @@ function toFlowSections(
   let current: TemplateFlowSection = { title: '概述', blocks: [] };
   let prose: string[] = [];
   let inFence: 'yaml' | 'drop' | null = null;
+  let fenceLen = 0;
   let buf: string[] = [];
   let lastH2 = '';
   let lastH3 = '';
@@ -170,9 +171,11 @@ function toFlowSections(
     if (current.blocks.length > 0) sections.push(current);
   };
   for (const line of body.split('\n')) {
-    const fence = line.trim().match(/^```(\w*)\s*$/);
+    // CommonMark 围栏规则：开围栏 ≥3 个反引号，闭围栏反引号数须 ≥ 开围栏。
+    // 这样 DSL 块内可嵌 Markdown 代码围栏（如 Markdown content 里的 ```bash）
     if (inFence) {
-      if (line.trim().startsWith('```')) {
+      const close = line.trim().match(/^(`{3,})\s*$/);
+      if (close && close[1].length >= fenceLen) {
         if (inFence === 'yaml') {
           flushProse();
           const yaml = buf.join('\n');
@@ -192,8 +195,10 @@ function toFlowSections(
       buf.push(line);
       continue;
     }
+    const fence = line.trim().match(/^(`{3,})(\w*)\s*$/);
     if (fence) {
-      inFence = fence[1] === 'yaml' ? 'yaml' : 'drop';
+      inFence = fence[2] === 'yaml' ? 'yaml' : 'drop';
+      fenceLen = fence[1].length;
       buf = [];
       continue;
     }

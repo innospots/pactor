@@ -1,0 +1,80 @@
+# 提炼自「布局 B — 左树右表（目录更深）」：三级目录树定位，右侧表格列出当前页授权项，底部全量替换保存条。
+# 人工提炼入库、落盘维护；构建期只读取，不做推导。
+title: 布局 B — 左树右表（目录更深）
+height: 640
+body:
+  type: Page
+  children:
+    - type: Flex
+      props: { direction: vertical, gap: 16 }
+      children:
+        - type: Flex
+          props: { justify: space-between, align: center }
+          children:
+            - type: Text
+              props: { text: 当前角色已选 12 项授权, strong: true }
+            - type: Input
+              props:
+                name: keyword
+                placeholder: 搜索资源名称 / Key
+                style: { width: 280 }
+        - type: Flex
+          props: { gap: 16, align: start }
+          children:
+            - type: Card
+              props: { style: { width: 280 } }
+              children:
+                - type: Tree
+                  props:
+                    treeData:
+                      - key: content
+                        title: 内容平台
+                        children:
+                          - key: help
+                            title: 帮助中心
+                            children:
+                              - { key: help-doc, title: 使用文档 }
+                              - { key: help-changelog, title: 更新日志 }
+                          - key: console
+                            title: 控制台
+                            children:
+                              - { key: console-overview, title: 概览 }
+                    defaultExpandedKeys: [content, help, console]
+            - type: Card
+              props: { style: { flex: 1 } }
+              children:
+                - type: Flex
+                  props: { direction: vertical, gap: 12 }
+                  children:
+                    - type: Text
+                      props: { text: 使用文档, strong: true }
+                    - type: Table
+                      props:
+                        pagination: false
+                        columns:
+                          - { title: 授权项, dataIndex: name }
+                          - { title: Key, dataIndex: actionKey }
+                          - { title: 类型, dataIndex: kind }
+                          - title: 已授权
+                            align: center
+                            width: 80
+                            cell:
+                              type: Checkbox
+                              props: { value: '${row.granted}' }
+                        dataSource:
+                          - { id: 1, name: 访问页面, actionKey: 'page:help:doc', kind: 页面, granted: true }
+                          - { id: 2, name: 新建文档, actionKey: 'action:doc:create', kind: 操作, granted: true }
+                          - { id: 3, name: 编辑文档, actionKey: 'action:doc:edit', kind: 操作, granted: false }
+                          - { id: 4, name: 删除文档, actionKey: 'action:doc:delete', kind: 操作, granted: false }
+        - type: Flex
+          props: { justify: space-between, align: center }
+          children:
+            - type: Text
+              props: { text: 变更尚未保存, type: warning, size: small }
+            - type: Flex
+              props: { gap: 8 }
+              children:
+                - type: Button
+                  props: { text: 取消 }
+                - type: Button
+                  props: { text: 保存完整授权, variant: primary }

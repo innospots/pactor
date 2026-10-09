@@ -1,0 +1,103 @@
+# 提炼自「布局 E — 长表单 + 底栏固定提交」：多 Card 滚动 + Affix 固定底栏一组按钮。
+# 交互：底栏「提交」校验必填项并提示；「取消」提示。
+# 人工提炼入库、落盘维护；构建期只读取，不做推导。
+title: 布局 E — 长表单 + 底栏固定提交
+height: 640
+body:
+  type: Page
+  children:
+    - type: Flex
+      props: { direction: vertical, gap: 16, align: start }
+      children:
+        - type: Text
+          props: { text: 编辑供应商档案, size: large, strong: true }
+        - type: Form
+          props: { layout: vertical, className: w-full }
+          events:
+            onSubmit:
+              - action: message
+                params: { messageType: success, text: 提交成功 }
+          children:
+            - type: Card
+              props: { title: 基本信息 }
+              children:
+                - type: Field
+                  props: { label: 名称, required: true }
+                  children:
+                    - type: Input
+                      props:
+                        name: name
+                        placeholder: 请输入供应商名称
+                        rules:
+                          - { required: true, message: 请输入供应商名称 }
+                - type: Field
+                  props: { label: 编码, required: true, description: 创建后不可修改 }
+                  children:
+                    - type: Input
+                      props:
+                        name: code
+                        placeholder: 如 SUP-0001
+                        rules:
+                          - { required: true, message: 请输入供应商编码 }
+                - type: Field
+                  props: { label: 负责人 }
+                  children:
+                    - type: Input
+                      props: { name: owner, placeholder: 请输入负责人 }
+                - type: Field
+                  props: { label: 联系电话 }
+                  children:
+                    - type: Input
+                      props: { name: phone, placeholder: 请输入联系电话 }
+            - type: Card
+              props: { title: 扩展信息, className: mt-4 }
+              children:
+                - type: Field
+                  props: { label: 地址 }
+                  children:
+                    - type: Input
+                      props: { name: address, placeholder: 请输入地址 }
+                - type: Field
+                  props: { label: 行业 }
+                  children:
+                    - type: Select
+                      props:
+                        name: industry
+                        placeholder: 请选择行业
+                        options:
+                          - { label: 制造业, value: manufacturing }
+                          - { label: 零售, value: retail }
+                          - { label: 软件服务, value: software }
+                - type: Field
+                  props: { label: 规模 }
+                  children:
+                    - type: Select
+                      props:
+                        name: scale
+                        placeholder: 请选择规模
+                        options:
+                          - { label: 50 人以下, value: s }
+                          - { label: 50-500 人, value: m }
+                          - { label: 500 人以上, value: l }
+                - type: Field
+                  props: { label: 备注 }
+                  children:
+                    - type: Textarea
+                      props: { name: remark, placeholder: 选填 }
+            - type: Affix
+              props: { offsetBottom: 0 }
+              children:
+                - type: Flex
+                  props:
+                    justify: end
+                    gap: 8
+                    className: border-t border-border bg-card px-4 py-3
+                  children:
+                    - type: Button
+                      props: { text: 取消 }
+                      events:
+                        onClick:
+                          - action: message
+                            params: { messageType: info, text: 已取消 }
+                    - type: Button
+                      props: { text: 提交, variant: primary, submit: true }

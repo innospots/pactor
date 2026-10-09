@@ -1,0 +1,70 @@
+# 提炼自「布局 A — 顶概览 + 多 Card」：插件详情场景，概览 Card（图标 + 名称描述 + 状态与主操作）+ 基本信息 Descriptions + 配置项 Table。
+# 人工提炼入库、落盘维护；构建期只读取，不做推导。
+title: 布局 A — 顶概览 + 多 Card
+height: 560
+body:
+  type: Page
+  children:
+    - type: Flex
+      props: { direction: vertical, gap: 16, align: start }
+      children:
+        - type: Card
+          props: { className: w-full }
+          children:
+            - type: Flex
+              props: { justify: space-between, align: center }
+              children:
+                - type: Flex
+                  props: { gap: 12, align: center }
+                  children:
+                    - type: Flex
+                      props: { className: rounded-md bg-muted p-3 }
+                      children:
+                        - type: Icon
+                          props: { name: package, size: lg }
+                    - type: Flex
+                      props: { direction: vertical, align: start }
+                      children:
+                        - type: Text
+                          props: { text: 数据同步插件, size: large, strong: true }
+                        - type: Text
+                          props:
+                            text: 每日凌晨将业务库数据同步至分析库
+                            size: small
+                            type: secondary
+                - type: Flex
+                  props: { gap: 8, align: center }
+                  children:
+                    - type: Tag
+                      props: { text: 已启用, color: success }
+                    - type: Tag
+                      props: { text: 运行中 }
+                    - type: Button
+                      props: { text: 手动触发, variant: primary }
+        - type: Card
+          props: { title: 基本信息, className: w-full }
+          children:
+            - type: Descriptions
+              props:
+                column: 3
+                items:
+                  - { label: 插件标识, value: data-sync }
+                  - { label: 版本, value: v1.4.2 }
+                  - { label: 发布方, value: 平台团队 }
+                  - { label: 安装时间, value: '2026-08-12 09:30' }
+                  - { label: 最近运行, value: '2026-10-09 02:00' }
+                  - { label: 下次运行, value: '2026-10-10 02:00' }
+        - type: Card
+          props: { title: 配置项, className: w-full }
+          children:
+            - type: Table
+              props:
+                pagination: false
+                columns:
+                  - { title: 配置项, dataIndex: name }
+                  - { title: 值, dataIndex: value }
+                  - { title: 描述, dataIndex: description }
+                dataSource:
+                  - { id: 1, name: source.dsn, value: 'mysql://biz-db:3306/orders', description: 业务库连接串 }
+                  - { id: 2, name: sync.cron, value: '0 2 * * *', description: 每日凌晨 2 点触发同步 }
+                  - { id: 3, name: batch.size, value: '5000', description: 单批同步记录数上限 }

@@ -1,0 +1,73 @@
+# 提炼自「布局 P2 — 工作台 / 欢迎页」：问候页头 + W5 快捷入口 Grid（4 列）+ W6 待办摘要卡。
+# 人工提炼入库、落盘维护；构建期只读取，不做推导。
+title: 布局 P2 — 工作台 / 欢迎页
+height: 520
+body:
+  type: Page
+  children:
+    - type: Flex
+      props: { direction: vertical, gap: 16 }
+      children:
+        - type: Text
+          props: { text: 上午好，管理员, size: large, strong: true }
+        - type: Grid
+          props: { columns: 4, gap: 16 }
+          children:
+            - type: Card
+              props: { hoverable: true, contentClassName: flex flex-col items-center justify-center gap-2 }
+              children:
+                - type: Icon
+                  props: { name: building, size: lg }
+                - type: Text
+                  props: { text: 租户管理 }
+            - type: Card
+              props: { hoverable: true, contentClassName: flex flex-col items-center justify-center gap-2 }
+              children:
+                - type: Icon
+                  props: { name: user, size: lg }
+                - type: Text
+                  props: { text: 用户管理 }
+            - type: Card
+              props: { hoverable: true, contentClassName: flex flex-col items-center justify-center gap-2 }
+              children:
+                - type: Icon
+                  props: { name: plus, size: lg }
+                - type: Text
+                  props: { text: 邀请成员 }
+            - type: Card
+              props: { hoverable: true, contentClassName: flex flex-col items-center justify-center gap-2 }
+              children:
+                - type: Icon
+                  props: { name: file-text, size: lg }
+                - type: Text
+                  props: { text: 帮助文档 }
+        - type: Card
+          props: { title: 待办摘要 }
+          children:
+            - type: Flex
+              props: { direction: vertical, gap: 8 }
+              children:
+                - type: Flex
+                  props: { justify: end }
+                  children:
+                    - type: Button
+                      props: { text: 查看全部 →, variant: link }
+                - type: Table
+                  props:
+                    pagination: false
+                    columns:
+                      - { title: 事项, dataIndex: item }
+                      - { title: 提交人, dataIndex: submitter }
+                      - { title: 时间, dataIndex: time }
+                      - title: 状态
+                        width: 100
+                        align: center
+                        cell:
+                          type: Status
+                          props:
+                            status: "${row.statusType}"
+                            text: "${row.statusText}"
+                    dataSource:
+                      - { id: 1, item: 注册审批, submitter: 租户 · 云启科技, time: 2026-09-28 10:12, statusType: processing, statusText: 待处理 }
+                      - { id: 2, item: 权限申请, submitter: 张三, time: 2026-09-27 16:40, statusType: warning, statusText: 待审批 }
+                      - { id: 3, item: 续费提醒, submitter: 系统, time: 2026-09-26 09:00, statusType: default, statusText: 提醒 }

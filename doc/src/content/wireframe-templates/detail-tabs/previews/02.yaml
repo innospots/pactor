@@ -1,0 +1,90 @@
+# 提炼自「布局 B — 锚点 Tab（单页滚动）」：内容区分 Card 纵向排列，右侧 Anchor scroll-spy 定位。
+# 人工提炼入库、落盘维护；构建期只读取，不做推导。
+title: 布局 B — 锚点 Tab（单页滚动）
+height: 560
+body:
+  type: Page
+  children:
+    - type: Flex
+      props: { direction: vertical, gap: 16, align: start }
+      children:
+        - type: Breadcrumb
+          props:
+            items:
+              - { label: 角色管理, href: /roles }
+              - { label: 超级管理员 }
+        - type: Flex
+          props: { direction: vertical, gap: 4, align: start }
+          children:
+            - type: Flex
+              props: { align: center, gap: 8 }
+              children:
+                - type: Text
+                  props: { text: 超级管理员, size: large, strong: true }
+                - type: Status
+                  props: { status: success, text: 启用 }
+            - type: Text
+              props:
+                text: ROLE_ADMIN · 系统内置 · 创建于 2026-01-15
+                type: secondary
+                size: small
+        - type: Flex
+          props: { gap: 24, align: start }
+          children:
+            - type: Flex
+              props: { direction: vertical, gap: 16, style: { flex: 1, minWidth: 0 } }
+              children:
+                - type: Card
+                  props: { id: section-info, title: 基本信息 }
+                  children:
+                    - type: Descriptions
+                      props:
+                        column: 3
+                        items:
+                          - { label: 角色编码, value: ROLE_ADMIN }
+                          - { label: 角色名称, value: 超级管理员 }
+                          - { label: 状态, value: 启用 }
+                          - { label: 归属, value: 系统内置 }
+                          - { label: 创建时间, value: 2026-01-15 10:24 }
+                          - { label: 最近修改, value: 2026-09-28 16:03 }
+                - type: Card
+                  props: { id: section-permissions, title: 权限设置 }
+                  children:
+                    - type: Table
+                      props:
+                        pagination: false
+                        columns:
+                          - { title: 权限点, dataIndex: name }
+                          - { title: 描述, dataIndex: description }
+                          - title: 状态
+                            cell:
+                              type: Status
+                              props:
+                                status: ${row.statusType}
+                                text: ${row.statusText}
+                        dataSource:
+                          - { id: 1, name: user:view, description: 查看用户列表与详情, statusType: success, statusText: 已授权 }
+                          - { id: 2, name: user:edit, description: 新建、编辑、禁用用户, statusType: success, statusText: 已授权 }
+                          - { id: 3, name: role:assign, description: 为用户分配角色, statusType: success, statusText: 已授权 }
+                          - { id: 4, name: audit:export, description: 导出审计日志, statusType: default, statusText: 未授权 }
+                - type: Card
+                  props: { id: section-members, title: 成员列表 }
+                  children:
+                    - type: Table
+                      props:
+                        pagination: false
+                        columns:
+                          - { title: 成员, dataIndex: name }
+                          - { title: 部门, dataIndex: dept }
+                          - { title: 加入时间, dataIndex: joinedAt }
+                        dataSource:
+                          - { id: 1, name: 张三, dept: 平台研发部, joinedAt: 2026-02-01 }
+                          - { id: 2, name: 李四, dept: 平台研发部, joinedAt: 2026-03-18 }
+                          - { id: 3, name: 王五, dept: 信息安全部, joinedAt: 2026-06-09 }
+            - type: Anchor
+              props:
+                className: sticky top-4 shrink-0
+                items:
+                  - { href: '#section-info', title: 基本信息 }
+                  - { href: '#section-permissions', title: 权限设置 }
+                  - { href: '#section-members', title: 成员列表 }

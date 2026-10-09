@@ -1,0 +1,59 @@
+# 提炼自「布局 I-B / I-C / I-D」：语义信息卡（图标+标题+说明+右下 link）、Result 成功结果卡、Field description 行内提示。
+# 人工提炼入库、落盘维护；构建期只读取，不做推导。
+title: 布局 I-B / I-C / I-D — 语义卡 · 结果卡 · 行内提示
+height: 640
+body:
+  type: Page
+  children:
+    - type: Flex
+      props: { direction: vertical, gap: 16 }
+      children:
+        - type: Card
+          props: { className: w-full }
+          children:
+            - type: Flex
+              props: { direction: vertical, gap: 8, align: start }
+              children:
+                - type: Flex
+                  props: { gap: 8, align: center }
+                  children:
+                    - type: Icon
+                      props: { name: info, size: sm }
+                    - type: Text
+                      props: { text: 计费说明, strong: true }
+                - type: Text
+                  props:
+                    text: 按 Token 用量计费；账单日每月 1 日结算。
+                    type: secondary
+                    size: small
+                - type: Flex
+                  props: { justify: end, className: w-full }
+                  children:
+                    - type: Button
+                      props: { text: 查看定价 →, variant: link }
+        - type: Card
+          props: { className: w-full }
+          children:
+            - type: Result
+              props:
+                status: success
+                title: 租户已开通
+                subTitle: 租户编码 acme-corp 已生效。
+              children:
+                - type: Flex
+                  props: { justify: center, gap: 8 }
+                  children:
+                    - type: Button
+                      props: { text: 进入租户控制台, variant: primary }
+                    - type: Button
+                      props: { text: 继续邀请用户 }
+        - type: Card
+          props: { className: w-full }
+          children:
+            - type: Form
+              children:
+                - type: Field
+                  props: { label: 租户编码, required: true, description: 创建后不可修改 }
+                  children:
+                    - type: Input
+                      props: { name: code, placeholder: 如 acme-corp }

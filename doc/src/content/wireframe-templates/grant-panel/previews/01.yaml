@@ -1,0 +1,91 @@
+# 提炼自「布局 A — 标准双栏（Nexus 角色权限）」：左树仅定位（3/4 计数）、右栏当前页全部可勾选项，底部全量替换保存条。
+# 人工提炼入库、落盘维护；构建期只读取，不做推导。
+title: 布局 A — 标准双栏（Nexus 角色权限）
+height: 640
+body:
+  type: Page
+  children:
+    - type: Flex
+      props: { direction: vertical, gap: 16 }
+      children:
+        - type: Flex
+          props: { justify: space-between, align: center }
+          children:
+            - type: Text
+              props: { text: 当前角色已选 12 项授权, strong: true }
+            - type: Input
+              props:
+                name: keyword
+                placeholder: 搜索资源名称 / Key
+                style: { width: 280 }
+        - type: Card
+          props: { contentClassName: p-0 }
+          children:
+            - type: Flex
+              props: { align: stretch }
+              children:
+                - type: Flex
+                  props:
+                    direction: vertical
+                    gap: 8
+                    style: { width: 280 }
+                    className: border-r border-border bg-muted/50 p-4
+                  children:
+                    - type: Text
+                      props: { text: 后台资源目录, size: small, type: secondary }
+                    - type: Tree
+                      props:
+                        treeData:
+                          - key: mod-a
+                            title: 模块A
+                            children:
+                              - { key: page-1, title: 页面1 · 3/4 }
+                              - { key: page-2, title: 页面2 · 2/3 }
+                          - key: mod-b
+                            title: 模块B
+                            children:
+                              - { key: page-3, title: 页面3 · 0/2 }
+                        defaultExpandedKeys: [mod-a, mod-b]
+                - type: Flex
+                  props:
+                    direction: vertical
+                    gap: 12
+                    style: { flex: 1 }
+                    className: p-4
+                  children:
+                    - type: Flex
+                      props: { gap: 8, align: baseline }
+                      children:
+                        - type: Text
+                          props: { text: 页面1, strong: true, size: large }
+                        - type: Text
+                          props: { text: 'PAGE · page:dashboard', size: small, type: secondary }
+                    - type: Text
+                      props: { text: 本页授权：已选 3 / 4 项, size: small, type: secondary }
+                    - type: Checkbox
+                      props: { label: 访问页面, value: true }
+                    - type: Flex
+                      props: { direction: vertical, gap: 8 }
+                      children:
+                        - type: Text
+                          props: { text: 操作权限, size: small, strong: true }
+                        - type: Container
+                          props: { className: border-b border-border }
+                    - type: Checkbox
+                      props: { label: 'action:user:create 创建用户', value: true }
+                    - type: Checkbox
+                      props: { label: 'action:user:edit 编辑用户', value: true }
+                    - type: Checkbox
+                      props: { label: 'action:user:delete 删除用户', value: false }
+        - type: Flex
+          props: { justify: space-between, align: center }
+          children:
+            - type: Text
+              props: { text: 变更尚未保存, type: warning, size: small }
+            - type: Flex
+              props: { gap: 8 }
+              children:
+                - type: Button
+                  props: { text: 取消 }
+                - type: Button
+                  props: { text: 保存完整授权, variant: primary }
