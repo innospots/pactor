@@ -18,6 +18,8 @@ export interface CardProps {
   rounded?: CardRounded;
   /** 可点击卡片：手型光标 + hover 边框/背景高亮，常配 events.onClick（如新建占位卡、整卡进详情） */
   hoverable?: boolean;
+  /** 根节点 DOM id（配合 Anchor 锚点定位等场景） */
+  id?: string;
   /** 通用：根节点 class（与内置样式合并） */
   className?: string;
   /** 通用：内容区（CardContent）class，如 `flex flex-1 flex-col items-center justify-center` 做整卡居中 */
@@ -35,6 +37,7 @@ export function Card({
   bordered = true,
   rounded,
   hoverable,
+  id,
   className,
   contentClassName,
   style,
@@ -44,6 +47,7 @@ export function Card({
   return (
     <ShadcnCard
       rounded={rounded}
+      id={id}
       className={cn(
         'gap-4 py-4',
         !bordered && 'border-transparent shadow-none',

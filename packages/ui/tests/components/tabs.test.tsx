@@ -116,3 +116,41 @@ describe('Tabs 内容区样式', () => {
     expect(paneB.style.minHeight).toBe('');
   });
 });
+
+describe('Tabs 竖排（tabPosition=left）', () => {
+  it('根节点横向排布、List 纵向且设置 orientation=vertical', () => {
+    const { container } = renderDsl({
+      type: 'Tabs',
+      props: {
+        tabPosition: 'left',
+        items: [
+          { key: 'a', label: '基本' },
+          { key: 'b', label: '权限' },
+        ],
+      },
+    });
+
+    const root = container.querySelector('[data-slot=tabs]') as HTMLElement;
+    expect(root.className).toContain('flex-row');
+
+    const list = container.querySelector('[data-slot=tabs-list]') as HTMLElement;
+    expect(list.getAttribute('aria-orientation')).toBe('vertical');
+    expect(list.className).toContain('flex-col');
+
+    const content = container.querySelector('[data-slot=tabs-content]') as HTMLElement;
+    expect(content.className).toContain('flex-1');
+  });
+
+  it('缺省 top：行为不变（无 vertical 标记）', () => {
+    const { container } = renderDsl({
+      type: 'Tabs',
+      props: { items: [{ key: 'a', label: '基本' }] },
+    });
+    const root = container.querySelector('[data-slot=tabs]') as HTMLElement;
+    expect(root.className).not.toContain('flex-row');
+    // horizontal 为 Base UI 默认方向，不输出 aria-orientation
+    expect(
+      container.querySelector('[data-slot=tabs-list]')!.getAttribute('aria-orientation'),
+    ).not.toBe('vertical');
+  });
+});

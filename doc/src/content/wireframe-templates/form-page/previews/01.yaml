@@ -1,0 +1,69 @@
+# 提炼自「布局 A — 单 Card 垂直表单」：Breadcrumb + 标题 + 单 Card 内垂直 Form，底部取消/提交。
+# 交互：「提交」校验必填项并提示；「取消」提示。
+# 人工提炼入库、落盘维护；构建期只读取，不做推导。
+title: 布局 A — 单 Card 垂直表单
+height: 560
+body:
+  type: Page
+  children:
+    - type: Flex
+      props: { direction: vertical, gap: 16, align: start }
+      children:
+        - type: Breadcrumb
+          props:
+            items:
+              - { label: 角色管理, href: /roles }
+              - { label: 新建角色 }
+        - type: Text
+          props: { text: 新建角色, size: large, strong: true }
+        - type: Card
+          props: { className: w-full }
+          children:
+            - type: Form
+              props: { layout: vertical }
+              events:
+                onSubmit:
+                  - action: message
+                    params: { messageType: success, text: 提交成功 }
+              children:
+                - type: Field
+                  props: { label: 角色名称, required: true }
+                  children:
+                    - type: Input
+                      props:
+                        name: name
+                        placeholder: 请输入角色名称
+                        rules:
+                          - { required: true, message: 请输入角色名称 }
+                - type: Field
+                  props: { label: 角色编码, required: true, description: 创建后不可修改 }
+                  children:
+                    - type: Input
+                      props:
+                        name: code
+                        placeholder: 如 ROLE_OPERATOR
+                        rules:
+                          - { required: true, message: 请输入角色编码 }
+                - type: Field
+                  props: { label: 状态 }
+                  children:
+                    - type: Switch
+                      props: { name: enabled, value: true }
+                - type: Field
+                  props: { label: 备注 }
+                  children:
+                    - type: Textarea
+                      props: { name: remark, placeholder: 选填，说明角色用途 }
+                - type: Field
+                  children:
+                    - type: Flex
+                      props: { justify: end, gap: 8 }
+                      children:
+                        - type: Button
+                          props: { text: 取消 }
+                          events:
+                            onClick:
+                              - action: message
+                                params: { messageType: info, text: 已取消 }
+                        - type: Button
+                          props: { text: 提交, variant: primary, submit: true }

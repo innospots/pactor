@@ -1,0 +1,129 @@
+# 提炼自「布局 C — 步骤条（Wizard）」：Steps + 当前步 Form + 上一步/下一步；current 绑 ${state.step}。
+# 交互：第一步「下一步」先校验必填项再推进；上一步/下一步切换步骤；末步「提交」提示成功并重置。
+# 人工提炼入库、落盘维护；构建期只读取，不做推导。
+title: 布局 C — 步骤条 Wizard
+height: 560
+state: { step: 0 }
+body:
+  type: Page
+  children:
+    - type: Flex
+      props: { direction: vertical, gap: 16, align: start }
+      children:
+        - type: Text
+          props: { text: 开通服务, size: large, strong: true }
+        - type: Card
+          props: { className: w-full }
+          children:
+            - type: Flex
+              props: { direction: vertical, gap: 16 }
+              children:
+                - type: Steps
+                  props:
+                    current: "${state.step}"
+                    items:
+                      - { title: 基本信息 }
+                      - { title: 配置 }
+                      - { title: 确认 }
+                - type: Form
+                  props: { layout: vertical }
+                  events:
+                    onSubmit:
+                      - action: if
+                        params:
+                          condition: "${state.step == 0}"
+                          then:
+                            - action: setState
+                              params: { step: 1 }
+                          else:
+                            - action: message
+                              params: { messageType: success, text: 开通成功 }
+                            - action: setState
+                              params: { step: 0 }
+                  children:
+                    - type: Flex
+                      when: "${state.step == 0}"
+                      props: { direction: vertical, gap: 0 }
+                      children:
+                        - type: Field
+                          props: { label: 名称, required: true }
+                          children:
+                            - type: Input
+                              props:
+                                name: name
+                                placeholder: 请输入服务名称
+                                rules:
+                                  - { required: true, message: 请输入服务名称 }
+                        - type: Field
+                          props: { label: 负责人 }
+                          children:
+                            - type: Input
+                              props: { name: owner, placeholder: 请输入负责人 }
+                    - type: Flex
+                      when: "${state.step == 1}"
+                      props: { direction: vertical, gap: 0 }
+                      children:
+                        - type: Field
+                          props: { label: 接入区域 }
+                          children:
+                            - type: Select
+                              props:
+                                name: region
+                                value: cn-east
+                                options:
+                                  - { label: 华东, value: cn-east }
+                                  - { label: 华北, value: cn-north }
+                        - type: Field
+                          props: { label: 数据保留期 }
+                          children:
+                            - type: Select
+                              props:
+                                name: retention
+                                value: d90
+                                options:
+                                  - { label: 30 天, value: d30 }
+                                  - { label: 90 天, value: d90 }
+                    - type: Flex
+                      when: "${state.step == 2}"
+                      props: { direction: vertical, gap: 8 }
+                      children:
+                        - type: Text
+                          props: { text: 请确认以下信息无误后提交, size: small, type: secondary }
+                        - type: Flex
+                          props: { gap: 8 }
+                          children:
+                            - type: Text
+                              props: { text: 服务名称：, type: secondary }
+                            - type: Text
+                              props: { text: "${form.name}" }
+                        - type: Flex
+                          props: { gap: 8 }
+                          children:
+                            - type: Text
+                              props: { text: 接入区域：, type: secondary }
+                            - type: Text
+                              props: { text: "${form.region}" }
+                    - type: Flex
+                      props: { justify: space-between, className: mt-4 }
+                      children:
+                        - type: Button
+                          props:
+                            text: 上一步
+                            disabled: "${state.step == 0}"
+                          events:
+                            onClick:
+                              - action: setState
+                                params: { step: "${state.step - 1}" }
+                        - type: Button
+                          when: "${state.step == 0}"
+                          props: { text: 下一步, variant: primary, submit: true }
+                        - type: Button
+                          when: "${state.step == 1}"
+                          props: { text: 下一步, variant: primary }
+                          events:
+                            onClick:
+                              - action: setState
+                                params: { step: 2 }
+                        - type: Button
+                          when: "${state.step == 2}"
+                          props: { text: 提交, variant: primary, submit: true }

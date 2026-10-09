@@ -10,6 +10,8 @@ export interface ContainerProps {
   size?: ContainerSize;
   /** 是否水平居中，默认 true */
   centered?: boolean;
+  /** 根节点 DOM id（配合 Anchor 锚点定位等场景） */
+  id?: string;
   /** 通用：根节点 class（与内置样式合并） */
   className?: string;
   /** 通用：根节点内联样式 */
@@ -32,6 +34,7 @@ const sizeClass: Record<ContainerSize, string> = {
 export function Container({
   size = 'lg',
   centered = true,
+  id,
   className,
   style,
   children,
@@ -40,6 +43,7 @@ export function Container({
     <div
       data-slot="container"
       data-size={size}
+      id={id}
       className={cn(
         'w-full px-4',
         sizeClass[size],

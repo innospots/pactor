@@ -1,0 +1,53 @@
+# 提炼自「布局 C — 主栏 + 侧栏元数据」：主栏 CodeBlock 宽内容（flex 7），右侧窄栏 Descriptions 元数据（flex 3）。
+# 人工提炼入库、落盘维护；构建期只读取，不做推导。
+title: 布局 C — 主栏 + 侧栏元数据
+height: 520
+body:
+  type: Page
+  children:
+    - type: Flex
+      props: { direction: vertical, gap: 16, align: start }
+      children:
+        - type: Breadcrumb
+          props:
+            items:
+              - { label: 配置中心, href: /configs }
+              - { label: 支付网关配置 }
+        - type: Text
+          props: { text: 支付网关配置, size: large, strong: true }
+        - type: Flex
+          props: { gap: 24, align: start, className: w-full }
+          children:
+            - type: Flex
+              props: { direction: vertical, gap: 16, style: { flex: 7, minWidth: 0 } }
+              children:
+                - type: Card
+                  props: { title: 配置内容 }
+                  children:
+                    - type: CodeBlock
+                      props:
+                        language: json
+                        copyable: true
+                        code: |
+                          {
+                            "endpoint": "https://pay-gateway.example.com/v2",
+                            "timeout": 3000,
+                            "retry": {
+                              "maxAttempts": 3,
+                              "backoff": "exponential"
+                            }
+                          }
+            - type: Flex
+              props: { direction: vertical, gap: 16, style: { flex: 3 } }
+              children:
+                - type: Card
+                  props: { title: 元数据 }
+                  children:
+                    - type: Descriptions
+                      props:
+                        column: 1
+                        items:
+                          - { label: 更新时间, value: '2026-10-08 11:20' }
+                          - { label: 更新人, value: 李四 }
+                          - { label: 追踪 ID, value: tr-8f3k2 }
+                          - { label: 来源, value: 控制台 }

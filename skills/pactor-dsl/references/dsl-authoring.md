@@ -347,6 +347,67 @@ events:
             params: { messageType: success, text: Customer updated }
 ```
 
+### 8.2.1 Controlled overlay nodes (state + `open` expression)
+
+Alternative to `overlay.open`: declare `Drawer` / `Dialog` / `AlertDialog` as ordinary DSL nodes with `open: ${state.x}` and drive them with `setState`. Use this when the overlay is a fixed part of the page tree (templates, statically known content). Key wiring:
+
+```yaml
+state: { drawerOpen: false }
+body:
+  type: Page
+  children:
+    - type: Button                            # open
+      props: { text: 新建, variant: primary }
+      events:
+        onClick:
+          - action: setState
+            params: { drawerOpen: true }
+    - type: Drawer
+      props:
+        title: 编辑
+        open: "${state.drawerOpen}"
+        style: { width: 480, maxWidth: 'none' }
+      events:
+        onClose:                              # mask click / Esc
+          - action: setState
+            params: { drawerOpen: false }
+      children:
+        - type: Form                          # wrap ALL fields AND the footer buttons:
+          events:                             # submit only works inside the <form> DOM
+            onSubmit:
+              - action: message
+                params: { messageType: success, text: 保存成功 }
+              - action: setState
+                params: { drawerOpen: false }
+          children:
+            - type: Field
+              props: { label: 名称, required: true }
+              children:
+                - type: Input
+                  props:
+                    name: name
+                    rules:
+                      - { required: true, message: 请输入名称 }
+            - type: Flex
+              props: { justify: end, gap: 8 }
+              children:
+                - type: Button
+                  props: { text: 取消 }
+                  events:
+                    onClick:
+                      - action: setState
+                        params: { drawerOpen: false }
+                - type: Button
+                  props: { text: 保存, variant: primary, submit: true }
+```
+
+Rules of thumb:
+
+- `Drawer`/`Dialog` close themselves only via `events.onClose` (mask/Esc) — plain 取消/关闭 buttons need explicit `setState x=false`.
+- `AlertDialog` in controlled mode never self-closes: wire BOTH `events.onConfirm` and `events.onCancel` to `setState x=false`.
+- A `submit: true` button submits the enclosing `<form>` — when the footer sits below non-form content (tables, section headers), wrap EVERYTHING in the `Form` instead of leaving the footer outside.
+- `${form.x}` is written to state only on successful submit; for per-step data in a wizard, submit at each step (or read Form values only after submit).
+
 ### 8.3 Server-side pagination
 
 Table's own `pagination` paginates the data already bound to it (client-side). For a server-paginated API, turn it off and pair the table with a standalone `Pagination` component driving state + reload:
@@ -464,6 +525,9 @@ state:
 | `pagination: true` | `pagination: { pageSize: 10 }` |
 | `htmlType: submit` | `submit: true` |
 | Bare `Input`/`Select`/`Button` directly under `Form` | Wrap every form control (incl. search-bar buttons) in `Field`; label / required / description / error belong to `Field` |
+| Relying on `Field required: true` for validation | It is a visual `*` marker only — declare `rules: [{ required: true, message: ... }]` on the CONTROL (`Input`/`Select`/…); Form validates control rules on submit |
+| `style` / `className` as node-level keys (sibling of `props:`) | They are component props — always nest them inside `props: { className: ..., style: ... }`; node-level keys are silently ignored |
+| `children` nested inside `props:` | `children` is a NODE-level key (sibling of `props:`); nested under `props:` it is silently dropped |
 | `navigate` param `path` / `url` | `to` |
 | `message` param `type: success` | `messageType: success` — a `type` (or `action`) key inside action `params` makes the engine treat params as a nested DSL/action config and SKIP expression evaluation |
 | Reading full form values in `onValuesChange` | It only carries the changed field; use `onSubmit` or `${form.x}` |

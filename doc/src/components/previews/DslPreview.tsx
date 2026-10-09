@@ -12,6 +12,13 @@ import {
   registerBuiltinActions,
 } from '@pactor-app/runtime';
 import { createComponentRegistry } from '@pactor-app/ui/components';
+import {
+  createUiBridge,
+  InteractionProvider,
+  OverlayHost,
+  OverlayManager,
+  registerInteractionActions,
+} from '@pactor-app/ui/interaction';
 import { previewExtraComponents } from './preview-extras';
 
 export default function DslPreview({
@@ -34,5 +41,19 @@ export default function DslPreview({
     return ctx;
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
-  return <DslRenderer context={context} node={node} />;
+  // 交互层（message toast / confirm / overlay.*）：与业务应用同一套
+  // InteractionProvider + OverlayHost，预览内动作反馈与真机一致
+  const interaction = useMemo(() => {
+    const manager = new OverlayManager();
+    const bridge = createUiBridge();
+    registerInteractionActions(context.actions, manager, bridge);
+    return { manager, bridge };
+  }, [context]);
+  return (
+    <InteractionProvider bridge={interaction.bridge}>
+      <DslRenderer context={context} node={node}>
+        <OverlayHost manager={interaction.manager} />
+      </DslRenderer>
+    </InteractionProvider>
+  );
 }

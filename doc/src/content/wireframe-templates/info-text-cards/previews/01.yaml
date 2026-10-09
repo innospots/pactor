@@ -1,0 +1,33 @@
+# 提炼自「布局 I-A — 条带 Alert」：贴内容区顶部的语义色条带（info / warning / error），宽度随内容区。
+# 人工提炼入库、落盘维护；构建期只读取，不做推导。
+title: 布局 I-A — 条带 Alert
+height: 420
+body:
+  type: Page
+  children:
+    - type: Flex
+      props: { direction: vertical, gap: 16 }
+      children:
+        - type: Alert
+          props:
+            variant: info
+            showIcon: true
+            message: 数据每 5 分钟刷新一次
+            description: 实时 RPM 为近 1 分钟滑动窗口。
+        - type: Alert
+          props:
+            variant: warning
+            showIcon: true
+            message: 当前为演示租户
+            description: 部分 API 不会真实扣费。
+        - type: Alert
+          props:
+            variant: error
+            showIcon: true
+            message: 看板加载失败
+            description: 服务暂时不可用，请稍后重试。
+        - type: Text
+          props:
+            text: 条带贴页头下 / Form 顶 / 表格上，宽度随内容区；同屏多条按 error > warning > info > success 优先级自上而下排列。
+            type: secondary
+            size: small
