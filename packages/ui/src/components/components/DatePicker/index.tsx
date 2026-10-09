@@ -20,6 +20,7 @@ import { useEffect, useId, useState, type CSSProperties } from 'react';
 import { cn } from '../../../lib/utils.js';
 import { Calendar as ShadcnCalendar } from '../../../ui/calendar.js';
 import { Popover, PopoverContent, PopoverTrigger } from '../../../ui/popover.js';
+import { CONTROL_SIZE_BOX, type ControlSize } from '../../control-size.js';
 import { formItemClass, useFormContext } from '../Form/context.js';
 import type { FieldRule } from '../Input/index.js';
 
@@ -53,6 +54,8 @@ interface DatePickerCommonProps {
   /** 占位文案（缺省取 i18n key，按 mode 区分 single/range） */
   placeholder?: string;
   disabled?: boolean;
+  /** 控件尺寸（默认 middle，即现行 h-9 尺寸） */
+  size?: ControlSize;
   /**
    * 快捷预设栏：未提供时 range 模式缺省为内置三项（今天/本周/本月），
    * single 模式不渲染；`false` 显式关闭
@@ -137,6 +140,7 @@ export function DatePicker(props: DatePickerProps) {
     rules,
     placeholder,
     disabled,
+    size = 'middle',
     presets,
     className,
     style,
@@ -396,6 +400,7 @@ export function DatePicker(props: DatePickerProps) {
         data-slot="datepicker-trigger"
         className={cn(
           'flex h-9 w-full min-w-0 cursor-pointer items-center justify-between gap-2 rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-xs transition-colors outline-none hover:bg-accent focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:cursor-not-allowed disabled:opacity-50',
+          CONTROL_SIZE_BOX[size],
           displayText === '' && 'text-muted-foreground',
           !inForm && className,
         )}

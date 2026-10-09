@@ -4,6 +4,7 @@ import { useEffect, useId, useState, type CSSProperties } from 'react';
 import { cn } from '../../../lib/utils.js';
 import { Input as ShadcnInput } from '../../../ui/input.js';
 import { Popover, PopoverContent, PopoverTrigger } from '../../../ui/popover.js';
+import { CONTROL_SIZE_BOX, type ControlSize } from '../../control-size.js';
 import { useFormContext } from '../Form/context.js';
 import { FieldShell } from '../Form/form-item.js';
 import type { FieldRule } from '../Input/index.js';
@@ -30,6 +31,8 @@ export interface TreeSelectProps {
   /** 弹层顶部显示过滤输入（按 label 过滤，命中节点的祖先保留展开） */
   searchable?: boolean;
   disabled?: boolean;
+  /** 控件尺寸（默认 middle，即现行 h-9 尺寸） */
+  size?: ControlSize;
   /** 选中变化事件，传出选中节点 value */
   onChange?: (value: string | number) => void;
   /** 通用：根节点 class（Form 内为 form-item 容器，独立渲染时为触发器） */
@@ -76,6 +79,7 @@ export function TreeSelect({
   placeholder,
   searchable,
   disabled,
+  size = 'middle',
   onChange,
   className,
   style,
@@ -190,6 +194,7 @@ export function TreeSelect({
         data-slot="treeselect-trigger"
         className={cn(
           'flex h-9 w-full min-w-0 cursor-pointer items-center justify-between gap-2 rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-xs transition-colors outline-none hover:bg-accent focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:cursor-not-allowed disabled:opacity-50',
+          CONTROL_SIZE_BOX[size],
           !selected && 'text-muted-foreground',
           !inForm && className,
         )}

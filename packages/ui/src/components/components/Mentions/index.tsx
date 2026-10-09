@@ -10,6 +10,7 @@ import {
 
 import { cn } from '../../../lib/utils.js';
 import { Textarea as ShadcnTextarea } from '../../../ui/textarea.js';
+import { CONTROL_SIZE_AREA, type ControlSize } from '../../control-size.js';
 import { useFormContext } from '../Form/context.js';
 import { FieldShell } from '../Form/form-item.js';
 import type { FieldRule } from '../Input/index.js';
@@ -37,6 +38,8 @@ export interface MentionsProps {
   /** 受控值（完整字符串）；Form 内作为字段初始值 */
   value?: string;
   disabled?: boolean;
+  /** 控件尺寸（默认 middle；影响内边距与字号，高度仍由行数/内容决定） */
+  size?: ControlSize;
   /** 输入变化事件，传出完整字符串 */
   onChange?: (value: string) => void;
   /** 通用：根节点 class（Form 内为 form-item 容器，独立渲染时为控件包裹节点） */
@@ -84,6 +87,7 @@ export function Mentions({
   placeholder,
   value,
   disabled,
+  size = 'middle',
   onChange,
   className,
   style,
@@ -186,6 +190,7 @@ export function Mentions({
         rows={rows}
         placeholder={placeholder}
         disabled={disabled}
+        className={CONTROL_SIZE_AREA[size]}
         onChange={handleChange}
         onKeyDown={handleKeyDown}
         onBlur={() => setMention(undefined)}

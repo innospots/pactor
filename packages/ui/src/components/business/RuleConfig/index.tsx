@@ -1,6 +1,7 @@
 import { Plus, Trash2 } from 'lucide-react';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
+import { cn } from '../../../lib/utils.js';
 import { Badge } from '../../../ui/badge.js';
 import { Button } from '../../../ui/button.js';
 import { Input } from '../../../ui/input.js';
@@ -11,6 +12,13 @@ import {
   SelectTrigger,
   SelectValue,
 } from '../../../ui/select.js';
+import {
+  CONTROL_SIZE_BOX,
+  CONTROL_SIZE_BOX_GROW,
+  CONTROL_SIZE_SELECT_ATTR,
+  CONTROL_SIZE_TRIGGER_TEXT,
+  type ControlSize,
+} from '../../control-size.js';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -187,11 +195,13 @@ export interface RuleConfigProps {
   value?: RuleConfigValue;
   onChange?: (value: RuleConfigValue) => void;
   disabled?: boolean;
+  /** 控件尺寸（默认 middle；权重/取值/评分输入与操作符下拉统一按尺寸令牌渲染） */
+  size?: ControlSize;
 }
 
 // ─── Main component ───────────────────────────────────────────────────────────
 
-export function RuleConfig({ value, onChange, disabled }: RuleConfigProps) {
+export function RuleConfig({ value, onChange, disabled, size = 'middle' }: RuleConfigProps) {
   const rawConditions = value?.ruleConditions;
   // 后端数据的条件没有 key（或 key 重复），统一补齐唯一 key；
   // 否则按 key 匹配更新时所有条件都会命中（undefined === undefined），
@@ -317,7 +327,7 @@ export function RuleConfig({ value, onChange, disabled }: RuleConfigProps) {
         <span className="text-sm shrink-0">权重</span>
         <Input
           type="number"
-          className="w-48"
+          className={cn('w-48', CONTROL_SIZE_BOX[size])}
           min={1}
           max={1000}
           step={1}
@@ -337,6 +347,7 @@ export function RuleConfig({ value, onChange, disabled }: RuleConfigProps) {
           issue={getConditionIssue(condition)}
           showDelete={conditions.length > 1}
           disabled={disabled}
+          size={size}
           onOptChange={(opt) => handleOptChange(condition.key, opt)}
           onValueChange={(val) => handleValueChange(condition.key, val)}
           onScoreChange={(score) => handleScoreChange(condition.key, score)}
@@ -348,10 +359,10 @@ export function RuleConfig({ value, onChange, disabled }: RuleConfigProps) {
           type="button"
           variant="link"
           size="sm"
-          className="h-auto p-0 text-sm"
+          className="h-auto p-0 text-sm mt-1"
           onClick={handleAdd}
         >
-          <Plus className="h-3.5 w-3.5 mr-1" />
+          <Plus className="h-3.5 w-3.5" />
           添加条件
         </Button>
       )}
@@ -366,6 +377,7 @@ interface ConditionRowProps {
   issue?: ConditionIssue | null;
   showDelete: boolean;
   disabled?: boolean;
+  size: ControlSize;
   onOptChange: (opt: ConditionOpt) => void;
   onValueChange: (val: Condition['value']) => void;
   onScoreChange: (score: number | undefined) => void;
@@ -377,6 +389,7 @@ function ConditionRow({
   issue,
   showDelete,
   disabled,
+  size,
   onOptChange,
   onValueChange,
   onScoreChange,
@@ -399,7 +412,10 @@ function ConditionRow({
         onValueChange={(v) => onOptChange(v as ConditionOpt)}
         disabled={disabled}
       >
-        <SelectTrigger className="w-36 shrink-0">
+        <SelectTrigger
+          size={CONTROL_SIZE_SELECT_ATTR[size]}
+          className={cn('w-36 shrink-0', CONTROL_SIZE_TRIGGER_TEXT[size])}
+        >
           <SelectValue />
         </SelectTrigger>
         <SelectContent>
@@ -422,6 +438,7 @@ function ConditionRow({
             opt={opt}
             value={value}
             disabled={disabled}
+            size={size}
             onChange={onValueChange}
           />
         </div>
@@ -430,9 +447,11 @@ function ConditionRow({
       {/* Score input */}
       <Input
         type="number"
-        className={
-          'w-24 shrink-0' + (missingScore ? ' border-destructive' : '')
-        }
+        className={cn(
+          'w-24 shrink-0',
+          CONTROL_SIZE_BOX[size],
+          missingScore && 'border-destructive',
+        )}
         placeholder="评分"
         value={score ?? ''}
         disabled={disabled}
@@ -479,10 +498,11 @@ interface ValueInputProps {
   opt: ConditionOpt;
   value: Condition['value'];
   disabled?: boolean;
+  size: ControlSize;
   onChange: (val: Condition['value']) => void;
 }
 
-function ValueInput({ opt, value, disabled, onChange }: ValueInputProps) {
+function ValueInput({ opt, value, disabled, size, onChange }: ValueInputProps) {
   if (NO_VALUE_OPT.includes(opt)) {
     return null;
   }
@@ -494,7 +514,7 @@ function ValueInput({ opt, value, disabled, onChange }: ValueInputProps) {
       <div className="flex items-center gap-2">
         <Input
           type="number"
-          className="flex-1"
+          className={cn('flex-1', CONTROL_SIZE_BOX[size])}
           value={v1 ?? ''}
           disabled={disabled}
           onChange={(e) => onChange([e.target.valueAsNumber, v2 as number])}
@@ -502,7 +522,7 @@ function ValueInput({ opt, value, disabled, onChange }: ValueInputProps) {
         <span className="text-muted-foreground text-sm shrink-0">~</span>
         <Input
           type="number"
-          className="flex-1"
+          className={cn('flex-1', CONTROL_SIZE_BOX[size])}
           value={v2 ?? ''}
           disabled={disabled}
           onChange={(e) => onChange([v1 as number, e.target.valueAsNumber])}
@@ -516,6 +536,7 @@ function ValueInput({ opt, value, disabled, onChange }: ValueInputProps) {
       <TagInput
         value={(value as string[]) ?? []}
         disabled={disabled}
+        size={size}
         onChange={(tags) => onChange(tags)}
       />
     );
@@ -525,6 +546,7 @@ function ValueInput({ opt, value, disabled, onChange }: ValueInputProps) {
     return (
       <Input
         type="number"
+        className={CONTROL_SIZE_BOX[size]}
         value={(value as number) ?? ''}
         disabled={disabled}
         onChange={(e) => onChange(e.target.valueAsNumber)}
@@ -535,6 +557,7 @@ function ValueInput({ opt, value, disabled, onChange }: ValueInputProps) {
   return (
     <Input
       type="text"
+      className={CONTROL_SIZE_BOX[size]}
       value={(value as string) ?? ''}
       disabled={disabled}
       onChange={(e) => onChange(e.target.value)}
@@ -547,10 +570,12 @@ function ValueInput({ opt, value, disabled, onChange }: ValueInputProps) {
 function TagInput({
   value,
   disabled,
+  size,
   onChange,
 }: {
   value: string[];
   disabled?: boolean;
+  size: ControlSize;
   onChange: (tags: string[]) => void;
 }) {
   const [input, setInput] = useState('');
@@ -566,8 +591,12 @@ function TagInput({
   const removeTag = (tag: string) => onChange(value.filter((t) => t !== tag));
 
   return (
-    <div className="flex flex-wrap items-center gap-1 min-h-9 rounded-md border bg-transparent px-3 py-1 text-sm">
-      {value.map((tag) => (
+    <div
+      className={cn(
+        'flex flex-wrap items-center gap-1 min-h-9 rounded-md border bg-transparent px-3 py-1 text-sm',
+        CONTROL_SIZE_BOX_GROW[size],
+      )}
+    >      {value.map((tag) => (
         <Badge key={tag} variant="secondary" className="gap-1 pr-1">
           {tag}
           {!disabled && (

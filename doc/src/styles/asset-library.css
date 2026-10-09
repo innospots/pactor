@@ -91,13 +91,17 @@ body {
   color: var(--text);
   background: var(--bg);
 }
-button,
-input,
-select {
-  font: inherit;
-}
-button {
-  cursor: pointer;
+/* 表单元素字体继承须放入 base 层：未分层规则会压过 Tailwind utilities 层，
+   导致 text-sm/text-xs 在 button/input 上失效、min-h 控件被内容撑高 */
+@layer base {
+  button,
+  input,
+  select {
+    font: inherit;
+  }
+  button {
+    cursor: pointer;
+  }
 }
 a {
   color: inherit;

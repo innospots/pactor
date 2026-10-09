@@ -3,6 +3,7 @@ import { useEffect, useId, type CSSProperties } from 'react';
 
 import { cn } from '../../../lib/utils.js';
 import { Input as ShadcnInput } from '../../../ui/input.js';
+import { CONTROL_SIZE_BOX, type ControlSize } from '../../control-size.js';
 import { formItemClass, useFormContext } from '../Form/context.js';
 
 /** DSL 校验规则（框架级协议，当前支持 required + message） */
@@ -24,6 +25,8 @@ export interface InputProps {
   type?: 'text' | 'password';
   placeholder?: string;
   disabled?: boolean;
+  /** 控件尺寸（默认 middle，即现行 h-9 尺寸；全局统一尺寸令牌见 control-size） */
+  size?: ControlSize;
   /** 值为非空时显示清除按钮，点击清空当前值；开启后独立渲染的
    *  className/style 挂控件包裹节点（含清除按钮），未开启时保持挂控件本身 */
   allowClear?: boolean;
@@ -53,6 +56,7 @@ export function Input({
   type = 'text',
   placeholder,
   disabled,
+  size = 'middle',
   allowClear,
   onChange,
   className,
@@ -95,6 +99,7 @@ export function Input({
       placeholder={placeholder}
       disabled={disabled}
       className={cn(
+        CONTROL_SIZE_BOX[size],
         !inFormRoot && allowClear !== true && className,
         allowClear !== true && controlClassName,
       )}

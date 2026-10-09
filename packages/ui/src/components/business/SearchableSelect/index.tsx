@@ -15,6 +15,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from '../../../ui/popover.js';
+import { CONTROL_SIZE_BOX_GROW, type ControlSize } from '../../control-size.js';
 
 // ─── 文案缺省值（原 next-intl Common 命名空间文案的中文默认值） ──────────────────
 
@@ -37,6 +38,8 @@ export interface SearchableSelectProps {
   /** 过滤无匹配的空态文案，缺省「无匹配结果」 */
   emptyText?: string;
   disabled?: boolean;
+  /** 控件尺寸（默认 middle，即现行 min-h-9 尺寸；与基础表单控件同一尺寸令牌） */
+  size?: ControlSize;
   className?: string;
   id?: string;
   /** Whether to show the search input. When undefined, auto-show if options.length > 8. */
@@ -57,6 +60,7 @@ export function SearchableSelect({
   searchPlaceholder,
   emptyText,
   disabled = false,
+  size = 'middle',
   className,
   id,
   showSearch,
@@ -112,6 +116,7 @@ export function SearchableSelect({
           "placeholder:text-muted-foreground min-w-32",
           "focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2",
           "disabled:cursor-not-allowed disabled:opacity-50",
+          CONTROL_SIZE_BOX_GROW[size],
           multiple && "flex-wrap gap-1",
           className,
         )}

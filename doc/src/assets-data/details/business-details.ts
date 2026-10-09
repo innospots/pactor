@@ -1,13 +1,11 @@
 /**
  * 业务组件完整详情（第十批 9 个组件，packages/ui business 子目录真实实现已核对）。
  * - API 属性与结构核对自 packages/ui/src/components/business/ 下同名目录的
- *   index.tsx：CardList / EntityCard / Login（已从包入口导出并在 register.ts
- *   注册 DSL 类型 Login / EntityCard / CardList）、ExpressionEditor /
- *   FieldCondition / RuleConfig / RuleExpression / ScriptEditor / SearchableSelect
- *   （React 组件，本期未从包入口导出、未注册 DSL，详情页以 previewNote 呈现
- *   静态结构，DSL 章节保留「待接入」说明）；
+ *   index.tsx；9 个组件均已从包入口导出并在 register.ts 注册同名 DSL 类型
+ *   （Login / EntityCard / CardList / ExpressionEditor / FieldCondition /
+ *   RuleConfig / RuleExpression / ScriptEditor / SearchableSelect）；
  * - 运行态预览核对自 doc/src/components/previews/business-a.tsx（同一文件注册
- *   component.card-list / entity-card / login）。
+ *   全部 9 个 component.* 预览）。
  */
 import type { ComponentDetailContent } from './component-details.ts';
 
@@ -283,6 +281,27 @@ export const businessDetailContents: Record<string, ComponentDetailContent> = {
   },
 
   'component.expression-editor': {
+    dsl: {
+      "type": "ExpressionEditor",
+      "props": {
+        "label": "周期表达式",
+        "required": true,
+        "value": "${state.formula}",
+        "valueTemplate": "return ft.period({{start}}, {{end}})",
+        "valueMapping": {
+          "start": { "label": "起始周期", "type": "number", "default": 1, "required": true },
+          "end": { "label": "结束周期", "type": "number", "default": 12, "required": true }
+        }
+      },
+      "events": {
+        "onChange": {
+          "action": "setState",
+          "params": {
+            "formula": "${event}"
+          }
+        }
+      }
+    },
     whenToUse: [
       '**何时使用**',
       '',
@@ -308,8 +327,8 @@ export const businessDetailContents: Record<string, ComponentDetailContent> = {
       { name: 'id', type: 'string', defaultValue: '—', description: '根节点 id' },
       { name: 'value', type: 'string', defaultValue: '—', description: '受控值（组合后的表达式字符串）' },
       { name: 'onChange', type: '(value: string) => void', defaultValue: '—', description: '表达式变更回调（display 态实时 emit）' },
-      { name: 'valueTemplate', type: 'string', defaultValue: '—', description: '表单值模板（如 "return ft.period(${a}, ${b})"）；空串时渲染 null' },
-      { name: 'valueMapping', type: 'Record<string, ExpressionMappingItem>', defaultValue: '—', description: '模板占位符（${key}）到控件配置的映射；未映射占位符保留字面量' },
+      { name: 'valueTemplate', type: 'string', defaultValue: '—', description: '表单值模板（如 "return ft.period(${a}, ${b})"）；空串时渲染 null。占位符支持 ${key} 与 {{key}} 两种写法，DSL props 内联书写时须用 {{key}}（${ 会被 DSL 表达式引擎提前求值）' },
+      { name: 'valueMapping', type: 'Record<string, ExpressionMappingItem>', defaultValue: '—', description: '模板占位符（${key} / {{key}}）到控件配置的映射；未映射占位符保留字面量' },
       { name: 'optionSources', type: 'Record<string, unknown>', defaultValue: '—', description: '页面级候选源集合；仅静态 { options } 条目生效，远程 { request } 条目按空候选渲染' },
       { name: 'label', type: 'string | null', defaultValue: '—', description: '字段标签（头部左侧）' },
       { name: 'required', type: 'boolean', defaultValue: 'false', description: '必填标记（label 后显示 *）' },
@@ -338,6 +357,25 @@ export const businessDetailContents: Record<string, ComponentDetailContent> = {
   },
 
   'component.field-condition': {
+    dsl: {
+      "type": "FieldCondition",
+      "props": {
+        "value": "${state.condition}",
+        "fields": [
+          { "featureCode": "age", "featureName": "年龄", "fieldType": "NUMBER" },
+          { "featureCode": "name", "featureName": "姓名", "fieldType": "STRING" },
+          { "featureCode": "registerTime", "featureName": "注册时间", "fieldType": "DATE" }
+        ]
+      },
+      "events": {
+        "onChange": {
+          "action": "setState",
+          "params": {
+            "condition": "${event}"
+          }
+        }
+      }
+    },
     whenToUse: [
       '**何时使用**',
       '',
@@ -380,6 +418,20 @@ export const businessDetailContents: Record<string, ComponentDetailContent> = {
   },
 
   'component.rule-config': {
+    dsl: {
+      "type": "RuleConfig",
+      "props": {
+        "value": "${state.rule}"
+      },
+      "events": {
+        "onChange": {
+          "action": "setState",
+          "params": {
+            "rule": "${event}"
+          }
+        }
+      }
+    },
     whenToUse: [
       '**何时使用**',
       '',
@@ -421,6 +473,26 @@ export const businessDetailContents: Record<string, ComponentDetailContent> = {
   },
 
   'component.rule-expression': {
+    dsl: {
+      "type": "RuleExpression",
+      "props": {
+        "value": "${state.ruleExpr}",
+        "placeholder": "输入字段名匹配候选，Enter 选中为 chip",
+        "options": [
+          { "label": "年龄", "value": "age" },
+          { "label": "注册时间", "value": "registerTime" },
+          { "label": "订单金额", "value": "orderAmount" }
+        ]
+      },
+      "events": {
+        "onChange": {
+          "action": "setState",
+          "params": {
+            "ruleExpr": "${event}"
+          }
+        }
+      }
+    },
     whenToUse: [
       '**何时使用**',
       '',
@@ -464,6 +536,29 @@ export const businessDetailContents: Record<string, ComponentDetailContent> = {
   },
 
   'component.script-editor': {
+    dsl: {
+      "type": "ScriptEditor",
+      "props": {
+        "value": "${state.script}",
+        "language": "python",
+        "height": 200,
+        "placeholder": "输入脚本，函数 / 变量自动联想",
+        "functions": [
+          { "name": "SUM", "description": "求和", "parameters": [{ "name": "field", "type": "string" }] }
+        ],
+        "variables": [
+          { "name": "order_amount", "type": "number", "description": "订单金额" }
+        ]
+      },
+      "events": {
+        "onChange": {
+          "action": "setState",
+          "params": {
+            "script": "${event}"
+          }
+        }
+      }
+    },
     whenToUse: [
       '**何时使用**',
       '',
@@ -511,6 +606,26 @@ export const businessDetailContents: Record<string, ComponentDetailContent> = {
   },
 
   'component.searchable-select': {
+    dsl: {
+      "type": "SearchableSelect",
+      "props": {
+        "value": "${state.fruit}",
+        "placeholder": "选择水果（可搜索）",
+        "options": [
+          { "label": "苹果", "value": "apple" },
+          { "label": "香蕉", "value": "banana" },
+          { "label": "橙子", "value": "orange" }
+        ]
+      },
+      "events": {
+        "onChange": {
+          "action": "setState",
+          "params": {
+            "fruit": "${event}"
+          }
+        }
+      }
+    },
     whenToUse: [
       '**何时使用**',
       '',

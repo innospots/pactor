@@ -1,18 +1,30 @@
 /**
  * 组件运行态预览注册表（业务批）：packages/ui business 子目录组件。
- * CardList / EntityCard / Login 已从包入口导出并在 register.ts 注册 DSL；
- * Login 内部经 Form / Link 依赖 Renderer 上下文（useRenderer），与
- * basic-a 的 Layout / Tabs 同类，经 DslPreview 以真实 DSL 渲染。
- * 其余 business 组件（ExpressionEditor / FieldCondition / RuleConfig /
- * RuleExpression / ScriptEditor / SearchableSelect）本期未从包入口导出，
- * 详情页经 previewNote 呈现静态结构说明。
+ * 9 个组件均已从包入口导出并在 register.ts 注册 DSL；Login 内部经
+ * Form / Link 依赖 Renderer 上下文（useRenderer），与 basic-a 的
+ * Layout / Tabs 同类，经 DslPreview 以真实 DSL 渲染；其余组件为
+ * 纯受控 React 组件，局部 state 受控 + 事件回显。
  */
 import { useState, type ReactElement } from 'react';
 import type { DslNode } from '@pactor-app/core';
-import { CardList, EntityCard, type CardListItem } from '@pactor-app/ui/components';
+import {
+  CardList,
+  EntityCard,
+  ExpressionEditor,
+  FieldCondition,
+  RuleConfig,
+  RuleExpression,
+  ScriptEditor,
+  SearchableSelect,
+  type CardListItem,
+  type FieldConditionValue,
+  type RuleConfigValue,
+  type RuleExpressionValue,
+} from '@pactor-app/ui/components';
 import DslPreview from './DslPreview';
 
 const columnStyle = { display: 'flex', flexDirection: 'column', gap: 12 } as const;
+const echoStyle = { fontSize: 12, color: 'var(--muted-foreground)' } as const;
 
 const ENTITY_ACTIONS = [
   { text: '编辑', key: 'edit' },
@@ -35,7 +47,7 @@ function EntityCardPreview() {
         onClick={() => setLastAction('整卡点击')}
         onAction={(e) => setLastAction(`操作：${e.key}`)}
       />
-      <span style={{ fontSize: 12, color: 'var(--muted-foreground)' }}>
+      <span style={echoStyle}>
         事件回显：{lastAction || '点击卡片或操作按钮'}
       </span>
     </div>
@@ -83,7 +95,7 @@ function CardListPreview() {
         onItemAction={(e) => setLastEvent(`操作：${e.key}（${e.item.title}）`)}
         onCreateClick={() => setLastEvent('新建占位卡点击')}
       />
-      <span style={{ fontSize: 12, color: 'var(--muted-foreground)' }}>
+      <span style={echoStyle}>
         事件回显：{lastEvent || '点击卡片、操作按钮或新建占位卡'}
       </span>
     </div>
@@ -115,8 +127,165 @@ function LoginPreview() {
   );
 }
 
+const FRUIT_OPTIONS = [
+  { label: '苹果', value: 'apple' },
+  { label: '香蕉', value: 'banana' },
+  { label: '橙子', value: 'orange' },
+  { label: '葡萄', value: 'grape' },
+  { label: '西瓜', value: 'watermelon' },
+  { label: '芒果', value: 'mango' },
+  { label: '草莓', value: 'strawberry' },
+  { label: '蓝莓', value: 'blueberry' },
+  { label: '菠萝', value: 'pineapple' },
+];
+
+function SearchableSelectPreview() {
+  const [single, setSingle] = useState<string | string[] | undefined>('apple');
+  const [multi, setMulti] = useState<string | string[] | undefined>(['banana']);
+  return (
+    <div style={columnStyle}>
+      <SearchableSelect
+        value={single}
+        onChange={setSingle}
+        options={FRUIT_OPTIONS}
+        placeholder="单选（>8 条自动出搜索框）"
+      />
+      <SearchableSelect
+        value={multi}
+        onChange={setMulti}
+        options={FRUIT_OPTIONS}
+        multiple
+        placeholder="多选（chips 可逐个删除）"
+      />
+      <span style={echoStyle}>
+        事件回显：单选 {JSON.stringify(single)} · 多选 {JSON.stringify(multi)}
+      </span>
+    </div>
+  );
+}
+
+const CONDITION_FIELDS = [
+  { featureCode: 'age', featureName: '年龄', fieldType: 'NUMBER' },
+  { featureCode: 'name', featureName: '姓名', fieldType: 'STRING' },
+  { featureCode: 'registerTime', featureName: '注册时间', fieldType: 'DATE' },
+  { featureCode: 'isVip', featureName: '是否会员', fieldType: 'BOOLEAN' },
+];
+
+function FieldConditionPreview() {
+  const [value, setValue] = useState<FieldConditionValue>({
+    relation: 'AND',
+    children: [
+      {
+        relation: 'AND',
+        children: [
+          {
+            field: { value: 'age', label: '年龄', dataType: 'NUMBER' },
+            term: { value: 'GREATER_EQUAL', label: '大于等于' },
+            value: 18,
+          },
+        ],
+      },
+    ],
+  });
+  return (
+    <div style={columnStyle}>
+      <FieldCondition value={value} onChange={setValue} fields={CONDITION_FIELDS} />
+      <span style={echoStyle}>事件回显：{JSON.stringify(value)}</span>
+    </div>
+  );
+}
+
+function ExpressionEditorPreview() {
+  const [value, setValue] = useState('return ft.period(1, 12)');
+  return (
+    <div style={columnStyle}>
+      <ExpressionEditor
+        label="周期表达式"
+        required
+        value={value}
+        onChange={setValue}
+        valueTemplate="return ft.period(${a}, ${b})"
+        valueMapping={{
+          a: { label: '起始周期', type: 'number', default: 1, required: true },
+          b: { label: '结束周期', type: 'number', default: 12, required: true },
+        }}
+      />
+      <span style={echoStyle}>事件回显：{value}</span>
+    </div>
+  );
+}
+
+function RuleConfigPreview() {
+  const [value, setValue] = useState<RuleConfigValue>({
+    score: 1,
+    ruleConditions: [{ key: 1, opt: 'GREATER', value: 100, score: 10 }],
+  });
+  return (
+    <div style={columnStyle}>
+      <RuleConfig value={value} onChange={setValue} />
+      <span style={echoStyle}>事件回显：{JSON.stringify(value)}</span>
+    </div>
+  );
+}
+
+const RULE_FIELDS = [
+  { label: '年龄', value: 'age' },
+  { label: '注册时间', value: 'registerTime' },
+  { label: '订单金额', value: 'orderAmount' },
+];
+
+function RuleExpressionPreview() {
+  const [value, setValue] = useState<RuleExpressionValue | null>({
+    expression: 'age > 18',
+    expressionLabel: '年龄 > 18',
+    sourceField: ['age'],
+  });
+  return (
+    <div style={columnStyle}>
+      <RuleExpression
+        options={RULE_FIELDS}
+        value={value}
+        onChange={setValue}
+        placeholder="输入字段名匹配候选，Enter 选中为 chip"
+      />
+      <span style={echoStyle}>
+        事件回显：{value ? `${value.expression}（字段：${value.sourceField.join(', ') || '无'}）` : '—'}
+      </span>
+    </div>
+  );
+}
+
+function ScriptEditorPreview() {
+  const [code, setCode] = useState('def commission(amount, rate):\n    return amount * rate');
+  return (
+    <div style={columnStyle}>
+      <ScriptEditor
+        value={code}
+        onChange={setCode}
+        language="python"
+        placeholder="输入脚本，函数 / 变量自动联想"
+        functions={[
+          { name: 'SUM', description: '求和', parameters: [{ name: 'field', type: 'string' }] },
+          { name: 'COUNT', description: '计数', parameters: [{ name: 'field', type: 'string' }] },
+        ]}
+        variables={[
+          { name: 'order_amount', type: 'number', description: '订单金额' },
+          { name: 'user_level', type: 'string', description: '用户等级' },
+        ]}
+      />
+      <span style={echoStyle}>事件回显：{code.length} 字符</span>
+    </div>
+  );
+}
+
 export const PREVIEWS_BUSINESS: Record<string, () => ReactElement> = {
   'component.entity-card': EntityCardPreview,
   'component.card-list': CardListPreview,
   'component.login': LoginPreview,
+  'component.searchable-select': SearchableSelectPreview,
+  'component.field-condition': FieldConditionPreview,
+  'component.expression-editor': ExpressionEditorPreview,
+  'component.rule-config': RuleConfigPreview,
+  'component.rule-expression': RuleExpressionPreview,
+  'component.script-editor': ScriptEditorPreview,
 };

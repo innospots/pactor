@@ -10,6 +10,11 @@ import {
   SelectValue,
 } from '../../../ui/select.js';
 import { formItemClass, useFormContext } from '../Form/context.js';
+import {
+  CONTROL_SIZE_SELECT_ATTR,
+  CONTROL_SIZE_TRIGGER_TEXT,
+  type ControlSize,
+} from '../../control-size.js';
 import type { FieldRule } from '../Input/index.js';
 
 /** Select 选项（支持表达式解析后的数组） */
@@ -38,6 +43,8 @@ export interface SelectProps {
   value?: string | number | boolean;
   placeholder?: string;
   disabled?: boolean;
+  /** 控件尺寸（默认 middle，即现行 h-9 尺寸） */
+  size?: ControlSize;
   allowClear?: boolean;
   /** 选中变化事件，传出选中的 value */
   onChange?: (value: unknown) => void;
@@ -68,6 +75,7 @@ export function Select({
   value,
   placeholder,
   disabled,
+  size = 'middle',
   allowClear,
   showSearch,
   onChange,
@@ -138,7 +146,11 @@ export function Select({
           }
         }}
       >
-        <SelectTrigger id={controlId} className={inFormRoot ? 'w-full' : undefined}>
+        <SelectTrigger
+          id={controlId}
+          size={CONTROL_SIZE_SELECT_ATTR[size]}
+          className={cn(CONTROL_SIZE_TRIGGER_TEXT[size], inFormRoot ? 'w-full' : undefined)}
+        >
           <SelectValue placeholder={placeholder} />
         </SelectTrigger>
         <SelectContent>

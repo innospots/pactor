@@ -1,0 +1,124 @@
+// @vitest-environment jsdom
+/**
+ * business 目录表单类组件的 DSL 渲染契约：
+ * 经 createComponentRegistry 按类型名解析渲染，事件经 events.onChange + ${event} 回写状态。
+ */
+import { fireEvent, screen } from '@testing-library/react';
+import { describe, expect, it } from 'vitest';
+
+import { createComponentRegistry } from '../../src/components/index.js';
+import { expectEventState, renderDsl } from './helpers.js';
+
+const BUSINESS_TYPES = [
+  'Login',
+  'EntityCard',
+  'CardList',
+  'SearchableSelect',
+  'FieldCondition',
+  'ExpressionEditor',
+  'RuleConfig',
+  'RuleExpression',
+  'ScriptEditor',
+];
+
+describe('business 组件 DSL 注册', () => {
+  it('全部业务组件类型名注册后可解析', () => {
+    const registry = createComponentRegistry();
+    for (const type of BUSINESS_TYPES) {
+      expect(registry.has(type), type).toBe(true);
+    }
+  });
+});
+
+describe('business 表单类组件 DSL 渲染', () => {
+  it('SearchableSelect：DSL props 渲染候选，onChange 事件回写 ${event}', async () => {
+    const { context } = renderDsl({
+      type: 'SearchableSelect',
+      props: {
+        options: [
+          { label: '苹果', value: 'apple' },
+          { label: '香蕉', value: 'banana' },
+        ],
+        placeholder: '选择水果',
+      },
+      events: {
+        onChange: [{ action: 'setState', params: { fruit: '${event}' } }],
+      },
+    });
+
+    fireEvent.click(screen.getByRole('combobox'));
+    fireEvent.click(await screen.findByText('香蕉'));
+    await expectEventState(context, 'fruit', 'banana');
+  });
+
+  it('FieldCondition：DSL fields 渲染候选字段', async () => {
+    renderDsl({
+      type: 'FieldCondition',
+      props: {
+        fields: [
+          { featureCode: 'age', featureName: '年龄', fieldType: 'NUMBER' },
+          { featureCode: 'name', featureName: '姓名', fieldType: 'STRING' },
+        ],
+      },
+    });
+
+    // 第一行条件的首个 combobox 是字段选择（操作符 Select 同为 combobox 角色）
+    fireEvent.click(screen.getAllByRole('combobox')[0]!);
+    expect(await screen.findByText('年龄')).toBeTruthy();
+    expect(screen.getByText('姓名')).toBeTruthy();
+  });
+
+  it('RuleConfig：DSL value 渲染权重与条件行', () => {
+    renderDsl({
+      type: 'RuleConfig',
+      props: {
+        value: {
+          score: 5,
+          ruleConditions: [{ key: 1, opt: 'EQUAL', value: 'vip', score: 10 }],
+        },
+      },
+    });
+
+    expect(screen.getByDisplayValue('5')).toBeTruthy();
+    expect(screen.getByDisplayValue('vip')).toBeTruthy();
+    expect(screen.getByDisplayValue('10')).toBeTruthy();
+  });
+
+  it('RuleExpression：DSL value 重建字段 chip 与文本', () => {
+    const { container } = renderDsl({
+      type: 'RuleExpression',
+      props: {
+        options: [{ label: '年龄', value: 'age' }],
+        value: {
+          expression: 'age > 18',
+          expressionLabel: '年龄 > 18',
+          sourceField: ['age'],
+        },
+      },
+    });
+
+    const chip = container.querySelector('[data-value=age]');
+    expect(chip).not.toBeNull();
+    expect(chip!.textContent).toContain('年龄');
+  });
+
+  it('ExpressionEditor：DSL valueTemplate + valueMapping 渲染表达式文本框', () => {
+    // 占位符用 {{key}} 写法：${ 与 DSL 表达式语法冲突（无转义机制），{{ 不冲突
+    renderDsl({
+      type: 'ExpressionEditor',
+      props: {
+        label: '提成公式',
+        valueTemplate: 'return ft.period({{a}}, {{b}})',
+        valueMapping: {
+          a: { label: '起始', type: 'number', default: 1 },
+          b: { label: '结束', type: 'number', default: 12 },
+        },
+      },
+    });
+
+    expect(screen.getByText('提成公式')).toBeTruthy();
+    expect(
+      screen.getByDisplayValue('return ft.period(1, 12)'),
+    ).toBeTruthy();
+  });
+});

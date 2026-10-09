@@ -5,6 +5,16 @@ export {
   builtinComponents,
 } from './register.js';
 
+// 表单控件统一尺寸令牌（small / middle / large，默认 middle）
+export {
+  CONTROL_SIZE_BOX,
+  CONTROL_SIZE_BOX_GROW,
+  CONTROL_SIZE_AREA,
+  CONTROL_SIZE_SELECT_ATTR,
+  CONTROL_SIZE_TRIGGER_TEXT,
+} from './control-size.js';
+export type { ControlSize } from './control-size.js';
+
 // 展示与布局组件
 export { Page } from './components/Page/index.js';
 export type { PageProps } from './components/Page/index.js';
@@ -458,3 +468,38 @@ export type {
 } from './business/EntityCard/index.js';
 export { CardList } from './business/CardList/index.js';
 export type { CardListItem, CardListProps } from './business/CardList/index.js';
+export { SearchableSelect } from './business/SearchableSelect/index.js';
+export type { SearchableSelectProps } from './business/SearchableSelect/index.js';
+export { FieldCondition } from './business/FieldCondition/index.js';
+export type {
+  ConditionFieldOption,
+  FieldConditionItem,
+  FieldConditionGroup,
+  FieldConditionProps,
+  FieldConditionValue,
+} from './business/FieldCondition/index.js';
+export { ExpressionEditor } from './business/ExpressionEditor/index.js';
+export type {
+  ExpressionEditorProps,
+  ExpressionMappingItem,
+} from './business/ExpressionEditor/index.js';
+export { RuleConfig } from './business/RuleConfig/index.js';
+export type {
+  Condition,
+  ConditionOpt,
+  RuleConfigProps,
+  RuleConfigValue,
+} from './business/RuleConfig/index.js';
+export { RuleExpression } from './business/RuleExpression/index.js';
+export type {
+  RuleExpressionOption,
+  RuleExpressionProps,
+  RuleExpressionValue,
+} from './business/RuleExpression/index.js';
+export { ScriptEditor } from './business/ScriptEditor/index.js';
+export type {
+  ScriptEditorProps,
+  ScriptFunctionDef,
+  ScriptFunctionParameter,
+  ScriptVariableDef,
+} from './business/ScriptEditor/index.js';

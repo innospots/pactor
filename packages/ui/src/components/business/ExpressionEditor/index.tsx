@@ -6,6 +6,11 @@ import { Input } from '../../../ui/input.js';
 import { Label } from '../../../ui/label.js';
 import { Textarea } from '../../../ui/textarea.js';
 import {
+  CONTROL_SIZE_BOX,
+  CONTROL_SIZE_BOX_GROW,
+  type ControlSize,
+} from '../../control-size.js';
+import {
   conditionToStatement,
   defaultFieldConditionValue,
   FieldCondition,
@@ -29,7 +34,7 @@ const TEXT = {
 // ─── Types ────────────────────────────────────────────────────────────────────
 
 /**
- * valueMapping 条目：描述模板中一个 ${key} 占位符的取值方式，
+ * valueMapping 条目：描述模板中一个 ${key} / {{key}} 占位符的取值方式，
  * 结构与表单项（FormFieldDefinition）一致。
  */
 export interface ExpressionMappingItem {
@@ -64,9 +69,13 @@ export interface ExpressionEditorProps {
   id?: string;
   value?: string;
   onChange?: (value: string) => void;
-  /** 表单值模板，如 "return ft.period(${a}, ${b})" */
+  /**
+   * 表单值模板，如 "return ft.period(${a}, ${b})"。
+   * 占位符支持 ${key} 与 {{key}} 两种写法；DSL props 内联书写时须用 {{key}}，
+   * 因为 ${ 会被 DSL 表达式引擎提前求值（后端数据 / state 透传的模板不受此限）。
+   */
   valueTemplate: string;
-  /** 模板占位符到控件的映射，key 与模板中 ${key} 对应 */
+  /** 模板占位符到控件的映射，key 与模板中 ${key} / {{key}} 对应 */
   valueMapping?: Record<string, ExpressionMappingItem>;
   /**
    * 页面级 optionSource 集合，供 mapping 条目的 optionSource 匹配。
@@ -78,6 +87,8 @@ export interface ExpressionEditorProps {
   /** 必填标记（label 后显示 *） */
   required?: boolean;
   readonly?: boolean;
+  /** 控件尺寸（默认 middle；编辑态子控件与表达式文本框统一按尺寸令牌渲染） */
+  size?: ControlSize;
   /**
    * 只读展示模式：以「表单控件」形态展示（控件禁用、隐藏编辑/确定/取消按钮），
    * 供详情页等"只看不改"的场景复用同一套组件。
@@ -124,7 +135,14 @@ export type TemplateSegment =
   | { type: "field"; key: string; config: ExpressionMappingItem };
 
 /**
- * 将模板按 ${key} 切分为文本/字段片段。
+ * 模板占位符：支持 `${key}` 与 `{{key}}` 两种写法。
+ * 后端下发的既有模板数据用 `${key}`；DSL props 内联书写时用 `{{key}}`——
+ * `${` 会被 DSL 表达式引擎提前求值（无转义机制），`{{` 不冲突。
+ */
+const PLACEHOLDER_RE = /\$\{(\w+)\}|\{\{(\w+)\}\}/g;
+
+/**
+ * 将模板按 ${key} / {{key}} 切分为文本/字段片段。
  * 未在 valueMapping 中定义的占位符保留为字面量文本片段。
  */
 export function parseTemplateSegments(
@@ -132,11 +150,11 @@ export function parseTemplateSegments(
   mapping?: Record<string, ExpressionMappingItem>,
 ): TemplateSegment[] {
   const segments: TemplateSegment[] = [];
-  const re = /\$\{(\w+)\}/g;
+  const re = new RegExp(PLACEHOLDER_RE.source, 'g');
   let lastIndex = 0;
   let match: RegExpExecArray | null;
   while ((match = re.exec(template)) !== null) {
-    const key = match[1];
+    const key = match[1] ?? match[2];
     const config = mapping?.[key];
     if (!config) continue; // 未 mapped 的占位符整体视为文本
     if (match.index > lastIndex) {
@@ -161,15 +179,19 @@ export function coerceMappingValue(raw: any, type?: string | null): any {
 
 /**
  * 用 values 填充模板：mapped 占位符替换为对应值（缺省为空串），
- * 未 mapped 的占位符保留字面量 ${key}。
+ * 未 mapped 的占位符保留字面量 ${key} / {{key}}。
  */
 export function composeExpression(
   template: string,
   values: Record<string, any>,
   mapping?: Record<string, ExpressionMappingItem>,
 ): string {
-  return template.replace(/\$\{(\w+)\}/g, (raw, key) =>
-    mapping?.[key] ? String(values[key] ?? "") : raw,
+  return template.replace(
+    new RegExp(PLACEHOLDER_RE.source, 'g'),
+    (raw, dollarKey, braceKey) => {
+      const key = dollarKey ?? braceKey;
+      return mapping?.[key] ? String(values[key] ?? "") : raw;
+    },
   );
 }
 
@@ -218,7 +240,7 @@ function escapeRegExp(text: string): string {
 
 /**
  * 反向解析：将已组合好的表达式字符串按模板拆回各 mapping 值。
- * 文本片段按字面量匹配（含未 mapped 的字面量 ${key}），field 片段非贪婪捕获；
+ * 文本片段按字面量匹配（含未 mapped 的字面量 ${key} / {{key}}），field 片段非贪婪捕获；
  * 不匹配模板时返回 null。
  */
 export function parseExpressionValues(
@@ -279,6 +301,7 @@ function MappingSelect({
   value,
   onChange,
   disabled,
+  size,
   fallbackLabel,
   className,
   viewOnly,
@@ -288,6 +311,7 @@ function MappingSelect({
   value?: string;
   onChange: (value: string) => void;
   disabled?: boolean;
+  size: ControlSize;
   fallbackLabel: string;
   className?: string;
   /** 只读展示：候选缺失时用原值兜底展示，避免显示为 placeholder */
@@ -312,6 +336,7 @@ function MappingSelect({
       options={displayOptions}
       placeholder={fallbackLabel}
       disabled={disabled}
+      size={size}
       // 选项列表限制最大高度并始终展示滚动条；超过 10 条时启用搜索
       showSearch={options.length > 10}
       fullOptionText
@@ -363,12 +388,14 @@ function MappingFieldCondition({
   value,
   onChange,
   disabled,
+  size,
 }: {
   config: ExpressionMappingItem;
   optionSources?: Record<string, any>;
   value?: string;
   onChange: (value: string) => void;
   disabled?: boolean;
+  size: ControlSize;
 }) {
   const { fields } = useMappingFieldOptions(config, optionSources);
   const [condition, setCondition] = useState<FieldConditionValue>(
@@ -391,6 +418,7 @@ function MappingFieldCondition({
       value={condition}
       fields={fields}
       disabled={disabled}
+      size={size}
       onChange={(next) => {
         touchedRef.current = true;
         setCondition(next);
@@ -413,6 +441,7 @@ export function ExpressionEditor({
   required,
   readonly,
   viewOnly,
+  size = 'middle',
   className,
   onValidityChange,
 }: ExpressionEditorProps) {
@@ -605,6 +634,7 @@ export function ExpressionEditor({
                   config={seg.config}
                   optionSources={optionSources}
                   disabled={viewOnly}
+                  size={size}
                   value={
                     formValues[seg.key] === "" ||
                     formValues[seg.key] === undefined
@@ -631,6 +661,7 @@ export function ExpressionEditor({
                     optionSources={optionSources}
                     disabled={viewOnly}
                     viewOnly={viewOnly}
+                    size={size}
                     value={
                       formValues[seg.key] === ""
                         ? undefined
@@ -647,7 +678,7 @@ export function ExpressionEditor({
                     disabled={viewOnly}
                     placeholder={hintOf(seg)}
                     aria-label={labelOf(seg)}
-                    className="w-full font-mono text-sm"
+                    className={cn(CONTROL_SIZE_BOX[size], "w-full font-mono")}
                   />
                 )}
                 {draftErrors[seg.key] && (
@@ -682,7 +713,10 @@ export function ExpressionEditor({
           onChange={(e) => handleTextChange(e.target.value)}
           readOnly={readonly}
           rows={1}
-          className="min-h-9 w-full resize-none break-all bg-muted/30 font-mono text-sm [field-sizing:content]"
+          className={cn(
+            CONTROL_SIZE_BOX_GROW[size],
+            "w-full resize-none break-all bg-muted/30 font-mono [field-sizing:content]",
+          )}
         />
       )}
     </div>
