@@ -14,6 +14,7 @@ import {
   CommandItem,
   CommandList,
 } from '../../../ui/command.js';
+import { CONTROL_SIZE_BOX, type ControlSize } from '../../control-size.js';
 import { formItemClass, useFormContext } from '../Form/context.js';
 import type { FieldRule } from '../Input/index.js';
 
@@ -39,6 +40,8 @@ export interface ComboboxProps {
   /** 是否可搜索过滤（缺省 true） */
   searchable?: boolean;
   disabled?: boolean;
+  /** 控件尺寸（默认 middle，即现行 h-9 尺寸） */
+  size?: ControlSize;
   /** 选中变化事件，传出选中项的原始 value */
   onChange?: (value: string | number | undefined) => void;
   /** 通用：根节点 class（Form 内为 form-item 容器，独立渲染时为触发器） */
@@ -61,6 +64,7 @@ export function Combobox({
   placeholder,
   searchable = true,
   disabled,
+  size = 'middle',
   onChange,
   className,
   style,
@@ -104,7 +108,7 @@ export function Combobox({
         id={controlId}
         type="button"
         disabled={disabled}
-        className={cn(!selected && 'text-muted-foreground', !inForm && className)}
+        className={cn(CONTROL_SIZE_BOX[size], !selected && 'text-muted-foreground', !inForm && className)}
         style={inForm ? undefined : style}
       >
         {selected ? selected.label : (placeholder ?? '')}

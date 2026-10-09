@@ -1,6 +1,8 @@
 import { useEffect, useId, type CSSProperties } from 'react';
 
+import { cn } from '../../../lib/utils.js';
 import { Textarea as ShadcnTextarea } from '../../../ui/textarea.js';
+import { CONTROL_SIZE_AREA, type ControlSize } from '../../control-size.js';
 import { useFormContext } from '../Form/context.js';
 import { FieldShell } from '../Form/form-item.js';
 import type { FieldRule } from '../Input/index.js';
@@ -18,6 +20,8 @@ export interface TextareaProps {
   /** 行数（缺省由内容自适应） */
   rows?: number;
   disabled?: boolean;
+  /** 控件尺寸（默认 middle；影响内边距与字号，高度仍由行数/内容决定） */
+  size?: ControlSize;
   /** 输入事件，传出 string 值 */
   onChange?: (value: string) => void;
   /** 通用：根节点 class（Form 内为 form-item 容器，独立渲染时为控件本身） */
@@ -38,6 +42,7 @@ export function Textarea({
   placeholder,
   rows,
   disabled,
+  size = 'middle',
   onChange,
   className,
   style,
@@ -71,6 +76,7 @@ export function Textarea({
           placeholder={placeholder}
           rows={rows}
           disabled={disabled}
+          className={CONTROL_SIZE_AREA[size]}
           onChange={(event) => {
             form.setValue(name, event.target.value);
             onChange?.(event.target.value);
@@ -86,7 +92,7 @@ export function Textarea({
       placeholder={placeholder}
       rows={rows}
       disabled={disabled}
-      className={className}
+      className={cn(CONTROL_SIZE_AREA[size], className)}
       style={style}
       onChange={(event) => onChange?.(event.target.value)}
     />

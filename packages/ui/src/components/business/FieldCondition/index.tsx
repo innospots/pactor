@@ -11,6 +11,13 @@ import {
   SelectTrigger,
   SelectValue,
 } from '../../../ui/select.js';
+import { DatePicker } from '../../components/DatePicker/index.js';
+import {
+  CONTROL_SIZE_BOX,
+  CONTROL_SIZE_SELECT_ATTR,
+  CONTROL_SIZE_TRIGGER_TEXT,
+  type ControlSize,
+} from '../../control-size.js';
 import { SearchableSelect } from '../SearchableSelect/index.js';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -46,6 +53,8 @@ export interface FieldConditionProps {
   /** 候选字段（datasource.json 结构） */
   fields?: ConditionFieldOption[];
   disabled?: boolean;
+  /** 控件尺寸（默认 middle；行内字段/操作符/值控件统一按尺寸令牌渲染） */
+  size?: ControlSize;
 }
 
 // ─── Operators（移植自参考项目 OPERATORS，裁剪到 DATE/STRING/NUMBER/BOOLEAN） ────
@@ -406,6 +415,7 @@ export function FieldCondition({
   onChange,
   fields = [],
   disabled,
+  size = 'middle',
 }: FieldConditionProps) {
   const data: FieldConditionValue = useMemo(
     () =>
@@ -458,6 +468,7 @@ export function FieldCondition({
               fields={fieldOptions}
               rawFields={fields}
               disabled={disabled}
+              size={size}
               fieldPlaceholder="选择字段"
               operatorLabel={operatorLabel}
               inputPlaceholder="请输入值"
@@ -479,12 +490,12 @@ export function FieldCondition({
           type="button"
           variant="link"
           size="sm"
-          className="h-auto p-0 ml-10 mt-1 text-sm"
+          className="h-auto p-0 ml-10 mt-2 text-sm"
           onClick={() =>
             updateGroup({ ...group, children: [...group.children, defaultItem()] })
           }
         >
-          <Plus className="h-3.5 w-3.5 mr-1" />
+          <Plus className="h-3.5 w-3.5" />
           添加条件
         </Button>
       )}
@@ -532,6 +543,7 @@ interface ConditionRowProps {
   fields: Array<{ label: string; value: string }>;
   rawFields: ConditionFieldOption[];
   disabled?: boolean;
+  size: ControlSize;
   fieldPlaceholder: string;
   operatorLabel: (op: string) => string;
   inputPlaceholder: string;
@@ -545,6 +557,7 @@ function ConditionRow({
   fields,
   rawFields,
   disabled,
+  size,
   fieldPlaceholder,
   operatorLabel,
   inputPlaceholder,
@@ -575,8 +588,9 @@ function ConditionRow({
         options={fields}
         placeholder={fieldPlaceholder}
         disabled={disabled}
+        size={size}
         fullOptionText
-        className="w-36 h-8 min-h-8 px-2 text-xs"
+        className="w-36"
       />
 
       {/* 操作符选择 */}
@@ -599,7 +613,10 @@ function ConditionRow({
           });
         }}
       >
-        <SelectTrigger className="w-24 h-8 shrink-0 text-xs">
+        <SelectTrigger
+          size={CONTROL_SIZE_SELECT_ATTR[size]}
+          className={cn('w-28 shrink-0', CONTROL_SIZE_TRIGGER_TEXT[size])}
+        >
           <SelectValue placeholder="请选择" />
         </SelectTrigger>
         <SelectContent>
@@ -618,6 +635,7 @@ function ConditionRow({
           termValue={termValue}
           value={item.value}
           disabled={disabled}
+          size={size}
           placeholder={inputPlaceholder}
           onChange={(v) => onChange({ value: v })}
         />
@@ -645,6 +663,7 @@ function ConditionValueInput({
   termValue,
   value,
   disabled,
+  size,
   placeholder,
   onChange,
 }: {
@@ -652,18 +671,44 @@ function ConditionValueInput({
   termValue: string;
   value: any;
   disabled?: boolean;
+  size: ControlSize;
   placeholder: string;
   onChange: (value: any) => void;
 }) {
-  const inputType = dataType === 'NUMBER' ? 'number' : dataType === 'DATE' ? 'date' : 'text';
+  // DATE 已改用 DatePicker 组件，原生 Input 只需区分 NUMBER / 文本
+  const inputType = dataType === 'NUMBER' ? 'number' : 'text';
 
+  // DATE 用组件库 DatePicker（弹层日历），NUMBER 用数字输入，其余文本输入
   if (termValue === 'BETWEEN') {
     const arr: any[] = Array.isArray(value) ? value : [];
+    if (dataType === 'DATE') {
+      return (
+        <div className="flex items-center gap-1">
+          <DatePicker
+            value={typeof arr[0] === 'string' && arr[0] ? arr[0] : undefined}
+            disabled={disabled}
+            size={size}
+            placeholder={placeholder}
+            className="w-32"
+            onChange={(v) => onChange([v, arr[1] ?? ''])}
+          />
+          <span className="text-xs text-muted-foreground">~</span>
+          <DatePicker
+            value={typeof arr[1] === 'string' && arr[1] ? arr[1] : undefined}
+            disabled={disabled}
+            size={size}
+            placeholder={placeholder}
+            className="w-32"
+            onChange={(v) => onChange([arr[0] ?? '', v])}
+          />
+        </div>
+      );
+    }
     return (
       <div className="flex items-center gap-1">
         <Input
           type={inputType}
-          className="w-28 h-8 px-2 text-xs"
+          className={cn('w-28', CONTROL_SIZE_BOX[size])}
           value={arr[0] ?? ''}
           disabled={disabled}
           placeholder={placeholder}
@@ -673,7 +718,7 @@ function ConditionValueInput({
         <span className="text-xs text-muted-foreground">~</span>
         <Input
           type={inputType}
-          className="w-28 h-8 px-2 text-xs"
+          className={cn('w-28', CONTROL_SIZE_BOX[size])}
           value={arr[1] ?? ''}
           disabled={disabled}
           placeholder={placeholder}
@@ -684,10 +729,23 @@ function ConditionValueInput({
     );
   }
 
+  if (dataType === 'DATE') {
+    return (
+      <DatePicker
+        value={typeof value === 'string' && value ? value : undefined}
+        disabled={disabled}
+        size={size}
+        placeholder={placeholder}
+        className="w-36"
+        onChange={(v) => onChange(v ?? '')}
+      />
+    );
+  }
+
   return (
     <Input
       type={inputType}
-      className="w-36 h-8 px-2 text-xs"
+      className={cn('w-36', CONTROL_SIZE_BOX[size])}
       value={value ?? ''}
       disabled={disabled}
       placeholder={placeholder}

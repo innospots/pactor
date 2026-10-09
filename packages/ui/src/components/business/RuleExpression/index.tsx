@@ -1,6 +1,7 @@
 import { useLayoutEffect, useRef, useState, type KeyboardEvent } from 'react';
 
 import { cn } from '../../../lib/utils.js';
+import { CONTROL_SIZE_BOX_GROW, type ControlSize } from '../../control-size.js';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -27,6 +28,8 @@ export interface RuleExpressionProps {
   onChange?: (value: RuleExpressionValue) => void;
   placeholder?: string;
   disabled?: boolean;
+  /** 控件尺寸（默认 middle；影响编辑区内边距与字号，高度仍随内容增长） */
+  size?: ControlSize;
   id?: string;
   className?: string;
 }
@@ -205,6 +208,7 @@ export function RuleExpression({
   onChange,
   placeholder,
   disabled,
+  size = 'middle',
   id,
   className,
 }: RuleExpressionProps) {
@@ -417,6 +421,7 @@ export function RuleExpression({
         data-placeholder={placeholder}
         className={cn(
           'min-h-9 w-full whitespace-pre-wrap break-words rounded-md border border-input bg-background px-3 py-2 text-sm',
+          CONTROL_SIZE_BOX_GROW[size],
           'focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2',
           'empty:before:pointer-events-none empty:before:text-muted-foreground empty:before:content-[attr(data-placeholder)]',
           disabled && 'cursor-not-allowed opacity-50',

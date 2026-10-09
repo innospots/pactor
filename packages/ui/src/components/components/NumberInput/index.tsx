@@ -4,6 +4,7 @@ import { useEffect, useId, useState, type CSSProperties } from 'react';
 
 import { cn } from '../../../lib/utils.js';
 import { Input as ShadcnInput } from '../../../ui/input.js';
+import { CONTROL_SIZE_BOX, type ControlSize } from '../../control-size.js';
 import { useFormContext } from '../Form/context.js';
 import { FieldShell } from '../Form/form-item.js';
 import type { FieldRule } from '../Input/index.js';
@@ -27,6 +28,8 @@ export interface NumberInputProps {
   precision?: number;
   placeholder?: string;
   disabled?: boolean;
+  /** 控件尺寸（默认 middle，即现行 h-9 尺寸） */
+  size?: ControlSize;
   /** 输入事件，传出 number；清空时传出 undefined */
   onChange?: (value: number | undefined) => void;
   /** 通用：根节点 class（Form 内为 form-item 容器，独立渲染时为控件包裹节点） */
@@ -82,6 +85,7 @@ export function NumberInput({
   precision,
   placeholder,
   disabled,
+  size = 'middle',
   onChange,
   className,
   controlClassName,
@@ -170,6 +174,7 @@ export function NumberInput({
         placeholder={placeholder}
         disabled={disabled}
         className={cn(
+          CONTROL_SIZE_BOX[size],
           'pr-7 [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none',
           controlClassName,
         )}

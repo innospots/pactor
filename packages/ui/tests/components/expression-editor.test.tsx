@@ -56,6 +56,16 @@ describe('parseTemplateSegments', () => {
       { type: 'text', text: 'return 1' },
     ]);
   });
+
+  it('{{key}} 占位符与 ${key} 等价（DSL props 内联书写用，避免表达式引擎求值）', () => {
+    expect(parseTemplateSegments('return ft.period({{a}}, {{b}})', mapping)).toEqual([
+      { type: 'text', text: 'return ft.period(' },
+      { type: 'field', key: 'a', config: mapping.a },
+      { type: 'text', text: ', ' },
+      { type: 'field', key: 'b', config: mapping.b },
+      { type: 'text', text: ')' },
+    ]);
+  });
 });
 
 describe('coerceMappingValue', () => {
@@ -84,6 +94,12 @@ describe('composeExpression', () => {
 
   it('缺失值替换为空串', () => {
     expect(composeExpression(TEMPLATE, {}, mapping)).toBe('return ft.period(, , ${d})');
+  });
+
+  it('{{key}} 占位符同样替换，未 mapped 保留字面量', () => {
+    expect(
+      composeExpression('return ft.period({{a}}, {{b}}, {{d}})', { a: 30, b: 'DAY' }, mapping),
+    ).toBe('return ft.period(30, DAY, {{d}})');
   });
 });
 
@@ -165,6 +181,16 @@ describe('parseExpressionValues', () => {
 
   it('空值返回 null', () => {
     expect(parseExpressionValues(CYCLE_TEMPLATE, '', cycleMapping)).toBeNull();
+  });
+
+  it('{{key}} 模板可反向解析（round-trip）', () => {
+    expect(
+      parseExpressionValues(
+        'return ft.period({{a}}, {{b}})',
+        'return ft.period(30, DAY)',
+        mapping,
+      ),
+    ).toEqual({ a: 30, b: 'DAY' });
   });
 });
 

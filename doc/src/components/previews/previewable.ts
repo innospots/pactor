@@ -135,11 +135,16 @@ export const PREVIEWABLE_IDS: readonly string[] = [
   'component.message-list',
   'component.composer',
   'component.conversation-list',
-  // 业务（packages/ui business 子目录；仅已导出并注册 DSL 的 3 个，
-  // 其余 business 组件以 previewNote 呈现静态结构说明）
+  // 业务（packages/ui business 子目录，9 个全部可预览）
   'component.entity-card',
   'component.card-list',
   'component.login',
+  'component.searchable-select',
+  'component.field-condition',
+  'component.expression-editor',
+  'component.rule-config',
+  'component.rule-expression',
+  'component.script-editor',
 ];
 
 export function isPreviewable(id: string): boolean {

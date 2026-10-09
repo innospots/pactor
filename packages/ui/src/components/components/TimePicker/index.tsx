@@ -3,6 +3,7 @@ import { useEffect, useId, useState, type CSSProperties } from 'react';
 
 import { cn } from '../../../lib/utils.js';
 import { Popover, PopoverContent, PopoverTrigger } from '../../../ui/popover.js';
+import { CONTROL_SIZE_BOX, type ControlSize } from '../../control-size.js';
 import { useFormContext } from '../Form/context.js';
 import { FieldShell } from '../Form/form-item.js';
 import type { FieldRule } from '../Input/index.js';
@@ -20,6 +21,8 @@ export interface TimePickerProps {
   format?: 'HH:mm:ss' | 'HH:mm';
   placeholder?: string;
   disabled?: boolean;
+  /** 控件尺寸（默认 middle，即现行 h-9 尺寸） */
+  size?: ControlSize;
   /** 时间变化事件，传出按 format 格式化的时间字符串 */
   onChange?: (value: string) => void;
   /** 通用：根节点 class（Form 内为 form-item 容器，独立渲染时为触发器） */
@@ -69,6 +72,7 @@ export function TimePicker({
   format = 'HH:mm:ss',
   placeholder,
   disabled,
+  size = 'middle',
   onChange,
   className,
   style,
@@ -154,6 +158,7 @@ export function TimePicker({
         data-slot="timepicker-trigger"
         className={cn(
           'flex h-9 w-full min-w-0 cursor-pointer items-center justify-between gap-2 rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-xs transition-colors outline-none hover:bg-accent focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:cursor-not-allowed disabled:opacity-50',
+          CONTROL_SIZE_BOX[size],
           displayText === '' && 'text-muted-foreground',
           !inForm && className,
         )}
