@@ -89,10 +89,16 @@ description: 反馈与弹层类 DSL 组件——Alert / Dialog / AlertDialog / D
 | `title` | string | — | 抽屉标题 |
 | `open` | boolean | `false` | 受控开关（可绑 `${state.x}` 表达式） |
 | `placement` | `left` \| `right` \| `top` \| `bottom` | `right` | 滑出方向 |
+| `draggable` | boolean | `false` | 允许按住面板拖拽关闭（遮罩 / Escape 关闭不受影响） |
+| `closable` | boolean | `true` | 右上角展示关闭图标（点击关闭并触发 `onClose`） |
+| `footer` | DslNode \| `false` | 默认按钮组 | 底部操作栏：`false` 不展示；DslNode 自定义内容；缺省为 [取消, 确定]，右对齐、固定于抽屉底部（内容区独立滚动） |
+| `cancelText` | string | `取消` | 默认 footer「取消」按钮文案（触发 `onClose`） |
+| `okText` | string | `确定` | 默认 footer「确定」按钮文案（触发 `onOk`） |
 | children | DslNode[] | — | 内容（DSL 子树，经 Renderer children 机制渲染） |
-| 事件 `onClose` | — | — | 关闭时触发（遮罩 / Escape / 拖拽关闭），无载荷 |
+| 事件 `onClose` | — | — | 关闭时触发（关闭图标 / 遮罩 / Escape / 拖拽关闭 / 默认 footer「取消」），无载荷 |
+| 事件 `onOk` | — | — | 默认 footer「确定」按钮触发，无载荷 |
 
-`className` / `style` 挂在抽屉内容根节点。
+`className` / `style` 挂在抽屉内容根节点。关闭链路（关闭图标 / 遮罩 / Escape / 默认「取消」）在未 wiring `onClose` 时也会默认关闭抽屉（内部回退标记，`open` 复置 true 时复位）；wiring `onClose` 回写 state 是推荐做法。
 
 ```yaml
 - type: Drawer
@@ -105,6 +111,41 @@ description: 反馈与弹层类 DSL 组件——Alert / Dialog / AlertDialog / D
       action: setState
       params:
         drawerOpen: false
+    onOk:                        # 默认 footer「确定」
+      action: setState
+      params:
+        drawerOpen: false
+  children:
+    - type: Text
+      props: { text: 抽屉内容 }
+
+# 表单抽屉：okText 改文案 + onOk 经 form.submit 桥接触发表单校验与提交
+- type: Drawer
+  props:
+    title: 编辑
+    open: ${state.editOpen}
+    okText: 保存
+  events:
+    onClose: [{ action: setState, params: { editOpen: false } }]
+    onOk: [{ action: form.submit }]            # 触发下方 Form 的校验 + onSubmit
+  children:
+    - type: Form
+      children:
+        # ...Field...
+
+# 自定义 footer：DslNode 子树（容器右对齐，内容声明 w-full 可自行控制对齐）
+- type: Drawer
+  props:
+    title: 编辑
+    open: ${state.editOpen}
+    footer:
+      type: Flex
+      props: { gap: 8 }
+      children:
+        - type: Button
+          props: { text: 取消 }
+        - type: Button
+          props: { text: 保存, variant: primary }
   children:
     - type: Text
       props: { text: 抽屉内容 }

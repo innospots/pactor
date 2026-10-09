@@ -65,6 +65,68 @@ describe('表单联动 form.setValues', () => {
   });
 });
 
+describe('表单提交桥 form.submit', () => {
+  it('DOM 外按钮经 form.submit 触发校验与 onSubmit 链路', async () => {
+    const { context } = renderDsl({
+      type: 'Flex',
+      props: { direction: 'vertical', gap: 8 },
+      children: [
+        {
+          type: 'Form',
+          props: { name: 'edit' },
+          events: {
+            onSubmit: { action: 'setState', params: { saved: true } },
+          },
+          children: [
+            {
+              type: 'Input',
+              props: {
+                name: 'city',
+                label: '城市',
+                rules: [{ required: true, message: '必填' }],
+              },
+            },
+          ],
+        },
+        // 提交按钮在 <form> DOM 外（Drawer footer 槽位场景）
+        {
+          type: 'Button',
+          props: { text: '保存', variant: 'primary' },
+          events: {
+            onClick: { action: 'form.submit', params: { form: 'edit' } },
+          },
+        },
+      ],
+    });
+
+    // 空值提交：显示校验错误，不触发 onSubmit
+    fireEvent.click(screen.getByRole('button', { name: '保存' }));
+    expect(await screen.findByText('必填')).toBeTruthy();
+    expect(context.state.get('saved')).toBeUndefined();
+
+    // 填值后提交：走 onSubmit 链路
+    fireEvent.change(screen.getByLabelText('城市'), { target: { value: '杭州' } });
+    fireEvent.click(screen.getByRole('button', { name: '保存' }));
+    await vi.waitFor(() => {
+      expect(context.state.get('saved')).toBe(true);
+    });
+  });
+
+  it('目标表单未注册时受控失败', async () => {
+    const { context } = renderDsl({
+      type: 'Form',
+      children: [{ type: 'Input', props: { name: 'city' } }],
+    });
+
+    const engine = new ActionEngine(context);
+    const result = await engine.execute({
+      action: 'form.submit',
+      params: { form: 'ghost' },
+    });
+    expect(result.ok).toBe(false);
+  });
+});
+
 describe('字段自动包装', () => {
   it('Form 内声明 name 的 Input 渲染为带标签的表单项', () => {
     const { container } = renderDsl({

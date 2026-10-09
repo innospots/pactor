@@ -45,10 +45,13 @@ body:
             title: 编辑成员
             open: "${state.drawerOpen}"
             style: { width: 360, maxWidth: 'none' }
+            okText: 保存
           events:
             onClose:
               - action: setState
                 params: { drawerOpen: false }
+            onOk:
+              - action: form.submit
           children:
             - type: Form
               events:
@@ -87,14 +90,3 @@ body:
                   children:
                     - type: Switch
                       props: { name: enabled, value: true }
-                - type: Flex
-                  props: { justify: end, gap: 8, className: mt-4 }
-                  children:
-                    - type: Button
-                      props: { text: 取消 }
-                      events:
-                        onClick:
-                          - action: setState
-                            params: { drawerOpen: false }
-                    - type: Button
-                      props: { text: 保存, variant: primary, submit: true }

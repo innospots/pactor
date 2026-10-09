@@ -200,6 +200,7 @@ Action catalog:
 | `call` | `name` | run a top-level named action, inherits caller scope |
 | `delay` | `ms` | wait |
 | `form.setValues` | `values` (req), `form?` (default `default`) | write field values; does NOT trigger validation or onValuesChange |
+| `form.submit` | `form?` (default `default`) | trigger the form's native submit — runs validation and `onSubmit`; for submit buttons outside the `<form>` DOM (e.g. Drawer `footer` slot) |
 | `overlay.open` / `overlay.close` | see below | open overlay and await close; close `payload` becomes open's result |
 
 `overlay.open` params: `{ overlay: { type: modal|drawer, title?, width?, content: <DslNode> | page: { pageId }, params? } }`. Overlay content evaluates in overlay scope: `${params.x}` = injected params, `${parent.x}` = parent page snapshot, `${state}`/`${data}` still live.
@@ -367,13 +368,16 @@ body:
         title: 编辑
         open: "${state.drawerOpen}"
         style: { width: 480, maxWidth: 'none' }
+        okText: 保存                          # 默认 footer [取消, 保存]
       events:
-        onClose:                              # mask click / Esc
+        onClose:                              # 关闭图标 / mask / Esc / 默认「取消」
           - action: setState
             params: { drawerOpen: false }
+        onOk:                                 # 默认「保存」→ form.submit 桥接校验 + onSubmit
+          - action: form.submit
       children:
-        - type: Form                          # wrap ALL fields AND the footer buttons:
-          events:                             # submit only works inside the <form> DOM
+        - type: Form
+          events:
             onSubmit:
               - action: message
                 params: { messageType: success, text: 保存成功 }
@@ -388,24 +392,14 @@ body:
                     name: name
                     rules:
                       - { required: true, message: 请输入名称 }
-            - type: Flex
-              props: { justify: end, gap: 8 }
-              children:
-                - type: Button
-                  props: { text: 取消 }
-                  events:
-                    onClick:
-                      - action: setState
-                        params: { drawerOpen: false }
-                - type: Button
-                  props: { text: 保存, variant: primary, submit: true }
 ```
 
 Rules of thumb:
 
-- `Drawer`/`Dialog` close themselves only via `events.onClose` (mask/Esc) — plain 取消/关闭 buttons need explicit `setState x=false`.
+- `Drawer` 默认带右上角关闭图标（`closable: false` 关闭）与默认 footer（[取消 → onClose, 确定 → onOk]，右对齐、固定底部）；关闭链路在未 wiring `onClose` 时也会默认自闭合，wiring `onClose` 回写 state 是推荐做法。
+- 表单抽屉优先用 `okText` + `events.onOk: form.submit`（最简）；需要非按钮组布局时才给 `footer` 传 DslNode 或 `false`。
+- A `submit: true` button only submits the enclosing `<form>`; from the `footer` slot (outside the `<form>` DOM) use the `form.submit` action instead — it runs the same validation + `onSubmit` chain.
 - `AlertDialog` in controlled mode never self-closes: wire BOTH `events.onConfirm` and `events.onCancel` to `setState x=false`.
-- A `submit: true` button submits the enclosing `<form>` — when the footer sits below non-form content (tables, section headers), wrap EVERYTHING in the `Form` instead of leaving the footer outside.
 - `${form.x}` is written to state only on successful submit; for per-step data in a wizard, submit at each step (or read Form values only after submit).
 
 ### 8.3 Server-side pagination

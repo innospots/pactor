@@ -222,6 +222,34 @@ export function registerBuiltinActions(registry: ActionRegistry): void {
     handle.setValues(values);
     return { ok: true };
   });
+
+  // 表单提交桥：经 FormHandle.submit 触发目标表单原生提交（requestSubmit），
+  // 走统一的校验与 onSubmit 链路——用于提交按钮在 <form> DOM 外的场景
+  // （如 Drawer footer 槽位内的「保存」按钮）；句柄未注册受控失败
+  register('form.submit', (action, ctx) => {
+    const formName = action.params?.['form'];
+    const name =
+      typeof formName === 'string' && formName !== '' ? formName : 'default';
+    const handle = ctx.context.forms.get(name);
+    if (!handle) {
+      return {
+        ok: false,
+        error: new Error(
+          `[@pactor-app/runtime] form.submit 目标表单未注册: "${name}"`,
+        ),
+      };
+    }
+    if (typeof handle.submit !== 'function') {
+      return {
+        ok: false,
+        error: new Error(
+          `[@pactor-app/runtime] form.submit 目标表单不支持提交: "${name}"`,
+        ),
+      };
+    }
+    handle.submit();
+    return { ok: true };
+  });
 }
 
 function asActions(value: unknown): ActionConfig[] {
