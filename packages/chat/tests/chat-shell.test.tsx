@@ -161,7 +161,7 @@ describe('ChatShell 侧栏增强（spec: chat-dsl-component，决策 D3/D4）', 
         content={<div>内容</div>}
       />,
     );
-    // 底部槽固定渲染（折叠前先断言：collapsed 时 footer 整体隐藏）
+    // 底部槽固定渲染
     expect(
       document.querySelector(
         '[data-slot=sidebar-footer] [data-testid="footer"]',
@@ -172,7 +172,10 @@ describe('ChatShell 侧栏增强（spec: chat-dsl-component，决策 D3/D4）', 
     expect(
       document.querySelector('[data-slot=sidebar][data-state="collapsed"]'),
     ).toBeTruthy();
-    expect(document.querySelector('[data-slot=sidebar-footer]')).toBeNull();
+    // 收起态底部槽保留，仅展示图标/头像（隐藏文字与附属图标、内容居中）
+    const footer = document.querySelector('[data-slot=sidebar-footer]');
+    expect(footer).toBeTruthy();
+    expect(footer?.getAttribute('class')).toContain('items-center');
   });
 });
 

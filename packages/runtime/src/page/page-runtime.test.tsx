@@ -91,6 +91,7 @@ describe('初始化链路', () => {
       'call',
       'delay',
       'form.setValues',
+      'form.submit',
       'if',
       'parallel',
       'reload',
