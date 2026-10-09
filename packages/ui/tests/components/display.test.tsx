@@ -247,3 +247,41 @@ describe('Card 圆角档位（rounded）', () => {
     expect(card.className).not.toContain('rounded-lg');
   });
 });
+
+describe('Card hoverable / contentClassName / onClick', () => {
+  it('hoverable 时根节点带手型与 hover 高亮类', () => {
+    const { container } = renderDsl({
+      type: 'Card',
+      props: { hoverable: true },
+    });
+    const card = container.querySelector('[data-slot=card]')!;
+    expect(card.className).toContain('cursor-pointer');
+    expect(card.className).toContain('hover:border-primary/50');
+    expect(card.className).toContain('hover:bg-accent/50');
+  });
+
+  it('contentClassName 应用到内容区（CardContent）', () => {
+    const { container } = renderDsl({
+      type: 'Card',
+      props: {
+        contentClassName: 'flex flex-1 flex-col items-center justify-center',
+      },
+      children: [{ type: 'Text', props: { text: '新建插件' } }],
+    });
+    const content = container.querySelector('[data-slot=card-content]')!;
+    expect(content.className).toContain('items-center');
+    expect(content.className).toContain('justify-center');
+    expect(screen.getByText('新建插件')).toBeTruthy();
+  });
+
+  it('hoverable 卡片 onClick 触发事件动作', () => {
+    const onAction = vi.fn();
+    const { container } = render(
+      <Card hoverable onClick={onAction}>
+        <span>新建</span>
+      </Card>,
+    );
+    fireEvent.click(container.querySelector('[data-slot=card]')!);
+    expect(onAction).toHaveBeenCalledTimes(1);
+  });
+});

@@ -11,6 +11,7 @@
 import CategoryOverview from '../../templates/CategoryOverview.astro';
 import PendingSectionPanel from '../../components/PendingSectionPanel.astro';
 import { SITE_NAV, findCategory, type SiteNavCategory } from '../../site-nav';
+import { wireframeTemplates } from '../../assets-data/wireframe-templates';
 import type { AssetCategory } from '../../assets-data/types';
 
 interface PathProps {
@@ -21,9 +22,9 @@ interface PathProps {
 /** 本期仅骨架接入的三个分类（组件 / 主题由 pages/components/*、pages/themes/* 生成） */
 export function getStaticPaths() {
   const SKELETON_CATEGORIES: AssetCategory[] = ['styles', 'templates', 'materials'];
-  /** 已有专属路由接管的板块（不再渲染「待接入」骨架） */
+  /** 已有专属路由接管的板块（不再渲染「待接入」骨架）：模板条目平铺于 templates/[slug] */
   const EXCLUDED: Partial<Record<AssetCategory, string[]>> = {
-    templates: ['wireframe'],
+    templates: wireframeTemplates.map((t) => t.slug),
   };
   return SITE_NAV.filter((cat) => SKELETON_CATEGORIES.includes(cat.id)).flatMap(
     (cat) =>
@@ -41,7 +42,7 @@ const CATEGORY_INTRO: Record<'styles' | 'templates' | 'materials', string> = {
   styles:
     '本板块承载样式 Token 与视觉规则，按 Primitive → Semantic → Component 三层模型组织，覆盖色彩、字体、排版、布局、形态、动效六个维度。本期 Token 数据尚未接入，各板块如实标注「待接入」，不展示模拟内容。',
   templates:
-    '本板块按任务类型组织页面模板。「线框模板」已接入：内容目录驱动（放入 markdown 即自动出现菜单与页面），每篇含 ASCII 线框预览与 DSL yaml 结构骨架；页面骨架、图表、列表、表单等其余板块待接入，各板块如实标注「待接入」，不展示模拟内容。',
+    '本板块按任务类型组织页面模板。已接入的线框模板直接平铺在模板目录中：内容目录驱动（放入 markdown 即自动出现菜单与页面），每篇含运行态预览与 DSL/yaml 结构。',
   materials:
     '本板块集中管理图标、SVG 图形、图片与插画、生成提示词、Logo 与品牌、UI 样式资源、媒体与动效、文案与数据、素材站点共 9 个板块，条目含独立拆分的权利字段。本期素材数据尚未接入，各板块如实标注「待接入」，不展示模拟内容。',
 };

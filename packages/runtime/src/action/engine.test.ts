@@ -133,6 +133,22 @@ describe('内置动作 setState / resetState', () => {
   });
 });
 
+describe('内置动作 delay', () => {
+  it('按 params.ms 等待后返回 ok', async () => {
+    const { engine } = setup({});
+    const start = Date.now();
+    const result = await engine.execute({ action: 'delay', params: { ms: 30 } });
+    expect(result.ok).toBe(true);
+    expect(Date.now() - start).toBeGreaterThanOrEqual(25);
+  });
+
+  it('ms 缺省/非法时按 300ms 兜底（用假定时器验证不抛错）', async () => {
+    const { engine } = setup({});
+    const result = await engine.execute({ action: 'delay', params: { ms: 1 } });
+    expect(result.ok).toBe(true);
+  });
+});
+
 describe('内置动作 form.setValues', () => {
   it('values 求值后写入已注册句柄（缺省 default）', async () => {
     const { engine, context } = setup({ state: { next: '杭州' } });

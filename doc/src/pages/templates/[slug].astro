@@ -1,15 +1,15 @@
 ---
 /**
- * 线框模板详情页 /templates/wireframe/<slug>。
+ * 模板详情页 /templates/<slug>。
  * 复用组件详情页 AssetDetail 骨架（面包屑 + 页头 + 固定章节），
  * 章节按模板文档的 ## 分组生成：每个布局章节内「预览 + 结构（DSL/yaml Tab）」
  * 放在一起展示；不渲染元信息/变体/API 属性章节，ASCII 线框不展示。
  * 面包屑右端「复制此页」复制该模板 markdown 源码原文。
  */
-import AssetDetail from '../../../templates/AssetDetail.astro';
-import CopyButton from '../../../components/CopyButton';
-import TemplateFlowSection from '../../../components/TemplateFlowSection.astro';
-import { wireframeTemplates } from '../../../assets-data/wireframe-templates';
+import AssetDetail from '../../templates/AssetDetail.astro';
+import CopyButton from '../../components/CopyButton';
+import TemplateFlowSection from '../../components/TemplateFlowSection.astro';
+import { wireframeTemplates } from '../../assets-data/wireframe-templates';
 
 export function getStaticPaths() {
   return wireframeTemplates.map((t) => ({
@@ -20,7 +20,9 @@ export function getStaticPaths() {
 
 const { slug } = Astro.props as { slug: string };
 const tpl = wireframeTemplates.find((t) => t.slug === slug)!;
-const currentPath = `/templates/wireframe/${tpl.slug}`;
+const currentPath = `/templates/${tpl.slug}`;
+const usage =
+  '每个「预览」为 DSL 实时渲染的运行态效果，点「新窗口打开」单独查看；「结构」Tab 可切换 DSL 结构（JSON 树）与 yaml 结构，点「复制」取回源码后直接用于页面 yaml；面包屑右端「复制此页」复制整篇模板 markdown，放入模板工程的内容目录即可作为新页面使用。';
 ---
 
 <AssetDetail
@@ -28,7 +30,7 @@ const currentPath = `/templates/wireframe/${tpl.slug}`;
   description={tpl.summary}
   category="templates"
   currentPath={currentPath}
-  parent={{ name: '线框模板', href: '/templates/wireframe' }}
+  usage={usage}
   status={{ maturity: 'stable', integration: 'integrated' }}
   meta={[]}
   sections={tpl.sections.map((s) => ({

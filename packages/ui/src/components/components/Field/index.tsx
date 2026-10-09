@@ -7,6 +7,7 @@ import {
   FieldError,
   FieldLabel,
 } from '../../../ui/field.js';
+import { useFormContext } from '../Form/context.js';
 
 export interface FieldProps {
   /** 表单项标签 */
@@ -49,7 +50,11 @@ export interface FieldProps {
  * 必填星号（对齐 antd Form.Item required 语义）；`labelHint` 与 label 同行
  * 右对齐（弱化为小字）；label 与控件容器间距由 Field 容器 flex-col gap-2
  * 承担，五个节点（label / labelHint / 控件容器 / description / error）
- * 均可独立加样式。
+ * 均可独立加样式。控件容器为相邻的直接子按钮自动加间距
+ * （`[&>button+button]:ml-2`，如同一 Field 放查询/重置）。
+ * 处于 layout=vertical 的 Form 内时根节点自动加 mb-2
+ * （表单项纵向间距）；处于 layout=inline 的 Form 内时 label 与控件同一行
+ * （覆盖默认上下结构）；horizontal 布局或 Form 外不加。
  */
 export function Field({
   label,
@@ -71,10 +76,25 @@ export function Field({
   errorClassName,
   errorStyle,
 }: FieldProps) {
+  const form = useFormContext();
+  const inline = form?.layout === 'inline';
   return (
-    <ShadcnField className={className} style={style}>
+    <ShadcnField
+      className={cn(
+        form?.layout === 'vertical' && 'mb-2',
+        // inline Form：label 与控件同一行（覆盖默认 flex-col）
+        inline && 'flex-row items-center',
+        className,
+      )}
+      style={style}
+    >
       {label || labelHint ? (
-        <div className="flex min-h-3.5 w-full items-center justify-between gap-2">
+        <div
+          className={cn(
+            'flex min-h-3.5 items-center gap-2',
+            inline ? 'shrink-0' : 'w-full justify-between',
+          )}
+        >
           {label ? (
             <FieldLabel className={labelClassName} style={labelStyle}>
               {required ? (
@@ -103,7 +123,7 @@ export function Field({
       ) : null}
       <div
         data-slot="field-control"
-        className={cn(controlClassName)}
+        className={cn('[&>button+button]:ml-2', controlClassName)}
         style={controlStyle}
       >
         {children}

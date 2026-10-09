@@ -181,7 +181,33 @@ Facts that are NOT guessable and must be followed:
 
 - Top level is `{ dsl, page, state?, dataSources?, actions?, components?, lifecycle?, body? }` — `page` is a wrapper object, `dsl: '1.0'` is mandatory.
 - `Table` reads data via an **expression** (`dataSource: ${data.customers}`), not a source name; column templates use the `cell` key (not `render`) with `${row.x}` scope; pagination is `pagination: { pageSize: 5 }`.
-- Form fields bind via `props.name`; the submit button uses `submit: true` (not `htmlType`); `Form onSubmit` receives all values as `${event.<field>}`.
+- **Inside `Form`, every form control must be wrapped in a `Field`** (`Input`/`NumberInput`/`Select`/`Textarea`/`RadioGroup`/`Checkbox`/`Switch`/`Slider`/`DatePicker` …): label / required / description / error belong to `Field`, the control keeps only its own props (`name` / `placeholder` / `value` / `options` / `rules`). Search-bar buttons (查询/重置) also go inside a `Field` so they align with the inputs; **multiple buttons in one `Field` are placed side by side directly — adjacent buttons get spacing automatically (`[&>button+button]:ml-2`), no extra wrapper or margin needed** (use a `Flex` with `gap` inside the `Field` only when aligning mixed content, e.g. a right-aligned button row). Fields bind via `props.name`; the submit button uses `submit: true` (not `htmlType`); `Form onSubmit` receives all values as `${event.<field>}`.
+
+```yaml
+- type: Form
+  props: { layout: inline }
+  children:
+    - type: Field
+      props: { label: 关键词 }
+      children:
+        - type: Input
+          props: { name: keyword, placeholder: 输入关键词 }
+    - type: Field
+      props: { label: 状态 }
+      children:
+        - type: Select
+          props:
+            name: status
+            options:
+              - { label: 启用, value: enabled }
+              - { label: 停用, value: disabled }
+    - type: Field            # 查询/重置按钮同样放 Field 内，与输入框对齐
+      children:
+        - type: Button
+          props: { text: 查询, variant: primary, submit: true }
+        - type: Button
+          props: { text: 重置 }
+```
 - `navigate` takes `to`; `message` takes `text` + `messageType` (a `type` key in action `params` disables expression evaluation).
 - Query linkage = `onSubmit: [setState, reload]`; the data source's `params` referencing `${state.x}` pick up new values on reload.
 
@@ -357,6 +383,7 @@ pnpm pactor create my-app
 - **Do not** rely on frontend permission checks for security; enforce authorization on backend APIs.
 - **Do not** forget to import `@pactor-app/ui/styles.css` when using the default shadcn kit (`@pactor-app/chat/styles.css` additionally for chat surfaces).
 - **Do not** put a `type` key in action `params` (see the events workflow pitfall).
+- **Do not** place bare form controls directly under `Form`; wrap every control (including search-bar buttons) in a `Field`.
 - **Do not** expect DslNode slots (sidebar / toolbar / inspector / …) to render outside a page runtime; in pure React hosts pass ReactNode instead.
 
 ## References (bundled — works from npm install)

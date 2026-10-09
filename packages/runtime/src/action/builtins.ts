@@ -40,6 +40,13 @@ export function registerBuiltinActions(registry: ActionRegistry): void {
     return { ok: true };
   });
 
+  // params.ms：等待毫秒数（缺省 300）；演示/原型中的异步等待（如按钮点击后的 loading 态）
+  register('delay', async (action) => {
+    const raw = Number(action.params?.['ms'] ?? 300);
+    await new Promise((resolve) => setTimeout(resolve, Number.isFinite(raw) ? raw : 300));
+    return { ok: true };
+  });
+
   // 经 HttpAdapter 发请求，结果写入 params.target 指定的 state 路径
   register('request', async (action, ctx) => {
     const params = action.params ?? {};

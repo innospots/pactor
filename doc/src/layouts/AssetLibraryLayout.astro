@@ -22,6 +22,8 @@ interface Props {
   headings?: { id: string; text: string }[];
   /** 右侧看板默认态的元信息键值 */
   meta?: { label: string; value: string }[];
+  /** 右侧看板默认态「使用说明」文案（缺省为对象检查模式说明） */
+  usage?: string;
 }
 
 const {
@@ -31,6 +33,7 @@ const {
   currentPath,
   headings = [],
   meta = [],
+  usage,
 } = Astro.props;
 
 function formatBuiltAt(iso: string): string {
@@ -79,7 +82,7 @@ const builtAtText = formatBuiltAt(buildInfo.builtAt);
         </div>
       </main>
       <aside class="inspector" id="inspector">
-        <Inspector client:load headings={headings} meta={meta} />
+        <Inspector client:load headings={headings} meta={meta} usage={usage} />
       </aside>
     </div>
     <div class="drawer-overlay" id="drawerOverlay"></div>

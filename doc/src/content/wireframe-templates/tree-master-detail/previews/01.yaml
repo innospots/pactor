@@ -1,0 +1,177 @@
+# 提炼自「布局 A — 左右等分（标准）」：占位已清洗、示例数据已注入，可直接渲染。
+# 人工提炼入库、落盘维护；构建期只读取，不做推导。
+title: 布局 A — 左右等分（标准）
+state:
+  tree:
+    - key: home
+      title: 首页
+    - key: system
+      title: 系统管理
+      children:
+        - key: menu
+          title: 菜单管理
+        - key: role
+          title: 角色管理
+        - key: user
+          title: 用户管理
+    - key: help
+      title: 帮助中心
+      children:
+        - key: doc
+          title: 使用文档
+        - key: changelog
+          title: 更新日志
+body:
+  type: Page
+  children:
+    # 页面工具栏：标题 + 预览 / 新建节点
+    - type: Flex
+      props:
+        justify: space-between
+        align: center
+      children:
+        - type: Text
+          props:
+            text: 自定义导航配置
+            strong: true
+            size: large
+        - type: Flex
+          props:
+            gap: 8
+          children:
+            - type: Button
+              props:
+                text: 预览
+            - type: Button
+              props:
+                text: 新建节点
+                variant: primary
+                icon: plus
+    # 单卡主从：左右等分（树面板 | 属性表单）
+    - type: Card
+      children:
+        # 负边距撑满卡片（Card 内边距 16px），两列通高等宽
+        - type: Flex
+          props:
+            align: stretch
+            className: overflow-hidden rounded-lg
+            style: { margin: -16 }
+          children:
+            - type: Flex
+              props:
+                direction: vertical
+                gap: middle
+                className: flex-1 p-4
+              children:
+                - type: Text
+                  props:
+                    text: 导航结构
+                    strong: true
+                - type: Input
+                  props:
+                    name: keyword
+                    placeholder: 搜索节点
+                - type: Tree
+                  props:
+                    treeData: ${state.tree}
+                    defaultExpandedKeys: [system]
+                    defaultSelectedKeys: [menu]
+                    # 拖拽调整层级/顺序：hover 行左侧 grip 手柄拖拽生效；
+                    # 组件内部即时更新，持久化经 events.onDrop 同步
+                    draggable: true
+                    # 行级操作（外部传入）：op 绑定静态编辑（同级后插/追加子级/删除子树，组件内部即时改树）
+                    nodeActionDisplay: dropdown
+                    nodeActions:
+                      - { value: addSibling, icon: plus, label: 同级, op: addSibling }
+                      - { value: addChild, icon: plus, label: 子级, op: addChild }
+                      - { value: delete, icon: trash, label: 删除, danger: true, op: delete, separatorBefore: true }
+                - type: Text
+                  props:
+                    text: 拖动节点可调整层级与顺序
+                    type: secondary
+                    size: small
+            - type: Flex
+              props:
+                direction: vertical
+                gap: middle
+                className: flex-1 p-4
+              children:
+                - type: Text
+                  props:
+                    text: 节点属性
+                    strong: true
+                - type: Form
+                  props:
+                    layout: vertical
+                  children:
+                    # Form 内控件必须放 Field 内（label / required 归 Field）
+                    - type: Field
+                      props: { label: 名称, required: true }
+                      children:
+                        - type: Input
+                          props:
+                            name: name
+                            value: 菜单管理
+                    - type: Field
+                      props: { label: 类型 }
+                      children:
+                        - type: RadioGroup
+                          props:
+                            name: type
+                            direction: horizontal
+                            value: page
+                            options:
+                              - { label: 目录, value: catalog }
+                              - { label: 页面, value: page }
+                              - { label: 外链, value: link }
+                    - type: Field
+                      props: { label: 路由路径 }
+                      children:
+                        - type: Input
+                          props:
+                            name: path
+                            value: /system/menu
+                    - type: Field
+                      children:
+                        - type: Switch
+                          props:
+                            name: visible
+                            label: 显示
+                            value: true
+                    - type: Field
+                      children:
+                        - type: Flex
+                          props:
+                            justify: end
+                            gap: 8
+                          children:
+                            - type: Button
+                              props:
+                                text: 取消
+                            - type: Button
+                              props:
+                                text: 保存
+                                variant: primary
+                                submit: true
+    # 底栏：结构批量保存与属性保存分离
+    - type: Flex
+      props:
+        justify: space-between
+        align: center
+      children:
+        - type: Text
+          props:
+            text: 结构有未保存的修改
+            type: warning
+            size: small
+        - type: Flex
+          props:
+            gap: 8
+          children:
+            - type: Button
+              props:
+                text: 撤销调整
+            - type: Button
+              props:
+                text: 保存结构
+                variant: primary

@@ -9,6 +9,7 @@ import { materials } from './assets-data/materials/index.ts';
 import { templates } from './assets-data/templates/index.ts';
 import { themes } from './assets-data/themes/index.ts';
 import { tokens } from './assets-data/tokens/index.ts';
+import { wireframeTemplates } from './assets-data/wireframe-templates/index.ts';
 
 /** 二级菜单项 */
 export interface SiteNavItem {
@@ -92,21 +93,10 @@ export const SITE_NAV: SiteNavCategory[] = [
     id: 'templates',
     label: '模板',
     routePrefix: 'templates',
+    // 已接入的线框模板直接平铺在模板目录菜单中（内容目录驱动，无「线框模板」分组）。
     items: [
       overview(),
-      { slug: 'wireframe', name: '线框模板' },
-      { slug: 'skeleton', name: '页面骨架' },
-      { slug: 'charts', name: '图表' },
-      { slug: 'lists', name: '列表' },
-      { slug: 'forms', name: '表单' },
-      { slug: 'details', name: '详情' },
-      { slug: 'results', name: '结果' },
-      { slug: 'profile', name: '个人' },
-      { slug: 'login', name: '登录' },
-      { slug: 'chat', name: 'Chat' },
-      { slug: 'payment', name: '支付' },
-      { slug: 'settings', name: '设置' },
-      { slug: 'text', name: '文字' },
+      ...wireframeTemplates.map((t): SiteNavItem => ({ slug: t.slug, name: t.title })),
     ],
   },
   {
@@ -171,6 +161,8 @@ export function sectionCount(categoryId: AssetCategory, slug: string): number {
     }
     case 'templates': {
       if (slug === 'overview') return templates.length;
+      // 平铺在菜单中的单个模板条目（slug 即模板 slug）计 1；分组板块按 category 统计
+      if (templates.some((t) => t.slug === slug)) return 1;
       return templates.filter((t) => t.category === slug).length;
     }
     case 'materials': {

@@ -1,0 +1,168 @@
+# 提炼自「4.6 表格区完整线框模板（S2 + 含可选块）」：表格工具栏（可选）→ 表头（可排序 ⇅）
+# → 表体（多选列 / 链接列 / 数字右对齐 / 状态列）→ 操作列 → 分页脚（左侧总条数 + 右侧每页条数与页码）。
+# 人工提炼入库、落盘维护；构建期只读取，不做推导。
+title: 表格区完整模板 — 工具栏 + 表头 + 表体 + 操作列 + 分页脚
+state:
+  selectedKeys: [1, 2]
+  tableLoading: false
+body:
+  type: Page
+  children:
+    - type: Card
+      children:
+        - type: Flex
+          props:
+            direction: vertical
+            gap: middle
+          children:
+            # 表格工具栏（可选块）：已选摘要 + 批量操作 | 刷新 / 列设置
+            - type: Flex
+              props:
+                justify: space-between
+                align: center
+              children:
+                - type: Flex
+                  props:
+                    align: center
+                    gap: small
+                  children:
+                    - type: Text
+                      props:
+                        text: 已选 ${state.selectedKeys.length} 项
+                        type: secondary
+                    - type: Button
+                      props:
+                        text: 批量启用
+                    - type: Button
+                      props:
+                        text: 批量删除
+                - type: Flex
+                  props:
+                    gap: small
+                  children:
+                    # 刷新：loading 态演示（setState → delay → setState）
+                    - type: Button
+                      props:
+                        text: 刷新
+                        icon: refresh
+                        variant: text
+                      events:
+                        onClick:
+                          - action: setState
+                            params: { tableLoading: true }
+                          - action: delay
+                            params: { ms: 800 }
+                          - action: setState
+                            params: { tableLoading: false }
+                    - type: Button
+                      props:
+                        text: 列设置
+                        icon: settings
+                        variant: text
+            - type: Separator
+            - type: Table
+              props:
+                rowSelection: true
+                selectedRowKeys: ${state.selectedKeys}
+                loading: ${state.tableLoading}
+                columns:
+                  # 链接列 + 可排序（sorter 列表头带 ⇅）
+                  - title: 名称
+                    width: 280
+                    sorter: true
+                    cell:
+                      type: Button
+                      props:
+                        text: ${row.name}
+                        variant: link
+                  - title: 负责人
+                    dataIndex: owner
+                    width: 200
+                  - title: 成员数
+                    dataIndex: members
+                    align: right
+                    width: 140
+                    sorter: true
+                  - title: 状态
+                    width: 160
+                    cell:
+                      type: Status
+                      props:
+                        status: ${row.statusType}
+                        text: ${row.status}
+                  # 默认序：创建时间降序
+                  - title: 创建时间
+                    dataIndex: createdAt
+                    width: 200
+                    sorter: true
+                    defaultSortOrder: descend
+                  - title: 操作
+                    width: 200
+                    align: center
+                    fixed: right
+                    cell:
+                      type: Flex
+                      props:
+                        align: center
+                        justify: center
+                        gap: 4
+                      children:
+                        - type: Button
+                          props:
+                            text: 详情
+                            variant: link
+                        - type: Button
+                          props:
+                            text: 编辑
+                            variant: link
+                        - type: DropdownMenu
+                          props:
+                            align: end
+                            items:
+                              - label: 停用
+                                value: disable
+                              - separator: true
+                              - label: 删除
+                                value: delete
+                                icon: trash
+                                danger: true
+                          children:
+                            - type: Button
+                              props:
+                                icon: ellipsis
+                                variant: text
+                dataSource:
+                  - id: 1
+                    name: 平台管理员
+                    owner: 张三
+                    members: 3
+                    status: 启用
+                    statusType: success
+                    createdAt: 2026-09-12
+                  - id: 2
+                    name: 租户管理员
+                    owner: 李四
+                    members: 12
+                    status: 启用
+                    statusType: success
+                    createdAt: 2026-09-08
+                  - id: 3
+                    name: 审计只读
+                    owner: 王五
+                    members: 5
+                    status: 停用
+                    statusType: default
+                    createdAt: 2026-08-30
+              events:
+                onSelectChange:
+                  - action: setState
+                    params:
+                      selectedKeys: ${event}
+            # 分页脚：左侧总条数 + 右侧每页条数与页码
+            - type: Pagination
+              props:
+                total: 128
+                pageSize: 10
+                align: right
+                showTotal: true
+                pageSizeOptions: [10, 20, 50]

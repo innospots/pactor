@@ -1,38 +1,76 @@
 # 提炼自「2.8 插件列表示例（上中下 + 平铺）」：占位已清洗、示例数据已注入，可直接渲染。
 # 人工提炼入库、落盘维护；构建期只读取，不做推导。
 title: 2.8 插件列表示例（上中下 + 平铺）
+height: 220
+center: true
 body:
-  type: Flex
+  type: Card
   props:
-    direction: column
-    gap: 16
+    style: { width: 380 }
   children:
-    - type: Card
+    - type: Flex
+      props:
+        direction: vertical
+        gap: 8
       children:
-        - type: Flex
-          children:
-            - type: Text
-              props:
-                text: Logo
-                type: secondary
-            - type: Text
-              props:
-                text: Typography
-                type: secondary
-            - type: Text
-              props:
-                text: Tag
-                type: secondary
-            - type: Text
-              props:
-                text: Button
-                type: secondary
-        - type: Typography
+        # 上层·平铺：左 Logo+标题+版本，右状态 Tag
         - type: Flex
           props:
-            className: card-footer
+            justify: space-between
+            align: center
           children:
-            - type: Text
+            - type: Flex
               props:
-                text: Button
-                type: secondary
+                align: center
+                gap: 8
+              children:
+                - type: Flex
+                  props:
+                    align: center
+                    justify: center
+                    className: size-9 rounded-md bg-muted
+                  children:
+                    - type: Icon
+                      props:
+                        name: package
+                - type: Flex
+                  props:
+                    direction: vertical
+                    gap: 2
+                  children:
+                    - type: Text
+                      props:
+                        text: 用户管理
+                        strong: true
+                    - type: Text
+                      props:
+                        text: v0.1.0
+                        type: secondary
+                        size: small
+            - type: Tag
+              props:
+                text: 已安装
+                color: success
+        # 中层·居左：描述·muted（固定两行高度，超出截断）
+        - type: Text
+          props:
+            text: 管理插件安装状态与运行生命周期。
+            type: secondary
+            size: small
+            className: line-clamp-2
+            style: { minHeight: 32 }
+        # 下层·居右·浅底栏：右下长方形「停用」，独立点击 + 二次确认
+        - type: Flex
+          props:
+            justify: end
+            gap: 4
+            className: -mx-4 -mb-4 mt-1 rounded-b-lg bg-muted px-4 py-2
+          children:
+            - type: Popconfirm
+              props:
+                title: 确认停用「用户管理」？
+                description: 停用后依赖该插件的功能将不可用。
+              children:
+                - type: Button
+                  props:
+                    text: 停用
