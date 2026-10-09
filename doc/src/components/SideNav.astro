@@ -45,7 +45,7 @@ const current = SITE_NAV.find((c) => c.id === category) ?? SITE_NAV[0];
             <span>{item.name}</span>
             <span class="menu-count">
               {count > 0 ? (
-                count
+                current.id === 'templates' && item.slug !== 'overview' ? null : count
               ) : (
                 <span class="badge warning">待接入</span>
               )}

@@ -1,0 +1,57 @@
+# 提炼自「W4 — 构成卡（Progress 行）」：Top N 占比分布。
+# 人工提炼入库、落盘维护；构建期只读取，不做推导。
+title: W4 — 构成卡（Progress 行）
+height: 400
+body:
+  type: Page
+  children:
+    - type: Card
+      props: { title: 用量构成 · 模型, style: { width: 420 } }
+      children:
+        - type: Flex
+          props: { direction: vertical, gap: 8, align: start }
+          children:
+            - type: Text
+              props:
+                text: 按请求量分布，识别主要模型流量来源
+                size: small
+                type: secondary
+                className: w-full
+            - type: Flex
+              props: { align: center, gap: 8, className: w-full }
+              children:
+                - type: Text
+                  props: { text: gpt-4o, size: small, style: { width: 110 } }
+                - type: Progress
+                  props: { value: 42, style: { flex: 1 } }
+                - type: Text
+                  props: { text: 42%, size: small, style: { width: 40 } }
+            - type: Flex
+              props: { align: center, gap: 8, className: w-full }
+              children:
+                - type: Text
+                  props: { text: claude-3, size: small, style: { width: 110 } }
+                - type: Progress
+                  props: { value: 28, style: { flex: 1 } }
+                - type: Text
+                  props: { text: 28%, size: small, style: { width: 40 } }
+            - type: Flex
+              props: { align: center, gap: 8, className: w-full }
+              children:
+                - type: Text
+                  props: { text: doubao-pro, size: small, style: { width: 110 } }
+                - type: Progress
+                  props: { value: 18, style: { flex: 1 } }
+                - type: Text
+                  props: { text: 18%, size: small, style: { width: 40 } }
+            - type: Flex
+              props: { align: center, gap: 8, className: w-full }
+              children:
+                - type: Text
+                  props: { text: 其他, size: small, style: { width: 110 } }
+                - type: Progress
+                  props: { value: 12, style: { flex: 1 } }
+                - type: Text
+                  props: { text: 12%, size: small, style: { width: 40 } }
+            - type: Button
+              props: { text: 查看全部 →, variant: link }

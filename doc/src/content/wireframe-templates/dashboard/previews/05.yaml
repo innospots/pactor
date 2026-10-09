@@ -1,0 +1,24 @@
+# 提炼自「W2 — 筛选 / 工具条卡（DatePicker / Segmented）」：页级筛选，不占图表区。
+# 人工提炼入库、落盘维护；构建期只读取，不做推导。
+title: W2 — 筛选 / 工具条卡（DatePicker / Segmented）
+height: 200
+center: true
+body:
+  type: Page
+  children:
+    - type: Card
+      props: { style: { width: 520 } }
+      children:
+        - type: Flex
+          props: { align: center, gap: 8 }
+          children:
+            - type: Text
+              props: { text: 分析时间范围, className: shrink-0 }
+            - type: DatePicker
+              props: { mode: range, placeholder: 选择起止日期 }
+            - type: Segmented
+              props:
+                options:
+                  - { label: 今天, value: today }
+                  - { label: 近 7 天, value: 7d }
+                  - { label: 近 30 天, value: 30d }

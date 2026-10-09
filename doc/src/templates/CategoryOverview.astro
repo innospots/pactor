@@ -119,7 +119,9 @@ const related = relatedCategories
                 <div class="card-desc">查看「{item.name}」全部条目</div>
                 <div class="badges">
                   {count > 0 ? (
-                    <span class="badge info">{count} 条</span>
+                    category.id === 'templates' ? null : (
+                      <span class="badge info">{count} 条</span>
+                    )
                   ) : (
                     <span class="badge warning">待接入</span>
                   )}
