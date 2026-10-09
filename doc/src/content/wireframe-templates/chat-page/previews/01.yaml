@@ -1,0 +1,126 @@
+# 提炼自「布局 C1 — 主区 + 右侧会话栏」：占位组件已映射为真实 chat 组件，可直接渲染。
+# 人工提炼入库、落盘维护；构建期只读取，不做推导。
+title: 布局 C1 — 完整对话工作页
+height: 640
+body:
+  type: ChatPage
+  props:
+    brand: { title: Pactor Chat, version: v1.0 }
+    # 最左图标栏（仅图标 + Tooltip）
+    railItems:
+      - { key: chat, label: 对话, icon: chat }
+      - { key: space, label: 空间, icon: folder }
+      - { key: usage, label: 用量, icon: chart }
+    railFooterItems:
+      - { key: settings, label: 设置, icon: settings }
+      - { key: me, label: 个人中心, icon: user }
+    # 展开菜单区：品牌 + 图标文字导航
+    menuItems:
+      - { key: chat, label: 对话, icon: message-square }
+      - { key: space, label: 空间, icon: folder }
+      - { key: usage, label: 用量, icon: chart }
+    activeMenuKey: chat
+    # 会话区（Z-H 左侧）：标题自动拼数量，点击折叠
+    conversationSectionTitle: 任务
+    conversations:
+      - { id: c1, title: 聊天页模板设计, description: 产物栏与步骤浮层…, time: 11:02 }
+      - { id: c2, title: 官网改版文案, description: 首屏 Slogan 三选一…, time: 昨天 }
+      - { id: c3, title: 数据导出脚本, description: 已生成 export.py…, time: 周一 }
+    activeConversationId: c1
+    moreLabel: 查看更多
+    footerSectionTitle: 空间 (3)
+    footerItems:
+      - { key: ws-main, label: 主工作区, icon: building }
+      - { key: ws-lab, label: 实验室, icon: zap }
+    conversationTitle: 聊天页模板设计
+    # 对话图标栏附加项（header 下方右缘纵向排列）：StepsPanel 浮层
+    conversationRailItems:
+      - key: steps
+        label: 执行步骤
+        icon: list
+        display: popover
+        content:
+          type: StepsPanel
+          props:
+            steps:
+              - { title: 理解需求, description: 分析页面布局与区域划分, status: done, duration: 12s }
+              - { title: 生成页面骨架, description: ChatPage 四区布局, status: done, duration: 38s }
+              - { title: 编写消息流 DSL, status: running }
+              - { title: 联调产物栏, status: pending }
+    # Z-L 消息流：M-user / M-thought / M-tool / M-assistant / artifacts 段
+    messages:
+      - id: m1
+        role: user
+        time: '11:02'
+        parts:
+          - { type: text, content: 帮我搭一个带产物栏和执行步骤浮层的聊天页 }
+      - id: m2
+        role: assistant
+        time: '11:03'
+        agent: { name: Pactor 助手, icon: chat }
+        parts:
+          - type: thinking
+            status: done
+            content: 用户需要一个聊天工作页：左侧导航 + 会话列表，中间消息流，右侧产物栏，另有执行步骤浮层。直接用 ChatPage 四区布局即可，消息块按 thinking → tool-call → markdown 顺序组织。
+          - type: tool-call
+            name: Bash
+            status: done
+            params: { command: pnpm --filter @pactor-app/ui test }
+            result: Test Files 47 passed (47) · Tests 791 passed (791)
+          - type: markdown
+            content: |-
+              已完成聊天页搭建，要点如下：
+
+              - **四区布局**：图标栏 / 菜单区 / 对话区 / 产物栏
+              - 消息流支持 `thinking`、`tool-call`、`markdown` 等块类型
+              - 产物栏内置 markdown / code / dsl 活预览
+
+              ```bash
+              pnpm --filter @pactor-app/ui build
+              ```
+          - { type: artifacts, count: 2 }
+        actions:
+          - { name: copy, label: 复制, icon: copy }
+          - { name: retry, label: 重试, icon: refresh }
+    # Z-I 输入区：模型 chip + @ 行内提及
+    composerPlaceholder: 输入消息… @ 引用文件 / 智能体
+    models:
+      - { value: qwen3-max, label: qwen3-max }
+      - { value: kimi-k2, label: kimi-k2 }
+      - { value: doubao-pro, label: doubao-pro }
+    model: qwen3-max
+    contexts:
+      - trigger: '@'
+        label: 引用上下文
+        icon: file-text
+        items:
+          - { id: f1, label: chat-page.yaml, icon: file-text }
+          - { id: f2, label: 会话数据接口, icon: database }
+          - { id: a1, label: 代码审查助手, icon: users }
+    # Z-R 产物栏（默认收起，图标栏首项 toggle；富模型内建预览）
+    artifactTitle: 产物
+    artifacts:
+      - id: a1
+        kind: markdown
+        title: 聊天页设计说明.md
+        content: |-
+          # 聊天页设计说明
+
+          - 布局：**C1 主聊天列 + 右侧产物栏**
+          - 消息块：thinking / tool-call / markdown
+          - 输入区：@ 提及 + 模型切换
+      - id: a2
+        kind: code
+        language: bash
+        title: run.sh
+        content: |-
+          #!/usr/bin/env bash
+          pnpm --filter @pactor-app/ui build
+          pnpm --filter @pactor-app/ui test
+  events:
+    onSend:
+      - action: message
+        params: { messageType: success, text: "已发送：${event}" }
+    onMessageAction:
+      - action: message
+        params: { messageType: info, text: "消息操作：${event.action}" }

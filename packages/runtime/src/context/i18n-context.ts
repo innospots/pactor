@@ -30,6 +30,7 @@ const defaultMessages = {
     'pactor.table.dragRow': '拖拽排序',
     'pactor.form.required': '必填',
     'pactor.select.clear': '清除',
+    'pactor.select.search': '搜索选项',
     'pactor.input.clear': '清除',
     'pactor.numberInput.increase': '增加',
     'pactor.numberInput.decrease': '减少',
@@ -50,6 +51,7 @@ const defaultMessages = {
     'pactor.login.passwordPlaceholder': '请输入密码',
     'pactor.login.passwordRequired': '请输入密码',
     'pactor.login.submit': '登 录',
+    'pactor.cardList.total': '共 {{count}} 个',
   },
   'en-US': {
     'pactor.layout.expandSidebar': 'Expand sidebar',
@@ -66,6 +68,7 @@ const defaultMessages = {
     'pactor.table.dragRow': 'Drag to reorder',
     'pactor.form.required': 'Required',
     'pactor.select.clear': 'Clear',
+    'pactor.select.search': 'Search options',
     'pactor.input.clear': 'Clear',
     'pactor.numberInput.increase': 'Increase',
     'pactor.numberInput.decrease': 'Decrease',
@@ -86,6 +89,7 @@ const defaultMessages = {
     'pactor.login.passwordPlaceholder': 'Enter password',
     'pactor.login.passwordRequired': 'Please enter password',
     'pactor.login.submit': 'Sign in',
+    'pactor.cardList.total': 'Total {{count}}',
   },
 };
 

@@ -43,41 +43,59 @@ sourceRef: innos-diagram/references/03-卡片列表页.md
 state:
   plugins:
     - id: 1
-      name: 用户管理
-      version: 0.1.0
-      desc: 管理插件安装状态与运行生命周期，支持启停与依赖检查。
-      statusText: 已安装
-      statusColor: success
+      icon: users
+      title: 用户管理
+      subtitle: v0.1.0
+      description: 管理插件安装状态与运行生命周期，支持启停与依赖检查。
+      tags:
+        - { text: 已安装, color: success }
+      actions:
+        - { text: 停用 }
     - id: 2
-      name: 数据同步
-      version: 2.3.1
-      desc: 定时将外部数据源同步至平台，支持增量与全量两种模式。
-      statusText: 已安装
-      statusColor: success
+      icon: database
+      title: 数据同步
+      subtitle: v2.3.1
+      description: 定时将外部数据源同步至平台，支持增量与全量两种模式。
+      tags:
+        - { text: 已安装, color: success }
+      actions:
+        - { text: 停用 }
     - id: 3
-      name: 审计日志
-      version: 1.8.0
-      desc: 记录平台关键操作与登录行为，提供检索与导出能力。
-      statusText: 未安装
-      statusColor: default
+      icon: file-text
+      title: 审计日志
+      subtitle: v1.8.0
+      description: 记录平台关键操作与登录行为，提供检索与导出能力。
+      tags:
+        - { text: 未安装 }
+      actions:
+        - { text: 安装, variant: primary }
     - id: 4
-      name: 消息通知
-      version: 3.0.2
-      desc: 站内信、邮件与 Webhook 多渠道通知，支持模板配置。
-      statusText: 已安装
-      statusColor: success
+      icon: bell
+      title: 消息通知
+      subtitle: v3.0.2
+      description: 站内信、邮件与 Webhook 多渠道通知，支持模板配置。
+      tags:
+        - { text: 已安装, color: success }
+      actions:
+        - { text: 停用 }
     - id: 5
-      name: 报表中心
-      version: 0.9.5
-      desc: 预置常用运营报表，支持自定义指标与订阅推送。
-      statusText: 未安装
-      statusColor: default
+      icon: chart
+      title: 报表中心
+      subtitle: v0.9.5
+      description: 预置常用运营报表，支持自定义指标与订阅推送。
+      tags:
+        - { text: 未安装 }
+      actions:
+        - { text: 安装, variant: primary }
     - id: 6
-      name: 文件存储
-      version: 1.2.4
-      desc: 对接对象存储服务，提供统一的上传、预览与权限管理。
-      statusText: 已安装
-      statusColor: success
+      icon: folder
+      title: 文件存储
+      subtitle: v1.2.4
+      description: 对接对象存储服务，提供统一的上传、预览与权限管理。
+      tags:
+        - { text: 已安装, color: success }
+      actions:
+        - { text: 停用 }
 body:
   type: Page
   children:
@@ -130,82 +148,18 @@ body:
             - type: Button
               props:
                 text: 重置
-    # 卡片网格：For 承担网格容器（maxColumns 4，预览取 3 列）
-    - type: For
+    # 卡片网格 + 结果计数：CardList 业务组件一次完成
+    - type: CardList
       props:
         items: ${state.plugins}
-        keyField: id
         columns: 3
-      children:
-        - type: Card
-          children:
-            - type: Flex
-              props:
-                direction: vertical
-                gap: 8
-              children:
-                # 上层·平铺：左 Logo+标题+版本，右状态 Tag
-                - type: Flex
-                  props:
-                    justify: space-between
-                    align: center
-                  children:
-                    - type: Flex
-                      props:
-                        align: center
-                        gap: 8
-                      children:
-                        - type: Flex
-                          props:
-                            align: center
-                            justify: center
-                            className: size-9 rounded-md bg-muted
-                          children:
-                            - type: Icon
-                              props:
-                                name: package
-                        - type: Flex
-                          props:
-                            direction: vertical
-                            gap: 2
-                          children:
-                            - type: Text
-                              props:
-                                text: ${row.name}
-                                strong: true
-                            - type: Text
-                              props:
-                                text: v${row.version}
-                                type: secondary
-                                size: small
-                    - type: Tag
-                      props:
-                        text: ${row.statusText}
-                        color: ${row.statusColor}
-                # 中层·居左：描述区域固定两行高度，超出截断
-                - type: Text
-                  props:
-                    text: ${row.desc}
-                    type: secondary
-                    size: small
-                    className: line-clamp-2
-                    style: { minHeight: 32 }
-                # 下层·居右·浅底栏：主操作长方形按钮
-                - type: Flex
-                  props:
-                    justify: end
-                    gap: 4
-                    className: -mx-4 -mb-4 mt-1 rounded-b-lg bg-muted px-4 py-2
-                  children:
-                    - type: Button
-                      props:
-                        text: 停用
-    # 结果计数（卡片列表常仅展示总数）
-    - type: Text
-      props:
-        text: 共 ${state.plugins.length} 个
-        type: secondary
-        size: small
+        showCount: true
+      events:
+        onItemAction:
+          - action: message
+            params:
+              messageType: info
+              text: 已触发「${event.text}」：${event.item.title}
 ```
 
 ### L2 — 单列宽卡片
@@ -221,115 +175,42 @@ body:
 state:
   plugins:
     - id: 1
-      name: 用户管理
-      version: 0.1.0
-      desc: 管理插件安装状态与运行生命周期，支持启停、依赖检查与灰度发布，覆盖平台全部业务空间。
-      owner: 平台组
-      updatedAt: 2026-09-28
-      statusText: 已安装
-      statusColor: success
+      icon: users
+      title: 用户管理
+      subtitle: v0.1.0
+      description: 管理插件安装状态与运行生命周期，支持启停、依赖检查与灰度发布，覆盖平台全部业务空间。
+      meta: 平台组 · 更新于 2026-09-28
+      tags:
+        - { text: 已安装, color: success }
+      actions:
+        - { text: 配置, variant: link }
+        - { text: 停用 }
     - id: 2
-      name: 数据同步
-      version: 2.3.1
-      desc: 定时将外部数据源同步至平台，支持增量与全量两种模式，失败自动重试并推送告警。
-      owner: 数据组
-      updatedAt: 2026-09-20
-      statusText: 未安装
-      statusColor: default
+      icon: database
+      title: 数据同步
+      subtitle: v2.3.1
+      description: 定时将外部数据源同步至平台，支持增量与全量两种模式，失败自动重试并推送告警。
+      meta: 数据组 · 更新于 2026-09-20
+      tags:
+        - { text: 未安装 }
+      actions:
+        - { text: 配置, variant: link }
+        - { text: 安装, variant: primary }
 body:
   type: Page
   children:
-    # 单列宽卡片：columns: 1，中/下层横向平铺更多信息
-    - type: For
+    # 单列宽卡片：columns: 1，meta 与描述在中层平铺
+    - type: CardList
       props:
         items: ${state.plugins}
-        keyField: id
         columns: 1
-      children:
-        - type: Card
-          children:
-            - type: Flex
-              props:
-                direction: vertical
-                gap: 8
-              children:
-                # 上层·平铺：左 Logo+标题+版本，右状态 Tag
-                - type: Flex
-                  props:
-                    justify: space-between
-                    align: center
-                  children:
-                    - type: Flex
-                      props:
-                        align: center
-                        gap: 8
-                      children:
-                        - type: Flex
-                          props:
-                            align: center
-                            justify: center
-                            className: size-9 rounded-md bg-muted
-                          children:
-                            - type: Icon
-                              props:
-                                name: package
-                        - type: Flex
-                          props:
-                            direction: vertical
-                            gap: 2
-                          children:
-                            - type: Text
-                              props:
-                                text: ${row.name}
-                                strong: true
-                            - type: Text
-                              props:
-                                text: v${row.version}
-                                type: secondary
-                                size: small
-                    - type: Tag
-                      props:
-                        text: ${row.statusText}
-                        color: ${row.statusColor}
-                # 中层·平铺：左描述（固定两行高度，超出截断），右维护信息
-                - type: Flex
-                  props:
-                    justify: space-between
-                    align: center
-                    gap: 16
-                  children:
-                    - type: Text
-                      props:
-                        text: ${row.desc}
-                        type: secondary
-                        size: small
-                        className: line-clamp-2
-                        style: { minHeight: 32 }
-                    - type: Text
-                      props:
-                        text: ${row.owner} · 更新于 ${row.updatedAt}
-                        type: secondary
-                        size: small
-                        className: shrink-0
-                # 下层·居右·浅底栏：主/次操作
-                - type: Flex
-                  props:
-                    justify: end
-                    gap: 4
-                    className: -mx-4 -mb-4 mt-1 rounded-b-lg bg-muted px-4 py-2
-                  children:
-                    - type: Button
-                      props:
-                        text: 配置
-                        variant: link
-                    - type: Button
-                      props:
-                        text: 停用
-    - type: Text
-      props:
-        text: 共 ${state.plugins.length} 个
-        type: secondary
-        size: small
+        showCount: true
+      events:
+        onItemAction:
+          - action: message
+            params:
+              messageType: info
+              text: 已触发「${event.text}」：${event.item.title}
 ```
 
 ### L3 — 网格 + 末尾占位卡
@@ -347,109 +228,42 @@ body:
 state:
   plugins:
     - id: 1
-      name: 用户管理
-      version: 0.1.0
-      desc: 管理插件安装状态与运行生命周期，支持启停与依赖检查。
-      statusText: 已安装
-      statusColor: success
+      icon: users
+      title: 用户管理
+      subtitle: v0.1.0
+      description: 管理插件安装状态与运行生命周期，支持启停与依赖检查。
+      tags:
+        - { text: 已安装, color: success }
+      actions:
+        - { text: 停用 }
     - id: 2
-      name: 数据同步
-      version: 2.3.1
-      desc: 定时将外部数据源同步至平台，支持增量与全量两种模式。
-      statusText: 未安装
-      statusColor: default
+      icon: database
+      title: 数据同步
+      subtitle: v2.3.1
+      description: 定时将外部数据源同步至平台，支持增量与全量两种模式。
+      tags:
+        - { text: 未安装 }
+      actions:
+        - { text: 安装, variant: primary }
 body:
   type: Page
   children:
-    # For 的 before 槽位放置首格「新建」占位卡（虚线、内容居中），占 1 格参与网格流
-    - type: For
+    # createText 渲染首格「新建」占位卡（虚线、内容居中），占 1 格参与网格流
+    - type: CardList
       props:
         items: ${state.plugins}
-        keyField: id
         columns: 3
-        before:
-          # 首格「新建」占位卡：虚线、整卡可点（手型 + hover 边框/背景高亮）、内容整卡水平垂直居中
-          - type: Card
-            props:
-              hoverable: true
-              className: h-full border-dashed
-              contentClassName: flex flex-1 flex-col items-center justify-center gap-2
-            children:
-              - type: Icon
-                props:
-                  name: plus
-                  size: lg
-                  className: text-muted-foreground
-              - type: Text
-                props:
-                  text: 新建插件
-                  type: secondary
-      children:
-        - type: Card
-          children:
-            - type: Flex
-              props:
-                direction: vertical
-                gap: 8
-              children:
-                - type: Flex
-                  props:
-                    justify: space-between
-                    align: center
-                  children:
-                    - type: Flex
-                      props:
-                        align: center
-                        gap: 8
-                      children:
-                        - type: Flex
-                          props:
-                            align: center
-                            justify: center
-                            className: size-9 rounded-md bg-muted
-                          children:
-                            - type: Icon
-                              props:
-                                name: package
-                        - type: Flex
-                          props:
-                            direction: vertical
-                            gap: 2
-                          children:
-                            - type: Text
-                              props:
-                                text: ${row.name}
-                                strong: true
-                            - type: Text
-                              props:
-                                text: v${row.version}
-                                type: secondary
-                                size: small
-                    - type: Tag
-                      props:
-                        text: ${row.statusText}
-                        color: ${row.statusColor}
-                - type: Text
-                  props:
-                    text: ${row.desc}
-                    type: secondary
-                    size: small
-                    className: line-clamp-2
-                    style: { minHeight: 32 }
-                - type: Flex
-                  props:
-                    justify: end
-                    gap: 4
-                    className: -mx-4 -mb-4 mt-1 rounded-b-lg bg-muted px-4 py-2
-                  children:
-                    - type: Button
-                      props:
-                        text: 停用
-    - type: Text
-      props:
-        text: 共 ${state.plugins.length} 个
-        type: secondary
-        size: small
+        createText: 新建插件
+        showCount: true
+      events:
+        onCreateClick:
+          - action: message
+            params: { messageType: info, text: 打开新建插件弹层 }
+        onItemAction:
+          - action: message
+            params:
+              messageType: info
+              text: 已触发「${event.text}」：${event.item.title}
 ```
 
 ## 二、单卡结构 — 上 / 中 / 下三层
@@ -607,76 +421,35 @@ body:
 ```yaml
 # 与上方预览同源的可运行 DSL（示例数据内联，人工提炼入库）
 body:
-  type: Card
+  type: EntityCard
   props:
+    icon: users
+    title: 用户管理
+    subtitle: v0.1.0
+    description: 管理插件安装状态与运行生命周期。
+    hoverable: true
     style: { width: 380 }
-  children:
-    - type: Flex
-      props:
-        direction: vertical
-        gap: 8
-      children:
-        # 上层·平铺：左 Logo+标题+版本，右状态 Tag
-        - type: Flex
-          props:
-            justify: space-between
-            align: center
-          children:
-            - type: Flex
-              props:
-                align: center
-                gap: 8
-              children:
-                - type: Flex
-                  props:
-                    align: center
-                    justify: center
-                    className: size-9 rounded-md bg-muted
-                  children:
-                    - type: Icon
-                      props:
-                        name: package
-                - type: Flex
-                  props:
-                    direction: vertical
-                    gap: 2
-                  children:
-                    - type: Text
-                      props:
-                        text: 用户管理
-                        strong: true
-                    - type: Text
-                      props:
-                        text: v0.1.0
-                        type: secondary
-                        size: small
-            - type: Tag
-              props:
-                text: 已安装
-                color: success
-        # 中层·居左：描述·muted（固定两行高度，超出截断）
-        - type: Text
-          props:
-            text: 管理插件安装状态与运行生命周期。
-            type: secondary
-            size: small
-            className: line-clamp-2
-            style: { minHeight: 32 }
-        # 下层·居右·浅底栏：右下长方形「停用」，独立点击 + 二次确认
-        - type: Flex
-          props:
-            justify: end
-            gap: 4
-            className: -mx-4 -mb-4 mt-1 rounded-b-lg bg-muted px-4 py-2
-          children:
-            - type: Popconfirm
-              props:
-                title: 确认停用「用户管理」？
-                description: 停用后依赖该插件的功能将不可用。
-              children:
-                - type: Button
-                  props:
-                    text: 停用
+    tags:
+      - { text: 已安装, color: success }
+    actions:
+      - { text: 停用 }
+  events:
+    # 整卡可点进详情；「停用」独立点击 + 二次确认（不触发整卡点击）
+    onClick:
+      - action: message
+        params: { messageType: info, text: 进入「用户管理」详情 }
+    onAction:
+      - action: confirm
+        id: disableConfirm
+        params:
+          title: 确认停用「用户管理」？
+          content: 停用后依赖该插件的功能将不可用。
+      - action: if
+        params:
+          condition: ${actions.disableConfirm}
+          then:
+            - action: message
+              params: { messageType: success, text: 已停用「用户管理」 }
 ```
 
 ## 三、响应式网格

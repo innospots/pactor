@@ -13,7 +13,7 @@
 | 下拉筛选（操作人等枚举） | `Select` | `options` 可绑 `${data.xxx}`（接口下发选项，单段路径） |
 | 日期范围筛选 | `DatePicker` | range 模式绑 state，onChange reload |
 | 数据表格 | `Table` | `columns` + `dataSource: ${data.x.items}`；操作列按钮统一 `Button variant: link`；「编辑」与「新建」共用同一表单，仅以预填数据区分（initialValues / form.setValues） |
-| 卡片网格（约 3-4 列） | `Grid` + `Card` | `columns: 3, gap: 16`；「添加卡」用 `Card` 虚线边框自定义样式 |
+| 卡片网格（约 3-4 列） | `CardList`（业务组件） | 数据项直接携带 `icon`/`title`/`subtitle`/`tags`/`description`/`meta`/`actions` 字段；`columns`、`createText`（首格虚线新建卡）、`showCount`、事件 `onItemClick`/`onItemAction`/`onCreateClick`（`${event}` 含 item/index/key）；单卡即 `EntityCard`，无需 `For`+`Card` 手写三层结构 |
 | 状态徽标（启用/停用/告警） | `Badge` / `StatusBadge` | 颜色语义化，状态文案取自线框图 |
 | 启停开关图标（⏻） | `StatusToggleIcon` | 卡片/行内启停，onChange 闭环动作 + reload |
 | 权限控制显隐（无权限隐藏新建卡等） | 表达式 `hidden` / `if` 动作 | 绑 `${data.session.permissions}` 等，按会话裁剪 |

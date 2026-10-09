@@ -1,0 +1,73 @@
+# 提炼自「区域 Z-L — 消息流」：全部消息块类型（M-user/M-thought/M-tool/M-assistant/产物段/system/流式），可直接渲染。
+# 人工提炼入库、落盘维护；构建期只读取，不做推导。
+title: 区域 Z-L — 消息块类型
+height: 560
+body:
+  type: MessageList
+  props:
+    className: p-4
+    messages:
+      # system：居中弱提示（无气泡、无底色）
+      - id: s1
+        role: system
+        parts:
+          - { type: text, content: 已切换到模型 kimi-k2 · 上下文 46.5% }
+      # M-user：右对齐气泡，纯文本 / 附件引用
+      - id: u1
+        role: user
+        time: '11:20'
+        parts:
+          - { type: text, content: 把上周的工单数据整理成周报，要点加粗 }
+      # M-assistant：thinking + tool-call + markdown + 产物段 + 操作行
+      - id: a1
+        role: assistant
+        time: '11:21'
+        agent: { name: Pactor 助手, icon: chat }
+        parts:
+          - type: thinking
+            status: done
+            content: 用户需要一份工单周报。先拉取上周工单列表，再按状态聚合成 Markdown 周报，关键指标加粗呈现。
+          - type: tool-call
+            name: Bash
+            status: done
+            params: { command: pactor report --week last --format md }
+            result: 已汇总 128 条工单（已完成 96 / 进行中 24 / 阻塞 8）
+          - type: markdown
+            content: |-
+              ## 工单周报（第 39 周）
+
+              - **完成率 75%**，环比 +6%
+              - **阻塞 8 条**，集中在支付网关联调
+              - 下周重点：阻塞清理与回归验证
+          - { type: artifacts, count: 3 }
+        actions:
+          - { name: copy, label: 复制, icon: copy }
+          - { name: retry, label: 重试, icon: refresh }
+      # M-tool 失败：error 状态 + 结果摘要
+      - id: a2
+        role: assistant
+        time: '11:24'
+        parts:
+          - type: tool-call
+            name: Bash
+            status: error
+            params: { command: pnpm deploy --prod }
+            result: ERR_PNPM_RECURSIVE_RUN_FIRST_FAIL · deploy 需要先登录
+          - { type: error, message: 部署失败：缺少生产环境凭证，请先执行 pactor login }
+      # 流式生成：status=streaming 末尾渲染光标
+      - id: a3
+        role: assistant
+        status: streaming
+        parts:
+          - type: thinking
+            status: thinking
+            content: 正在整理部署失败的重试方案…
+          - type: markdown
+            content: 部署失败通常有两类原因，一是**凭证缺失**，二是…
+  events:
+    onAction:
+      - action: message
+        params: { messageType: info, text: "消息操作：${event.action}" }
+    onOpenArtifacts:
+      - action: message
+        params: { messageType: info, text: 打开产物栏 }

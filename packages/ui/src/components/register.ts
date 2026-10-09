@@ -47,6 +47,8 @@ import { Gallery } from './components/Gallery/index.js';
 import { Form } from './components/Form/index.js';
 import { For } from './components/For/index.js';
 import { Grid } from './components/Grid/index.js';
+import { Row } from './components/Row/index.js';
+import { Col } from './components/Col/index.js';
 import { Header } from './components/Header/index.js';
 import { HoverCard } from './components/HoverCard/index.js';
 import { Icon } from './components/Icon/index.js';
@@ -157,6 +159,8 @@ import { ScatterChart } from './chart/ScatterChart/index.js';
 import { TreeChart } from './chart/TreeChart/index.js';
 
 // 业务组件（business 子目录）
+import { CardList } from './business/CardList/index.js';
+import { EntityCard } from './business/EntityCard/index.js';
 import { Login } from './business/Login/index.js';
 
 /**
@@ -167,6 +171,8 @@ import { Login } from './business/Login/index.js';
 export const builtinComponents = {
   Page,
   Grid,
+  Row,
+  Col,
   // 循环渲染：行模板（原始 DSL children）由 For 逐项渲染并注入 { row, rowIndex } 作用域
   For: { component: For, withScope: true },
   Flex,
@@ -332,6 +338,8 @@ export const builtinComponents = {
   ComposedChart,
   // 业务组件（business 子目录）
   Login,
+  EntityCard,
+  CardList,
 } as const;
 
 /** 把全部 V1 内置组件按 DSL 类型名注册到给定 ComponentRegistry */

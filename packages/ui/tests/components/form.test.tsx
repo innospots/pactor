@@ -406,6 +406,85 @@ describe('Form 初始值', () => {
 });
 
 describe('Select 选项', () => {
+  const manyOptions = Array.from({ length: 12 }, (_, i) => ({
+    label: `城市${i + 1}号`,
+    value: `c${i + 1}`,
+  }));
+
+  it('选项 > 10 时默认展示搜索框，输入过滤选项；过滤后仍可选择', async () => {
+    const user = userEvent.setup();
+    const { context } = renderDsl({
+      type: 'Select',
+      props: { options: manyOptions },
+      events: {
+        onChange: { action: 'setState', params: { picked: '${event}' } },
+      },
+    });
+
+    await user.click(screen.getByRole('combobox'));
+    const search = await screen.findByLabelText('搜索选项');
+    await user.type(search, '城市12');
+
+    expect(screen.queryByRole('option', { name: '城市1号' })).toBeNull();
+    await user.click(screen.getByRole('option', { name: '城市12号' }));
+    await vi.waitFor(() => {
+      expect(context.state.get('picked')).toBe('c12');
+    });
+  });
+
+  it('选项 ≤ 10 时默认不展示搜索框', async () => {
+    const user = userEvent.setup();
+    renderDsl({
+      type: 'Select',
+      props: {
+        options: [
+          { label: '选项一', value: 'a' },
+          { label: '选项二', value: 'b' },
+        ],
+      },
+    });
+
+    await user.click(screen.getByRole('combobox'));
+    await screen.findByRole('option', { name: '选项一' });
+    expect(screen.queryByLabelText('搜索选项')).toBeNull();
+  });
+
+  it('showSearch: true 少数选项也展示；showSearch: false 多数选项也不展示', async () => {
+    const user = userEvent.setup();
+    const few = renderDsl({
+      type: 'Select',
+      props: {
+        showSearch: true,
+        options: [{ label: '选项一', value: 'a' }],
+      },
+    });
+    await user.click(screen.getByRole('combobox'));
+    expect(await screen.findByLabelText('搜索选项')).toBeTruthy();
+    few.unmount();
+
+    renderDsl({
+      type: 'Select',
+      props: { showSearch: false, options: manyOptions },
+    });
+    await user.click(screen.getByRole('combobox'));
+    await screen.findByRole('option', { name: '城市1号' });
+    expect(screen.queryByLabelText('搜索选项')).toBeNull();
+  });
+
+  it('搜索无匹配时展示空文案', async () => {
+    const user = userEvent.setup();
+    renderDsl({
+      type: 'Select',
+      props: { options: manyOptions },
+    });
+
+    await user.click(screen.getByRole('combobox'));
+    const search = await screen.findByLabelText('搜索选项');
+    // 弹层打开动画期间 popup 短暂 pointer-events: none，直接走 change 事件
+    fireEvent.change(search, { target: { value: '不存在的城市' } });
+    expect(await screen.findByText('无匹配结果')).toBeTruthy();
+  });
+
   it('渲染 options 并在选择后经 onChange 传出 value', async () => {
     const user = userEvent.setup();
     const { context } = renderDsl({

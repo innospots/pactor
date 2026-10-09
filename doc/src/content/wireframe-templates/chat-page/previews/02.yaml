@@ -1,0 +1,31 @@
+# 提炼自「响应式与状态 — 无会话」：空会话 Welcome + prompts 起始任务，可直接渲染。
+# 人工提炼入库、落盘维护；构建期只读取，不做推导。
+title: 空会话 — Welcome 起始任务
+height: 560
+body:
+  type: ChatPage
+  props:
+    brand: { title: Pactor Chat }
+    menuItems:
+      - { key: chat, label: 对话, icon: message-square }
+      - { key: space, label: 空间, icon: folder }
+    activeMenuKey: chat
+    conversationSectionTitle: 任务
+    conversations: []
+    # messages 为空时展示 Welcome；prompts 选择即发送（onSend）
+    welcome:
+      title: 有什么可以帮你？
+      description: 可以从下面的任务开始，或直接输入你的问题
+      prompts:
+        - { title: 写一个落地页, description: 生成响应式落地页 DSL, icon: square-pen, value: 帮我写一个产品落地页 }
+        - { title: 解释这段代码, description: 粘贴代码获取逐行讲解, icon: code, value: 帮我解释一段代码 }
+        - { title: 分析销售数据, description: 上传表格生成图表报告, icon: chart, value: 帮我分析一份销售数据表 }
+    composerPlaceholder: 输入消息… @ 引用文件 / 智能体
+    models:
+      - { value: qwen3-max, label: qwen3-max }
+      - { value: kimi-k2, label: kimi-k2 }
+    model: qwen3-max
+  events:
+    onSend:
+      - action: message
+        params: { messageType: success, text: "已发送：${event}" }

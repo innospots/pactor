@@ -617,6 +617,33 @@ describe('Composer', () => {
     await expectEventState(context, 'chips', []);
   });
 
+  it('非受控提及（不传 contextItems）：插入的行内块不被清空', async () => {
+    renderDsl({
+      type: 'Composer',
+      props: {
+        placeholder: '输入消息',
+        contexts: [
+          {
+            trigger: '@',
+            label: '智能体',
+            items: [{ id: 'helper', label: '小助手' }],
+          },
+        ],
+      },
+    });
+
+    const field = document.querySelector('[data-slot=mention-input]') as HTMLElement;
+    typeIntoMentionField(field, '@');
+    expect(document.querySelector('[data-slot=mention-menu]')).not.toBeNull();
+    fireEvent.keyDown(field, { key: 'Enter' });
+
+    const chip = field.querySelector('[data-mention-chip]')!;
+    expect(chip.textContent).toContain('小助手');
+    // 回归：非受控模式下 chips 内部自持，插入后不应被受控同步效应移除
+    await new Promise((resolve) => setTimeout(resolve, 50));
+    expect(field.querySelector('[data-mention-chip]')).not.toBeNull();
+  });
+
   it('footer 槽渲染 DSL 子树；提供 onAttachFiles 时渲染附件钮', () => {
     renderDsl({
       type: 'Composer',

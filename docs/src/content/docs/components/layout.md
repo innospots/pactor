@@ -144,6 +144,46 @@ flex 容器；直接子节点含 `Sider` 时横向、否则纵向（`component` 
 | `columns` | number（默认 1） | 列数 |
 | `gap` | number | 栏间距 |
 
+### Row / Col
+
+对齐 antd Grid 的 24 分栏栅格：`Row` 为 flex 行容器（gutter 经上下文传给 Col），`Col` 声明占位与响应式档位。
+
+**Row**:
+
+| prop | 类型 | 说明 |
+| --- | --- | --- |
+| `gutter` | number \| [number, number] | 栏间距（px）；数组为 [水平, 垂直]；默认 0 |
+| `justify` | start / end / center / space-around / space-between / space-evenly | 水平排列（flex justify-content），默认 start |
+| `align` | top / middle / bottom / stretch | 垂直对齐（align-items），默认 top |
+| `wrap` | boolean | 是否换行，默认 true |
+
+**Col**:
+
+| prop | 类型 | 说明 |
+| --- | --- | --- |
+| `span` | number（0–24，默认 24） | 栅格占位；0 隐藏 |
+| `offset` | number | 左侧偏移栏数 |
+| `order` | number | 排列顺序 |
+| `pull` / `push` | number | 右移 / 左移栏数（position relative） |
+| `flex` | string \| number | flex 值；number 展开为 `0 0 Npx` |
+| `xs` / `sm` / `md` / `lg` / `xl` / `xxl` | number \| { span, offset, order, pull, push } | 响应式档位（断点同 antd：xs <576，其余 min-width）；number 简写 span |
+
+```yaml
+- type: Row
+  props: { gutter: [16, 8] }
+  children:
+    - type: Col
+      props: { span: 24, md: { span: 8, offset: 2 } }
+      children:
+        - type: Card
+          props: { title: 左侧内容 }
+    - type: Col
+      props: { span: 24, md: 14 }
+      children:
+        - type: Card
+          props: { title: 右侧内容 }
+```
+
 ### For
 
 数据驱动的循环渲染：对 `items` 逐项渲染 children 模板（DSL 子树），行作用域注入 `${row}` / `${rowIndex}`（与 Table cell 模板一致）。以 withScope 注册。
