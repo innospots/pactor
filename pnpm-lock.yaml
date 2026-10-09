@@ -4,6 +4,11 @@ settings:
   autoInstallPeers: true
   excludeLinksFromLockfile: false
 
+patchedDependencies:
+  vaul@1.1.2:
+    hash: 6d0a37b5ddc97a7c29c65f2a0b76771551f87b693e3f1e4c7d634c6e0841da33
+    path: patches/vaul@1.1.2.patch
+
 importers:
 
   .:
@@ -697,7 +702,7 @@ importers:
         version: 3.6.0
       vaul:
         specifier: ^1.1.2
-        version: 1.1.2(@types/react-dom@19.2.4(@types/react@19.2.18))(@types/react@19.2.18)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
+        version: 1.1.2(patch_hash=6d0a37b5ddc97a7c29c65f2a0b76771551f87b693e3f1e4c7d634c6e0841da33)(@types/react-dom@19.2.4(@types/react@19.2.18))(@types/react@19.2.18)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
     devDependencies:
       '@tailwindcss/cli':
         specifier: ^4.3.3
@@ -15296,7 +15301,7 @@ snapshots:
 
   vary@1.1.2: {}
 
-  vaul@1.1.2(@types/react-dom@19.2.4(@types/react@19.2.18))(@types/react@19.2.18)(react-dom@19.2.8(react@19.2.8))(react@19.2.8):
+  vaul@1.1.2(patch_hash=6d0a37b5ddc97a7c29c65f2a0b76771551f87b693e3f1e4c7d634c6e0841da33)(@types/react-dom@19.2.4(@types/react@19.2.18))(@types/react@19.2.18)(react-dom@19.2.8(react@19.2.8))(react@19.2.8):
     dependencies:
       '@radix-ui/react-dialog': 1.1.23(@types/react-dom@19.2.4(@types/react@19.2.18))(@types/react@19.2.18)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
       react: 19.2.8

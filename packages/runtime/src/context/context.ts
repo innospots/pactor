@@ -42,6 +42,9 @@ export type CapabilityRegistry = Registry<unknown>;
  */
 export interface FormHandle {
   setValues(values: Record<string, unknown>): void;
+  /** 触发表单原生提交（requestSubmit）：走统一校验与 onSubmit 链路，
+   *  供 <form> DOM 外的提交入口（如 Drawer footer 按钮 / form.submit 动作） */
+  submit?(): void;
 }
 
 /** Form Registry：表单名 → 句柄（缺省名 'default'） */

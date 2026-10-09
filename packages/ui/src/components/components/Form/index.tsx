@@ -43,7 +43,7 @@ function isEmpty(value: unknown): boolean {
  * 维护受控 values 并经 React Context 下发，Form 内声明了 `name` 的
  * Input / Select 自动成为表单项。创建时以 `initialValues` 初始化 values，
  * 字段挂载注册时合并字段级 `value` 初始值（字段级优先，仅首次注册写入）。
- * 提交（`submit: true` 的 Button）时：
+ * 提交（`submit: true` 的 Button，或 <form> DOM 外经 `form.submit` 动作桥）时：
  * 1. 统一校验已注册字段的 rules（required + message），失败则展示错误并阻止提交
  * 2. 校验通过把 values 写入 runtime state 的 `form` 路径（`${form.<field>}` 可用）
  * 3. 以 values 调用 onSubmit（Renderer 把它放入 `event` 作用域）
@@ -74,13 +74,19 @@ export function Form({
     setValues((prev) => ({ ...prev, ...partial }));
   }, []);
 
+  // form.submit 动作桥：<form> DOM 引用，requestSubmit 走统一校验与 onSubmit
+  const formElRef = useRef<HTMLFormElement | null>(null);
+  const submitForm = useCallback(() => {
+    formElRef.current?.requestSubmit();
+  }, []);
+
   // 表单联动桥：挂载注册句柄、卸载注销
   useEffect(() => {
-    context.forms.register(name, { setValues: setValuesBatch });
+    context.forms.register(name, { setValues: setValuesBatch, submit: submitForm });
     return () => {
       context.forms.unregister(name);
     };
-  }, [context, name, setValuesBatch]);
+  }, [context, name, setValuesBatch, submitForm]);
 
   const formContext = useMemo<FormContextValue>(
     () => ({
@@ -143,6 +149,7 @@ export function Form({
   return (
     <FormContextProvider value={formContext}>
       <form
+        ref={formElRef}
         data-slot="form"
         className={cn(layout === 'inline' && 'flex flex-wrap items-center gap-3', className)}
         style={style}

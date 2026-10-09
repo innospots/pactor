@@ -349,6 +349,129 @@ describe('Drawer', () => {
     await screen.findByText('抽屉内容');
     expectCommonProps(document.querySelector('[data-slot=drawer-content]'));
   });
+
+  it('缺省 footer：展示取消/确定并分别触发 onClose/onOk', async () => {
+    const { context } = renderDsl({
+      type: 'Drawer',
+      props: { open: true, title: '面板' },
+      events: {
+        onClose: { action: 'setState', params: { cancelled: true } },
+        onOk: { action: 'setState', params: { confirmed: true } },
+      },
+      children: [{ type: 'Text', props: { text: 'x' } }],
+    });
+
+    const footer = document.querySelector('[data-slot=drawer-footer]');
+    expect(footer).toBeTruthy();
+    fireEvent.click(screen.getByRole('button', { name: '确定' }));
+    await expectEventState(context, 'confirmed', true);
+    expect(context.state.get('cancelled')).toBeUndefined();
+    fireEvent.click(screen.getByRole('button', { name: '取消' }));
+    await expectEventState(context, 'cancelled', true);
+  });
+
+  it('footer: false 不展示底部操作栏', async () => {
+    renderDsl({
+      type: 'Drawer',
+      props: { open: true, title: '面板', footer: false },
+      children: [{ type: 'Text', props: { text: 'x' } }],
+    });
+
+    await screen.findByText('面板');
+    expect(document.querySelector('[data-slot=drawer-footer]')).toBeNull();
+  });
+
+  it('footer 传 DSL 子树：渲染自定义内容，不渲染默认按钮', async () => {
+    renderDsl({
+      type: 'Drawer',
+      props: {
+        open: true,
+        title: '面板',
+        footer: { type: 'Button', props: { text: '保存全部', variant: 'primary' } },
+      },
+      children: [{ type: 'Text', props: { text: 'x' } }],
+    });
+
+    expect(await screen.findByRole('button', { name: '保存全部' })).toBeTruthy();
+    expect(screen.queryByRole('button', { name: '确定' })).toBeNull();
+    expect(screen.queryByRole('button', { name: '取消' })).toBeNull();
+  });
+
+  it('cancelText / okText 替换默认按钮文案，事件不变', async () => {
+    const { context } = renderDsl({
+      type: 'Drawer',
+      props: { open: true, title: '面板', cancelText: '放弃', okText: '保存' },
+      events: {
+        onClose: { action: 'setState', params: { cancelled: true } },
+        onOk: { action: 'setState', params: { confirmed: true } },
+      },
+      children: [{ type: 'Text', props: { text: 'x' } }],
+    });
+
+    fireEvent.click(await screen.findByRole('button', { name: '保存' }));
+    await expectEventState(context, 'confirmed', true);
+    fireEvent.click(screen.getByRole('button', { name: '放弃' }));
+    await expectEventState(context, 'cancelled', true);
+  });
+
+  it('默认展示右上角关闭图标，点击触发 onClose', async () => {
+    const { context } = renderDsl({
+      type: 'Drawer',
+      props: { open: true, title: '面板' },
+      events: {
+        onClose: { action: 'setState', params: { closed: true } },
+      },
+      children: [{ type: 'Text', props: { text: 'x' } }],
+    });
+
+    const icon = document.querySelector('[data-slot=drawer-close-icon]')!;
+    expect(icon).toBeTruthy();
+    fireEvent.click(icon);
+    await expectEventState(context, 'closed', true);
+  });
+
+  it('closable: false 不展示关闭图标', async () => {
+    renderDsl({
+      type: 'Drawer',
+      props: { open: true, title: '面板', closable: false },
+      children: [{ type: 'Text', props: { text: 'x' } }],
+    });
+
+    await screen.findByText('面板');
+    expect(document.querySelector('[data-slot=drawer-close-icon]')).toBeNull();
+  });
+
+  it('未 wiring onClose 时，「取消」与关闭图标也能默认关闭（open 复置 true 可重开）', async () => {
+    const { context } = renderDsl(
+      {
+        type: 'Drawer',
+        props: { open: '${state.open}', title: '面板' },
+        children: [{ type: 'Text', props: { text: '抽屉内容' } }],
+      },
+      { state: { open: true } },
+    );
+
+    // 「取消」默认关闭
+    fireEvent.click(screen.getByRole('button', { name: '取消' }));
+    await vi.waitFor(() => {
+      expect(screen.queryByText('抽屉内容')).toBeNull();
+    });
+
+    // open 复置 true 重开（先 false 再 true，复位 dismissed）
+    act(() => {
+      context.state.set('open', false);
+    });
+    act(() => {
+      context.state.set('open', true);
+    });
+    expect(await screen.findByText('抽屉内容')).toBeTruthy();
+
+    // 关闭图标默认关闭
+    fireEvent.click(document.querySelector('[data-slot=drawer-close-icon]')!);
+    await vi.waitFor(() => {
+      expect(screen.queryByText('抽屉内容')).toBeNull();
+    });
+  });
 });
 
 describe('Sheet', () => {

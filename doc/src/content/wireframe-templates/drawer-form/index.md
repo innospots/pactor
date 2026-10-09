@@ -90,10 +90,13 @@ body:
             title: 编辑字典类型
             open: "${state.drawerOpen}"
             style: { width: 480, maxWidth: 'none' }
+            okText: 保存全部
           events:
             onClose:
               - action: setState
                 params: { drawerOpen: false }
+            onOk:
+              - action: form.submit
           children:
             - type: Form
               events:
@@ -162,17 +165,6 @@ body:
                           - { id: 2, name: 女, value: 2, sort: 2 }
                     - type: Button
                       props: { text: 添加项, variant: dashed, icon: plus }
-                    - type: Flex
-                      props: { justify: end, gap: 8 }
-                      children:
-                        - type: Button
-                          props: { text: 取消 }
-                          events:
-                            onClick:
-                              - action: setState
-                                params: { drawerOpen: false }
-                        - type: Button
-                          props: { text: 保存全部, variant: primary, submit: true }
 ```
 
 ## 布局 B — 窄滑层（轻量编辑）
@@ -227,10 +219,13 @@ body:
             title: 编辑成员
             open: "${state.drawerOpen}"
             style: { width: 360, maxWidth: 'none' }
+            okText: 保存
           events:
             onClose:
               - action: setState
                 params: { drawerOpen: false }
+            onOk:
+              - action: form.submit
           children:
             - type: Form
               events:
@@ -269,17 +264,6 @@ body:
                   children:
                     - type: Switch
                       props: { name: enabled, value: true }
-                - type: Flex
-                  props: { justify: end, gap: 8, className: mt-4 }
-                  children:
-                    - type: Button
-                      props: { text: 取消 }
-                      events:
-                        onClick:
-                          - action: setState
-                            params: { drawerOpen: false }
-                    - type: Button
-                      props: { text: 保存, variant: primary, submit: true }
 ```
 
 ## 布局 C — 行内展开（非滑层变体）

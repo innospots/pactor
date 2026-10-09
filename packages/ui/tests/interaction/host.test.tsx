@@ -129,9 +129,9 @@ describe('Modal / Drawer 渲染（shadcn 实现）', () => {
     const opened = manager.open({ type: 'drawer', title: '编辑面板' });
     await screen.findByText('编辑面板');
 
-    // modal={false} 后遮罩点击关闭由 overlay 自身 onClick 承担
-    // （jsdom 中 body pointer-events 复位时序不稳定，用 fireEvent  bypass 检查）
-    fireEvent.click(document.querySelector('[data-slot=drawer-overlay]')!);
+    // modal={false} 后遮罩关闭由 overlay 自身 onPointerDown 承担
+    // （pointerdown 无点击穿透窗口，弹层选项关闭动画后的 pointerup 不会误触）
+    fireEvent.pointerDown(document.querySelector('[data-slot=drawer-overlay]')!);
 
     await expect(opened).resolves.toEqual({ success: false });
     expect(manager.stack()).toHaveLength(0);

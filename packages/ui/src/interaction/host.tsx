@@ -221,7 +221,9 @@ function ShadcnDrawerView({
         // 显式 width 时解除默认 sm:max-w-sm 上限，与 modal width 语义一致
         className={cn(entry.width !== undefined && 'sm:max-w-none')}
         style={panelStyle}
-        overlayProps={{ onClick: onCancel }}
+        // onPointerDown 而非 onClick：避免弹层（Select 等）选项点击在
+        // 弹层关闭动画后穿透到遮罩造成误关
+        overlayProps={{ onPointerDown: onCancel }}
       >
         <DrawerHeader
           data-slot="drawer-header"
