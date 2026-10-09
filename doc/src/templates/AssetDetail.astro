@@ -56,6 +56,8 @@ interface Props {
   sections: AssetDetailSection[];
   /** 右看板默认态元信息 */
   meta?: { label: string; value: string }[];
+  /** 右看板默认态「使用说明」文案（缺省为对象检查模式说明） */
+  usage?: string;
   related?: AssetDetailRelated[];
   /** 页面主体资产本身（传入后页头可被右看板检查） */
   inspect?: InspectEntry;
@@ -72,6 +74,7 @@ const {
   meta = [],
   related = [],
   inspect,
+  usage,
 } = Astro.props;
 const cat = findCategory(category)!;
 
@@ -95,6 +98,7 @@ const preparedSections = sections.map((s, i) => ({
   currentPath={currentPath}
   headings={headings}
   meta={meta}
+  usage={usage}
 >
   <div class:list={['breadcrumb', { 'with-extra': Astro.slots.has('breadcrumb-extra') }]}>
     <span class="breadcrumb-trail">

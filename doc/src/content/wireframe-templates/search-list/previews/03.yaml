@@ -11,58 +11,70 @@ body:
   props:
     layout: inline
   children:
-    - type: Input
-      props:
-        name: fieldA
-        label: 标签A
-        placeholder: 请输入
-    - type: Select
-      props:
-        name: fieldB
-        label: 标签B
-        value: all
-        options:
-          - { label: 全部, value: all }
-          - { label: 选项一, value: one }
-          - { label: 选项二, value: two }
-    - type: Input
-      props:
-        name: fieldC
-        label: 标签C
-        placeholder: 请输入
+    - type: Field
+      props: { label: 标签A }
+      children:
+        - type: Input
+          props:
+            name: fieldA
+            placeholder: 请输入
+    - type: Field
+      props: { label: 标签B }
+      children:
+        - type: Select
+          props:
+            name: fieldB
+            value: all
+            options:
+              - { label: 全部, value: all }
+              - { label: 选项一, value: one }
+              - { label: 选项二, value: two }
+    - type: Field
+      props: { label: 标签C }
+      children:
+        - type: Input
+          props:
+            name: fieldC
+            placeholder: 请输入
     # 折叠区字段（「更多」展开后显示，可再收起）
-    - type: Input
+    - type: Field
       when: "${state.filterExpanded}"
-      props:
-        name: fieldD
-        label: 标签D
-        placeholder: 请输入
-    - type: Select
+      props: { label: 标签D }
+      children:
+        - type: Input
+          props:
+            name: fieldD
+            placeholder: 请输入
+    - type: Field
       when: "${state.filterExpanded}"
-      props:
-        name: fieldE
-        label: 标签E
-        placeholder: 请选择
-        options:
-          - { label: 全部, value: all }
-          - { label: 启用, value: enabled }
-          - { label: 停用, value: disabled }
-    - type: Button
-      props:
-        text: 查询
-        variant: primary
-        submit: true
-    - type: Button
-      props:
-        text: 重置
-    # 「更多 / 收起」链接触发折叠区（文档 F1 规则：展开后显示完整行，可再收起）
-    - type: Button
-      props:
-        text: "${state.filterExpanded ? '收起' : '更多'}"
-        variant: link
-        icon: "${state.filterExpanded ? 'chevron-up' : 'chevron-down'}"
-      events:
-        onClick:
-          action: setState
-          params:
-            filterExpanded: "${!state.filterExpanded}"
+      props: { label: 标签E }
+      children:
+        - type: Select
+          props:
+            name: fieldE
+            placeholder: 请选择
+            options:
+              - { label: 全部, value: all }
+              - { label: 启用, value: enabled }
+              - { label: 停用, value: disabled }
+    - type: Field
+      children:
+        - type: Button
+          props:
+            text: 查询
+            variant: primary
+            submit: true
+        - type: Button
+          props:
+            text: 重置
+        # 「更多 / 收起」链接触发折叠区（文档 F1 规则：展开后显示完整行，可再收起）
+        - type: Button
+          props:
+            text: "${state.filterExpanded ? '收起' : '更多'}"
+            variant: link
+            icon: "${state.filterExpanded ? 'chevron-up' : 'chevron-down'}"
+          events:
+            onClick:
+              action: setState
+              params:
+                filterExpanded: "${!state.filterExpanded}"

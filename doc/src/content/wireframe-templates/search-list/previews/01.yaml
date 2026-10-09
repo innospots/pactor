@@ -13,31 +13,37 @@ body:
             name: filter
             layout: inline
           children:
-            - type: Input
-              props:
-                name: keyword
-                label: 关键词
-                placeholder: 输入关键词
-            - type: Select
-              props:
-                name: status
-                label: 状态
-                placeholder: 选择状态
-                options:
-                  - label: 全部
-                    value: all
-                  - label: 启用
-                    value: enabled
-                  - label: 停用
-                    value: disabled
-            - type: Button
-              props:
-                text: 查询
-                variant: primary
-                submit: true
-            - type: Button
-              props:
-                text: 重置
+            - type: Field
+              props: { label: 关键词 }
+              children:
+                - type: Input
+                  props:
+                    name: keyword
+                    placeholder: 输入关键词
+            - type: Field
+              props: { label: 状态 }
+              children:
+                - type: Select
+                  props:
+                    name: status
+                    placeholder: 选择状态
+                    options:
+                      - label: 全部
+                        value: all
+                      - label: 启用
+                        value: enabled
+                      - label: 停用
+                        value: disabled
+            - type: Field
+              children:
+                - type: Button
+                  props:
+                    text: 查询
+                    variant: primary
+                    submit: true
+                - type: Button
+                  props:
+                    text: 重置
     - type: Card
       children:
         - type: Table

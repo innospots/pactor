@@ -2,12 +2,21 @@ import * as React from 'react';
 
 import { cn } from '../lib/utils.js';
 
-/** shadcn/ui Table（vendored 源码） */
-function Table({ className, ...props }: React.ComponentProps<'table'>) {
+/** shadcn/ui Table（vendored 源码）；扩展 containerClassName/containerStyle 以支持纵向滚动（固定表头） */
+function Table({
+  className,
+  containerClassName,
+  containerStyle,
+  ...props
+}: React.ComponentProps<'table'> & {
+  containerClassName?: string;
+  containerStyle?: React.CSSProperties;
+}) {
   return (
     <div
       data-slot="table-container"
-      className="relative w-full overflow-x-auto"
+      className={cn('relative w-full overflow-x-auto', containerClassName)}
+      style={containerStyle}
     >
       <table
         data-slot="table"

@@ -55,6 +55,7 @@
     --default-transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
     --default-font-family: var(--font-sans);
     --default-mono-font-family: var(--font-mono);
+    --color-primary: var(--primary);
   }
 }
 @layer base {
@@ -391,6 +392,9 @@
   .z-20 {
     z-index: 20;
   }
+  .z-30 {
+    z-index: 30;
+  }
   .z-40 {
     z-index: 40;
   }
@@ -465,6 +469,9 @@
   }
   .my-6 {
     margin-block: calc(var(--spacing) * 6);
+  }
+  .my-\[2px\] {
+    margin-block: 2px;
   }
   .-mt-4 {
     margin-top: calc(var(--spacing) * -4);
@@ -1147,6 +1154,9 @@
   .cursor-grab {
     cursor: grab;
   }
+  .cursor-move {
+    cursor: move;
+  }
   .cursor-not-allowed {
     cursor: not-allowed;
   }
@@ -1667,6 +1677,12 @@
       background-color: color-mix(in oklab, var(--primary) 8%, transparent);
     }
   }
+  .bg-primary\/10 {
+    background-color: var(--primary);
+    @supports (color: color-mix(in lab, red, red)) {
+      background-color: color-mix(in oklab, var(--primary) 10%, transparent);
+    }
+  }
   .bg-secondary {
     background-color: var(--secondary);
   }
@@ -2164,6 +2180,9 @@
   .opacity-35 {
     opacity: 35%;
   }
+  .opacity-40 {
+    opacity: 40%;
+  }
   .opacity-50 {
     opacity: 50%;
   }
@@ -2179,6 +2198,22 @@
   }
   .shadow-\[0_0_0_1px_var\(--sidebar-border\)\] {
     --tw-shadow: 0 0 0 1px var(--tw-shadow-color, var(--sidebar-border));
+    box-shadow: var(--tw-inset-shadow), var(--tw-inset-ring-shadow), var(--tw-ring-offset-shadow), var(--tw-ring-shadow), var(--tw-shadow);
+  }
+  .shadow-\[inset_-10px_0_8px_-8px_var\(--shadow-color\)\] {
+    --tw-shadow: inset -10px 0 8px -8px var(--tw-shadow-color, var(--shadow-color));
+    box-shadow: var(--tw-inset-shadow), var(--tw-inset-ring-shadow), var(--tw-ring-offset-shadow), var(--tw-ring-shadow), var(--tw-shadow);
+  }
+  .shadow-\[inset_0_-2px_0_0_var\(--color-primary\)\] {
+    --tw-shadow: inset 0 -2px 0 0 var(--tw-shadow-color, var(--color-primary));
+    box-shadow: var(--tw-inset-shadow), var(--tw-inset-ring-shadow), var(--tw-ring-offset-shadow), var(--tw-ring-shadow), var(--tw-shadow);
+  }
+  .shadow-\[inset_0_2px_0_0_var\(--color-primary\)\] {
+    --tw-shadow: inset 0 2px 0 0 var(--tw-shadow-color, var(--color-primary));
+    box-shadow: var(--tw-inset-shadow), var(--tw-inset-ring-shadow), var(--tw-ring-offset-shadow), var(--tw-ring-shadow), var(--tw-shadow);
+  }
+  .shadow-\[inset_10px_0_8px_-8px_var\(--shadow-color\)\] {
+    --tw-shadow: inset 10px 0 8px -8px var(--tw-shadow-color, var(--shadow-color));
     box-shadow: var(--tw-inset-shadow), var(--tw-inset-ring-shadow), var(--tw-ring-offset-shadow), var(--tw-ring-shadow), var(--tw-shadow);
   }
   .shadow-lg {
@@ -2205,6 +2240,10 @@
     --tw-shadow: 0 1px 2px 0 var(--tw-shadow-color, rgb(0 0 0 / 0.05));
     box-shadow: var(--tw-inset-shadow), var(--tw-inset-ring-shadow), var(--tw-ring-offset-shadow), var(--tw-ring-shadow), var(--tw-shadow);
   }
+  .ring-1 {
+    --tw-ring-shadow: var(--tw-ring-inset,) 0 0 0 calc(1px + var(--tw-ring-offset-width)) var(--tw-ring-color, currentcolor);
+    box-shadow: var(--tw-inset-shadow), var(--tw-inset-ring-shadow), var(--tw-ring-offset-shadow), var(--tw-ring-shadow), var(--tw-shadow);
+  }
   .ring-2 {
     --tw-ring-shadow: var(--tw-ring-inset,) 0 0 0 calc(2px + var(--tw-ring-offset-width)) var(--tw-ring-color, currentcolor);
     box-shadow: var(--tw-inset-shadow), var(--tw-inset-ring-shadow), var(--tw-ring-offset-shadow), var(--tw-ring-shadow), var(--tw-shadow);
@@ -2221,6 +2260,12 @@
   }
   .ring-card {
     --tw-ring-color: var(--card);
+  }
+  .ring-primary\/40 {
+    --tw-ring-color: var(--primary);
+    @supports (color: color-mix(in lab, red, red)) {
+      --tw-ring-color: color-mix(in oklab, var(--primary) 40%, transparent);
+    }
   }
   .ring-ring {
     --tw-ring-color: var(--ring);
@@ -2701,6 +2746,14 @@
     .hover\:border-primary:hover {
       border-color: var(--primary);
     }
+    .hover\:border-primary\/50:hover {
+      border-color: var(--primary);
+    }
+    @supports (color: color-mix(in lab, red, red)) {
+      .hover\:border-primary\/50:hover {
+        border-color: color-mix(in oklab, var(--primary) 50%, transparent);
+      }
+    }
     .hover\:bg-\(--calendar-day-hover-background\):hover {
       background-color: var(--calendar-day-hover-background);
     }
@@ -2725,6 +2778,9 @@
       .hover\:bg-accent\/50:hover {
         background-color: color-mix(in oklab, var(--accent) 50%, transparent);
       }
+    }
+    .hover\:bg-background:hover {
+      background-color: var(--background);
     }
     .hover\:bg-destructive\/90:hover {
       background-color: var(--destructive);
@@ -2897,6 +2953,9 @@
   .disabled\:cursor-not-allowed:disabled {
     cursor: not-allowed;
   }
+  .disabled\:opacity-40:disabled {
+    opacity: 40%;
+  }
   .disabled\:opacity-50:disabled {
     opacity: 50%;
   }
@@ -3004,6 +3063,15 @@
   .data-ending-style\:opacity-0[data-ending-style] {
     opacity: 0%;
   }
+  .data-indeterminate\:border-primary[data-indeterminate] {
+    border-color: var(--primary);
+  }
+  .data-indeterminate\:bg-primary[data-indeterminate] {
+    background-color: var(--primary);
+  }
+  .data-indeterminate\:text-primary-foreground[data-indeterminate] {
+    color: var(--primary-foreground);
+  }
   .data-pressed\:bg-accent[data-pressed] {
     background-color: var(--accent);
   }
@@ -3060,6 +3128,15 @@
   }
   .data-\[align\=end\]\:self-end[data-align="end"] {
     align-self: flex-end;
+  }
+  .data-\[disabled\]\:cursor-not-allowed[data-disabled] {
+    cursor: not-allowed;
+  }
+  .data-\[disabled\]\:bg-muted[data-disabled] {
+    background-color: var(--muted);
+  }
+  .data-\[disabled\]\:opacity-60[data-disabled] {
+    opacity: 60%;
   }
   .data-\[disabled\=true\]\:pointer-events-none[data-disabled="true"] {
     pointer-events: none;
@@ -3903,6 +3980,9 @@
     .\[\&\>button\]\:hover\:text-\(--calendar-today-foreground\) > button:hover {
       color: var(--calendar-today-foreground);
     }
+  }
+  .\[\&\>button\+button\]\:ml-2 > button + button {
+    margin-left: calc(var(--spacing) * 2);
   }
   .\[\&\>li\]\:mt-2 > li {
     margin-top: calc(var(--spacing) * 2);

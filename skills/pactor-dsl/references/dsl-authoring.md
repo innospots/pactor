@@ -178,7 +178,9 @@ Event payloads (`${event}`):
 | Button `onClick` | none |
 | Input / Select / Switch `onChange` | the new value (`${event}`) |
 | Tabs `onChange` | new active key |
-| Table `onChange` | `{ current, pageSize, total }` |
+| Table `onChange` | `{ current, pageSize, total, field?, order? }` |
+| Table `onSelectChange` | selected row keys array (`rowSelection: true`) |
+| Table `onRowDrop` | `{ dragKey, dropKey, position: 'before' \| 'after' }` (`rowDraggable: true`) |
 | Form `onSubmit` | all values (`${event.name}`) |
 | Form `onValuesChange` | ONLY the changed field `{ <field>: newValue }` |
 
@@ -249,17 +251,24 @@ body:
               - action: reload
                 params: { dataSource: customers }
           children:
-            - type: Input
-              props: { name: keyword, label: Keyword, placeholder: Name / owner }
-            - type: Select
-              props:
-                name: status
-                label: Status
-                options:
-                  - { label: Enabled, value: active }
-                  - { label: Disabled, value: inactive }
-            - type: Button
-              props: { text: Search, variant: primary, submit: true }   # submit: true, NOT htmlType
+            - type: Field                      # Form 内控件必须放 Field 内（label 归 Field）
+              props: { label: Keyword }
+              children:
+                - type: Input
+                  props: { name: keyword, placeholder: Name / owner }
+            - type: Field
+              props: { label: Status }
+              children:
+                - type: Select
+                  props:
+                    name: status
+                    options:
+                      - { label: Enabled, value: active }
+                      - { label: Disabled, value: inactive }
+            - type: Field                      # 查询按钮也放 Field 内，与输入框对齐
+              children:
+                - type: Button
+                  props: { text: Search, variant: primary, submit: true }   # submit: true, NOT htmlType
     - type: Card
       props: { title: Customer Data }
       children:
@@ -315,15 +324,19 @@ events:
                       - action: message
                         params: { messageType: error, text: Save failed, please retry }
             children:
-              - type: Input
-                props:
-                  name: name
-                  label: Name
-                  value: ${params.name}    # field-level initial value (row data backfill)
-                  rules:
-                    - { required: true, message: Please enter a name }
-              - type: Button
-                props: { text: Save, variant: primary, submit: true }
+              - type: Field
+                props: { label: Name, required: true }
+                children:
+                  - type: Input
+                    props:
+                      name: name
+                      value: ${params.name}    # field-level initial value (row data backfill)
+                      rules:
+                        - { required: true, message: Please enter a name }
+              - type: Field
+                children:
+                  - type: Button
+                    props: { text: Save, variant: primary, submit: true }
     - action: if                           # runs after the drawer closes; cancel (X / mask / Esc) skips
       params:
         condition: ${actions.editResult.success}
@@ -372,6 +385,28 @@ dataSources:
 
 Table also supports `rowKey` (row key field, default `'id'`); Table `onChange` (`{ current, pageSize, total }`) exists for its built-in client-side pager.
 
+### 8.3.1 Table extras: tree data, row drag, sticky header
+
+```yaml
+- type: Table
+  props:
+    dataSource: ${data.menus}            # rows containing a `children` array render as a tree table automatically
+    childrenColumnName: children         # default; set another field name, or false to disable tree mode
+    indentSize: 16                       # px per tree level (default 16); expand toggles render in the first column
+    defaultExpandAllRows: true           # start fully expanded (default: all collapsed, toggle via the row arrow)
+    rowDraggable: true                   # grip handle column; drag to reorder within the same parent level
+    scrollY: 400                         # px; body scrolls vertically with the header stuck on top
+  events:
+    onRowDrop:                           # reorder already applied internally; use this to persist
+      - action: request
+        params:
+          url: /api/menus/reorder
+          method: POST
+          body: ${event}                 # { dragKey, dropKey, position }
+```
+
+Tree tables sort recursively per level and paginate by top-level rows. Sortable columns (`sorter: true`), `rowSelection`, fixed columns (`fixed: right` on the action column) all compose with the above.
+
 ### 8.4 Confirm then act
 
 ```yaml
@@ -396,21 +431,26 @@ events:
 state:
   cityMap: { Zhejiang: [{ label: Hangzhou, value: Hangzhou }], Jiangsu: [{ label: Nanjing, value: Nanjing }] }
   cityOptions: []
-# fields:
-- type: Select
-  props: { name: region, label: Province, options: [{ label: Zhejiang, value: Zhejiang }, { label: Jiangsu, value: Jiangsu }] }
-  events:
-    onChange:
-      - action: form.setValues             # clear the child field first
-        params: { values: { city: '' } }   # add `form: edit` when targeting a named form
-      - action: setState                   # then update child options (computed member access)
-        params: { cityOptions: ${state.cityMap[event]} }
-- type: Select
-  props:
-    name: city
-    label: City
-    options: ${state.cityOptions}
-    disabled: ${state.cityOptions.length === 0}
+# fields (each control wrapped in Field, as required inside Form):
+- type: Field
+  props: { label: Province }
+  children:
+    - type: Select
+      props: { name: region, options: [{ label: Zhejiang, value: Zhejiang }, { label: Jiangsu, value: Jiangsu }] }
+      events:
+        onChange:
+          - action: form.setValues             # clear the child field first
+            params: { values: { city: '' } }   # add `form: edit` when targeting a named form
+          - action: setState                   # then update child options (computed member access)
+            params: { cityOptions: ${state.cityMap[event]} }
+- type: Field
+  props: { label: City }
+  children:
+    - type: Select
+      props:
+        name: city
+        options: ${state.cityOptions}
+        disabled: ${state.cityOptions.length === 0}
 ```
 
 ## 9. Common mistakes (observed — do not do these)
@@ -423,6 +463,7 @@ state:
 | Column template key `render` | `cell` |
 | `pagination: true` | `pagination: { pageSize: 10 }` |
 | `htmlType: submit` | `submit: true` |
+| Bare `Input`/`Select`/`Button` directly under `Form` | Wrap every form control (incl. search-bar buttons) in `Field`; label / required / description / error belong to `Field` |
 | `navigate` param `path` / `url` | `to` |
 | `message` param `type: success` | `messageType: success` — a `type` (or `action`) key inside action `params` makes the engine treat params as a nested DSL/action config and SKIP expression evaluation |
 | Reading full form values in `onValuesChange` | It only carries the changed field; use `onSubmit` or `${form.x}` |

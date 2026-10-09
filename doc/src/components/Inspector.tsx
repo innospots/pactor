@@ -79,9 +79,12 @@ function readInspectState(el: Element): InspectState {
 export default function Inspector({
   headings,
   meta,
+  usage,
 }: {
   headings: InspectorHeading[];
   meta: InspectorMetaItem[];
+  /** 默认态「使用说明」文案（缺省为对象检查模式说明） */
+  usage?: string;
 }) {
   const [current, setCurrent] = useState<InspectState | null>(null);
   const selectedRef = useRef<Element | null>(null);
@@ -241,7 +244,8 @@ export default function Inspector({
       <div className="ins-section">
         <h4>使用说明</h4>
         <div className="ins-desc">
-          点击中间内容区带高亮边框的对象（卡片、Token 行、色板等），此处将切换为该对象的属性看板；点击 × 恢复本目录。
+          {usage ??
+            '点击中间内容区带高亮边框的对象（卡片、Token 行、色板等），此处将切换为该对象的属性看板；点击 × 恢复本目录。'}
         </div>
       </div>
     </div>

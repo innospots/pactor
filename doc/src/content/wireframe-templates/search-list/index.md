@@ -41,48 +41,84 @@ sourceRef: innos-diagram/references/02-搜索列表页.md
 | 适用 | 筛选区较高（多行、可展开）、或需在筛选与表格间插入 **已选条件摘要 / 批量操作条** |
 | 视觉 | 两块边界清晰；表格 Card 可单独 `title`（如「查询结果」） |
 
-#### DSL 配置（预留）
-
-> 同一布局可挂 **多套** DSL；下列为 **yaml 语法骨架**（`#` 为占位说明），节点与字段按业务补全，非可直接运行的完整配置。
-
-**套 1 · minimal**
+#### DSL 配置
 
 ```yaml
-# 布局对照：S1 筛选 Card + 表格 Card 分离
-dsl: "1.0"
-page:
-  id: <page-id>
-  title: <列表标题>
+# 与上方预览同源的可运行 DSL（示例数据内联，人工提炼入库）
 state:
-  <filterField>: ""
-dataSources:
-  <listKey>:
-    type: http
-    autoLoad: true
-    request:
-      method: GET
-      url: /api/data/<resource>
-      params: { <filterField>: ${state.<filterField>} }
+  xxx: ""
 body:
   type: Page
   children:
-    - type: Card  # 筛选区
+    - type: Card
       children:
         - type: Form
           props:
             name: filter
             layout: inline
-          events:
-            onSubmit:
-              - action: setState
-              - action: reload
-                params: { dataSource: <listKey> }
-    - type: Card  # 表格区
+          children:
+            - type: Field
+              props: { label: 关键词 }
+              children:
+                - type: Input
+                  props:
+                    name: keyword
+                    placeholder: 输入关键词
+            - type: Field
+              props: { label: 状态 }
+              children:
+                - type: Select
+                  props:
+                    name: status
+                    placeholder: 选择状态
+                    options:
+                      - label: 全部
+                        value: all
+                      - label: 启用
+                        value: enabled
+                      - label: 停用
+                        value: disabled
+            - type: Field
+              children:
+                - type: Button
+                  props:
+                    text: 查询
+                    variant: primary
+                    submit: true
+                - type: Button
+                  props:
+                    text: 重置
+    - type: Card
       children:
         - type: Table
           props:
-            dataSource: ${data.<listKey>.rows}
+            dataSource:
+              - id: 1
+                name: 示例数据 A
+                owner: 张三
+                status: 启用
+              - id: 2
+                name: 示例数据 B
+                owner: 李四
+                status: 停用
+              - id: 3
+                name: 示例数据 C
+                owner: 王五
+                status: 启用
+            columns:
+              - title: 名称
+                dataIndex: name
+              - title: 负责人
+                dataIndex: owner
+              - title: 状态
+                dataIndex: status
     - type: Pagination
+      props:
+        total: 128
+        pageSize: 10
+        align: right
+        showTotal: true
+        pageSizeOptions: [10, 20, 50]
 ```
 
 ### 结构 S2 — 筛选与表格在同一区域
@@ -109,41 +145,85 @@ body:
 
 ---
 
-#### DSL 配置（预留）
-
-> 同一布局可挂 **多套** DSL；下列为 **yaml 语法骨架**（`#` 为占位说明），节点与字段按业务补全，非可直接运行的完整配置。
-
-**套 1 · minimal**
+#### DSL 配置
 
 ```yaml
-# 布局对照：S2 筛选 + 表格同一 Card
-dsl: "1.0"
-page:
-  id: <page-id>
+# 与上方预览同源的可运行 DSL（示例数据内联，人工提炼入库）
 body:
   type: Page
   children:
     - type: Card
       children:
-        - type: Form
-          props: { layout: inline }
-        - type: Divider
-        - type: Table
-        - type: Pagination
-```
-
-**套 2 · full（扩展点示例）**
-
-```yaml
-# 套 2：含 dataSources + state
-state:
-  keyword: ""
-dataSources:
-  list:
-    type: http
-    request:
-      url: /api/data/<resource>
-      params: { keyword: ${state.keyword} }
+        - type: Flex
+          props:
+            direction: vertical
+            gap: middle
+          children:
+            - type: Form
+              props:
+                layout: inline
+              children:
+                - type: Field
+                  props: { label: 关键词 }
+                  children:
+                    - type: Input
+                      props:
+                        name: keyword
+                        placeholder: 输入关键词
+                - type: Field
+                  props: { label: 状态 }
+                  children:
+                    - type: Select
+                      props:
+                        name: status
+                        placeholder: 选择状态
+                        options:
+                          - label: 全部
+                            value: all
+                          - label: 启用
+                            value: enabled
+                          - label: 停用
+                            value: disabled
+                - type: Field
+                  children:
+                    - type: Button
+                      props:
+                        text: 查询
+                        variant: primary
+                        submit: true
+                    - type: Button
+                      props:
+                        text: 重置
+            - type: Separator
+            - type: Table
+              props:
+                columns:
+                  - title: 名称
+                    dataIndex: name
+                  - title: 负责人
+                    dataIndex: owner
+                  - title: 状态
+                    dataIndex: status
+                dataSource:
+                  - id: 1
+                    name: 示例数据 A
+                    owner: 张三
+                    status: 启用
+                  - id: 2
+                    name: 示例数据 B
+                    owner: 李四
+                    status: 停用
+                  - id: 3
+                    name: 示例数据 C
+                    owner: 王五
+                    status: 启用
+            - type: Pagination
+              props:
+                total: 128
+                pageSize: 10
+                align: right
+                showTotal: true
+                pageSizeOptions: [10, 20, 50]
 ```
 
 ## 二、筛选区形态
@@ -175,25 +255,84 @@ dataSources:
 
 **适用：** [角色列表](../../../nexus/prd-diagram/角色管理/01-角色列表.md)、[租户列表](../../../platform/prd-diagram/租户管理/01-租户列表.md)。
 
-#### DSL 配置（预留）
-
-> 同一布局可挂 **多套** DSL；下列为 **yaml 语法骨架**（`#` 为占位说明），节点与字段按业务补全，非可直接运行的完整配置。
-
-**套 1 · minimal**
+#### DSL 配置
 
 ```yaml
-# 筛选形态 F1：Form inline（常驻文档流）
-- type: Form
+# 与上方预览同源的可运行 DSL（示例数据内联，人工提炼入库）
+state:
+  filterExpanded: false
+body:
+  type: Form
   props:
     layout: inline
-    # 或 Grid columns: 2~4
   children:
     - type: Field
-      children: [ { type: Input } ]
-    - type: Button
-      props: { text: 查询, htmlType: submit }
-    - type: Button
-      props: { text: 重置 }
+      props: { label: 标签A }
+      children:
+        - type: Input
+          props:
+            name: fieldA
+            placeholder: 请输入
+    - type: Field
+      props: { label: 标签B }
+      children:
+        - type: Select
+          props:
+            name: fieldB
+            value: all
+            options:
+              - { label: 全部, value: all }
+              - { label: 选项一, value: one }
+              - { label: 选项二, value: two }
+    - type: Field
+      props: { label: 标签C }
+      children:
+        - type: Input
+          props:
+            name: fieldC
+            placeholder: 请输入
+    # 折叠区字段（「更多」展开后显示，可再收起）
+    - type: Field
+      when: "${state.filterExpanded}"
+      props: { label: 标签D }
+      children:
+        - type: Input
+          props:
+            name: fieldD
+            placeholder: 请输入
+    - type: Field
+      when: "${state.filterExpanded}"
+      props: { label: 标签E }
+      children:
+        - type: Select
+          props:
+            name: fieldE
+            placeholder: 请选择
+            options:
+              - { label: 全部, value: all }
+              - { label: 启用, value: enabled }
+              - { label: 停用, value: disabled }
+    - type: Field
+      children:
+        - type: Button
+          props:
+            text: 查询
+            variant: primary
+            submit: true
+        - type: Button
+          props:
+            text: 重置
+        # 「更多 / 收起」链接触发折叠区（文档 F1 规则：展开后显示完整行，可再收起）
+        - type: Button
+          props:
+            text: "${state.filterExpanded ? '收起' : '更多'}"
+            variant: link
+            icon: "${state.filterExpanded ? 'chevron-up' : 'chevron-down'}"
+          events:
+            onClick:
+              action: setState
+              params:
+                filterExpanded: "${!state.filterExpanded}"
 ```
 
 ### 筛选 F2 — 筛选按钮 + 弹层筛选（Popover / Dropdown Panel）
@@ -253,23 +392,131 @@ dataSources:
 
 **与 F1 区分：** F1 字段始终占位在页面流内；F2 字段 **仅在弹层内**，未打开时不占垂直空间（除按钮一行）。
 
-#### DSL 配置（预留）
-
-> 同一布局可挂 **多套** DSL；下列为 **yaml 语法骨架**（`#` 为占位说明），节点与字段按业务补全，非可直接运行的完整配置。
-
-**套 1 · minimal**
+#### DSL 配置
 
 ```yaml
-# 筛选形态 F2：工具条按钮 + Popover/浮层内 Form（不撑高表格）
-- type: Flex  # 工具条
+# 与上方预览同源的可运行 DSL（示例数据内联，人工提炼入库）
+body:
+  type: Page
   children:
-    - type: Input  # 可选关键词
-    - type: Button
-      props: { text: 筛选 }
-      # popover: Form + 查询/重置
-- type: Card
-  children:
-    - type: Table  # 弹层不画入 Table 子节点
+    - type: Card
+      children:
+        - type: Flex
+          props:
+            direction: vertical
+            gap: middle
+          children:
+            # 工具条：左侧关键词快捷项，右侧「筛选」弹层锚点 + 主操作
+            - type: Flex
+              props:
+                justify: space-between
+                gap: 8
+              children:
+                - type: Input
+                  props:
+                    name: keyword
+                    placeholder: 输入关键词
+                    style: { width: 260 }
+                - type: Flex
+                  props:
+                    gap: 8
+                  children:
+                    - type: Popover
+                      props:
+                        align: end
+                        style: { width: 300 }
+                        # 浮层内为完整 Form（字段 + 查询/重置），独立于文档流
+                        content:
+                          type: Form
+                          props:
+                            layout: vertical
+                          children:
+                            - type: Field
+                              props: { label: 状态 }
+                              children:
+                                - type: Select
+                                  props:
+                                    name: status
+                                    value: all
+                                    options:
+                                      - { label: 全部, value: all }
+                                      - { label: 启用, value: enabled }
+                                      - { label: 停用, value: disabled }
+                            - type: Field
+                              props: { label: 负责人 }
+                              children:
+                                - type: Input
+                                  props:
+                                    name: owner
+                                    placeholder: 请输入
+                            - type: Field
+                              props: { label: 类型 }
+                              children:
+                                - type: Select
+                                  props:
+                                    name: category
+                                    placeholder: 请选择
+                                    options:
+                                      - { label: 全部, value: all }
+                                      - { label: 登录, value: login }
+                                      - { label: 创建, value: create }
+                                      - { label: 更新, value: update }
+                            - type: Field
+                              children:
+                                - type: Flex
+                                  props:
+                                    justify: end
+                                    gap: 8
+                                  children:
+                                    - type: Button
+                                      props:
+                                        text: 重置
+                                    - type: Button
+                                      props:
+                                        text: 查询
+                                        variant: primary
+                                        submit: true
+                      children:
+                        - type: Button
+                          props:
+                            text: 筛选
+                            icon: funnel
+                    - type: Button
+                      props:
+                        text: 新建
+                        variant: primary
+                        icon: plus
+            - type: Separator
+            # 表格区：弹层打开/关闭均不改变其高度与排版
+            - type: Table
+              props:
+                columns:
+                  - title: 名称
+                    dataIndex: name
+                  - title: 负责人
+                    dataIndex: owner
+                  - title: 状态
+                    dataIndex: status
+                dataSource:
+                  - id: 1
+                    name: 示例数据 A
+                    owner: 张三
+                    status: 启用
+                  - id: 2
+                    name: 示例数据 B
+                    owner: 李四
+                    status: 停用
+                  - id: 3
+                    name: 示例数据 C
+                    owner: 王五
+                    status: 启用
+            - type: Pagination
+              props:
+                total: 128
+                pageSize: 10
+                align: right
+                showTotal: true
+                pageSizeOptions: [10, 20, 50]
 ```
 
 ### 筛选 F3 — 标签筛选（Chip / 标签行）
@@ -296,23 +543,133 @@ dataSources:
 
 ---
 
-#### DSL 配置（预留）
-
-> 同一布局可挂 **多套** DSL；下列为 **yaml 语法骨架**（`#` 为占位说明），节点与字段按业务补全，非可直接运行的完整配置。
-
-**套 1 · minimal**
+#### DSL 配置
 
 ```yaml
-# 筛选形态 F3：ChipFilter / 标签行（快筛）
-- type: ChipFilter
-  props:
-    groups:
-      - label: 状态
-        options: [ { label: 全部, value: "" }, ... ]
-  events:
-    onChange:
-      - action: setState
-      - action: reload
+# 与上方预览同源的可运行 DSL（示例数据内联，人工提炼入库）
+state:
+  statusChip: all
+  scopeChip: all
+  typeChips: []
+body:
+  type: Page
+  children:
+    - type: Card
+      children:
+        - type: Flex
+          props:
+            direction: vertical
+            gap: middle
+          children:
+            # 状态：单选快筛（点已选项回「全部」；dot 为状态色点）
+            - type: Flex
+              props:
+                align: center
+                gap: small
+                style: { flexWrap: wrap }
+              children:
+                - type: Text
+                  props:
+                    text: 状态
+                    strong: true
+                    className: w-10
+                - type: ChipFilter
+                  props:
+                    mode: single
+                    value: ${state.statusChip}
+                    items:
+                      - { value: all, text: 全部 6 }
+                      - { value: enabled, text: 启用 4, dot: '#22c55e' }
+                      - { value: disabled, text: 停用 2, dot: '#f59e0b' }
+                  events:
+                    onChange:
+                      - action: setState
+                        params:
+                          statusChip: ${event}
+            # 归属：单选快筛
+            - type: Flex
+              props:
+                align: center
+                gap: small
+                style: { flexWrap: wrap }
+              children:
+                - type: Text
+                  props:
+                    text: 归属
+                    strong: true
+                    className: w-10
+                - type: ChipFilter
+                  props:
+                    mode: single
+                    value: ${state.scopeChip}
+                    items:
+                      - { value: all, text: 全部 }
+                      - { value: platform, text: 平台 }
+                      - { value: tenant, text: 租户 }
+                      - { value: workspace, text: 工作空间 }
+                  events:
+                    onChange:
+                      - action: setState
+                        params:
+                          scopeChip: ${event}
+            # 类型：多选快筛（value 为数组；「全部」项清空选择）
+            - type: Flex
+              props:
+                align: center
+                gap: small
+                style: { flexWrap: wrap }
+              children:
+                - type: Text
+                  props:
+                    text: 类型
+                    strong: true
+                    className: w-10
+                - type: ChipFilter
+                  props:
+                    mode: multi
+                    value: ${state.typeChips}
+                    items:
+                      - { value: all, text: 全部 }
+                      - { value: login, text: 登录 }
+                      - { value: create, text: 创建 }
+                      - { value: update, text: 更新 }
+                      - { value: delete, text: 删除 }
+                      - { value: export, text: 导出 }
+                  events:
+                    onChange:
+                      - action: setState
+                        params:
+                          typeChips: ${event}
+            - type: Separator
+            - type: Table
+              props:
+                columns:
+                  - title: 名称
+                    dataIndex: name
+                  - title: 负责人
+                    dataIndex: owner
+                  - title: 状态
+                    dataIndex: status
+                dataSource:
+                  - id: 1
+                    name: 示例数据 A
+                    owner: 张三
+                    status: 启用
+                  - id: 2
+                    name: 示例数据 B
+                    owner: 李四
+                    status: 停用
+                  - id: 3
+                    name: 示例数据 C
+                    owner: 王五
+                    status: 启用
+            - type: Pagination
+              props:
+                total: 128
+                pageSize: 10
+                align: right
+                showTotal: true
+                pageSizeOptions: [10, 20, 50]
 ```
 
 ## 三、组合示例（线框标注用）
@@ -332,6 +689,8 @@ dataSources:
 列表 **表格区** 自上而下：**表格工具栏（可选）→ 表头 → 表体 → 分页脚**。与 **页面级工具栏**（标题旁「新建」）区分见下。
 
 ### 4.1 工具栏分区（两层）
+
+{{preview:06}}
 
 | 层级 | 位置 | 典型按钮 | 线框是否必画 |
 | --- | --- | --- | --- |
@@ -359,7 +718,154 @@ dataSources:
 | 与筛选 | **查询/重置** 属于筛选 F1/F2，**不** 放在表格工具栏（避免与「刷新列表」混淆） |
 | 权限 | 无权限按钮隐藏或置灰 + Tooltip |
 
+#### DSL 配置
+
+```yaml
+# 与上方预览同源的可运行 DSL（示例数据内联，人工提炼入库）
+state:
+  selectedKeys: [1]
+  tableLoading: false
+body:
+  type: Page
+  children:
+    - type: Card
+      children:
+        - type: Flex
+          props:
+            direction: vertical
+            gap: middle
+          children:
+            # 表格工具栏：左侧已选摘要 + 批量操作；右侧列表级操作
+            - type: Flex
+              props:
+                justify: space-between
+                align: center
+              children:
+                - type: Flex
+                  props:
+                    align: center
+                    gap: small
+                  children:
+                    - type: Text
+                      props:
+                        text: 已选 ${state.selectedKeys.length} 项
+                        type: secondary
+                    - type: Button
+                      props:
+                        text: 批量启用
+                    - type: Button
+                      props:
+                        text: 批量删除
+                - type: Flex
+                  props:
+                    gap: small
+                  children:
+                    # 刷新：loading 态演示（setState → delay → setState）
+                    - type: Button
+                      props:
+                        text: 刷新
+                        icon: refresh
+                        variant: text
+                      events:
+                        onClick:
+                          - action: setState
+                            params: { tableLoading: true }
+                          - action: delay
+                            params: { ms: 800 }
+                          - action: setState
+                            params: { tableLoading: false }
+                    - type: Button
+                      props:
+                        text: 列设置
+                        icon: settings
+                        variant: text
+            - type: Separator
+            - type: Table
+              props:
+                rowSelection: true
+                selectedRowKeys: ${state.selectedKeys}
+                selectionDisabledField: selectDisabled
+                loading: ${state.tableLoading}
+                columns:
+                  - title: 名称
+                    dataIndex: name
+                  - title: 负责人
+                    dataIndex: owner
+                  - title: 状态
+                    dataIndex: status
+                  # 操作列固定最右：一律 Button variant: link，主操作在左；居中
+                  - title: 操作
+                    width: 200
+                    align: center
+                    fixed: right
+                    cell:
+                      type: Flex
+                      props:
+                        align: center
+                        justify: center
+                        gap: 4
+                      children:
+                        - type: Button
+                          props:
+                            text: 详情
+                            variant: link
+                        # 无编辑权限的行禁用「编辑」（行数据 editable: false）
+                        - type: Button
+                          props:
+                            text: 编辑
+                            variant: link
+                            disabled: ${!row.editable}
+                        - type: DropdownMenu
+                          props:
+                            align: end
+                            items:
+                              - label: 停用
+                                value: disable
+                              - separator: true
+                              - label: 删除
+                                value: delete
+                                icon: trash
+                                danger: true
+                          children:
+                            - type: Button
+                              props:
+                                icon: ellipsis
+                                variant: text
+                dataSource:
+                  - id: 1
+                    name: 示例数据 A
+                    owner: 张三
+                    status: 启用
+                    editable: true
+                  # 无选择权限（Checkbox 禁用）+ 无编辑权限（隐藏「编辑」）
+                  - id: 2
+                    name: 示例数据 B
+                    owner: 李四
+                    status: 停用
+                    selectDisabled: true
+                    editable: false
+                  - id: 3
+                    name: 示例数据 C
+                    owner: 王五
+                    status: 启用
+                    editable: true
+              events:
+                onSelectChange:
+                  - action: setState
+                    params:
+                      selectedKeys: ${event}
+            - type: Pagination
+              props:
+                total: 128
+                pageSize: 10
+                align: right
+                showTotal: true
+                pageSizeOptions: [10, 20, 50]
+```
+
 ### 4.2 表头与排序
+
+{{preview:07}}
 
 ```text
 │ │ 角色名称 ⇅    编码        归属范围 ⇵    成员数    状态      操作          │ │
@@ -374,7 +880,65 @@ dataSources:
 | **与查询** | 排序变更 **立即** reload 或随「查询」一并提交，须在页面「实现衔接」写明 |
 | **多列排序** | 若不支持，线框只标一个主排序列 |
 
+#### DSL 配置
+
+```yaml
+# 与上方预览同源的可运行 DSL（示例数据内联，人工提炼入库）
+body:
+  type: Page
+  children:
+    - type: Card
+      children:
+        - type: Table
+          props:
+            columns:
+              # 可排序列：sorter: true（表头自动带 ⇅ 图标）
+              - title: 角色名称
+                dataIndex: name
+                sorter: true
+              - title: 编码
+                dataIndex: code
+              - title: 归属范围
+                dataIndex: scope
+                sorter: true
+              - title: 成员数
+                dataIndex: members
+                align: right
+                sorter: true
+              - title: 状态
+                dataIndex: status
+              # 默认序：创建时间降序（初始即按此排序，表头显示 ↓）
+              - title: 创建时间
+                dataIndex: createdAt
+                sorter: true
+                defaultSortOrder: descend
+            dataSource:
+              - id: 1
+                name: 平台管理员
+                code: platform-admin
+                scope: 平台
+                members: 3
+                status: 启用
+                createdAt: 2026-09-12
+              - id: 2
+                name: 租户管理员
+                code: tenant-admin
+                scope: 租户
+                members: 12
+                status: 启用
+                createdAt: 2026-09-08
+              - id: 3
+                name: 审计只读
+                code: audit-readonly
+                scope: 工作空间
+                members: 5
+                status: 停用
+                createdAt: 2026-08-30
+```
+
 ### 4.3 表体与列类型
+
+{{preview:08}}
 
 ```text
 │ │ ☐  张三       zhangsan    平台        3        ●启用    [详情] [编辑] [⋯] │ │
@@ -389,7 +953,64 @@ dataSources:
 
 行点击：线框注明 **整行可点** 或 **仅名称列/详情按钮** 进详情。
 
+#### DSL 配置
+
+```yaml
+# 与上方预览同源的可运行 DSL（示例数据内联，人工提炼入库）
+body:
+  type: Page
+  children:
+    - type: Card
+      children:
+        - type: Table
+          props:
+            # 行多选（非受控，组件内部管理选中态）
+            rowSelection: true
+            columns:
+              # 链接列：主字段用 link 样式按钮，点击进详情（与操作列「详情」二选一）
+              - title: 名称
+                cell:
+                  type: Button
+                  props:
+                    text: ${row.name}
+                    variant: link
+              - title: 负责人
+                dataIndex: owner
+              # 数字列右对齐
+              - title: 成员数
+                dataIndex: members
+                align: right
+              # 状态列：Status 状态点 + 文案（●启用 / ○停用）
+              - title: 状态
+                cell:
+                  type: Status
+                  props:
+                    status: ${row.statusType}
+                    text: ${row.status}
+            dataSource:
+              - id: 1
+                name: 示例数据 A
+                owner: 张三
+                members: 3
+                status: 启用
+                statusType: success
+              - id: 2
+                name: 示例数据 B
+                owner: 李四
+                members: 12
+                status: 停用
+                statusType: default
+              - id: 3
+                name: 示例数据 C
+                owner: 王五
+                members: 5
+                status: 启用
+                statusType: success
+```
+
 ### 4.4 操作列（固定右侧）
+
+{{preview:09}}
 
 操作列 **固定在最右**，不换行到多行按钮堆叠（窄屏可收进 `⋯` 更多菜单）。
 
@@ -407,6 +1028,91 @@ dataSources:
 | **列宽** | 操作列标题为「操作」；按钮文案以线框图为准，不写「查看」与「详情」混用（择一） |
 | **无操作** | 纯只读列表可 **无操作列**，名称列 link 即可 |
 
+#### DSL 配置
+
+```yaml
+# 与上方预览同源的可运行 DSL（示例数据内联，人工提炼入库）
+body:
+  type: Page
+  children:
+    - type: Card
+      children:
+        - type: Flex
+          props:
+            direction: vertical
+            gap: middle
+          children:
+            - type: Table
+              props:
+                columns:
+                  - title: 名称
+                    dataIndex: name
+                    width: 340
+                  - title: 负责人
+                    dataIndex: owner
+                    width: 340
+                  - title: 状态
+                    dataIndex: status
+                    width: 340
+                  # 操作列固定最右（sticky）：一律 Button variant: link，主操作在左；居中
+                  - title: 操作
+                    width: 200
+                    align: center
+                    fixed: right
+                    cell:
+                      type: Flex
+                      props:
+                        align: center
+                        justify: center
+                        gap: 4
+                      children:
+                        - type: Button
+                          props:
+                            text: 详情
+                            variant: link
+                        - type: Button
+                          props:
+                            text: 编辑
+                            variant: link
+                        # 次要操作收进 ⋯ 更多菜单（危险项 danger 标红）
+                        - type: DropdownMenu
+                          props:
+                            align: end
+                            items:
+                              - label: 停用
+                                value: disable
+                              - separator: true
+                              - label: 删除
+                                value: delete
+                                icon: trash
+                                danger: true
+                          children:
+                            - type: Button
+                              props:
+                                icon: ellipsis
+                                variant: text
+                dataSource:
+                  - id: 1
+                    name: 示例数据 A
+                    owner: 张三
+                    status: 启用
+                  - id: 2
+                    name: 示例数据 B
+                    owner: 李四
+                    status: 停用
+                  - id: 3
+                    name: 示例数据 C
+                    owner: 王五
+                    status: 启用
+            - type: Pagination
+              props:
+                total: 128
+                pageSize: 10
+                align: right
+                showTotal: true
+                pageSizeOptions: [10, 20, 50]
+```
+
 ### 4.5 分页脚
 
 ```text
@@ -422,6 +1128,8 @@ dataSources:
 
 ### 4.6 表格区完整线框模板（S2 + 含可选块）
 
+{{preview:10}}
+
 ```text
 │ ┌─ 表格 Card ─────────────────────────────────────────────────────────────┐ │
 │ │ [表格工具栏]  已选 n 项  [批量…]                    [刷新] [列设置]     │ │  ← 可选，无则删此行
@@ -435,7 +1143,179 @@ dataSources:
 │ └────────────────────────────────────────────────────────────────────────┘ │
 ```
 
+#### DSL 配置
+
+```yaml
+# 与上方预览同源的可运行 DSL（示例数据内联，人工提炼入库）
+state:
+  selectedKeys: [1, 2]
+  tableLoading: false
+body:
+  type: Page
+  children:
+    - type: Card
+      children:
+        - type: Flex
+          props:
+            direction: vertical
+            gap: middle
+          children:
+            # 表格工具栏（可选块）：已选摘要 + 批量操作 | 刷新 / 列设置
+            - type: Flex
+              props:
+                justify: space-between
+                align: center
+              children:
+                - type: Flex
+                  props:
+                    align: center
+                    gap: small
+                  children:
+                    - type: Text
+                      props:
+                        text: 已选 ${state.selectedKeys.length} 项
+                        type: secondary
+                    - type: Button
+                      props:
+                        text: 批量启用
+                    - type: Button
+                      props:
+                        text: 批量删除
+                - type: Flex
+                  props:
+                    gap: small
+                  children:
+                    # 刷新：loading 态演示（setState → delay → setState）
+                    - type: Button
+                      props:
+                        text: 刷新
+                        icon: refresh
+                        variant: text
+                      events:
+                        onClick:
+                          - action: setState
+                            params: { tableLoading: true }
+                          - action: delay
+                            params: { ms: 800 }
+                          - action: setState
+                            params: { tableLoading: false }
+                    - type: Button
+                      props:
+                        text: 列设置
+                        icon: settings
+                        variant: text
+            - type: Separator
+            - type: Table
+              props:
+                rowSelection: true
+                selectedRowKeys: ${state.selectedKeys}
+                loading: ${state.tableLoading}
+                columns:
+                  # 链接列 + 可排序（sorter 列表头带 ⇅）
+                  - title: 名称
+                    width: 280
+                    sorter: true
+                    cell:
+                      type: Button
+                      props:
+                        text: ${row.name}
+                        variant: link
+                  - title: 负责人
+                    dataIndex: owner
+                    width: 200
+                  - title: 成员数
+                    dataIndex: members
+                    align: right
+                    width: 140
+                    sorter: true
+                  - title: 状态
+                    width: 160
+                    cell:
+                      type: Status
+                      props:
+                        status: ${row.statusType}
+                        text: ${row.status}
+                  # 默认序：创建时间降序
+                  - title: 创建时间
+                    dataIndex: createdAt
+                    width: 200
+                    sorter: true
+                    defaultSortOrder: descend
+                  - title: 操作
+                    width: 200
+                    align: center
+                    fixed: right
+                    cell:
+                      type: Flex
+                      props:
+                        align: center
+                        justify: center
+                        gap: 4
+                      children:
+                        - type: Button
+                          props:
+                            text: 详情
+                            variant: link
+                        - type: Button
+                          props:
+                            text: 编辑
+                            variant: link
+                        - type: DropdownMenu
+                          props:
+                            align: end
+                            items:
+                              - label: 停用
+                                value: disable
+                              - separator: true
+                              - label: 删除
+                                value: delete
+                                icon: trash
+                                danger: true
+                          children:
+                            - type: Button
+                              props:
+                                icon: ellipsis
+                                variant: text
+                dataSource:
+                  - id: 1
+                    name: 平台管理员
+                    owner: 张三
+                    members: 3
+                    status: 启用
+                    statusType: success
+                    createdAt: 2026-09-12
+                  - id: 2
+                    name: 租户管理员
+                    owner: 李四
+                    members: 12
+                    status: 启用
+                    statusType: success
+                    createdAt: 2026-09-08
+                  - id: 3
+                    name: 审计只读
+                    owner: 王五
+                    members: 5
+                    status: 停用
+                    statusType: default
+                    createdAt: 2026-08-30
+              events:
+                onSelectChange:
+                  - action: setState
+                    params:
+                      selectedKeys: ${event}
+            # 分页脚：左侧总条数 + 右侧每页条数与页码
+            - type: Pagination
+              props:
+                total: 128
+                pageSize: 10
+                align: right
+                showTotal: true
+                pageSizeOptions: [10, 20, 50]
+```
+
 ## 五、状态与异常
+
+{{preview:11}}
 
 | 状态 | 展示 |
 | --- | --- |
@@ -443,3 +1323,52 @@ dataSources:
 | 空数据 | 文案 + 具备权限时显示「新建」 |
 | 无搜索结果 | 提示清除条件 / 展开更多筛选项 |
 | 失败 | 保留筛选值 + 重试 |
+
+#### DSL 配置
+
+```yaml
+# 与上方预览同源的可运行 DSL（示例数据内联，人工提炼入库）
+body:
+  type: Page
+  children:
+    - type: Card
+      children:
+        - type: Flex
+          props:
+            direction: vertical
+            gap: middle
+          children:
+            # 工具栏保留：搜索与主操作不受空态影响
+            - type: Flex
+              props:
+                justify: space-between
+                gap: 8
+              children:
+                - type: Input
+                  props:
+                    name: keyword
+                    placeholder: 输入关键词
+                    style: { width: 260 }
+                - type: Button
+                  props:
+                    text: 新建
+                    variant: primary
+                    icon: plus
+            - type: Separator
+            - type: Table
+              props:
+                # 空态文案由外部传入（缺省为 i18n「暂无数据」）
+                emptyText: 暂无符合条件的角色
+                columns:
+                  - title: 名称
+                    dataIndex: name
+                  - title: 负责人
+                    dataIndex: owner
+                  - title: 状态
+                    dataIndex: status
+                  - title: 操作
+                    width: 200
+                    align: center
+                    fixed: right
+                dataSource: []
+```

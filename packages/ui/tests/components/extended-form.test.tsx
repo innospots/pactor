@@ -624,3 +624,84 @@ describe('Field 布局与节点样式', () => {
     ).toBe('4px');
   });
 });
+
+describe('Field 在 Form 内的布局间距', () => {
+  it('控件容器为相邻按钮预留间距（[&>button+button]:ml-2）', () => {
+    const { container } = renderDsl({
+      type: 'Field',
+      children: [
+        { type: 'Button', props: { text: '查询', variant: 'primary', submit: true } },
+        { type: 'Button', props: { text: '重置' } },
+      ],
+    });
+    const control = container.querySelector('[data-slot=field-control]')!;
+    expect(control.className).toContain('[&>button+button]:ml-2');
+    expect(control.querySelectorAll('button')).toHaveLength(2);
+  });
+
+  it('inline Form 中 label 与控件同一行（flex-row + label 行 w-auto）', () => {
+    const { container } = renderDsl({
+      type: 'Form',
+      props: { layout: 'inline' },
+      children: [
+        {
+          type: 'Field',
+          props: { label: '关键词' },
+          children: [{ type: 'Input', props: { name: 'a' } }],
+        },
+      ],
+    });
+    const field = container.querySelector('[data-slot=field]')!;
+    expect(field.className).toContain('flex-row');
+    expect(field.className).toContain('items-center');
+    const labelRow = field.querySelector('[data-slot=field-label]')!.parentElement!;
+    expect(labelRow.className).not.toContain('w-full');
+    expect(labelRow.className).toContain('shrink-0');
+  });
+
+  it('vertical Form 中的 Field 带 mb-2', () => {
+    const { container } = renderDsl({
+      type: 'Form',
+      props: { layout: 'vertical' },
+      children: [
+        {
+          type: 'Field',
+          props: { label: '名称' },
+          children: [{ type: 'Input', props: { name: 'a' } }],
+        },
+      ],
+    });
+    expect(container.querySelector('[data-slot=field]')?.className).toContain(
+      'mb-2',
+    );
+  });
+
+  it('inline / horizontal Form 与 Form 外的 Field 不带 mb-2', () => {
+    for (const layout of ['inline', 'horizontal'] as const) {
+      const { container, unmount } = renderDsl({
+        type: 'Form',
+        props: { layout },
+        children: [
+          {
+            type: 'Field',
+            props: { label: '名称' },
+            children: [{ type: 'Input', props: { name: 'a' } }],
+          },
+        ],
+      });
+      expect(
+        container.querySelector('[data-slot=field]')?.className,
+      ).not.toContain('mb-2');
+      unmount();
+    }
+
+    const outside = renderDsl({
+      type: 'Field',
+      props: { label: '名称' },
+      children: [{ type: 'Input', props: { name: 'a' } }],
+    });
+    expect(
+      outside.container.querySelector('[data-slot=field]')?.className,
+    ).not.toContain('mb-2');
+  });
+});
