@@ -328,6 +328,8 @@ Widget Card 统一外框为 **Card 组件**：白底、圆角、内边距；无�
 
 ### W1 — 指标卡（Statistic）
 
+{{preview:04}}
+
 **用途：** KPI 单值 + 辅助说明或下钻 link。
 
 ```text
@@ -348,7 +350,35 @@ Widget Card 统一外框为 **Card 组件**：白底、圆角、内边距；无�
 
 线框标注：`W1·指标`、是否含 link 脚注。
 
-### W2 — 筛选 / 工具条卡
+#### DSL 配置
+
+```yaml
+# 与上方预览同源的可运行 DSL（示例数据内联，人工提炼入库）
+body:
+  type: Page
+  children:
+    - type: Card
+      props: { style: { width: 280 } }
+      children:
+        - type: Flex
+          props: { direction: vertical, gap: 8 }
+          children:
+            - type: Flex
+              props: { justify: space-between, align: center }
+              children:
+                - type: Text
+                  props: { text: 请求量, size: small, type: secondary }
+                - type: Icon
+                  props: { name: chart-column, size: sm }
+            - type: Statistic
+              props: { value: '1,234,567' }
+            - type: Text
+              props: { text: 12 位活跃客户端 · 98M Token, size: small, type: secondary }
+```
+
+### W2 — 筛选 / 工具条卡（DatePicker / Segmented）
+
+{{preview:05}}
 
 **用途：** 页级或段级筛选，**不占图表区**。
 
@@ -362,7 +392,34 @@ Widget Card 统一外框为 **Card 组件**：白底、圆角、内边距；无�
 - 筛选字段多时可引用「搜索列表页」的 **F1 内联** 形态，但仍包在 **单张 W2 Card** 内。
 - 线框 **不要** 把表格画进 W2；浮层筛选见搜索列表页 **F2**。
 
-### W3 — 图表卡
+#### DSL 配置
+
+```yaml
+# 与上方预览同源的可运行 DSL（示例数据内联，人工提炼入库）
+body:
+  type: Page
+  children:
+    - type: Card
+      props: { style: { width: 520 } }
+      children:
+        - type: Flex
+          props: { align: center, gap: 8 }
+          children:
+            - type: Text
+              props: { text: 分析时间范围, className: shrink-0 }
+            - type: DatePicker
+              props: { mode: range, placeholder: 选择起止日期 }
+            - type: Segmented
+              props:
+                options:
+                  - { label: 今天, value: today }
+                  - { label: 近 7 天, value: 7d }
+                  - { label: 近 30 天, value: 30d }
+```
+
+### W3 — 图表卡（Line / Area / Bar 图表）
+
+{{preview:06}}
 
 **用途：** 单图或单表可视化容器。
 
@@ -380,7 +437,49 @@ Widget Card 统一外框为 **Card 组件**：白底、圆角、内边距；无�
 - 图区固定最小高度；加载用骨架块，不闪 0 轴。
 - 空数据：图区内 Empty +「调整时间范围」。
 
+#### DSL 配置
+
+```yaml
+# 与上方预览同源的可运行 DSL（示例数据内联，人工提炼入库）
+body:
+  type: Page
+  children:
+    - type: Card
+      props: { title: 趋势分析 }
+      children:
+        - type: Flex
+          props: { direction: vertical, gap: 8 }
+          children:
+            - type: Flex
+              props: { justify: space-between, align: center }
+              children:
+                - type: Text
+                  props: { text: 观察流量与消费趋势, size: small, type: secondary }
+                - type: Segmented
+                  props:
+                    value: req
+                    options:
+                      - { label: 请求, value: req }
+                      - { label: Token, value: token }
+                      - { label: 费用, value: cost }
+            - type: AreaChart
+              props:
+                xKey: date
+                yKeys: [requests, tokens]
+                height: 240
+                data:
+                  - { date: '09-22', requests: 8200, tokens: 6900 }
+                  - { date: '09-23', requests: 9400, tokens: 8100 }
+                  - { date: '09-24', requests: 8800, tokens: 7600 }
+                  - { date: '09-25', requests: 11200, tokens: 9800 }
+                  - { date: '09-26', requests: 10500, tokens: 9000 }
+                  - { date: '09-27', requests: 6200, tokens: 5400 }
+                  - { date: '09-28', requests: 5800, tokens: 4900 }
+```
+
 ### W4 — 构成卡（Progress 行）
+
+{{preview:07}}
 
 **用途：** Top N 占比、模型/客户端/租户分布。
 
@@ -399,7 +498,68 @@ Widget Card 统一外框为 **Card 组件**：白底、圆角、内边距；无�
 | **行数** | 线框写明 **Top 4** 或「动态 N≤5」 |
 | **底链** | 单条 link「查看全部 → {列表页}」 |
 
-### W5 — 快捷入口卡
+#### DSL 配置
+
+```yaml
+# 与上方预览同源的可运行 DSL（示例数据内联，人工提炼入库）
+body:
+  type: Page
+  children:
+    - type: Card
+      props: { title: 用量构成 · 模型, style: { width: 420 } }
+      children:
+        - type: Flex
+          props: { direction: vertical, gap: 8, align: start }
+          children:
+            - type: Text
+              props:
+                text: 按请求量分布，识别主要模型流量来源
+                size: small
+                type: secondary
+                className: w-full
+            - type: Flex
+              props: { align: center, gap: 8, className: w-full }
+              children:
+                - type: Text
+                  props: { text: gpt-4o, size: small, style: { width: 110 } }
+                - type: Progress
+                  props: { value: 42, style: { flex: 1 } }
+                - type: Text
+                  props: { text: 42%, size: small, style: { width: 40 } }
+            - type: Flex
+              props: { align: center, gap: 8, className: w-full }
+              children:
+                - type: Text
+                  props: { text: claude-3, size: small, style: { width: 110 } }
+                - type: Progress
+                  props: { value: 28, style: { flex: 1 } }
+                - type: Text
+                  props: { text: 28%, size: small, style: { width: 40 } }
+            - type: Flex
+              props: { align: center, gap: 8, className: w-full }
+              children:
+                - type: Text
+                  props: { text: doubao-pro, size: small, style: { width: 110 } }
+                - type: Progress
+                  props: { value: 18, style: { flex: 1 } }
+                - type: Text
+                  props: { text: 18%, size: small, style: { width: 40 } }
+            - type: Flex
+              props: { align: center, gap: 8, className: w-full }
+              children:
+                - type: Text
+                  props: { text: 其他, size: small, style: { width: 110 } }
+                - type: Progress
+                  props: { value: 12, style: { flex: 1 } }
+                - type: Text
+                  props: { text: 12%, size: small, style: { width: 40 } }
+            - type: Button
+              props: { text: 查看全部 →, variant: link }
+```
+
+### W5 — 快捷入口卡（Card + Icon）
+
+{{preview:08}}
 
 **用途：** 导航到高频模块；**非**实体列表卡。
 
@@ -417,7 +577,49 @@ Widget Card 统一外框为 **Card 组件**：白底、圆角、内边距；无�
 | 网格 | 列数同卡片列表页栅格约定（常用 2–4） |
 | 样式 | 可 `hover` 描边/阴影；与 W1 **勿混排同一 Grid 行**（入口与指标分区） |
 
-### W6 — 列表摘要卡
+#### DSL 配置
+
+```yaml
+# 与上方预览同源的可运行 DSL（示例数据内联，人工提炼入库）
+body:
+  type: Page
+  children:
+    - type: Grid
+      props: { columns: 4, gap: 16, style: { width: 560 } }
+      children:
+        - type: Card
+          props: { hoverable: true, contentClassName: flex flex-col items-center justify-center gap-2 }
+          children:
+            - type: Icon
+              props: { name: building, size: lg }
+            - type: Text
+              props: { text: 租户管理 }
+        - type: Card
+          props: { hoverable: true, contentClassName: flex flex-col items-center justify-center gap-2 }
+          children:
+            - type: Icon
+              props: { name: user, size: lg }
+            - type: Text
+              props: { text: 用户管理 }
+        - type: Card
+          props: { hoverable: true, contentClassName: flex flex-col items-center justify-center gap-2 }
+          children:
+            - type: Icon
+              props: { name: plus, size: lg }
+            - type: Text
+              props: { text: 邀请成员 }
+        - type: Card
+          props: { hoverable: true, contentClassName: flex flex-col items-center justify-center gap-2 }
+          children:
+            - type: Icon
+              props: { name: file-text, size: lg }
+            - type: Text
+              props: { text: 帮助文档 }
+```
+
+### W6 — 列表摘要卡（Table）
+
+{{preview:09}}
 
 **用途：** 看板内嵌 **精简表格** 或待办列表（≤5 行）。
 
@@ -431,6 +633,42 @@ Widget Card 统一外框为 **Card 组件**：白底、圆角、内边距；无�
 
 - 无分页或仅「查看更多」；完整列表仍用搜索列表页。
 - 操作列若有，用 link；危险操作仍走二次确认。
+
+#### DSL 配置
+
+```yaml
+# 与上方预览同源的可运行 DSL（示例数据内联，人工提炼入库）
+body:
+  type: Page
+  children:
+    - type: Card
+      props:
+        title: 待办摘要
+        style: { width: 560 }
+        extra:
+          - type: Button
+            props: { text: 查看全部 →, variant: link }
+      children:
+        - type: Table
+          props:
+            pagination: false
+            columns:
+              - { title: 事项, dataIndex: item }
+              - { title: 提交人, dataIndex: submitter }
+              - { title: 时间, dataIndex: time }
+              - title: 状态
+                width: 100
+                align: center
+                cell:
+                  type: Status
+                  props:
+                    status: "${row.statusType}"
+                    text: "${row.statusText}"
+            dataSource:
+              - { id: 1, item: 注册审批, submitter: 租户 · 云启科技, time: 2026-09-28 10:12, statusType: processing, statusText: 待处理 }
+              - { id: 2, item: 权限申请, submitter: 张三, time: 2026-09-27 16:40, statusType: warning, statusText: 待审批 }
+              - { id: 3, item: 续费提醒, submitter: 系统, time: 2026-09-26 09:00, statusType: default, statusText: 提醒 }
+```
 
 ## 响应式栅格
 

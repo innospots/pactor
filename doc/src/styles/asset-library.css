@@ -793,6 +793,31 @@ h1 {
   color: var(--brand);
 }
 
+/* note-md 内标题：正文小字氛围下仍以标题样式呈现（W1–W6 卡片样式等）。
+   渲染器降级规则：### → h4、## → h3、#### → h5 */
+.note-md h3,
+.note-md h4 {
+  margin: 24px 0 10px;
+  font-size: 15px;
+  font-weight: 650;
+  line-height: 1.5;
+  color: var(--text);
+}
+.note-md h3:first-child,
+.note-md h4:first-child {
+  margin-top: 0;
+}
+.note-md h5 {
+  margin: 16px 0 6px;
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.5;
+  color: var(--text-soft);
+}
+.note-md h5:first-child {
+  margin-top: 0;
+}
+
 /* ===== 底栏 ===== */
 .footer {
   position: fixed;

@@ -285,3 +285,53 @@ describe('Card hoverable / contentClassName / onClick', () => {
     expect(onAction).toHaveBeenCalledTimes(1);
   });
 });
+
+describe('Card extra（title 行右端内容）', () => {
+  it('extra 经 card-action 槽位渲染在标题行右端（Button 可点）', () => {
+    const { container } = renderDsl({
+      type: 'Card',
+      props: {
+        title: '趋势分析',
+        extra: [{ type: 'Button', props: { text: '导出' } }],
+      },
+      children: [{ type: 'Text', props: { text: '图表区' } }],
+    });
+
+    const header = container.querySelector('[data-slot=card-header]')!;
+    const action = header.querySelector('[data-slot=card-action]')!;
+    expect(action.textContent).toContain('导出');
+    expect(screen.getByText('趋势分析')).toBeTruthy();
+    expect(screen.getByText('图表区')).toBeTruthy();
+  });
+
+  it('仅 extra（无 title）也渲染标题行；无 title 无 extra 不渲染 CardHeader', () => {
+    const withExtra = renderDsl({
+      type: 'Card',
+      props: { extra: [{ type: 'Text', props: { text: '右端说明' } }] },
+      children: [{ type: 'Text', props: { text: '内容' } }],
+    });
+    expect(
+      withExtra.container.querySelector('[data-slot=card-header]'),
+    ).not.toBeNull();
+    withExtra.unmount();
+
+    const plain = renderDsl({
+      type: 'Card',
+      children: [{ type: 'Text', props: { text: '内容' } }],
+    });
+    expect(plain.container.querySelector('[data-slot=card-header]')).toBeNull();
+  });
+
+  it('loading 时内容区以 Skeleton 骨架占位，标题行保留，children 不渲染', () => {
+    const { container } = renderDsl({
+      type: 'Card',
+      props: { title: '趋势分析', loading: true },
+      children: [{ type: 'Text', props: { text: '图表区' } }],
+    });
+
+    const loading = container.querySelector('[data-slot=card-loading]')!;
+    expect(loading.querySelectorAll('[data-slot=skeleton]').length).toBe(3);
+    expect(screen.getByText('趋势分析')).toBeTruthy();
+    expect(screen.queryByText('图表区')).toBeNull();
+  });
+});

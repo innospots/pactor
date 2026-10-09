@@ -138,11 +138,11 @@ body:
                 gap: small
                 className: flex-1 p-4
               children:
-                  - type: Text
-                    props:
-                      text: 节点属性
-                      strong: true
-                  - type: Form
+                - type: Text
+                  props:
+                    text: 节点属性
+                    strong: true
+                - type: Form
                   props:
                     layout: vertical
                   children:
