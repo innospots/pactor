@@ -12,6 +12,7 @@ import {
   Avatar,
   Badge,
   Button,
+  Col,
   DropdownMenu,
   Flex,
   Grid,
@@ -19,6 +20,7 @@ import {
   Menu,
   NavigationMenu,
   Pagination,
+  Row,
   ScrollArea,
   Separator,
   Tooltip,
@@ -145,6 +147,38 @@ function FlexPreview() {
       <div style={{ ...blockStyle, background: '#dcfce7', border: 'none' }}>中</div>
       <div style={{ ...blockStyle, background: '#fef3c7', border: 'none' }}>右</div>
     </Flex>
+  );
+}
+
+const ROW_COL_COLORS = ['#dbeafe', '#dcfce7', '#fef3c7'];
+
+function RowPreview() {
+  return (
+    <Row gutter={[16, 12]} justify="center" style={{ width: '100%' }}>
+      {ROW_COL_COLORS.map((color, i) => (
+        <Col key={color} span={i === 0 ? 6 : 8}>
+          <div style={{ height: 48, borderRadius: 6, background: color, padding: '0 8px' }}>
+            Col {i + 1}
+          </div>
+        </Col>
+      ))}
+    </Row>
+  );
+}
+
+function ColPreview() {
+  return (
+    <Row style={{ width: '100%' }}>
+      <Col span={8}>
+        <div style={{ height: 48, borderRadius: 6, background: '#dbeafe' }}>span 8</div>
+      </Col>
+      <Col span={8} offset={4}>
+        <div style={{ height: 48, borderRadius: 6, background: '#dcfce7' }}>span 8 + offset 4</div>
+      </Col>
+      <Col span={4} style={{ order: 3 }}>
+        <div style={{ height: 48, borderRadius: 6, background: '#fef3c7' }}>order 3</div>
+      </Col>
+    </Row>
   );
 }
 
@@ -558,6 +592,8 @@ export const PREVIEWS_A: Record<string, () => ReactElement> = {
   'component.tooltip': TooltipPreview,
   'component.grid': GridPreview,
   'component.flex': FlexPreview,
+  'component.row': RowPreview,
+  'component.col': ColPreview,
   'component.aspect-ratio': AspectRatioPreview,
   'component.scroll-area': ScrollAreaPreview,
   'component.menu': MenuPreview,

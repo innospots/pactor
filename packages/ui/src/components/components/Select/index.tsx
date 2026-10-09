@@ -1,5 +1,5 @@
 import { useI18n } from '@pactor-app/runtime';
-import { useEffect, useId, type CSSProperties } from 'react';
+import { useEffect, useId, useRef, useState, type CSSProperties } from 'react';
 
 import { cn } from '../../../lib/utils.js';
 import {
@@ -29,6 +29,11 @@ export interface SelectProps {
   rules?: FieldRule[];
   /** 选项列表 */
   options?: SelectOption[];
+  /**
+   * 选项搜索：true 始终展示搜索框；false 禁止；缺省选项数 > 10 时自动展示。
+   * 按 label 包含匹配过滤（大小写不敏感）
+   */
+  showSearch?: boolean;
   /** 受控值（独立渲染时生效）；Form 内作为字段初始值（优先于 Form initialValues） */
   value?: string | number | boolean;
   placeholder?: string;
@@ -64,6 +69,7 @@ export function Select({
   placeholder,
   disabled,
   allowClear,
+  showSearch,
   onChange,
   className,
   controlClassName,
@@ -73,6 +79,14 @@ export function Select({
   const { t } = useI18n();
   const controlId = useId();
   const inForm = form?.inForm === true && typeof name === 'string' && name !== '';
+  const [query, setQuery] = useState('');
+  const searchInputRef = useRef<HTMLInputElement>(null);
+
+  const searchEnabled = showSearch ?? options.length > 10;
+  const keyword = query.trim().toLowerCase();
+  const visibleOptions = keyword
+    ? options.filter((option) => option.label.toLowerCase().includes(keyword))
+    : options;
 
   // 注册字段校验规则，同时把 value prop 作为字段级初始值交给 Form 上下文合并
   useEffect(() => {
@@ -115,12 +129,41 @@ export function Select({
         onValueChange={handleChange}
         disabled={disabled}
         name={inForm ? name : undefined}
+        onOpenChange={(open) => {
+          if (open) {
+            // 弹层打开后聚焦搜索框（Base UI 默认把焦点给选中项，延后一帧让位）
+            requestAnimationFrame(() => searchInputRef.current?.focus());
+          } else {
+            setQuery('');
+          }
+        }}
       >
         <SelectTrigger id={controlId} className={inFormRoot ? 'w-full' : undefined}>
           <SelectValue placeholder={placeholder} />
         </SelectTrigger>
         <SelectContent>
-          {options.map((option) => (
+          {searchEnabled ? (
+            <div
+              data-slot="select-search"
+              className="sticky top-0 z-10 -mx-1 -mt-1 bg-popover px-1 pt-1 pb-1"
+            >
+              <input
+                ref={searchInputRef}
+                value={query}
+                placeholder={t('pactor.select.search')}
+                aria-label={t('pactor.select.search')}
+                className="h-8 w-full rounded-md border border-border bg-transparent px-2 text-sm outline-none placeholder:text-muted-foreground focus:border-primary"
+                onChange={(event) => setQuery(event.target.value)}
+                onKeyDown={(event) => {
+                  // 字符键拦截列表 typeahead；导航/确认/关闭键放行给列表处理
+                  if (!['Escape', 'ArrowDown', 'ArrowUp', 'Enter', 'Tab'].includes(event.key)) {
+                    event.stopPropagation();
+                  }
+                }}
+              />
+            </div>
+          ) : null}
+          {visibleOptions.map((option) => (
             <SelectItem
               key={String(option.value)}
               value={option.value}
@@ -129,6 +172,11 @@ export function Select({
               {option.label}
             </SelectItem>
           ))}
+          {visibleOptions.length === 0 ? (
+            <div className="px-2 py-3 text-center text-sm text-muted-foreground">
+              {t('pactor.command.empty')}
+            </div>
+          ) : null}
         </SelectContent>
       </ShadcnSelect>
       {allowClear && selectedValue !== null && !disabled ? (

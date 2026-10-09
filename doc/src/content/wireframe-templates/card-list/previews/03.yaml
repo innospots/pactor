@@ -4,106 +4,39 @@ title: L3 — 网格 + 末尾占位卡
 state:
   plugins:
     - id: 1
-      name: 用户管理
-      version: 0.1.0
-      desc: 管理插件安装状态与运行生命周期，支持启停与依赖检查。
-      statusText: 已安装
-      statusColor: success
+      icon: users
+      title: 用户管理
+      subtitle: v0.1.0
+      description: 管理插件安装状态与运行生命周期，支持启停与依赖检查。
+      tags:
+        - { text: 已安装, color: success }
+      actions:
+        - { text: 停用 }
     - id: 2
-      name: 数据同步
-      version: 2.3.1
-      desc: 定时将外部数据源同步至平台，支持增量与全量两种模式。
-      statusText: 未安装
-      statusColor: default
+      icon: database
+      title: 数据同步
+      subtitle: v2.3.1
+      description: 定时将外部数据源同步至平台，支持增量与全量两种模式。
+      tags:
+        - { text: 未安装 }
+      actions:
+        - { text: 安装, variant: primary }
 body:
   type: Page
   children:
-    # For 的 before 槽位放置首格「新建」占位卡（虚线、内容居中），占 1 格参与网格流
-    - type: For
+    # createText 渲染首格「新建」占位卡（虚线、内容居中），占 1 格参与网格流
+    - type: CardList
       props:
         items: ${state.plugins}
-        keyField: id
         columns: 3
-        before:
-          # 首格「新建」占位卡：虚线、整卡可点（手型 + hover 边框/背景高亮）、内容整卡水平垂直居中
-          - type: Card
-            props:
-              hoverable: true
-              className: h-full border-dashed
-              contentClassName: flex flex-1 flex-col items-center justify-center gap-2
-            children:
-              - type: Icon
-                props:
-                  name: plus
-                  size: lg
-                  className: text-muted-foreground
-              - type: Text
-                props:
-                  text: 新建插件
-                  type: secondary
-      children:
-        - type: Card
-          children:
-            - type: Flex
-              props:
-                direction: vertical
-                gap: 8
-              children:
-                - type: Flex
-                  props:
-                    justify: space-between
-                    align: center
-                  children:
-                    - type: Flex
-                      props:
-                        align: center
-                        gap: 8
-                      children:
-                        - type: Flex
-                          props:
-                            align: center
-                            justify: center
-                            className: size-9 rounded-md bg-muted
-                          children:
-                            - type: Icon
-                              props:
-                                name: package
-                        - type: Flex
-                          props:
-                            direction: vertical
-                            gap: 2
-                          children:
-                            - type: Text
-                              props:
-                                text: ${row.name}
-                                strong: true
-                            - type: Text
-                              props:
-                                text: v${row.version}
-                                type: secondary
-                                size: small
-                    - type: Tag
-                      props:
-                        text: ${row.statusText}
-                        color: ${row.statusColor}
-                - type: Text
-                  props:
-                    text: ${row.desc}
-                    type: secondary
-                    size: small
-                    className: line-clamp-2
-                    style: { minHeight: 32 }
-                - type: Flex
-                  props:
-                    justify: end
-                    gap: 4
-                    className: -mx-4 -mb-4 mt-1 rounded-b-lg bg-muted px-4 py-2
-                  children:
-                    - type: Button
-                      props:
-                        text: 停用
-    - type: Text
-      props:
-        text: 共 ${state.plugins.length} 个
-        type: secondary
-        size: small
+        createText: 新建插件
+        showCount: true
+      events:
+        onCreateClick:
+          - action: message
+            params: { messageType: info, text: 打开新建插件弹层 }
+        onItemAction:
+          - action: message
+            params:
+              messageType: info
+              text: 已触发「${event.text}」：${event.item.title}

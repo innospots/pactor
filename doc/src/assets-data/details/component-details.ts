@@ -24,6 +24,8 @@
  *   previews/basic-a|b|c.tsx，见同目录 general-details.ts /
  *   layout-details.ts / navigation-details.ts，并追加至
  *   data-entry-details.ts / data-display-details.ts / feedback-details.ts。
+ * - 第十批 9 个组件（业务，packages/ui business 子目录真实实现）：
+ *   见同目录 business-details.ts。
  */
 
 import type { DslNode } from '@pactor-app/core';
@@ -38,6 +40,7 @@ import { dataDisplayDetailContents } from './data-display-details.ts';
 import { feedbackDetailContents } from './feedback-details.ts';
 import { chartDetailContents } from './chart-details.ts';
 import { mediaDetailContents } from './media-details.ts';
+import { businessDetailContents } from './business-details.ts';
 
 /** 变体条目 */
 export interface ComponentVariant {
@@ -218,4 +221,6 @@ export const componentDetailContents: Record<string, ComponentDetailContent> = {
   ...generalDetailContents,
   ...layoutDetailContents,
   ...navigationDetailContents,
+  // 第十批 9 个组件（业务，packages/ui business 子目录真实实现）
+  ...businessDetailContents,
 };

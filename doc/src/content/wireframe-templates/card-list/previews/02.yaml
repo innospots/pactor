@@ -4,112 +4,39 @@ title: L2 — 单列宽卡片
 state:
   plugins:
     - id: 1
-      name: 用户管理
-      version: 0.1.0
-      desc: 管理插件安装状态与运行生命周期，支持启停、依赖检查与灰度发布，覆盖平台全部业务空间。
-      owner: 平台组
-      updatedAt: 2026-09-28
-      statusText: 已安装
-      statusColor: success
+      icon: users
+      title: 用户管理
+      subtitle: v0.1.0
+      description: 管理插件安装状态与运行生命周期，支持启停、依赖检查与灰度发布，覆盖平台全部业务空间。
+      meta: 平台组 · 更新于 2026-09-28
+      tags:
+        - { text: 已安装, color: success }
+      actions:
+        - { text: 配置, variant: link }
+        - { text: 停用 }
     - id: 2
-      name: 数据同步
-      version: 2.3.1
-      desc: 定时将外部数据源同步至平台，支持增量与全量两种模式，失败自动重试并推送告警。
-      owner: 数据组
-      updatedAt: 2026-09-20
-      statusText: 未安装
-      statusColor: default
+      icon: database
+      title: 数据同步
+      subtitle: v2.3.1
+      description: 定时将外部数据源同步至平台，支持增量与全量两种模式，失败自动重试并推送告警。
+      meta: 数据组 · 更新于 2026-09-20
+      tags:
+        - { text: 未安装 }
+      actions:
+        - { text: 配置, variant: link }
+        - { text: 安装, variant: primary }
 body:
   type: Page
   children:
-    # 单列宽卡片：columns: 1，中/下层横向平铺更多信息
-    - type: For
+    # 单列宽卡片：columns: 1，meta 与描述在中层平铺
+    - type: CardList
       props:
         items: ${state.plugins}
-        keyField: id
         columns: 1
-      children:
-        - type: Card
-          children:
-            - type: Flex
-              props:
-                direction: vertical
-                gap: 8
-              children:
-                # 上层·平铺：左 Logo+标题+版本，右状态 Tag
-                - type: Flex
-                  props:
-                    justify: space-between
-                    align: center
-                  children:
-                    - type: Flex
-                      props:
-                        align: center
-                        gap: 8
-                      children:
-                        - type: Flex
-                          props:
-                            align: center
-                            justify: center
-                            className: size-9 rounded-md bg-muted
-                          children:
-                            - type: Icon
-                              props:
-                                name: package
-                        - type: Flex
-                          props:
-                            direction: vertical
-                            gap: 2
-                          children:
-                            - type: Text
-                              props:
-                                text: ${row.name}
-                                strong: true
-                            - type: Text
-                              props:
-                                text: v${row.version}
-                                type: secondary
-                                size: small
-                    - type: Tag
-                      props:
-                        text: ${row.statusText}
-                        color: ${row.statusColor}
-                # 中层·平铺：左描述（固定两行高度，超出截断），右维护信息
-                - type: Flex
-                  props:
-                    justify: space-between
-                    align: center
-                    gap: 16
-                  children:
-                    - type: Text
-                      props:
-                        text: ${row.desc}
-                        type: secondary
-                        size: small
-                        className: line-clamp-2
-                        style: { minHeight: 32 }
-                    - type: Text
-                      props:
-                        text: ${row.owner} · 更新于 ${row.updatedAt}
-                        type: secondary
-                        size: small
-                        className: shrink-0
-                # 下层·居右·浅底栏：主/次操作
-                - type: Flex
-                  props:
-                    justify: end
-                    gap: 4
-                    className: -mx-4 -mb-4 mt-1 rounded-b-lg bg-muted px-4 py-2
-                  children:
-                    - type: Button
-                      props:
-                        text: 配置
-                        variant: link
-                    - type: Button
-                      props:
-                        text: 停用
-    - type: Text
-      props:
-        text: 共 ${state.plugins.length} 个
-        type: secondary
-        size: small
+        showCount: true
+      events:
+        onItemAction:
+          - action: message
+            params:
+              messageType: info
+              text: 已触发「${event.text}」：${event.item.title}

@@ -2,7 +2,6 @@
 import './setup.js';
 
 import { cleanup, fireEvent, render, screen, act } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
 import type { PageDsl } from '@pactor-app/core';
 import {
   ActionEngine,

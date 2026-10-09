@@ -508,6 +508,45 @@ state:
         disabled: ${state.cityOptions.length === 0}
 ```
 
+### 8.6 Card list page (CardList / EntityCard business components)
+
+`CardList` renders a grid of `EntityCard` summary cards in one node — no `For` + nested `Flex`/`Text`/`Tag` scaffolding. Item fields mirror `EntityCard` props; extra business fields ride along and come back in event payloads.
+
+```yaml
+state:
+  plugins:
+    - id: 1
+      icon: users                      # Icon whitelist name (or `logo` image URL)
+      title: 用户管理
+      subtitle: v0.1.0                 # auxiliary line under the title
+      description: 管理插件安装状态与运行生命周期，支持启停与依赖检查。
+      tags: [{ text: 已安装, color: success }]   # Tag colors: default/success/warning/error/info
+      actions: [{ text: 停用 }]        # footer buttons, right-aligned, muted bar
+body:
+  - type: CardList
+    props:
+      items: ${state.plugins}
+      columns: 3                       # grid columns, default 3; 1 = single wide rows
+      gap: 16                          # default 16
+      showCount: true                  # footer "共 N 个" count line
+      # createText: 新建插件           # dashed "create" placeholder card in the first cell
+      # hoverable: true                # whole-card pointer + hover highlight
+    events:
+      onCreateClick: { action: message, params: { messageType: info, text: open create dialog } }
+      onItemClick: { action: message, params: { messageType: info, text: "进入详情：${event.item.title}" } }
+      onItemAction:                    # ${event} = { key, text, item, index }
+        - action: confirm
+          id: opConfirm
+          params: { title: "确认${event.text}「${event.item.title}」？" }
+        - action: if
+          params:
+            condition: ${actions.opConfirm}
+            then: [{ action: message, params: { messageType: success, text: done } }]
+```
+
+- `EntityCard` standalone: `icon`/`logo`, `title`, `subtitle`, `tags[]`, `description` (two-line clamp), `meta` (right side of the middle row), `actions[]` (`{ text, key?, variant?, danger? }`), `footerBackground` (muted footer bar, default `true`), `hoverable`. Events `onClick` (whole card) and `onAction` (`{ key, text, index }`) — footer button clicks never trigger the card click.
+- Empty `items` renders an `Empty` state (`emptyText` overrides the default).
+
 ## 9. Common mistakes (observed — do not do these)
 
 | Wrong | Right |

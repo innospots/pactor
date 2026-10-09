@@ -295,6 +295,227 @@ export const layoutDetailContents: Record<string, ComponentDetailContent> = {
       '用 Flex 做整页等宽多列栅格（应使用 Grid）。',
     ],
   },
+  'component.row': {
+    dsl: {
+      "type": "Row",
+      "props": {
+        "gutter": [16, 12],
+        "justify": "center",
+        "align": "middle"
+      },
+      "children": [
+        {
+          "type": "Col",
+          "props": {
+            "span": 6
+          },
+          "children": [
+            {
+              "type": "Card",
+              "props": {
+                "title": "左"
+              },
+              "children": [
+                {
+                  "type": "Text",
+                  "props": {
+                    "text": "span 6"
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "Col",
+          "props": {
+            "span": 8
+          },
+          "children": [
+            {
+              "type": "Card",
+              "props": {
+                "title": "中"
+              },
+              "children": [
+                {
+                  "type": "Text",
+                  "props": {
+                    "text": "span 8"
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "Col",
+          "props": {
+            "span": 8
+          },
+          "children": [
+            {
+              "type": "Card",
+              "props": {
+                "title": "右"
+              },
+              "children": [
+                {
+                  "type": "Text",
+                  "props": {
+                    "text": "span 8"
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    whenToUse: [
+      '**何时使用**',
+      '',
+      '- 需要 antd 式 24 分栏栅格：Col 按 span 占比分列，行容器统一 gutter / 对齐。',
+      '- 需要响应式断点：Col 的 xs~xxl 档位在断点处切换占位，Row 只做行容器。',
+      '- 需要与视觉稿的栅格标注一一对应：设计稿上的 8/8/8、6/12/6 分栏直接翻译为 span。',
+      '',
+      '**何时不用**',
+      '',
+      '- 等宽均分且列数简单（3 列指标卡墙）：使用 Grid（语义更窄、写法更短）。',
+      '- 一维排列与对齐（工具条两端对齐）：使用 Flex。',
+      '- 只做循环渲染的网格列表：使用 For（columns 模式，行作用域注入 ${row}）。',
+    ].join('\n'),
+    previewNote:
+      '静态结构：Row 渲染为 <div data-slot="row">（class flex，flexWrap 按 wrap 配置，justifyContent / alignItems 由 justify / align 映射）；gutter 经 React Context 传给子级 Col（Col 以 padding 对半拆分，Row 根节点负 margin 抵消首尾列留白）；Col 渲染为 <div data-slot="col">（基础占位经 inline style：span 换算 width 百分比、offset 换算 margin-left 百分比、order / pull / push / flex 直写，span 0 为 display:none），响应式档位（xs/sm/md/lg/xl/xxl）经客户端注入的 style 标签媒体查询类实现（!important 覆盖基础内联样式）。',
+    variants: [
+      { name: 'gutter 栏间距', visual: 'Row gutter=[水平, 垂直]，Col 自动留白', scene: '卡片墙、表单多列，间距统一管理' },
+      { name: 'justify / align', visual: 'center / space-between 等 6 档 + top/middle/bottom/stretch', scene: '行内对齐与垂直对齐控制' },
+      { name: 'span / offset', visual: 'Col 按 24 分栏占比 + 左侧偏移', scene: '视觉稿栅格标注直译' },
+      { name: '响应式断点', visual: 'md: { span: 8 } 在断点处切换占位', scene: '桌面多列、移动端单列' },
+    ],
+    apiProps: [
+      { name: 'gutter', type: 'number | [number, number]', defaultValue: '0', description: '栏间距（px）；数组为 [水平, 垂直]；经上下文传给 Col 对半拆分为 padding' },
+      { name: 'justify', type: "'start' | 'end' | 'center' | 'space-around' | 'space-between' | 'space-evenly'", defaultValue: "'start'", description: '水平排列（flex justify-content）' },
+      { name: 'align', type: "'top' | 'middle' | 'bottom' | 'stretch'", defaultValue: "'top'", description: '垂直对齐（align-items）' },
+      { name: 'wrap', type: 'boolean', defaultValue: 'true', description: '是否换行（flex-wrap）' },
+      { name: 'className / style', type: 'string / CSSProperties', defaultValue: '—', description: '通用：根节点 class 合并 / 内联样式' },
+    ],
+    guidelines: [
+      '- 一行一组 Col：Row 只做行容器，跨行内容拆多个 Row，不靠 wrap 硬撑不规则布局。',
+      '- gutter 用数组分别控制水平 / 垂直间距，比在 Col 上手写 margin 一致且好改。',
+      '- 响应式档位按「移动优先」声明：基础 span 给小屏值，md/lg 档位逐级放大。',
+    ].join('\n'),
+    examplesDo: [
+      '详情页双栏：Row gutter={16}，Col span=12 两列表单区。',
+      '指标区：Row justify="space-between"，四个 Col span=6 卡片。',
+    ],
+    examplesDont: [
+      '用 Row 表达等宽均分指标墙（应使用 Grid）。',
+      '在 Col 内部再手写负 margin 抵消 gutter（gutter 已内建首尾抵消）。',
+    ],
+  },
+  'component.col': {
+    dsl: {
+      "type": "Row",
+      "props": {
+        "gutter": 16
+      },
+      "children": [
+        {
+          "type": "Col",
+          "props": {
+            "span": 24,
+            "md": {
+              "span": 8,
+              "offset": 2
+            }
+          },
+          "children": [
+            {
+              "type": "Card",
+              "props": {
+                "title": "左侧内容"
+              },
+              "children": [
+                {
+                  "type": "Text",
+                  "props": {
+                    "text": "移动端整行，md 起占 8 栏并偏移 2 栏"
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "Col",
+          "props": {
+            "span": 24,
+            "md": 14
+          },
+          "children": [
+            {
+              "type": "Card",
+              "props": {
+                "title": "右侧内容"
+              },
+              "children": [
+                {
+                  "type": "Text",
+                  "props": {
+                    "text": "md 起占 14 栏"
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    whenToUse: [
+      '**何时使用**',
+      '',
+      '- 24 分栏占位：span 按 24 分栏换算宽度，offset 平移起始栏位。',
+      '- 断点切换布局：xs~xxl 档位在断点处改变占位 / 偏移 / 顺序（响应式详情页、仪表盘）。',
+      '- 排列顺序调整：order / push / pull 在不改 DOM 顺序的前提下调整视觉位置。',
+      '',
+      '**何时不用**',
+      '',
+      '- 等宽均分：使用 Grid。',
+      '- 只是包一层容器加内边距：使用 Container / Space。',
+      '- 无栅格语义的独立区块：直接用块级元素或 Flex。',
+    ].join('\n'),
+    previewNote:
+      '静态结构：Col 渲染为 <div data-slot="col">（class min-w-0 防内容撑破栅格 + 响应式媒体查询类）；基础占位 inline style：span → width 百分比、offset → margin-left 百分比、order → order、pull → position relative + right、push → left、flex 数字展开为 0 0 Npx，span 0 为 display none；响应式档位（xs/sm/md/lg/xl/xxl，断点同 antd：xs <576，其余 min-width）number 简写 span 或对象 { span, offset, order, pull, push }，经客户端注入 style 标签（!important 覆盖基础内联样式）；在 Row 内读取 gutter 上下文对半拆分为 padding。',
+    variants: [
+      { name: 'span 占位', visual: '24 分栏换算宽度（span 6 = 25%）', scene: '视觉稿栅格标注直译' },
+      { name: 'offset 偏移', visual: 'margin-left 平移起始栏位', scene: '表单列留白、不对称布局' },
+      { name: '响应式断点', visual: 'md / lg 档位切换占位与偏移', scene: '移动单列 → 桌面多列' },
+      { name: 'order / push / pull', visual: '不改变 DOM 顺序调整视觉位置', scene: '移动端内容优先排列' },
+    ],
+    apiProps: [
+      { name: 'span', type: 'number（0–24）', defaultValue: '24', description: '栅格占位（24 分栏换算宽度百分比）；0 隐藏' },
+      { name: 'offset', type: 'number', defaultValue: '—', description: '左侧偏移栏数（margin-left 百分比）' },
+      { name: 'order', type: 'number', defaultValue: '—', description: '排列顺序（CSS order）' },
+      { name: 'pull / push', type: 'number', defaultValue: '—', description: '右移 / 左移栏数（position relative + right / left 百分比）' },
+      { name: 'flex', type: 'string | number', defaultValue: '—', description: 'flex 值；number 展开为 0 0 Npx' },
+      { name: 'xs / sm / md / lg / xl / xxl', type: 'number | { span?, offset?, order?, pull?, push? }', defaultValue: '—', description: '响应式档位（断点同 antd）；number 简写 span' },
+      { name: 'className / style', type: 'string / CSSProperties', defaultValue: '—', description: '通用：根节点 class 合并 / 内联样式（与栅格样式合并，同键后者优先）' },
+    ],
+    guidelines: [
+      '- 基础 span 给小屏值、md/lg 档位逐级放大（移动优先），不要在基础值上写死桌面布局。',
+      '- 同一行 Col 的 span 之和 ≤ 24（超出自动换行，别靠这个拼不规则布局）。',
+      '- 内容放 min-w-0 约束内：长文本 / 表格列内容需自行处理溢出，Col 已内置 min-w-0。',
+    ].join('\n'),
+    examplesDo: [
+      '详情页：Col span=24 md=12 双列表单，移动端自动叠单列。',
+      '列表页：Col span=24 md={span: 8, offset: 2} 让主内容区居中偏左。',
+    ],
+    examplesDont: [
+      '用 Col 表达等宽均分（应使用 Grid）。',
+      'span 之和超 24 且依赖换行位置做布局（应拆多行 Row）。',
+    ],
+  },
   'component.splitter': {
     dsl: {
       "type": "Resizable",

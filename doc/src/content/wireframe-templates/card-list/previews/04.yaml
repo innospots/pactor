@@ -4,73 +4,32 @@ title: 2.8 插件列表示例（上中下 + 平铺）
 height: 220
 center: true
 body:
-  type: Card
+  type: EntityCard
   props:
+    icon: users
+    title: 用户管理
+    subtitle: v0.1.0
+    description: 管理插件安装状态与运行生命周期。
+    hoverable: true
     style: { width: 380 }
-  children:
-    - type: Flex
-      props:
-        direction: vertical
-        gap: 8
-      children:
-        # 上层·平铺：左 Logo+标题+版本，右状态 Tag
-        - type: Flex
-          props:
-            justify: space-between
-            align: center
-          children:
-            - type: Flex
-              props:
-                align: center
-                gap: 8
-              children:
-                - type: Flex
-                  props:
-                    align: center
-                    justify: center
-                    className: size-9 rounded-md bg-muted
-                  children:
-                    - type: Icon
-                      props:
-                        name: package
-                - type: Flex
-                  props:
-                    direction: vertical
-                    gap: 2
-                  children:
-                    - type: Text
-                      props:
-                        text: 用户管理
-                        strong: true
-                    - type: Text
-                      props:
-                        text: v0.1.0
-                        type: secondary
-                        size: small
-            - type: Tag
-              props:
-                text: 已安装
-                color: success
-        # 中层·居左：描述·muted（固定两行高度，超出截断）
-        - type: Text
-          props:
-            text: 管理插件安装状态与运行生命周期。
-            type: secondary
-            size: small
-            className: line-clamp-2
-            style: { minHeight: 32 }
-        # 下层·居右·浅底栏：右下长方形「停用」，独立点击 + 二次确认
-        - type: Flex
-          props:
-            justify: end
-            gap: 4
-            className: -mx-4 -mb-4 mt-1 rounded-b-lg bg-muted px-4 py-2
-          children:
-            - type: Popconfirm
-              props:
-                title: 确认停用「用户管理」？
-                description: 停用后依赖该插件的功能将不可用。
-              children:
-                - type: Button
-                  props:
-                    text: 停用
+    tags:
+      - { text: 已安装, color: success }
+    actions:
+      - { text: 停用 }
+  events:
+    # 整卡可点进详情；「停用」独立点击 + 二次确认（不触发整卡点击）
+    onClick:
+      - action: message
+        params: { messageType: info, text: 进入「用户管理」详情 }
+    onAction:
+      - action: confirm
+        id: disableConfirm
+        params:
+          title: 确认停用「用户管理」？
+          content: 停用后依赖该插件的功能将不可用。
+      - action: if
+        params:
+          condition: ${actions.disableConfirm}
+          then:
+            - action: message
+              params: { messageType: success, text: 已停用「用户管理」 }

@@ -4,41 +4,59 @@ title: L1 — 响应式网格（默认）
 state:
   plugins:
     - id: 1
-      name: 用户管理
-      version: 0.1.0
-      desc: 管理插件安装状态与运行生命周期，支持启停与依赖检查。
-      statusText: 已安装
-      statusColor: success
+      icon: users
+      title: 用户管理
+      subtitle: v0.1.0
+      description: 管理插件安装状态与运行生命周期，支持启停与依赖检查。
+      tags:
+        - { text: 已安装, color: success }
+      actions:
+        - { text: 停用 }
     - id: 2
-      name: 数据同步
-      version: 2.3.1
-      desc: 定时将外部数据源同步至平台，支持增量与全量两种模式。
-      statusText: 已安装
-      statusColor: success
+      icon: database
+      title: 数据同步
+      subtitle: v2.3.1
+      description: 定时将外部数据源同步至平台，支持增量与全量两种模式。
+      tags:
+        - { text: 已安装, color: success }
+      actions:
+        - { text: 停用 }
     - id: 3
-      name: 审计日志
-      version: 1.8.0
-      desc: 记录平台关键操作与登录行为，提供检索与导出能力。
-      statusText: 未安装
-      statusColor: default
+      icon: file-text
+      title: 审计日志
+      subtitle: v1.8.0
+      description: 记录平台关键操作与登录行为，提供检索与导出能力。
+      tags:
+        - { text: 未安装 }
+      actions:
+        - { text: 安装, variant: primary }
     - id: 4
-      name: 消息通知
-      version: 3.0.2
-      desc: 站内信、邮件与 Webhook 多渠道通知，支持模板配置。
-      statusText: 已安装
-      statusColor: success
+      icon: bell
+      title: 消息通知
+      subtitle: v3.0.2
+      description: 站内信、邮件与 Webhook 多渠道通知，支持模板配置。
+      tags:
+        - { text: 已安装, color: success }
+      actions:
+        - { text: 停用 }
     - id: 5
-      name: 报表中心
-      version: 0.9.5
-      desc: 预置常用运营报表，支持自定义指标与订阅推送。
-      statusText: 未安装
-      statusColor: default
+      icon: chart
+      title: 报表中心
+      subtitle: v0.9.5
+      description: 预置常用运营报表，支持自定义指标与订阅推送。
+      tags:
+        - { text: 未安装 }
+      actions:
+        - { text: 安装, variant: primary }
     - id: 6
-      name: 文件存储
-      version: 1.2.4
-      desc: 对接对象存储服务，提供统一的上传、预览与权限管理。
-      statusText: 已安装
-      statusColor: success
+      icon: folder
+      title: 文件存储
+      subtitle: v1.2.4
+      description: 对接对象存储服务，提供统一的上传、预览与权限管理。
+      tags:
+        - { text: 已安装, color: success }
+      actions:
+        - { text: 停用 }
 body:
   type: Page
   children:
@@ -91,79 +109,15 @@ body:
             - type: Button
               props:
                 text: 重置
-    # 卡片网格：For 承担网格容器（maxColumns 4，预览取 3 列）
-    - type: For
+    # 卡片网格 + 结果计数：CardList 业务组件一次完成
+    - type: CardList
       props:
         items: ${state.plugins}
-        keyField: id
         columns: 3
-      children:
-        - type: Card
-          children:
-            - type: Flex
-              props:
-                direction: vertical
-                gap: 8
-              children:
-                # 上层·平铺：左 Logo+标题+版本，右状态 Tag
-                - type: Flex
-                  props:
-                    justify: space-between
-                    align: center
-                  children:
-                    - type: Flex
-                      props:
-                        align: center
-                        gap: 8
-                      children:
-                        - type: Flex
-                          props:
-                            align: center
-                            justify: center
-                            className: size-9 rounded-md bg-muted
-                          children:
-                            - type: Icon
-                              props:
-                                name: package
-                        - type: Flex
-                          props:
-                            direction: vertical
-                            gap: 2
-                          children:
-                            - type: Text
-                              props:
-                                text: ${row.name}
-                                strong: true
-                            - type: Text
-                              props:
-                                text: v${row.version}
-                                type: secondary
-                                size: small
-                    - type: Tag
-                      props:
-                        text: ${row.statusText}
-                        color: ${row.statusColor}
-                # 中层·居左：描述区域固定两行高度，超出截断
-                - type: Text
-                  props:
-                    text: ${row.desc}
-                    type: secondary
-                    size: small
-                    className: line-clamp-2
-                    style: { minHeight: 32 }
-                # 下层·居右·浅底栏：主操作长方形按钮
-                - type: Flex
-                  props:
-                    justify: end
-                    gap: 4
-                    className: -mx-4 -mb-4 mt-1 rounded-b-lg bg-muted px-4 py-2
-                  children:
-                    - type: Button
-                      props:
-                        text: 停用
-    # 结果计数（卡片列表常仅展示总数）
-    - type: Text
-      props:
-        text: 共 ${state.plugins.length} 个
-        type: secondary
-        size: small
+        showCount: true
+      events:
+        onItemAction:
+          - action: message
+            params:
+              messageType: info
+              text: 已触发「${event.text}」：${event.item.title}

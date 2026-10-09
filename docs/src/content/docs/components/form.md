@@ -67,6 +67,7 @@ Form 内声明 `name` 的 Input / NumberInput / Select 及本页其余录入组�
 | `options` | `{ label, value, disabled? }[]`（value: string \| number \| boolean） | 选项列表；`disabled: true` 的选项不可选；远程任意字段名经 dataSource 的 `valueField` / `labelField` / `disabledField` 映射 |
 | `value` | string \| number \| boolean | 同 Input 的初始值语义 |
 | `allowClear` | boolean | 可清空 |
+| `showSearch` | boolean | 选项搜索：`true` 始终展示搜索框，`false` 禁止；缺省选项数 > 10 时自动展示。按 label 包含匹配过滤（大小写不敏感），弹层关闭后搜索词自动清空 |
 | `controlClassName` | string | 控件本体 class（挂载规则同 Input） |
 | 事件 `onChange` | — | 传出选中 value |
 

@@ -164,7 +164,18 @@ export function Composer({
   const modelEnabled = models !== undefined && models.length > 0;
   const currentModel = models?.find((m) => m.value === model) ?? models?.[0];
 
-  const chips = contextItems ?? [];
+  const [innerChips, setInnerChips] = useState<ComposerContextItem[]>([]);
+  // contextItems 未提供时块列表内部自持（非受控）：否则 MentionInput 的
+  // 受控同步效应会以空列表把刚插入的行内块全部移除
+  const chipsControlled = contextItems !== undefined;
+  const chips = chipsControlled ? contextItems : innerChips;
+
+  const handleChipsChange = (next: ComposerContextItem[]): void => {
+    if (!chipsControlled) {
+      setInnerChips(next);
+    }
+    onContextItemsChange?.(next);
+  };
 
   const closePopovers = (): void => {
     setPlusOpen(false);
@@ -198,7 +209,7 @@ export function Composer({
         (existing) => existing.id === chip.id && existing.trigger === chip.trigger,
       );
       if (!duplicated) {
-        onContextItemsChange?.([...chips, chip]);
+        handleChipsChange([...chips, chip]);
       }
     }
     closePopovers();
@@ -310,7 +321,7 @@ export function Composer({
                 disabled={disabled || loading}
                 sources={sources}
                 chips={chips}
-                onChipsChange={onContextItemsChange}
+                onChipsChange={handleChipsChange}
                 onChange={handleChange}
                 onSubmit={handleSubmit}
               />
