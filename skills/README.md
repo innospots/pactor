@@ -78,7 +78,7 @@ ln -s node_modules/@pactor-app/skills/pactor-prd ~/.claude/skills/pactor-prd
 | 路径 | 作用 |
 | --- | --- |
 | `pactor-prd/template/` | 可运行模板工程（common + provider/route 参考模块） |
-| `pactor-prd/references/*.md` | 目录结构、组件映射、页模板、mock、主题、验收清单 |
+| `pactor-prd/references/*.md` | 目录结构、组件映射、页模板、mock、主题、验收清单、资产库查找（`doc/` 组件/模板/业务组件文档） |
 
 详见 [`pactor-prd/SKILL.md`](pactor-prd/SKILL.md) 与 [`pactor-prd/template/README.md`](pactor-prd/template/README.md)。
 

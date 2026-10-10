@@ -336,6 +336,7 @@ export const businessDetailContents: Record<string, ComponentDetailContent> = {
       { name: 'required', type: 'boolean', defaultValue: 'false', description: '必填标记（label 后显示 *）' },
       { name: 'readonly', type: 'boolean', defaultValue: 'false', description: '表达式文本只读（隐藏编辑按钮）' },
       { name: 'viewOnly', type: 'boolean', defaultValue: 'false', description: '只读展示模式：控件禁用、隐藏编辑 / 确定 / 取消按钮' },
+      { name: 'size', type: "'small' | 'middle' | 'large'", defaultValue: "'middle'", description: '控件尺寸令牌：small h-8 / middle h-9（默认）/ large h-10；内部控件同令牌联动，与基础表单控件混排保持一致' },
       { name: 'className', type: 'string', defaultValue: '—', description: '根容器类名' },
       { name: 'onValidityChange', type: '(invalid: boolean) => void', defaultValue: '—', description: '编辑态草稿存在未通过校验项时上报 true，供外层表单提交前阻断' },
     ],
@@ -391,18 +392,20 @@ export const businessDetailContents: Record<string, ComponentDetailContent> = {
       '- 含函数调用、运算符混排的自由表达式：使用 ExpressionEditor 或 RuleExpression。',
     ].join('\n'),
     previewNote:
-      '静态结构：根节点为条件组容器——组内 >1 条时顶部展示「且 / 或」relation 切换按钮（AND=蓝 / OR=橙）；每条条件一行：字段（SearchableSelect 选候选字段）→ 操作符（Select，13 个操作符按 fieldType 白名单过滤）→ 值输入（NUMBER→数字、DATE→日期、BETWEEN→双输入 ~ 分隔、无值操作符 HASVAL / NOHASVAL / TRUE / FALSE 隐藏值输入）；行尾删除按钮（组内仅 1 条时隐藏），底部「添加条件」按钮（disabled 时隐藏）。当前实现单层结构：只渲染第一个分组，根 relation 仅用于组间连接；字段变更重置操作符与值，操作符变更在值语义变化时重置 value；statementToCondition 仅支持单层解析（顶层 || 组成单个 OR 组，否则 && 组成 AND 组，支持生成器外层括号与简单 AI 格式），无法解析返回 null。',
+      '静态结构：根节点为条件组容器——组内 >1 条时顶部展示「且 / 或」relation 切换按钮（AND=蓝 / OR=橙）；每条条件一行：字段（SearchableSelect 选候选字段）→ 操作符（Select，w-28 固定宽，13 个操作符按 fieldType 白名单过滤）→ 值输入（NUMBER→数字 Input、DATE→DatePicker 弹层日历、BETWEEN→双值输入（日期为双 DatePicker）以 ~ 分隔、无值操作符 HASVAL / NOHASVAL / TRUE / FALSE 隐藏值输入）；行内全部控件（字段 / 操作符 / 值输入）统一走 control-size 尺寸令牌、随 size prop 联动（small h-8 / middle h-9 / large h-10），与基础表单控件混排高度一致；行尾删除按钮（组内仅 1 条时隐藏），底部「添加条件」按钮（disabled 时隐藏）。当前实现单层结构：只渲染第一个分组，根 relation 仅用于组间连接；字段变更重置操作符与值，操作符变更在值语义变化时重置 value；statementToCondition 仅支持单层解析（顶层 || 组成单个 OR 组，否则 && 组成 AND 组，支持生成器外层括号与简单 AI 格式），无法解析返回 null。',
     variants: [
       { name: '操作符按字段类型过滤', visual: '13 个操作符，按 fieldType 白名单收敛', scene: 'BOOLEAN 只出 TRUE / FALSE，NUMBER / DATE 才出 BETWEEN，IN / NOT_IN 限 NUMBER / STRING' },
-      { name: 'BETWEEN 范围输入', visual: '双值输入，~ 分隔', scene: '数值 / 日期区间条件' },
+      { name: 'BETWEEN 范围输入', visual: '双值输入，~ 分隔（日期为双 DatePicker）', scene: '数值 / 日期区间条件' },
       { name: '无值操作符', visual: 'HASVAL / NOHASVAL / TRUE / FALSE 隐藏值输入', scene: '只看有无值的存在性条件' },
       { name: 'relation 切换', visual: 'AND=蓝 / OR=橙「且 / 或」', scene: '组内 >1 条时切换连接方式' },
+      { name: 'size 尺寸令牌', visual: 'small / middle（默认）/ large 三档，行内控件同档联动', scene: '与基础表单控件混排时对齐页面密度' },
     ],
     apiProps: [
       { name: 'value', type: 'FieldConditionValue', defaultValue: 'defaultFieldConditionValue()', description: '受控条件树：{ relation, children: 分组[] }，每条 { field, term, value? }' },
       { name: 'onChange', type: '(value: FieldConditionValue) => void', defaultValue: '—', description: '条件树变更回调' },
       { name: 'fields', type: 'ConditionFieldOption[]', defaultValue: '[]', description: '候选字段（datasource.json 结构：featureCode / featureName / fieldType / recommended）' },
       { name: 'disabled', type: 'boolean', defaultValue: 'false', description: '禁用：隐藏添加 / 删除入口，控件全部禁用' },
+      { name: 'size', type: "'small' | 'middle' | 'large'", defaultValue: "'middle'", description: '控件尺寸令牌：small h-8 / middle h-9（默认）/ large h-10；内部控件同令牌联动，与基础表单控件混排保持一致' },
     ],
     guidelines: [
       '- fields 来自 datasource.json 结构，featureCode 唯一；fieldType（DATE / STRING / NUMBER / BOOLEAN）决定操作符白名单，必须准确。',
@@ -457,6 +460,7 @@ export const businessDetailContents: Record<string, ComponentDetailContent> = {
       { name: 'value', type: 'RuleConfigValue', defaultValue: '—', description: '受控值：{ score?: number; ruleConditions: Condition[] }' },
       { name: 'onChange', type: '(value: RuleConfigValue) => void', defaultValue: '—', description: '规则值变更回调' },
       { name: 'disabled', type: 'boolean', defaultValue: 'false', description: 'true 时为只读展示形态' },
+      { name: 'size', type: "'small' | 'middle' | 'large'", defaultValue: "'middle'", description: '控件尺寸令牌：small h-8 / middle h-9（默认）/ large h-10；内部控件同令牌联动，与基础表单控件混排保持一致' },
     ],
     guidelines: [
       '- 接入 react-hook-form 用 validate 组合 isRuleConfigComplete / getIncompleteConditions：对象值对 required 恒为真值，必须显式校验。',
@@ -520,6 +524,7 @@ export const businessDetailContents: Record<string, ComponentDetailContent> = {
       { name: 'placeholder', type: 'string', defaultValue: '—', description: '占位符（空态伪元素展示）' },
       { name: 'disabled', type: 'boolean', defaultValue: 'false', description: '禁用：contentEditable 关闭，chip 不渲染删除按钮' },
       { name: 'id', type: 'string', defaultValue: '—', description: '编辑器 DOM 的 id' },
+      { name: 'size', type: "'small' | 'middle' | 'large'", defaultValue: "'middle'", description: '控件尺寸令牌：small h-8 / middle h-9（默认）/ large h-10；内部控件同令牌联动，与基础表单控件混排保持一致' },
       { name: 'className', type: 'string', defaultValue: '—', description: '外层容器类名' },
     ],
     guidelines: [
@@ -659,6 +664,7 @@ export const businessDetailContents: Record<string, ComponentDetailContent> = {
       { name: 'showSearch', type: 'boolean', defaultValue: 'undefined（>8 自动）', description: '是否展示搜索框；缺省按 options.length > 8 自动' },
       { name: 'multiple', type: 'boolean', defaultValue: 'false', description: '多选模式' },
       { name: 'fullOptionText', type: 'boolean', defaultValue: 'false', description: '选项完整显示：不截断，弹层宽度自适应内容' },
+      { name: 'size', type: "'small' | 'middle' | 'large'", defaultValue: "'middle'", description: '控件尺寸令牌：small h-8 / middle h-9（默认）/ large h-10；内部控件同令牌联动，与基础表单控件混排保持一致' },
       { name: 'listClassName / className', type: 'string', defaultValue: '—', description: '下拉列表（CommandList）/ 触发器样式' },
     ],
     guidelines: [

@@ -2,7 +2,7 @@
 name: pactor-prd
 description: |
   Use when PRD or markdown wireframes drive Pactor YAML pages (skill id pactor-prd). Greenfield: copy template/ into a new repo. Incremental: in an existing Pactor project, add or update pages from new/changed wireframe files (DSL, sitemap, menus, data API, styles). Triggers: pactor-prd, prd-to-app, 线框图增量, 已有项目加页面, PRD 更新页面.
-version: 1.5.0
+version: 1.6.0
 ---
 
 # PRD → YAML 页面应用生成
@@ -73,6 +73,7 @@ version: 1.5.0
 - **增量**：仅 **add** 新建文件；**update** 改已有 yaml；**deprecate** 删文件并改 sitemap（须用户确认）
 - 校验见 `page-inventory-and-files.md`（全量）或 `incremental-wireframe-delta.md`（增量）
 - 按 `references/component-mapping.md` 映射组件；按 `references/page-templates.md` 选列表/详情/表单模板（**数据列表页直接复制 `yaml/models/data-list.yaml` 替换占位符**）；表单一律 `Form` 包裹
+- **组件/模板/业务组件拿不准时先查资产库**（`references/asset-library.md`）：组件详情含可套用的 DSL 示例与 whenToUse，线框模板含可渲染的提炼 DSL；业务组件以 details 条目 + packages/ui 导出为准（catalog 的 integration 字段不可信）
 - 同步更新 `sitemap.yaml` 的 `pages` + `menus`（hidden 详情/编辑带 `activeMenu`）
 - 每页 dataSources 全部 `type: http`：**有接口文档 → url 取文档接口地址**；无 → 按 `references/data-api.md` 命名约定写 `/api/d/...`（转发层空数据回退，无需 mock）；交互 events + actions 闭环
 
@@ -92,6 +93,7 @@ version: 1.5.0
 | `references/incremental-wireframe-delta.md` | **已有工程**：线框图 add/update/deprecate、改 sitemap/数据接口/样式 |
 | `references/project-structure.md` | 阶段 2：目录结构约定与 sitemap.yaml 骨架 |
 | `references/component-mapping.md` | 阶段 3：线框图区域 → pactor 组件映射 |
+| `references/asset-library.md` | 阶段 3–4：查资产库组件详情（DSL 示例/whenToUse）、线框模板（可渲染 DSL）、业务组件真伪核对、主题令牌；线上 https://pactor.innospots.com 或源码 `doc/` |
 | `references/page-templates.md` | 阶段 3：列表/详情/表单页 yaml 模板；数据列表页默认用「数据列表标准模型」（搜索 Form + 表格 + 抽屉新建/编辑） |
 | `references/data-api.md` | 阶段 3：数据接口层约定（纯转发、路径即契约、空数据回退、路径命名） |
 | `references/theme-and-style.md` | 阶段 4：主题令牌提取、皮肤、自定义 CSS、换肤 |
