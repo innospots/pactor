@@ -1,8 +1,10 @@
+import { useI18n } from '@pactor-app/runtime';
 import { Clock } from 'lucide-react';
 import { useEffect, useId, useState, type CSSProperties } from 'react';
 
 import { cn } from '../../../lib/utils.js';
 import { Popover, PopoverContent, PopoverTrigger } from '../../../ui/popover.js';
+import { CLEARABLE_GROUP, CLEARABLE_ICON_HIDE, ClearHoverButton } from '../../clearable.js';
 import { CONTROL_SIZE_BOX, type ControlSize } from '../../control-size.js';
 import { useFormContext } from '../Form/context.js';
 import { FieldShell } from '../Form/form-item.js';
@@ -23,8 +25,10 @@ export interface TimePickerProps {
   disabled?: boolean;
   /** 控件尺寸（默认 middle，即现行 h-9 尺寸） */
   size?: ControlSize;
-  /** 时间变化事件，传出按 format 格式化的时间字符串 */
-  onChange?: (value: string) => void;
+  /** hover 清除（缺省开启，传 false 关闭）：有值时悬停触发器，时钟图标替换为 ×，点击清空（传出 undefined） */
+  allowClear?: boolean;
+  /** 时间变化事件，传出按 format 格式化的时间字符串；清除时传出 undefined */
+  onChange?: (value: string | undefined) => void;
   /** 通用：根节点 class（Form 内为 form-item 容器，独立渲染时为触发器） */
   className?: string;
   /** 通用：根节点内联样式（同 className 的挂载规则） */
@@ -73,11 +77,13 @@ export function TimePicker({
   placeholder,
   disabled,
   size = 'middle',
+  allowClear,
   onChange,
   className,
   style,
 }: TimePickerProps) {
   const form = useFormContext();
+  const { t } = useI18n();
   const controlId = useId();
   const inForm = form?.inForm === true && typeof name === 'string' && name !== '';
   const [open, setOpen] = useState(false);
@@ -99,6 +105,16 @@ export function TimePicker({
 
   const current = inForm && form && name ? form.values[name] : innerValue;
   const displayText = typeof current === 'string' ? current : '';
+  // hover 清除：有值且未禁用时，悬停把触发器右侧时钟图标替换为 ×
+  const showClear = allowClear !== false && disabled !== true && displayText !== '';
+  const handleClear = () => {
+    if (inForm && form && name) {
+      form.setValue(name, undefined);
+    } else {
+      setInnerValue(undefined);
+    }
+    onChange?.(undefined);
+  };
 
   // 弹层内待选值（打开时以当前值或此刻初始化）
   const [pending, setPending] = useState<TimeParts>(() => nowParts());
@@ -159,6 +175,7 @@ export function TimePicker({
         className={cn(
           'flex h-9 w-full min-w-0 cursor-pointer items-center justify-between gap-2 rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-xs transition-colors outline-none hover:bg-accent focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:cursor-not-allowed disabled:opacity-50',
           CONTROL_SIZE_BOX[size],
+          CLEARABLE_GROUP,
           displayText === '' && 'text-muted-foreground',
           !inForm && className,
         )}
@@ -167,7 +184,12 @@ export function TimePicker({
         <span className="min-w-0 flex-1 truncate text-left">
           {displayText === '' ? (placeholder ?? '请选择时间') : displayText}
         </span>
-        <Clock className="size-4 shrink-0 opacity-50" />
+        {showClear ? (
+          <ClearHoverButton label={t('pactor.control.clear')} onClear={handleClear} />
+        ) : null}
+        <Clock
+          className={cn('size-4 shrink-0 opacity-50', showClear && CLEARABLE_ICON_HIDE)}
+        />
       </PopoverTrigger>
       <PopoverContent className="w-auto p-3">
         <div data-slot="timepicker-panel" className="flex flex-col gap-2">

@@ -20,6 +20,7 @@ import { useEffect, useId, useState, type CSSProperties } from 'react';
 import { cn } from '../../../lib/utils.js';
 import { Calendar as ShadcnCalendar } from '../../../ui/calendar.js';
 import { Popover, PopoverContent, PopoverTrigger } from '../../../ui/popover.js';
+import { CLEARABLE_GROUP, CLEARABLE_ICON_HIDE, ClearHoverButton } from '../../clearable.js';
 import { CONTROL_SIZE_BOX, type ControlSize } from '../../control-size.js';
 import { formItemClass, useFormContext } from '../Form/context.js';
 import type { FieldRule } from '../Input/index.js';
@@ -56,6 +57,8 @@ interface DatePickerCommonProps {
   disabled?: boolean;
   /** 控件尺寸（默认 middle，即现行 h-9 尺寸） */
   size?: ControlSize;
+  /** hover 清除（缺省开启，传 false 关闭）：有值时悬停触发器，日历图标替换为 ×，点击清空当前值 */
+  allowClear?: boolean;
   /**
    * 快捷预设栏：未提供时 range 模式缺省为内置三项（今天/本周/本月），
    * single 模式不渲染；`false` 显式关闭
@@ -141,6 +144,7 @@ export function DatePicker(props: DatePickerProps) {
     placeholder,
     disabled,
     size = 'middle',
+    allowClear,
     presets,
     className,
     style,
@@ -346,6 +350,8 @@ export function DatePicker(props: DatePickerProps) {
     : typeof current === 'string'
       ? current
       : '';
+  // hover 清除：有值且未禁用时，悬停把触发器右侧日历图标替换为 ×
+  const showClear = allowClear !== false && disabled !== true && displayText !== '';
   const placeholderText =
     placeholder ??
     t(isRange ? 'pactor.datePicker.placeholderRange' : 'pactor.datePicker.placeholder');
@@ -401,6 +407,7 @@ export function DatePicker(props: DatePickerProps) {
         className={cn(
           'flex h-9 w-full min-w-0 cursor-pointer items-center justify-between gap-2 rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-xs transition-colors outline-none hover:bg-accent focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:cursor-not-allowed disabled:opacity-50',
           CONTROL_SIZE_BOX[size],
+          CLEARABLE_GROUP,
           displayText === '' && 'text-muted-foreground',
           !inForm && className,
         )}
@@ -409,7 +416,15 @@ export function DatePicker(props: DatePickerProps) {
         <span className="min-w-0 flex-1 truncate text-left">
           {displayText === '' ? placeholderText : displayText}
         </span>
-        <CalendarIcon className="size-4 shrink-0 opacity-50" />
+        {showClear ? (
+          <ClearHoverButton
+            label={t('pactor.control.clear')}
+            onClear={() => commit(undefined)}
+          />
+        ) : null}
+        <CalendarIcon
+          className={cn('size-4 shrink-0 opacity-50', showClear && CLEARABLE_ICON_HIDE)}
+        />
       </PopoverTrigger>
       <PopoverContent className="w-auto p-0">
         {presetList.length > 0 ? (

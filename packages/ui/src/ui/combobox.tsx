@@ -28,8 +28,15 @@ function Combobox({
 function ComboboxTrigger({
   className,
   children,
+  endAdornment,
+  iconClassName,
   ...props
-}: React.ComponentProps<'button'>) {
+}: React.ComponentProps<'button'> & {
+  /** 文本与右侧图标之间的附加内容（clearable 的清除按钮） */
+  endAdornment?: React.ReactNode;
+  /** 右侧图标 class（clearable 场景 hover 隐藏、由清除按钮替换） */
+  iconClassName?: string;
+}) {
   return (
     <PopoverTrigger
       data-slot="combobox-trigger"
@@ -40,7 +47,8 @@ function ComboboxTrigger({
       {...props}
     >
       <span className="min-w-0 flex-1 truncate text-left">{children}</span>
-      <ChevronsUpDownIcon className="size-4 shrink-0 opacity-50" />
+      {endAdornment}
+      <ChevronsUpDownIcon className={cn('size-4 shrink-0 opacity-50', iconClassName)} />
     </PopoverTrigger>
   );
 }

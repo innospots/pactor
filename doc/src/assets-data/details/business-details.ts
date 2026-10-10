@@ -664,6 +664,7 @@ export const businessDetailContents: Record<string, ComponentDetailContent> = {
       { name: 'showSearch', type: 'boolean', defaultValue: 'undefined（>8 自动）', description: '是否展示搜索框；缺省按 options.length > 8 自动' },
       { name: 'multiple', type: 'boolean', defaultValue: 'false', description: '多选模式' },
       { name: 'fullOptionText', type: 'boolean', defaultValue: 'false', description: '选项完整显示：不截断，弹层宽度自适应内容' },
+      { name: 'allowClear', type: 'boolean', defaultValue: 'true', description: 'hover 清除（缺省开启，传 false 关闭；仅单选）：有选中值时悬停触发器，× 原位替换上下箭头，点击清空（回传 ""）' },
       { name: 'size', type: "'small' | 'middle' | 'large'", defaultValue: "'middle'", description: '控件尺寸令牌：small h-8 / middle h-9（默认）/ large h-10；内部控件同令牌联动，与基础表单控件混排保持一致' },
       { name: 'listClassName / className', type: 'string', defaultValue: '—', description: '下拉列表（CommandList）/ 触发器样式' },
     ],

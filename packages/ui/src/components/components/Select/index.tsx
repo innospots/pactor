@@ -10,6 +10,7 @@ import {
   SelectValue,
 } from '../../../ui/select.js';
 import { formItemClass, useFormContext } from '../Form/context.js';
+import { CLEARABLE_GROUP, CLEARABLE_ICON_HIDE, ClearHoverButton } from '../../clearable.js';
 import {
   CONTROL_SIZE_SELECT_ATTR,
   CONTROL_SIZE_TRIGGER_TEXT,
@@ -45,6 +46,7 @@ export interface SelectProps {
   disabled?: boolean;
   /** 控件尺寸（默认 middle，即现行 h-9 尺寸） */
   size?: ControlSize;
+  /** hover 清除（缺省开启，传 false 关闭）：有选中值时悬停触发器，下拉箭头替换为 ×，点击清空选中 */
   allowClear?: boolean;
   /** 选中变化事件，传出选中的 value */
   onChange?: (value: unknown) => void;
@@ -110,6 +112,7 @@ export function Select({
     current === undefined || current === null || current === ''
       ? null
       : (current as SelectOption['value']);
+  const showClear = allowClear !== false && disabled !== true && selectedValue !== null;
 
   const handleChange = (next: SelectOption['value'] | null) => {
     if (inForm && form && name) {
@@ -149,9 +152,20 @@ export function Select({
         <SelectTrigger
           id={controlId}
           size={CONTROL_SIZE_SELECT_ATTR[size]}
-          className={cn(CONTROL_SIZE_TRIGGER_TEXT[size], inFormRoot ? 'w-full' : undefined)}
+          iconClassName={showClear ? CLEARABLE_ICON_HIDE : undefined}
+          className={cn(
+            CONTROL_SIZE_TRIGGER_TEXT[size],
+            inFormRoot ? 'w-full' : undefined,
+            CLEARABLE_GROUP,
+          )}
         >
           <SelectValue placeholder={placeholder} />
+          {showClear ? (
+            <ClearHoverButton
+              label={t('pactor.select.clear')}
+              onClear={() => handleChange(null)}
+            />
+          ) : null}
         </SelectTrigger>
         <SelectContent>
           {searchEnabled ? (
@@ -191,21 +205,6 @@ export function Select({
           ) : null}
         </SelectContent>
       </ShadcnSelect>
-      {allowClear && selectedValue !== null && !disabled ? (
-        <button
-          type="button"
-          aria-label={t('pactor.select.clear')}
-          className="cursor-pointer text-muted-foreground hover:text-foreground"
-          onClick={() => {
-            if (inForm && form && name) {
-              form.setValue(name, undefined);
-            }
-            onChange?.(undefined);
-          }}
-        >
-          ×
-        </button>
-      ) : null}
     </span>
   );
 

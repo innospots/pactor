@@ -10,6 +10,10 @@ export type {
 } from './application.js';
 export { ReactRouterBinding } from './application.js';
 
+// 语言偏好持久化适配器（设计 D4）
+export { createLocalStorageLocaleStorage } from './locale-storage.js';
+export type { LocaleStorage } from './locale-storage.js';
+
 // React 组合层（高级用法：不经 mount 自行嵌入时可用）
 export { Application } from './app-shell.js';
 export type { ApplicationProps } from './app-shell.js';

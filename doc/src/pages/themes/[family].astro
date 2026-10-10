@@ -6,8 +6,8 @@
  * 标注「待资产接入」不可点）、跨主题组件对比占位（ExceptionState）。
  */
 import AssetLibraryLayout from '../../layouts/AssetLibraryLayout.astro';
-import StatusBadges from '../../components/StatusBadges.astro';
-import ExceptionState from '../../components/ExceptionState.astro';
+import StatusBadges from '../../components/StatusBadges';
+import ExceptionState from '../../components/ExceptionState';
 import { themes, themeFamilies, themeDefs } from '../../assets-data/themes';
 import { SITE_NAV, findSection } from '../../site-nav';
 import { toInspectAttrs } from '../../lib/inspect';
@@ -94,7 +94,7 @@ const guidance = [
     <div class="page-head-main">
       <h1>{family.name}色系</h1>
       <div class="page-desc">{family.description}</div>
-      <StatusBadges
+      <StatusBadges client:visible
         maturity={family.maturity}
         change={family.change}
         integration={family.integration}
@@ -183,7 +183,7 @@ const guidance = [
                   <span class="badge info">传统色：{t.traditionalColorRef}</span>
                 )}
               </div>
-              <StatusBadges
+              <StatusBadges client:visible
                 maturity={t.maturity}
                 change={t.change}
                 integration={t.integration}
@@ -233,6 +233,7 @@ const guidance = [
       kind="empty"
       title="跨主题组件对比预览待接入"
       hint="同一组件在本系多个主题下的渲染对比依赖组件 Token 映射与主题预览能力，均为后续批次；接入前本区不提供静态截图，以免与真实渲染产生偏差。"
+      client:visible
     />
   </section>
 </AssetLibraryLayout>
