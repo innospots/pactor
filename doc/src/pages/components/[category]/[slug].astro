@@ -10,10 +10,12 @@
  */
 import AssetDetail from '../../../templates/AssetDetail.astro';
 import ComponentPreviewSection from '../../../components/previews/ComponentPreviewSection.astro';
+import CopyButton from '../../../components/CopyButton';
 import DslStructureSection from '../../../components/DslStructureSection.astro';
 import { isPreviewable } from '../../../components/previews/previewable';
 import { components } from '../../../assets-data/components';
 import { componentDetailContents } from '../../../assets-data/details/component-details';
+import { buildComponentMarkdown } from '../../../lib/component-markdown';
 import { SITE_NAV, findSection } from '../../../site-nav';
 import type { ComponentCategoryId } from '../../../assets-data/types';
 
@@ -60,6 +62,14 @@ const metaInfoBody = [
   `| 用途 | ${component.purpose} |`,
   `| 描述 | ${component.description} |`,
 ].join('\n');
+
+/** 「复制此页」：与页面章节一致的组件 markdown 文档（构建期生成，无需 JS 取回） */
+const markdownSource = buildComponentMarkdown(
+  component,
+  detail,
+  section.name,
+  currentPath,
+);
 ---
 
 <AssetDetail
@@ -172,4 +182,12 @@ const metaInfoBody = [
     },
   ]}
   related={related}
-/>
+>
+  <CopyButton
+    slot="breadcrumb-extra"
+    text={markdownSource}
+    label="复制此页"
+    appendSource={false}
+    client:visible
+  />
+</AssetDetail>

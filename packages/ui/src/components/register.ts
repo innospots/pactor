@@ -168,6 +168,7 @@ import { RuleConfig } from './business/RuleConfig/index.js';
 import { RuleExpression } from './business/RuleExpression/index.js';
 import { ScriptEditor } from './business/ScriptEditor/index.js';
 import { SearchableSelect } from './business/SearchableSelect/index.js';
+import { SiteFooter } from './business/SiteFooter/index.js';
 
 /**
  * 内置组件表：DSL 类型名 → 组件适配器。
@@ -346,6 +347,7 @@ export const builtinComponents = {
   Login,
   EntityCard,
   CardList,
+  SiteFooter,
   // 业务表单类组件（value/onChange 受控；DSL 用 props.value + events.onChange 读写 ${event}）
   SearchableSelect,
   FieldCondition,

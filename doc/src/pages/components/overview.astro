@@ -7,6 +7,7 @@
 import CategoryOverview from '../../templates/CategoryOverview.astro';
 import ComponentsOverviewSections from '../../components/ComponentsOverviewSections.astro';
 import { components } from '../../assets-data/components';
+import { isPreviewable } from '../../components/previews/previewable';
 import { SITE_NAV } from '../../site-nav';
 
 const category = SITE_NAV.find((c) => c.id === 'components')!;
@@ -14,11 +15,12 @@ const total = components.length;
 const experimentalCount = components.filter(
   (c) => c.maturity === 'experimental',
 ).length;
+const previewableCount = components.filter((c) => isPreviewable(c.id)).length;
 
 const intro = [
   `组件资产按 10 个二级分类组织，合计 ${total} 个组件（首版验收清单，构建期统计）。`,
   '每个组件以规范 ID（`component.<name>`）为唯一引用键，卡片标注成熟度与变更标识；点击分类入口进入集合页，可继续进入组件详情。',
-  `本期 ${experimentalCount > 0 ? `${experimentalCount} 个组件处于实验态` : '组件全部按稳定录入，实验区为空'}；74 个组件已在详情页提供运行态预览（真实 @pactor-app/ui 组件或真实 DSL 渲染，可操作），其余组件因尚无实现（图表高阶图型、媒体、业务组件等）或仅为模型定义（ChatMessage），预览章节如实标注「不适用」，Design Token 映射随后续批次接入。`,
+  `本期 ${experimentalCount > 0 ? `${experimentalCount} 个组件处于实验态` : '组件全部按稳定录入，实验区为空'}；${previewableCount} 个组件已在详情页提供运行态预览（真实 @pactor-app/ui 组件或真实 DSL 渲染，可操作），其余组件因仅为模型定义（ChatMessage）或无运行态预览接入，预览章节如实标注「不适用」，Design Token 映射随后续批次接入。`,
 ].join('\n\n');
 
 const guidance = [
@@ -26,7 +28,7 @@ const guidance = [
   '',
   '- 触发动作还是跳转页面：动作选 Button，跳转选 Link / 导航。',
   '- 全局反馈还是会话消息：反馈分类 Message / Notification 对应全局；ChatMessage 只用于会话内。',
-  '- 表格三层级：Table（常规只读 / 轻操作）→ DataTable（高密度编辑与虚拟化）→ 高级表格（查询、列配置与批量任务）。',
+  '- 表格两层级：Table（常规只读 / 轻操作）→ DataTable（高密度编辑与虚拟化）。',
   '- Spinner 表示紧邻内容的局部处理中；LoadingOverlay 覆盖页面或区块并阻断操作，二者不可互换。',
   '',
   '**成熟度含义**：稳定 = 可生产使用；实验 = 接口或视觉可能调整，使用需评估；废弃 = 保留入口并给出替代项。',

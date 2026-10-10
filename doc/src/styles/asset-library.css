@@ -23,7 +23,6 @@
   --warning: #a96a00;
   --danger: #c53c3c;
   --header: 58px;
-  --footer: 30px;
   --left: 252px;
   --right: 316px;
   --panel-soft: #fafbfc;
@@ -247,7 +246,7 @@ a {
 .shell {
   position: fixed;
   top: var(--header);
-  bottom: var(--footer);
+  bottom: 0;
   left: 0;
   right: 0;
   display: grid;
@@ -822,26 +821,10 @@ h1 {
   margin-top: 0;
 }
 
-/* ===== 底栏 ===== */
-.footer {
-  position: fixed;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  height: var(--footer);
-  background: var(--panel);
-  border-top: 1px solid var(--line);
-  display: flex;
-  align-items: center;
-  padding: 0 15px;
-  font-size: 11px;
-  color: var(--subtle);
-  z-index: 60;
-  white-space: nowrap;
-  overflow: hidden;
-}
-.footer .right {
-  margin-left: auto;
+/* ===== 站点页脚（SiteFooter 岛容器，位于 main 内随内容滚动；
+     边框 / 底色由 SiteFooter 组件自身承载） ===== */
+.site-footer {
+  margin-top: 24px;
 }
 
 /* ===== 数据表（API 属性 / 色阶 / 语义映射 / 覆盖矩阵） ===== */
@@ -1011,7 +994,7 @@ h1 {
   .inspector {
     position: fixed;
     top: var(--header);
-    bottom: var(--footer);
+    bottom: 0;
     z-index: 46;
     transition: transform 0.2s;
     width: 280px;
@@ -1037,7 +1020,7 @@ h1 {
     display: block;
     position: fixed;
     top: var(--header);
-    bottom: var(--footer);
+    bottom: 0;
     left: 0;
     right: 0;
     background: rgba(15, 23, 42, 0.32);
