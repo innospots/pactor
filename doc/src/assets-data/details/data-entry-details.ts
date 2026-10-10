@@ -123,6 +123,7 @@ export const dataEntryDetailContents: Record<string, ComponentDetailContent> = {
       { name: 'placeholder', type: 'string', defaultValue: "'请选择时间'", description: '空态提示文案' },
       { name: 'disabled', type: 'boolean', defaultValue: 'false', description: '禁用触发器' },
       { name: 'onChange', type: '(value: string) => void', defaultValue: '—', description: '时间变化事件，传出按 format 格式化的时间字符串（DSL 语义值）' },
+      { name: 'size', type: "'small' | 'middle' | 'large'", defaultValue: "'middle'", description: '控件尺寸令牌：small h-8 / middle h-9（默认）/ large h-10，与全部表单控件同一令牌，同行混排保持高度一致' },
       { name: 'className', type: 'string', defaultValue: '—', description: '根节点 class（Form 内为 form-item 容器，独立渲染时为触发器）' },
       { name: 'style', type: 'CSSProperties', defaultValue: '—', description: '根节点内联样式（同 className 的挂载规则）' },
     ],
@@ -337,6 +338,7 @@ export const dataEntryDetailContents: Record<string, ComponentDetailContent> = {
       { name: 'searchable', type: 'boolean', defaultValue: 'false', description: '弹层顶部显示过滤输入（按 label 过滤，命中节点的祖先保留展开）' },
       { name: 'disabled', type: 'boolean', defaultValue: 'false', description: '禁用触发器' },
       { name: 'onChange', type: '(value: string | number) => void', defaultValue: '—', description: '选中变化事件，传出选中节点 value（DSL 语义值）' },
+      { name: 'size', type: "'small' | 'middle' | 'large'", defaultValue: "'middle'", description: '控件尺寸令牌：small h-8 / middle h-9（默认）/ large h-10，与全部表单控件同一令牌，同行混排保持高度一致' },
       { name: 'className', type: 'string', defaultValue: '—', description: '根节点 class（Form 内为 form-item 容器，独立渲染时为触发器）' },
       { name: 'style', type: 'CSSProperties', defaultValue: '—', description: '根节点内联样式（同 className 的挂载规则）' },
     ],
@@ -418,6 +420,7 @@ export const dataEntryDetailContents: Record<string, ComponentDetailContent> = {
       { name: 'placeholder', type: 'string', defaultValue: "'请选择'", description: '空态提示文案' },
       { name: 'disabled', type: 'boolean', defaultValue: 'false', description: '禁用触发器' },
       { name: 'onChange', type: '(value: Array<string | number>) => void', defaultValue: '—', description: '选中叶子事件，传出路径 value 数组（DSL 语义值）' },
+      { name: 'size', type: "'small' | 'middle' | 'large'", defaultValue: "'middle'", description: '控件尺寸令牌：small h-8 / middle h-9（默认）/ large h-10，与全部表单控件同一令牌，同行混排保持高度一致' },
       { name: 'className', type: 'string', defaultValue: '—', description: '根节点 class（Form 内为 form-item 容器，独立渲染时为触发器）' },
       { name: 'style', type: 'CSSProperties', defaultValue: '—', description: '根节点内联样式（同 className 的挂载规则）' },
     ],
@@ -571,6 +574,7 @@ export const dataEntryDetailContents: Record<string, ComponentDetailContent> = {
       { name: 'value', type: 'string', defaultValue: '—', description: '受控值（完整字符串）；Form 内作为字段初始值' },
       { name: 'disabled', type: 'boolean', defaultValue: 'false', description: '禁用输入' },
       { name: 'onChange', type: '(value: string) => void', defaultValue: '—', description: '输入变化事件，传出完整字符串（DSL 语义值）' },
+      { name: 'size', type: "'small' | 'middle' | 'large'", defaultValue: "'middle'", description: '控件尺寸令牌：影响内边距与字号（small text-xs / middle text-sm / large text-base），高度由行数/内容决定' },
       { name: 'className', type: 'string', defaultValue: '—', description: '根节点 class（Form 内为 form-item 容器，独立渲染时为控件包裹节点）' },
       { name: 'style', type: 'CSSProperties', defaultValue: '—', description: '根节点内联样式（同 className 的挂载规则）' },
     ],
@@ -636,6 +640,7 @@ export const dataEntryDetailContents: Record<string, ComponentDetailContent> = {
       { name: 'allowClear', type: 'boolean', defaultValue: 'false', description: '值为非空且未禁用时显示清除按钮；开启后独立渲染的 className / style 挂控件包裹节点（含清除按钮）' },
       { name: 'onChange', type: '(value: string) => void', defaultValue: '—', description: '输入事件，传出 string（Renderer 绑定 events.onChange；非原生 event）' },
       { name: 'controlClassName', type: 'string', defaultValue: '—', description: '控件本体 class（无论是否在 Form 内都挂 input 节点；Form 内精确设置控件样式如宽度时使用）' },
+      { name: 'size', type: "'small' | 'middle' | 'large'", defaultValue: "'middle'", description: '控件尺寸令牌：small h-8 / middle h-9（默认）/ large h-10，与全部表单控件同一令牌，同行混排保持高度一致' },
       { name: 'className / style', type: 'string / CSSProperties', defaultValue: '—', description: '通用：根节点 class 合并 / 内联样式（Form 内为 form-item 容器，独立渲染时为控件本身）' },
     ],
     guidelines: [
@@ -697,6 +702,7 @@ export const dataEntryDetailContents: Record<string, ComponentDetailContent> = {
       { name: 'rows', type: 'number', defaultValue: '—', description: '行数；缺省由内容自适应' },
       { name: 'disabled', type: 'boolean', defaultValue: 'false', description: '禁用输入' },
       { name: 'onChange', type: '(value: string) => void', defaultValue: '—', description: '输入事件，传出 string（Renderer 绑定 events.onChange；非原生 event）' },
+      { name: 'size', type: "'small' | 'middle' | 'large'", defaultValue: "'middle'", description: '控件尺寸令牌：影响内边距与字号（small text-xs / middle text-sm / large text-base），高度由行数/内容决定' },
       { name: 'className / style', type: 'string / CSSProperties', defaultValue: '—', description: '通用：根节点 class 合并 / 内联样式（Form 内为 form-item 容器，独立渲染时为文本域本身）' },
     ],
     guidelines: [
@@ -766,6 +772,7 @@ export const dataEntryDetailContents: Record<string, ComponentDetailContent> = {
       { name: 'disabled', type: 'boolean', defaultValue: 'false', description: '禁用输入与步进按钮' },
       { name: 'onChange', type: '(value: number | undefined) => void', defaultValue: '—', description: '输入事件，传出 number，清空时传出 undefined（Renderer 绑定 events.onChange；DSL 语义值）' },
       { name: 'controlClassName', type: 'string', defaultValue: '—', description: '控件本体（input）class（无论是否在 Form 内都挂 input 节点）' },
+      { name: 'size', type: "'small' | 'middle' | 'large'", defaultValue: "'middle'", description: '控件尺寸令牌：small h-8 / middle h-9（默认）/ large h-10，与全部表单控件同一令牌，同行混排保持高度一致' },
       { name: 'className / style', type: 'string / CSSProperties', defaultValue: '—', description: '通用：根节点 class 合并 / 内联样式（Form 内为 form-item 容器，独立渲染时为控件包裹节点）' },
     ],
     guidelines: [
@@ -850,6 +857,7 @@ export const dataEntryDetailContents: Record<string, ComponentDetailContent> = {
       { name: 'allowClear', type: 'boolean', defaultValue: 'false', description: '已选值且未禁用时显示清除按钮（清空为 undefined）' },
       { name: 'onChange', type: '(value: unknown) => void', defaultValue: '—', description: '选中变化事件，传出选中项的原始 value；清空传出 undefined（Renderer 绑定 events.onChange；DSL 语义值）' },
       { name: 'controlClassName', type: 'string', defaultValue: '—', description: '控件本体 class（无论是否在 Form 内都挂控件包裹节点；独立渲染时与 className 同点合并）' },
+      { name: 'size', type: "'small' | 'middle' | 'large'", defaultValue: "'middle'", description: '控件尺寸令牌：small h-8 / middle h-9（默认）/ large h-10，与全部表单控件同一令牌，同行混排保持高度一致' },
       { name: 'className / style', type: 'string / CSSProperties', defaultValue: '—', description: '通用：根节点 class 合并 / 内联样式（Form 内为 form-item 容器，独立渲染时为控件包裹节点）' },
     ],
     guidelines: [
@@ -933,6 +941,7 @@ export const dataEntryDetailContents: Record<string, ComponentDetailContent> = {
       { name: 'searchable', type: 'boolean', defaultValue: 'true', description: '弹层顶部显示过滤输入（按 label / value 匹配）' },
       { name: 'disabled', type: 'boolean', defaultValue: 'false', description: '禁用触发器；选项级禁用用 options 项的 disabled' },
       { name: 'onChange', type: '(value: string | number | undefined) => void', defaultValue: '—', description: '选中变化事件，传出选中项的原始 value（Renderer 绑定 events.onChange；DSL 语义值）' },
+      { name: 'size', type: "'small' | 'middle' | 'large'", defaultValue: "'middle'", description: '控件尺寸令牌：small h-8 / middle h-9（默认）/ large h-10，与全部表单控件同一令牌，同行混排保持高度一致' },
       { name: 'className / style', type: 'string / CSSProperties', defaultValue: '—', description: '通用：根节点 class 合并 / 内联样式（Form 内为 form-item 容器，独立渲染时为触发器）' },
     ],
     guidelines: [
@@ -1258,6 +1267,7 @@ export const dataEntryDetailContents: Record<string, ComponentDetailContent> = {
       { name: 'placeholder', type: 'string', defaultValue: '—', description: '空态提示文案；缺省取 i18n key，按 mode 区分 single / range' },
       { name: 'disabled', type: 'boolean', defaultValue: 'false', description: '禁用触发器' },
       { name: 'presets', type: 'DatePickerPreset[] | false', defaultValue: '—', description: '快捷预设栏：range 缺省内置三项（今天 / 本周 / 本月），single 不渲染，false 显式关闭；项可为 { key, label? } / { label, days } / { label, range }' },
+      { name: 'size', type: "'small' | 'middle' | 'large'", defaultValue: "'middle'", description: '控件尺寸令牌：small h-8 / middle h-9（默认）/ large h-10，与全部表单控件同一令牌，同行混排保持高度一致' },
       { name: 'className / style', type: 'string / CSSProperties', defaultValue: '—', description: '通用：根节点 class 合并 / 内联样式（Form 内为 form-item 容器，独立渲染时为触发器）' },
     ],
     guidelines: [
