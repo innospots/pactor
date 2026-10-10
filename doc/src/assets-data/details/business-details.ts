@@ -318,7 +318,7 @@ export const businessDetailContents: Record<string, ComponentDetailContent> = {
       '- 无模板、无占位符的普通文本输入：使用 Input / Textarea。',
     ].join('\n'),
     previewNote:
-      '静态结构：根节点为纵向编辑器容器——顶部左侧 label（required 时带 *），右侧按钮随状态切换（display 态出「编辑」，edit 态出「取消 / 确定」，viewOnly / readonly 隐藏）；display 态展示可编辑表达式文本（Textarea，实时 emit）；edit 态按 valueTemplate 的 ${key} 占位符拆分（正则 /\\$\\{(\\w+)\\}/g，未在 valueMapping 定义的占位符保留字面量、同 key 去重）渲染子字段控件——type=select 用 SearchableSelect（>10 条启用搜索）、number 用数字输入、fieldCondition 内嵌 FieldCondition（变更经 conditionToStatement 输出语句串、外部值经 statementToCondition 反向回填，用户编辑后不再被覆盖）、其余回退文本输入；确定时逐项执行 validateMappingValue（required 优先、pattern 正则次之），未通过写入 draftErrors 并阻断，同时经 onValidityChange 上报；viewOnly 态以禁用控件形态只读展示解析值；valueTemplate 为空渲染 null。',
+      '静态结构：根节点为纵向编辑器容器——顶部左侧 label（required 时带 *），右侧按钮随状态切换（display 态出「编辑」，edit 态出「取消 / 确定」，viewOnly / readonly 隐藏）；display 态展示可编辑表达式文本（Textarea，实时 emit）；edit 态按 valueTemplate 的占位符拆分（统一正则 /\\$\\{(\\w+)\\}|\\{\\{(\\w+)\\}\\}/g 同时匹配 ${key} 与 {{key}} 两种写法——DSL props 内联书写时用 {{key}} 避免被表达式引擎提前求值；未在 valueMapping 定义的占位符保留字面量、同 key 去重）渲染子字段控件——type=select 用 SearchableSelect（>10 条启用搜索）、number 用数字输入、fieldCondition 内嵌 FieldCondition（变更经 conditionToStatement 输出语句串、外部值经 statementToCondition 反向回填，用户编辑后不再被覆盖）、其余回退文本输入；确定时逐项执行 validateMappingValue（required 优先、pattern 正则次之），未通过写入 draftErrors 并阻断，同时经 onValidityChange 上报；viewOnly 态以禁用控件形态只读展示解析值；valueTemplate 为空渲染 null。',
     variants: [
       { name: 'display / edit 两步编辑', visual: '表达式文本区 ↔ 结构化子字段表单', scene: '既有表达式文本直编灵活性，又有模板参数控件校验' },
       { name: 'viewOnly 只读展示', visual: '解析值以禁用控件形态呈现，无操作按钮', scene: '详情页复用同一结构回显' },
