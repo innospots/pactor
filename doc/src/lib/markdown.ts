@@ -35,12 +35,31 @@ function isTableSeparator(line: string): boolean {
 }
 
 function splitRow(line: string): string[] {
-  return line
+  const t = line
     .trim()
     .replace(/^\|/, '')
-    .replace(/\|$/, '')
-    .split('|')
-    .map((c) => c.trim());
+    .replace(/\|$/, '');
+  // 逐字符切分：行内 code（`…`）内的 | 与转义 \| 不作分隔符
+  const cells: string[] = [];
+  let cur = '';
+  let inCode = false;
+  for (let i = 0; i < t.length; i++) {
+    const ch = t[i];
+    if (ch === '\\' && t[i + 1] === '|') {
+      cur += '|';
+      i++;
+      continue;
+    }
+    if (ch === '`') inCode = !inCode;
+    if (ch === '|' && !inCode) {
+      cells.push(cur.trim());
+      cur = '';
+      continue;
+    }
+    cur += ch;
+  }
+  cells.push(cur.trim());
+  return cells;
 }
 
 /** 将 Markdown 子集渲染为安全 HTML 字符串 */
