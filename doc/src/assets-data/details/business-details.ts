@@ -681,4 +681,87 @@ export const businessDetailContents: Record<string, ComponentDetailContent> = {
       '期望 value 用数字类型（选项 value 约定 string，需自行转换）。',
     ],
   },
+
+  'component.site-footer': {
+    dsl: {
+      "type": "SiteFooter",
+      "props": {
+        "brand": {
+          "name": "Pactor",
+          "description": "DSL 驱动的应用构建平台"
+        },
+        "groups": [
+          {
+            "title": "产品",
+            "links": [
+              { "text": "组件库", "href": "/components" },
+              { "text": "模板中心", "href": "/templates" }
+            ]
+          },
+          {
+            "title": "资源",
+            "links": [
+              { "text": "反馈问题", "href": "/feedback" }
+            ]
+          }
+        ],
+        "copyright": "© 2026 Pactor",
+        "bottomLinks": [
+          { "text": "隐私协议", "href": "/privacy" },
+          { "text": "服务条款" }
+        ]
+      },
+      "events": {
+        "onLinkClick": {
+          "action": "setState",
+          "params": {
+            "lastLink": "服务条款"
+          }
+        }
+      }
+    },
+    whenToUse: [
+      '**何时使用**',
+      '',
+      '- 站点 / 应用级页脚：品牌区（logo / 名称 / 描述）+ 多列链接组 + 底部版权栏的组合。',
+      '- 需要统一承载「备案号 / 隐私协议 / 服务条款」等法务类辅助链接。',
+      '- 作为业务页面外壳的一部分，与登录页、控制台布局配套收尾。',
+      '',
+      '**何时不用**',
+      '',
+      '- 页面骨架内嵌的页脚槽位（Layout 的 Footer 子区域）：使用 Layout / Footer，二者职责不同。',
+      '- 富交互页脚（订阅表单、二维码、地图等定制区块）：本组件为展示型，不提供插槽。',
+    ].join('\n'),
+    previewNote:
+      '静态结构：根节点为 <footer data-slot="site-footer">（border-t + bg-muted/40）；主区 data-slot="site-footer-main"（max-w-6xl 居中，flex-col / md:flex-row 响应式）左侧品牌列 data-slot="site-footer-brand"（logo 图片 size-8 圆角 + 名称 + 描述，任一存在才渲染），右侧链接组区 data-slot="site-footer-groups"（grid 2/3 列自适应，每组 data-slot="site-footer-group"：标题 + 链接列表）；底部栏 data-slot="site-footer-bottom"（border-t 分隔，copyright 左、bottomLinks 右，窄屏居中堆叠）。链接双形态：有 href 渲染 Link（<a>，SPA 跳转语义），无 href 渲染 button（data-slot="site-footer-link"）并触发 onLinkClick 回传 { key, text }（key 缺省取 text）。brand / groups / copyright+bottomLinks 全部为空时渲染 null。',
+    variants: [
+      { name: '完整形态', visual: '品牌列 + 链接列组 + 底部版权栏', scene: '官网 / 业务站点标准页脚' },
+      { name: '仅底部栏', visual: 'copyright + 辅助链接单行', scene: '控制台页脚（无品牌诉求）' },
+      { name: 'href 链接', visual: '渲染 <a>，SPA 站内跳转', scene: '站内页跳转' },
+      { name: 'button 链接', visual: '无 href 渲染 button，事件上抛', scene: '需要动作编排的入口（反馈、客服等）' },
+      { name: '响应式', visual: '窄屏上下堆叠、底部栏居中；宽屏左右分栏', scene: '移动端浏览' },
+    ],
+    apiProps: [
+      { name: 'brand', type: 'SiteFooterBrand', defaultValue: '—', description: '品牌区配置：{ logo?, name?, description? }；未配置不渲染品牌列' },
+      { name: 'groups', type: 'SiteFooterLinkGroup[]', defaultValue: '—', description: '链接列组：{ title, links: { text, href? }[] }；未配置不渲染链接区' },
+      { name: 'copyright', type: 'string', defaultValue: '—', description: '底部栏版权文案' },
+      { name: 'bottomLinks', type: 'SiteFooterLink[]', defaultValue: '—', description: '底部栏辅助链接（备案号 / 隐私协议 / 服务条款）' },
+      { name: 'onLinkClick', type: '(event: { key: string; text: string }) => void', defaultValue: '—', description: '链接点击（仅无 href 的链接），key 缺省取 text（对齐 EntityCardAction 约定）' },
+      { name: 'className / style', type: 'string / CSSProperties', defaultValue: '—', description: '通用：根节点 class 合并 / 内联样式' },
+    ],
+    guidelines: [
+      '- 与 Layout 子区域 Footer 区分：Layout Footer 是页面骨架槽位，SiteFooter 是独立站点页脚资产。',
+      '- 链接列组按信息架构分组（产品 / 资源 / 支持），每组 3–5 条为宜，标题用名词短语。',
+      '- 法务类链接（隐私协议 / 服务条款 / 备案号）统一放 bottomLinks，与产品链接分层。',
+      '- 无 href 的链接用于动作型入口（打开反馈表单、唤起客服），事件经 onLinkClick 编排，不在组件内写业务。',
+    ].join('\n'),
+    examplesDo: [
+      '官网页脚：brand + 三组链接列（产品 / 资源 / 支持）+ copyright + 备案 / 隐私链接。',
+      '控制台收尾：仅 copyright「© 2026 Pactor · 京ICP备XXXXXXXX号」+ 服务条款 bottomLink。',
+    ],
+    examplesDont: [
+      '把 SiteFooter 放进 Layout 的 Footer 槽位表达页面页脚（应使用 Layout / Footer）。',
+      '把品牌描述写成长文案（描述是副文案，不超过两行）。',
+    ],
+  },
 };

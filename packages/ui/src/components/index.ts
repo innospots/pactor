@@ -468,6 +468,13 @@ export type {
 } from './business/EntityCard/index.js';
 export { CardList } from './business/CardList/index.js';
 export type { CardListItem, CardListProps } from './business/CardList/index.js';
+export { SiteFooter } from './business/SiteFooter/index.js';
+export type {
+  SiteFooterBrand,
+  SiteFooterLink,
+  SiteFooterLinkGroup,
+  SiteFooterProps,
+} from './business/SiteFooter/index.js';
 export { SearchableSelect } from './business/SearchableSelect/index.js';
 export type { SearchableSelectProps } from './business/SearchableSelect/index.js';
 export { FieldCondition } from './business/FieldCondition/index.js';

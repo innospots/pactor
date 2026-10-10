@@ -10,7 +10,7 @@ import type { ComponentEntry } from '../types.ts';
 export const dataDisplayComponents: ComponentEntry[] = [
   { id: 'component.card', name: 'Card', category: 'data-display', purpose: '承载一个独立主题或对象摘要', maturity: 'stable', change: 'new', integration: 'integrated', description: '中文惯用名：卡片。' },
   { id: 'component.list', name: 'List', category: 'data-display', purpose: '纵向展示同类对象集合', maturity: 'stable', change: 'new', integration: 'integrated', description: '中文惯用名：列表。' },
-  { id: 'component.table', name: 'Table', category: 'data-display', purpose: '按行列展示和操作结构化数据', maturity: 'stable', change: 'new', integration: 'integrated', description: '中文惯用名：表格；与 DataTable、高级表格为不同层级的表格方案。' },
+  { id: 'component.table', name: 'Table', category: 'data-display', purpose: '按行列展示和操作结构化数据', maturity: 'stable', change: 'new', integration: 'integrated', description: '中文惯用名：表格；与 DataTable 为不同层级的表格方案。' },
   { id: 'component.tree', name: 'Tree', category: 'data-display', purpose: '展示和操作层级数据', maturity: 'stable', change: 'new', integration: 'integrated', description: '中文惯用名：树。' },
   { id: 'component.descriptions', name: 'Descriptions', category: 'data-display', purpose: '展示对象的标签—值属性', maturity: 'stable', change: 'new', integration: 'integrated', description: '中文惯用名：描述列表。' },
   { id: 'component.statistic', name: 'Statistic', category: 'data-display', purpose: '突出显示单个指标', maturity: 'stable', change: 'new', integration: 'integrated', description: '中文惯用名：统计数值。' },

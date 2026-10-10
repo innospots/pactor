@@ -121,11 +121,11 @@ const CATEGORY_INFO: Record<
   },
   business: {
     description:
-      '由多个基础组件组成、可跨业务复用的复杂任务单元：高级筛选、高级表格、高级表单、组织选择、权限配置、流程设计与导入导出。',
+      '由多个基础组件组成、可跨业务复用的复合任务单元：实体摘要卡（EntityCard / CardList）、登录页（Login）、站点页脚（SiteFooter）与规则配置类编辑器（ExpressionEditor / FieldCondition / RuleConfig / RuleExpression / ScriptEditor / SearchableSelect）。',
     guidance: [
       '- 优先评估用基础组件组合实现；组合成本高于复用收益时再引入业务组件。',
       '- 业务组件内部子任务需处理加载、局部失败、权限不足、未保存、冲突与大数据量状态。',
-      '- 典型组合：高级筛选 + 高级表格、组织选择器 + 权限配置器、流程设计器 + 规则编辑器。',
+      '- 典型组合：CardList + EntityCard（实体列表）、Login + SiteFooter（整页收尾）、ExpressionEditor + FieldCondition（表达式与条件编辑）。',
       '- 引入业务组件需接受其依赖成本（数据服务、权限模型），详情页将逐项说明适用边界。',
     ].join('\n'),
   },

@@ -1,7 +1,7 @@
 /**
  * 组件运行态预览注册表（业务批）：packages/ui business 子目录组件。
- * 9 个组件均已从包入口导出并在 register.ts 注册 DSL；Login 内部经
- * Form / Link 依赖 Renderer 上下文（useRenderer），与 basic-a 的
+ * 10 个组件均已从包入口导出并在 register.ts 注册 DSL；Login / SiteFooter
+ * 内部经 Form / Link 依赖 Renderer 上下文（useRenderer），与 basic-a 的
  * Layout / Tabs 同类，经 DslPreview 以真实 DSL 渲染；其余组件为
  * 纯受控 React 组件，局部 state 受控 + 事件回显。
  */
@@ -74,7 +74,7 @@ const CARD_ITEMS: CardListItem[] = [
   },
   {
     icon: 'workflow',
-    title: '流程设计器',
+    title: '消息网关',
     subtitle: 'v0.5.0',
     tags: [{ text: '开发中', color: 'blue' }],
     description: '通过节点和连线配置业务流程。',
@@ -365,10 +365,48 @@ function ScriptEditorPreview() {
   );
 }
 
+const SITE_FOOTER_NODE: DslNode = {
+  type: 'SiteFooter',
+  props: {
+    brand: {
+      name: 'Pactor',
+      description: 'DSL 驱动的应用构建平台，组件 / 模板 / 规范一站式管理。',
+    },
+    groups: [
+      {
+        title: '产品',
+        links: [
+          { text: '组件库', href: '/components' },
+          { text: '模板中心', href: '/templates' },
+          { text: '主题生成器', href: '/themes' },
+        ],
+      },
+      {
+        title: '资源',
+        links: [{ text: '文档', href: '/' }, { text: '反馈问题' }],
+      },
+      {
+        title: '支持',
+        links: [{ text: '更新日志', href: '/' }],
+      },
+    ],
+    copyright: '© 2026 Pactor',
+    bottomLinks: [
+      { text: '隐私协议', href: '/privacy' },
+      { text: '服务条款' },
+    ],
+  },
+};
+
+function SiteFooterPreview() {
+  return <DslPreview node={SITE_FOOTER_NODE} />;
+}
+
 export const PREVIEWS_BUSINESS: Record<string, () => ReactElement> = {
   'component.entity-card': EntityCardPreview,
   'component.card-list': CardListPreview,
   'component.login': LoginPreview,
+  'component.site-footer': SiteFooterPreview,
   'component.searchable-select': SearchableSelectPreview,
   'component.field-condition': FieldConditionPreview,
   'component.expression-editor': ExpressionEditorPreview,

@@ -48,13 +48,20 @@ export function buildCopyText(
 
 /**
  * 写入剪贴板：优先 Clipboard API，不可用时回退 document.execCommand。
+ * Clipboard API 在无焦点 / 权限受限环境可能悬挂（不 resolve 也不 reject），
+ * 加超时竞速（1.5s）降级，避免复制按钮无反馈。
  * 返回是否成功（成功/失败均由调用方给出明确反馈）。
  */
 export async function copyText(text: string): Promise<boolean> {
   try {
     if (typeof navigator !== 'undefined' && navigator.clipboard?.writeText) {
-      await navigator.clipboard.writeText(text);
-      return true;
+      const result = await Promise.race([
+        navigator.clipboard.writeText(text).then(() => 'ok' as const),
+        new Promise<'timeout'>((resolve) => {
+          setTimeout(() => resolve('timeout'), 1500);
+        }),
+      ]);
+      if (result === 'ok') return true;
     }
   } catch {
     // 继续尝试 execCommand 回退

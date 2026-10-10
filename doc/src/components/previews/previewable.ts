@@ -135,10 +135,11 @@ export const PREVIEWABLE_IDS: readonly string[] = [
   'component.message-list',
   'component.composer',
   'component.conversation-list',
-  // 业务（packages/ui business 子目录，9 个全部可预览）
+  // 业务（packages/ui business 子目录，全部已导出并注册 DSL）
   'component.entity-card',
   'component.card-list',
   'component.login',
+  'component.site-footer',
   'component.searchable-select',
   'component.field-condition',
   'component.expression-editor',
