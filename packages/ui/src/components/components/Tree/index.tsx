@@ -1,3 +1,4 @@
+import { useI18n } from "@pactor-app/runtime";
 import {
   Fragment,
   useEffect,
@@ -165,6 +166,7 @@ export function Tree({
   // 拖拽：内部维护树副本即时更新；props 内容变化（如 onDrop 后服务端回写）时重新同步，
   // 以 JSON 签名对比避免父级重渲染产生的新引用覆盖本地拖拽结果
   const [innerData, setInnerData] = useState<TreeNodeData[]>(treeData);
+  const { t } = useI18n();
   const lastPropJsonRef = useRef(JSON.stringify(treeData));
   useEffect(() => {
     const json = JSON.stringify(treeData);
@@ -284,7 +286,7 @@ export function Tree({
       const newKey = `node-${Date.now()}-${++newKeySeqRef.current}`;
       const [next, inserted] = insertTreeNode(
         cloneTree(data),
-        { key: newKey, title: "新节点" },
+        { key: newKey, title: t("pactor.tree.newNode") },
         node.key,
         op === "addSibling" ? "after" : "inside",
       );
@@ -336,7 +338,7 @@ export function Tree({
         >
           <DropdownMenu>
             <DropdownMenuTrigger
-              aria-label="节点操作"
+              aria-label={t("pactor.tree.nodeActions")}
               className="flex size-5 items-center justify-center rounded text-muted-foreground hover:bg-background hover:text-foreground"
             >
               <Icon name="ellipsis" size="sm" />
@@ -442,8 +444,8 @@ export function Tree({
               <span
                 data-slot="tree-drag-handle"
                 role="button"
-                aria-label="拖拽排序"
-                title="拖拽排序"
+                aria-label={t("pactor.tree.dragToReorder")}
+                title={t("pactor.tree.dragToReorder")}
                 draggable
                 onDragStart={(event) => {
                   event.dataTransfer.effectAllowed = "move";
@@ -460,7 +462,7 @@ export function Tree({
               <button
                 type="button"
                 data-slot="tree-switcher"
-                aria-label={isExpanded ? "收起" : "展开"}
+                aria-label={isExpanded ? t("pactor.tree.collapse") : t("pactor.tree.expand")}
                 disabled={isDisabled}
                 onClick={() => toggleExpand(node.key)}
                 className="flex size-5 shrink-0 items-center justify-center"

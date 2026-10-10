@@ -1,3 +1,4 @@
+import { useI18n } from '@pactor-app/runtime';
 import {
   useEffect,
   useId,
@@ -204,6 +205,7 @@ export function ColorPicker({
   const controlId = useId();
   const inForm = form?.inForm === true && typeof name === 'string' && name !== '';
   const [open, setOpen] = useState(false);
+  const { t } = useI18n();
 
   useEffect(() => {
     if (inForm && form && name) {
@@ -342,7 +344,7 @@ export function ColorPicker({
           }}
         />
         <span className="min-w-0 flex-1 truncate text-left">
-          {currentHex === '' ? (placeholder ?? '请选择颜色') : currentHex}
+          {currentHex === '' ? (placeholder ?? t('pactor.colorPicker.placeholder')) : currentHex}
         </span>
       </PopoverTrigger>
       <PopoverContent className="w-64">
@@ -418,7 +420,7 @@ export function ColorPicker({
           </div>
           <div className="flex flex-col gap-1.5">
             <ShadcnInput
-              aria-label="hex 颜色值"
+              aria-label={t('pactor.colorPicker.hexLabel')}
               value={hexInput}
               placeholder="#RRGGBB"
               className="h-8 w-full px-2 text-xs"
@@ -434,7 +436,7 @@ export function ColorPicker({
               {channels.map((channel) => (
                 <div key={channel.key} className="flex min-w-0 flex-1 flex-col items-center gap-0.5">
                   <ShadcnInput
-                    aria-label={`${channel.label} 通道`}
+                    aria-label={t('pactor.colorPicker.channel', { label: channel.label })}
                     key={`${channel.key}-${displayHex}`}
                     defaultValue={channel.text}
                     className="h-8 w-full px-1 text-center text-xs"
@@ -453,7 +455,7 @@ export function ColorPicker({
           </div>
           {hexError ? (
             <div data-slot="colorpicker-error" className="text-sm text-destructive">
-              颜色格式不正确，请输入十六进制色值
+              {t('pactor.colorPicker.invalidFormat')}
             </div>
           ) : null}
           {presets && presets.length > 0 ? (

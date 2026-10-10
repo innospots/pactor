@@ -144,7 +144,7 @@ export function Combobox({
         <Command>
           {searchable ? <CommandInput placeholder={placeholder} /> : null}
           <CommandList>
-            <CommandEmpty>无匹配结果</CommandEmpty>
+            <CommandEmpty>{t('pactor.command.empty')}</CommandEmpty>
             <CommandGroup>
               {options.map((option) => (
                 <CommandItem

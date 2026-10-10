@@ -169,7 +169,9 @@ export function Cascader({
         style={inForm ? undefined : style}
       >
         <span className="min-w-0 flex-1 truncate text-left">
-          {displayText === '' ? (placeholder ?? '请选择') : displayText}
+          {displayText === ''
+            ? (placeholder ?? t('pactor.select.placeholder'))
+            : displayText}
         </span>
         {showClear ? (
           <ClearHoverButton label={t('pactor.control.clear')} onClear={handleClear} />

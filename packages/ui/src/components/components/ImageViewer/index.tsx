@@ -1,3 +1,4 @@
+import { useI18n } from '@pactor-app/runtime';
 import { useCallback, useEffect, useState, type CSSProperties } from 'react';
 
 import { cn } from '../../../lib/utils.js';
@@ -43,6 +44,7 @@ const toolButtonClass =
 export function ImageLightbox({ src, alt, index, count, onPrev, onNext, onClose }: ImageLightboxProps) {
   const [scale, setScale] = useState(1);
   const [rotate, setRotate] = useState(0);
+  const { t } = useI18n();
 
   const reset = useCallback(() => {
     setScale(1);
@@ -68,11 +70,11 @@ export function ImageLightbox({ src, alt, index, count, onPrev, onNext, onClose 
       className="fixed inset-0 z-50 flex flex-col bg-(--overlay-background)"
       role="dialog"
       aria-modal="true"
-      aria-label="图片查看"
+      aria-label={t('pactor.imageViewer.open')}
     >
       <button
         type="button"
-        aria-label="关闭"
+        aria-label={t('pactor.overlay.close')}
         className="absolute inset-0 cursor-zoom-out"
         onClick={onClose}
       />
@@ -99,7 +101,7 @@ export function ImageLightbox({ src, alt, index, count, onPrev, onNext, onClose 
         <button
           type="button"
           data-slot="image-lightbox-prev"
-          aria-label="上一张"
+          aria-label={t('pactor.imageViewer.prev')}
           className={cn(toolButtonClass, 'absolute top-1/2 left-4 z-10 -translate-y-1/2 bg-background/80')}
           onClick={onPrev}
         >
@@ -110,7 +112,7 @@ export function ImageLightbox({ src, alt, index, count, onPrev, onNext, onClose 
         <button
           type="button"
           data-slot="image-lightbox-next"
-          aria-label="下一张"
+          aria-label={t('pactor.imageViewer.next')}
           className={cn(toolButtonClass, 'absolute top-1/2 right-4 z-10 -translate-y-1/2 bg-background/80')}
           onClick={onNext}
         >
@@ -124,7 +126,7 @@ export function ImageLightbox({ src, alt, index, count, onPrev, onNext, onClose 
         <button
           type="button"
           data-slot="image-lightbox-zoom-out"
-          aria-label="缩小"
+          aria-label={t('pactor.imageViewer.zoomOut')}
           className={toolButtonClass}
           disabled={scale <= MIN_SCALE}
           onClick={() => setScale((value) => Math.max(MIN_SCALE, value - 0.5))}
@@ -134,7 +136,7 @@ export function ImageLightbox({ src, alt, index, count, onPrev, onNext, onClose 
         <button
           type="button"
           data-slot="image-lightbox-zoom-in"
-          aria-label="放大"
+          aria-label={t('pactor.imageViewer.zoomIn')}
           className={toolButtonClass}
           disabled={scale >= MAX_SCALE}
           onClick={() => setScale((value) => Math.min(MAX_SCALE, value + 0.5))}
@@ -144,7 +146,7 @@ export function ImageLightbox({ src, alt, index, count, onPrev, onNext, onClose 
         <button
           type="button"
           data-slot="image-lightbox-rotate"
-          aria-label="旋转"
+          aria-label={t('pactor.imageViewer.rotate')}
           className={toolButtonClass}
           onClick={() => setRotate((value) => value - 90)}
         >
@@ -153,7 +155,7 @@ export function ImageLightbox({ src, alt, index, count, onPrev, onNext, onClose 
         <button
           type="button"
           data-slot="image-lightbox-reset"
-          aria-label="复位"
+          aria-label={t('pactor.imageViewer.reset')}
           className={toolButtonClass}
           onClick={reset}
         >
@@ -162,7 +164,7 @@ export function ImageLightbox({ src, alt, index, count, onPrev, onNext, onClose 
         <button
           type="button"
           data-slot="image-lightbox-close"
-          aria-label="关闭预览"
+          aria-label={t('pactor.imageViewer.close')}
           className={toolButtonClass}
           onClick={onClose}
         >

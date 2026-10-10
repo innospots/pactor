@@ -1,3 +1,4 @@
+import { useI18n } from '@pactor-app/runtime';
 import { useState, type CSSProperties, type ReactNode } from 'react';
 
 import { cn } from '../../../lib/utils.js';
@@ -20,9 +21,13 @@ function isObject(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null && !Array.isArray(value);
 }
 
-function summarize(value: unknown): string {
-  if (Array.isArray(value)) return `[…] ${value.length} 项`;
-  return `{…} ${Object.keys(value as Record<string, unknown>).length} 键`;
+function summarize(value: unknown, t: (key: string, params?: Record<string, unknown>) => string): string {
+  if (Array.isArray(value)) {
+    return t('pactor.jsonViewer.items', { count: value.length });
+  }
+  return t('pactor.jsonViewer.keys', {
+    count: Object.keys(value as Record<string, unknown>).length,
+  });
 }
 
 function PrimitiveValue({ value }: { value: unknown }) {
@@ -62,6 +67,7 @@ interface JsonNodeProps {
 
 function JsonNode({ keyName, value, depth, expandedDepth }: JsonNodeProps): ReactNode {
   const [expanded, setExpanded] = useState(depth < expandedDepth);
+  const { t } = useI18n();
   const composite = isObject(value) || Array.isArray(value);
 
   if (!composite) {
@@ -89,7 +95,7 @@ function JsonNode({ keyName, value, depth, expandedDepth }: JsonNodeProps): Reac
         <Icon name={expanded ? 'chevron-down' : 'chevron-right'} size="sm" />
         {keyName !== undefined ? <span className="text-foreground">{keyName}:</span> : null}
         {!expanded ? (
-          <span className="text-muted-foreground">{summarize(value)}</span>
+          <span className="text-muted-foreground">{summarize(value, t)}</span>
         ) : (
           <span className="text-muted-foreground">{Array.isArray(value) ? '[' : '{'}</span>
         )}
@@ -113,6 +119,7 @@ function JsonNode({ keyName, value, depth, expandedDepth }: JsonNodeProps): Reac
  */
 export function JSONViewer({ data, expandedDepth = 1, copyable = true, className, style }: JSONViewerProps) {
   const [copied, setCopied] = useState(false);
+  const { t } = useI18n();
 
   const handleCopy = async () => {
     try {
@@ -134,7 +141,7 @@ export function JSONViewer({ data, expandedDepth = 1, copyable = true, className
         <button
           type="button"
           data-slot="json-viewer-copy"
-          aria-label="复制 JSON"
+          aria-label={t('pactor.jsonViewer.copy')}
           className="absolute top-2 right-2 flex size-7 items-center justify-center rounded-md bg-background/80 text-muted-foreground hover:text-foreground"
           onClick={handleCopy}
         >

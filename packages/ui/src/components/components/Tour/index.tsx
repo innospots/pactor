@@ -1,3 +1,4 @@
+import { useI18n } from '@pactor-app/runtime';
 import { XIcon } from 'lucide-react';
 import {
   useEffect,
@@ -51,6 +52,7 @@ export function Tour({
 }: TourProps) {
   const controlled = current !== undefined;
   const [inner, setInner] = useState(0);
+  const { t } = useI18n();
   const index = controlled ? current : inner;
   const safeIndex = Math.min(Math.max(index, 0), Math.max(steps.length - 1, 0));
   const [anchor, setAnchor] = useState<{ top: number; left: number } | null>(
@@ -142,7 +144,7 @@ export function Tour({
                 size="sm"
                 onClick={() => goTo(safeIndex - 1)}
               >
-                上一步
+                {t('pactor.tour.prev')}
               </Button>
             ) : null}
             <Button
@@ -155,7 +157,7 @@ export function Tour({
                 }
               }}
             >
-              {last ? '完成' : '下一步'}
+              {last ? t('pactor.tour.done') : t('pactor.tour.next')}
             </Button>
           </div>
         </div>

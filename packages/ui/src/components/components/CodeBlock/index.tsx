@@ -1,3 +1,4 @@
+import { useI18n } from '@pactor-app/runtime';
 import { useState, type CSSProperties } from 'react';
 
 import { CodeBlock as HighlightedCodeBlock, registerCodeLanguages } from '@pactor-app/markdown';
@@ -27,6 +28,7 @@ export interface CodeBlockProps {
  */
 export function CodeBlock({ code = '', language = 'text', copyable = true, className, style }: CodeBlockProps) {
   const [copied, setCopied] = useState(false);
+  const { t } = useI18n();
 
   const handleCopy = async () => {
     try {
@@ -48,7 +50,7 @@ export function CodeBlock({ code = '', language = 'text', copyable = true, class
         <button
           type="button"
           data-slot="code-block-copy"
-          aria-label="复制代码"
+          aria-label={t('pactor.codeBlock.copy')}
           className="absolute top-2 right-2 z-10 flex size-7 items-center justify-center rounded-md bg-background/80 text-muted-foreground hover:text-foreground"
           onClick={handleCopy}
         >

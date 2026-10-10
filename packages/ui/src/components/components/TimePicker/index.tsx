@@ -182,7 +182,9 @@ export function TimePicker({
         style={inForm ? undefined : style}
       >
         <span className="min-w-0 flex-1 truncate text-left">
-          {displayText === '' ? (placeholder ?? '请选择时间') : displayText}
+          {displayText === ''
+            ? (placeholder ?? t('pactor.timePicker.placeholder'))
+            : displayText}
         </span>
         {showClear ? (
           <ClearHoverButton label={t('pactor.control.clear')} onClear={handleClear} />
@@ -212,7 +214,7 @@ export function TimePicker({
               className="cursor-pointer rounded-md px-2 py-1 text-sm text-primary hover:bg-accent"
               onClick={() => setPending(nowParts())}
             >
-              此刻
+              {t('pactor.timePicker.now')}
             </button>
             <button
               type="button"
@@ -222,7 +224,7 @@ export function TimePicker({
                 setOpen(false);
               }}
             >
-              确定
+              {t('pactor.alertDialog.confirm')}
             </button>
           </div>
         </div>

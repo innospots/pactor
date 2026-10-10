@@ -602,3 +602,92 @@ describe('SitemapApp', () => {
     expect(echo).toHaveBeenCalledTimes(1);
   });
 });
+
+describe('SitemapApp：国际化（设计 D7，i18n spec）', () => {
+  const renderI18n = (
+    sitemap: SitemapResource,
+    props: Record<string, unknown> = {},
+  ) => {
+    const fetcher = (async () => jsonResponse(sitemap)) as unknown as typeof fetch;
+    return render(
+      <SitemapApp
+        sources={['/api/sitemap']}
+        pathname="/"
+        navigate={vi.fn()}
+        fetcher={fetcher}
+        {...props}
+      />,
+    );
+  };
+
+  const welcomePage = (): PageDsl => ({
+    dsl: '1.0',
+    page: { id: 'home', title: 'home' },
+    body: { type: 'Text', props: { text: "${t('welcome')}" } },
+  });
+
+  it('locale/messages 透传：页面表达式与内置组件按配置语言渲染', async () => {
+    const sitemap = createSitemap({
+      user: { name: 'A' },
+      pages: [
+        { id: 'home', path: '/', title: 'home', version: 1, pageDsl: welcomePage() },
+      ],
+    });
+    renderI18n(sitemap, { locale: 'en-US', messages: { welcome: 'Welcome' } });
+
+    await screen.findByText('Welcome');
+  });
+
+  it('宿主切换 locale prop：页面重建按新语言渲染', async () => {
+    const sitemap = createSitemap({
+      user: { name: 'A' },
+      pages: [
+        { id: 'home', path: '/', title: 'home', version: 1, pageDsl: welcomePage() },
+      ],
+    });
+    const messages = {
+      'zh-CN': { welcome: '欢迎' },
+      'en-US': { welcome: 'Welcome' },
+    };
+    const fetcher = (async () => jsonResponse(sitemap)) as unknown as typeof fetch;
+    const common = {
+      sources: ['/api/sitemap'],
+      pathname: '/',
+      navigate: vi.fn(),
+      fetcher,
+      messages,
+    };
+    const { rerender } = render(<SitemapApp {...common} locale="zh-CN" />);
+    await screen.findByText('欢迎');
+
+    rerender(<SitemapApp {...common} locale="en-US" />);
+    await screen.findByText('Welcome');
+  });
+
+  it('sitemap 状态文案按语言渲染（拉取失败）', async () => {
+    const fetcher = vi.fn(async () => {
+      throw new Error('boom');
+    }) as unknown as typeof fetch;
+    render(
+      <SitemapApp
+        sources={['/api/sitemap']}
+        pathname="/"
+        navigate={vi.fn()}
+        fetcher={fetcher}
+        locale="en-US"
+      />,
+    );
+
+    await screen.findByText('Sitemap loading failed: boom');
+  });
+
+  it('messages 覆盖 sitemap 状态文案（404）', async () => {
+    const sitemap = createSitemap({ user: { name: 'A' } });
+    renderI18n(sitemap, {
+      pathname: '/none',
+      messages: { 'pactor.sitemap.notFound': 'Missing {{path}}!' },
+    });
+
+    await screen.findByText('Missing /none!');
+  });
+});

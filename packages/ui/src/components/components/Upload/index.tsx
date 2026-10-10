@@ -1,3 +1,4 @@
+import { useI18n } from '@pactor-app/runtime';
 import { Upload as UploadIcon, X } from 'lucide-react';
 import { useEffect, useId, useRef, useState, type CSSProperties } from 'react';
 
@@ -114,6 +115,7 @@ export function Upload({
 
   // 校验被拒文件数（提示用，下一次选择时重置）
   const [rejected, setRejected] = useState(0);
+  const { t } = useI18n();
 
   const commit = (next: UploadFileMeta[]) => {
     if (inForm && form && name) {
@@ -197,7 +199,7 @@ export function Upload({
       }}
     >
       <UploadIcon className="size-6" />
-      <span>点击或拖拽文件到此区域</span>
+      <span>{t('pactor.upload.dragText')}</span>
     </div>
   ) : (
     <button
@@ -208,7 +210,7 @@ export function Upload({
       onClick={() => inputRef.current?.click()}
     >
       <UploadIcon className="size-4" />
-      选择文件
+      {t('pactor.upload.selectFile')}
     </button>
   );
 
@@ -227,7 +229,7 @@ export function Upload({
       ) : null}
       {rejected > 0 ? (
         <div data-slot="upload-rejected" className="text-xs text-destructive">
-          已忽略 {rejected} 个不符合要求的文件
+          {t('pactor.upload.rejected', { count: rejected })}
         </div>
       ) : null}
       {files.length > 0 ? (
@@ -243,7 +245,7 @@ export function Upload({
               </span>
               <button
                 type="button"
-                aria-label={`移除 ${file.name}`}
+                aria-label={t('pactor.upload.remove', { name: file.name })}
                 disabled={disabled}
                 className="shrink-0 cursor-pointer text-muted-foreground hover:text-foreground disabled:cursor-not-allowed"
                 onClick={() => handleRemove(index)}

@@ -113,6 +113,33 @@ describe('Separator', () => {
     expect(separator.getAttribute('data-orientation')).toBe('horizontal');
   });
 
+  it('缺省外边距随方向：horizontal 上下、vertical 左右', () => {
+    const { container, unmount } = renderDsl({ type: 'Separator' });
+    expect(
+      container.querySelector('[data-slot=separator]')!.className,
+    ).toContain('my-4');
+    unmount();
+
+    const { container: vContainer } = renderDsl({
+      type: 'Separator',
+      props: { orientation: 'vertical' },
+    });
+    expect(
+      vContainer.querySelector('[data-slot=separator]')!.className,
+    ).toContain('mx-4');
+  });
+
+  it('className 可覆盖缺省外边距（tailwind-merge 去重）', () => {
+    const { container } = renderDsl({
+      type: 'Separator',
+      props: { className: 'my-0' },
+    });
+
+    const cls = container.querySelector('[data-slot=separator]')!.className;
+    expect(cls).toContain('my-0');
+    expect(cls).not.toContain('my-4');
+  });
+
   it('通用 props 作用于根节点', () => {
     const { container } = renderDsl({
       type: 'Separator',

@@ -8,6 +8,7 @@ import {
   DslSourceResolver,
   I18nContextProvider,
   PageRuntimeView,
+  useI18n,
   type PageRuntime,
   type PermissionAdapter,
 } from '@pactor-app/runtime';
@@ -134,7 +135,19 @@ export function createPactorPage(
   }
 
   return function ConfiguredPactorPage(props: PactorPageProps) {
-    return <EmbeddedPage assembly={assembly} options={options} i18n={i18n} createRuntime={createRuntime} resolvePage={options.loader ? resolvePage : undefined} {...props} />;
+    // Provider 上提到工厂组件层：EmbeddedPage 自身（loading/error 态）
+    // 与页面内容消费同一 i18n 上下文
+    return (
+      <I18nContextProvider value={i18n}>
+        <EmbeddedPage
+          assembly={assembly}
+          options={options}
+          createRuntime={createRuntime}
+          resolvePage={options.loader ? resolvePage : undefined}
+          {...props}
+        />
+      </I18nContextProvider>
+    );
   };
 
   async function resolvePage(pageId: string): Promise<PageDsl> {
@@ -165,7 +178,6 @@ export function PactorPage(props: PactorPageProps & PactorPageOptions) {
 function EmbeddedPage({
   assembly,
   options,
-  i18n,
   createRuntime,
   resolvePage,
   pageId,
@@ -174,10 +186,10 @@ function EmbeddedPage({
 }: PactorPageProps & {
   assembly: PactorAssembly;
   options: PactorPageOptions;
-  i18n: ReturnType<typeof createI18nContext>;
   createRuntime: (pageDsl: PageDsl, route: PactorPageProps['route']) => PageRuntime;
   resolvePage?: (pageId: string) => Promise<PageDsl>;
 }) {
+  const { t } = useI18n();
   const [state, setState] = useState<EmbeddedPageState>({ status: 'loading' });
   const [retryTick, setRetryTick] = useState(0);
   const onError = options.onError;
@@ -249,11 +261,11 @@ function EmbeddedPage({
     content = (
       <ResultView
         className="pactor-app-page-load-error"
-        title="页面加载失败"
+        title={t('pactor.page.loadFailed')}
         subTitle={state.error.message}
         extra={
           <PrimaryButton onClick={() => setRetryTick((n) => n + 1)}>
-            重试
+            {t('pactor.page.retry')}
           </PrimaryButton>
         }
       />
@@ -273,10 +285,8 @@ function EmbeddedPage({
   }
 
   return (
-    <I18nContextProvider value={i18n}>
-      <InteractionProvider bridge={assembly.uiBridge}>
-        {content}
-      </InteractionProvider>
-    </I18nContextProvider>
+    <InteractionProvider bridge={assembly.uiBridge}>
+      {content}
+    </InteractionProvider>
   );
 }

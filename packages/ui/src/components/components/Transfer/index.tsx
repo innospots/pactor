@@ -1,3 +1,4 @@
+import { useI18n } from '@pactor-app/runtime';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { useEffect, useState, type CSSProperties } from 'react';
 
@@ -48,7 +49,7 @@ export function Transfer({
   rules,
   options = [],
   value,
-  titles = ['列表 1', '列表 2'],
+  titles,
   disabled,
   onChange,
   className,
@@ -79,6 +80,9 @@ export function Transfer({
 
   const [leftChecked, setLeftChecked] = useState<Set<Key>>(new Set());
   const [rightChecked, setRightChecked] = useState<Set<Key>>(new Set());
+  const { t } = useI18n();
+  const resolvedTitles =
+    titles ?? [t('pactor.transfer.listOne'), t('pactor.transfer.listTwo')];
 
   const commit = (next: Key[]) => {
     if (inForm && form && name) {
@@ -141,7 +145,7 @@ export function Transfer({
         <div className="flex items-center gap-2 border-b border-border px-3 py-2">
           <input
             type="checkbox"
-            aria-label={`全选${title}`}
+            aria-label={t('pactor.transfer.selectAll', { title })}
             disabled={disabled || enabledItems.length === 0}
             checked={allChecked}
             onChange={(event) => {
@@ -156,7 +160,7 @@ export function Transfer({
           />
           <span className="text-sm font-medium">{title}</span>
           <span className="ml-auto text-xs text-muted-foreground">
-            {items.length} 项
+            {t('pactor.transfer.itemCount', { count: items.length })}
           </span>
         </div>
         <div className="flex max-h-48 flex-col overflow-y-auto p-1">
@@ -190,11 +194,11 @@ export function Transfer({
       className={cn('flex items-center gap-2', !inForm && className)}
       style={inForm ? undefined : style}
     >
-      {renderPanel('left', titles[0], leftOptions, leftChecked)}
+      {renderPanel('left', resolvedTitles[0], leftOptions, leftChecked)}
       <div className="flex flex-col gap-2">
         <button
           type="button"
-          aria-label="移到右侧"
+          aria-label={t('pactor.transfer.moveRight')}
           disabled={disabled || leftChecked.size === 0}
           className="flex size-8 cursor-pointer items-center justify-center rounded-md bg-primary text-primary-foreground hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-50"
           onClick={moveRight}
@@ -203,7 +207,7 @@ export function Transfer({
         </button>
         <button
           type="button"
-          aria-label="移到左侧"
+          aria-label={t('pactor.transfer.moveLeft')}
           disabled={disabled || rightChecked.size === 0}
           className="flex size-8 cursor-pointer items-center justify-center rounded-md bg-primary text-primary-foreground hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-50"
           onClick={moveLeft}
@@ -211,7 +215,7 @@ export function Transfer({
           <ChevronLeft className="size-4" />
         </button>
       </div>
-      {renderPanel('right', titles[1], rightOptions, rightChecked)}
+      {renderPanel('right', resolvedTitles[1], rightOptions, rightChecked)}
     </div>
   );
 

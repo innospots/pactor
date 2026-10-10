@@ -1,3 +1,4 @@
+import { useI18n } from '@pactor-app/runtime';
 import type { CSSProperties } from 'react';
 
 import { cn } from '../../../lib/utils.js';
@@ -43,6 +44,7 @@ export function List({
   className,
   style,
 }: ListProps) {
+  const { t } = useI18n();
   if (items.length === 0) {
     return (
       <ShadcnEmpty
@@ -51,7 +53,7 @@ export function List({
         style={style}
       >
         <EmptyHeader>
-          <EmptyTitle>暂无数据</EmptyTitle>
+          <EmptyTitle>{t('pactor.table.empty')}</EmptyTitle>
         </EmptyHeader>
       </ShadcnEmpty>
     );

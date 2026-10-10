@@ -398,6 +398,7 @@ function HeaderThemeToggle({
 }: {
   onSelect?: (theme: HeaderTheme) => void;
 }) {
+  const { t } = useI18n();
   const [theme, setTheme] = useState<HeaderTheme>(readCurrentTheme);
 
   const handleToggle = (): void => {
@@ -416,8 +417,8 @@ function HeaderThemeToggle({
       type="button"
       data-slot="header-theme-toggle"
       className="flex size-8 cursor-pointer items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-accent/50 hover:text-foreground"
-      title={theme === 'dark' ? '切换为浅色' : '切换为深色'}
-      aria-label="切换明暗主题"
+      title={theme === 'dark' ? t('pactor.header.themeToLight') : t('pactor.header.themeToDark')}
+      aria-label={t('pactor.header.themeToggle')}
       onClick={handleToggle}
     >
       {theme === 'dark' ? (

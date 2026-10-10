@@ -1,4 +1,5 @@
 import { X } from 'lucide-react';
+import { useI18n } from '@pactor-app/runtime';
 import { useState, type CSSProperties } from 'react';
 
 import { cn } from '../../../lib/utils.js';
@@ -50,6 +51,7 @@ export function Tag({
   style,
 }: TagProps) {
   const [hidden, setHidden] = useState(false);
+  const { t } = useI18n();
   if (hidden) return null;
 
   return (
@@ -70,7 +72,7 @@ export function Tag({
         <button
           type="button"
           data-slot="tag-close"
-          aria-label="关闭"
+          aria-label={t('pactor.overlay.close')}
           className="-mr-0.5 inline-flex size-3.5 items-center justify-center rounded-sm opacity-70 hover:opacity-100"
           onClick={() => {
             onClose?.();
