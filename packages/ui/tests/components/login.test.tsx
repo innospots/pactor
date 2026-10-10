@@ -27,8 +27,8 @@ describe('Login 业务组件', () => {
     expect(screen.getByText('统一管理后台')).toBeTruthy();
     expect(screen.getByText('面向管理员的一站式控制台')).toBeTruthy();
     expect(container.querySelector('img[src="/brand.webp"]')).not.toBeNull();
-    expect(screen.getByLabelText('用户名')).toBeTruthy();
-    expect(screen.getByLabelText('密码')).toBeTruthy();
+    expect(screen.getByPlaceholderText('请输入用户名')).toBeTruthy();
+    expect(screen.getByPlaceholderText('请输入密码')).toHaveProperty('type', 'password');
     expect(screen.getByRole('button', { name: '登 录' })).toBeTruthy();
   });
 
@@ -124,6 +124,64 @@ describe('Login 业务组件', () => {
     expect(container.querySelectorAll('[data-slot=card]').length).toBe(2);
   });
 
+  it('brandSide=right：brand-card / overlap / backdrop 品牌区镜像到右侧（DOM 后置 + 叠加方向翻转）', () => {
+    // brand-card：表单在前、品牌卡在后
+    const bc = renderDsl({
+      type: 'Login',
+      props: { layout: 'brand-card', brandSide: 'right', brand },
+    });
+    const bcRow = bc.container.querySelector('.md\\:flex-row')!;
+    expect(
+      bc.container.querySelector('[data-slot=login]')!.getAttribute('data-brand-side'),
+    ).toBe('right');
+    // 品牌卡（含插画）为行内最后一个节点
+    expect(bcRow.lastElementChild!.querySelector('img[src="/brand.webp"]')).not.toBeNull();
+    bc.unmount();
+
+    // overlap：登录卡在前、品牌卡在后，叠加方向翻转为 -mr-24；
+    // 品牌卡内容右对齐（文字右对齐 + 插画贴右缘），但容器保持全宽、尺寸不变
+    const ol = renderDsl({
+      type: 'Login',
+      props: { layout: 'overlap', brandSide: 'right', brand },
+    });
+    const olRow = ol.container.querySelector('.md\\:flex-row')!;
+    expect(olRow.firstElementChild!.className).toContain('md:-mr-24');
+    const olBrandCard = olRow.lastElementChild!;
+    expect(olBrandCard.querySelector('img[src="/brand.webp"]')).not.toBeNull();
+    const rightContent = olBrandCard.querySelector(
+      '[data-slot=login-brand-card-content]',
+    )!;
+    expect(rightContent.className).toContain('text-right');
+    // 不用 items-end（shrink-to-fit 会缩窄插画、改变卡片高度）
+    expect(rightContent.className).not.toContain('items-end');
+    // 视觉区保持全宽，插画贴右缘
+    const visual = rightContent.querySelector('img[src="/brand.webp"]')!;
+    expect(visual.className).toContain('w-full');
+    expect(visual.className).toContain('self-end');
+    ol.unmount();
+
+    // overlap 默认 left：品牌卡内容不右对齐
+    const olLeft = renderDsl({
+      type: 'Login',
+      props: { layout: 'overlap', brand },
+    });
+    const leftContent = olLeft.container.querySelector(
+      '[data-slot=login-brand-card-content]',
+    )!;
+    expect(leftContent.className).not.toContain('text-right');
+    olLeft.unmount();
+
+    // backdrop：认证列在前、品牌列（含插画）在后
+    const bd = renderDsl({
+      type: 'Login',
+      props: { layout: 'backdrop', brandSide: 'right', brand },
+    });
+    const bdRoot = bd.container.querySelector('[data-slot=login]')!;
+    expect(bdRoot.getAttribute('data-brand-side')).toBe('right');
+    expect(bdRoot.lastElementChild!.querySelector('img[src="/brand.webp"]')).not.toBeNull();
+    bd.unmount();
+  });
+
   it('默认渲染背景装饰，decor=false 关闭，brandPanelBackground=false 去品牌面板渐变', () => {
     const { container, unmount } = renderDsl({ type: 'Login', props: {} });
     expect(container.querySelector('[data-slot=login-bg-decor]')).not.toBeNull();
@@ -206,9 +264,75 @@ describe('Login 业务组件', () => {
       },
     });
 
-    await user.type(screen.getByLabelText('用户名'), 'admin');
-    await user.type(screen.getByLabelText('密码'), 'pactor123');
+    await user.type(screen.getByPlaceholderText('请输入用户名'), 'admin');
+    await user.type(screen.getByPlaceholderText('请输入密码'), 'pactor123');
     await user.click(screen.getByRole('button', { name: '登 录' }));
     await expectEventState(context, 'loginUser', 'admin');
+  });
+
+  it('children 插槽替换内置表单：内嵌 Tabs 切换登录方式，标题与辅助入口保留', async () => {
+    const user = userEvent.setup();
+    const { context } = renderDsl({
+      type: 'Login',
+      props: {
+        title: '登录你的设计账号',
+        registerLink: { text: '立即注册' },
+      },
+      events: {
+        onRegisterClick: { action: 'setState', params: { register: true } },
+      },
+      children: [
+        {
+          type: 'Tabs',
+          props: {
+            items: [
+              {
+                key: 'sms',
+                label: '手机验证码登录',
+                children: [
+                  {
+                    type: 'Form',
+                    props: { name: 'smsLogin' },
+                    children: [
+                      { type: 'Input', props: { name: 'phone', placeholder: '请输入手机号' } },
+                      { type: 'Button', props: { submit: true, text: '获取验证码并登录' } },
+                    ],
+                    events: {
+                      onSubmit: { action: 'setState', params: { smsPhone: '${event.phone}' } },
+                    },
+                  },
+                ],
+              },
+              {
+                key: 'password',
+                label: '账号密码登录',
+                children: [
+                  { type: 'Text', props: { text: '账号密码表单占位' } },
+                ],
+              },
+            ],
+          },
+        },
+      ],
+    });
+
+    // 内置账号密码表单被插槽替换
+    expect(screen.queryByLabelText('用户名')).toBeNull();
+    // 标题与辅助入口保留
+    expect(screen.getByText('登录你的设计账号')).toBeTruthy();
+    expect(screen.getByText('立即注册')).toBeTruthy();
+    // Tabs 两个页签渲染，默认第一个页签的内容可见
+    expect(screen.getByRole('tab', { name: '手机验证码登录' })).toBeTruthy();
+    expect(screen.getByRole('tab', { name: '账号密码登录' })).toBeTruthy();
+    expect(screen.getByPlaceholderText('请输入手机号')).toBeTruthy();
+
+    // 插槽内表单事件自行编排
+    await user.type(screen.getByPlaceholderText('请输入手机号'), '13800001111');
+    await user.click(screen.getByRole('button', { name: '获取验证码并登录' }));
+    await expectEventState(context, 'smsPhone', '13800001111');
+
+    // 切换到账号密码页签
+    await user.click(screen.getByRole('tab', { name: '账号密码登录' }));
+    expect(await screen.findByText('账号密码表单占位')).toBeTruthy();
   });
 });

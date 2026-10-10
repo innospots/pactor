@@ -3587,6 +3587,9 @@
     }
   }
   @media (width >= 48rem) {
+    .md\:-mr-24 {
+      margin-right: calc(var(--spacing) * -24);
+    }
     .md\:-ml-24 {
       margin-left: calc(var(--spacing) * -24);
     }

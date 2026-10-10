@@ -119,10 +119,97 @@ const LOGIN_NODE: DslNode = {
   },
 };
 
+// 认证区插槽演示：内嵌 Tabs 切换「手机验证码 / 账号密码」两种登录方式，
+// 插槽内表单字段与提交事件由 DSL 自行编排（预览内提交触发 message 反馈）
+const LOGIN_TABS_NODE: DslNode = {
+  type: 'Login',
+  props: {
+    layout: 'centered',
+    authVariant: 'card',
+    title: '登录你的设计账号',
+    registerLink: { text: '立即注册' },
+    footer: '© 2026 Pactor',
+  },
+  children: [
+    {
+      type: 'Tabs',
+      props: {
+        items: [
+          {
+            key: 'sms',
+            label: '手机验证码登录',
+            children: [
+              {
+                type: 'Form',
+                props: { name: 'smsLogin', className: 'flex flex-col gap-4 pt-2' },
+                children: [
+                  {
+                    type: 'Input',
+                    props: { name: 'phone', placeholder: '请输入手机号' },
+                  },
+                  {
+                    type: 'Input',
+                    props: { name: 'code', placeholder: '请输入验证码' },
+                  },
+                  {
+                    type: 'Button',
+                    props: { submit: true, variant: 'primary', text: '登录' },
+                  },
+                ],
+                events: {
+                  onSubmit: {
+                    action: 'message',
+                    params: { text: '验证码登录提交：${event.phone}', messageType: 'success' },
+                  },
+                },
+              },
+            ],
+          },
+          {
+            key: 'password',
+            label: '账号密码登录',
+            children: [
+              {
+                type: 'Form',
+                props: { name: 'passwordLogin', className: 'flex flex-col gap-4 pt-2' },
+                children: [
+                  {
+                    type: 'Input',
+                    props: { name: 'username', placeholder: '请输入账号' },
+                  },
+                  {
+                    type: 'Input',
+                    props: { name: 'password', type: 'password', placeholder: '请输入密码' },
+                  },
+                  {
+                    type: 'Button',
+                    props: { submit: true, variant: 'primary', text: '登录' },
+                  },
+                ],
+                events: {
+                  onSubmit: {
+                    action: 'message',
+                    params: { text: '账号密码登录提交：${event.username}', messageType: 'success' },
+                  },
+                },
+              },
+            ],
+          },
+        ],
+      },
+    },
+  ],
+};
+
 function LoginPreview() {
   return (
-    <div style={{ height: 440, overflow: 'auto', borderRadius: 8, border: '1px solid var(--border)' }}>
-      <DslPreview node={LOGIN_NODE} />
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+      <div style={{ height: 440, overflow: 'auto', borderRadius: 8, border: '1px solid var(--border)' }}>
+        <DslPreview node={LOGIN_NODE} />
+      </div>
+      <div style={{ height: 460, overflow: 'auto', borderRadius: 8, border: '1px solid var(--border)' }}>
+        <DslPreview node={LOGIN_TABS_NODE} />
+      </div>
     </div>
   );
 }

@@ -237,7 +237,7 @@ export const businessDetailContents: Record<string, ComponentDetailContent> = {
       '- 扫码登录等非常规认证形态（不在本组件范围，见设计文档 10 号变体说明）。',
     ].join('\n'),
     previewNote:
-      '静态结构：布局五态——split 分栏（品牌面板 + 认证列，brandSide 控制方向、brandRatio 经 --login-grid 变量控制占比、窄屏品牌面板隐藏并改顶部品牌行）、centered 居中（整页渐变背景 + 居中身份 + 认证区 + 页脚）、brand-card（品牌区独立 Card + 右侧裸表单）、overlap（品牌卡与登录卡局部叠加）、backdrop（渐变品牌背景 + 悬浮认证卡）；authVariant 三态（split/centered 生效）——plain 裸表单 / card 常规卡片 / float 大尺寸悬浮卡。认证区为 Form name="login" 内嵌 username / password 两个必填 Input（rules 必填校验 + i18n 文案）与全宽 submit Button，校验通过后 onSubmit 上抛 { username, password }；registerLink / forgotLink 有 href 渲染 Link、无 href 渲染 button 并触发对应 onXxxClick；品牌 identity 仅配置 logo 或 name 时渲染，插画未传展示内置默认插画、传空串隐藏。',
+      '静态结构：布局五态——split 分栏（品牌面板 + 认证列，brandRatio 经 --login-grid 变量控制占比、窄屏品牌面板隐藏并改顶部品牌行）、centered 居中（整页渐变背景 + 居中身份 + 认证区 + 页脚）、brand-card（品牌区独立 Card + 裸表单）、overlap（品牌卡与登录卡局部叠加，叠加方向随 brandSide 镜像、品牌卡在右时内容整体右对齐）、backdrop（渐变品牌背景 + 悬浮认证卡）；brandSide 控制品牌区左右方向（split / brand-card / overlap / backdrop 生效，centered 无分栏不适用）；authVariant 三态（split/centered 生效）——plain 裸表单 / card 常规卡片 / float 大尺寸悬浮卡。认证区缺省为 Form name="login"，表单项均经 Field 承载（username / password 两个必填 Input 的 label 与必填标记归 Field、校验由 Input rules 承担，全宽 submit Button 同样置于无 label 的 Field 内与输入项对齐），校验通过后 onSubmit 上抛 { username, password }；children 插槽可整体替换内置表单（如内嵌 Tabs 切换手机验证码 / 账号密码登录），标题 / 副标题与辅助入口保留；registerLink / forgotLink 有 href 渲染 Link、无 href 渲染 button 并触发对应 onXxxClick；品牌 identity 仅配置 logo 或 name 时渲染，插画未传展示内置默认插画、传空串隐藏。',
     variants: [
       { name: 'split 分栏', visual: '品牌面板 + 认证列网格分栏（brandSide / brandRatio 可调）', scene: '常规企业登录页（默认）' },
       { name: 'centered 居中', visual: '整页渐变背景 + 居中认证区', scene: '轻品牌页、移动端优先' },
@@ -248,7 +248,7 @@ export const businessDetailContents: Record<string, ComponentDetailContent> = {
     ],
     apiProps: [
       { name: 'layout', type: "'split' | 'centered' | 'brand-card' | 'overlap' | 'backdrop'", defaultValue: "'split'", description: '结构模式（对应设计文档 01–12 变体编号）' },
-      { name: 'brandSide', type: "'left' | 'right'", defaultValue: "'left'", description: '品牌区方向（仅 split 生效）' },
+      { name: 'brandSide', type: "'left' | 'right'", defaultValue: "'left'", description: '品牌区方向（split / brand-card / overlap / backdrop 生效；centered 无分栏不适用）。right 时品牌区镜像到右侧：split 反向分栏、brand-card 表单居左、overlap 登录卡左置并向右叠加、backdrop 两列镜像；窄屏均为认证区在前' },
       { name: 'brandRatio', type: 'number', defaultValue: '0.5', description: '品牌区分栏占比 0–1（实际钳制 0.2–0.8，仅 split）' },
       { name: 'authVariant', type: "'plain' | 'card' | 'float'", defaultValue: "'card'", description: '认证区容器形态（split / centered 生效）' },
       { name: 'brandPanelBackground', type: 'boolean', defaultValue: 'true', description: 'split 品牌面板是否带渐变背景' },
@@ -260,8 +260,9 @@ export const businessDetailContents: Record<string, ComponentDetailContent> = {
       { name: 'submitText', type: 'string', defaultValue: 'i18n pactor.login.submit', description: '提交按钮文案' },
       { name: 'registerLink / forgotLink', type: 'LoginLink', defaultValue: '—', description: '注册 / 找回密码入口：{ text, href? }；有 href 渲染 Link，否则 button + 事件' },
       { name: 'footer', type: 'string', defaultValue: '—', description: '页脚文案（版权 / 协议行）' },
+      { name: 'children（插槽）', type: 'DslNode[] / ReactNode', defaultValue: '—', description: '认证区内容插槽：提供时替换内置账号密码表单（标题 / 副标题与辅助入口保留），可内嵌 Tabs 切换手机验证码 / 账号密码等多种登录方式；插槽内表单字段、校验与提交由 DSL 自行编排，onSubmit 不再生效' },
       { name: 'className / style', type: 'string / CSSProperties', defaultValue: '—', description: '根节点样式' },
-      { name: 'onSubmit', type: '(values: Record<string, unknown>) => void', defaultValue: '—', description: '校验通过后触发，参数 { username, password }；登录请求与跳转由 DSL 编排' },
+      { name: 'onSubmit', type: '(values: Record<string, unknown>) => void', defaultValue: '—', description: '内置表单校验通过后触发，参数 { username, password }；登录请求与跳转由 DSL 编排（使用 children 插槽时不生效）' },
       { name: 'onRegisterClick / onForgotClick', type: '() => void', defaultValue: '—', description: '注册 / 找回密码按钮点击（仅对应 link 无 href 时）' },
     ],
     guidelines: [
@@ -273,6 +274,7 @@ export const businessDetailContents: Record<string, ComponentDetailContent> = {
     examplesDo: [
       '企业门户：layout=split + brand（logo / name / title）+ registerLink 配置 href 跳注册页。',
       '营销活动页：layout=overlap + float 认证卡 + brand.description 强化品牌文案。',
+      '多方式登录：children 插槽内嵌 Tabs（手机验证码 / 账号密码），各自 Form 独立编排提交事件。',
     ],
     examplesDont: [
       '在 onSubmit 内直接发登录请求（应上抛值，由页面 / DSL 编排）。',
