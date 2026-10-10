@@ -1,3 +1,4 @@
+import { useI18n } from '@pactor-app/runtime';
 import { ChevronDownIcon, ChevronLeftIcon, ChevronRightIcon } from 'lucide-react';
 import { useState, type CSSProperties } from 'react';
 
@@ -74,6 +75,7 @@ export function Pagination({
 }: PaginationProps) {
   const [innerPage, setInnerPage] = useState(1);
   const [innerPageSize, setInnerPageSize] = useState<number | null>(null);
+  const { t } = useI18n();
   const effectivePageSize = innerPageSize ?? pageSize;
   const pageCount = Math.max(1, Math.ceil(total / Math.max(1, effectivePageSize)));
   const current = Math.min(Math.max(1, page ?? innerPage), pageCount);
@@ -119,7 +121,7 @@ export function Pagination({
               data-slot="pagination-total"
               className="px-2 text-sm whitespace-nowrap text-muted-foreground"
             >
-              共 {total} 条
+              {t('pactor.pagination.total', { count: total })}
             </span>
           </PaginationItem>
         )}
@@ -133,13 +135,13 @@ export function Pagination({
                   'gap-1 px-2.5 whitespace-nowrap cursor-pointer outline-hidden',
                 )}
               >
-                每页 {effectivePageSize} 条
+                {t('pactor.pagination.pageSize', { size: effectivePageSize })}
                 <ChevronDownIcon className="size-3.5" aria-hidden="true" />
               </DropdownMenuTrigger>
               <DropdownMenuContent align="start">
                 {renderDropdownItems(
                   sizes.map((s) => ({
-                    label: `${s} 条/页`,
+                    label: t('pactor.pagination.itemsPerPage', { size: s }),
                     value: String(s),
                     selected: s === effectivePageSize,
                   })),
@@ -152,7 +154,7 @@ export function Pagination({
         <PaginationItem>
           <PaginationLink
             href="#"
-            aria-label="上一页"
+            aria-label={t('pactor.pagination.prev')}
             disabled={current <= 1}
             className="gap-1 px-2.5 sm:pl-2.5"
             onClick={(e) => {
@@ -161,7 +163,7 @@ export function Pagination({
             }}
           >
             <ChevronLeftIcon />
-            <span className="hidden sm:block">上一页</span>
+            <span className="hidden sm:block">{t('pactor.pagination.prev')}</span>
           </PaginationLink>
         </PaginationItem>
         {pageItems(current, pageCount).map((item, index) => (
@@ -185,7 +187,7 @@ export function Pagination({
         <PaginationItem>
           <PaginationLink
             href="#"
-            aria-label="下一页"
+            aria-label={t('pactor.pagination.next')}
             disabled={current >= pageCount}
             className="gap-1 px-2.5 sm:pr-2.5"
             onClick={(e) => {
@@ -193,7 +195,7 @@ export function Pagination({
               goTo(current + 1);
             }}
           >
-            <span className="hidden sm:block">下一页</span>
+            <span className="hidden sm:block">{t('pactor.pagination.next')}</span>
             <ChevronRightIcon />
           </PaginationLink>
         </PaginationItem>

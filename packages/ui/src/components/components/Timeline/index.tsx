@@ -1,3 +1,4 @@
+import { useI18n } from '@pactor-app/runtime';
 import type { CSSProperties } from 'react';
 
 import { cn } from '../../../lib/utils.js';
@@ -26,8 +27,9 @@ export interface TimelineProps {
 /** Timeline 适配器（shadcn kit）：竖向时间轴；节点圆点（color 覆盖）+ content + 可选 time */
 export function Timeline({ items = [], pending, className, style }: TimelineProps) {
   const nodes: TimelineItemData[] = [...items];
+  const { t } = useI18n();
   if (pending) {
-    nodes.push({ content: typeof pending === 'string' ? pending : '进行中' });
+    nodes.push({ content: typeof pending === 'string' ? pending : t('pactor.timeline.inProgress') });
   }
 
   return (

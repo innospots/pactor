@@ -169,7 +169,7 @@ export function TreeSelect({
             {hasChildren ? (
               <button
                 type="button"
-                aria-label={`${isExpanded ? '收起' : '展开'} ${option.label}`}
+                aria-label={`${isExpanded ? t('pactor.tree.collapse') : t('pactor.tree.expand')} ${option.label}`}
                 className="flex size-5 shrink-0 cursor-pointer items-center justify-center text-muted-foreground hover:text-foreground"
                 onClick={() => toggleExpanded(option.value)}
               >
@@ -218,7 +218,9 @@ export function TreeSelect({
         style={inForm ? undefined : style}
       >
         <span className="min-w-0 flex-1 truncate text-left">
-          {selected ? selected.node.label : (placeholder ?? '请选择')}
+          {selected
+            ? selected.node.label
+            : (placeholder ?? t('pactor.select.placeholder'))}
         </span>
         {showClear ? (
           <ClearHoverButton label={t('pactor.control.clear')} onClear={handleClear} />
@@ -234,8 +236,8 @@ export function TreeSelect({
         {searchable ? (
           <div className="pb-2">
             <ShadcnInput
-              aria-label="搜索"
-              placeholder="搜索"
+              aria-label={t('pactor.select.search')}
+              placeholder={t('pactor.select.search')}
               className="h-8"
               value={query}
               onChange={(event) => setQuery(event.target.value)}

@@ -1,3 +1,4 @@
+import { useI18n } from '@pactor-app/runtime';
 import { useEffect, useState, type CSSProperties, type ReactNode } from 'react';
 
 import { cn } from '../../../lib/utils.js';
@@ -20,6 +21,7 @@ export interface BackTopProps {
  */
 export function BackTop({ visibilityHeight = 400, children, className, style }: BackTopProps) {
   const [visible, setVisible] = useState(false);
+  const { t } = useI18n();
 
   useEffect(() => {
     const update = () => setVisible(window.scrollY > visibilityHeight);
@@ -34,7 +36,7 @@ export function BackTop({ visibilityHeight = 400, children, className, style }: 
     <button
       type="button"
       data-slot="back-top"
-      aria-label="回到顶部"
+      aria-label={t('pactor.backTop.top')}
       className={cn(
         'fixed right-10 bottom-10 z-50 flex size-10 items-center justify-center rounded-full border border-border bg-background text-foreground shadow-md transition-colors hover:bg-accent',
         className,

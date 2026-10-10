@@ -1,3 +1,4 @@
+import { useI18n } from '@pactor-app/runtime';
 import { useState, type CSSProperties } from 'react';
 
 import { cn } from '../../../lib/utils.js';
@@ -35,6 +36,7 @@ const toolButtonClass =
 export function DocumentPreview({ pages = [], currentPage, onChange, className, style }: DocumentPreviewProps) {
   const [innerPage, setInnerPage] = useState(1);
   const [scale, setScale] = useState(1);
+  const { t } = useI18n();
 
   const total = pages.length;
   const page = Math.min(Math.max(currentPage ?? innerPage, 1), Math.max(total, 1));
@@ -63,7 +65,7 @@ export function DocumentPreview({ pages = [], currentPage, onChange, className, 
         <button
           type="button"
           data-slot="document-preview-prev"
-          aria-label="上一页"
+          aria-label={t('pactor.documentPreview.prev')}
           className={toolButtonClass}
           disabled={page <= 1}
           onClick={() => goTo(page - 1)}
@@ -76,7 +78,7 @@ export function DocumentPreview({ pages = [], currentPage, onChange, className, 
         <button
           type="button"
           data-slot="document-preview-next"
-          aria-label="下一页"
+          aria-label={t('pactor.documentPreview.next')}
           className={toolButtonClass}
           disabled={page >= total}
           onClick={() => goTo(page + 1)}
@@ -87,7 +89,7 @@ export function DocumentPreview({ pages = [], currentPage, onChange, className, 
         <button
           type="button"
           data-slot="document-preview-zoom-out"
-          aria-label="缩小"
+          aria-label={t('pactor.documentPreview.zoomOut')}
           className={toolButtonClass}
           disabled={scale <= MIN_SCALE}
           onClick={() => setScale((value) => Math.max(MIN_SCALE, value - 0.25))}
@@ -97,7 +99,7 @@ export function DocumentPreview({ pages = [], currentPage, onChange, className, 
         <button
           type="button"
           data-slot="document-preview-zoom-in"
-          aria-label="放大"
+          aria-label={t('pactor.documentPreview.zoomIn')}
           className={toolButtonClass}
           disabled={scale >= MAX_SCALE}
           onClick={() => setScale((value) => Math.min(MAX_SCALE, value + 0.25))}
@@ -111,7 +113,7 @@ export function DocumentPreview({ pages = [], currentPage, onChange, className, 
             <img
               data-slot="document-preview-page"
               src={active.src}
-              alt={`第 ${page} 页`}
+              alt={t('pactor.documentPreview.page', { page })}
               className="max-w-full object-contain"
               style={{ transform: `scale(${scale})`, transformOrigin: 'top center' }}
             />
@@ -126,7 +128,7 @@ export function DocumentPreview({ pages = [], currentPage, onChange, className, 
           )
         ) : (
           <div className="flex items-center justify-center p-10 text-sm text-muted-foreground">
-            暂无文档内容
+            {t('pactor.documentPreview.empty')}
           </div>
         )}
       </div>

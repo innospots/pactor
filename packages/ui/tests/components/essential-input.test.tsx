@@ -432,7 +432,7 @@ describe('TreeSelect', () => {
     });
 
     await openPopover(document.querySelector('[data-slot=treeselect-trigger]')!);
-    fireEvent.change(within(popoverContent()).getByLabelText('搜索'), {
+    fireEvent.change(within(popoverContent()).getByLabelText('搜索选项'), {
       target: { value: '子节点B' },
     });
 

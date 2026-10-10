@@ -1,4 +1,5 @@
 import type { DslNode } from '@pactor-app/core';
+import { useI18n } from '@pactor-app/runtime';
 import { useRenderer } from '@pactor-app/runtime';
 import { ArrowUp } from 'lucide-react';
 import {
@@ -85,6 +86,7 @@ export function ChatInput({
   const { renderChildren } = useRenderer();
   const controlled = value !== undefined;
   const [draft, setDraft] = useState('');
+  const { t } = useI18n();
   const text = controlled ? value : draft;
   const canSubmit = !disabled && text.trim() !== '';
   // 自定义输入区（field）模式：编辑面由调用方自持，此处不维护草稿
@@ -168,7 +170,7 @@ export function ChatInput({
             <ShadcnButton
               type="button"
               size="icon"
-              aria-label="发送"
+              aria-label={t('pactor.chatInput.send')}
               disabled={!canSubmit}
               onClick={submit}
               className="size-8 rounded-full"

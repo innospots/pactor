@@ -1,3 +1,4 @@
+import { useI18n } from '@pactor-app/runtime';
 import { Star } from 'lucide-react';
 import { useEffect, useState, type CSSProperties } from 'react';
 
@@ -58,6 +59,7 @@ export function Rate({
 
   // 独立渲染：内部选中态（外部 value 变化时同步镜像）
   const [innerValue, setInnerValue] = useState(value);
+  const { t } = useI18n();
   useEffect(() => {
     if (!inForm) setInnerValue(value);
   }, [inForm, value]);
@@ -96,14 +98,14 @@ export function Rate({
           <>
             <button
               type="button"
-              aria-label={`第 ${i} 星左半`}
+              aria-label={t('pactor.rate.starLeft', { index: i })}
               disabled={disabled}
               className="absolute inset-y-0 left-0 w-1/2 cursor-pointer disabled:cursor-not-allowed"
               onClick={() => handleSelect(i - 0.5)}
             />
             <button
               type="button"
-              aria-label={`第 ${i} 星右半`}
+              aria-label={t('pactor.rate.starRight', { index: i })}
               disabled={disabled}
               className="absolute inset-y-0 right-0 w-1/2 cursor-pointer disabled:cursor-not-allowed"
               onClick={() => handleSelect(i)}
@@ -112,7 +114,7 @@ export function Rate({
         ) : (
           <button
             type="button"
-            aria-label={`第 ${i} 星`}
+            aria-label={t('pactor.rate.star', { index: i })}
             disabled={disabled}
             className="absolute inset-0 cursor-pointer disabled:cursor-not-allowed"
             onClick={() => handleSelect(i)}

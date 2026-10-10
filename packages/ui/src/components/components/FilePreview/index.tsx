@@ -1,3 +1,4 @@
+import { useI18n } from '@pactor-app/runtime';
 import type { CSSProperties } from 'react';
 
 import { cn } from '../../../lib/utils.js';
@@ -65,6 +66,7 @@ export function FilePreview({
   style,
 }: FilePreviewProps) {
   const resolvedKind = kind ?? inferKind(name, fileType);
+  const { t } = useI18n();
 
   return (
     <div
@@ -96,7 +98,7 @@ export function FilePreview({
       </div>
       <div data-slot="file-preview-meta" className="flex items-center gap-2 px-3 py-2 text-sm">
         <Icon name={kindIcon[resolvedKind]} size="sm" />
-        <span className="min-w-0 flex-1 truncate font-medium">{name ?? '未命名文件'}</span>
+        <span className="min-w-0 flex-1 truncate font-medium">{name ?? t('pactor.filePreview.unnamed')}</span>
         {fileSize !== undefined ? (
           <span className="shrink-0 text-xs text-muted-foreground">{formatSize(fileSize)}</span>
         ) : null}
@@ -109,7 +111,7 @@ export function FilePreview({
             href={src}
             download={name ?? true}
             className="shrink-0 text-primary hover:underline"
-            aria-label="下载"
+            aria-label={t('pactor.filePreview.download')}
           >
             <Icon name="download" size="sm" />
           </a>

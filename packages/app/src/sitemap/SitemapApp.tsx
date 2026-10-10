@@ -1,6 +1,12 @@
-import type { PageDsl } from '@pactor-app/core';
+import type { I18nMessages, PageDsl } from '@pactor-app/core';
+import { createI18nContext } from '@pactor-app/core';
 import { MenuRegistry } from '@pactor-app/router';
-import type { ActionHandler, ServiceHandler } from '@pactor-app/runtime';
+import {
+  I18nContextProvider,
+  useI18n,
+  type ActionHandler,
+  type ServiceHandler,
+} from '@pactor-app/runtime';
 import { Menu } from '@pactor-app/ui/components';
 import {
   createContext,
@@ -12,7 +18,7 @@ import {
   type ReactNode,
 } from 'react';
 
-import { PactorPage } from '../embedded.js';
+import { createPactorPage } from '../embedded.js';
 import type { PactorHttpHooks } from '../assembly.js';
 
 import { defaultSitemapActions } from './actions.js';
@@ -90,6 +96,15 @@ export interface SitemapAppProps {
   guard?: SitemapGuard;
   /** 会话服务名（缺省 session.context） */
   sessionService?: string;
+  /** 当前语言代码（透传页面与布局运行时；缺省 'zh-CN'）。切换即重建页面 */
+  locale?: string;
+  /** 回退语言代码（缺省 'zh-CN'） */
+  defaultLocale?: string;
+  /**
+   * 翻译消息表（透传页面与布局运行时）。按值参与重建判定：
+   * 宿主每次渲染新建等值对象不会触发重建，但内容变化会。
+   */
+  messages?: I18nMessages;
   /** 加载中视图 */
   loading?: ReactNode;
   /** sitemap 加载失败视图 */
@@ -132,7 +147,29 @@ function SitemapMenu({
   );
 }
 
+/**
+ * SitemapApp 外壳（设计 D7）：按 props 组装 i18n 上下文并经 Provider
+ * 包裹——自身状态文案与页面/布局运行时消费同一语言配置。
+ */
 export function SitemapApp(props: SitemapAppProps) {
+  const i18n = useMemo(
+    () =>
+      createI18nContext({
+        locale: props.locale,
+        defaultLocale: props.defaultLocale,
+        messages: props.messages,
+      }),
+    [props.locale, props.defaultLocale, props.messages],
+  );
+  return (
+    <I18nContextProvider value={i18n}>
+      <SitemapAppInner {...props} />
+    </I18nContextProvider>
+  );
+}
+
+function SitemapAppInner(props: SitemapAppProps) {
+  const { t } = useI18n();
   const { sources, fetcher, baseUrl } = props;
   // 宿主未注入路由时回退到内置浏览器路由（纯前端 SPA 模式）
   const browserRoute = useBrowserRoute();
@@ -203,26 +240,28 @@ export function SitemapApp(props: SitemapAppProps) {
   }, [decision, navigate]);
 
   if (state.status === 'loading') {
-    return <Centered>{props.loading ?? '加载中…'}</Centered>;
+    return <Centered>{props.loading ?? t('pactor.table.loading')}</Centered>;
   }
   if (state.status === 'error') {
     return props.renderError !== undefined ? (
       <>{props.renderError(state.error)}</>
     ) : (
-      <Centered>sitemap 加载失败：{state.error.message}</Centered>
+      <Centered>
+        {t('pactor.sitemap.loadError', { message: state.error.message })}
+      </Centered>
     );
   }
   if (sitemap === null || registry === null || resolution === null) {
     return null;
   }
   if (!decision.allow) {
-    return <Centered>重定向…</Centered>;
+    return <Centered>{t('pactor.sitemap.redirecting')}</Centered>;
   }
   if (resolution.route === null) {
     return props.renderNotFound !== undefined ? (
       <>{props.renderNotFound(pathname)}</>
     ) : (
-      <Centered>页面不存在（{pathname}）</Centered>
+      <Centered>{t('pactor.sitemap.notFound', { path: pathname })}</Centered>
     );
   }
   const { pageId, layoutName, highlightKey, params } = resolution.route;
@@ -268,6 +307,7 @@ function SitemapLayout({
   routeParams: Record<string, string>;
   props: SitemapAppProps;
 }) {
+  const { t } = useI18n();
   const sessionService = props.sessionService ?? 'session.context';
   const session: SitemapSessionContext = useMemo(
     () => ({
@@ -339,35 +379,86 @@ function SitemapLayout({
   }, [layoutDsl, layoutName, sessionService]);
 
   if (layoutDsl === undefined || layoutPage === null) {
-    return <Centered>布局未定义：{layoutName}</Centered>;
+    return (
+      <Centered>
+        {t('pactor.sitemap.layoutMissing', { name: layoutName })}
+      </Centered>
+    );
   }
+
+  // 语言配置（设计 D7）：locale/messages 变化时经工厂重建 PactorPage——
+  // PactorPage 直接形态首次渲染组装一次，切换语言必须产生新工厂
+  // （组件类型变化触发卸载重建）。messages 按值签名参与依赖：
+  // 宿主每次渲染新建等值对象不会导致重建。
+  const messagesSignature = JSON.stringify(props.messages ?? {});
+  const pageFactory = useMemo(
+    () =>
+      createPactorPage({
+        loader,
+        services,
+        actions,
+        navigate,
+        httpAdapter: props.httpAdapter,
+        permissions: sitemap.permissions ?? [],
+        components: props.components,
+        locale: props.locale,
+        defaultLocale: props.defaultLocale,
+        messages: props.messages,
+      }),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [
+      loader,
+      services,
+      actions,
+      navigate,
+      props.httpAdapter,
+      props.components,
+      sitemap,
+      props.locale,
+      props.defaultLocale,
+      messagesSignature,
+    ],
+  );
+  const layoutFactory = useMemo(
+    () =>
+      createPactorPage({
+        services,
+        actions,
+        navigate,
+        httpAdapter: props.httpAdapter,
+        components: { PageOutlet, SitemapMenu, ...props.components },
+        locale: props.locale,
+        defaultLocale: props.defaultLocale,
+        messages: props.messages,
+      }),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [
+      services,
+      actions,
+      navigate,
+      props.httpAdapter,
+      props.components,
+      props.locale,
+      props.defaultLocale,
+      messagesSignature,
+    ],
+  );
+  const Page = pageFactory;
+  const LayoutPage = layoutFactory;
+
   return (
     <OutletContext.Provider
       value={
         // 页面实例：key 随 pageId + pathname 变化（route 参数变化需重建，
         // PactorPage 的 route prop 不参与运行时重建）——布局保持挂载
-        <PactorPage
+        <Page
           key={`${pageId}@${pathname}`}
           pageId={pageId}
           route={{ params: routeParams, query }}
-          loader={loader}
-          services={services}
-          actions={actions}
-          permissions={sitemap.permissions ?? []}
-          navigate={navigate}
-          httpAdapter={props.httpAdapter}
-          components={props.components}
         />
       }
     >
-      <PactorPage
-        pageDsl={layoutPage}
-        services={services}
-        actions={actions}
-        navigate={navigate}
-        httpAdapter={props.httpAdapter}
-        components={{ PageOutlet, SitemapMenu, ...props.components }}
-      />
+      <LayoutPage pageDsl={layoutPage} />
     </OutletContext.Provider>
   );
 }

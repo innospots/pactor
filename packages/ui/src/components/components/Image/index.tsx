@@ -1,3 +1,4 @@
+import { useI18n } from '@pactor-app/runtime';
 import { useState, type CSSProperties, type ReactNode } from 'react';
 
 import { cn } from '../../../lib/utils.js';
@@ -43,6 +44,7 @@ export function Image({
 }: ImageProps) {
   const [failed, setFailed] = useState(false);
   const [previewOpen, setPreviewOpen] = useState(false);
+  const { t } = useI18n();
 
   const sizeStyle: CSSProperties = {
     ...(width !== undefined ? { width } : {}),
@@ -80,8 +82,8 @@ export function Image({
       />
       {preview ? (
         <ShadcnDialog open={previewOpen} onOpenChange={setPreviewOpen}>
-          <DialogContent className="sm:max-w-3xl" aria-label={alt || '图片预览'}>
-            <DialogTitle className="sr-only">{alt || '图片预览'}</DialogTitle>
+          <DialogContent className="sm:max-w-3xl" aria-label={alt || t('pactor.image.preview')}>
+            <DialogTitle className="sr-only">{alt || t('pactor.image.preview')}</DialogTitle>
             <img
               data-slot="image-preview"
               src={src}
