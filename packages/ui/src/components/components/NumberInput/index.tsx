@@ -4,6 +4,7 @@ import { useEffect, useId, useState, type CSSProperties } from 'react';
 
 import { cn } from '../../../lib/utils.js';
 import { Input as ShadcnInput } from '../../../ui/input.js';
+import { CLEARABLE_ICON_HIDE, ClearHoverButton } from '../../clearable.js';
 import { CONTROL_SIZE_BOX, type ControlSize } from '../../control-size.js';
 import { useFormContext } from '../Form/context.js';
 import { FieldShell } from '../Form/form-item.js';
@@ -30,6 +31,8 @@ export interface NumberInputProps {
   disabled?: boolean;
   /** 控件尺寸（默认 middle，即现行 h-9 尺寸） */
   size?: ControlSize;
+  /** hover 清除（缺省开启，传 false 关闭）：有值时悬停控件，右侧步进按钮替换为 ×，点击清空（传出 undefined） */
+  allowClear?: boolean;
   /** 输入事件，传出 number；清空时传出 undefined */
   onChange?: (value: number | undefined) => void;
   /** 通用：根节点 class（Form 内为 form-item 容器，独立渲染时为控件包裹节点） */
@@ -86,6 +89,7 @@ export function NumberInput({
   placeholder,
   disabled,
   size = 'middle',
+  allowClear,
   onChange,
   className,
   controlClassName,
@@ -156,12 +160,18 @@ export function NumberInput({
 
   const stepperClass =
     'flex flex-1 cursor-pointer items-center justify-center text-muted-foreground transition-colors hover:text-foreground disabled:cursor-not-allowed disabled:opacity-50';
+  // hover 清除：有值且未禁用时，悬停把控件右侧步进按钮替换为 ×
+  const showClear = allowClear !== false && disabled !== true && text !== '';
+  const handleClear = () => {
+    setText('');
+    commit(undefined);
+  };
   // 包裹节点承载步进按钮（data-slot="number-input"）；原生步进箭头隐藏，
   // 避免与自定义按钮重复（键盘 ArrowUp/ArrowDown 步进行为不受影响）
   const control = (
     <span
       data-slot="number-input"
-      className={cn('relative block', !inForm && className)}
+      className={cn('group relative block', !inForm && className)}
       style={!inForm ? style : undefined}
     >
       <ShadcnInput
@@ -190,7 +200,12 @@ export function NumberInput({
           commit(applyPrecision(clamp(parsed, min, max), precision));
         }}
       />
-      <span className="absolute inset-y-0 right-0 flex w-7 flex-col divide-y divide-input border-l border-input">
+      <span
+        className={cn(
+          'absolute inset-y-0 right-0 flex w-7 flex-col divide-y divide-input border-l border-input',
+          showClear && CLEARABLE_ICON_HIDE,
+        )}
+      >
         <button
           type="button"
           tabIndex={-1}
@@ -212,6 +227,13 @@ export function NumberInput({
           <ChevronDownIcon className="size-3" />
         </button>
       </span>
+      {showClear ? (
+        <ClearHoverButton
+          label={t('pactor.control.clear')}
+          className="absolute inset-y-0 right-0 w-7"
+          onClear={handleClear}
+        />
+      ) : null}
     </span>
   );
 

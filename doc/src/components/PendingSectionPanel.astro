@@ -5,7 +5,7 @@
  * 不出现任何模拟资产条目。
  */
 import AssetLibraryLayout from '../layouts/AssetLibraryLayout.astro';
-import ExceptionState from './ExceptionState.astro';
+import ExceptionState from './ExceptionState';
 import { findCategory, findSection } from '../site-nav';
 import type { AssetCategory } from '../assets-data/types';
 
@@ -61,6 +61,7 @@ const meta = [
       kind="empty"
       title="该分类内容待资产接入"
       hint="本板块资产数据尚未接入，本期不展示模拟资产条目；数据经构建期校验接入后，本页将自动替换为正式条目列表。"
+      client:visible
     />
   </section>
 

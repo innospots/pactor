@@ -40,6 +40,8 @@ import { createRoot, type Root } from 'react-dom/client';
 import { Application } from './app-shell.js';
 import { createPactorAssembly, upsert } from './assembly.js';
 import type { PactorHttpHooks } from './assembly.js';
+import { createLocalStorageLocaleStorage } from './locale-storage.js';
+import type { LocaleStorage } from './locale-storage.js';
 
 /** 认证令牌提供者：同步或异步返回 Bearer token（无令牌返回 undefined） */
 export type AuthTokenProvider = () =>
@@ -115,12 +117,18 @@ export interface PactorApplicationOptions {
   authTokenProvider?: AuthTokenProvider;
   /** HTTP 钩子：加工页面运行时所有 HTTP 出口（request 改配置 / response 改数据） */
   httpAdapter?: PactorHttpHooks;
-  /** 当前语言代码（优先级高于 bootstrap.locale 与浏览器语言） */
+  /** 当前语言代码（优先级高于持久化值、bootstrap.locale 与浏览器语言） */
   locale?: string;
   /** 回退语言代码（缺省 'zh-CN'） */
   defaultLocale?: string;
   /** 翻译消息表（优先级高于 bootstrap.messages） */
   messages?: I18nMessages;
+  /**
+   * 语言偏好持久化适配器（设计 D4）：缺省
+   * `createLocalStorageLocaleStorage('pactor.locale')`；传 `false` 关闭
+   * 框架持久化（由调用方自管）；自定义实现可替换为 cookie / 服务端同步。
+   */
+  localeStorage?: LocaleStorage | false;
 }
 
 /**
@@ -148,6 +156,11 @@ export interface PactorAppSession {
   defaultLocale: string;
   /** 翻译消息表 */
   messages: I18nMessages;
+  /**
+   * i18n 版本（设计 D3）：locale 或 messages 任一变化时 +1，
+   * 页面加载器 key 携带该版本以触发页面运行时重建。
+   */
+  i18nVersion: number;
 }
 
 /** 应用实例（设计决策 D4）：mount/unmount 与扩展注册 API */
@@ -165,7 +178,17 @@ export interface PactorApplication {
   registerService(name: string, handler: ServiceHandler): void;
   /** 注册业务能力（同名覆盖） */
   registerCapability(name: string, capability: unknown): void;
-  /** 运行时切换语言：更新应用级 i18n 配置并触发页面重建 */
+  /**
+   * 运行时切换语言（低频操作）：无整页刷新地更新应用级 i18n 配置——
+   * 布局与菜单保留，内置组件默认文案与页面表达式按新语言渲染，
+   * 语言偏好经 localeStorage 持久化（options.localeStorage 可关闭/替换）。
+   *
+   * - `messages` 未传时保留现有业务词条：内置文案立即切换，
+   *   业务文案经回退链（defaultLocale）继续展示，异步补齐后再调用一次即可；
+   * - 页面运行时按 i18n 版本重建：页面内 DataStore 快照与未提交表单
+   *   在此次切换中丢失（布局、菜单、路由、会话均保留）；
+   * - bootstrap 完成前调用会被暂存，会话就绪后自动应用。
+   */
   setLocale(locale: string, messages?: I18nMessages): void;
 }
 
@@ -193,6 +216,13 @@ export interface PactorApplicationHandle {
   readonly navigation: ReactRouterBinding;
   /** 启动编排：加载 bootstrap 并组装会话（失败 reject，由组合层渲染重试页） */
   loadSession(): Promise<PactorAppSession>;
+  /**
+   * 订阅会话变化（设计 D1）：setLocale 更新会话时通知所有监听器
+   * （AppShell 经 useSyncExternalStore 消费）。返回取消订阅函数。
+   */
+  subscribeSession(listener: () => void): () => void;
+  /** 当前会话快照（bootstrap 完成前为 null） */
+  getSession(): PactorAppSession | null;
   /** 页面运行时工厂（设计决策 D2）：注入共享 registries / adapters / route / user / app */
   createPageRuntime(pageDsl: PageDsl, route: RouteContext): PageRuntime;
   /** OverlayHost 的 page overlay 页面加载（loader.loadPage → PageDsl） */
@@ -406,6 +436,24 @@ export function createPactorApplication(
 
   // bootstrap 成功后缓存会话，供页面运行时工厂读取 user/app
   let session: PactorAppSession | null = null;
+  // 会话订阅（设计 D1）：setLocale 更新会话时通知（AppShell 经
+  // useSyncExternalStore 消费），bootstrap 前调用 setLocale 暂存 pending
+  const sessionListeners = new Set<() => void>();
+  let pendingLocale: { locale: string; messages?: I18nMessages } | null = null;
+
+  /** 替换会话并通知订阅者（仅在会话内容实际变化时调用） */
+  function updateSession(next: PactorAppSession): void {
+    session = next;
+    for (const listener of [...sessionListeners]) {
+      listener();
+    }
+  }
+
+  // 语言偏好持久化（设计 D4/D5）：false 关闭，自定义实现替换，缺省 localStorage
+  const localeStorage =
+    options.localeStorage === false
+      ? undefined
+      : (options.localeStorage ?? createLocalStorageLocaleStorage());
 
   const handle: PactorApplicationHandle = {
     appId,
@@ -448,8 +496,11 @@ export function createPactorApplication(
         typeof navigator !== 'undefined' && typeof navigator.language === 'string'
           ? navigator.language
           : 'zh-CN';
+      // 解析链（设计 D5）：显式 options 权威 > 用户上次选择（持久化）>
+      // bootstrap 下发 > 浏览器语言 > zh-CN
       const locale =
         options.locale ??
+        localeStorage?.get() ??
         (typeof bootstrap.locale === 'string' ? bootstrap.locale : undefined) ??
         browserLocale;
       const defaultLocale =
@@ -464,7 +515,7 @@ export function createPactorApplication(
           ? (bootstrap.messages as I18nMessages)
           : undefined) ??
         {};
-      const next: PactorAppSession = {
+      let next: PactorAppSession = {
         bootstrap,
         menuRegistry,
         layoutType,
@@ -475,9 +526,31 @@ export function createPactorApplication(
         locale,
         defaultLocale,
         messages,
+        i18nVersion: 0,
       };
-      session = next;
+      // 设计 D6：bootstrap 前调用 setLocale 暂存于此，会话就绪时应用并持久化
+      if (pendingLocale !== null) {
+        next = {
+          ...next,
+          locale: pendingLocale.locale,
+          messages: pendingLocale.messages ?? next.messages,
+        };
+        pendingLocale = null;
+        localeStorage?.set(next.locale);
+      }
+      updateSession(next);
       return next;
+    },
+
+    subscribeSession(listener: () => void): () => void {
+      sessionListeners.add(listener);
+      return () => {
+        sessionListeners.delete(listener);
+      };
+    },
+
+    getSession(): PactorAppSession | null {
+      return session;
     },
 
     createPageRuntime(pageDsl: PageDsl, route: RouteContext): PageRuntime {
@@ -545,13 +618,27 @@ export function createPactorApplication(
     },
 
     setLocale(locale: string, messages?: I18nMessages): void {
+      // 设计 D6：bootstrap 完成前暂存，会话就绪时应用并持久化
       if (session === null) {
-        console.warn('[@pactor-app/app] setLocale 在 bootstrap 完成前调用已忽略');
+        pendingLocale = { locale, messages };
         return;
       }
-      session = { ...session, locale, messages: messages ?? session.messages };
-      // V1 策略：整页刷新以重建所有页面运行时
-      window.location.reload();
+      // 业务 messages 未补充时保留旧语言词条（跨语言切换场景经回退链
+      // 继续展示旧文案，不白屏、不显示原始 key）
+      const nextMessages = messages ?? session.messages;
+      if (locale === session.locale && nextMessages === session.messages) {
+        return;
+      }
+      // 仅换 i18n 切片（其余字段引用不变，布局/菜单不重建），
+      // 无整页刷新：订阅者（AppShell）重建 I18nContext，
+      // i18nVersion 驱动页面运行时重建
+      updateSession({
+        ...session,
+        locale,
+        messages: nextMessages,
+        i18nVersion: session.i18nVersion + 1,
+      });
+      localeStorage?.set(locale);
     },
   };
 }

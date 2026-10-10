@@ -3,6 +3,7 @@ import { useEffect, useId, type CSSProperties } from 'react';
 
 import { cn } from '../../../lib/utils.js';
 import { Input as ShadcnInput } from '../../../ui/input.js';
+import { ClearHoverButton } from '../../clearable.js';
 import { CONTROL_SIZE_BOX, type ControlSize } from '../../control-size.js';
 import { formItemClass, useFormContext } from '../Form/context.js';
 
@@ -27,17 +28,19 @@ export interface InputProps {
   disabled?: boolean;
   /** 控件尺寸（默认 middle，即现行 h-9 尺寸；全局统一尺寸令牌见 control-size） */
   size?: ControlSize;
-  /** 值为非空时显示清除按钮，点击清空当前值；开启后独立渲染的
-   *  className/style 挂控件包裹节点（含清除按钮），未开启时保持挂控件本身 */
+  /** hover 清除（缺省开启，传 false 关闭）：值为非空时鼠标悬停控件，右缘浮出
+   *  × 按钮（覆盖在控件内侧），点击清空当前值；独立渲染的 className/style
+   *  挂控件包裹节点，关闭时保持挂控件本身 */
   allowClear?: boolean;
   /** 输入事件，传出 string 值（非原生 event，设计决策 D2） */
   onChange?: (value: string) => void;
-  /** 通用：根节点 class（Form 内为 form-item 容器，独立渲染时为控件本身） */
+  /** 通用：根节点 class（Form 内为 form-item 容器；独立渲染时挂控件包裹节点——
+   *  allowClear 缺省开启、包裹节点常态存在；仅 allowClear: false 时挂 input 本身） */
   className?: string;
-  /** 控件本体 class（无论是否在 Form 内都挂控件节点；独立渲染时与
-   *  className 同点合并——Form 内需要精确设置控件样式（如宽度）时使用） */
+  /** 控件本体 class（无论是否在 Form 内都挂 input 节点；Form 内需要精确
+   *  设置控件样式（如宽度）时使用） */
   controlClassName?: string;
-  /** 通用：根节点内联样式（同 className 的挂载规则） */
+  /** 通用：根节点内联样式（挂载规则同 className） */
   style?: CSSProperties;
 }
 
@@ -81,7 +84,7 @@ export function Input({
   const fieldValue = inForm && form && name ? form.values[name] : undefined;
   const currentValue =
     typeof fieldValue === 'string' ? fieldValue : inForm ? '' : (value ?? '');
-  const showClear = allowClear === true && disabled !== true && currentValue !== '';
+  const showClear = allowClear !== false && disabled !== true && currentValue !== '';
 
   const handleClear = () => {
     if (inForm && form && name) {
@@ -100,10 +103,10 @@ export function Input({
       disabled={disabled}
       className={cn(
         CONTROL_SIZE_BOX[size],
-        !inFormRoot && allowClear !== true && className,
-        allowClear !== true && controlClassName,
+        // 清除按钮悬浮覆盖在控件右缘内侧，文本预留右内边距避免被遮挡
+        allowClear !== false && 'pr-8',
+        controlClassName,
       )}
-      style={!inFormRoot && allowClear !== true ? style : undefined}
       onChange={(event) => {
         if (inForm && form && name) {
           form.setValue(name, event.target.value);
@@ -113,24 +116,19 @@ export function Input({
     />
   );
   const clearButton = showClear ? (
-    <button
-      type="button"
-      aria-label={t('pactor.input.clear')}
-      className="shrink-0 cursor-pointer text-muted-foreground hover:text-foreground"
-      onClick={handleClear}
-    >
-      ×
-    </button>
+    <ClearHoverButton
+      label={t('pactor.input.clear')}
+      className="absolute top-1/2 right-2 -translate-y-1/2"
+      onClear={handleClear}
+    />
   ) : null;
-  // allowClear 需要包裹节点承载清除按钮；未开启时保持裸控件（className/style 挂 input 本身）
+  // allowClear 缺省开启，输入框常态带包裹节点（group + relative）承载悬浮
+  // 清除按钮（避免输入过程中值由空变有时结构切换导致输入框重建失焦）；
+  // 显式关闭（false）时保持裸控件（className/style 挂 input 本身）
   const control =
-    allowClear === true ? (
+    allowClear !== false ? (
       <span
-        className={cn(
-          'flex items-center gap-1',
-          !inFormRoot && className,
-          controlClassName,
-        )}
+        className={cn('group relative flex items-center', !inFormRoot && className)}
         style={inFormRoot ? undefined : style}
       >
         {input}

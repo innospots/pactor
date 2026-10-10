@@ -3,13 +3,10 @@
 ## Purpose
 
 createPactorApplication 启动编排与扩展 API（`@pactor-app/app`，设计文档第 86–88 节）。
-
-
 ## Requirements
-
 ### Requirement: 启动编排
 
-`createPactorApplication(options)` SHALL 在 mount 时依次完成：加载 bootstrap（loader 注入或按 api.baseURL 创建 HttpDslResourceLoader，默认 `/api/runtime`）→ PermissionStore 写入 permissions → MenuRegistry(menus) → 解析布局（options.layout > bootstrap.layout.type > 'admin'）→ 解析 i18n 配置（options.locale/messages/defaultLocale > bootstrap.locale/messages > 浏览器语言 > 'zh-CN'）→ 组装共享 registries 与 adapters。bootstrap 加载失败 MUST 渲染受控启动错误页（含重试），不白屏。menus/permissions 缺省 MUST 按 `[]` 处理。
+`createPactorApplication(options)` SHALL 在 mount 时依次完成：加载 bootstrap（loader 注入或按 api.baseURL 创建 HttpDslResourceLoader，默认 `/api/runtime`）→ PermissionStore 写入 permissions → MenuRegistry(menus) → 解析布局（options.layout > bootstrap.layout.type > 'admin'）→ 解析 i18n 配置（options.locale/messages/defaultLocale > 持久化值（缺省 localStorage['pactor.locale']，可经 options.localeStorage 关闭/替换）> bootstrap.locale/messages > 浏览器语言 > 'zh-CN'）→ 组装共享 registries 与 adapters。bootstrap 加载失败 MUST 渲染受控启动错误页（含重试），不白屏。menus/permissions 缺省 MUST 按 `[]` 处理。
 
 #### Scenario: 完整启动
 
@@ -35,6 +32,26 @@ createPactorApplication 启动编排与扩展 API（`@pactor-app/app`，设计�
 
 - **WHEN** bootstrap 返回 `locale: 'zh-CN'` 与 `messages: { 'menu.home': '首页' }`
 - **THEN** 应用以 `zh-CN` 渲染，菜单与页面表达式使用中文翻译
+
+#### Scenario: 持久化语言生效
+
+- **WHEN** localStorage 存在 `pactor.locale = 'en-US'`，options 与 bootstrap 均未配置 locale
+- **THEN** 应用以 `en-US` 渲染，优先级高于浏览器语言
+
+#### Scenario: options 覆盖持久化语言
+
+- **WHEN** localStorage 存在 `pactor.locale = 'en-US'` 且 options 传入 `locale: 'zh-CN'`
+- **THEN** 应用以 `zh-CN` 渲染
+
+#### Scenario: 显式 options.locale 下用户切换不跨重启存活
+
+- **WHEN** options 传入 `locale: 'zh-CN'`，用户经 `setLocale('en-US')` 切换后重新加载页面
+- **THEN** 应用仍以 `zh-CN` 启动（显式 options 优先级高于持久化值）；需要用户偏好优先的接入方 MUST NOT 传 `options.locale`
+
+#### Scenario: 自定义存储适配器
+
+- **WHEN** options 传入 `localeStorage` 自定义实现（如基于 cookie）
+- **THEN** 启动时经该适配器读取持久化语言，`setLocale` 经该适配器写入
 
 ### Requirement: 共享注册表与页面运行时工厂
 
@@ -81,3 +98,4 @@ app 实例 SHALL 提供 `registerComponent` / `registerAction` / `registerServic
 
 - **WHEN** 同一 PageDsl 分别经整应用模式（路由命中）与嵌入模式（PactorPage）渲染
 - **THEN** 两种模式下页面内容与交互行为一致
+

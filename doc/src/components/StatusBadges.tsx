@@ -1,9 +1,12 @@
----
 /**
- * 三轨状态徽章（design D4）：成熟度 / 变更标识 / 接入状态 / 外链可用性。
+ * 三轨状态徽章（React 岛，pactor Badge 渲染；design D4）：
+ * 成熟度 / 变更标识 / 接入状态 / 外链可用性。
  * 纯展示组件：仅资产卡片与详情页调用，分类菜单 MUST NOT 使用。
  * 四类状态相互独立，按需输出对应徽章。
+ * 语义色沿用站点 badge 类（success / warning / danger / info），
+ * 与站点既有配色一致（pactor Badge variant 无对应语义色档位）。
  */
+import { Badge } from '@pactor-app/ui/components';
 import type {
   ChangeFlag,
   Integration,
@@ -16,10 +19,8 @@ interface Props {
   change?: ChangeFlag;
   integration?: Integration;
   availability?: LinkAvailability;
-  class?: string;
+  className?: string;
 }
-
-const { maturity, change, integration, availability, class: className } = Astro.props;
 
 const MATURITY_BADGE: Record<Maturity, { text: string; cls: string }> = {
   stable: { text: '稳定', cls: 'success' },
@@ -41,20 +42,25 @@ const AVAILABILITY_BADGE: Record<LinkAvailability, { text: string; cls: string }
   broken: { text: '失效', cls: 'danger' },
 };
 
-const badges = [
-  ...(maturity ? [MATURITY_BADGE[maturity]] : []),
-  ...(change ? [CHANGE_BADGE[change]] : []),
-  ...(integration ? [INTEGRATION_BADGE[integration]] : []),
-  ...(availability ? [AVAILABILITY_BADGE[availability]] : []),
-];
----
-
-{
-  badges.length > 0 && (
-    <div class={className ? `badges ${className}` : 'badges'}>
+export default function StatusBadges({
+  maturity,
+  change,
+  integration,
+  availability,
+  className,
+}: Props) {
+  const badges = [
+    ...(maturity ? [MATURITY_BADGE[maturity]] : []),
+    ...(change ? [CHANGE_BADGE[change]] : []),
+    ...(integration ? [INTEGRATION_BADGE[integration]] : []),
+    ...(availability ? [AVAILABILITY_BADGE[availability]] : []),
+  ];
+  if (badges.length === 0) return null;
+  return (
+    <div className={className ? `badges ${className}` : 'badges'}>
       {badges.map((b) => (
-        <span class={`badge ${b.cls}`}>{b.text}</span>
+        <Badge key={b.text} text={b.text} className={`badge ${b.cls}`} />
       ))}
     </div>
-  )
+  );
 }

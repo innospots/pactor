@@ -9,7 +9,7 @@
  * resolvedTokens JSON；均经 CopyButton 内部 buildCopyText 追加构建标注。
  */
 import AssetLibraryLayout from '../../../layouts/AssetLibraryLayout.astro';
-import StatusBadges from '../../../components/StatusBadges.astro';
+import StatusBadges from '../../../components/StatusBadges';
 import CopyButton from '../../../components/CopyButton';
 import { themes, themeFamilies, themeDefs } from '../../../assets-data/themes';
 import { findSection } from '../../../site-nav';
@@ -119,7 +119,7 @@ const tokenEntries = Object.entries(theme.resolvedTokens ?? {});
     >
       <h1>{theme.name}主题</h1>
       <div class="page-desc">{theme.description}</div>
-      <StatusBadges
+      <StatusBadges client:visible
         maturity={theme.maturity}
         change={theme.change}
         integration={theme.integration}

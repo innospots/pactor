@@ -15,6 +15,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from '../../../ui/popover.js';
+import { ClearHoverButton } from '../../clearable.js';
 import { CONTROL_SIZE_BOX_GROW, type ControlSize } from '../../control-size.js';
 
 // ─── 文案缺省值（原 next-intl Common 命名空间文案的中文默认值） ──────────────────
@@ -38,6 +39,8 @@ export interface SearchableSelectProps {
   /** 过滤无匹配的空态文案，缺省「无匹配结果」 */
   emptyText?: string;
   disabled?: boolean;
+  /** hover 清除（缺省开启，传 false 关闭；仅单选）：有选中值时悬停触发器，上下箭头替换为 ×，点击清空（回传 ""） */
+  allowClear?: boolean;
   /** 控件尺寸（默认 middle，即现行 min-h-9 尺寸；与基础表单控件同一尺寸令牌） */
   size?: ControlSize;
   className?: string;
@@ -60,6 +63,7 @@ export function SearchableSelect({
   searchPlaceholder,
   emptyText,
   disabled = false,
+  allowClear = true,
   size = 'middle',
   className,
   id,
@@ -148,25 +152,20 @@ export function SearchableSelect({
             {selectedLabel || resolvedPlaceholder}
           </span>
         )}
-        {/* 单选已选值时：hover 用清除按钮替换上下箭头（嵌套 button 非法，用 span 承载点击）。
-            清除回传 "" 而非 undefined：RHF 下 undefined 会被移除并回退到 defaultValue */}
-        {!multiple && !disabled && value !== undefined && value !== "" ? (
-          <span
-            role="button"
-            aria-label="clear-selection"
-            className="ml-2 hidden shrink-0 cursor-pointer rounded-sm opacity-50 hover:opacity-100 group-hover:inline-flex"
-            onClick={(e) => {
-              e.stopPropagation();
-              onChange?.("");
-            }}
-          >
-            <X className="h-4 w-4" />
-          </span>
+        {/* 单选已选值时：hover 用清除按钮替换上下箭头（清除回传 "" 而非
+            undefined：RHF 下 undefined 会被移除并回退到 defaultValue） */}
+        {allowClear && !multiple && !disabled && value !== undefined && value !== "" ? (
+          <ClearHoverButton
+            label="clear-selection"
+            className="ml-2 rounded-sm opacity-50 hover:opacity-100"
+            onClear={() => onChange?.("")}
+          />
         ) : null}
         <ChevronsUpDown
           className={cn(
             "ml-2 h-4 w-4 shrink-0 opacity-50",
-            !multiple &&
+            allowClear &&
+              !multiple &&
               !disabled &&
               value !== undefined &&
               value !== "" &&

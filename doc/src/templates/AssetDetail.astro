@@ -6,7 +6,7 @@
  * 不静默省略；卡片/列表对象可继续用 data-inspect（经 toInspectAttrs）。
  */
 import AssetLibraryLayout from '../layouts/AssetLibraryLayout.astro';
-import StatusBadges from '../components/StatusBadges.astro';
+import StatusBadges from '../components/StatusBadges';
 import { findCategory } from '../site-nav';
 import { renderMarkdown } from '../lib/markdown';
 import { toInspectAttrs, type InspectEntry } from '../lib/inspect';
@@ -111,7 +111,7 @@ const preparedSections = sections.map((s, i) => ({
     <div class="page-head-main" {...(inspect ? toInspectAttrs(inspect) : {})}>
       <h1>{title}</h1>
       {description && <div class="page-desc">{description}</div>}
-      <StatusBadges
+      <StatusBadges client:visible
         maturity={status.maturity}
         change={status.change}
         integration={status.integration}
@@ -158,7 +158,7 @@ const preparedSections = sections.map((s, i) => ({
               <div class="card-body">
                 <div class="card-title">{r.name}</div>
                 {r.note && <div class="card-desc">{r.note}</div>}
-                <StatusBadges maturity={r.maturity} />
+                <StatusBadges client:visible maturity={r.maturity} />
               </div>
             </a>
           ))}

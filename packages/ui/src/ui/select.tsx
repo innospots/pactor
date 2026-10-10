@@ -28,9 +28,12 @@ function SelectTrigger({
   className,
   size = 'default',
   children,
+  iconClassName,
   ...props
 }: SelectPrimitive.Trigger.Props & {
   size?: 'sm' | 'default' | 'lg';
+  /** 右侧下拉箭头图标 class（clearable 场景 hover 隐藏、由清除按钮替换） */
+  iconClassName?: string;
 }) {
   return (
     <SelectPrimitive.Trigger
@@ -44,7 +47,7 @@ function SelectTrigger({
     >
       {children}
       <SelectPrimitive.Icon
-        render={<ChevronDownIcon className="size-4 opacity-50" />}
+        render={<ChevronDownIcon className={cn('size-4 opacity-50', iconClassName)} />}
       />
     </SelectPrimitive.Trigger>
   );

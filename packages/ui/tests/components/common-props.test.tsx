@@ -83,7 +83,8 @@ describe('通用 props 契约（className / style）', () => {
 
   it('Input（独立渲染）', () => {
     const { container } = renderDsl({ type: 'Input', props: { ...COMMON_PROPS } });
-    expectCommonProps(container.querySelector('input'));
+    // allowClear 缺省开启，根节点为清除按钮的包裹节点（group + relative）
+    expectCommonProps(container.firstElementChild);
   });
 
   it('Select（独立渲染）', () => {

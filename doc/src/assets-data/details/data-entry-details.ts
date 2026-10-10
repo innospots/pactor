@@ -107,7 +107,7 @@ export const dataEntryDetailContents: Record<string, ComponentDetailContent> = {
       '- 相对时长（如「30 分钟后」）：使用 NumberInput + 单位说明。',
     ].join('\n'),
     previewNote:
-      '静态结构：TimePicker 为 input 风格触发器（data-slot="timepicker-trigger"，右侧 Clock 图标）+ 受控 Popover 弹层（data-slot="timepicker-panel"）；弹层内为时 / 分（/秒）三列滚动列表（data-slot 分别为 timepicker-hour-column / timepicker-minute-column / timepicker-second-column，format 为 HH:mm 时无秒列），列内点选更新待选值；底部操作行左侧「此刻」（取当前时间）、右侧「确定」（提交并关闭）。Form 内声明 name 时外层包 FieldShell（label + 校验错误）。',
+      '静态结构：TimePicker 为 input 风格触发器（data-slot="timepicker-trigger"，右侧 Clock 图标）+ 受控 Popover 弹层（data-slot="timepicker-panel"）；弹层内为时 / 分（/秒）三列滚动列表（data-slot 分别为 timepicker-hour-column / timepicker-minute-column / timepicker-second-column，format 为 HH:mm 时无秒列），列内点选更新待选值；底部操作行左侧「此刻」（取当前时间）、右侧「确定」（提交并关闭）。Form 内声明 name 时外层包 FieldShell（label + 校验错误）。allowClear 且有值时悬停触发器，右侧时钟图标原位替换为 × 清除按钮（点击清空传出 undefined）。',
     variants: [
       { name: 'HH:mm:ss 含秒（缺省）', visual: '时 / 分 / 秒三列，值形如 13:45:00', scene: '需要秒级精度的时刻（定时任务、日志时间）' },
       { name: 'HH:mm 无秒', visual: '时 / 分两列，值形如 13:45', scene: '常规业务时刻（营业时间、预约）' },
@@ -123,6 +123,7 @@ export const dataEntryDetailContents: Record<string, ComponentDetailContent> = {
       { name: 'placeholder', type: 'string', defaultValue: "'请选择时间'", description: '空态提示文案' },
       { name: 'disabled', type: 'boolean', defaultValue: 'false', description: '禁用触发器' },
       { name: 'onChange', type: '(value: string) => void', defaultValue: '—', description: '时间变化事件，传出按 format 格式化的时间字符串（DSL 语义值）' },
+      { name: 'allowClear', type: 'boolean', defaultValue: 'true', description: 'hover 清除（缺省开启，传 false 关闭）：有值时悬停控件，右缘浮出 ×（有右侧图标的控件在原图标位置替换），点击清空' },
       { name: 'size', type: "'small' | 'middle' | 'large'", defaultValue: "'middle'", description: '控件尺寸令牌：small h-8 / middle h-9（默认）/ large h-10，与全部表单控件同一令牌，同行混排保持高度一致' },
       { name: 'className', type: 'string', defaultValue: '—', description: '根节点 class（Form 内为 form-item 容器，独立渲染时为触发器）' },
       { name: 'style', type: 'CSSProperties', defaultValue: '—', description: '根节点内联样式（同 className 的挂载规则）' },
@@ -321,7 +322,7 @@ export const dataEntryDetailContents: Record<string, ComponentDetailContent> = {
       '- 需要多选：当前实现为单选，多选用 Checkbox 组或其他多选组件。',
     ].join('\n'),
     previewNote:
-      '静态结构：TreeSelect 为 input 风格触发器（data-slot="treeselect-trigger"，显示选中节点 label，缺省「请选择」）+ 受控 Popover 弹层；searchable 时弹层顶部为过滤输入（按 label 过滤，命中节点的祖先保留展开），下方为 data-slot="treeselect-tree" 内联树（自实现）：每个节点 data-slot="treeselect-node"，含子节点的节点前置 ChevronRight 展开 / 收起按钮（展开时旋转 90°），按深度缩进，选中节点高亮；打开弹层时自动展开到当前选中节点。单选，选中即关闭弹层。Form 内声明 name 时外层包 FieldShell（label + 校验错误）。',
+      '静态结构：TreeSelect 为 input 风格触发器（data-slot="treeselect-trigger"，显示选中节点 label，缺省「请选择」）+ 受控 Popover 弹层；searchable 时弹层顶部为过滤输入（按 label 过滤，命中节点的祖先保留展开），下方为 data-slot="treeselect-tree" 内联树（自实现）：每个节点 data-slot="treeselect-node"，含子节点的节点前置 ChevronRight 展开 / 收起按钮（展开时旋转 90°），按深度缩进，选中节点高亮；打开弹层时自动展开到当前选中节点。单选，选中即关闭弹层。Form 内声明 name 时外层包 FieldShell（label + 校验错误）。allowClear 且有值时悬停触发器，右侧箭头图标原位替换为 × 清除按钮（点击清空传出 undefined）。',
     variants: [
       { name: '基础树选择', visual: '弹层内联树，可展开 / 收起逐级浏览', scene: '层级不深、节点可浏览的场景' },
       { name: 'searchable 搜索', visual: '弹层顶部过滤输入，按 label 过滤并保留祖先展开', scene: '树较大、需要快速定位节点' },
@@ -338,6 +339,7 @@ export const dataEntryDetailContents: Record<string, ComponentDetailContent> = {
       { name: 'searchable', type: 'boolean', defaultValue: 'false', description: '弹层顶部显示过滤输入（按 label 过滤，命中节点的祖先保留展开）' },
       { name: 'disabled', type: 'boolean', defaultValue: 'false', description: '禁用触发器' },
       { name: 'onChange', type: '(value: string | number) => void', defaultValue: '—', description: '选中变化事件，传出选中节点 value（DSL 语义值）' },
+      { name: 'allowClear', type: 'boolean', defaultValue: 'true', description: 'hover 清除（缺省开启，传 false 关闭）：有值时悬停控件，右缘浮出 ×（有右侧图标的控件在原图标位置替换），点击清空' },
       { name: 'size', type: "'small' | 'middle' | 'large'", defaultValue: "'middle'", description: '控件尺寸令牌：small h-8 / middle h-9（默认）/ large h-10，与全部表单控件同一令牌，同行混排保持高度一致' },
       { name: 'className', type: 'string', defaultValue: '—', description: '根节点 class（Form 内为 form-item 容器，独立渲染时为触发器）' },
       { name: 'style', type: 'CSSProperties', defaultValue: '—', description: '根节点内联样式（同 className 的挂载规则）' },
@@ -404,7 +406,7 @@ export const dataEntryDetailContents: Record<string, ComponentDetailContent> = {
       '- 多选路径：当前实现为单选路径。',
     ].join('\n'),
     previewNote:
-      '静态结构：Cascader 为 input 风格触发器（data-slot="cascader-trigger"，文本以 ` / ` 连接路径各级 label，缺省「请选择」）+ 受控 Popover 弹层（data-slot="cascader-panel"）：多列并排（每列 data-slot="cascader-column"，宽 40、独立滚动），点击含 children 的节点开下一列（行尾 ChevronRight 指示），点击叶子提交并关闭弹层；列内当前路径节点高亮。打开弹层时以已提交路径初始化下钻位置。Form 内声明 name 时外层包 FieldShell（label + 校验错误）。',
+      '静态结构：Cascader 为 input 风格触发器（data-slot="cascader-trigger"，文本以 ` / ` 连接路径各级 label，缺省「请选择」）+ 受控 Popover 弹层（data-slot="cascader-panel"）：多列并排（每列 data-slot="cascader-column"，宽 40、独立滚动），点击含 children 的节点开下一列（行尾 ChevronRight 指示），点击叶子提交并关闭弹层；列内当前路径节点高亮。打开弹层时以已提交路径初始化下钻位置。Form 内声明 name 时外层包 FieldShell（label + 校验错误）。allowClear 且有值时悬停触发器，右侧箭头图标原位替换为 × 清除按钮（点击清空传出 undefined）。',
     variants: [
       { name: '基础级联', visual: '多列逐级下钻，叶子完成选择', scene: '省市区、类目等固定层级数据' },
       { name: '路径回显', visual: '触发器文本以「 / 」连接各级 label', scene: '编辑场景回显已存路径 value 数组' },
@@ -420,6 +422,7 @@ export const dataEntryDetailContents: Record<string, ComponentDetailContent> = {
       { name: 'placeholder', type: 'string', defaultValue: "'请选择'", description: '空态提示文案' },
       { name: 'disabled', type: 'boolean', defaultValue: 'false', description: '禁用触发器' },
       { name: 'onChange', type: '(value: Array<string | number>) => void', defaultValue: '—', description: '选中叶子事件，传出路径 value 数组（DSL 语义值）' },
+      { name: 'allowClear', type: 'boolean', defaultValue: 'true', description: 'hover 清除（缺省开启，传 false 关闭）：有值时悬停控件，右缘浮出 ×（有右侧图标的控件在原图标位置替换），点击清空' },
       { name: 'size', type: "'small' | 'middle' | 'large'", defaultValue: "'middle'", description: '控件尺寸令牌：small h-8 / middle h-9（默认）/ large h-10，与全部表单控件同一令牌，同行混排保持高度一致' },
       { name: 'className', type: 'string', defaultValue: '—', description: '根节点 class（Form 内为 form-item 容器，独立渲染时为触发器）' },
       { name: 'style', type: 'CSSProperties', defaultValue: '—', description: '根节点内联样式（同 className 的挂载规则）' },
@@ -621,11 +624,11 @@ export const dataEntryDetailContents: Record<string, ComponentDetailContent> = {
       '- 从候选中选值而非自由输入：候选少且固定用 Select，候选多且可搜索用 Combobox。',
     ].join('\n'),
     previewNote:
-      '静态结构：Input 为单行文本控件（vendored shadcn Input，data-slot="input"，高 h-9）；allowClear 且值非空且未禁用时，控件外再包一层 flex 行容器承载右侧 × 清除按钮（点击清空并触发 onChange("")），此时独立渲染的 className / style 挂包裹节点；未开启 allowClear 时保持裸控件，className / style 直接挂 input 本身。Form 内声明非空 name 时外层为 data-slot="form-item" 容器（label 经 htmlFor 关联控件 useId + data-slot="form-error" 校验错误行），不走 FieldShell。',
+      '静态结构：Input 为单行文本控件（vendored shadcn Input，data-slot="input"，高 h-9）；allowClear 且值非空且未禁用时启用 hover 清除：控件外包 group + relative 包裹节点，悬停时 × 清除按钮浮出（hidden group-hover:inline-flex）覆盖在控件内侧右缘（input 预留 pr-8 防遮挡），点击清空并触发 onChange("")；此时独立渲染的 className / style 挂包裹节点。未开启 allowClear 时保持裸控件，className / style 直接挂 input 本身。Form 内声明非空 name 时外层为 data-slot="form-item" 容器（label 经 htmlFor 关联控件 useId + data-slot="form-error" 校验错误行），不走 FieldShell。',
     variants: [
       { name: '默认 text', visual: '单行描边输入框，聚焦 ring 高亮', scene: '常规短文本录入' },
       { name: 'type="password"', visual: '原生掩码输入', scene: '密码、密钥等敏感短文本' },
-      { name: 'allowClear 可清空', visual: '值非空时右侧出现 × 按钮', scene: '搜索框、筛选条件等高频重填输入' },
+      { name: 'allowClear 可清空', visual: '值非空时悬停控件，右缘浮出 × 按钮', scene: '搜索框、筛选条件等高频重填输入' },
       { name: 'Form 表单项', visual: 'form-item 容器：label + 控件 + 校验错误行', scene: '表单内字段（声明 name 自动注册）' },
       { name: 'disabled 禁用', visual: '半透明不可输入，清除按钮不渲染', scene: '只读回显、流程未就绪' },
     ],
@@ -637,7 +640,7 @@ export const dataEntryDetailContents: Record<string, ComponentDetailContent> = {
       { name: 'type', type: "'text' | 'password'", defaultValue: "'text'", description: '输入类型：password 时掩码输入' },
       { name: 'placeholder', type: 'string', defaultValue: '—', description: '空态提示文案' },
       { name: 'disabled', type: 'boolean', defaultValue: 'false', description: '禁用输入；同时使 allowClear 的清除按钮不渲染' },
-      { name: 'allowClear', type: 'boolean', defaultValue: 'false', description: '值为非空且未禁用时显示清除按钮；开启后独立渲染的 className / style 挂控件包裹节点（含清除按钮）' },
+      { name: 'allowClear', type: 'boolean', defaultValue: 'true', description: 'hover 清除（缺省开启，传 false 关闭）：值非空时悬停浮出 ×，点击清空；独立渲染的 className / style 挂控件包裹节点' },
       { name: 'onChange', type: '(value: string) => void', defaultValue: '—', description: '输入事件，传出 string（Renderer 绑定 events.onChange；非原生 event）' },
       { name: 'controlClassName', type: 'string', defaultValue: '—', description: '控件本体 class（无论是否在 Form 内都挂 input 节点；Form 内精确设置控件样式如宽度时使用）' },
       { name: 'size', type: "'small' | 'middle' | 'large'", defaultValue: "'middle'", description: '控件尺寸令牌：small h-8 / middle h-9（默认）/ large h-10，与全部表单控件同一令牌，同行混排保持高度一致' },
@@ -647,7 +650,7 @@ export const dataEntryDetailContents: Record<string, ComponentDetailContent> = {
       '- 单行短文本专用：长文本、备注、富文本一律换 Textarea 或对应组件，不靠 Input 拉伸。',
       '- Form 内必须声明非空 name 才会注册为表单项并参与校验；rules 随字段注册，value 作字段初始值且优先于 Form initialValues。',
       '- placeholder 写「请输入…」并给格式示例（如「请输入订单号，如 PO20260922001」），不用 placeholder 代替 label。',
-      '- allowClear 适合高频重填场景；开启后独立渲染的 className / style 挂在包裹节点而非 input 本身，设置宽度等样式时注意作用对象。',
+      '- allowClear 适合高频重填场景；悬停才浮出 ×（不占用常态视觉），开启后独立渲染的 className / style 挂在包裹节点而非 input 本身，设置宽度等样式时注意作用对象。',
       '- password 仅做输入掩码，不提供强度校验与加密传输，敏感字段需配合服务端安全策略。',
     ].join('\n'),
     examplesDo: [
@@ -750,7 +753,7 @@ export const dataEntryDetailContents: Record<string, ComponentDetailContent> = {
       '- 编号、手机号等「数字形态的标识」：使用 Input，它们不做数值运算。',
     ].join('\n'),
     previewNote:
-      '静态结构：NumberInput 的控件为包裹节点 data-slot="number-input"（relative block），内嵌原生 number input（隐藏浏览器原生步进箭头）+ 右侧绝对定位的竖排双按钮列（上 / 下 Chevron 图标，按 step 增减并以 min / max 钳制；到达边界或 disabled 时对应按钮禁用）。输入过程保留中间文本（如 "-" / "1."），可解析时传出钳制 + precision 规整后的 number，清空传出 undefined。Form 内声明非空 name 时经 FieldShell 包裹（label + 校验错误行）。',
+      '静态结构：NumberInput 的控件为包裹节点 data-slot="number-input"（relative block），内嵌原生 number input（隐藏浏览器原生步进箭头）+ 右侧绝对定位的竖排双按钮列（上 / 下 Chevron 图标，按 step 增减并以 min / max 钳制；到达边界或 disabled 时对应按钮禁用）。输入过程保留中间文本（如 "-" / "1."），可解析时传出钳制 + precision 规整后的 number，清空传出 undefined。Form 内声明非空 name 时经 FieldShell 包裹（label + 校验错误行）。allowClear 且有值时悬停控件，右侧步进按钮组原位替换为 × 清除按钮（点击清空传出 undefined）。',
     variants: [
       { name: '默认', visual: '描边数字输入框 + 右侧上 / 下步进按钮', scene: '常规数值录入' },
       { name: 'min / max 钳制', visual: '越界输入被钳制，边界处对应按钮禁用', scene: '有明确取值范围的字段（如 0-100 分）' },
@@ -772,6 +775,7 @@ export const dataEntryDetailContents: Record<string, ComponentDetailContent> = {
       { name: 'disabled', type: 'boolean', defaultValue: 'false', description: '禁用输入与步进按钮' },
       { name: 'onChange', type: '(value: number | undefined) => void', defaultValue: '—', description: '输入事件，传出 number，清空时传出 undefined（Renderer 绑定 events.onChange；DSL 语义值）' },
       { name: 'controlClassName', type: 'string', defaultValue: '—', description: '控件本体（input）class（无论是否在 Form 内都挂 input 节点）' },
+      { name: 'allowClear', type: 'boolean', defaultValue: 'true', description: 'hover 清除（缺省开启，传 false 关闭）：有值时悬停控件，右缘浮出 ×（有右侧图标的控件在原图标位置替换），点击清空' },
       { name: 'size', type: "'small' | 'middle' | 'large'", defaultValue: "'middle'", description: '控件尺寸令牌：small h-8 / middle h-9（默认）/ large h-10，与全部表单控件同一令牌，同行混排保持高度一致' },
       { name: 'className / style', type: 'string / CSSProperties', defaultValue: '—', description: '通用：根节点 class 合并 / 内联样式（Form 内为 form-item 容器，独立渲染时为控件包裹节点）' },
     ],
@@ -837,11 +841,11 @@ export const dataEntryDetailContents: Record<string, ComponentDetailContent> = {
       '- 需要多选：当前实现为单选，多选用 Checkbox 组或 Transfer。',
     ].join('\n'),
     previewNote:
-      '静态结构：Select 为触发器（vendored shadcn Select，data-slot="select-trigger"，内 data-slot="select-value" 显示选中项 label 或 placeholder）+ 弹层（data-slot="select-content" 内 data-slot="select-item" 列表，选项级 disabled 灰化不可选）。选中值经 Root 的 items 映射回 label，表单初始值回填、弹层尚未渲染过时触发器同样显示 label。allowClear 且已有选中值且未禁用时，触发器右侧追加 × 清除按钮（点击清空并触发 onChange(undefined)）。Form 内声明非空 name 时外层为 data-slot="form-item" 容器（label 经 htmlFor 关联控件 useId + data-slot="form-error"），不走 FieldShell。',
+      '静态结构：Select 为触发器（vendored shadcn Select，data-slot="select-trigger"，内 data-slot="select-value" 显示选中项 label 或 placeholder）+ 弹层（data-slot="select-content" 内 data-slot="select-item" 列表，选项级 disabled 灰化不可选）。选中值经 Root 的 items 映射回 label，表单初始值回填、弹层尚未渲染过时触发器同样显示 label。allowClear 且已有选中值且未禁用时启用 hover 清除：悬停触发器时下拉箭头隐藏（group-hover:hidden）、原位替换为 × 清除按钮（点击清空并触发 onChange(undefined)）。Form 内声明非空 name 时外层为 data-slot="form-item" 容器（label 经 htmlFor 关联控件 useId + data-slot="form-error"），不走 FieldShell。',
     variants: [
       { name: '默认（单选）', visual: '描边触发器 + 下拉选项列表', scene: '常规枚举单选' },
       { name: '选项级 disabled', visual: '单个选项灰化不可选', scene: '无权限 / 不可用的候选项（如已归档状态）' },
-      { name: 'allowClear 可清空', visual: '已选值时触发器右侧出现 × 按钮', scene: '非必填筛选项，需要回到「未选」态' },
+      { name: 'allowClear 可清空', visual: '已选值悬停时，下拉箭头原位替换为 × 按钮', scene: '非必填筛选项，需要回到「未选」态' },
       { name: 'placeholder 空态', visual: '未选时触发器显示弱化提示文案', scene: '非必填字段、需要引导选择的必填字段' },
       { name: 'Form 表单项', visual: 'form-item 容器：label + 触发器 + 校验错误行', scene: '表单内单选字段（声明 name 自动注册）' },
       { name: 'disabled 禁用', visual: '触发器半透明不可点开', scene: '联动未就绪或只读场景' },
@@ -854,7 +858,7 @@ export const dataEntryDetailContents: Record<string, ComponentDetailContent> = {
       { name: 'value', type: 'string | number | boolean', defaultValue: '—', description: '受控值（独立渲染时生效）；Form 内作为字段初始值（优先于 Form initialValues）' },
       { name: 'placeholder', type: 'string', defaultValue: '—', description: '空态提示文案' },
       { name: 'disabled', type: 'boolean', defaultValue: 'false', description: '禁用触发器；选项级禁用用 options 项的 disabled' },
-      { name: 'allowClear', type: 'boolean', defaultValue: 'false', description: '已选值且未禁用时显示清除按钮（清空为 undefined）' },
+      { name: 'allowClear', type: 'boolean', defaultValue: 'true', description: 'hover 清除（缺省开启，传 false 关闭）：已选值时悬停触发器，× 原位替换下拉箭头，点击清空为 undefined' },
       { name: 'onChange', type: '(value: unknown) => void', defaultValue: '—', description: '选中变化事件，传出选中项的原始 value；清空传出 undefined（Renderer 绑定 events.onChange；DSL 语义值）' },
       { name: 'controlClassName', type: 'string', defaultValue: '—', description: '控件本体 class（无论是否在 Form 内都挂控件包裹节点；独立渲染时与 className 同点合并）' },
       { name: 'size', type: "'small' | 'middle' | 'large'", defaultValue: "'middle'", description: '控件尺寸令牌：small h-8 / middle h-9（默认）/ large h-10，与全部表单控件同一令牌，同行混排保持高度一致' },
@@ -922,7 +926,7 @@ export const dataEntryDetailContents: Record<string, ComponentDetailContent> = {
       '- 需要多选：当前实现为单选。',
     ].join('\n'),
     previewNote:
-      '静态结构：Combobox 为触发器（data-slot="combobox-trigger"，显示选中项 label；无选中时显示 placeholder 并弱化配色）+ 受控 Popover 弹层（data-slot="combobox-content"，内为 vendored Command：searchable 时顶部渲染 data-slot="command-input" 过滤输入、列表 data-slot="command-list"、无匹配时 data-slot="command-empty" 显示「无匹配结果」）。候选项为 data-slot="command-item"，以 value 作为 Command 值、label 作为 keywords 参与过滤；当前选中项带 data-checked 标记，点击即选中、写值并关闭弹层，禁用项不可选。Form 内声明非空 name 时外层为 data-slot="form-item" 容器（label + 触发器 + data-slot="form-error"）。',
+      '静态结构：Combobox 为触发器（data-slot="combobox-trigger"，显示选中项 label；无选中时显示 placeholder 并弱化配色）+ 受控 Popover 弹层（data-slot="combobox-content"，内为 vendored Command：searchable 时顶部渲染 data-slot="command-input" 过滤输入、列表 data-slot="command-list"、无匹配时 data-slot="command-empty" 显示「无匹配结果」）。候选项为 data-slot="command-item"，以 value 作为 Command 值、label 作为 keywords 参与过滤；当前选中项带 data-checked 标记，点击即选中、写值并关闭弹层，禁用项不可选。Form 内声明非空 name 时外层为 data-slot="form-item" 容器（label + 触发器 + data-slot="form-error"）。allowClear 且有选中值时悬停触发器，右侧上下箭头原位替换为 × 清除按钮（点击清空传出 undefined）。',
     variants: [
       { name: 'searchable 可搜索（缺省）', visual: '弹层顶部过滤输入，按 label 过滤候选', scene: '候选多，需关键字定位' },
       { name: 'searchable=false 纯下拉', visual: '弹层无过滤输入，等同下拉选择', scene: '候选稍多但无需搜索（10-30 项）' },
@@ -941,6 +945,7 @@ export const dataEntryDetailContents: Record<string, ComponentDetailContent> = {
       { name: 'searchable', type: 'boolean', defaultValue: 'true', description: '弹层顶部显示过滤输入（按 label / value 匹配）' },
       { name: 'disabled', type: 'boolean', defaultValue: 'false', description: '禁用触发器；选项级禁用用 options 项的 disabled' },
       { name: 'onChange', type: '(value: string | number | undefined) => void', defaultValue: '—', description: '选中变化事件，传出选中项的原始 value（Renderer 绑定 events.onChange；DSL 语义值）' },
+      { name: 'allowClear', type: 'boolean', defaultValue: 'true', description: 'hover 清除（缺省开启，传 false 关闭）：有值时悬停控件，右缘浮出 ×（有右侧图标的控件在原图标位置替换），点击清空' },
       { name: 'size', type: "'small' | 'middle' | 'large'", defaultValue: "'middle'", description: '控件尺寸令牌：small h-8 / middle h-9（默认）/ large h-10，与全部表单控件同一令牌，同行混排保持高度一致' },
       { name: 'className / style', type: 'string / CSSProperties', defaultValue: '—', description: '通用：根节点 class 合并 / 内联样式（Form 内为 form-item 容器，独立渲染时为触发器）' },
     ],
@@ -949,7 +954,7 @@ export const dataEntryDetailContents: Record<string, ComponentDetailContent> = {
       '- 候选 label 是过滤的主依据，需可辨识（成员用「姓名（部门）」而非同名缩写）；value 保持稳定唯一。',
       '- 候选集很大时确认数据已就绪再渲染，避免弹层打开却「无匹配结果」。',
       '- 选中即关闭弹层并立即生效；下游如有关联刷新应放在 onChange 中处理。',
-      '- Combobox 无清除按钮（allowClear）；需要「回到未选」时提供一条「全部 / 不限」候选或改用 Select。',
+      '- 需要「回到未选」时配 allowClear（悬停时 × 原位替换上下箭头，清空为 undefined）。',
     ].join('\n'),
     examplesDo: [
       '指派负责人：options 为成员列表，searchable 输入姓名过滤，选中即回写 ownerId。',
@@ -1248,7 +1253,7 @@ export const dataEntryDetailContents: Record<string, ComponentDetailContent> = {
       '- 需要面向月 / 季 / 年粒度的选择面板：当前实现为日粒度日历，粒度更粗的选择需业务侧另行处理。',
     ].join('\n'),
     previewNote:
-      '静态结构：DatePicker 为触发器（data-slot="datepicker-trigger"，左侧截断文本显示已选值或 placeholder、右侧 Calendar 图标）+ 受控 Popover 弹层（PopoverContent w-auto p-0）。single 为单月日历；range 为左右双面板（data-slot="datepicker-start-panel" / "datepicker-end-panel"，各自受控月份且左右至少相差一个月），选择语义为「任意面板两次点击」：首击设开始日并清空结束日，第二击不早于开始日即提交、早于则重设开始日，已有完整区间再点击即开始新一轮；区间端点与中间日期经 DayPicker modifiers 施加选中 / 过渡样式。presets 快捷栏（data-slot="datepicker-presets"，左列按钮）在 range 模式缺省内置「今天 / 本周 / 本月」，除定位型「今天」外点击即提交区间且不关弹层。Form 内声明非空 name 时外层为 data-slot="form-item" 容器（label + 控件 + data-slot="form-error"）。',
+      '静态结构：DatePicker 为触发器（data-slot="datepicker-trigger"，左侧截断文本显示已选值或 placeholder、右侧 Calendar 图标）+ 受控 Popover 弹层（PopoverContent w-auto p-0）。single 为单月日历；range 为左右双面板（data-slot="datepicker-start-panel" / "datepicker-end-panel"，各自受控月份且左右至少相差一个月），选择语义为「任意面板两次点击」：首击设开始日并清空结束日，第二击不早于开始日即提交、早于则重设开始日，已有完整区间再点击即开始新一轮；区间端点与中间日期经 DayPicker modifiers 施加选中 / 过渡样式。presets 快捷栏（data-slot="datepicker-presets"，左列按钮）在 range 模式缺省内置「今天 / 本周 / 本月」，除定位型「今天」外点击即提交区间且不关弹层。Form 内声明非空 name 时外层为 data-slot="form-item" 容器（label + 控件 + data-slot="form-error"）。allowClear 且有值时悬停触发器，右侧日历图标原位替换为 × 清除按钮（点击清空传出 undefined）。',
     variants: [
       { name: 'single 单日期（缺省）', visual: '单月日历，点击日期即选中并回填触发器', scene: '截止日、生效日等单个日期字段' },
       { name: 'range 日期区间', visual: '左右双月面板，端点高亮 + 中间区间过渡色', scene: '统计周期、报表时间范围' },
@@ -1267,6 +1272,7 @@ export const dataEntryDetailContents: Record<string, ComponentDetailContent> = {
       { name: 'placeholder', type: 'string', defaultValue: '—', description: '空态提示文案；缺省取 i18n key，按 mode 区分 single / range' },
       { name: 'disabled', type: 'boolean', defaultValue: 'false', description: '禁用触发器' },
       { name: 'presets', type: 'DatePickerPreset[] | false', defaultValue: '—', description: '快捷预设栏：range 缺省内置三项（今天 / 本周 / 本月），single 不渲染，false 显式关闭；项可为 { key, label? } / { label, days } / { label, range }' },
+      { name: 'allowClear', type: 'boolean', defaultValue: 'true', description: 'hover 清除（缺省开启，传 false 关闭）：有值时悬停控件，右缘浮出 ×（有右侧图标的控件在原图标位置替换），点击清空' },
       { name: 'size', type: "'small' | 'middle' | 'large'", defaultValue: "'middle'", description: '控件尺寸令牌：small h-8 / middle h-9（默认）/ large h-10，与全部表单控件同一令牌，同行混排保持高度一致' },
       { name: 'className / style', type: 'string / CSSProperties', defaultValue: '—', description: '通用：根节点 class 合并 / 内联样式（Form 内为 form-item 容器，独立渲染时为触发器）' },
     ],

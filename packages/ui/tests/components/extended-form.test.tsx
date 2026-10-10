@@ -525,15 +525,17 @@ describe('Field', () => {
     expect(selectControl?.className).toContain('ctrl-select');
   });
 
-  it('Input 独立渲染：controlClassName 与 className 同点合并', () => {
+  it('Input 独立渲染：className 挂包裹节点（allowClear 缺省开启），controlClassName 挂 input 本体', () => {
     const { container } = renderDsl({
       type: 'Input',
       props: { className: 'root-cls', controlClassName: 'ctrl-cls' },
     });
 
+    const wrapper = container.firstElementChild;
+    expect(wrapper?.className).toContain('root-cls');
     const input = container.querySelector('input');
-    expect(input?.className).toContain('root-cls');
     expect(input?.className).toContain('ctrl-cls');
+    expect(input?.className).not.toContain('root-cls');
   });
 });
 

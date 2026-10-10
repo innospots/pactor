@@ -3,7 +3,12 @@ import { resolveLayout } from '@pactor-app/ui/layout';
 import { resolveRoute } from '@pactor-app/router';
 import { DynamicDslRoute, useReactRouterBridge } from '@pactor-app/router/react';
 import { I18nContextProvider } from '@pactor-app/runtime';
-import { useEffect, useState, type ReactNode } from 'react';
+import {
+  useEffect,
+  useState,
+  useSyncExternalStore,
+  type ReactNode,
+} from 'react';
 import {
   BrowserRouter,
   HashRouter,
@@ -91,11 +96,19 @@ export function Application({ app }: ApplicationProps) {
 /** bootstrap 就绪后的组合：Router → 桥接同步 → providers（可选）→ interactionKit.Provider → 布局 → 动态路由 */
 function AppShell({
   app,
-  session,
+  session: initialSession,
 }: {
   app: PactorApplicationHandle;
   session: PactorAppSession;
 }) {
+  // 设计 D1：订阅会话快照，setLocale 更新后此处重渲染 → 重建
+  // I18nContext → 所有 useI18n 消费者跟随新语言（无整页刷新）。
+  // bootstrap 后 getSession 恒非 null，initialSession 仅为 TS 兜底。
+  const liveSession = useSyncExternalStore(
+    app.subscribeSession,
+    app.getSession,
+  );
+  const session = liveSession ?? initialSession;
   const Router = app.routerOptions.type === 'hash' ? HashRouter : BrowserRouter;
   const InteractionKit = app.interactionKit.Provider;
   const Providers = app.providers;
@@ -171,7 +184,7 @@ function ShellLayout({
             forbidden={<ForbiddenPage />}
             render={({ pageId, route: pageRoute }) => (
               <DslPageLoader
-                key={pageLoaderKey(pageId, pageRoute)}
+                key={pageLoaderKey(pageId, pageRoute, session.i18nVersion)}
                 app={app}
                 pageId={pageId}
                 route={pageRoute}
@@ -219,14 +232,16 @@ function ShellLayout({
 }
 
 /**
- * 页面加载器 key（决策 D2）：pageId 或 route.params/query 变化时
- * 卸载旧页面并重建运行时（V1 无 keepAlive）。
+ * 页面加载器 key（决策 D2 + 设计 D3）：pageId、route.params/query 或
+ * i18nVersion（语言/文案变化）任一变化即卸载旧页面并重建运行时
+ * （V1 无 keepAlive）。
  */
 function pageLoaderKey(
   pageId: string,
   route: { params: Record<string, string>; query: Record<string, string> },
+  i18nVersion: number,
 ): string {
-  return `${pageId}|${JSON.stringify(route.params)}|${JSON.stringify(route.query)}`;
+  return `${pageId}|${i18nVersion}|${JSON.stringify(route.params)}|${JSON.stringify(route.query)}`;
 }
 
 /** 404：路径未命中任何菜单页 */

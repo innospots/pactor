@@ -3,8 +3,8 @@
  * 组件总览页自定义区（任务 4.3）：覆盖矩阵、常用组件、最近更新、实验区。
  * 所有计数与列表构建期从组件数据统计；「常用组件」为运营手工选择并注明。
  */
-import StatusBadges from './StatusBadges.astro';
-import ExceptionState from './ExceptionState.astro';
+import StatusBadges from './StatusBadges';
+import ExceptionState from './ExceptionState';
 import { components } from '../assets-data/components';
 import { SITE_NAV } from '../site-nav';
 import { toInspectAttrs } from '../lib/inspect';
@@ -114,7 +114,7 @@ const cardAttrs = (c: ComponentEntry) =>
           <div class="card-body">
             <div class="card-title">{c.name}</div>
             <div class="card-desc">{c.purpose}。</div>
-            <StatusBadges maturity={c.maturity} change={c.change} />
+            <StatusBadges client:visible maturity={c.maturity} change={c.change} />
           </div>
         </a>
       ))
@@ -138,7 +138,7 @@ const cardAttrs = (c: ComponentEntry) =>
           <div class="card-body">
             <div class="card-title">{c.name}</div>
             <div class="card-desc">{c.purpose}。</div>
-            <StatusBadges maturity={c.maturity} change={c.change} />
+            <StatusBadges client:visible maturity={c.maturity} change={c.change} />
           </div>
         </a>
       ))
@@ -160,7 +160,7 @@ const cardAttrs = (c: ComponentEntry) =>
             <div class="card-body">
               <div class="card-title">{c.name}</div>
               <div class="card-desc">{c.purpose}。</div>
-              <StatusBadges maturity={c.maturity} change={c.change} />
+              <StatusBadges client:visible maturity={c.maturity} change={c.change} />
             </div>
           </a>
         ))}
@@ -170,6 +170,7 @@ const cardAttrs = (c: ComponentEntry) =>
         kind="empty"
         title="暂无实验组件"
         hint="本期 137 个组件全部按稳定（stable）录入，暂无成熟度为实验的组件；后续批次接入新组件时将在此展示。"
+        client:visible
       />
     )
   }

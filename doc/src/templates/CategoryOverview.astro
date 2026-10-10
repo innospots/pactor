@@ -6,7 +6,7 @@
  * 子菜单计数一律用 site-nav 的 sectionCount，不自行统计。
  */
 import AssetLibraryLayout from '../layouts/AssetLibraryLayout.astro';
-import StatusBadges from '../components/StatusBadges.astro';
+import StatusBadges from '../components/StatusBadges';
 import { findCategory, sectionCount, type SiteNavCategory } from '../site-nav';
 import { renderMarkdown } from '../lib/markdown';
 import { toInspectAttrs } from '../lib/inspect';
@@ -163,7 +163,7 @@ const related = relatedCategories
               <div class="card-body">
                 <div class="card-title">{item.name}</div>
                 <div class="card-desc">{item.description}</div>
-                <StatusBadges maturity={item.maturity} change={item.change} />
+                <StatusBadges client:visible maturity={item.maturity} change={item.change} />
               </div>
             </a>
           ))}

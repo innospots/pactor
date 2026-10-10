@@ -1,8 +1,10 @@
+import { useI18n } from '@pactor-app/runtime';
 import { ChevronRight } from 'lucide-react';
 import { useEffect, useId, useState, type CSSProperties } from 'react';
 
 import { cn } from '../../../lib/utils.js';
 import { Popover, PopoverContent, PopoverTrigger } from '../../../ui/popover.js';
+import { CLEARABLE_GROUP, CLEARABLE_ICON_HIDE, ClearHoverButton } from '../../clearable.js';
 import { CONTROL_SIZE_BOX, type ControlSize } from '../../control-size.js';
 import { useFormContext } from '../Form/context.js';
 import { FieldShell } from '../Form/form-item.js';
@@ -30,8 +32,10 @@ export interface CascaderProps {
   disabled?: boolean;
   /** 控件尺寸（默认 middle，即现行 h-9 尺寸） */
   size?: ControlSize;
-  /** 选中叶子事件，传出路径 value 数组 */
-  onChange?: (value: Array<string | number>) => void;
+  /** hover 清除（缺省开启，传 false 关闭）：有值时悬停触发器，箭头图标替换为 ×，点击清空（传出 undefined） */
+  allowClear?: boolean;
+  /** 选中叶子事件，传出路径 value 数组；清除时传出 undefined */
+  onChange?: (value: Array<string | number> | undefined) => void;
   /** 通用：根节点 class（Form 内为 form-item 容器，独立渲染时为触发器） */
   className?: string;
   /** 通用：根节点内联样式（同 className 的挂载规则） */
@@ -71,11 +75,13 @@ export function Cascader({
   placeholder,
   disabled,
   size = 'middle',
+  allowClear,
   onChange,
   className,
   style,
 }: CascaderProps) {
   const form = useFormContext();
+  const { t } = useI18n();
   const controlId = useId();
   const inForm = form?.inForm === true && typeof name === 'string' && name !== '';
   const [open, setOpen] = useState(false);
@@ -101,6 +107,16 @@ export function Cascader({
     committedNodes && committedNodes.length > 0
       ? committedNodes.map((node) => node.label).join(' / ')
       : '';
+  // hover 清除：有值且未禁用时，悬停把触发器右侧箭头图标替换为 ×
+  const showClear = allowClear !== false && disabled !== true && displayText !== '';
+  const handleClear = () => {
+    if (inForm && form && name) {
+      form.setValue(name, undefined);
+    } else {
+      setInnerValue(undefined);
+    }
+    onChange?.(undefined);
+  };
 
   // 弹层内下钻路径（打开时以已提交路径初始化）
   const [activePath, setActivePath] = useState<Path>([]);
@@ -146,6 +162,7 @@ export function Cascader({
         className={cn(
           'flex h-9 w-full min-w-0 cursor-pointer items-center justify-between gap-2 rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-xs transition-colors outline-none hover:bg-accent focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:cursor-not-allowed disabled:opacity-50',
           CONTROL_SIZE_BOX[size],
+          CLEARABLE_GROUP,
           displayText === '' && 'text-muted-foreground',
           !inForm && className,
         )}
@@ -154,7 +171,15 @@ export function Cascader({
         <span className="min-w-0 flex-1 truncate text-left">
           {displayText === '' ? (placeholder ?? '请选择') : displayText}
         </span>
-        <ChevronRight className="size-4 shrink-0 rotate-90 opacity-50" />
+        {showClear ? (
+          <ClearHoverButton label={t('pactor.control.clear')} onClear={handleClear} />
+        ) : null}
+        <ChevronRight
+          className={cn(
+            'size-4 shrink-0 rotate-90 opacity-50',
+            showClear && CLEARABLE_ICON_HIDE,
+          )}
+        />
       </PopoverTrigger>
       <PopoverContent className="w-auto p-1">
         <div data-slot="cascader-panel" className="flex">

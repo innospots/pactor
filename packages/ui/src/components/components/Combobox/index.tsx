@@ -1,3 +1,4 @@
+import { useI18n } from '@pactor-app/runtime';
 import { useEffect, useId, useState, type CSSProperties } from 'react';
 
 import { cn } from '../../../lib/utils.js';
@@ -14,6 +15,7 @@ import {
   CommandItem,
   CommandList,
 } from '../../../ui/command.js';
+import { CLEARABLE_GROUP, CLEARABLE_ICON_HIDE, ClearHoverButton } from '../../clearable.js';
 import { CONTROL_SIZE_BOX, type ControlSize } from '../../control-size.js';
 import { formItemClass, useFormContext } from '../Form/context.js';
 import type { FieldRule } from '../Input/index.js';
@@ -42,6 +44,8 @@ export interface ComboboxProps {
   disabled?: boolean;
   /** 控件尺寸（默认 middle，即现行 h-9 尺寸） */
   size?: ControlSize;
+  /** hover 清除（缺省开启，传 false 关闭）：有选中值时悬停触发器，上下箭头替换为 ×，点击清空（传出 undefined） */
+  allowClear?: boolean;
   /** 选中变化事件，传出选中项的原始 value */
   onChange?: (value: string | number | undefined) => void;
   /** 通用：根节点 class（Form 内为 form-item 容器，独立渲染时为触发器） */
@@ -65,11 +69,13 @@ export function Combobox({
   searchable = true,
   disabled,
   size = 'middle',
+  allowClear,
   onChange,
   className,
   style,
 }: ComboboxProps) {
   const form = useFormContext();
+  const { t } = useI18n();
   const controlId = useId();
   const inForm = form?.inForm === true && typeof name === 'string' && name !== '';
   const [open, setOpen] = useState(false);
@@ -90,6 +96,16 @@ export function Combobox({
 
   const current = inForm && form && name ? form.values[name] : innerValue;
   const selected = options.find((option) => option.value === current);
+  // hover 清除：有选中且未禁用时，悬停把触发器右侧上下箭头替换为 ×
+  const showClear = allowClear !== false && disabled !== true && selected !== undefined;
+  const handleClear = () => {
+    if (inForm && form && name) {
+      form.setValue(name, undefined);
+    } else {
+      setInnerValue(undefined);
+    }
+    onChange?.(undefined);
+  };
 
   const handleSelect = (option: ComboboxOption) => {
     if (option.disabled) return;
@@ -108,7 +124,18 @@ export function Combobox({
         id={controlId}
         type="button"
         disabled={disabled}
-        className={cn(CONTROL_SIZE_BOX[size], !selected && 'text-muted-foreground', !inForm && className)}
+        iconClassName={showClear ? CLEARABLE_ICON_HIDE : undefined}
+        endAdornment={
+          showClear ? (
+            <ClearHoverButton label={t('pactor.control.clear')} onClear={handleClear} />
+          ) : null
+        }
+        className={cn(
+          CONTROL_SIZE_BOX[size],
+          CLEARABLE_GROUP,
+          !selected && 'text-muted-foreground',
+          !inForm && className,
+        )}
         style={inForm ? undefined : style}
       >
         {selected ? selected.label : (placeholder ?? '')}

@@ -7,7 +7,7 @@
  * 失效外链条目禁用跳转并给出说明。
  */
 import AssetLibraryLayout from '../layouts/AssetLibraryLayout.astro';
-import StatusBadges from '../components/StatusBadges.astro';
+import StatusBadges from '../components/StatusBadges';
 import FilterBar from '../components/FilterBar';
 import { findCategory } from '../site-nav';
 import { renderMarkdown } from '../lib/markdown';
@@ -150,7 +150,7 @@ const prepared = items.map((item) => {
               <div class="card-body">
                 <div class="card-title">{item.name}</div>
                 <div class="card-desc">{item.description}</div>
-                <StatusBadges
+                <StatusBadges client:visible
                   maturity={item.maturity}
                   change={item.change}
                   integration={item.integration}
