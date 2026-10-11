@@ -11,8 +11,34 @@ import buildInfo from '../generated/build-info.json';
 <header class="topbar">
   <button class="btn small mobile-btn" data-drawer-toggle="left" aria-label="打开分类导航">目录</button>
   <a class="brand" href="/styles/overview" style="text-decoration:none;color:inherit">
-    <div class="logo">UI</div>
-    <span>UI Design System</span>
+    <div class="logo" aria-hidden="true">
+      <svg
+        viewBox="0 0 24 24"
+        width="17"
+        height="17"
+        fill="none"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <path d="M12 3.25 20.75 7.75 12 12.25 3.25 7.75Z" fill="currentColor"></path>
+        <path
+          d="M3.25 11.25 12 15.75 20.75 11.25"
+          stroke="currentColor"
+          stroke-width="2.25"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          opacity="0.55"
+        ></path>
+        <path
+          d="M3.25 14.75 12 19.25 20.75 14.75"
+          stroke="currentColor"
+          stroke-width="2.25"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          opacity="0.3"
+        ></path>
+      </svg>
+    </div>
+    <span>Pactor</span>
   </a>
   <nav class="topnav">
     <a class="navitem" href={DOCS_SITE_URL} target="_blank" rel="noreferrer">文档</a>
