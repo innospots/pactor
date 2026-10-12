@@ -6,6 +6,7 @@ import {
   ArrowRight,
   ArrowUp,
   ArrowUpRight,
+  AudioLines,
   Bell,
   Bookmark,
   Brain,
@@ -64,6 +65,7 @@ import {
   Menu,
   MessageCircle,
   MessageSquare,
+  Mic,
   Minus,
   Moon,
   Package,
@@ -73,10 +75,12 @@ import {
   Paperclip,
   Pencil,
   Phone,
+  Play,
   Plus,
   Quote,
   RefreshCcw,
   RotateCcw,
+  RotateCw,
   Save,
   Search,
   Send,
@@ -243,6 +247,11 @@ export const ICONS: Record<string, LucideIcon> = {
   'zoom-out': ZoomOut,
   video: Video,
   music: Music,
+  // 录音 / 音频场景（spec: chat-page 录音模板）：波形、麦克风、播放控制
+  'audio-lines': AudioLines,
+  mic: Mic,
+  play: Play,
+  'rotate-cw': RotateCw,
 };
 
 /** DSL Icon 尺寸（数字直接作 px） */

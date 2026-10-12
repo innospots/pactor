@@ -19,6 +19,7 @@ sourceRef: innos-diagram/references/14-聊天交互页.md
 | ChatThread（Z-L） | `MessageList` + `ChatMessage`（parts 块类型） |
 | ChatComposer（Z-I） | `Composer`（ChatPage 内建，亦可独立使用） |
 | SessionPanel（Z-R） | `ChatPage` 产物栏（`artifacts`）与 `conversationRailItems` 附加项 |
+| 独立主体区（如录音） | `ChatPage` 的 `content` 槽（整体替换右侧主区域，含 header） |
 | 会话列表 | `ChatPage` 的 `conversations` / `conversationSectionTitle` |
 | 思考块 M-thought | parts `{ type: thinking }`（Thinking 组件） |
 | 工具块 M-tool | parts `{ type: tool-call }`（ToolCall 组件） |
@@ -41,7 +42,7 @@ sourceRef: innos-diagram/references/14-聊天交互页.md
 
 #### DSL 配置
 
-```yaml
+````yaml
 # 与上方预览同源的可运行 DSL（示例数据内联，人工提炼入库）
 body:
   type: ChatPage
@@ -165,56 +166,7 @@ body:
     onMessageAction:
       - action: message
         params: { messageType: info, text: "消息操作：${event.action}" }
-```bash
-              pnpm --filter @pactor-app/ui build
-              ```
-          - { type: artifacts, count: 2 }
-        actions:
-          - { name: copy, label: 复制, icon: copy }
-          - { name: retry, label: 重试, icon: refresh }
-    # Z-I 输入区：模型 chip + @ 行内提及
-    composerPlaceholder: 输入消息… @ 引用文件 / 智能体
-    models:
-      - { value: qwen3-max, label: qwen3-max }
-      - { value: kimi-k2, label: kimi-k2 }
-      - { value: doubao-pro, label: doubao-pro }
-    model: qwen3-max
-    contexts:
-      - trigger: '@'
-        label: 引用上下文
-        icon: file-text
-        items:
-          - { id: f1, label: chat-page.yaml, icon: file-text }
-          - { id: f2, label: 会话数据接口, icon: database }
-          - { id: a1, label: 代码审查助手, icon: users }
-    # Z-R 产物栏（默认收起，图标栏首项 toggle；富模型内建预览）
-    artifactTitle: 产物
-    artifacts:
-      - id: a1
-        kind: markdown
-        title: 聊天页设计说明.md
-        content: |-
-          # 聊天页设计说明
-
-          - 布局：**C1 主聊天列 + 右侧产物栏**
-          - 消息块：thinking / tool-call / markdown
-          - 输入区：@ 提及 + 模型切换
-      - id: a2
-        kind: code
-        language: bash
-        title: run.sh
-        content: |-
-          #!/usr/bin/env bash
-          pnpm --filter @pactor-app/ui build
-          pnpm --filter @pactor-app/ui test
-  events:
-    onSend:
-      - action: message
-        params: { messageType: success, text: "已发送：${event}" }
-    onMessageAction:
-      - action: message
-        params: { messageType: info, text: "消息操作：${event.action}" }
-```
+````
 
 ### 布局 C2 — 图标栏浮层
 
@@ -440,7 +392,100 @@ body:
 
 ---
 
-## 六、交互要点
+## 六、主体内容槽 — content 整体替换（含 header）
+
+{{preview:05}}
+
+菜单新增独立主体入口（如「录音」）时，无需拆开 ChatPage 自己拼外壳：给 `content` 槽传 DslNode / React 元素，右侧主区域（对话 header / Welcome / MessageList / Composer / 对话图标栏 / 产物分栏）整体替换为调用方内容，最左图标栏与展开菜单区保留。菜单点击经 `onMenuSelect` → `setState` 闭环，两个 `when` 互斥的 ChatPage 分别承载聊天主体与录音主体。
+
+录音主体由业务组件 `RecordingPage`（business 目录）承载：**左列录音记录列表**（`filters` 过滤 pills / `processingText` 处理状态横幅 / 「开始新录音」/ `groups` 分组条目——条目含波形图标、标题、`status`+`statusType` 状态标与时长，`activeRecordingId` 受控选中高亮）、**右列转写详情**（`title`+`meta` 头部、`editLabel`/`shareLabel` 操作、`tabs` 胶囊页签——`transcript` 页签内建渲染 `segments` 说话人段落（Avatar 首字母 + 姓名 + 改名铅笔 + 时间戳 + 正文，`marked` 附「已标记」徽标），其余页签传 `content` 槽；`summary` 页签（`summaryTabKey`，缺省 `summary`）内建渲染 `summary` 结构化纪要——思维导图（`mindmap` 中心/左右节点 + `mindmapActionLabel` 查看入口）、`overview` 会议概况、`topics` 主要议题两列卡、`conclusions` 评审结论表（事项/结论/负责人）、`followUp` 后续说明、`materials` 相关材料（+`onMaterialClick`）、`todos` 待办事项（`done` 对勾态，+`onTodoClick`）与底部 `actions` 操作条（+`onSummaryAction`），各段提供才展示；`ai` 页签（`insightTabKey`，缺省 `ai`）内建渲染 `insight` AI 解读——视角横幅（`perspectiveTitle` + `perspectiveActionLabel` 修改入口 + `perspectiveHint`）、`basics` 基础信息、`chapters` 章节速览（时间戳 + 标题 + 解读）、`viewpoints` 观点分析（发言人头像 + 加粗观点前缀 + 自动识别标签）与底部操作条（+`onPerspectiveEdit` / `onInsightAction`）；`knowledge` 页签（`memoryTabKey`，缺省 `knowledge`）内建渲染 `memory` 知识记忆——`groups` 分组卡片（组标题自动拼接计数「客观事实 · 4」，条目为标题 + 正文白卡）与底部操作条（+`onMemoryAction`）；`translation` 页签（`translationTabKey`，缺省 `translation`）内建渲染 `translation` 翻译——语言选择器（`languageLabel`，+`onLanguageClick`）、双语对照段落（`segments`：说话人 + 原文 / `targetLabel` + 译文）与底部操作条（+`onTranslationAction`））、**底部播放条**（`player` 提供才渲染：快退 / 播放 / 快进 + 进度）。过滤、选中录音与页签缺省非受控，均可经受控 prop + change 事件闭环。
+
+#### DSL 配置
+
+```yaml
+# 与上方预览同源（节选主体骨架；完整可运行 DSL 见预览「结构」Tab）
+state: { menu: chat }
+body:
+  type: Flex
+  children:
+    # 对话主体：常规 ChatPage 四区布局（同布局 C1，略）
+    - type: ChatPage
+      when: "${state.menu !== 'recording'}"
+      props:
+        menuItems:
+          - { key: chat, label: 对话, icon: message-square }
+          - { key: space, label: 空间, icon: folder }
+          # 菜单新增「录音」项
+          - { key: recording, label: 录音, icon: music }
+        activeMenuKey: ${state.menu}
+        # ...品牌 / 会话列表 / 消息流 / 输入区等同布局 C1
+      events:
+        onMenuSelect:
+          - action: setState
+            params: { menu: "${event}" }
+    # 录音主体：同一外壳（图标栏 / 菜单区保留），右侧由 content 槽整体接管
+    - type: ChatPage
+      when: "${state.menu === 'recording'}"
+      props:
+        # ...品牌 / 菜单 / 会话列表同对话主体
+        activeMenuKey: ${state.menu}
+        content:               # 主体内容槽：替换右侧主区域（含 header）
+          type: RecordingPage  # 业务组件：录音记录列表 + 转写详情 + 播放条
+          props:
+            filters: [{ key: all, label: 全部 }, ...]
+            processingText: 3 条录音处理中
+            groups:            # 分组条目：今天 / 昨天 / 本周…
+              - label: 今天
+                items:
+                  - { id: r1, title: Q3 产品定价策略评审会议, duration: '42:18',
+                      status: 纪要已生成, statusType: success }
+            title: Q3 产品定价策略评审会议
+            meta: 07 月 28 日 14:02 · 42:18
+            tabs: [{ key: transcript, label: 原文转写 }, { key: summary, label: 详细纪要 }, ...]
+            segments: [{ speaker: 王原, time: 00:42, content: … }, ...]
+            summary:             # 详细纪要页签内建渲染（各段提供才展示）
+              mindmap: { center: Q3 产品评审, left: [定价试点], right: [交付准备, 资源缺口] }
+              overview: 本次评审围绕 Q3 产品路线图 v3 …
+              topics: [{ title: 定价试点范围, content: … }, ...]
+              conclusions: [{ item: 定价试点, conclusion: 首轮仅覆盖制造、医疗, owner: 李珂 }, ...]
+              materials: [{ id: m1, title: 上周评审纪要：…, meta: 7 月 21 日 · 文档 }, ...]
+              todos: [{ id: t1, title: 对齐财务定价口径, owner: 李珂 · 本周, done: true }, ...]
+              actions: [{ key: copy, icon: copy }, { key: like, icon: thumbs-up }, ...]
+            insight:             # AI 解读页签内建渲染（各段提供才展示）
+              perspectiveTitle: AI 判断你负责产品战略与关键业务决策
+              perspectiveActionLabel: 修改
+              basics: 产品团队季度评审会。核心是用范围收窄换取口径一致…
+              chapters: [{ time: '00:05', title: 定点价格, content: … }, ...]
+              viewpoints: [{ speaker: 李珂, label: 数据优先, content: … }, ...]
+            memory:              # 知识记忆页签内建渲染（组标题自动拼接计数）
+              groups:
+                - label: 客观事实
+                  items: [{ title: 企业版交付日期, content: … }, ...]
+            translation:         # 翻译页签内建渲染（双语对照）
+              languageLabel: 自动判断 → English
+              targetLabel: 译文 · 英语
+              segments: [{ speaker: 王原, source: …, target: … }, ...]
+            player: { currentTime: '14:22', totalTime: '42:18', progress: 34 }
+          events:
+            onSelectRecording:
+              - action: message
+                params: { messageType: info, text: "选中录音：${event}" }
+      events:
+        onMenuSelect:
+          - action: setState
+            params: { menu: "${event}" }
+```
+
+| 要点 | 说明 |
+| --- | --- |
+| **替换范围** | `content` 提供时右侧主区域整体替换（含 header），左侧图标栏 / 展开菜单区不受影响 |
+| **内容形态** | React 元素直接渲染；DslNode 经 Renderer 渲染（同 `composerFooter` 等槽位） |
+| **菜单切换** | `activeMenuKey` 受控绑 `${state.menu}`，`onMenuSelect` → `setState`；两个 ChatPage 用 `when` 互斥 |
+| **RecordingPage** | 录音工作区业务组件：`groups` / `tabs` / `segments` / `player` 数据化 props，事件经 `onSelectRecording` / `onTabChange` / `onNewRecording` 等传出 |
+
+---
+
+## 七、交互要点
 
 1. 发送闭环：`onSend` 传出文本 → 调用方追加消息并置 `sending`，完成后复位（禁用发送钮防重发）。
 2. 工具失败：`tool-call` `status: error` + `{ type: error }` 一行摘要；助手块底可配「重试」操作项。
