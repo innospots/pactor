@@ -448,6 +448,9 @@
   .m-0 {
     margin: 0px;
   }
+  .m-3 {
+    margin: calc(var(--spacing) * 3);
+  }
   .-mx-1 {
     margin-inline: calc(var(--spacing) * -1);
   }
@@ -1003,8 +1006,8 @@
   .w-\[100px\] {
     width: 100px;
   }
-  .w-\[264px\] {
-    width: 264px;
+  .w-\[250px\] {
+    width: 250px;
   }
   .w-auto {
     width: auto;
@@ -2218,6 +2221,9 @@
   }
   .text-accent-foreground {
     color: var(--accent-foreground);
+  }
+  .text-background {
+    color: var(--background);
   }
   .text-card-foreground {
     color: var(--card-foreground);
@@ -3586,6 +3592,9 @@
     }
     .sm\:max-w-sm {
       max-width: var(--container-sm);
+    }
+    .sm\:max-w-xl {
+      max-width: var(--container-xl);
     }
     .sm\:grid-cols-2 {
       grid-template-columns: repeat(2, minmax(0, 1fr));
