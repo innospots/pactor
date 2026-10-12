@@ -181,6 +181,13 @@ export interface ChatPageProps {
   defaultArtifactOpen?: boolean;
   /** 产物区开关变化事件，传出 boolean */
   onArtifactOpenChange?: (open: boolean) => void;
+  /**
+   * 主体内容槽（React 元素或 DslNode）：提供时整体替换右侧主区域——
+   * 对话 header、Welcome / MessageList、Composer、对话图标栏与右侧
+   * 产物 / 附加分栏均不渲染，由调用方自带完整主体（含 header）；
+   * 最左图标栏与展开菜单区不受影响
+   */
+  content?: DslNode | ReactNode;
   /** 通用：根节点 class（与内置样式合并） */
   className?: string;
   /** 通用：根节点内联样式 */
@@ -201,6 +208,8 @@ export interface ChatPageProps {
  * 展示附加内容——popover 悬浮弹框或 panel 右侧分栏，与产物区互斥）、
  * 最右产物区（ArtifactPanel：内建产物预览、
  * 目录树与下载，可显隐；展示时经 Resizable 拖拽调节与对话区的宽度）。
+ * content 槽（React 元素或 DslNode）提供时整体替换右侧主区域（含对话
+ * header），由调用方自带完整主体内容；左侧图标栏与展开菜单区保留。
  * 数据与行为全部经 props / events 进出，
  * 本组件不持有业务状态（产物区开关、图标栏激活项与分区折叠缺省非受控，
  * 均可经受控 prop + change 事件闭环）。
@@ -266,6 +275,7 @@ export function ChatPage({
   artifactOpen,
   defaultArtifactOpen = false,
   onArtifactOpenChange,
+  content,
   className,
   style,
 }: ChatPageProps) {
@@ -652,9 +662,12 @@ export function ChatPage({
         ) : null}
       </div>
       {/* 主区域：对话区 + 右侧分栏（产物区或 panel 形态附加内容，互斥；
-          展示时拖拽调宽）。@container 使对话内容列的 61.8cqw 相对主区域解析 */}
+          展示时拖拽调宽）。@container 使对话内容列的 61.8cqw 相对主区域解析。
+          content 槽提供时整体替换本区域（含 header，调用方自带完整主体） */}
       <div className="@container h-full min-w-0 flex-1">
-        {open || activePanelItem ? (
+        {content !== undefined ? (
+          renderSlot(content)
+        ) : open || activePanelItem ? (
           <PanelGroup orientation="horizontal" style={{ width: '100%', height: '100%' }}>
             <Panel defaultSize="62%">{chatArea}</Panel>
             <ResizableHandle withHandle />

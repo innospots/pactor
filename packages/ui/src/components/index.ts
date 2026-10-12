@@ -468,6 +468,32 @@ export type {
 } from './business/EntityCard/index.js';
 export { CardList } from './business/CardList/index.js';
 export type { CardListItem, CardListProps } from './business/CardList/index.js';
+export { RecordingPage } from './business/RecordingPage/index.js';
+export type {
+  RecordingFilterItem,
+  RecordingGroup,
+  RecordingInsight,
+  RecordingInsightChapter,
+  RecordingInsightViewpoint,
+  RecordingItem,
+  RecordingMemory,
+  RecordingMemoryGroup,
+  RecordingMemoryItem,
+  RecordingPageProps,
+  RecordingPlayer,
+  RecordingStatusType,
+  RecordingSummary,
+  RecordingSummaryAction,
+  RecordingSummaryConclusion,
+  RecordingSummaryMaterial,
+  RecordingSummaryMindmap,
+  RecordingSummaryTodo,
+  RecordingSummaryTopic,
+  RecordingTabItem,
+  RecordingTranscriptSegment,
+  RecordingTranslation,
+  RecordingTranslationSegment,
+} from './business/RecordingPage/index.js';
 export { SiteFooter } from './business/SiteFooter/index.js';
 export type {
   SiteFooterBrand,

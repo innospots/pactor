@@ -264,6 +264,22 @@ describe('ChatPage', () => {
     );
     await expectEventState(context, 'conv', 'c1');
   });
+
+  it('content 槽：整体替换右侧主区域（含 header），左侧图标栏与菜单保留', () => {
+    const { container } = renderChatPage({
+      content: { type: 'Text', props: { text: '自定义主体' } },
+    });
+
+    expect(screen.getByText('自定义主体')).toBeTruthy();
+    // 右侧主区域整体被替换：对话 header / 消息区 / Composer / 对话图标栏 / 产物区均不渲染
+    expect(screen.queryByText('月报讨论', { selector: '[data-slot=chat-page-conversation-header] *' })).toBeNull();
+    expect(container.querySelector('[data-slot=chat-page-conversation]')).toBeNull();
+    expect(container.querySelector('[data-slot=chat-page-conv-rail]')).toBeNull();
+    expect(container.querySelector('[data-slot=chat-page-artifact]')).toBeNull();
+    // 左侧图标栏与展开菜单区不受影响
+    expect(container.querySelector('[data-slot=chat-page-rail]')).not.toBeNull();
+    expect(container.querySelector('[data-slot=chat-page-menu]')).not.toBeNull();
+  });
 });
 
 describe('ChatPage 对话图标栏（conversation rail）', () => {
