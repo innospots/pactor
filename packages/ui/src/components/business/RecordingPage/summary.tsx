@@ -9,7 +9,10 @@ export interface RecordingSummaryViewProps {
   summary: RecordingSummary;
   onMindmapAction?: () => void;
   onMaterialClick?: (id: string | number) => void;
-  onTodoClick?: (id: string | number) => void;
+  /** 当前选中的待办 id 列表（已解析受控 / 非受控） */
+  selectedTodoIds?: (string | number)[];
+  /** 待办条目点击（切换选中态） */
+  onTodoToggle?: (id: string | number) => void;
   onSummaryAction?: (key: string) => void;
 }
 
@@ -35,14 +38,16 @@ const mindmapLine = (
 
 /**
  * 详细纪要（RecordingPage summaryTabKey 页签内建内容）：思维导图 /
- * 会议概况 / 主要议题 / 评审结论表 / 后续说明 / 相关材料 / 待办事项 /
- * 底部操作条，各段提供才展示。
+ * 会议概况 / 主要议题 / 评审结论表 / 后续说明 / 相关材料 / 待办事项
+ * （点击切换选中态，选中列表由 RecordingPage 维护）/ 底部操作条，
+ * 各段提供才展示。
  */
 export function RecordingSummaryView({
   summary,
   onMindmapAction,
   onMaterialClick,
-  onTodoClick,
+  selectedTodoIds,
+  onTodoToggle,
   onSummaryAction,
 }: RecordingSummaryViewProps) {
   return (
@@ -182,39 +187,47 @@ export function RecordingSummaryView({
         <section className="flex flex-col gap-3">
           <Text text={summary.todosTitle ?? "待办事项"} strong size="large" />
           <div className="flex flex-col divide-y divide-border rounded-lg border border-border">
-            {summary.todos.map((todo, index) => (
-              <button
-                key={todo.id ?? index}
-                type="button"
-                data-slot="recording-todo"
-                className="flex cursor-pointer items-center gap-2 px-4 py-3 text-left"
-                onClick={() => onTodoClick?.(todo.id ?? index)}
-              >
-                {todo.done ? (
-                  <Icon
-                    name="check-circle"
-                    size={16}
-                    className="shrink-0 text-success"
+            {summary.todos.map((todo, index) => {
+              const todoId = todo.id ?? index;
+              const checked =
+                selectedTodoIds !== undefined
+                  ? selectedTodoIds.includes(todoId)
+                  : todo.done === true;
+              return (
+                <button
+                  key={todoId}
+                  type="button"
+                  data-slot="recording-todo"
+                  aria-pressed={checked}
+                  className="flex cursor-pointer items-center gap-2 px-4 py-3 text-left"
+                  onClick={() => onTodoToggle?.(todoId)}
+                >
+                  {checked ? (
+                    <Icon
+                      name="check-circle"
+                      size={16}
+                      className="shrink-0 text-success"
+                    />
+                  ) : (
+                    <span
+                      className="shrink-0 rounded-full border border-border"
+                      style={{ width: 16, height: 16 }}
+                    />
+                  )}
+                  <Text
+                    text={todo.title}
+                    size="small"
+                    className="min-w-0 flex-1 truncate"
                   />
-                ) : (
-                  <span
-                    className="shrink-0 rounded-full border border-border"
-                    style={{ width: 16, height: 16 }}
+                  <Text
+                    text={todo.owner}
+                    size="small"
+                    type="secondary"
+                    className="shrink-0"
                   />
-                )}
-                <Text
-                  text={todo.title}
-                  size="small"
-                  className="min-w-0 flex-1 truncate"
-                />
-                <Text
-                  text={todo.owner}
-                  size="small"
-                  type="secondary"
-                  className="shrink-0"
-                />
-              </button>
-            ))}
+                </button>
+              );
+            })}
           </div>
         </section>
       ) : null}

@@ -4,9 +4,9 @@
  * 新建钮 / 分组条目）+ 右列详情（头部 / 页签 / 说话人段落 / 播放条）；
  * 过滤、选中录音与页签缺省非受控，可经受控 prop + change 事件闭环。
  */
-import { fireEvent, screen } from '@testing-library/react';
+import { fireEvent, screen, within } from '@testing-library/react';
 import type { DslNode } from '@pactor-app/core';
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 
 import { expectEventState, renderDsl } from './helpers.js';
 
@@ -33,6 +33,14 @@ function baseProps(): Record<string, unknown> {
     meta: '07 月 28 日 14:02 · 42:18',
     editLabel: '编辑',
     shareLabel: '分享',
+    shareOptions: [
+      { key: 'summary', label: '详细纪要', disabled: true },
+      { key: 'audio', label: '录音' },
+      { key: 'insight', label: 'AI 解读' },
+      { key: 'transcript', label: '原文转写 · 含发言人' },
+    ],
+    defaultShareSelectedKeys: ['summary', 'audio', 'insight'],
+    shareLink: 'https://hojo.app/share/q3-product-review',
     tabs: [
       { key: 'transcript', label: '原文转写' },
       { key: 'summary', label: '详细纪要' },
@@ -44,6 +52,12 @@ function baseProps(): Record<string, unknown> {
     segments: [
       { speaker: '王原', avatarText: '王', time: '00:42', content: '定价试点先按席位费推进。' },
       { speaker: '发言人 1', time: '02:18', marked: true, content: '制造业客户更关注预算锁定。' },
+    ],
+    speakers: [
+      { name: '王原', role: '产品负责人 · Hojo', tag: '参会人' },
+      { name: '李珂', role: '产品设计 · Hojo', tag: '参会人' },
+      { name: '王悦', role: '交付负责人 · Acme', tag: '自动识别' },
+      { name: '陈致远', role: '客户成功 · Acme', tag: '用户创建' },
     ],
     player: { currentTime: '14:22', totalTime: '42:18', progress: 34 },
     summary: {
@@ -162,6 +176,7 @@ describe('RecordingPage 录音工作区', () => {
     const { container, context } = renderRecordingPage(
       { defaultActiveTabKey: 'summary' },
       {
+        onMindmapAction: { action: 'setState', params: { mindmap: true } },
         onMaterialClick: { action: 'setState', params: { material: '${event}' } },
         onTodoClick: { action: 'setState', params: { todo: '${event}' } },
         onSummaryAction: { action: 'setState', params: { op: '${event}' } },
@@ -183,6 +198,9 @@ describe('RecordingPage 录音工作区', () => {
     // transcript 内容不在 summary 页签
     expect(screen.queryByText('定价试点先按席位费推进。')).toBeNull();
 
+    fireEvent.click(screen.getByText('查看思维导图'));
+    await expectEventState(context, 'mindmap', true);
+
     fireEvent.click(screen.getByText('上周评审纪要'));
     await expectEventState(context, 'material', 'm1');
 
@@ -194,6 +212,106 @@ describe('RecordingPage 录音工作区', () => {
     )!;
     fireEvent.click(copyBtn);
     await expectEventState(context, 'op', 'copy');
+  });
+
+  it('待办事项：点击组件内切换选中态，onTodoSelectionChange 传出完整选中列表', async () => {
+    const { container, context } = renderRecordingPage(
+      { defaultActiveTabKey: 'summary' },
+      {
+        onTodoClick: { action: 'setState', params: { clicked: '${event}' } },
+        onTodoSelectionChange: { action: 'setState', params: { selected: '${event}' } },
+      },
+    );
+
+    const pressedStates = () =>
+      [...container.querySelectorAll('[data-slot=recording-todo]')].map((el) =>
+        el.getAttribute('aria-pressed'),
+      );
+    // 初始：done=true 的 t1 选中
+    expect(pressedStates()).toEqual(['true', 'false']);
+
+    // 选中 t2：传出完整列表 [t1, t2]，onTodoClick 仍传出当前 id
+    fireEvent.click(screen.getByText('更新试点客户邀请名单'));
+    await expectEventState(context, 'clicked', 't2');
+    await expectEventState(context, 'selected', ['t1', 't2']);
+    expect(pressedStates()).toEqual(['true', 'true']);
+
+    // 再点 t1 取消选中：传出 [t2]
+    fireEvent.click(screen.getByText('对齐财务定价口径'));
+    await expectEventState(context, 'clicked', 't1');
+    await expectEventState(context, 'selected', ['t2']);
+    expect(pressedStates()).toEqual(['false', 'true']);
+  });
+
+  it('transcript 改名铅笔打开修改发言人弹层：列表选人应用并传出事件', async () => {
+    const { container, context } = renderRecordingPage(
+      {},
+      {
+        onSpeakerChange: {
+          action: 'setState',
+          params: { idx: '${event.index}', prev: '${event.previous}', name: '${event.name}' },
+        },
+      },
+    );
+
+    // 点第一段的改名铅笔打开弹层
+    fireEvent.click(container.querySelector('[data-slot=recording-speaker-edit]')!);
+    await screen.findByText('修改发言人');
+    expect(
+      screen.getByText('选择参会信息、已识别人员或你曾手动创建的联系人。'),
+    ).toBeTruthy();
+    // 当前发言人（王原）预选中
+    const options = document.querySelectorAll('[data-slot=recording-speaker-option]');
+    expect(options).toHaveLength(4);
+    expect(options[0].getAttribute('aria-pressed')).toBe('true');
+
+    // 改选李珂 → 应用姓名：组件内更新展示名 + 事件传出
+    fireEvent.click(screen.getByText('李珂'));
+    fireEvent.click(screen.getByRole('button', { name: '应用姓名' }));
+    await expectEventState(context, 'idx', 0);
+    await expectEventState(context, 'prev', '王原');
+    await expectEventState(context, 'name', '李珂');
+    await vi.waitFor(() => {
+      expect(screen.queryByText('修改发言人')).toBeNull();
+    });
+    expect(screen.getByText('李珂')).toBeTruthy();
+    expect(screen.queryByText('王原')).toBeNull();
+  });
+
+  it('transcript 修改发言人弹层：自由输入姓名优先于列表，X 关闭丢弃草稿', async () => {
+    const { container, context } = renderRecordingPage(
+      {},
+      {
+        onSpeakerChange: { action: 'setState', params: { name: '${event.name}' } },
+      },
+    );
+
+    // 第二段（发言人 1）输入自定义姓名后应用
+    const editButtons = container.querySelectorAll('[data-slot=recording-speaker-edit]');
+    fireEvent.click(editButtons[1]);
+    await screen.findByText('修改发言人');
+    // 未选选项且未输入时应用按钮禁用
+    expect(
+      (screen.getByRole('button', { name: '应用姓名' }) as HTMLButtonElement).disabled,
+    ).toBe(true);
+    fireEvent.change(
+      document.querySelector('[data-slot=recording-speaker-dialog] input')!,
+      { target: { value: '张产品' } },
+    );
+    fireEvent.click(screen.getByRole('button', { name: '应用姓名' }));
+    await expectEventState(context, 'name', '张产品');
+    expect(screen.getByText('张产品')).toBeTruthy();
+
+    // 再打开选人后 X 关闭：不应用、展示名不变
+    fireEvent.click(container.querySelectorAll('[data-slot=recording-speaker-edit]')[1]);
+    await screen.findByText('修改发言人');
+    fireEvent.click(screen.getByText('王悦'));
+    fireEvent.click(screen.getByRole('button', { name: 'Close' }));
+    await vi.waitFor(() => {
+      expect(screen.queryByText('修改发言人')).toBeNull();
+    });
+    expect(screen.queryByText('王悦')).toBeNull();
+    expect(screen.getByText('张产品')).toBeTruthy();
   });
 
   it('insight 页签内建渲染 AI 解读：视角横幅 / 基础信息 / 章节速览 / 观点分析 / 操作条', async () => {
@@ -294,5 +412,300 @@ describe('RecordingPage 录音工作区', () => {
     await expectEventState(context, 'created', true);
 
     expect(container.querySelector('[data-slot=recording-page-player]')).toBeNull();
+  });
+
+  it('翻译语种弹层：点语言选择器打开，确定提交 onLanguageChange 并关闭', async () => {
+    const { context } = renderRecordingPage(
+      {
+        defaultActiveTabKey: 'translation',
+        translation: {
+          ...baseProps().translation as Record<string, unknown>,
+          sourceLanguages: [
+            { key: 'auto', label: '自动判断' },
+            { key: 'zh', label: '中文' },
+            { key: 'en', label: '英语' },
+          ],
+          targetLanguages: [
+            { key: 'zh', label: '中文' },
+            { key: 'en', label: 'English' },
+            { key: 'ja', label: '日本語' },
+          ],
+        },
+      },
+      {
+        onLanguageChange: {
+          action: 'setState',
+          params: {
+            source: '${event.source}',
+            target: '${event.target}',
+            targetLabel: '${event.targetLabel}',
+          },
+        },
+      },
+    );
+
+    fireEvent.click(screen.getByText('自动判断 → English'));
+    await screen.findByText('选择翻译语言');
+    expect(screen.getByText('原文语言识别')).toBeTruthy();
+    expect(screen.getByText('译文语言选择')).toBeTruthy();
+    // 缺省非受控选中各列首项
+    const options = document.querySelectorAll('[data-slot=recording-language-option]');
+    expect(options).toHaveLength(6);
+    expect(options[0].getAttribute('aria-pressed')).toBe('true');
+    expect(options[3].getAttribute('aria-pressed')).toBe('true');
+
+    fireEvent.click(screen.getByText('日本語'));
+    fireEvent.click(screen.getByRole('button', { name: '确定' }));
+    await expectEventState(context, 'source', 'auto');
+    await expectEventState(context, 'target', 'ja');
+    await expectEventState(context, 'targetLabel', '日本語');
+    await vi.waitFor(() => {
+      expect(screen.queryByText('选择翻译语言')).toBeNull();
+    });
+  });
+
+  it('翻译语种弹层：取消丢弃草稿，再次打开回到已提交选中', async () => {
+    const { context } = renderRecordingPage(
+      {
+        defaultActiveTabKey: 'translation',
+        translation: {
+          ...baseProps().translation as Record<string, unknown>,
+          defaultTargetLanguage: 'en',
+          sourceLanguages: [
+            { key: 'auto', label: '自动判断' },
+            { key: 'en', label: '英语' },
+          ],
+          targetLanguages: [
+            { key: 'en', label: 'English' },
+            { key: 'ja', label: '日本語' },
+          ],
+        },
+      },
+      {
+        onLanguageChange: { action: 'setState', params: { changed: true } },
+      },
+    );
+
+    fireEvent.click(screen.getByText('自动判断 → English'));
+    await screen.findByText('选择翻译语言');
+    // 草稿改为「英语」后取消：不提交、不触发事件
+    fireEvent.click(screen.getByText('英语'));
+    fireEvent.click(screen.getByRole('button', { name: '取消' }));
+    await vi.waitFor(() => {
+      expect(screen.queryByText('选择翻译语言')).toBeNull();
+    });
+    expect(context.state.get('changed')).toBeUndefined();
+
+    // 再次打开：草稿回到已提交值（auto / en）
+    fireEvent.click(screen.getByText('自动判断 → English'));
+    await screen.findByText('选择翻译语言');
+    const options = document.querySelectorAll('[data-slot=recording-language-option]');
+    expect(options[0].getAttribute('aria-pressed')).toBe('true');
+    expect(options[2].getAttribute('aria-pressed')).toBe('true');
+  });
+
+  it('解读身份弹层：点「修改」打开，应用提交 onPerspectiveApply 并关闭', async () => {
+    const { context } = renderRecordingPage(
+      {
+        defaultActiveTabKey: 'ai',
+        insight: {
+          ...baseProps().insight as Record<string, unknown>,
+          defaultPerspectiveInput: '我是产品负责人，关注产品战略、团队目标和关键业务决策。',
+        },
+      },
+      {
+        onPerspectiveApply: { action: 'setState', params: { identity: '${event}' } },
+      },
+    );
+
+    fireEvent.click(screen.getByText('修改'));
+    await screen.findByText('修改解读身份');
+    expect(screen.getByText('用自然语言说明你在本次会议中的身份与关注点。')).toBeTruthy();
+    const textarea = document.querySelector(
+      '[data-slot=recording-perspective-dialog] textarea',
+    ) as HTMLTextAreaElement;
+    expect(textarea.value).toBe('我是产品负责人，关注产品战略、团队目标和关键业务决策。');
+
+    fireEvent.change(textarea, { target: { value: '我是销售负责人，关注试点名单。' } });
+    fireEvent.click(screen.getByRole('button', { name: '应用身份' }));
+    await expectEventState(context, 'identity', '我是销售负责人，关注试点名单。');
+    await vi.waitFor(() => {
+      expect(screen.queryByText('修改解读身份')).toBeNull();
+    });
+
+    // 非受控提交后再次打开：草稿为已提交文本
+    fireEvent.click(screen.getByText('修改'));
+    await screen.findByText('修改解读身份');
+    expect(
+      (document.querySelector('[data-slot=recording-perspective-dialog] textarea') as HTMLTextAreaElement).value,
+    ).toBe('我是销售负责人，关注试点名单。');
+  });
+
+  it('解读身份弹层：取消丢弃草稿，不触发 onPerspectiveApply', async () => {
+    const { context } = renderRecordingPage(
+      {
+        defaultActiveTabKey: 'ai',
+        insight: {
+          ...baseProps().insight as Record<string, unknown>,
+          defaultPerspectiveInput: '初始身份',
+        },
+      },
+      {
+        onPerspectiveApply: { action: 'setState', params: { identity: '${event}' } },
+      },
+    );
+
+    fireEvent.click(screen.getByText('修改'));
+    await screen.findByText('修改解读身份');
+    fireEvent.change(
+      document.querySelector('[data-slot=recording-perspective-dialog] textarea')!,
+      { target: { value: '改过的身份' } },
+    );
+    fireEvent.click(screen.getByRole('button', { name: '取消' }));
+    await vi.waitFor(() => {
+      expect(screen.queryByText('修改解读身份')).toBeNull();
+    });
+    expect(context.state.get('identity')).toBeUndefined();
+
+    // 再次打开：草稿回到初始文本
+    fireEvent.click(screen.getByText('修改'));
+    await screen.findByText('修改解读身份');
+    expect(
+      (document.querySelector('[data-slot=recording-perspective-dialog] textarea') as HTMLTextAreaElement).value,
+    ).toBe('初始身份');
+  });
+
+  it('分享：点「分享」弹出选择分享内容 Popover，确定传出选中列表并打开分享对话框', async () => {
+    const { context } = renderRecordingPage(
+      {},
+      {
+        onShareConfirm: { action: 'setState', params: { shareKeys: '${event}' } },
+        onShareChannel: { action: 'setState', params: { channel: '${event}' } },
+      },
+    );
+
+    fireEvent.click(screen.getAllByRole('button', { name: '分享' })[0]);
+    await screen.findByText('选择分享内容');
+    const options = document.querySelectorAll('[data-slot=recording-share-option]');
+    expect(options).toHaveLength(4);
+    // 初始选中前三个；详细纪要禁用锁定
+    expect(options[0].getAttribute('aria-pressed')).toBe('true');
+    expect((options[0] as HTMLButtonElement).disabled).toBe(true);
+    expect(options[3].getAttribute('aria-pressed')).toBe('false');
+
+    // 禁用项点击不改变勾选
+    const popover = () =>
+      within(document.querySelector('[data-slot=recording-share-popover]') as HTMLElement);
+    fireEvent.click(popover().getByText('详细纪要'));
+    expect(options[0].getAttribute('aria-pressed')).toBe('true');
+
+    // 勾选「原文转写 · 含发言人」后确定：按选项顺序传出完整列表
+    fireEvent.click(popover().getByText('原文转写 · 含发言人'));
+    fireEvent.click(popover().getByRole('button', { name: '确定' }));
+    await expectEventState(context, 'shareKeys', ['summary', 'audio', 'insight', 'transcript']);
+
+    // 确定后打开分享对话框
+    await screen.findByText('分享会议内容');
+    expect(screen.getByText('https://hojo.app/share/q3-product-review')).toBeTruthy();
+    // 复制链接：真实写剪贴板 + 按钮短暂变为「已复制」+ 渠道事件
+    const writeText = vi.fn().mockResolvedValue(undefined);
+    Object.defineProperty(navigator, 'clipboard', {
+      value: { writeText },
+      configurable: true,
+    });
+    fireEvent.click(screen.getByRole('button', { name: '复制链接' }));
+    expect(writeText).toHaveBeenCalledWith('https://hojo.app/share/q3-product-review');
+    expect(screen.getByRole('button', { name: '已复制' })).toBeTruthy();
+    await expectEventState(context, 'channel', 'copyLink');
+    fireEvent.click(screen.getByRole('button', { name: '邮件' }));
+    await expectEventState(context, 'channel', 'mail');
+    fireEvent.click(screen.getByRole('button', { name: '系统分享' }));
+    await expectEventState(context, 'channel', 'system');
+  });
+
+  it('分享 Popover：取消丢弃草稿，重开回到已提交选中', async () => {
+    renderRecordingPage();
+
+    fireEvent.click(screen.getAllByRole('button', { name: '分享' })[0]);
+    await screen.findByText('选择分享内容');
+    const popover = () =>
+      within(document.querySelector('[data-slot=recording-share-popover]') as HTMLElement);
+    // 取消勾选「录音」后点取消
+    fireEvent.click(popover().getByText('录音'));
+    fireEvent.click(popover().getByRole('button', { name: '取消' }));
+    await vi.waitFor(() => {
+      expect(screen.queryByText('选择分享内容')).toBeNull();
+    });
+
+    fireEvent.click(screen.getAllByRole('button', { name: '分享' })[0]);
+    await screen.findByText('选择分享内容');
+    const options = document.querySelectorAll('[data-slot=recording-share-option]');
+    expect(options[1].getAttribute('aria-pressed')).toBe('true');
+  });
+
+  it('多选模式：点「选择」进入，勾选/全选/删除传出事件，「完成」退出', async () => {
+    const { container, context } = renderRecordingPage(
+      {},
+      {
+        onSelectClick: { action: 'setState', params: { selecting: true } },
+        onRecordingSelectionChange: { action: 'setState', params: { sel: '${event}' } },
+        onDeleteRecordings: { action: 'setState', params: { deleted: '${event}' } },
+      },
+    );
+    const list = () =>
+      within(container.querySelector('[data-slot=recording-page-list]') as HTMLElement);
+
+    // 进入多选模式
+    fireEvent.click(list().getByText('选择'));
+    await expectEventState(context, 'selecting', true);
+    expect(list().getByText('完成')).toBeTruthy();
+    expect(list().getByText('已选 0 条')).toBeTruthy();
+    expect(list().getByText('全选')).toBeTruthy();
+    // 过滤 pills / 处理横幅 / 新建钮收起，底部出现删除
+    expect(list().queryByText('开始新录音')).toBeNull();
+    expect(container.querySelector('[data-slot=recording-page-filters]')).toBeNull();
+    expect(container.querySelector('[data-slot=recording-page-processing]')).toBeNull();
+    expect(list().getByRole('button', { name: '删除' })).toBeTruthy();
+    // 条目 aria-pressed 进入可选态
+    expect(container.querySelectorAll('[data-slot=recording-item][aria-pressed]')).toHaveLength(2);
+
+    // 逐条勾选：传出完整选中列表 + 计数更新
+    fireEvent.click(list().getByText('Q3 产品定价策略评审会议'));
+    await expectEventState(context, 'sel', ['r1']);
+    fireEvent.click(list().getByText('走廊讨论记录'));
+    await expectEventState(context, 'sel', ['r1', 'r2']);
+    expect(list().getByText('已选 2 条')).toBeTruthy();
+
+    // 全选：已全部选中时再点清空；再点重新全选
+    fireEvent.click(list().getByText('全选'));
+    await expectEventState(context, 'sel', []);
+    expect(list().getByText('已选 0 条')).toBeTruthy();
+    fireEvent.click(list().getByText('全选'));
+    await expectEventState(context, 'sel', ['r1', 'r2']);
+
+    // 删除：先弹二次确认，取消不触发事件
+    fireEvent.click(list().getByRole('button', { name: '删除' }));
+    await screen.findByText('删除录音');
+    expect(screen.getByText('确定删除选中的 2 条录音吗？删除后不可恢复。')).toBeTruthy();
+    fireEvent.click(screen.getByRole('button', { name: '取消' }));
+    await vi.waitFor(() => {
+      expect(screen.queryByText('删除录音')).toBeNull();
+    });
+    expect(context.state.get('deleted')).toBeUndefined();
+
+    // 再次删除并确认：传出选中 id 列表
+    fireEvent.click(list().getByRole('button', { name: '删除' }));
+    await screen.findByText('删除录音');
+    fireEvent.click(screen.getByRole('alertdialog').querySelector('[data-slot=alert-dialog-action]')!);
+    await expectEventState(context, 'deleted', ['r1', 'r2']);
+    await vi.waitFor(() => {
+      expect(screen.queryByText('删除录音')).toBeNull();
+    });
+
+    // 完成退出多选模式
+    fireEvent.click(list().getByText('完成'));
+    expect(list().getByText('选择')).toBeTruthy();
+    expect(list().queryByText('全选')).toBeNull();
+    expect(list().getByText('开始新录音')).toBeTruthy();
   });
 });

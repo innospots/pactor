@@ -579,7 +579,7 @@ export function ChatPage({
       {/* 展开菜单区：品牌 + 图标文字导航（固定）+ 会话 / 底部分组（各自独立滚动） */}
       <div
         data-slot="chat-page-menu"
-        className="flex h-full w-[264px] shrink-0 flex-col gap-2 overflow-hidden border-r border-border px-2 py-3"
+        className="flex h-full w-[250px] shrink-0 flex-col gap-2 overflow-hidden border-r border-border px-2 py-3"
       >
         {brand ? (
           <div className="flex shrink-0 items-center justify-between px-2">

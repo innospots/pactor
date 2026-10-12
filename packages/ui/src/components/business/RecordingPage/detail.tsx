@@ -1,6 +1,6 @@
 import type { DslNode } from '@pactor-app/core';
 import { useRenderer } from '@pactor-app/runtime';
-import { isValidElement, type ReactNode } from 'react';
+import { isValidElement, useEffect, useRef, useState, type ReactNode } from 'react';
 
 import { cn } from '../../../lib/utils.js';
 import { Avatar } from '../../components/Avatar/index.js';
@@ -11,12 +11,18 @@ import { Progress } from '../../components/Progress/index.js';
 import { Text } from '../../components/Text/index.js';
 import { RecordingInsightView } from './insight.js';
 import { RecordingMemoryView } from './memory.js';
+import { RecordingShare } from './share.js';
+import { RecordingSpeakerDialog } from './speaker-dialog.js';
 import { RecordingSummaryView } from './summary.js';
 import { RecordingTranslationView } from './translation.js';
 import type {
   RecordingInsight,
+  RecordingLanguageChange,
   RecordingMemory,
   RecordingPlayer,
+  RecordingShareOption,
+  RecordingSpeaker,
+  RecordingSpeakerChange,
   RecordingSummary,
   RecordingTabItem,
   RecordingTranscriptSegment,
@@ -28,6 +34,22 @@ export interface RecordingDetailProps {
   meta?: string;
   editLabel?: string;
   shareLabel?: string;
+  /** 分享内容选项（Popover 复选列表）；非空时「分享」打开内建 Popover */
+  shareOptions?: RecordingShareOption[];
+  /** 分享内容选中 key 列表（已解析受控 / 非受控） */
+  shareSelectedKeys?: string[];
+  sharePopoverTitle?: string;
+  shareCancelLabel?: string;
+  shareConfirmLabel?: string;
+  shareDialogTitle?: string;
+  shareLink?: string;
+  shareCopyLinkLabel?: string;
+  shareCopiedLabel?: string;
+  shareMailLabel?: string;
+  shareSystemLabel?: string;
+  onShareSelectionCommit?: (keys: string[]) => void;
+  onShareConfirm?: (keys: string[]) => void;
+  onShareChannel?: (channel: string) => void;
   onEdit?: () => void;
   onShare?: () => void;
   tabs: RecordingTabItem[];
@@ -36,15 +58,26 @@ export interface RecordingDetailProps {
   onTabChange: (key: string) => void;
   transcriptTabKey: string;
   segments: RecordingTranscriptSegment[];
+  /** 修改发言人弹层的人员选项列表 */
+  speakers?: RecordingSpeaker[];
+  speakerDialogTitle?: string;
+  speakerDialogHint?: string;
+  speakerInputPlaceholder?: string;
+  speakerApplyLabel?: string;
+  onSpeakerChange?: (change: RecordingSpeakerChange) => void;
   summary?: RecordingSummary;
   summaryTabKey: string;
   onMindmapAction?: () => void;
   onMaterialClick?: (id: string | number) => void;
-  onTodoClick?: (id: string | number) => void;
+  /** 当前选中的待办 id 列表（已解析受控 / 非受控） */
+  selectedTodoIds: (string | number)[];
+  /** 待办条目点击（组件内切换选中态并外发事件） */
+  onTodoToggle: (id: string | number) => void;
   onSummaryAction?: (key: string) => void;
   insight?: RecordingInsight;
   insightTabKey: string;
   onPerspectiveEdit?: () => void;
+  onPerspectiveApply?: (value: string) => void;
   onInsightAction?: (key: string) => void;
   memory?: RecordingMemory;
   memoryTabKey: string;
@@ -52,6 +85,7 @@ export interface RecordingDetailProps {
   translation?: RecordingTranslation;
   translationTabKey: string;
   onLanguageClick?: () => void;
+  onLanguageChange?: (change: RecordingLanguageChange) => void;
   onTranslationAction?: (key: string) => void;
   player?: RecordingPlayer;
   onPlay?: () => void;
@@ -61,16 +95,30 @@ export interface RecordingDetailProps {
 
 function TranscriptSegment({
   segment,
+  speaker,
+  onRename,
 }: {
   segment: RecordingTranscriptSegment;
+  /** 展示用说话人名（可能被弹层改名覆盖） */
+  speaker?: string;
+  /** 点击改名铅笔 */
+  onRename?: () => void;
 }) {
   return (
     <div data-slot="recording-segment" className="flex flex-col gap-2">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <Avatar fallback={segment.avatarText ?? segment.speaker?.charAt(0) ?? '?'} />
-          <Text text={segment.speaker} strong size="small" />
-          <Icon name="pencil" size={14} className="text-muted-foreground" />
+          <Avatar fallback={segment.avatarText ?? speaker?.charAt(0) ?? '?'} />
+          <Text text={speaker} strong size="small" />
+          <button
+            type="button"
+            data-slot="recording-speaker-edit"
+            aria-label="修改发言人"
+            className="cursor-pointer text-muted-foreground"
+            onClick={() => onRename?.()}
+          >
+            <Icon name="pencil" size={14} />
+          </button>
         </div>
         <div className="flex items-center gap-2">
           {segment.marked ? <Badge text="⚑ 已标记" variant="outline" /> : null}
@@ -83,15 +131,32 @@ function TranscriptSegment({
 }
 
 /**
- * 转写详情（RecordingPage 右列）：标题 + 元信息头部（编辑 / 分享操作）、
- * 胶囊页签（transcriptTabKey 页签内建说话人段落、summaryTabKey 页签内建
- * 详细纪要，其余页签走 content 槽）、底部播放条（player 提供才渲染）。
+ * 转写详情（RecordingPage 右列）：标题 + 元信息头部（编辑 / 分享操作——
+ * 提供 shareOptions 时「分享」下方弹出选择分享内容 Popover，确定后打开
+ * 分享会议内容对话框）、胶囊页签（transcriptTabKey 页签内建说话人段落——改名铅笔打开内建
+ * 「修改发言人」弹层（人员单选 + 自由输入，应用经 onSpeakerChange 传出
+ * { index, previous, name }，组件内同步更新展示名）、summaryTabKey 页签
+ * 内建详细纪要，其余页签走 content 槽）、底部播放条（player 提供才渲染）。
  */
 export function RecordingDetail({
   title,
   meta,
   editLabel,
   shareLabel,
+  shareOptions = [],
+  shareSelectedKeys = [],
+  sharePopoverTitle,
+  shareCancelLabel,
+  shareConfirmLabel,
+  shareDialogTitle,
+  shareLink,
+  shareCopyLinkLabel,
+  shareCopiedLabel,
+  shareMailLabel,
+  shareSystemLabel,
+  onShareSelectionCommit,
+  onShareConfirm,
+  onShareChannel,
   onEdit,
   onShare,
   tabs,
@@ -99,15 +164,23 @@ export function RecordingDetail({
   onTabChange,
   transcriptTabKey,
   segments,
+  speakers = [],
+  speakerDialogTitle,
+  speakerDialogHint,
+  speakerInputPlaceholder,
+  speakerApplyLabel,
+  onSpeakerChange,
   summary,
   summaryTabKey,
   onMindmapAction,
   onMaterialClick,
-  onTodoClick,
+  selectedTodoIds,
+  onTodoToggle,
   onSummaryAction,
   insight,
   insightTabKey,
   onPerspectiveEdit,
+  onPerspectiveApply,
   onInsightAction,
   memory,
   memoryTabKey,
@@ -115,6 +188,7 @@ export function RecordingDetail({
   translation,
   translationTabKey,
   onLanguageClick,
+  onLanguageChange,
   onTranslationAction,
   player,
   onPlay,
@@ -130,9 +204,45 @@ export function RecordingDetail({
 
   const activeTabItem = tabs.find((tab) => tab.key === activeTab);
 
+  // 发言人改名：弹层状态 + 草稿 + 组件内覆盖（segments 说话人名单变化时
+  // 重置；DSL 下父级重渲染会产生新数组引用，故按内容签名比较而非引用）
+  const [renameIndex, setRenameIndex] = useState<number | null>(null);
+  const [draftSpeakerIndex, setDraftSpeakerIndex] = useState(-1);
+  const [draftSpeakerName, setDraftSpeakerName] = useState('');
+  const [speakerOverrides, setSpeakerOverrides] = useState<Record<number, string>>({});
+  const speakerSignature = useRef('');
+  useEffect(() => {
+    const signature = JSON.stringify(segments.map((segment) => segment.speaker ?? ''));
+    if (speakerSignature.current !== signature) {
+      speakerSignature.current = signature;
+      setSpeakerOverrides((prev) => (Object.keys(prev).length > 0 ? {} : prev));
+    }
+  }, [segments]);
+
+  const displaySpeaker = (index: number): string | undefined =>
+    speakerOverrides[index] ?? segments[index]?.speaker;
+  const openRename = (index: number): void => {
+    const current = displaySpeaker(index);
+    setDraftSpeakerIndex(speakers.findIndex((item) => item.name === current));
+    setDraftSpeakerName('');
+    setRenameIndex(index);
+  };
+  const confirmRename = (): void => {
+    if (renameIndex === null) return;
+    const name =
+      draftSpeakerName.trim() !== ''
+        ? draftSpeakerName.trim()
+        : speakers[draftSpeakerIndex]?.name;
+    if (name === undefined || name === '') return;
+    const previous = displaySpeaker(renameIndex);
+    setSpeakerOverrides((prev) => ({ ...prev, [renameIndex]: name }));
+    onSpeakerChange?.({ index: renameIndex, previous, name });
+    setRenameIndex(null);
+  };
+
   return (
     <div data-slot="recording-page-detail" className="flex h-full min-w-0 flex-1 flex-col">
-      <div className="flex shrink-0 items-center justify-between border-b border-border px-6 py-4">
+      <div className="flex shrink-0 items-center justify-between px-6 py-4">
         <div className="flex min-w-0 flex-col gap-1">
           <Text text={title} strong size="large" className="truncate" />
           {meta !== undefined ? <Text text={meta} size="small" type="secondary" /> : null}
@@ -142,14 +252,35 @@ export function RecordingDetail({
             <Button text={editLabel} variant="link" size="small" onClick={() => onEdit?.()} />
           ) : null}
           {shareLabel !== undefined ? (
-            <Button text={shareLabel} size="small" onClick={() => onShare?.()} />
+            shareOptions.length > 0 ? (
+              <RecordingShare
+                shareLabel={shareLabel}
+                options={shareOptions}
+                selectedKeys={shareSelectedKeys}
+                popoverTitle={sharePopoverTitle ?? '选择分享内容'}
+                cancelLabel={shareCancelLabel ?? '取消'}
+                confirmLabel={shareConfirmLabel ?? '确定'}
+                dialogTitle={shareDialogTitle ?? '分享会议内容'}
+                link={shareLink}
+                copyLinkLabel={shareCopyLinkLabel ?? '复制链接'}
+                copiedLabel={shareCopiedLabel ?? '已复制'}
+                mailLabel={shareMailLabel ?? '邮件'}
+                systemLabel={shareSystemLabel ?? '系统分享'}
+                onShare={onShare}
+                onSelectionCommit={(keys) => onShareSelectionCommit?.(keys)}
+                onShareConfirm={onShareConfirm}
+                onShareChannel={onShareChannel}
+              />
+            ) : (
+              <Button text={shareLabel} size="small" onClick={() => onShare?.()} />
+            )
           ) : null}
         </div>
       </div>
       {tabs.length > 0 ? (
         <>
-          <div data-slot="recording-page-tabs" className="flex shrink-0 justify-center px-6 pt-3">
-            <div className="inline-flex items-center gap-1 rounded-lg bg-muted p-1">
+          <div data-slot="recording-page-tabs" className="flex shrink-0 px-6 pt-3">
+            <div className="flex w-full items-center gap-1 rounded-lg bg-muted p-1">
               {tabs.map((tab) => {
                 const active = tab.key === activeTab;
                 return (
@@ -159,7 +290,7 @@ export function RecordingDetail({
                     role="tab"
                     aria-selected={active}
                     className={cn(
-                      'cursor-pointer rounded-md px-3 py-1 text-sm',
+                      'flex-1 cursor-pointer rounded-md px-3 py-1 text-sm',
                       active ? 'bg-background shadow-sm' : 'text-muted-foreground',
                     )}
                     onClick={() => onTabChange(tab.key)}
@@ -179,7 +310,12 @@ export function RecordingDetail({
             ) : activeTabItem?.key === transcriptTabKey ? (
               <div className="flex flex-col gap-6">
                 {segments.map((segment, index) => (
-                  <TranscriptSegment key={segment.time ?? index} segment={segment} />
+                  <TranscriptSegment
+                    key={segment.time ?? index}
+                    segment={segment}
+                    speaker={displaySpeaker(index)}
+                    onRename={() => openRename(index)}
+                  />
                 ))}
               </div>
             ) : activeTabItem?.key === summaryTabKey && summary !== undefined ? (
@@ -187,13 +323,15 @@ export function RecordingDetail({
                 summary={summary}
                 onMindmapAction={onMindmapAction}
                 onMaterialClick={onMaterialClick}
-                onTodoClick={onTodoClick}
+                selectedTodoIds={selectedTodoIds}
+                onTodoToggle={onTodoToggle}
                 onSummaryAction={onSummaryAction}
               />
             ) : activeTabItem?.key === insightTabKey && insight !== undefined ? (
               <RecordingInsightView
                 insight={insight}
                 onPerspectiveEdit={onPerspectiveEdit}
+                onPerspectiveApply={onPerspectiveApply}
                 onInsightAction={onInsightAction}
               />
             ) : activeTabItem?.key === memoryTabKey && memory !== undefined ? (
@@ -202,6 +340,7 @@ export function RecordingDetail({
               <RecordingTranslationView
                 translation={translation}
                 onLanguageClick={onLanguageClick}
+                onLanguageChange={onLanguageChange}
                 onTranslationAction={onTranslationAction}
               />
             ) : null}
@@ -225,6 +364,20 @@ export function RecordingDetail({
           <Text text={player.totalTime} size="small" type="secondary" />
         </div>
       ) : null}
+      <RecordingSpeakerDialog
+        open={renameIndex !== null}
+        title={speakerDialogTitle ?? '修改发言人'}
+        hint={speakerDialogHint ?? '选择参会信息、已识别人员或你曾手动创建的联系人。'}
+        speakers={speakers}
+        selectedIndex={draftSpeakerIndex}
+        customName={draftSpeakerName}
+        inputPlaceholder={speakerInputPlaceholder ?? '输入姓名'}
+        applyLabel={speakerApplyLabel ?? '应用姓名'}
+        onSelect={setDraftSpeakerIndex}
+        onInputName={setDraftSpeakerName}
+        onCancel={() => setRenameIndex(null)}
+        onConfirm={confirmRename}
+      />
     </div>
   );
 }
