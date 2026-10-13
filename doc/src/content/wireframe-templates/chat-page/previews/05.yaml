@@ -1,11 +1,11 @@
-# 提炼自「录音 — content 槽替换右侧主体」：菜单新增「录音」项，点击后右侧
+# 提炼自「录音页模板 — content 槽替换右侧主体」：菜单新增「录音」项，点击后右侧
 # 主区域（含对话 header）整体替换为 content 槽内容——业务组件 RecordingPage
 # （录音记录列表 + 转写详情 + 播放条）；「对话」切回聊天主体。
 # 默认定位到「录音」页（state.menu 初值 recording）。
 # 详细纪要 tab 点「查看思维导图」经 onMindmapAction 切入思维导图页
 # （state.view=mindmap，第三个 ChatPage 分支），左上角返回键切回。
 # 人工提炼入库、落盘维护；构建期只读取，不做推导。
-title: 录音 — content 槽替换右侧主体（含 header）
+title: 录音页模板 — content 槽替换右侧主体（含 header）
 height: 640
 state: { menu: recording, view: recording, recTab: transcript, langSource: 自动判断, langTarget: English }
 body:
