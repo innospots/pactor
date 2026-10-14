@@ -1,11 +1,18 @@
 ---
 /**
- * 左侧分类导航：5 个一级 Tab + 当前分类二级菜单（无三级菜单）。
- * 切换 Tab 即链接到该分类「总览」；条目计数构建期从数据模块长度计算，
- * 数据为空时显示「待接入」角标而非 0。
+ * 左侧分类导航：顶部搜索框 + 5 个一级 Tab（SideNavBar 岛，Tabs size=small）
+ * + 当前分类二级菜单。
+ * 切换 Tab 即链接到该分类「总览」；搜索框实时过滤当前分类菜单项。
+ * 条目计数构建期从数据模块长度计算，数据为空时显示「待接入」角标而非 0。
+ * 组件分类特殊化：无「总览」菜单项，「组件目录」标题右端展示组件总数；
+ * 各分类（通用 / 布局 / …）渲染为可折叠菜单组（<details>，含当前页的组默认展开），
+ * 组头右端展示组内组件数，组内子项链接到组件详情页。
  */
 import { SITE_NAV, sectionCount } from '../site-nav';
+import { components } from '../assets-data/components';
 import type { AssetCategory } from '../assets-data/types';
+import { Icon } from '@pactor-app/ui/components';
+import SideNavBar from './SideNavBar';
 
 interface Props {
   category: AssetCategory;
@@ -14,45 +21,116 @@ interface Props {
 
 const { category, currentPath } = Astro.props;
 const current = SITE_NAV.find((c) => c.id === category) ?? SITE_NAV[0];
+const CATEGORY_ICONS: Record<AssetCategory, string> = {
+  styles: 'palette',
+  components: 'layout-grid',
+  themes: 'paintbrush',
+  templates: 'layout-template',
+  materials: 'image',
+};
+const tabs = SITE_NAV.map((cat) => ({
+  key: cat.id,
+  label: cat.label,
+  href: `/${cat.routePrefix}/overview`,
+  icon: CATEGORY_ICONS[cat.id],
+}));
+
+const isComponents = current.id === 'components';
+/** 组件菜单组图标（Icon 白名单键） */
+const GROUP_ICONS: Record<string, string> = {
+  general: 'package',
+  layout: 'panel-left',
+  navigation: 'menu',
+  'data-entry': 'square-pen',
+  'data-display': 'table',
+  feedback: 'bell',
+  charts: 'chart',
+  media: 'image',
+  'ai-chat': 'brain',
+  business: 'briefcase',
+};
+const componentGroups = isComponents
+  ? current.items
+      .filter((item) => item.slug !== 'overview')
+      .map((item) => {
+        const entries = components
+          .filter((c) => c.category === item.slug)
+          .map((c) => ({
+            name: c.name,
+            href: `/components/${item.slug}/${c.id.slice('component.'.length)}`,
+          }));
+        return {
+          slug: item.slug,
+          name: item.name,
+          count: entries.length,
+          entries,
+          containsCurrent: entries.some((e) => e.href === currentPath),
+        };
+      })
+  : [];
 ---
 
 <aside class="sidebar" id="sidebar">
-  <nav class="asset-tabs" aria-label="资产分类">
-    {
-      SITE_NAV.map((cat) => (
-        <a
-          class={`asset-tab${cat.id === current.id ? ' active' : ''}`}
-          href={`/${cat.routePrefix}/overview`}
-          aria-current={cat.id === current.id ? 'page' : undefined}
-        >
-          {cat.label}
-        </a>
-      ))
-    }
-  </nav>
-  <div class="side-title">{current.label}目录</div>
+  <SideNavBar client:load tabs={tabs} activeKey={current.id} />
+  <div class:list={['side-title', { 'side-title-row': isComponents }]}>
+    <span>{current.label}目录</span>
+    {isComponents ? <span class="menu-count">{components.length}</span> : null}
+  </div>
   <div class="side-menu" id="sideMenu">
     {
-      current.items.map((item) => {
-        const href = `/${current.routePrefix}/${item.slug}`;
-        const count = sectionCount(current.id, item.slug);
-        return (
-          <a
-            class={`menu-item${href === currentPath ? ' active' : ''}`}
-            href={href}
-            aria-current={href === currentPath ? 'page' : undefined}
-          >
-            <span>{item.name}</span>
-            <span class="menu-count">
-              {count > 0 ? (
-                current.id === 'templates' && item.slug !== 'overview' ? null : count
-              ) : (
-                <span class="badge warning">待接入</span>
-              )}
-            </span>
-          </a>
-        );
-      })
+      isComponents
+        ? componentGroups.map((group) => (
+            <details
+              class="menu-group"
+              data-search={group.name}
+              data-default-open={group.containsCurrent ? 'true' : 'false'}
+              open={group.containsCurrent}
+            >
+              <summary class="menu-group-header">
+                <span class="menu-group-label">
+                  <Icon name={GROUP_ICONS[group.slug]} size={14} className="menu-group-icon" />
+                  {group.name}
+                </span>
+                <span class="menu-group-meta">
+                  <span class="menu-count">{group.count}</span>
+                  <Icon name="chevron-right" size={14} className="menu-group-caret" />
+                </span>
+              </summary>
+              <div class="menu-sub">
+                {group.entries.map((entry) => (
+                  <a
+                    class={`menu-subitem${entry.href === currentPath ? ' active' : ''}`}
+                    href={entry.href}
+                    data-search={entry.name}
+                    aria-current={entry.href === currentPath ? 'page' : undefined}
+                  >
+                    {entry.name}
+                  </a>
+                ))}
+              </div>
+            </details>
+          ))
+        : current.items.map((item) => {
+            const href = `/${current.routePrefix}/${item.slug}`;
+            const count = sectionCount(current.id, item.slug);
+            return (
+              <a
+                class={`menu-item${href === currentPath ? ' active' : ''}`}
+                href={href}
+                data-search={item.name}
+                aria-current={href === currentPath ? 'page' : undefined}
+              >
+                <span>{item.name}</span>
+                <span class="menu-count">
+                  {count > 0 ? (
+                    current.id === 'templates' && item.slug !== 'overview' ? null : count
+                  ) : (
+                    <span class="badge warning">待接入</span>
+                  )}
+                </span>
+              </a>
+            );
+          })
     }
   </div>
   <div class="side-note">
