@@ -2,26 +2,26 @@
 
 ## Purpose
 
-`@pactor-app/ui` 的图表组件集（`src/components/chart/`）：17 个基于 echarts 按需引入的图表组件、受限 props 契约与统一数据源形状、语义色令牌、交互事件映射，以及旧 recharts Chart 组件的移除与迁移。
+`@pactor-app/chart` 独立包的图表组件集（`packages/chart/src/components/`；自 `@pactor-app/ui` 拆出）：17 个基于 echarts 按需引入的图表组件、受限 props 契约与统一数据源形状、语义色令牌、交互事件映射，以及旧 recharts Chart 组件的移除与迁移。
 
 ## Requirements
 
 ### Requirement: 图表组件集目录结构
 
-`@pactor-app/ui` SHALL 在 `src/components/chart/` 目录（与 `register.ts`、`components/` 平级）提供 17 个图表组件：MetricCard、LineChart、ColumnChart、BarChart、AreaChart、PieChart、DonutChart、ScatterChart、BubbleChart、RadarChart、FunnelChart、GaugeChart、Heatmap、TreeChart、SankeyChart、MapChart、ComposedChart。每个组件 SHALL 以 `<Name>/index.tsx` 形式组织，共享基础件 `EChartBase` 与模块化注册文件放在 chart/ 目录下且不作为 DSL 组件注册。
+`@pactor-app/chart` SHALL 在 `src/components/` 目录提供 17 个图表组件：MetricCard、LineChart、ColumnChart、BarChart、AreaChart、PieChart、DonutChart、ScatterChart、BubbleChart、RadarChart、FunnelChart、GaugeChart、Heatmap、TreeChart、SankeyChart、MapChart、ComposedChart。每个组件 SHALL 以 `<Name>/index.tsx` 形式组织，共享基础件 `EChartBase` 与模块化注册文件放在 components/ 目录下且不作为 DSL 组件注册。
 
 #### Scenario: 目录布局符合约定
 
-- **WHEN** 检查 `packages/ui/src/components/chart/`
-- **THEN** 存在 17 个组件目录及共享基础件文件，chart/ 与 register.ts、components/ 平级，组件路径深度为 3 层
+- **WHEN** 检查 `packages/chart/src/components/`
+- **THEN** 存在 17 个组件目录及共享基础件文件，组件路径深度为 3 层
 
 ### Requirement: DSL 注册与导出
 
-每个图表组件 SHALL 注册进 `packages/ui` 的组件注册表（`register.ts`），并在 `components/index.ts` 导出组件与 props 类型。DSL 页面 SHALL 能通过组件名直接渲染各图表组件。
+每个图表组件 SHALL 由 `@pactor-app/chart` 的 `chartComponents` 映射经 `registerChartComponents(registry)` 注册（或在 `createChartComponentRegistry()` 纯图表注册表中提供），并在包入口导出组件与 props 类型；`@pactor-app/ui` 主注册表不再内置图表组件，需要图表的接入方 SHALL 显式合并。DSL 页面 SHALL 能通过组件名直接渲染各图表组件。
 
 #### Scenario: 注册表包含全部图表组件
 
-- **WHEN** 检查 register.ts 与 components/index.ts
+- **WHEN** 检查 `packages/chart/src/index.ts`
 - **THEN** 17 个图表组件全部完成注册与导出
 
 #### Scenario: DSL 页面渲染折线图
@@ -122,9 +122,9 @@ doc 资产库 SHALL 为 17 个图表组件提供详情条目与可运行预览�
 
 ### Requirement: 测试覆盖
 
-ui 包 SHALL 为 chart/ 组件提供测试：option 构建逻辑（纯函数）与组件渲染结构必须覆盖；测试 SHALL NOT 重复注册组件（注册已在 register.ts 完成）；事件断言 SHALL 使用 `expectEventState(context, key, expected)` 三参形式。
+chart 包 SHALL 为图表组件提供测试：option 构建逻辑（纯函数）与组件渲染结构必须覆盖；DSL 集成测试 SHALL 经 `registerChartComponents` 合并进注册表，测试内不重复手工注册；事件断言 SHALL 使用 `expectEventState(context, key, expected)` 三参形式。
 
-#### Scenario: ui 测试全绿
+#### Scenario: chart 测试全绿
 
-- **WHEN** 在 `packages/ui` 运行 `npx tsc --noEmit && npx vitest run`
-- **THEN** 类型检查通过，全部测试通过（含既有测试无回归）
+- **WHEN** 在 `packages/chart` 运行 `npx tsc --noEmit && npx vitest run`
+- **THEN** 类型检查通过，全部测试通过（且 `@pactor-app/ui` 既有测试无回归）

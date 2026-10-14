@@ -1,6 +1,6 @@
 /**
  * 表单控件统一尺寸令牌：small / middle / large，默认 middle（= 现行 h-9 尺寸）。
- * 所有盒式表单控件（Input / Select / DatePicker / SearchableSelect / 业务组件
+ * 所有盒式表单控件（Input / Select / DatePicker / 业务组件
  * 内嵌控件等）共用同一映射，保证同一 size 下高度、内边距、字号一致。
  *
  * 使用方式：把控件尺寸类合并到控件 className 末位（cn/tailwind-merge 会覆盖

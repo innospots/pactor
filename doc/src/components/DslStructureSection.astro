@@ -1,17 +1,19 @@
 ---
 /**
- * 「DSL 结构」章节片段：调用该组件时的 DslNode 结构。
- * JSON 在构建期序列化直出（无需 JS 即可阅读），复制按钮
+ * 结构代码章节片段：组件调用结构代码块（JSON / YAML）。
+ * 代码在构建期序列化直出（无需 JS 即可阅读），复制按钮
  * 经 DslStructure 岛承载（client:visible，滚入视口才水合）。
  */
 import DslStructure from './DslStructure';
 
 interface Props {
-  /** JSON.stringify(dsl, null, 2) 后的字符串 */
-  json: string;
+  /** 序列化后的代码字符串 */
+  code: string;
+  /** 语法高亮语言（json / yaml，缺省 json） */
+  language?: string;
 }
 
-const { json } = Astro.props;
+const { code, language } = Astro.props;
 ---
 
-<DslStructure json={json} client:visible />
+<DslStructure code={code} language={language} client:visible />

@@ -1,8 +1,8 @@
-import { cn } from "../../../lib/utils.js";
-import { Button } from "../../components/Button/index.js";
-import { Icon } from "../../components/Icon/index.js";
-import { Table } from "../../components/Table/index.js";
-import { Text } from "../../components/Text/index.js";
+import { cn } from '../../lib/utils.js';
+import { Button } from "@pactor-app/ui/components";
+import { Icon } from "@pactor-app/ui/components";
+import { Table } from "@pactor-app/ui/components";
+import { Text } from "@pactor-app/ui/components";
 import type { RecordingSummary } from "./types.js";
 
 export interface RecordingSummaryViewProps {

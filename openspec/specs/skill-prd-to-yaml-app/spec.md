@@ -142,7 +142,7 @@ Skill 的 `references/` SHALL 至少包含：页面 yaml 模板（列表页/详�
 
 ### Requirement: 模板登录页使用 Login 业务组件
 
-模板工程的登录页（`src/server/yaml/common/login.yaml`）SHALL 以 DSL `type: Login` 业务组件（`packages/ui` `components/business/Login/`）实现，登录页特有的可配置信息（品牌区、标题、副标题、字段文案、提交按钮文案、辅助入口、页脚）经 props 表达；提交闭环 SHALL 由 `events.onSubmit` 动作链编排（`request` 登录接口 + 失败 `message` + 成功 `app.reload` 跳转），组件 SHALL NOT 内置登录请求；手写登录样式特例（`login-page` 渐变外壳布局与 `app/login.css`）SHALL 移除，sitemap 的 `login` 布局简化为纯页面出口。
+模板工程的登录页（`src/server/yaml/common/login.yaml`）SHALL 以 DSL `type: Login` 区块组件（`@pactor-app/blocks` `components/Login/`）实现，登录页特有的可配置信息（品牌区、标题、副标题、字段文案、提交按钮文案、辅助入口、页脚）经 props 表达；提交闭环 SHALL 由 `events.onSubmit` 动作链编排（`request` 登录接口 + 失败 `message` + 成功 `app.reload` 跳转），组件 SHALL NOT 内置登录请求；手写登录样式特例（`login-page` 渐变外壳布局与 `app/login.css`）SHALL 移除，sitemap 的 `login` 布局简化为纯页面出口。
 
 #### Scenario: 登录页 DSL 渲染与提交闭环
 

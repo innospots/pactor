@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState, type CSSProperties } from 'react';
 
-import { cn } from '../../../lib/utils.js';
+import { cn } from '../../lib/utils.js';
 import { echarts, type EChartsCoreOption } from '../echarts-modules.js';
 
 /** 图表点击事件的规范化载荷（DSL 事件 `${event}` 值） */

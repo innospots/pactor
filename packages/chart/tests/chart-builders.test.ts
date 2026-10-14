@@ -21,8 +21,8 @@ import {
   buildSankeyOption,
   buildScatterOption,
   buildTreeOption,
-} from '../../src/components/chart/lib/option-builders.js';
-import type { ChartTheme } from '../../src/components/chart/lib/theme.js';
+} from '../src/components/lib/option-builders.js';
+import type { ChartTheme } from '../src/components/lib/theme.js';
 
 const theme: ChartTheme = {
   palette: ['c1', 'c2', 'c3', 'c4', 'c5'],

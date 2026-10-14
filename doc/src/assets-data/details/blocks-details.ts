@@ -1,15 +1,15 @@
 /**
- * 业务组件完整详情（第十批 9 个组件，packages/ui business 子目录真实实现已核对）。
- * - API 属性与结构核对自 packages/ui/src/components/business/ 下同名目录的
+ * 区块组件完整详情（第十批 9 个组件，@pactor-app/blocks 包真实实现已核对）。
+ * - API 属性与结构核对自 packages/blocks/src/components/ 下同名目录的
  *   index.tsx；9 个组件均已从包入口导出并在 register.ts 注册同名 DSL 类型
  *   （Login / EntityCard / CardList / ExpressionEditor / FieldCondition /
- *   RuleConfig / RuleExpression / ScriptEditor / SearchableSelect）；
- * - 运行态预览核对自 doc/src/components/previews/business-a.tsx（同一文件注册
+ *   RuleConfig / RuleExpression / ScriptEditor）；
+ * - 运行态预览核对自 doc/src/components/previews/blocks-a.tsx（同一文件注册
  *   全部 9 个 component.* 预览）。
  */
 import type { ComponentDetailContent } from './component-details.ts';
 
-export const businessDetailContents: Record<string, ComponentDetailContent> = {
+export const blocksDetailContents: Record<string, ComponentDetailContent> = {
   'component.entity-card': {
     dsl: {
       "type": "EntityCard",
@@ -47,7 +47,7 @@ export const businessDetailContents: Record<string, ComponentDetailContent> = {
       '',
       '- 列表 / 网格页中展示业务实体摘要：图标（logo）、标题、副文案、状态标签、描述与维护信息。',
       '- 摘要卡需要承载操作入口（编辑、配置、删除等），且操作与整卡点击解耦。',
-      '- 作为 CardList 的列表项底层卡片，与其他 business 组合组件配合。',
+      '- 作为 CardList 的列表项底层卡片，与其他 blocks 组合组件配合。',
       '',
       '**何时不用**',
       '',
@@ -609,77 +609,6 @@ export const businessDetailContents: Record<string, ComponentDetailContent> = {
     examplesDont: [
       '把 ScriptEditor 用于单行表达式输入（应使用 ExpressionEditor / Input）。',
       '期望未注册的语言自动高亮（本期仅 python，其余回退纯文本）。',
-    ],
-  },
-
-  'component.searchable-select': {
-    dsl: {
-      "type": "SearchableSelect",
-      "props": {
-        "value": "${state.fruit}",
-        "placeholder": "选择水果（可搜索）",
-        "options": [
-          { "label": "苹果", "value": "apple" },
-          { "label": "香蕉", "value": "banana" },
-          { "label": "橙子", "value": "orange" }
-        ]
-      },
-      "events": {
-        "onChange": {
-          "action": "setState",
-          "params": {
-            "fruit": "${event}"
-          }
-        }
-      }
-    },
-    whenToUse: [
-      '**何时使用**',
-      '',
-      '- 选项较多（默认 >8 自动出搜索框）的下拉选择。',
-      '- 表单场景需要单选 / 多选、清除与空态文案定制。',
-      '- 作为其他 business 组件的内嵌控件（ExpressionEditor / FieldCondition 的字段与选项选择）。',
-      '',
-      '**何时不用**',
-      '',
-      '- 选项极少（≤8）且无需搜索：使用基础 Select。',
-      '- 级联 / 树形选择：使用 Cascader / TreeSelect。',
-    ].join('\n'),
-    previewNote:
-      '静态结构：Popover + Command（Base UI）组合——触发器为原生 button（role="combobox"、aria-expanded，选中显示 label、未选 placeholder、hover 出清除按钮 span[role=button]）；弹层内 CommandInput 搜索框（CommandItem 以 label 过滤，按过滤后无匹配展示 emptyText「无匹配结果」、options 为空展示「无选项」）；选中项 Check 图标高亮。单选选中即关闭弹层、清除回传 ""（注释：RHF 下 undefined 会被移除回退 defaultValue）；多选为 toggle（选中不关弹层），触发器内渲染 chips（bg-muted + × 删除）。fullOptionText 时选项不截断、弹层宽度自适应内容。弹层 portal 到 body，Content 上 onWheel / onTouchMove stopPropagation（规避外层 Dialog / Drawer 滚动锁）；宽度变量为 --anchor-width（Base UI 定位变量）。',
-    variants: [
-      { name: '单选', visual: '选中即关、hover 清除按钮', scene: '单值选择（默认）' },
-      { name: '多选', visual: 'chips + toggle 选中', scene: '多值集合选择' },
-      { name: '搜索开关', visual: 'showSearch 显式控制，缺省 >8 条自动展示', scene: '选项数量决定是否出搜索框' },
-      { name: '完整选项文本', visual: 'fullOptionText：不截断 + 弹层自适应宽度', scene: '长选项文案' },
-    ],
-    apiProps: [
-      { name: 'value', type: 'string | string[]', defaultValue: '—', description: '受控值；单选 string，多选 string[]' },
-      { name: 'onChange', type: '(value: string | string[] | undefined) => void', defaultValue: '—', description: '变化回调；单选清除回传 ""（避免 RHF 移除 undefined 回退默认值）' },
-      { name: 'options', type: 'Array<{ label: string; value: string }>', defaultValue: '—', description: '选项列表（必填）' },
-      { name: 'placeholder / searchPlaceholder', type: 'string', defaultValue: "'请选择' / '搜索…'", description: '触发器 / 搜索框占位文案' },
-      { name: 'emptyText', type: 'string', defaultValue: "'无匹配结果'", description: '过滤无匹配的空态文案' },
-      { name: 'disabled', type: 'boolean', defaultValue: 'false', description: '禁用' },
-      { name: 'id', type: 'string', defaultValue: '—', description: '触发器 DOM 的 id' },
-      { name: 'showSearch', type: 'boolean', defaultValue: 'undefined（>8 自动）', description: '是否展示搜索框；缺省按 options.length > 8 自动' },
-      { name: 'multiple', type: 'boolean', defaultValue: 'false', description: '多选模式' },
-      { name: 'fullOptionText', type: 'boolean', defaultValue: 'false', description: '选项完整显示：不截断，弹层宽度自适应内容' },
-      { name: 'allowClear', type: 'boolean', defaultValue: 'true', description: 'hover 清除（缺省开启，传 false 关闭；仅单选）：有选中值时悬停触发器，× 原位替换上下箭头，点击清空（回传 ""）' },
-      { name: 'size', type: "'small' | 'middle' | 'large'", defaultValue: "'middle'", description: '控件尺寸令牌：small h-8 / middle h-9（默认）/ large h-10；内部控件同令牌联动，与基础表单控件混排保持一致' },
-      { name: 'listClassName / className', type: 'string', defaultValue: '—', description: '下拉列表（CommandList）/ 触发器样式' },
-    ],
-    guidelines: [
-      '- 选项过滤按 label（CommandItem value=label）：label 命名要可检索（含关键词），不依赖 value。',
-      '- 单选清除约定回传 ""：表单库（RHF）下 undefined 会被移除并回退 defaultValue。',
-      '- 弹层内列表滚动依赖组件内置的滚动锁规避，不要在外层再包 scroll-lock 容器。',
-    ].join('\n'),
-    examplesDo: [
-      '字段选择：options 传 datasource 字段（featureCode → value、featureName → label），>8 条自动出搜索。',
-      '多选标签：multiple + value 数组，触发器 chips 逐个删除。',
-    ],
-    examplesDont: [
-      '用 SearchableSelect 承载级联 / 树形数据（应使用 Cascader / TreeSelect）。',
-      '期望 value 用数字类型（选项 value 约定 string，需自行转换）。',
     ],
   },
 

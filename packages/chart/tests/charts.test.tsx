@@ -55,7 +55,7 @@ const fake = vi.hoisted(() => {
   };
 });
 
-vi.mock('../../src/components/chart/echarts-modules.js', () => ({
+vi.mock('../src/components/echarts-modules.js', () => ({
   echarts: fake.echarts,
 }));
 
@@ -65,11 +65,11 @@ import {
   LineChart,
   MapChart,
   MetricCard,
-} from '../../src/components/index.js';
+} from '../src/index.js';
 import {
   CHART_SKIN_CHANGE_EVENT,
   resetChartTheme,
-} from '../../src/components/chart/lib/theme.js';
+} from '../src/components/lib/theme.js';
 import { expectEventState, renderDsl } from './helpers.js';
 
 afterEach(() => {

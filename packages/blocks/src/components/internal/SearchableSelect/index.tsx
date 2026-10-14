@@ -1,3 +1,7 @@
+/**
+ * 内部组件（不导出、不注册 DSL）：可搜索下拉选择器。
+ * 仅供 business 复合组件内嵌使用（ExpressionEditor / FieldCondition）。
+ */
 import { Check, ChevronsUpDown, X } from 'lucide-react';
 import * as React from 'react';
 
@@ -9,14 +13,14 @@ import {
   CommandInput,
   CommandItem,
   CommandList,
-} from '../../../ui/command.js';
+} from '@pactor-app/ui/ui';
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
-} from '../../../ui/popover.js';
-import { ClearHoverButton } from '../../clearable.js';
-import { CONTROL_SIZE_BOX_GROW, type ControlSize } from '../../control-size.js';
+} from '@pactor-app/ui/ui';
+import { ClearHoverButton } from '@pactor-app/ui/components';
+import { CONTROL_SIZE_BOX_GROW, type ControlSize } from '@pactor-app/ui/components';
 
 // ─── 文案缺省值（原 next-intl Common 命名空间文案的中文默认值） ──────────────────
 

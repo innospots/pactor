@@ -1,7 +1,7 @@
 /**
  * 组件详情页 markdown 源码生成（复制此页用）：
  * 构建期把组件条目 + 详情内容组装为与页面章节一致的 markdown 文档
- * （frontmatter + 元信息 + 何时用 / 变体 / API 属性 / 使用规范 / DSL 结构）。
+ * （frontmatter + 何时用 / 变体 / API 属性 / 使用规范 / DSL 结构）。
  * 未接入详情的组件渲染对应「不适用」说明，与页面骨架口径一致。
  */
 import type { ComponentDetailContent } from '../assets-data/details/component-details';
@@ -10,8 +10,6 @@ import type { ComponentEntry } from '../assets-data/types';
 export function buildComponentMarkdown(
   component: ComponentEntry,
   detail: ComponentDetailContent | undefined,
-  sectionName: string,
-  currentPath: string,
 ): string {
   const lines: string[] = [];
 
@@ -25,19 +23,6 @@ export function buildComponentMarkdown(
   lines.push(`# ${component.name}`);
   lines.push('');
   lines.push(`${component.purpose}。${component.description}`);
-  lines.push('');
-
-  lines.push('## 元信息');
-  lines.push('');
-  lines.push('| 字段 | 值 |');
-  lines.push('| --- | --- |');
-  lines.push(`| 规范 ID | \`${component.id}\` |`);
-  lines.push(`| 二级分类 | ${sectionName}（\`${component.category}\`） |`);
-  lines.push(`| 成熟度 | ${component.maturity} |`);
-  lines.push(
-    `| 接入状态 | ${component.integration === 'integrated' ? '已接入' : '待资产接入'} |`,
-  );
-  lines.push(`| 路由 | ${currentPath} |`);
   lines.push('');
 
   lines.push('## 何时使用');

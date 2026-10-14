@@ -19,7 +19,7 @@ import {
   resolveMappingOptions,
   textWidthCh,
   validateMappingValue,
-} from '../../src/components/business/ExpressionEditor/index.js';
+} from '../src/components/ExpressionEditor/index.js';
 
 afterEach(cleanup);
 

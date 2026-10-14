@@ -116,7 +116,7 @@ export type ComponentCategoryId =
   | 'charts' // 图表
   | 'media' // 媒体与内容
   | 'ai-chat' // AI 与会话
-  | 'business'; // 业务组件
+  | 'blocks'; // 区块组件
 
 export interface ComponentEntry extends AssetBase {
   category: ComponentCategoryId;

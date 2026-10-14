@@ -1,6 +1,6 @@
 /**
- * 组件运行态预览注册表（业务批）：packages/ui business 子目录组件。
- * 10 个组件均已从包入口导出并在 register.ts 注册 DSL；Login / SiteFooter
+ * 组件运行态预览注册表（区块批）：@pactor-app/blocks 包组件。
+ * 9 个组件均已从包入口导出并在 register.ts 注册 DSL；Login / SiteFooter
  * 内部经 Form / Link 依赖 Renderer 上下文（useRenderer），与 basic-a 的
  * Layout / Tabs 同类，经 DslPreview 以真实 DSL 渲染；其余组件为
  * 纯受控 React 组件，局部 state 受控 + 事件回显。
@@ -15,12 +15,11 @@ import {
   RuleConfig,
   RuleExpression,
   ScriptEditor,
-  SearchableSelect,
   type CardListItem,
   type FieldConditionValue,
   type RuleConfigValue,
   type RuleExpressionValue,
-} from '@pactor-app/ui/components';
+} from '@pactor-app/blocks';
 import DslPreview from './DslPreview';
 
 const columnStyle = { display: 'flex', flexDirection: 'column', gap: 12 } as const;
@@ -214,42 +213,6 @@ function LoginPreview() {
   );
 }
 
-const FRUIT_OPTIONS = [
-  { label: '苹果', value: 'apple' },
-  { label: '香蕉', value: 'banana' },
-  { label: '橙子', value: 'orange' },
-  { label: '葡萄', value: 'grape' },
-  { label: '西瓜', value: 'watermelon' },
-  { label: '芒果', value: 'mango' },
-  { label: '草莓', value: 'strawberry' },
-  { label: '蓝莓', value: 'blueberry' },
-  { label: '菠萝', value: 'pineapple' },
-];
-
-function SearchableSelectPreview() {
-  const [single, setSingle] = useState<string | string[] | undefined>('apple');
-  const [multi, setMulti] = useState<string | string[] | undefined>(['banana']);
-  return (
-    <div style={columnStyle}>
-      <SearchableSelect
-        value={single}
-        onChange={setSingle}
-        options={FRUIT_OPTIONS}
-        placeholder="单选（>8 条自动出搜索框）"
-      />
-      <SearchableSelect
-        value={multi}
-        onChange={setMulti}
-        options={FRUIT_OPTIONS}
-        multiple
-        placeholder="多选（chips 可逐个删除）"
-      />
-      <span style={echoStyle}>
-        事件回显：单选 {JSON.stringify(single)} · 多选 {JSON.stringify(multi)}
-      </span>
-    </div>
-  );
-}
 
 const CONDITION_FIELDS = [
   { featureCode: 'age', featureName: '年龄', fieldType: 'NUMBER' },
@@ -402,12 +365,11 @@ function SiteFooterPreview() {
   return <DslPreview node={SITE_FOOTER_NODE} />;
 }
 
-export const PREVIEWS_BUSINESS: Record<string, () => ReactElement> = {
+export const PREVIEWS_BLOCKS: Record<string, () => ReactElement> = {
   'component.entity-card': EntityCardPreview,
   'component.card-list': CardListPreview,
   'component.login': LoginPreview,
   'component.site-footer': SiteFooterPreview,
-  'component.searchable-select': SearchableSelectPreview,
   'component.field-condition': FieldConditionPreview,
   'component.expression-editor': ExpressionEditorPreview,
   'component.rule-config': RuleConfigPreview,

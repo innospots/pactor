@@ -23,7 +23,7 @@ import {
   SankeyChart,
   ScatterChart,
   TreeChart,
-} from '@pactor-app/ui/components';
+} from '@pactor-app/chart';
 
 const MONTH_VISITS = [
   { month: '1月', visits: 320, signups: 120 },

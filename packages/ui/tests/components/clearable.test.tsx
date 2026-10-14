@@ -6,9 +6,9 @@
  * Cascader / TreeSelect 箭头、Combobox 上下箭头、NumberInput 步进按钮）
  * 在原图标位置替换（原图标带 group-hover:hidden）；点击清空并传出空值。
  */
-import { render, screen } from '@testing-library/react';
+import { screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { describe, expect, it, vi } from 'vitest';
+import { describe, expect, it } from 'vitest';
 
 import { renderDsl } from './helpers.js';
 
@@ -193,24 +193,5 @@ describe('hover 清除 allowClear', () => {
     expect((document.querySelector('input') as HTMLInputElement).value).toBe('abc');
     await user.click(screen.getByLabelText(CLEAR_LABEL));
     expect((document.querySelector('input') as HTMLInputElement).value).toBe('');
-  });
-
-  it('SearchableSelect：清除按钮沿用既有 clear-selection 标签与回传 "" 契约', async () => {
-    const user = userEvent.setup();
-    const onChange = vi.fn();
-    const { SearchableSelect } = await import(
-      '../../src/components/business/SearchableSelect/index.js'
-    );
-    render(
-      <SearchableSelect
-        value="a"
-        onChange={onChange}
-        options={[{ label: '选项A', value: 'a' }]}
-      />,
-    );
-    const clear = screen.getByLabelText('clear-selection');
-    expect(clear.className).toContain('group-hover:inline-flex');
-    await user.click(clear);
-    expect(onChange).toHaveBeenCalledWith('');
   });
 });

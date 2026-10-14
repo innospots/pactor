@@ -15,6 +15,8 @@ const r = (p) => fileURLToPath(new URL(p, import.meta.url));
  */
 const PACTOR_ALIAS = [
   { find: '@pactor-app/ui/styles.css', replacement: r('../packages/ui/styles.css') },
+  { find: /^@pactor-app\/chart$/, replacement: r('../packages/chart/dist/index.js') },
+  { find: /^@pactor-app\/blocks$/, replacement: r('../packages/blocks/dist/index.js') },
   { find: /^@pactor-app\/ui$/, replacement: r('../packages/ui/dist/index.js') },
   { find: /^@pactor-app\/ui\/components$/, replacement: r('../packages/ui/dist/components/index.js') },
   { find: /^@pactor-app\/ui\/interaction$/, replacement: r('../packages/ui/dist/interaction/index.js') },

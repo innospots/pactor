@@ -139,37 +139,7 @@ import { Thinking } from './chat/Thinking/index.js';
 import { ToolCall } from './chat/ToolCall/index.js';
 import { Welcome } from './chat/Welcome/index.js';
 
-// 图表组件集（src/components/chart 目录，echarts 渲染）
-import { AreaChart } from './chart/AreaChart/index.js';
-import { BarChart } from './chart/BarChart/index.js';
-import { BubbleChart } from './chart/BubbleChart/index.js';
-import { ColumnChart } from './chart/ColumnChart/index.js';
-import { ComposedChart } from './chart/ComposedChart/index.js';
-import { DonutChart } from './chart/DonutChart/index.js';
-import { FunnelChart } from './chart/FunnelChart/index.js';
-import { GaugeChart } from './chart/GaugeChart/index.js';
-import { Heatmap } from './chart/Heatmap/index.js';
-import { LineChart } from './chart/LineChart/index.js';
-import { MapChart } from './chart/MapChart/index.js';
-import { MetricCard } from './chart/MetricCard/index.js';
-import { PieChart } from './chart/PieChart/index.js';
-import { RadarChart } from './chart/RadarChart/index.js';
-import { SankeyChart } from './chart/SankeyChart/index.js';
-import { ScatterChart } from './chart/ScatterChart/index.js';
-import { TreeChart } from './chart/TreeChart/index.js';
 
-// 业务组件（business 子目录）
-import { CardList } from './business/CardList/index.js';
-import { EntityCard } from './business/EntityCard/index.js';
-import { ExpressionEditor } from './business/ExpressionEditor/index.js';
-import { FieldCondition } from './business/FieldCondition/index.js';
-import { Login } from './business/Login/index.js';
-import { RecordingPage } from './business/RecordingPage/index.js';
-import { RuleConfig } from './business/RuleConfig/index.js';
-import { RuleExpression } from './business/RuleExpression/index.js';
-import { ScriptEditor } from './business/ScriptEditor/index.js';
-import { SearchableSelect } from './business/SearchableSelect/index.js';
-import { SiteFooter } from './business/SiteFooter/index.js';
 
 /**
  * 内置组件表：DSL 类型名 → 组件适配器。
@@ -325,38 +295,6 @@ export const builtinComponents = {
   Composer,
   ConversationList,
   StepsPanel,
-  // 图表组件集（src/components/chart 目录，echarts 渲染；
-  // 交互事件经 echarts click → onSelect，DSL 用 events.onSelect + ${event}）
-  MetricCard,
-  LineChart,
-  ColumnChart,
-  BarChart,
-  AreaChart,
-  PieChart,
-  DonutChart,
-  ScatterChart,
-  BubbleChart,
-  RadarChart,
-  FunnelChart,
-  GaugeChart,
-  Heatmap,
-  TreeChart,
-  SankeyChart,
-  MapChart,
-  ComposedChart,
-  // 业务组件（business 子目录）
-  Login,
-  EntityCard,
-  CardList,
-  RecordingPage,
-  SiteFooter,
-  // 业务表单类组件（value/onChange 受控；DSL 用 props.value + events.onChange 读写 ${event}）
-  SearchableSelect,
-  FieldCondition,
-  ExpressionEditor,
-  RuleConfig,
-  RuleExpression,
-  ScriptEditor,
 } as const;
 
 /** 把全部 V1 内置组件按 DSL 类型名注册到给定 ComponentRegistry */

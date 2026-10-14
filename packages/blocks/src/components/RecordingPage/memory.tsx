@@ -1,5 +1,5 @@
-import { Button } from '../../components/Button/index.js';
-import { Text } from '../../components/Text/index.js';
+import { Button } from '@pactor-app/ui/components';
+import { Text } from '@pactor-app/ui/components';
 import type { RecordingMemory } from './types.js';
 
 export interface RecordingMemoryViewProps {

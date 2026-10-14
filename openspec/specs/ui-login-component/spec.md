@@ -2,13 +2,13 @@
 
 ## Purpose
 
-`packages/ui` 的登录业务组件（`components/business/Login/`，DSL type `Login`）：十种登录页布局、可配置品牌区与认证区元素、提交闭环交由 DSL 编排，以及主题令牌与 i18n 适配。
+`@pactor-app/blocks` 的登录区块组件（`components/Login/`，DSL type `Login`）：十种登录页布局、可配置品牌区与认证区元素、提交闭环交由 DSL 编排，以及主题令牌与 i18n 适配。
 
 ## Requirements
 
 ### Requirement: Login 业务组件
 
-`packages/ui` SHALL 在 `components/business/Login/` 提供登录业务组件并注册 DSL type `Login`，以 props 承载登录页可配置信息，经 `onSubmit` 事件抛出表单 values 供 DSL 编排提交闭环。
+`@pactor-app/blocks` SHALL 在 `components/Login/` 提供登录区块组件，并经 `registerBlockComponents` 注册 DSL type `Login`，以 props 承载登录页可配置信息，经 `onSubmit` 事件抛出表单 values 供 DSL 编排提交闭环。
 
 #### Scenario: DSL 调用
 

@@ -1,11 +1,11 @@
 import { useI18n } from '@pactor-app/runtime';
 import type { CSSProperties } from 'react';
 
-import { cn } from '../../../lib/utils.js';
-import { Card } from '../../components/Card/index.js';
-import { Empty } from '../../components/Empty/index.js';
-import { Icon } from '../../components/Icon/index.js';
-import { Text } from '../../components/Text/index.js';
+import { cn } from '../../lib/utils.js';
+import { Card } from '@pactor-app/ui/components';
+import { Empty } from '@pactor-app/ui/components';
+import { Icon } from '@pactor-app/ui/components';
+import { Text } from '@pactor-app/ui/components';
 import {
   EntityCard,
   type EntityCardAction,

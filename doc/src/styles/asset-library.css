@@ -77,6 +77,26 @@
 * {
   box-sizing: border-box;
 }
+
+/* ===== 全局滚动条：细 + 浅色（跟随明暗主题变量） ===== */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--line-strong) transparent;
+}
+*::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+*::-webkit-scrollbar-track {
+  background: transparent;
+}
+*::-webkit-scrollbar-thumb {
+  background: var(--line-strong);
+  border-radius: 4px;
+}
+*::-webkit-scrollbar-thumb:hover {
+  background: var(--subtle);
+}
 [hidden] {
   display: none !important;
 }
@@ -223,7 +243,8 @@ a {
   text-overflow: ellipsis;
   white-space: nowrap;
 }
-.key {
+/* ⌘K 快捷键提示（限定在搜索触发器内，避免命中语法高亮的 .token.key） */
+.search-trigger .key {
   margin-left: auto;
   border: 1px solid var(--line-strong);
   background: var(--panel);
@@ -273,6 +294,10 @@ a {
 
 /* ===== 左侧分类导航 ===== */
 .side-nav-bar {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  background: var(--panel);
   display: flex;
   flex-direction: column;
   gap: 10px;

@@ -62,7 +62,7 @@ export const SITE_NAV: SiteNavCategory[] = [
       { slug: 'charts', name: '图表' },
       { slug: 'media', name: '媒体与内容' },
       { slug: 'ai-chat', name: 'AI 与会话' },
-      { slug: 'business', name: '业务组件' },
+      { slug: 'blocks', name: '区块组件' },
     ],
   },
   {

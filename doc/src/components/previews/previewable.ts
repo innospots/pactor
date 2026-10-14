@@ -135,12 +135,11 @@ export const PREVIEWABLE_IDS: readonly string[] = [
   'component.message-list',
   'component.composer',
   'component.conversation-list',
-  // 业务（packages/ui business 子目录，全部已导出并注册 DSL）
+  // 区块（@pactor-app/blocks 包，全部已导出并注册 DSL）
   'component.entity-card',
   'component.card-list',
   'component.login',
   'component.site-footer',
-  'component.searchable-select',
   'component.field-condition',
   'component.expression-editor',
   'component.rule-config',

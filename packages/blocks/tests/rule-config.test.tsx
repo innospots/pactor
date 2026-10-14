@@ -9,7 +9,7 @@ import {
   RuleConfig,
   isRuleConfigComplete,
   normalizeBetweenValue,
-} from '../../src/components/business/RuleConfig/index.js';
+} from '../src/components/RuleConfig/index.js';
 
 afterEach(cleanup);
 

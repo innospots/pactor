@@ -1,13 +1,13 @@
 import { useI18n } from "@pactor-app/runtime";
 import type { CSSProperties, ReactNode } from "react";
 
-import { cn } from "../../../lib/utils.js";
-import { Button } from "../../components/Button/index.js";
-import { Card } from "../../components/Card/index.js";
-import { Field } from "../../components/Field/index.js";
-import { Form } from "../../components/Form/index.js";
-import { Input } from "../../components/Input/index.js";
-import { Link } from "../../components/Link/index.js";
+import { cn } from '../../lib/utils.js';
+import { Button } from "@pactor-app/ui/components";
+import { Card } from "@pactor-app/ui/components";
+import { Field } from "@pactor-app/ui/components";
+import { Form } from "@pactor-app/ui/components";
+import { Input } from "@pactor-app/ui/components";
+import { Link } from "@pactor-app/ui/components";
 
 /**
  * 结构模式（对应《登录页产品结构设计》的容器关系）：

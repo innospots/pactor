@@ -1,0 +1,45 @@
+/**
+ * @pactor-app/blocks 样式入口源文件
+ * → 构建期经 Tailwind v4 CLI 编译为包根预建 `styles.css`（pnpm build:styles）。
+ * 只产出组件源码用到的工具类（theme + utilities 层，theme 提供尺寸/字号标尺；preflight、:root 主题令牌、
+ * 动画层由 @pactor-app/ui 的 styles.css 提供——本表不含全局基线，须与
+ * ui styles.css 搭配导入（import '@pactor-app/blocks/styles.css'，顺序在 ui 之后均可，
+ * 无冲突规则）。
+ */
+@import 'tailwindcss/theme.css' layer(theme);
+@import 'tailwindcss/utilities.css' layer(utilities);
+
+/* 语义令牌 → 工具类桥接（与 @pactor-app/ui 同一契约，运行时解析 var()，
+ * 令牌实体由 ui styles.css 的 :root 提供，皮肤/暗色覆盖自动跟随） */
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-success: var(--success);
+  --color-warning: var(--warning);
+  --color-info: var(--info);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+
+  --radius-sm: calc(var(--radius) * 0.6);
+  --radius-md: calc(var(--radius) * 0.8);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) * 1.4);
+  --radius-2xl: calc(var(--radius) * 1.8);
+  --radius-3xl: calc(var(--radius) * 2.2);
+  --radius-4xl: calc(var(--radius) * 2.6);
+}

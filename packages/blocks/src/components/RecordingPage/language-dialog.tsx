@@ -1,10 +1,10 @@
-import { cn } from '../../../lib/utils.js';
+import { cn } from '../../lib/utils.js';
 import {
   Dialog,
   DialogContent,
   DialogTitle,
-} from '../../../ui/dialog.js';
-import { Button } from '../../components/Button/index.js';
+} from '@pactor-app/ui/ui';
+import { Button } from '@pactor-app/ui/components';
 import type { RecordingLanguageOption } from './types.js';
 
 export interface RecordingLanguageDialogProps {

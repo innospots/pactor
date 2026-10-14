@@ -1,6 +1,6 @@
 import { useState } from 'react';
 
-import { cn } from '../../../lib/utils.js';
+import { cn } from '../../lib/utils.js';
 import { RecordingDetail } from './detail.js';
 import { RecordingList } from './list.js';
 import type { RecordingPageProps } from './types.js';

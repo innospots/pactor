@@ -1,6 +1,6 @@
 import { useState } from 'react';
 
-import { cn } from '../../../lib/utils.js';
+import { cn } from '../../lib/utils.js';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -10,11 +10,11 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from '../../../ui/alert-dialog.js';
-import { Button } from '../../components/Button/index.js';
-import { Empty } from '../../components/Empty/index.js';
-import { Icon } from '../../components/Icon/index.js';
-import { Text } from '../../components/Text/index.js';
+} from '@pactor-app/ui/ui';
+import { Button } from '@pactor-app/ui/components';
+import { Empty } from '@pactor-app/ui/components';
+import { Icon } from '@pactor-app/ui/components';
+import { Text } from '@pactor-app/ui/components';
 import type { RecordingFilterItem, RecordingGroup, RecordingItem } from './types.js';
 
 export interface RecordingListProps {

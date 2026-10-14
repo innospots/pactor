@@ -38,7 +38,7 @@ import { PREVIEWS_C } from './basic-c';
 import { PREVIEWS_CHART } from './chart-a';
 import { PREVIEWS_D } from './basic-d';
 import { PREVIEWS_E } from './basic-e';
-import { PREVIEWS_BUSINESS } from './business-a';
+import { PREVIEWS_BLOCKS } from './blocks-a';
 
 const rowStyle = { display: 'flex', flexWrap: 'wrap', gap: 12, alignItems: 'center' } as const;
 const columnStyle = { display: 'flex', flexDirection: 'column', gap: 12 } as const;
@@ -458,7 +458,7 @@ const PREVIEWS: Record<string, () => ReactElement> = {
   ...PREVIEWS_D,
   ...PREVIEWS_E,
   ...PREVIEWS_CHART,
-  ...PREVIEWS_BUSINESS,
+  ...PREVIEWS_BLOCKS,
 };
 
 export default function ComponentPreview({ componentId }: { componentId: string }): ReactNode {
