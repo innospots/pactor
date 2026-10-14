@@ -1,24 +1,24 @@
 import { Plus, Trash2 } from 'lucide-react';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
-import { cn } from '../../../lib/utils.js';
-import { Badge } from '../../../ui/badge.js';
-import { Button } from '../../../ui/button.js';
-import { Input } from '../../../ui/input.js';
+import { cn } from '../../lib/utils.js';
+import { Badge } from '@pactor-app/ui/ui';
+import { Button } from '@pactor-app/ui/ui';
+import { Input } from '@pactor-app/ui/ui';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '../../../ui/select.js';
+} from '@pactor-app/ui/ui';
 import {
   CONTROL_SIZE_BOX,
   CONTROL_SIZE_BOX_GROW,
   CONTROL_SIZE_SELECT_ATTR,
   CONTROL_SIZE_TRIGGER_TEXT,
   type ControlSize,
-} from '../../control-size.js';
+} from '@pactor-app/ui/components';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 

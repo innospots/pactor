@@ -1,18 +1,18 @@
 import { useState } from 'react';
 
-import { cn } from '../../../lib/utils.js';
+import { cn } from '../../lib/utils.js';
 import {
   Dialog,
   DialogContent,
   DialogTitle,
-} from '../../../ui/dialog.js';
+} from '@pactor-app/ui/ui';
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
-} from '../../../ui/popover.js';
-import { Button } from '../../components/Button/index.js';
-import { Icon } from '../../components/Icon/index.js';
+} from '@pactor-app/ui/ui';
+import { Button } from '@pactor-app/ui/components';
+import { Icon } from '@pactor-app/ui/components';
 import type { RecordingShareOption } from './types.js';
 
 export interface RecordingShareProps {

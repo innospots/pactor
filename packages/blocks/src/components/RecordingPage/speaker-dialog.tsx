@@ -1,13 +1,13 @@
-import { cn } from '../../../lib/utils.js';
+import { cn } from '../../lib/utils.js';
 import {
   Dialog,
   DialogContent,
   DialogDescription,
   DialogTitle,
-} from '../../../ui/dialog.js';
-import { Avatar } from '../../components/Avatar/index.js';
-import { Button } from '../../components/Button/index.js';
-import { Input } from '../../components/Input/index.js';
+} from '@pactor-app/ui/ui';
+import { Avatar } from '@pactor-app/ui/components';
+import { Button } from '@pactor-app/ui/components';
+import { Input } from '@pactor-app/ui/components';
 import type { RecordingSpeaker } from './types.js';
 
 export interface RecordingSpeakerDialogProps {

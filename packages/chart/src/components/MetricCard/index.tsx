@@ -1,7 +1,7 @@
 import type { CSSProperties } from 'react';
 import { ArrowDownRight, ArrowUpRight } from 'lucide-react';
 
-import { cn } from '../../../lib/utils.js';
+import { cn } from '../../lib/utils.js';
 
 /**
  * MetricCard 适配器（chart/ 组件集）：单指标卡——标题 + 大数值 +

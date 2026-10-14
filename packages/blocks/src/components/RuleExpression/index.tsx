@@ -1,7 +1,7 @@
 import { useLayoutEffect, useRef, useState, type KeyboardEvent } from 'react';
 
-import { cn } from '../../../lib/utils.js';
-import { CONTROL_SIZE_BOX_GROW, type ControlSize } from '../../control-size.js';
+import { cn } from '../../lib/utils.js';
+import { CONTROL_SIZE_BOX_GROW, type ControlSize } from '@pactor-app/ui/components';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 

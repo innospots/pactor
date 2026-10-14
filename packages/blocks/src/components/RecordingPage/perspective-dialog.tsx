@@ -3,9 +3,9 @@ import {
   DialogContent,
   DialogDescription,
   DialogTitle,
-} from '../../../ui/dialog.js';
-import { Button } from '../../components/Button/index.js';
-import { Textarea } from '../../components/Textarea/index.js';
+} from '@pactor-app/ui/ui';
+import { Button } from '@pactor-app/ui/components';
+import { Textarea } from '@pactor-app/ui/components';
 
 export interface RecordingPerspectiveDialogProps {
   open: boolean;

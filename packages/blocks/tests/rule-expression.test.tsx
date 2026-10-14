@@ -2,7 +2,7 @@
 import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
-import { RuleExpression } from '../../src/components/business/RuleExpression/index.js';
+import { RuleExpression } from '../src/components/RuleExpression/index.js';
 
 afterEach(cleanup);
 

@@ -4,7 +4,7 @@
  */
 import { describe, expect, it } from 'vitest';
 
-import { normalizeColor } from '../../src/components/chart/lib/color.js';
+import { normalizeColor } from '../src/components/lib/color.js';
 
 describe('normalizeColor', () => {
   it('黑白锚点', () => {

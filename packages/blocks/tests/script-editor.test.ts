@@ -4,7 +4,7 @@ import { describe, expect, it } from 'vitest';
 import {
   buildFunctionSnippet,
   buildScriptCompletions,
-} from '../../src/components/business/ScriptEditor/index.js';
+} from '../src/components/ScriptEditor/index.js';
 
 const functions = [
   {

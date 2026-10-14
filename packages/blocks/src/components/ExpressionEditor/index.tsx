@@ -1,15 +1,15 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 
-import { cn } from '../../../lib/utils.js';
-import { Button } from '../../../ui/button.js';
-import { Input } from '../../../ui/input.js';
-import { Label } from '../../../ui/label.js';
-import { Textarea } from '../../../ui/textarea.js';
+import { cn } from '../../lib/utils.js';
+import { Button } from '@pactor-app/ui/ui';
+import { Input } from '@pactor-app/ui/ui';
+import { Label } from '@pactor-app/ui/ui';
+import { Textarea } from '@pactor-app/ui/ui';
 import {
   CONTROL_SIZE_BOX,
   CONTROL_SIZE_BOX_GROW,
   type ControlSize,
-} from '../../control-size.js';
+} from '@pactor-app/ui/components';
 import {
   conditionToStatement,
   defaultFieldConditionValue,
@@ -18,7 +18,7 @@ import {
   type ConditionFieldOption,
   type FieldConditionValue,
 } from '../FieldCondition/index.js';
-import { SearchableSelect } from '../SearchableSelect/index.js';
+import { SearchableSelect } from '../internal/SearchableSelect/index.js';
 
 // ─── 文案缺省值（原 next-intl Common 命名空间文案的中文默认值） ──────────────────
 

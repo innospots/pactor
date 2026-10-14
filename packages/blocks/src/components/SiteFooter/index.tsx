@@ -1,7 +1,7 @@
 import type { CSSProperties } from 'react';
 
-import { cn } from '../../../lib/utils.js';
-import { Link } from '../../components/Link/index.js';
+import { cn } from '../../lib/utils.js';
+import { Link } from '@pactor-app/ui/components';
 
 /** 页脚链接：有 href 渲染 Link（SPA 语义），无 href 渲染 button 并触发 onLinkClick */
 export interface SiteFooterLink {

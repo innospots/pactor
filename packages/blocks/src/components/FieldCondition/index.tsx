@@ -1,24 +1,24 @@
 import { Plus, X } from 'lucide-react';
 import { useCallback, useMemo } from 'react';
 
-import { cn } from '../../../lib/utils.js';
-import { Button } from '../../../ui/button.js';
-import { Input } from '../../../ui/input.js';
+import { cn } from '../../lib/utils.js';
+import { Button } from '@pactor-app/ui/ui';
+import { Input } from '@pactor-app/ui/ui';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '../../../ui/select.js';
-import { DatePicker } from '../../components/DatePicker/index.js';
+} from '@pactor-app/ui/ui';
+import { DatePicker } from '@pactor-app/ui/components';
 import {
   CONTROL_SIZE_BOX,
   CONTROL_SIZE_SELECT_ATTR,
   CONTROL_SIZE_TRIGGER_TEXT,
   type ControlSize,
-} from '../../control-size.js';
-import { SearchableSelect } from '../SearchableSelect/index.js';
+} from '@pactor-app/ui/components';
+import { SearchableSelect } from '../internal/SearchableSelect/index.js';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 

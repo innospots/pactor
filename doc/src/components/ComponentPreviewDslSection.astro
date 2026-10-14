@@ -1,0 +1,67 @@
+---
+/**
+ * 「预览与 DSL」合并章节片段：预览 / DSL 结构 / YAML 结构 三个页签切换展示。
+ * YAML 由构建期把 DSL JSON 经 yaml 包序列化得到。
+ * 预览未接入 / DSL 未接入时在对应页签内渲染「不适用」说明，
+ * 不静默省略（与原独立章节的口径一致）。
+ */
+import YAML from 'yaml';
+import ComponentPreviewSection from './previews/ComponentPreviewSection.astro';
+import DslStructureSection from './DslStructureSection.astro';
+import PreviewDslTabs from './PreviewDslTabs';
+
+interface Props {
+  /** 资产规范 id（component.*） */
+  componentId: string;
+  /** 实现结构说明文本 */
+  previewNote?: string;
+  /** 预览不可用时的原因说明 */
+  previewNotApplicable?: string;
+  /** JSON.stringify(dsl, null, 2) 后的字符串 */
+  dslJson?: string;
+  /** DSL / YAML 结构不可用时的原因说明 */
+  dslNotApplicable?: string;
+}
+
+const { componentId, previewNote, previewNotApplicable, dslJson, dslNotApplicable } =
+  Astro.props;
+
+const dslYaml = dslJson !== undefined ? YAML.stringify(JSON.parse(dslJson)) : undefined;
+---
+
+<PreviewDslTabs client:visible>
+  {
+    previewNotApplicable !== undefined ? (
+      <div slot="preview" class="na-box">
+        <b>不适用：</b>
+        {previewNotApplicable}
+      </div>
+    ) : (
+      <ComponentPreviewSection
+        slot="preview"
+        componentId={componentId}
+        note={previewNote}
+      />
+    )
+  }
+  {
+    dslJson === undefined ? (
+      <div slot="dsl" class="na-box">
+        <b>不适用：</b>
+        {dslNotApplicable}
+      </div>
+    ) : (
+      <DslStructureSection slot="dsl" code={dslJson} language="json" />
+    )
+  }
+  {
+    dslYaml === undefined ? (
+      <div slot="yaml" class="na-box">
+        <b>不适用：</b>
+        {dslNotApplicable}
+      </div>
+    ) : (
+      <DslStructureSection slot="yaml" code={dslYaml} language="yaml" />
+    )
+  }
+</PreviewDslTabs>

@@ -1,11 +1,11 @@
 import type { CSSProperties } from 'react';
 
-import { cn } from '../../../lib/utils.js';
-import { Button, type ButtonVariant } from '../../components/Button/index.js';
-import { Card } from '../../components/Card/index.js';
-import { Icon } from '../../components/Icon/index.js';
-import { Tag, type TagColor } from '../../components/Tag/index.js';
-import { Text } from '../../components/Text/index.js';
+import { cn } from '../../lib/utils.js';
+import { Button, type ButtonVariant } from '@pactor-app/ui/components';
+import { Card } from '@pactor-app/ui/components';
+import { Icon } from '@pactor-app/ui/components';
+import { Tag, type TagColor } from '@pactor-app/ui/components';
+import { Text } from '@pactor-app/ui/components';
 
 /** 上层右侧状态/分类标签 */
 export interface EntityCardTag {

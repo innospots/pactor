@@ -1,19 +1,18 @@
 // @vitest-environment jsdom
 /**
- * business 目录表单类组件的 DSL 渲染契约：
+ * blocks 目录表单类组件的 DSL 渲染契约：
  * 经 createComponentRegistry 按类型名解析渲染，事件经 events.onChange + ${event} 回写状态。
  */
 import { fireEvent, screen } from '@testing-library/react';
 import { describe, expect, it } from 'vitest';
 
-import { createComponentRegistry } from '../../src/components/index.js';
-import { expectEventState, renderDsl } from './helpers.js';
+import { createBlockComponentRegistry } from '../src/index.js';
+import { renderDsl } from './helpers.js';
 
 const BUSINESS_TYPES = [
   'Login',
   'EntityCard',
   'CardList',
-  'SearchableSelect',
   'FieldCondition',
   'ExpressionEditor',
   'RuleConfig',
@@ -21,36 +20,16 @@ const BUSINESS_TYPES = [
   'ScriptEditor',
 ];
 
-describe('business 组件 DSL 注册', () => {
-  it('全部业务组件类型名注册后可解析', () => {
-    const registry = createComponentRegistry();
+describe('blocks 组件 DSL 注册', () => {
+  it('全部区块组件类型名注册后可解析', () => {
+    const registry = createBlockComponentRegistry();
     for (const type of BUSINESS_TYPES) {
       expect(registry.has(type), type).toBe(true);
     }
   });
 });
 
-describe('business 表单类组件 DSL 渲染', () => {
-  it('SearchableSelect：DSL props 渲染候选，onChange 事件回写 ${event}', async () => {
-    const { context } = renderDsl({
-      type: 'SearchableSelect',
-      props: {
-        options: [
-          { label: '苹果', value: 'apple' },
-          { label: '香蕉', value: 'banana' },
-        ],
-        placeholder: '选择水果',
-      },
-      events: {
-        onChange: [{ action: 'setState', params: { fruit: '${event}' } }],
-      },
-    });
-
-    fireEvent.click(screen.getByRole('combobox'));
-    fireEvent.click(await screen.findByText('香蕉'));
-    await expectEventState(context, 'fruit', 'banana');
-  });
-
+describe('blocks 表单类组件 DSL 渲染', () => {
   it('FieldCondition：DSL fields 渲染候选字段', async () => {
     renderDsl({
       type: 'FieldCondition',

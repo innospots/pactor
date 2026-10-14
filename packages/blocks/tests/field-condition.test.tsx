@@ -14,7 +14,7 @@ import {
   isNoValueOperator,
   itemToStatement,
   statementToCondition,
-} from '../../src/components/business/FieldCondition/index.js';
+} from '../src/components/FieldCondition/index.js';
 
 afterEach(cleanup);
 

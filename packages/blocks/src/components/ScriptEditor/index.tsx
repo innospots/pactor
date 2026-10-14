@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import type { Ace } from 'ace-builds';
 
-import { cn } from '../../../lib/utils.js';
+import { cn } from '../../lib/utils.js';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 

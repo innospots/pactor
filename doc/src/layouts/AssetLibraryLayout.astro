@@ -2,10 +2,12 @@
 /**
  * 资产库三栏布局壳（design D5）：58px 顶栏 + 左导航 / 中内容 / 右看板。
  * 中间区独立滚动；<1024px 左右栏收起为抽屉（少量 vanilla JS 控制开合）。
- * 站点页脚（SiteFooter 业务组件）位于 main 内随内容滚动，
+ * 站点页脚（SiteFooter 区块组件）位于 main 内随内容滚动，
  * 底部栏展示构建期注入的真实构建版本 / 最近同步时间 / Git 提交号。
  */
 import '@pactor-app/ui/styles.css';
+import '@pactor-app/chart/styles.css';
+import '@pactor-app/blocks/styles.css';
 import '../styles/asset-library.css';
 import TopNav from '../components/TopNav.astro';
 import SideNav from '../components/SideNav.astro';

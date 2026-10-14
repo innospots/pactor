@@ -1,7 +1,7 @@
 import type { DslNode } from '@pactor-app/core';
 import type { CSSProperties, ReactNode } from 'react';
 
-import type { TextType } from '../../components/Text/index.js';
+import type { TextType } from '@pactor-app/ui/components';
 
 /** 过滤 pill 项（全部 / 会议 / 来自设备 / 未整理…） */
 export interface RecordingFilterItem {

@@ -1,9 +1,9 @@
 import { useState } from 'react';
 
-import { Avatar } from '../../components/Avatar/index.js';
-import { Button } from '../../components/Button/index.js';
-import { Icon } from '../../components/Icon/index.js';
-import { Text } from '../../components/Text/index.js';
+import { Avatar } from '@pactor-app/ui/components';
+import { Button } from '@pactor-app/ui/components';
+import { Icon } from '@pactor-app/ui/components';
+import { Text } from '@pactor-app/ui/components';
 import { RecordingPerspectiveDialog } from './perspective-dialog.js';
 import type { RecordingInsight } from './types.js';
 

@@ -1,6 +1,6 @@
 import { useEffect, useState, type CSSProperties } from 'react';
 
-import { Empty } from '../../components/Empty/index.js';
+import { Empty } from '@pactor-app/ui/components';
 import { echarts } from '../echarts-modules.js';
 import { EChartBase, type ChartSelectPayload } from '../EChartBase/index.js';
 import { buildMapOption } from '../lib/option-builders.js';

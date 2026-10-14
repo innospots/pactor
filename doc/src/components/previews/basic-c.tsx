@@ -1,14 +1,12 @@
 /**
  * 组件运行态预览注册表（第三批）：反馈 / 数据展示 / 图表 / 弹层类组件。
- * 纯 React 组件直接命名导入渲染；Dialog / Popover 依赖 Renderer 上下文，
- * 经 DslPreview 以真实 DSL 渲染（与业务页面同一代码路径）。
+ * 纯 React 组件直接命名导入渲染；Drawer / Dialog / Popover 依赖 Renderer
+ * 上下文，经 DslPreview 以真实 DSL 渲染（与业务页面同一代码路径）。
  */
-import { useState, type ReactElement } from 'react';
+import type { ReactElement } from 'react';
 import type { DslNode } from '@pactor-app/core';
 import {
   Alert,
-  Button,
-  Drawer,
   Progress,
   Skeleton,
   Spinner,
@@ -37,20 +35,43 @@ function AlertPreview() {
   );
 }
 
+const DRAWER_NODE: DslNode = {
+  type: 'Flex',
+  children: [
+    {
+      type: 'Button',
+      props: { text: '打开抽屉', variant: 'primary' },
+      events: {
+        onClick: [{ action: 'setState', params: { drawerOpen: true } }],
+      },
+    },
+    {
+      type: 'Drawer',
+      props: {
+        title: '订单详情',
+        placement: 'right',
+        open: '${state.drawerOpen}',
+      },
+      events: {
+        onClose: [{ action: 'setState', params: { drawerOpen: false } }],
+      },
+      children: [
+        {
+          type: 'Flex',
+          props: { direction: 'vertical', gap: 'middle' },
+          children: [
+            { type: 'Text', props: { text: '订单号：PO20260921001' } },
+            { type: 'Text', props: { text: '金额：¥1,280.00 · 已支付' } },
+            { type: 'Text', props: { text: '收货地址：杭州市西湖区文三路 100 号' } },
+          ],
+        },
+      ],
+    },
+  ],
+};
+
 function DrawerPreview() {
-  const [open, setOpen] = useState(false);
-  return (
-    <div>
-      <Button text="打开抽屉" variant="primary" onClick={() => setOpen(true)} />
-      <Drawer open={open} title="订单详情" placement="right" onClose={() => setOpen(false)}>
-        <div style={columnStyle}>
-          <div style={blockStyle}>订单号：PO20260921001</div>
-          <div style={blockStyle}>金额：¥1,280.00 · 已支付</div>
-          <div style={blockStyle}>收货地址：杭州市西湖区文三路 100 号</div>
-        </div>
-      </Drawer>
-    </div>
-  );
+  return <DslPreview node={DRAWER_NODE} />;
 }
 
 function ProgressPreview() {
