@@ -86,6 +86,8 @@ const markdownSource = buildComponentMarkdown(component, detail);
   sections={[
     {
       title: '预览与 DSL',
+      // Login：标题行右端出挂载位，状态胶囊页签由预览节岛 portal 注入（与预览 / DSL / YAML 联动）
+      titleExtra: component.id === 'component.login',
       body: ComponentPreviewDslSection,
       bodyProps: {
         componentId: component.id,

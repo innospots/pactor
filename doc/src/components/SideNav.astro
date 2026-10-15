@@ -7,6 +7,13 @@
  * 组件分类特殊化：无「总览」菜单项，「组件目录」标题右端展示组件总数；
  * 各分类（通用 / 布局 / …）渲染为可折叠菜单组（<details>，含当前页的组默认展开），
  * 组头右端展示组内组件数，组内子项链接到组件详情页。
+ * 区块组件内 Login 为嵌套组：按结构模式（split / centered / brand-card /
+ * overlap / backdrop）出子菜单，链接到详情页 ?layout=<模式>，预览随模式切换；
+ * 带 query 的子项 active 态由页面底部内联脚本按 location.search 修正（服务端只见 pathname）。
+ * 通用分类的 Button 为嵌套组：Button + 扩展按钮族（ButtonGroup / ActionButton /
+ * SplitButton / CopyButton / IconMorph / ConfirmMorph / FloatingButtonGroup /
+ * ExpandingButtonGroup）收进一个 menu-nested 组，子项为普通详情页链接，
+ * active 态服务端按 pathname 判定，无需 query 修正。
  */
 import { SITE_NAV, sectionCount } from '../site-nav';
 import { components } from '../assets-data/components';
@@ -36,6 +43,27 @@ const tabs = SITE_NAV.map((cat) => ({
 }));
 
 const isComponents = current.id === 'components';
+/** Login 结构模式子菜单（与 packages/blocks Login 的 layout 枚举一一对应）；label 仅中文，英文标识仅用于搜索命中 */
+const LOGIN_MODES = [
+  { key: 'split', label: '分栏' },
+  { key: 'centered', label: '居中' },
+  { key: 'brand-card', label: '品牌卡' },
+  { key: 'overlap', label: '叠加' },
+  { key: 'backdrop', label: '背景' },
+];
+/** 通用分类按钮族嵌套组（Button + ButtonGroup + 扩展按钮 7 个）；顺序即子菜单顺序 */
+const BUTTON_FAMILY = [
+  { name: 'Button', href: '/components/general/button' },
+  { name: 'ButtonGroup', href: '/components/general/button-group' },
+  { name: 'ActionButton', href: '/components/general/action-button' },
+  { name: 'SplitButton', href: '/components/general/split-button' },
+  { name: 'CopyButton', href: '/components/general/copy-button' },
+  { name: 'IconMorph', href: '/components/general/icon-morph' },
+  { name: 'ConfirmMorph', href: '/components/general/confirm-morph' },
+  { name: 'FloatingButtonGroup', href: '/components/general/floating-button-group' },
+  { name: 'ExpandingButtonGroup', href: '/components/general/expanding-button-group' },
+];
+const BUTTON_FAMILY_NAMES = new Set(BUTTON_FAMILY.map((m) => m.name));
 /** 组件菜单组图标（Icon 白名单键） */
 const GROUP_ICONS: Record<string, string> = {
   general: 'package',
@@ -97,16 +125,72 @@ const componentGroups = isComponents
                 </span>
               </summary>
               <div class="menu-sub">
-                {group.entries.map((entry) => (
-                  <a
-                    class={`menu-subitem${entry.href === currentPath ? ' active' : ''}`}
-                    href={entry.href}
-                    data-search={entry.name}
-                    aria-current={entry.href === currentPath ? 'page' : undefined}
-                  >
-                    {entry.name}
-                  </a>
-                ))}
+                {group.entries.map((entry) =>
+                  group.slug === 'general' && BUTTON_FAMILY_NAMES.has(entry.name) ? (
+                    entry.name === 'Button' ? (
+                      <details
+                        class="menu-group menu-nested"
+                        data-search="Button 按钮"
+                        data-default-open={BUTTON_FAMILY.some((m) => m.href === currentPath) ? 'true' : 'false'}
+                        open={BUTTON_FAMILY.some((m) => m.href === currentPath)}
+                      >
+                        <summary class="menu-group-header">
+                          <span class="menu-group-label">Button</span>
+                          <span class="menu-group-meta">
+                            <span class="menu-count">{BUTTON_FAMILY.length}</span>
+                            <Icon name="chevron-right" size={14} className="menu-group-caret" />
+                          </span>
+                        </summary>
+                        <div class="menu-sub">
+                          {BUTTON_FAMILY.map((member) => (
+                            <a
+                              class={`menu-subitem${member.href === currentPath ? ' active' : ''}`}
+                              href={member.href}
+                              data-search={member.name}
+                              aria-current={member.href === currentPath ? 'page' : undefined}
+                            >
+                              {member.name}
+                            </a>
+                          ))}
+                        </div>
+                      </details>
+                    ) : null
+                  ) : group.slug === 'blocks' && entry.name === 'Login' ? (
+                    <details
+                      class="menu-group menu-nested"
+                      data-search="Login 登录页"
+                      data-default-open={entry.href === currentPath ? 'true' : 'false'}
+                      open={entry.href === currentPath}
+                    >
+                      <summary class="menu-group-header">
+                        <span class="menu-group-label">Login</span>
+                        <span class="menu-group-meta">
+                          <Icon name="chevron-right" size={14} className="menu-group-caret" />
+                        </span>
+                      </summary>
+                      <div class="menu-sub">
+                        {LOGIN_MODES.map((mode) => (
+                          <a
+                            class="menu-subitem"
+                            href={`${entry.href}?layout=${mode.key}`}
+                            data-search={`${mode.label} ${mode.key}`}
+                          >
+                            {mode.label}
+                          </a>
+                        ))}
+                      </div>
+                    </details>
+                  ) : (
+                    <a
+                      class={`menu-subitem${entry.href === currentPath ? ' active' : ''}`}
+                      href={entry.href}
+                      data-search={entry.name}
+                      aria-current={entry.href === currentPath ? 'page' : undefined}
+                    >
+                      {entry.name}
+                    </a>
+                  ),
+                )}
               </div>
             </details>
           ))
@@ -137,3 +221,22 @@ const componentGroups = isComponents
     条目数由构建期资产数据统计；标注「待接入」的板块内容尚未接入，页面仅展示框架与占位说明。
   </div>
 </aside>
+
+<script is:inline>
+  // 带 ?layout= 的子菜单项（Login 结构模式）：服务端只见 pathname，
+  // 这里按 location.search 修正 active；无 query 访问登录页时视为 split
+  (function () {
+    var layout =
+      new URLSearchParams(location.search).get('layout') || 'split';
+    document
+      .querySelectorAll('#sideMenu .menu-subitem[href*="?layout="]')
+      .forEach(function (a) {
+        var url = new URL(a.getAttribute('href'), location.origin);
+        var active =
+          url.pathname === location.pathname &&
+          (url.searchParams.get('layout') || 'split') === layout;
+        a.classList.toggle('active', active);
+        if (active) a.setAttribute('aria-current', 'page');
+      });
+  })();
+</script>

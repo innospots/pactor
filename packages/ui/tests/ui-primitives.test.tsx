@@ -22,6 +22,9 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
+  Tabs,
+  TabsList,
+  TabsTrigger,
 } from '../src/ui/index.js';
 import './components/setup.js';
 
@@ -151,6 +154,37 @@ describe('/ui 原语可渲染', () => {
       </Select>,
     );
     expect(screen.getByText('选择')).toBeDefined();
+  });
+
+  it('Tabs：List size=sm 标记 data-size 并压缩胶囊高度与触发器字号', () => {
+    render(
+      <Tabs defaultValue="a">
+        <TabsList size="sm">
+          <TabsTrigger value="a">甲</TabsTrigger>
+        </TabsList>
+      </Tabs>,
+    );
+    const list = screen.getByRole('tab', { name: '甲' })
+      .parentElement as HTMLElement;
+    expect(list.dataset.size).toBe('sm');
+    expect(list.className).toContain('h-8');
+    expect(screen.getByRole('tab', { name: '甲' }).className).toContain(
+      'group-data-[size=sm]/tabs-list:text-xs',
+    );
+  });
+
+  it('Tabs：List size 缺省为 default（h-9）', () => {
+    render(
+      <Tabs defaultValue="b">
+        <TabsList>
+          <TabsTrigger value="b">乙</TabsTrigger>
+        </TabsList>
+      </Tabs>,
+    );
+    const list = screen.getByRole('tab', { name: '乙' })
+      .parentElement as HTMLElement;
+    expect(list.dataset.size).toBe('default');
+    expect(list.className).toContain('h-9');
   });
 
   it('Select：弹层最小宽度跟随触发器（--anchor-width）', async () => {

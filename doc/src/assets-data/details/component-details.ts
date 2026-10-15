@@ -26,6 +26,8 @@
  *   data-entry-details.ts / data-display-details.ts / feedback-details.ts。
  * - 第十批 9 个组件（区块，@pactor-app/blocks 包真实实现）：
  *   见同目录 blocks-details.ts。
+ * - 按钮族 8 个组件（通用，packages/ui/src/ui 扩展按钮组件真实实现，
+ *   交互设计参考 arc-library）：见同目录 general-details.ts。
  */
 
 import type { DslNode } from '@pactor-app/core';

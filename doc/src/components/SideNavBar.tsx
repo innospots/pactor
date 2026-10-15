@@ -1,6 +1,6 @@
 /**
  * 左侧分类导航顶栏（React 岛）：搜索框 + 分类 Tabs（小尺寸）。
- * - Tabs 复用 vendored ui Tabs（default 胶囊变体，className 压到 small 尺寸），
+ * - Tabs 复用 vendored ui Tabs（default 胶囊变体，size=sm 小尺寸），
  *   触发器 render 为 <a>：SSR 直出真实链接，水合前也可点击跳转；
  * - 搜索框实时过滤当前分类的菜单项（操作 SideNav.astro 服务端渲染的
  *   #sideMenu .menu-item DOM，按 data-search 匹配，同 FilterBar 渐进增强模式）。
@@ -69,7 +69,7 @@ export default function SideNavBar({ tabs, activeKey }: Props) {
         className="h-8 text-xs"
       />
       <Tabs value={activeKey}>
-        <TabsList className="h-8 w-full">
+        <TabsList size="sm" className="w-full">
           {tabs.map((tab) => (
             <TabsTrigger
               key={tab.key}

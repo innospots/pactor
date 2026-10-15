@@ -14,5 +14,6 @@ export default function DslStructure({
   code: string;
   language?: string;
 }): ReactElement {
-  return <CodeBlock code={code} language={language} copyable />;
+  // dsl-code-fill：组件详情页 DSL / YAML 页签容器高度 = 视口 - 顶栏 - 12px（asset-library.css）
+  return <CodeBlock code={code} language={language} copyable className="dsl-code-fill" />;
 }

@@ -7,6 +7,8 @@
  * （如 Button）与 DSL 适配层同名组件互不污染导入路径。
  */
 export { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from './accordion.js';
+export { ActionButton } from './action-button.js';
+export type { ActionButtonProps } from './action-button.js';
 export { Alert, AlertDescription, AlertTitle } from './alert.js';
 export {
   Attachment,
@@ -73,6 +75,8 @@ export {
   CommandItem,
   CommandList,
 } from './command.js';
+export { ConfirmMorph } from './confirm-morph.js';
+export type { ConfirmMorphProps, ConfirmMorphState } from './confirm-morph.js';
 export {
   ContextMenu,
   ContextMenuContent,
@@ -80,6 +84,8 @@ export {
   ContextMenuSeparator,
   ContextMenuTrigger,
 } from './context-menu.js';
+export { CopyButton } from './copy-button.js';
+export type { CopyButtonProps } from './copy-button.js';
 export {
   Drawer,
   DrawerClose,
@@ -102,6 +108,16 @@ export {
   DropdownMenuSubTrigger,
   DropdownMenuTrigger,
 } from './dropdown-menu.js';
+export { ExpandingButtonGroup } from './expanding-button-group.js';
+export type {
+  ExpandingButtonGroupOption,
+  ExpandingButtonGroupProps,
+} from './expanding-button-group.js';
+export { FloatingButtonGroup } from './floating-button-group.js';
+export type {
+  FloatingButtonGroupOption,
+  FloatingButtonGroupProps,
+} from './floating-button-group.js';
 export { HoverCard, HoverCardContent, HoverCardTrigger } from './hover-card.js';
 export {
   Menubar,
@@ -171,6 +187,8 @@ export { Field, FieldDescription, FieldError, FieldLabel } from './field.js';
 export { Input } from './input.js';
 export { InputGroup, InputGroupAddon, InputGroupInput } from './input-group.js';
 export { InputOTP, InputOTPGroup, InputOTPSeparator, InputOTPSlot } from './input-otp.js';
+export { IconMorph, MORPH_PAIRS } from './icon-morph.js';
+export type { IconMorphPreset, IconMorphProps } from './icon-morph.js';
 export {
   Item,
   ItemActions,
@@ -236,6 +254,8 @@ export {
 export { Skeleton } from './skeleton.js';
 export { Slider, SliderControl, SliderIndicator, SliderThumb, SliderTrack } from './slider.js';
 export { Spinner } from './spinner.js';
+export { SplitButton } from './split-button.js';
+export type { SplitButtonOption, SplitButtonProps } from './split-button.js';
 export { Switch } from './switch.js';
 export {
   Table,

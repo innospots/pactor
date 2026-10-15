@@ -8,9 +8,9 @@
 import type { ComponentEntry } from '../types.ts';
 
 export const blocksComponents: ComponentEntry[] = [
+  { id: 'component.login', name: 'Login', category: 'blocks', purpose: '登录整页：品牌区 + 认证表单 + 辅助入口', maturity: 'stable', change: 'new', integration: 'integrated', description: '中文惯用名：登录页（5 种布局形态）。' },
   { id: 'component.entity-card', name: 'EntityCard', category: 'blocks', purpose: '三层结构实体摘要卡：图标/标题/标签、描述与操作按钮', maturity: 'stable', change: 'new', integration: 'integrated', description: '中文惯用名：实体卡片。' },
   { id: 'component.card-list', name: 'CardList', category: 'blocks', purpose: '网格展示实体摘要卡片，附带新建占位与结果计数', maturity: 'stable', change: 'new', integration: 'integrated', description: '中文惯用名：卡片列表（基于 EntityCard 组合）。' },
-  { id: 'component.login', name: 'Login', category: 'blocks', purpose: '登录整页：品牌区 + 认证表单 + 辅助入口', maturity: 'stable', change: 'new', integration: 'integrated', description: '中文惯用名：登录页（5 种布局形态）。' },
   { id: 'component.expression-editor', name: 'ExpressionEditor', category: 'blocks', purpose: '按模板占位符结构化编辑表达式，支持表达式文本与控件值双向解析', maturity: 'stable', change: 'new', integration: 'integrated', description: '中文惯用名：表达式编辑器。' },
   { id: 'component.field-condition', name: 'FieldCondition', category: 'blocks', purpose: '以字段+操作符+值行式编辑 AND/OR 条件组', maturity: 'stable', change: 'new', integration: 'integrated', description: '中文惯用名：字段条件（条件树与表达式字符串互转）。' },
   { id: 'component.rule-config', name: 'RuleConfig', category: 'blocks', purpose: '评分规则配置：权重与带操作符/取值/评分的条件列表', maturity: 'stable', change: 'new', integration: 'integrated', description: '中文惯用名：规则配置。' },

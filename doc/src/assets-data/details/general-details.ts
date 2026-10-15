@@ -1,15 +1,378 @@
 /**
- * 通用分类完整详情（第九批组件，packages/ui 真实实现已核对）。
+ * 通用分类完整详情（第九批组件 + 按钮族，packages/ui 真实实现已核对）。
  * - API 属性与 DSL 结构核对自 packages/ui/src/components/components/ 下同名
  *   目录的 index.tsx：Icon / Typography / Link / Separator / Avatar / Badge /
  *   Tooltip；
  * - 运行态预览核对自 doc/src/components/previews/basic-a.tsx（同一文件注册
  *   component.icon / typography / link / separator / avatar / badge / tooltip）；
  *   其中 component.link 的 dsl 直接复用预览文件中的 LINK_NODE 常量。
+ * - 按钮族 8 个（ButtonGroup / ActionButton / SplitButton / CopyButton /
+ *   IconMorph / ConfirmMorph / FloatingButtonGroup / ExpandingButtonGroup）：
+ *   API 属性核对自 packages/ui/src/ui/ 下同名组件源码（扩展按钮组件，
+ *   交互设计参考 arc-library，Tailwind 实现）；ButtonGroup 的 DSL 结构核对自
+ *   packages/ui/src/components/components/ButtonGroup/index.tsx（已注册
+ *   builtinComponents），其余 7 个 DSL 注册为后续变更，无 dsl 字段；
+ *   运行态预览见 doc/src/components/previews/buttons-a.tsx。
  */
 import type { ComponentDetailContent } from './component-details.ts';
 
 export const generalDetailContents: Record<string, ComponentDetailContent> = {
+  'component.button-group': {
+    dsl: {
+      "type": "ButtonGroup",
+      "children": [
+        { "type": "Button", "props": { "text": "年" } },
+        { "type": "Button", "props": { "text": "季", "variant": "primary" } },
+        { "type": "Button", "props": { "text": "月" } }
+      ]
+    },
+    whenToUse: [
+      '**何时使用**',
+      '',
+      '- 将语义关联的按钮组合为一个相连表面：对齐方式切换（左 / 中 / 右）、视图切换、主操作 + 关联命令。',
+      '- 需要强调「同一组互斥或并列操作」的整体性：相连边框消除按钮间距，视觉上是一个控件。',
+      '- 作为 SplitButton 等复合按钮的相连容器：主按钮 + 下拉触发按钮共享同一表面。',
+      '',
+      '**何时不用**',
+      '',
+      '- 按钮之间无语义关联：用 Space / Flex 的 gap 并列普通 Button，不必强行相连。',
+      '- 单选式切换且需要选中态持久指示：使用 Segmented 或 FloatingButtonGroup（ButtonGroup 不含选中态管理）。',
+      '- 需要滑动高亮或悬停展开等动态反馈：使用 FloatingButtonGroup / ExpandingButtonGroup。',
+    ].join('\n'),
+    previewNote:
+      '静态结构：渲染为 <div role="group" data-slot="button-group">（flex w-fit items-stretch）；内部按钮经 [data-slot=button] 选择器去圆角，首尾按钮保留外侧圆角（first:rounded-l-md / last:rounded-r-md），相邻按钮 -ml-px 边框重叠，focus-visible 的按钮提升到 z-10 避免焦点环被裁切；纯样式组合，不接管 children 的行为与状态。DSL 适配器（已注册 builtinComponents）children 为若干 Button 节点，渲染为相连按钮组。',
+    variants: [
+      { name: '并列命令组', visual: '多个描边按钮相连为单一表面', scene: '对齐切换、视图切换、编辑器等成组命令' },
+      { name: '主次组合', visual: '主按钮 + 关联次按钮相连', scene: '「保存」+「另存」、SplitButton 的主按钮 + 下拉触发' },
+      { name: '焦点提升', visual: 'focus-visible 按钮 z-10 浮出', scene: '键盘遍历组内按钮时焦点环完整可见' },
+    ],
+    apiProps: [
+      { name: 'children', type: 'DslNode[]', defaultValue: '—', description: '组内按钮（DSL 适配器为若干 Button 节点；ui 层为渲染好的 ReactNode）' },
+      { name: 'className / style', type: 'string / CSSProperties', defaultValue: '—', description: '通用：根节点 class 合并 / 内联样式' },
+    ],
+    guidelines: [
+      '- 组内按钮必须语义关联（同一对象的并列命令），无关操作不放进来。',
+      '- 组内按钮取同一尺寸与相近视觉权重；混用尺寸会破坏相连表面的整齐边缘。',
+      '- 相连组最多承载 3–4 个按钮，超过时改用工具栏或 DropdownMenu 收拢。',
+      '- ButtonGroup 只管样式组合：选中态、加载态由各 Button 自身属性表达。',
+    ].join('\n'),
+    examplesDo: [
+      '文本编辑器：「左对齐 / 居中 / 右对齐」三个 outline 按钮相连。',
+      '统计卡片：「年 / 季 / 月」切换，当前档用 primary 变体突出。',
+    ],
+    examplesDont: [
+      '把无关的「保存」与「删除」相连成组（语义无关，应分开摆放）。',
+      '用 ButtonGroup 做需要持久选中指示的单选切换（应使用 Segmented / FloatingButtonGroup）。',
+    ],
+  },
+  'component.action-button': {
+    whenToUse: [
+      '**何时使用**',
+      '',
+      '- 工具栏、表头、卡片角落的紧凑操作入口：icon + 可选短 label，默认 sm 尺寸。',
+      '- 纯图标操作且需要提示：tooltip 属性一键包裹现有 Tooltip，悬浮 / 聚焦显示说明。',
+      '- 需要与 Button 体系完全同肤的小型动作：variant / size 复用 buttonVariants。',
+      '',
+      '**何时不用**',
+      '',
+      '- 表单主操作、流程动作：使用 Button（完整文案与尺寸档位）。',
+      '- 一组并列视图切换：使用 FloatingButtonGroup 或 Segmented。',
+      '- 需要复制反馈 / 二次确认语义：使用 CopyButton / ConfirmMorph。',
+    ].join('\n'),
+    previewNote:
+      '静态结构：buttonVariants 薄封装——渲染为 <button data-slot="action-button">（Base UI Button 原语），内容 = icon 节点 + 可选 <span>label</span>；size 缺省按内容回退（有 label 为 sm，无 label 为 icon-sm 方形）；tooltip 提供时经 TooltipTrigger render 模式包裹现有 Tooltip（浮层 data-slot="tooltip-content"），根节点仍为按钮本体；icon-only 缺 aria-label 时开发环境告警（不抛错）。',
+    variants: [
+      { name: '图标 + 文字', visual: 'icon 在前、label 在后，sm 尺寸', scene: '工具栏常规操作（「保存」「导出」）' },
+      { name: 'icon-only', visual: 'icon-sm 方形按钮', scene: '密集工具栏、卡片角落、表头操作' },
+      { name: '带 tooltip', visual: 'hover / 聚焦浮出反色提示气泡', scene: '纯图标操作的可访问名称与含义说明' },
+      { name: 'variant 全档位', visual: '与 buttonVariants 六档一致', scene: 'ghost 用于工具栏低干扰、outline 用于表单区次操作' },
+    ],
+    apiProps: [
+      { name: 'icon', type: 'ReactNode', defaultValue: '—（必填）', description: '图标节点（lucide 图标），恒显' },
+      { name: 'label', type: 'ReactNode', defaultValue: '—', description: '可选文字；缺省时渲染 icon-only 方形按钮（size 缺省回退 icon-sm）' },
+      { name: 'tooltip', type: 'string', defaultValue: '—', description: '可选提示文案，提供时包裹现有 Tooltip，悬浮 / 聚焦显示' },
+      { name: 'variant', type: "'default' | 'destructive' | 'outline' | 'secondary' | 'ghost' | 'link'", defaultValue: "'default'", description: '变体，与 buttonVariants 对齐' },
+      { name: 'size', type: "'default' | 'xs' | 'sm' | 'lg' | 'icon' | 'icon-xs' | 'icon-sm' | 'icon-lg'", defaultValue: "有 label 为 'sm'，否则 'icon-sm'", description: '尺寸，与 buttonVariants 对齐' },
+      { name: 'aria-label', type: 'string', defaultValue: '—', description: 'icon-only 时必填（缺失开发环境告警，不抛错）' },
+      { name: 'onClick / disabled', type: '原生 button 属性', defaultValue: '—', description: '点击回调 / 禁用态' },
+      { name: 'className / style', type: 'string / CSSProperties', defaultValue: '—', description: '通用：根节点 class 合并 / 内联样式' },
+    ],
+    guidelines: [
+      '- DSL 注册（builtinComponents）为后续变更，当前从 `@pactor-app/ui/ui` 直接导入使用。',
+      '- icon-only 必须给 aria-label 或 tooltip，二者至少其一作为可访问名称。',
+      '- 工具栏内统一用 ghost 或 outline 一档，不混用多种 variant 造成权重混乱。',
+      '- label 不超过 4 个字；需要更长说明时放进 tooltip。',
+    ].join('\n'),
+    examplesDo: [
+      '编辑器工具栏：ActionButton icon={保存图标} tooltip="保存（⌘S）" 的 icon-only 按钮。',
+      '卡片头部：icon + label「导出」的 sm outline 按钮。',
+    ],
+    examplesDont: [
+      '用 ActionButton 承载表单提交主操作（应使用 Button）。',
+      'icon-only 既无 aria-label 也无 tooltip（读屏用户无法得知含义）。',
+    ],
+  },
+  'component.split-button': {
+    whenToUse: [
+      '**何时使用**',
+      '',
+      '- 一个高频主操作 + 若干低频关联变体：「保存」+「存为草稿 / 另存副本」，主操作一键直达，备选经下拉选择。',
+      '- 需要压缩工具栏空间：主操作与备选合并为一个相连表面，避免一排近似按钮。',
+      '',
+      '**何时不用**',
+      '',
+      '- 备选操作与主操作无关联：拆开为独立 Button 或 DropdownMenu。',
+      '- 备选操作同样高频：并列放置独立按钮，不要藏进下拉。',
+      '- 纯单选切换：使用 Segmented / FloatingButtonGroup。',
+    ].join('\n'),
+    previewNote:
+      '静态结构：ButtonGroup（data-slot="split-button"）相连表面 = 主操作 Button + DropdownMenu（chevron 触发按钮，aria-label 默认「更多选项」）；主按钮点击走原生 onClick，下拉复用现有 DropdownMenu（data-slot="dropdown-menu-content"），备选操作经 options 声明为 DropdownMenuItem，选中经 onSelect(value) 语义化抛出并自动关闭菜单；variant / size / disabled 同时作用于两段；className / style 作用于 ButtonGroup 根节点。',
+    variants: [
+      { name: '默认两段式', visual: '主按钮 + chevron 按钮相连', scene: '「保存」主操作 + 保存变体下拉' },
+      { name: '变体与尺寸', visual: '两段同 variant / size（buttonVariants 全档位）', scene: 'primary 主流程、outline 表单区、sm 工具栏' },
+      { name: '整体禁用', visual: '两段同步禁用', scene: '前置条件未满足时整个入口置灰' },
+      { name: '单项禁用', visual: '下拉中个别选项置灰', scene: '某变体在当前上下文不可用' },
+    ],
+    apiProps: [
+      { name: 'children', type: 'ReactNode', defaultValue: '—', description: '主操作按钮文字' },
+      { name: 'options', type: 'SplitButtonOption[]', defaultValue: '—（必填）', description: '备选操作：{ value, label, icon?, disabled? }，选中经 onSelect(value) 抛出' },
+      { name: 'onSelect', type: '(value: string) => void', defaultValue: '—', description: '选中备选操作回调，携带 option.value' },
+      { name: 'onClick', type: 'MouseEventHandler', defaultValue: '—', description: '主操作按钮原生点击（与 onSelect 互不触发）' },
+      { name: 'triggerLabel', type: 'string', defaultValue: "'更多选项'", description: '下拉触发按钮的无障碍名（aria-label）' },
+      { name: 'variant / size', type: 'buttonVariants 档位', defaultValue: "'default' / 'default'", description: '同时作用于主按钮与下拉触发按钮' },
+      { name: 'disabled', type: 'boolean', defaultValue: 'false', description: '整体禁用（两段均不可交互）' },
+      { name: 'className / style', type: 'string / CSSProperties', defaultValue: '—', description: '通用：作用于 ButtonGroup 根节点' },
+    ],
+    guidelines: [
+      '- DSL 注册（builtinComponents）为后续变更，当前从 `@pactor-app/ui/ui` 直接导入使用。',
+      '- 主操作必须是最高频路径；备选操作与主操作同源（如同一保存动作的不同形态）。',
+      '- 备选项 2–5 个为宜，更多说明信息架构有问题，应收进独立菜单。',
+      '- 主操作与备选共享 loading / 成功反馈语义时，由调用方按 value 分支处理 onSelect。',
+    ].join('\n'),
+    examplesDo: [
+      '编辑器：「保存」主按钮 + 下拉「存为草稿 / 另存副本 / 存为模板」。',
+      '列表页：「导出」主按钮 + 下拉「导出 CSV / 导出 Excel」。',
+    ],
+    examplesDont: [
+      '把与主操作无关的命令塞进下拉（应使用独立 DropdownMenu）。',
+      '主操作本身需要二次确认却无确认流程（危险操作改用 ConfirmMorph）。',
+    ],
+  },
+  'component.copy-button': {
+    whenToUse: [
+      '**何时使用**',
+      '',
+      '- 复制短值到剪贴板并即时确认：安装命令、分享链接、Token、订单号。',
+      '- 需要明确的「已复制」反馈：成功后图标 copy → check 形变 + 可选 copiedLabel 文字，resetDelay 后自动还原。',
+      '',
+      '**何时不用**',
+      '',
+      '- 复制大段富文本或需要选择范围：提供文本框让用户自行选择复制。',
+      '- 非安全上下文（http）环境：组件会走 onError 失败路径，需调用方给出替代方案。',
+    ].join('\n'),
+    previewNote:
+      '静态结构：Button（data-slot="copy-button"，data-state=idle|copied，默认 variant=outline / size=sm）+ IconMorph（morph=copy-check）；点击 → navigator.clipboard.writeText(value) → 成功进入 copied 态（check 图标 + copiedLabel）→ resetDelay（默认 1500ms）后自动还原 idle；成功触发 onCopy(value)；剪贴板不可用（非安全上下文）或写入 reject 时触发 onError 且不进入 copied 态；重复点击清理旧计时器重新计时。',
+    variants: [
+      { name: '图标 + 文字', visual: 'copy 图标 + label，复制后 check + copiedLabel', scene: '分享区、安装命令行' },
+      { name: 'icon-only', visual: '仅 copy/check 图标形变', scene: '表格行内、代码块角落的紧凑复制入口' },
+      { name: '失败路径', visual: '保持 idle 态不切换', scene: '非安全上下文或权限拒绝，经 onError 兜底提示' },
+    ],
+    apiProps: [
+      { name: 'value', type: 'string', defaultValue: '—（必填）', description: '待写入剪贴板的文本' },
+      { name: 'label', type: 'ReactNode', defaultValue: '—', description: '初始态可选文字（图标恒显）' },
+      { name: 'copiedLabel', type: 'ReactNode', defaultValue: '—', description: 'copied 态可选文字，缺省沿用 label' },
+      { name: 'resetDelay', type: 'number', defaultValue: '1500', description: 'copied 态自动还原延迟（ms）' },
+      { name: 'onCopy', type: '(value: string) => void', defaultValue: '—', description: '写入成功回调，携带 value' },
+      { name: 'onError', type: '(error: unknown) => void', defaultValue: '—', description: '剪贴板不可用 / 写入失败回调（不进入 copied 态）' },
+      { name: 'variant / size', type: 'buttonVariants 档位', defaultValue: "'outline' / 'sm'", description: '变体与尺寸，与 buttonVariants 对齐' },
+      { name: 'className / style', type: 'string / CSSProperties', defaultValue: '—', description: '通用：根节点 class 合并 / 内联样式' },
+    ],
+    guidelines: [
+      '- DSL 注册（builtinComponents）为后续变更，当前从 `@pactor-app/ui/ui` 直接导入使用。',
+      '- 必须处理 onError：非安全上下文（http）或权限拒绝时给用户可见反馈，不静默失败。',
+      '- value 为敏感信息（Token、密钥）时，copiedLabel 不回显内容本身。',
+      '- icon-only 用法补 aria-label（如「复制链接」）。',
+    ].join('\n'),
+    examplesDo: [
+      '安装文档：CopyButton value="npm install @pactor-app/ui" label="复制" copiedLabel="已复制"。',
+      '分享弹层：链接文本旁的 icon-only CopyButton，onError 时 toast 提示手动复制。',
+    ],
+    examplesDont: [
+      '不提供 onError，失败时用户误以为已复制。',
+      '用 CopyButton 复制整篇文档正文（应提供文本选择区域）。',
+    ],
+  },
+  'component.icon-morph': {
+    whenToUse: [
+      '**何时使用**',
+      '',
+      '- 同一入口的两个互斥状态用图标形变表达：菜单开合（menu-close）、播放暂停（play-pause）、复制确认（copy-check）、展开收起（plus-minus）。',
+      '- 需要在同一挂载点内完成过渡（不卸载重建），保持视觉连续性。',
+      '',
+      '**何时不用**',
+      '',
+      '- 静态语义图标：使用 Icon（无形变开销）。',
+      '- 两个以上状态轮转：IconMorph 只有 a / b 两态，多态用条件渲染 Icon。',
+    ].join('\n'),
+    previewNote:
+      '静态结构：渲染为 <span data-slot="icon-morph" data-state=a|b>（relative inline-flex size-4），双图层绝对定位堆叠两个 lucide 图标（aria-hidden，纯装饰）；受控 state 切换时一层 rotate±90 + scale-50 + fade 出、另一层入（transition-all duration-200，motion-reduce 降级为无过渡直切）；morph 查 MORPH_PAIRS 白名单（menu-close / play-pause / copy-check / plus-minus），未知名渲染 CircleQuestionMark 占位（data-unknown）并开发环境告警，不抛错。',
+    variants: [
+      { name: 'menu-close', visual: 'Menu ↔ X', scene: '导航抽屉开合、菜单展开收起' },
+      { name: 'play-pause', visual: 'Play ↔ Pause', scene: '媒体播放控制' },
+      { name: 'copy-check', visual: 'Copy ↔ Check', scene: 'CopyButton 的复制确认反馈' },
+      { name: 'plus-minus', visual: 'Plus ↔ Minus', scene: '折叠面板开合、数量增减切换' },
+      { name: '未知名占位', visual: 'help-circle 占位 + data-unknown', scene: '开发期发现未登记 morph 名' },
+    ],
+    apiProps: [
+      { name: 'morph', type: "'menu-close' | 'play-pause' | 'copy-check' | 'plus-minus'", defaultValue: '—（必填）', description: '预设图标对名（MORPH_PAIRS 白名单）；未知名渲染占位图标并 dev 告警' },
+      { name: 'state', type: "'a' | 'b'", defaultValue: '—（必填）', description: "受控状态：'a' 显示对中首图标，'b' 显示次图标" },
+      { name: 'className / style', type: 'string / CSSProperties', defaultValue: '—', description: '通用：根节点 class 合并 / 内联样式（尺寸经 size-* 覆盖）' },
+    ],
+    guidelines: [
+      '- DSL 注册（builtinComponents）为后续变更，当前从 `@pactor-app/ui/ui` 直接导入使用。',
+      '- state 由父组件受控驱动（如菜单 open 态），组件自身不管理切换。',
+      '- 图标对语义必须互斥且可逆（开 / 关、播放 / 暂停），不用于表达进度或流程。',
+      '- 需要新增图标对时在 MORPH_PAIRS 登记（静态导入 lucide，可 tree-shake）。',
+    ].join('\n'),
+    examplesDo: [
+      '侧边栏开关：ActionButton 内嵌 IconMorph morph="menu-close" state={open ? "b" : "a"}。',
+      '音频卡片：播放中 state="b" 显示 Pause，暂停回 "a"。',
+    ],
+    examplesDont: [
+      '用 IconMorph 表达三种以上状态（应条件渲染 Icon）。',
+      '依赖未登记的 morph 名（静默落为占位问号图标）。',
+    ],
+  },
+  'component.confirm-morph': {
+    whenToUse: [
+      '**何时使用**',
+      '',
+      '- 破坏性操作的轻量二次确认：删除、清空、撤销发布，不想打断流程弹 Dialog。',
+      '- 确认后需要执行异步任务并给出结果反馈：onConfirm 返回 Promise 时自动 pending → success / error，error 可原地撤销回 idle。',
+      '',
+      '**何时不用**',
+      '',
+      '- 确认需要说明后果详情或附带输入：使用 Dialog / Popconfirm（ConfirmMorph 只有按钮内一行文案）。',
+      '- 批量、不可逆且高损失操作：按钮内确认强度不足，应使用 Dialog。',
+    ].join('\n'),
+    previewNote:
+      '静态结构：Button（data-slot="confirm-morph"，data-state=idle|confirming|pending|success|error）内五段内容（idle=label / confirming=confirmLabel，默认 destructive 变体 / pending=Spinner / success=Check+successLabel / error=RotateCcw+undoLabel）在同一 grid 单元堆叠（col-start-1 row-start-1），非激活段 opacity-0 + aria-hidden，宽度恒等于最宽段，状态切换无布局跳动；状态机：idle 点击进入 confirming（confirmTimeout 默认 3000ms 超时回 idle）→ 确认后 onConfirm 返回 Promise 则 pending（resolve→success、reject→error），非 Promise 直接 success；success 停留 resetDelay（默认 1500ms）回 idle；error 段点击即撤销（onUndo）回 idle；带代际标记，超时回退后迟到的 resolve 不会回写状态。',
+    variants: [
+      { name: 'idle 初始', visual: '普通按钮（variant 可控）', scene: '「删除」「清空」入口常态' },
+      { name: 'confirming 待确认', visual: 'destructive 变体 + confirmLabel', scene: '首次点击后的原地确认段，超时自动回退' },
+      { name: 'pending 执行中', visual: 'Spinner + 可选 pendingLabel，不可交互', scene: 'onConfirm 异步执行期间' },
+      { name: 'success / error', visual: 'Check+已完成 / RotateCcw+撤销', scene: '执行结果反馈；error 点击撤销回 idle' },
+    ],
+    apiProps: [
+      { name: 'label', type: 'ReactNode', defaultValue: '—（必填）', description: 'idle 段文字' },
+      { name: 'confirmLabel', type: 'ReactNode', defaultValue: "'确认'", description: 'confirming 段文字' },
+      { name: 'pendingLabel', type: 'ReactNode', defaultValue: '—', description: 'pending 段可选文字（Spinner 恒显）' },
+      { name: 'successLabel', type: 'ReactNode', defaultValue: "'已完成'", description: 'success 段文字' },
+      { name: 'undoLabel', type: 'ReactNode', defaultValue: "'撤销'", description: 'error 段撤销操作文字' },
+      { name: 'confirmVariant', type: 'buttonVariants variant', defaultValue: "'destructive'", description: 'confirming 段按钮变体' },
+      { name: 'confirmTimeout', type: 'number', defaultValue: '3000', description: 'confirming 超时未确认自动回 idle 的时长（ms）' },
+      { name: 'resetDelay', type: 'number', defaultValue: '1500', description: 'success 段停留时长（ms），随后回 idle' },
+      { name: 'onConfirm', type: '() => void | Promise<unknown>', defaultValue: '—', description: '确认回调：返回 Promise 时自动 pending，resolve→success、reject→error' },
+      { name: 'onUndo', type: '() => void', defaultValue: '—', description: 'error 段撤销回调（点击 error 段按钮触发，随后回 idle）' },
+      { name: 'onStateChange', type: '(state: ConfirmMorphState) => void', defaultValue: '—', description: '状态流转回调（idle / confirming / pending / success / error）' },
+      { name: 'variant / size', type: 'buttonVariants 档位', defaultValue: "'default' / 'default'", description: 'idle / pending / success 段的变体与尺寸' },
+      { name: 'className / style', type: 'string / CSSProperties', defaultValue: '—', description: '通用：根节点 class 合并 / 内联样式' },
+    ],
+    guidelines: [
+      '- DSL 注册（builtinComponents）为后续变更，当前从 `@pactor-app/ui/ui` 直接导入使用。',
+      '- confirmLabel 写明动作与后果（「确认删除」），不用裸「确定」。',
+      '- onConfirm 返回 Promise 才有 pending / error 语义；同步回调视为立即成功。',
+      '- error 撤销（onUndo）只负责回退 UI 状态，业务回滚由调用方自行处理。',
+      '- 各段文案长度接近，避免最宽段撑起过宽按钮（宽度取最宽段恒定）。',
+    ].join('\n'),
+    examplesDo: [
+      '列表行内：「删除」→ 点击变 destructive「确认删除」→ onConfirm 调接口 → success「已完成」。',
+      '清空回收站：confirmLabel="确认清空"，onConfirm 失败进 error，点击「撤销」回 idle。',
+    ],
+    examplesDont: [
+      '用 ConfirmMorph 承载需要阅读后果说明的高危操作（应使用 Dialog）。',
+      'onConfirm 同步返回但仍需表达执行中（应返回 Promise 进入 pending）。',
+    ],
+  },
+  'component.floating-button-group': {
+    whenToUse: [
+      '**何时使用**',
+      '',
+      '- 托盘式并列切换：列表 / 网格视图、日 / 周 / 月时间粒度、看板模式切换。',
+      '- 需要指针滑动高亮的探索感：共享高亮块在 hover 与键盘聚焦的按钮间平滑滑动，受控 value 时恒定指示当前项。',
+      '',
+      '**何时不用**',
+      '',
+      '- 表单内单选录入：使用 RadioGroup / Segmented（FloatingButtonGroup 不挂表单语义）。',
+      '- 导航页签：使用 Tabs / NavigationMenu。',
+    ].join('\n'),
+    previewNote:
+      '静态结构：托盘容器 <div role="group" data-slot="floating-button-group">（relative inline-flex rounded-full bg-muted p-1）内渲染独立按钮（data-slot="floating-button-group-item"，受控项标 data-active）+ 绝对定位共享高亮块（data-slot="floating-button-group-highlight"，rounded-full bg-card shadow-sm）；高亮块经 ref 测量目标按钮 offsetLeft / offsetWidth，以 transform / width 过渡（duration-200，motion-reduce 降级）在 hover 与 :focus-visible 按钮间滑动，离开组后淡出；受控 value 提供时高亮恒定位于该项；测量为 0（jsdom / 未挂载）时防御跳过不抛错；按钮 active:scale-95 原地按下。',
+    variants: [
+      { name: '悬停跟随', visual: '高亮块随指针在按钮间滑动', scene: '未受控时的预览式探索' },
+      { name: '受控当前项', visual: '高亮恒定位于 value 项', scene: '视图模式、时间粒度的当前选中指示' },
+      { name: '键盘可达', visual: ':focus-visible 同样牵引高亮', scene: '键盘 Tab 遍历组内按钮' },
+    ],
+    apiProps: [
+      { name: 'options', type: 'FloatingButtonGroupOption[]', defaultValue: '—（必填）', description: '选项：{ value, label?, icon?, disabled? }' },
+      { name: 'value', type: 'string', defaultValue: '—', description: '受控当前项：提供时共享高亮块恒定位于该项' },
+      { name: 'onSelect', type: '(value: string) => void', defaultValue: '—', description: '点击选项回调，携带 option.value' },
+      { name: 'className / style', type: 'string / CSSProperties', defaultValue: '—', description: '通用：根节点 class 合并 / 内联样式' },
+    ],
+    guidelines: [
+      '- DSL 注册（builtinComponents）为后续变更，当前从 `@pactor-app/ui/ui` 直接导入使用。',
+      '- 选项 2–5 个、label 极短（或纯 icon + aria 语义），托盘宽度随行内内容自适应。',
+      '- 受控用法（value + onSelect）是推荐形态：选中结果由调用方持有，组件只做指示。',
+      '- 纯 icon 选项补可访问名称（label 缺省时经 aria 属性或外围 Tooltip）。',
+    ].join('\n'),
+    examplesDo: [
+      '资产列表：「列表 / 网格 / 图表」三档切换，value 受控于页面 state。',
+      '统计页：「日 / 周 / 月」粒度托盘，悬停预览高亮、点击落定。',
+    ],
+    examplesDont: [
+      '把 FloatingButtonGroup 当表单单选控件提交（应使用 RadioGroup）。',
+      '选项超过 6 个导致托盘过宽（应改用 Tabs 或 Select）。',
+    ],
+  },
+  'component.expanding-button-group': {
+    whenToUse: [
+      '**何时使用**',
+      '',
+      '- 空间紧凑但需要可发现性的操作组：卡片角落、列表行尾，常态只显图标，hover / 聚焦原地展开 label。',
+      '- 组内含个别危险操作：选项声明 confirm 后首点击进入原地确认态，再次点击才触发回调。',
+      '',
+      '**何时不用**',
+      '',
+      '- 空间充足：直接显示 icon + label 的普通按钮组，不必依赖悬停。',
+      '- 触屏为主的场景：无悬停态，展开依赖聚焦，关键操作应直接可见。',
+    ].join('\n'),
+    previewNote:
+      '静态结构：<div role="group" data-slot="expanding-button-group"> 内渲染原生 button（data-slot="expanding-button-group-item"），icon 恒显、label 包在 grid 容器内经 grid-template-columns 0fr→1fr 过渡展开（duration-200，motion-reduce 降级），邻位按钮保持图标态自然让位；展开项标 data-expanded；声明 confirm 的选项首点击进入确认态（data-confirming，destructive 底色，label 换为 confirmLabel / 默认「确认」），再次点击 onSelect(value) 恰好一次，移出 / 失焦取消确认态；按钮为原生 button，键盘可达（聚焦同样展开）。',
+    variants: [
+      { name: '悬停展开', visual: '图标按钮原地拉宽显示 label', scene: '卡片角落「编辑 / 分享 / 删除」操作组' },
+      { name: '原地确认', visual: 'confirm 选项变 destructive + 确认文案', scene: '组内危险操作的轻量二次确认' },
+      { name: '键盘展开', visual: '聚焦按钮同样展开 label', scene: '键盘遍历操作组' },
+    ],
+    apiProps: [
+      { name: 'options', type: 'ExpandingButtonGroupOption[]', defaultValue: '—（必填）', description: '选项：{ value, label, icon, confirm?, confirmLabel?, disabled? }；confirm 选项需二次点击' },
+      { name: 'onSelect', type: '(value: string) => void', defaultValue: '—', description: '选中回调（confirm 选项二次点击后触发），携带 option.value' },
+      { name: 'className / style', type: 'string / CSSProperties', defaultValue: '—', description: '通用：根节点 class 合并 / 内联样式' },
+    ],
+    guidelines: [
+      '- DSL 注册（builtinComponents）为后续变更，当前从 `@pactor-app/ui/ui` 直接导入使用。',
+      '- 组内 2–4 个选项为宜；label 2–4 字，避免展开时整组让位幅度过大。',
+      '- 危险操作必须声明 confirm（如「删除」），普通操作保持单次点击直达。',
+      '- 图标本身要能区分（不堆叠近似图形），因为常态只有图标可见。',
+    ].join('\n'),
+    examplesDo: [
+      '文档卡片：「编辑 / 分享 / 删除」图标组，删除项 confirm: true。',
+      '列表行尾：hover 行后出现的紧凑操作组，聚焦同样可展开。',
+    ],
+    examplesDont: [
+      '把唯一主操作藏进 ExpandingButtonGroup（主操作应直接可见）。',
+      '触屏页面依赖悬停展开表达关键操作含义。',
+    ],
+  },
   'component.icon': {
     dsl: {
       "type": "Icon",

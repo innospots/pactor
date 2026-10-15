@@ -391,6 +391,21 @@ a {
   color: var(--brand);
   font-weight: 650;
 }
+/* 嵌套菜单组（区块组件 / Login 结构模式）：组头对齐子项形态，子项再进一级缩进 */
+.menu-nested {
+  margin: 1px 0;
+}
+.menu-nested > .menu-group-header {
+  height: 32px;
+  padding: 0 11px 0 31px;
+  font-size: 12.5px;
+}
+.menu-nested .menu-sub {
+  padding: 0 0 2px;
+}
+.menu-nested .menu-subitem {
+  padding-left: 43px;
+}
 .side-menu {
   padding: 0 9px 18px;
 }
@@ -491,11 +506,63 @@ h1 {
   align-items: center;
   gap: 8px;
 }
+/* 章节标题行右端挂载位（如 Login 预览的状态切换页签） */
+.section-title-extra {
+  margin-left: auto;
+  font-size: 13px;
+  font-weight: 400;
+  line-height: 1;
+}
 .section-sub {
   font-size: 13px;
   color: var(--muted-text);
   margin: -4px 0 13px;
   line-height: 1.6;
+}
+/* 组件详情页 DSL / YAML 结构代码块：高度 = 视口 - 顶栏（--header）- 12px，代码体内部滚动 */
+.dsl-code-fill {
+  height: calc(100vh - var(--header) - 12px);
+  display: flex;
+  flex-direction: column;
+}
+.dsl-code-fill [data-slot='code-block-body'] {
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+}
+/* 预览页签栏右端的展开按钮与全屏预览弹层（doc 自有样式，避免依赖 ui 预编译工具类） */
+.preview-tabs-row {
+  position: relative;
+}
+.preview-tabs-row [data-slot='tabs-list'] {
+  padding-right: 40px;
+}
+.preview-expand-btn {
+  position: absolute;
+  top: 0;
+  right: 0;
+}
+.preview-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  overflow: auto;
+  background: var(--panel);
+}
+.preview-overlay-body {
+  width: 100%;
+  height: 100%;
+  padding: 0;
+}
+.preview-overlay-close {
+  position: fixed;
+  top: 16px;
+  right: 16px;
+  z-index: 1;
+}
+/* 全屏弹层内不展示预览底部的实现说明文字 */
+.preview-overlay .preview-note {
+  display: none;
 }
 .card-grid {
   display: grid;

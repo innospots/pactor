@@ -39,6 +39,7 @@ import { PREVIEWS_CHART } from './chart-a';
 import { PREVIEWS_D } from './basic-d';
 import { PREVIEWS_E } from './basic-e';
 import { PREVIEWS_BLOCKS } from './blocks-a';
+import { PREVIEWS_BUTTONS } from './buttons-a';
 
 const rowStyle = { display: 'flex', flexWrap: 'wrap', gap: 12, alignItems: 'center' } as const;
 const columnStyle = { display: 'flex', flexDirection: 'column', gap: 12 } as const;
@@ -450,7 +451,8 @@ const PREVIEWS: Record<string, () => ReactElement> = {
   'component.tour': TourPreview,
   // 扩展批次：A（通用/布局/导航）、B（数据录入/数据展示）、C（反馈）、
   // D（媒体与内容）、E（AI 与会话）、CHART（图表组件集，echarts 渲染）、
-  // BUSINESS（业务，packages/ui business 子目录）；
+  // BUSINESS（业务，packages/ui business 子目录）、
+  // BUTTONS（按钮族：ButtonGroup + 扩展按钮 7 个，@pactor-app/ui/ui）；
   // component.collapse / component.carousel 在 A 与 B 重复定义，以 B 为准
   ...PREVIEWS_A,
   ...PREVIEWS_B,
@@ -459,6 +461,7 @@ const PREVIEWS: Record<string, () => ReactElement> = {
   ...PREVIEWS_E,
   ...PREVIEWS_CHART,
   ...PREVIEWS_BLOCKS,
+  ...PREVIEWS_BUTTONS,
 };
 
 export default function ComponentPreview({ componentId }: { componentId: string }): ReactNode {
