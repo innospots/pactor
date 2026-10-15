@@ -92,7 +92,11 @@ export interface LoginProps {
   children?: ReactNode;
   /** 通用：根节点 class（与内置样式合并） */
   className?: string;
-  /** 通用：根节点内联样式 */
+  /**
+   * 通用：根节点内联样式。
+   * 最小高度默认撑满视口（100svh）；嵌入定高容器（如预览框）时经 CSS 变量
+   * `--login-min-h` 覆盖（如 `100%`），变量继承到内部分栏列
+   */
   style?: CSSProperties;
   /** 校验通过后触发，参数为 { username, password }；登录请求与跳转由 DSL 编排 */
   onSubmit?: (values: Record<string, unknown>) => void;
@@ -408,7 +412,7 @@ export function Login({
     variant: "plain" | "card" | "float",
     identityAlways = false,
   ) => (
-    <div className="flex min-h-svh flex-col bg-linear-to-b from-primary/5 via-background to-background dark:from-primary/10">
+    <div className="flex min-h-[var(--login-min-h,100svh)] flex-col bg-linear-to-b from-primary/5 via-background to-background dark:from-primary/10">
       {brandIdentity ? (
         <div className={cn("p-6", !identityAlways && "md:hidden")}>
           {brandIdentity}
@@ -463,7 +467,7 @@ export function Login({
 
   /** backdrop 的认证列：窄屏品牌行 + 居中悬浮认证卡片 + 页脚 */
   const backdropAuthColumn = (
-    <div className="relative flex min-h-svh flex-col">
+    <div className="relative flex min-h-[var(--login-min-h,100svh)] flex-col">
       {brandIdentity ? (
         <div className="p-6 md:hidden">{brandIdentity}</div>
       ) : null}
@@ -483,7 +487,7 @@ export function Login({
         data-slot="login"
         data-layout={layout}
         className={cn(
-          "relative flex min-h-svh w-full flex-col overflow-hidden bg-background bg-linear-to-b from-primary/10 via-background to-background dark:from-primary/15",
+          "relative flex min-h-[var(--login-min-h,100svh)] w-full flex-col overflow-hidden bg-background bg-linear-to-b from-primary/10 via-background to-background dark:from-primary/15",
           className,
         )}
         style={style}
@@ -507,7 +511,7 @@ export function Login({
         data-layout={layout}
         data-brand-side={brandSide}
         className={cn(
-          "relative flex min-h-svh w-full flex-col overflow-hidden bg-background p-6 md:p-10",
+          "relative flex min-h-[var(--login-min-h,100svh)] w-full flex-col overflow-hidden bg-background p-6 md:p-10",
           className,
         )}
         style={style}
@@ -545,7 +549,7 @@ export function Login({
         data-layout={layout}
         data-brand-side={brandSide}
         className={cn(
-          "relative flex min-h-svh w-full flex-col overflow-hidden bg-background p-6 md:p-10",
+          "relative flex min-h-[var(--login-min-h,100svh)] w-full flex-col overflow-hidden bg-background p-6 md:p-10",
           className,
         )}
         style={style}
@@ -578,7 +582,7 @@ export function Login({
         data-layout={layout}
         data-brand-side={brandSide}
         className={cn(
-          "relative grid min-h-svh w-full overflow-hidden bg-linear-to-br from-primary/20 via-accent to-primary/10 md:grid-cols-2 dark:from-primary/25 dark:to-primary/15",
+          "relative grid min-h-[var(--login-min-h,100svh)] w-full overflow-hidden bg-linear-to-br from-primary/20 via-accent to-primary/10 md:grid-cols-2 dark:from-primary/25 dark:to-primary/15",
           className,
         )}
         style={style}
@@ -612,7 +616,7 @@ export function Login({
       data-layout={layout}
       data-brand-side={brandSide}
       className={cn(
-        "grid min-h-svh w-full bg-background md:[grid-template-columns:var(--login-grid)]",
+        "grid min-h-[var(--login-min-h,100svh)] w-full bg-background md:[grid-template-columns:var(--login-grid)]",
         className,
       )}
       style={rootStyle}

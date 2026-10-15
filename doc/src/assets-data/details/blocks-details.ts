@@ -236,8 +236,6 @@ export const blocksDetailContents: Record<string, ComponentDetailContent> = {
       '- 嵌入卡片 / 弹窗内的小型登录表单（非整页）：使用 Form 自行组合。',
       '- 扫码登录等非常规认证形态（不在本组件范围，见设计文档 10 号变体说明）。',
     ].join('\n'),
-    previewNote:
-      '静态结构：布局五态——split 分栏（品牌面板 + 认证列，brandRatio 经 --login-grid 变量控制占比、窄屏品牌面板隐藏并改顶部品牌行）、centered 居中（整页渐变背景 + 居中身份 + 认证区 + 页脚）、brand-card（品牌区独立 Card + 裸表单）、overlap（品牌卡与登录卡局部叠加，叠加方向随 brandSide 镜像、品牌卡在右时内容整体右对齐）、backdrop（渐变品牌背景 + 悬浮认证卡）；brandSide 控制品牌区左右方向（split / brand-card / overlap / backdrop 生效，centered 无分栏不适用）；authVariant 三态（split/centered 生效）——plain 裸表单 / card 常规卡片 / float 大尺寸悬浮卡。认证区缺省为 Form name="login"，表单项均经 Field 承载（username / password 两个必填 Input 的 label 与必填标记归 Field、校验由 Input rules 承担，全宽 submit Button 同样置于无 label 的 Field 内与输入项对齐），校验通过后 onSubmit 上抛 { username, password }；children 插槽可整体替换内置表单（如内嵌 Tabs 切换手机验证码 / 账号密码登录），标题 / 副标题与辅助入口保留；registerLink / forgotLink 有 href 渲染 Link、无 href 渲染 button 并触发对应 onXxxClick；品牌 identity 仅配置 logo 或 name 时渲染，插画未传展示内置默认插画、传空串隐藏。',
     variants: [
       { name: 'split 分栏', visual: '品牌面板 + 认证列网格分栏（brandSide / brandRatio 可调）', scene: '常规企业登录页（默认）' },
       { name: 'centered 居中', visual: '整页渐变背景 + 居中认证区', scene: '轻品牌页、移动端优先' },

@@ -101,21 +101,35 @@ function CardListPreview() {
   );
 }
 
-const LOGIN_NODE: DslNode = {
-  type: 'Login',
-  props: {
-    layout: 'split',
-    brand: {
-      name: 'Pactor',
-      title: '资产化开发平台',
-      description: '组件 / 模板 / 规范一站式管理',
-    },
-    title: '欢迎回来',
-    subtitle: '使用企业账号登录（预览内任意输入即可提交）',
-    registerLink: { text: '立即注册' },
-    forgotLink: { text: '忘记密码' },
-    footer: '© 2026 Pactor',
+const LOGIN_BASE_PROPS = {
+  brand: {
+    name: 'Pactor',
+    title: '资产化开发平台',
+    description: '组件 / 模板 / 规范一站式管理',
   },
+  title: '欢迎回来',
+  subtitle: '使用企业账号登录（预览内任意输入即可提交）',
+  registerLink: { text: '立即注册' },
+  forgotLink: { text: '忘记密码' },
+  footer: '© 2026 Pactor',
+  // 预览框定高：经 --login-min-h 让登录页内容自适应容器（默认 100svh 撑满视口）
+  style: { '--login-min-h': '100%' },
+} as const;
+
+// 5 种结构模式（layout）各一份 DSL，经左侧「Login」组子菜单 ?layout=<模式> 切换
+const LOGIN_MODE_NODES: Record<string, DslNode> = {
+  split: { type: 'Login', props: { ...LOGIN_BASE_PROPS, layout: 'split' } },
+  centered: { type: 'Login', props: { ...LOGIN_BASE_PROPS, layout: 'centered' } },
+  'brand-card': { type: 'Login', props: { ...LOGIN_BASE_PROPS, layout: 'brand-card' } },
+  overlap: { type: 'Login', props: { ...LOGIN_BASE_PROPS, layout: 'overlap' } },
+  backdrop: { type: 'Login', props: { ...LOGIN_BASE_PROPS, layout: 'backdrop' } },
+};
+const LOGIN_MODE_LABELS: Record<string, string> = {
+  split: '分栏',
+  centered: '居中',
+  'brand-card': '品牌卡',
+  overlap: '叠加',
+  backdrop: '背景',
 };
 
 // 认证区插槽演示：内嵌 Tabs 切换「手机验证码 / 账号密码」两种登录方式，
@@ -200,17 +214,105 @@ const LOGIN_TABS_NODE: DslNode = {
   ],
 };
 
-function LoginPreview() {
+/** 当前 URL 中的结构模式（?layout=，SSR 安全，缺省 split） */
+export function currentLoginMode(): string {
+  if (typeof window === 'undefined') return 'split';
+  return new URLSearchParams(window.location.search).get('layout') || 'split';
+}
+
+/** 状态页签：brandSide 仅分栏类模式生效（centered 无分栏不适用）；默认落第一项（基本状态） */
+export function loginStateTabs(mode: string): { key: string; label: string }[] {
+  return mode !== 'centered' && LOGIN_MODE_NODES[mode] !== undefined
+    ? [
+        { key: 'left', label: '品牌区居左' },
+        { key: 'right', label: '品牌区居右' },
+        { key: 'slot', label: '认证区插槽' },
+      ]
+    : [
+        { key: 'basic', label: '基本状态' },
+        { key: 'slot', label: '认证区插槽' },
+      ];
+}
+
+/** 预览节点：插槽演示跟随当前结构模式（品牌配置沿用基础 props，保留自身标题与 authVariant） */
+export function buildLoginPreviewNode(mode: string, stateKey: string): DslNode {
+  if (stateKey === 'slot') {
+    return {
+      ...LOGIN_TABS_NODE,
+      props: { ...LOGIN_BASE_PROPS, ...LOGIN_TABS_NODE.props, layout: mode },
+    };
+  }
+  const node = LOGIN_MODE_NODES[mode] ?? LOGIN_MODE_NODES.split;
+  return stateKey === 'left' || stateKey === 'right'
+    ? { ...node, props: { ...node.props, brandSide: stateKey } }
+    : node;
+}
+
+/** DSL / YAML 页签展示用节点：剔除预览专用的 --login-min-h 覆盖，补齐事件编排 */
+export function buildLoginDisplayDsl(mode: string, stateKey: string): DslNode {
+  const { style: _previewOnly, ...base } = LOGIN_BASE_PROPS;
+  if (stateKey === 'slot') {
+    return {
+      ...LOGIN_TABS_NODE,
+      props: { ...base, ...LOGIN_TABS_NODE.props, layout: mode },
+    };
+  }
+  return {
+    type: 'Login',
+    props: {
+      ...base,
+      layout: mode,
+      ...(stateKey === 'left' || stateKey === 'right' ? { brandSide: stateKey } : {}),
+    },
+    events: {
+      onSubmit: { action: 'setState', params: { loggingIn: true } },
+      onRegisterClick: { action: 'navigate', params: { to: '/register' } },
+    },
+  };
+}
+
+/** 预览框 + 模式回显（LoginPreviewSection 岛与注册表预览共用）；fill 时预览框撑满全屏弹层高度 */
+export function LoginPreviewFrame({
+  mode,
+  stateKey,
+  fill = false,
+}: {
+  mode: string;
+  stateKey: string;
+  fill?: boolean;
+}) {
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-      <div style={{ height: 440, overflow: 'auto', borderRadius: 8, border: '1px solid var(--border)' }}>
-        <DslPreview node={LOGIN_NODE} />
+    <div
+      style={{
+        display: 'flex',
+        flexDirection: 'column',
+        gap: 12,
+        ...(fill ? { height: '100%' } : {}),
+      }}
+    >
+      <div
+        style={{
+          ...(fill
+            ? { flex: 1, minHeight: 0, borderRadius: 0 }
+            : { height: 520, borderRadius: 8 }),
+          overflow: 'auto',
+          border: '1px solid var(--border)',
+        }}
+      >
+        <DslPreview node={buildLoginPreviewNode(mode, stateKey)} />
       </div>
-      <div style={{ height: 460, overflow: 'auto', borderRadius: 8, border: '1px solid var(--border)' }}>
-        <DslPreview node={LOGIN_TABS_NODE} />
-      </div>
+      {fill ? null : (
+        <span style={echoStyle}>
+          结构模式：{LOGIN_MODE_LABELS[mode] ?? '分栏'}（左侧 Login 组子菜单切换）；右上方页签切换组件状态
+        </span>
+      )}
     </div>
   );
+}
+
+function LoginPreview() {
+  const [mode] = useState(currentLoginMode);
+  return <LoginPreviewFrame mode={mode} stateKey={loginStateTabs(mode)[0].key} />;
 }
 
 

@@ -25,6 +25,8 @@ export interface AssetDetailSection {
   body?: string | AstroComponentFactory;
   /** body 为片段组件时透传的 props */
   bodyProps?: Record<string, unknown>;
+  /** 章节标题行右端挂载位（渲染空 span，由章节体内的 React 岛 createPortal 注入内容） */
+  titleExtra?: boolean;
   /** 不适用的原因；给出时渲染「不适用：原因」 */
   notApplicable?: string;
 }
@@ -123,7 +125,14 @@ const preparedSections = sections.map((s, i) => ({
   {
     preparedSections.map((s) => (
       <section class="section" id={s.anchor}>
-        <h2 class="section-title">{s.title}</h2>
+        {s.titleExtra ? (
+          <h2 class="section-title">
+            {s.title}
+            <span class="section-title-extra" data-title-extra={s.anchor} />
+          </h2>
+        ) : (
+          <h2 class="section-title">{s.title}</h2>
+        )}
         {s.notApplicable !== undefined ? (
           <div class="na-box">
             <b>不适用：</b>

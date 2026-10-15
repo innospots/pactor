@@ -256,6 +256,9 @@
   .inset-y-0 {
     inset-block: 0px;
   }
+  .inset-y-1 {
+    inset-block: var(--spacing);
+  }
   .-top-12 {
     top: calc(var(--spacing) * -12);
   }
@@ -393,6 +396,9 @@
   }
   .order-last {
     order: 9999;
+  }
+  .col-start-1 {
+    grid-column-start: 1;
   }
   .col-start-2 {
     grid-column-start: 2;
@@ -1077,6 +1083,24 @@
   .translate-y-\[-50\%\] {
     --tw-translate-y: -50%;
     translate: var(--tw-translate-x) var(--tw-translate-y);
+  }
+  .scale-50 {
+    --tw-scale-x: 50%;
+    --tw-scale-y: 50%;
+    --tw-scale-z: 50%;
+    scale: var(--tw-scale-x) var(--tw-scale-y);
+  }
+  .scale-100 {
+    --tw-scale-x: 100%;
+    --tw-scale-y: 100%;
+    --tw-scale-z: 100%;
+    scale: var(--tw-scale-x) var(--tw-scale-y);
+  }
+  .-rotate-90 {
+    rotate: calc(90deg * -1);
+  }
+  .rotate-0 {
+    rotate: 0deg;
   }
   .rotate-45 {
     rotate: 45deg;
@@ -2055,6 +2079,9 @@
   .opacity-70 {
     opacity: 70%;
   }
+  .opacity-100 {
+    opacity: 100%;
+  }
   .shadow-\(--card-shadow\) {
     --tw-shadow: var(--card-shadow);
     box-shadow: var(--tw-inset-shadow), var(--tw-inset-ring-shadow), var(--tw-ring-offset-shadow), var(--tw-ring-shadow), var(--tw-shadow);
@@ -2166,6 +2193,11 @@
     transition-timing-function: var(--tw-ease, var(--default-transition-timing-function));
     transition-duration: var(--tw-duration, var(--default-transition-duration));
   }
+  .transition-\[grid-template-columns\] {
+    transition-property: grid-template-columns;
+    transition-timing-function: var(--tw-ease, var(--default-transition-timing-function));
+    transition-duration: var(--tw-duration, var(--default-transition-duration));
+  }
   .transition-\[height\] {
     transition-property: height;
     transition-timing-function: var(--tw-ease, var(--default-transition-timing-function));
@@ -2183,6 +2215,16 @@
   }
   .transition-\[opacity\,transform\] {
     transition-property: opacity,transform;
+    transition-timing-function: var(--tw-ease, var(--default-transition-timing-function));
+    transition-duration: var(--tw-duration, var(--default-transition-duration));
+  }
+  .transition-\[transform\,color\] {
+    transition-property: transform,color;
+    transition-timing-function: var(--tw-ease, var(--default-transition-timing-function));
+    transition-duration: var(--tw-duration, var(--default-transition-duration));
+  }
+  .transition-\[transform\,width\,opacity\] {
+    transition-property: transform,width,opacity;
     transition-timing-function: var(--tw-ease, var(--default-transition-timing-function));
     transition-duration: var(--tw-duration, var(--default-transition-duration));
   }
@@ -2220,6 +2262,10 @@
     transition-property: transform, translate, scale, rotate;
     transition-timing-function: var(--tw-ease, var(--default-transition-timing-function));
     transition-duration: var(--tw-duration, var(--default-transition-duration));
+  }
+  .duration-150 {
+    --tw-duration: 150ms;
+    transition-duration: 150ms;
   }
   .duration-200 {
     --tw-duration: 200ms;
@@ -2389,6 +2435,13 @@
   }
   .group-data-\[size\=sm\]\/attachment\:w-8:is(:where(.group\/attachment)[data-size="sm"] *) {
     width: calc(var(--spacing) * 8);
+  }
+  .group-data-\[size\=sm\]\/tabs-list\:py-0\.5:is(:where(.group\/tabs-list)[data-size="sm"] *) {
+    padding-block: calc(var(--spacing) * 0.5);
+  }
+  .group-data-\[size\=sm\]\/tabs-list\:text-xs:is(:where(.group\/tabs-list)[data-size="sm"] *) {
+    font-size: var(--text-xs);
+    line-height: var(--tw-leading, var(--text-xs--line-height));
   }
   .group-data-\[size\=xs\]\/attachment\:w-7:is(:where(.group\/attachment)[data-size="xs"] *) {
     width: calc(var(--spacing) * 7);
@@ -2805,6 +2858,12 @@
   .focus-visible\:outline-none:focus-visible {
     --tw-outline-style: none;
     outline-style: none;
+  }
+  .active\:scale-95:active {
+    --tw-scale-x: 95%;
+    --tw-scale-y: 95%;
+    --tw-scale-z: 95%;
+    scale: var(--tw-scale-x) var(--tw-scale-y);
   }
   .active\:cursor-grabbing:active {
     cursor: grabbing;
@@ -3278,6 +3337,12 @@
     .motion-reduce\:animate-none {
       animation: none;
     }
+    .motion-reduce\:transition-none {
+      transition-property: none;
+    }
+    .motion-reduce\:active\:transform-none:active {
+      transform: none;
+    }
   }
   @media (width >= 40rem) {
     .sm\:block {
@@ -3569,6 +3634,10 @@
   .group-data-\[size\=xs\]\/attachment\:\[\&_svg\:not\(\[class\*\=\'size-\'\]\)\]\:size-3\.5:is(:where(.group\/attachment)[data-size="xs"] *) svg:not([class*='size-']) {
     width: calc(var(--spacing) * 3.5);
     height: calc(var(--spacing) * 3.5);
+  }
+  .\[\&_svg\:not\(\[class\*\=size-\]\)\]\:size-4 svg:not([class*=size-]) {
+    width: calc(var(--spacing) * 4);
+    height: calc(var(--spacing) * 4);
   }
   .\[\&_tr\]\:border-b tr {
     border-bottom-style: var(--tw-border-style);
@@ -4283,6 +4352,21 @@
   inherits: false;
   initial-value: 0;
 }
+@property --tw-scale-x {
+  syntax: "*";
+  inherits: false;
+  initial-value: 1;
+}
+@property --tw-scale-y {
+  syntax: "*";
+  inherits: false;
+  initial-value: 1;
+}
+@property --tw-scale-z {
+  syntax: "*";
+  inherits: false;
+  initial-value: 1;
+}
 @property --tw-rotate-x {
   syntax: "*";
   inherits: false;
@@ -4587,6 +4671,9 @@
       --tw-translate-x: 0;
       --tw-translate-y: 0;
       --tw-translate-z: 0;
+      --tw-scale-x: 1;
+      --tw-scale-y: 1;
+      --tw-scale-z: 1;
       --tw-rotate-x: initial;
       --tw-rotate-y: initial;
       --tw-rotate-z: initial;

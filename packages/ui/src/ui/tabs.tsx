@@ -8,8 +8,10 @@ import { cn } from '../lib/utils.js';
  * 官方源码：https://ui.shadcn.com/r/styles/base-nova/tabs.json
  * Root/List/Tab/Panel 对应原 Radix Root/List/Trigger/Content；激活态属性
  * 由 `data-[state=active]` 换成官方 `data-active` 自定义变体。
- * List 支持 `variant`（default 胶囊 / line 下划线）；激活态装饰按
- * `group-data-[variant=*]/tabs-list` 分别限定，两种变体互不污染。
+ * List 支持 `variant`（default 胶囊 / line 下划线）与 `size`（default h-9 /
+ * sm h-8 + 触发器 text-xs，仅压缩胶囊变体，line 行高不变）；激活态装饰按
+ * `group-data-[variant=*]/tabs-list`、尺寸按 `group-data-[size=*]/tabs-list`
+ * 分别限定，互不污染。
  */
 function Tabs({
   className,
@@ -33,9 +35,18 @@ const tabsListVariants = cva(
         // line：页签栏通栏（下划线轨道占满容器宽），触发器自然宽度靠左排列
         line: 'h-auto w-full justify-start gap-1 rounded-none border-b border-border bg-transparent p-0',
       },
+      /** 尺寸（对齐 Button 的 size 语义）：sm 经 compoundVariants 仅压缩胶囊变体 */
+      size: {
+        default: '',
+        sm: '',
+      },
     },
+    compoundVariants: [
+      { variant: 'default', size: 'sm', class: 'h-8' },
+    ],
     defaultVariants: {
       variant: 'default',
+      size: 'default',
     },
   },
 );
@@ -43,13 +54,15 @@ const tabsListVariants = cva(
 function TabsList({
   className,
   variant,
+  size,
   ...props
 }: TabsPrimitive.List.Props & VariantProps<typeof tabsListVariants>) {
   return (
     <TabsPrimitive.List
       data-slot="tabs-list"
       data-variant={variant ?? 'default'}
-      className={cn(tabsListVariants({ variant }), className)}
+      data-size={size ?? 'default'}
+      className={cn(tabsListVariants({ variant, size }), className)}
       {...props}
     />
   );
@@ -70,6 +83,8 @@ function TabsTrigger({
         //（叠在 List 的底边轨道上），无底色/圆角/阴影；通栏 List 下取消
         // flex-1 拉伸，触发器保持自然宽度
         'group-data-[variant=line]/tabs-list:-mb-px group-data-[variant=line]/tabs-list:h-9 group-data-[variant=line]/tabs-list:flex-none group-data-[variant=line]/tabs-list:rounded-none group-data-[variant=line]/tabs-list:border-x-0 group-data-[variant=line]/tabs-list:border-t-0 group-data-[variant=line]/tabs-list:border-b-2 group-data-[variant=line]/tabs-list:py-1.5 group-data-[variant=line]/tabs-list:text-muted-foreground group-data-[variant=line]/tabs-list:data-active:border-b-primary group-data-[variant=line]/tabs-list:data-active:text-foreground',
+        // size=sm：小字号 + 收紧纵向 padding（高度随 List h-8 自动收缩）
+        'group-data-[size=sm]/tabs-list:py-0.5 group-data-[size=sm]/tabs-list:text-xs',
         className,
       )}
       {...props}

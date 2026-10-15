@@ -259,8 +259,8 @@
   .min-h-10 {
     min-height: calc(var(--spacing) * 10);
   }
-  .min-h-svh {
-    min-height: 100svh;
+  .min-h-\[var\(--login-min-h\,100svh\)\] {
+    min-height: var(--login-min-h,100svh);
   }
   .w-\(--anchor-width\) {
     width: var(--anchor-width);
