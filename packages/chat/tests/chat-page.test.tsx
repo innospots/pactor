@@ -169,6 +169,14 @@ describe('ChatPage', () => {
     expect(within(menu as HTMLElement).getByText('助理')).toBeTruthy();
   });
 
+  it('hideMenu：展开菜单区整体不渲染，图标栏与对话区保留', () => {
+    const { container } = renderChatPage({ hideMenu: true });
+    expect(container.querySelector('[data-slot=chat-page-menu]')).toBeNull();
+    expect(screen.queryByText('新建任务')).toBeNull();
+    expect(container.querySelector('[data-slot=chat-page-rail]')).toBeTruthy();
+    expect(container.querySelector('[data-slot=chat-page-conversation]')).toBeTruthy();
+  });
+
   it('会话区折叠 / 展开：点击标题切换列表显隐与 chevron', () => {
     renderChatPage();
 

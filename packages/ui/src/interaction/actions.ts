@@ -86,9 +86,17 @@ export function registerInteractionActions(
     const { content, ...rest } = overlay;
     const resolved = resolveDeep(rest, ctx.scope) as Record<string, unknown>;
     const config = { ...resolved, content } as unknown as OverlayConfig;
+    // 归属运行时：沿 parentRuntime 链上溯到根——多运行时共享同一
+    // OverlayManager 时（布局嵌套链共用装配单例），OverlayHost 只渲染
+    // owner 匹配自身运行时的条目，避免同一弹层在每级布局各渲染一次
+    let owner = ctx.context;
+    while (owner.parentRuntime !== undefined) {
+      owner = owner.parentRuntime;
+    }
     // 父页面作用域浅快照（只读约定），overlay 内容以 parent 键访问
     const data = await manager.open(config, {
       parentScope: { ...ctx.scope },
+      owner,
     });
     return { ok: true, data };
   });

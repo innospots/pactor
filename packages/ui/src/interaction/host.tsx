@@ -88,15 +88,23 @@ export function OverlayHost({ manager, resolvePage }: OverlayHostProps) {
 
   return (
     <>
-      {stack.map((entry) => (
-        <OverlayEntryView
-          key={entry.id}
-          entry={entry}
-          manager={manager}
-          renderer={renderer}
-          resolvePage={resolvePage}
-        />
-      ))}
+      {stack
+        // owner 归属过滤：共享 OverlayManager 的多运行时（布局嵌套链）
+        // 各自的宿主只渲染本运行时（或其子运行时）打开的条目；
+        // 无 owner 的条目（程序直开）所有宿主可见
+        .filter(
+          (entry) =>
+            entry.owner === undefined || entry.owner === renderer.context,
+        )
+        .map((entry) => (
+          <OverlayEntryView
+            key={entry.id}
+            entry={entry}
+            manager={manager}
+            renderer={renderer}
+            resolvePage={resolvePage}
+          />
+        ))}
     </>
   );
 }
@@ -391,6 +399,9 @@ function PageOverlayBody({
           http: host.http,
           route: { params: entry.params ?? {} },
         });
+        // 指回宿主运行时：子运行时内的 overlay.open 归属沿链上溯，
+        // 嵌套弹层仍渲染在宿主运行时的 OverlayHost
+        created.context.parentRuntime = host;
         setChild(created);
         onRuntime?.(created);
       } catch (cause) {

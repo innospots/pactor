@@ -441,3 +441,56 @@ describe('footer 底部按钮区', () => {
     expect(manager.stack()).toHaveLength(0);
   });
 });
+
+describe('owner 归属过滤（多运行时共享 OverlayManager，如布局嵌套链）', () => {
+  it('overlay.open 条目只在发起运行时（含其子运行时链）的宿主渲染；无 owner 条目所有宿主可见', async () => {
+    // 两个运行时上下文共享同一动作注册表与 OverlayManager（模拟
+    // 布局嵌套：装配级单例，每级布局运行时各挂一个 OverlayHost）
+    const manager = new OverlayManager();
+    const sharedActions = createRuntimeContext().actions;
+    registerInteractionActions(sharedActions, manager, createUiBridge());
+    const ctxOuter = createRuntimeContext({ actions: sharedActions });
+    const ctxInner = createRuntimeContext({ actions: sharedActions });
+    const engineInner = new ActionEngine(ctxInner);
+    render(
+      <>
+        <DslRenderer context={ctxOuter}>
+          <OverlayHost manager={manager} />
+        </DslRenderer>
+        <DslRenderer context={ctxInner}>
+          <OverlayHost manager={manager} />
+        </DslRenderer>
+      </>,
+    );
+
+    // 内层运行时打开弹层：仅一处渲染（owner = 内层上下文）
+    void engineInner.execute({
+      action: 'overlay.open',
+      params: { overlay: { type: 'modal', title: '内层弹层' } },
+    });
+    await screen.findByText('内层弹层');
+    expect(document.querySelectorAll('[data-slot=overlay-modal]')).toHaveLength(1);
+
+    // 子运行时（page overlay 场景）：parentRuntime 指回内层 → 归属上溯，
+    // 仍只渲染在内层宿主
+    const ctxChild = createRuntimeContext({ actions: sharedActions });
+    ctxChild.parentRuntime = ctxInner;
+    const engineChild = new ActionEngine(ctxChild);
+    void engineChild.execute({
+      action: 'overlay.open',
+      params: { overlay: { type: 'modal', title: '子运行时弹层' } },
+    });
+    await screen.findByText('子运行时弹层');
+    expect(document.querySelectorAll('[data-slot=overlay-modal]')).toHaveLength(2);
+
+    // 无 owner（程序直开）：两个宿主都渲染
+    void manager.open({ type: 'modal', title: '广播弹层' });
+    await waitForModals(4);
+  });
+
+  async function waitForModals(count: number) {
+    await vi.waitFor(() => {
+      expect(document.querySelectorAll('[data-slot=overlay-modal]')).toHaveLength(count);
+    });
+  }
+});

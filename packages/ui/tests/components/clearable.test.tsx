@@ -1,10 +1,11 @@
 // @vitest-environment jsdom
 /**
  * hover 清除（allowClear）契约：
- * 盒式表单项有值且未禁用时，悬停控件右缘浮出 × 清除按钮（group-hover 类），
- * 本身有右侧图标的组件（Select 下拉箭头 / DatePicker 日历 / TimePicker 时钟 /
- * Cascader / TreeSelect 箭头、Combobox 上下箭头、NumberInput 步进按钮）
- * 在原图标位置替换（原图标带 group-hover:hidden）；点击清空并传出空值。
+ * 盒式表单项有值且未禁用时，悬停控件右缘浮出 × 清除按钮（专用类 pactor-clearable，
+ * 见 clearable.tsx 的跨层冲突说明），本身有右侧图标的组件（Select 下拉箭头 /
+ * DatePicker 日历 / TimePicker 时钟 / Cascader / TreeSelect 箭头、Combobox 上下箭头）
+ * 在原图标位置替换（原图标带 group-hover:hidden；NumberInput 步进按钮列自带 flex，
+ * 改用 visibility 隐藏的 pactor-clearable-ghost）；点击清空并传出空值。
  */
 import { screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -29,7 +30,7 @@ describe('hover 清除 allowClear', () => {
     expect(screen.queryByLabelText(CLEAR_LABEL)).toBeNull();
     await user.type(input, 'hello');
     const clear = screen.getByLabelText(CLEAR_LABEL);
-    expect(clear.className).toContain('group-hover:inline-flex');
+    expect(clear.className).toContain('pactor-clearable');
     await user.click(clear);
     expect((input as HTMLInputElement).value).toBe('');
     expect(screen.queryByLabelText(CLEAR_LABEL)).toBeNull();
@@ -39,9 +40,9 @@ describe('hover 清除 allowClear', () => {
     const user = userEvent.setup();
     renderDsl({ type: 'NumberInput', props: { value: 42, allowClear: true } });
     const steppers = screen.getByLabelText('增加').parentElement!;
-    expect(steppers.className).toContain('group-hover:hidden');
+    expect(steppers.className).toContain('pactor-clearable-ghost');
     const clear = screen.getByLabelText(CLEAR_LABEL);
-    expect(clear.className).toContain('group-hover:inline-flex');
+    expect(clear.className).toContain('pactor-clearable');
     await user.click(clear);
     expect((document.querySelector('input') as HTMLInputElement).value).toBe('');
     expect(screen.queryByLabelText(CLEAR_LABEL)).toBeNull();

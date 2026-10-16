@@ -42,6 +42,7 @@
     --font-weight-extrabold: 800;
     --tracking-tight: -0.025em;
     --leading-tight: 1.25;
+    --leading-normal: 1.5;
     --leading-relaxed: 1.625;
     --radius-xs: 0.125rem;
     --ease-out: cubic-bezier(0, 0, 0.2, 1);
@@ -1820,6 +1821,10 @@
   .leading-none {
     --tw-leading: 1;
     line-height: 1;
+  }
+  .leading-normal {
+    --tw-leading: var(--leading-normal);
+    line-height: var(--leading-normal);
   }
   .leading-relaxed {
     --tw-leading: var(--leading-relaxed);
@@ -3603,6 +3608,16 @@
   .\[\&\>\[data-slot\=button\]\:not\(\:first-child\)\]\:-ml-px > [data-slot=button]:not(:first-child) {
     margin-left: -1px;
   }
+  .\[\&\>\[data-slot\=dropdown-menu-trigger\]\]\:rounded-none > [data-slot=dropdown-menu-trigger] {
+    border-radius: 0;
+  }
+  .\[\&\>\[data-slot\=dropdown-menu-trigger\]\]\:last\:rounded-r-md > [data-slot=dropdown-menu-trigger]:last-child {
+    border-top-right-radius: calc(var(--radius) * 0.8);
+    border-bottom-right-radius: calc(var(--radius) * 0.8);
+  }
+  .\[\&\>\[data-slot\=dropdown-menu-trigger\]\:not\(\:first-child\)\]\:-ml-px > [data-slot=dropdown-menu-trigger]:not(:first-child) {
+    margin-left: -1px;
+  }
   .\[\&\>\[data-slot\=text\]\]\:shrink-0 > [data-slot=text] {
     flex-shrink: 0;
   }
@@ -4146,6 +4161,17 @@
   }
   100% {
     background-position: -200% 0;
+  }
+}
+.pactor-clearable {
+  display: none;
+}
+@media (hover: hover) {
+  .group:hover .pactor-clearable {
+    display: inline-flex;
+  }
+  .group:hover .pactor-clearable-ghost {
+    visibility: hidden;
   }
 }
 @layer base {

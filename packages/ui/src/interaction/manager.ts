@@ -51,6 +51,12 @@ export interface OverlayConfig {
 /** 堆栈条目：配置 + 生成的 id */
 export interface OverlayEntry extends OverlayConfig {
   id: string;
+  /**
+   * 打开方身份（缺省为发起 overlay.open 的运行时上下文根）：多运行时
+   * 共享同一 OverlayManager（如布局嵌套链共用装配单例）时，OverlayHost
+   * 只渲染 owner 匹配所在运行时的条目；缺省（程序直开）所有宿主可见
+   */
+  owner?: unknown;
 }
 
 /** 堆栈变化监听器：open / close 时以最新堆栈快照回调 */
@@ -93,7 +99,7 @@ export class OverlayManager {
    */
   open(
     config: OverlayConfig,
-    options: { parentScope?: Record<string, unknown> } = {},
+    options: { parentScope?: Record<string, unknown>; owner?: unknown } = {},
   ): Promise<unknown> {
     if (!config || (config.type !== 'modal' && config.type !== 'drawer')) {
       return Promise.reject(
@@ -103,7 +109,11 @@ export class OverlayManager {
       );
     }
     this.counter += 1;
-    const entry: OverlayEntry = { ...config, id: `overlay-${this.counter}` };
+    const entry: OverlayEntry = {
+      ...config,
+      id: `overlay-${this.counter}`,
+      owner: options.owner,
+    };
     return new Promise((resolve) => {
       this.pending.push({
         entry,

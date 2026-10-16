@@ -15,10 +15,11 @@ import {
   useMemo,
   useState,
   type ComponentProps,
+  type ComponentType,
   type ReactNode,
 } from 'react';
 
-import { createPactorPage } from '../embedded.js';
+import { createPactorPage, type PactorPageProps } from '../embedded.js';
 import type { PactorHttpHooks } from '../assembly.js';
 
 import { defaultSitemapActions } from './actions.js';
@@ -66,7 +67,9 @@ import type { SitemapResource } from './types.js';
  * 页面内联 / 懒加载（id@version 缓存）、session.context 服务桥
  * （${data.session.*}）、缺省动作（app.reload / service.call）。
  *
- * 布局常驻：切换导航（同布局名）时仅 PageOutlet 内页面随路由重建。
+ * 布局常驻与嵌套：LayoutDsl.parent 引用外层布局形成嵌套链（最外层在
+ * 前），每级布局为独立运行时；切换导航时链共享前缀的外层布局保持
+ * 挂载（state 跨页面保持），仅分叉层与 PageOutlet 内页面随路由重建。
  */
 export interface SitemapAppProps {
   /** sitemap 接口 URL 列表（多源合并，冲突后源覆盖前源）；相对路径以 baseUrl 补全 */
@@ -264,18 +267,18 @@ function SitemapAppInner(props: SitemapAppProps) {
       <Centered>{t('pactor.sitemap.notFound', { path: pathname })}</Centered>
     );
   }
-  const { pageId, layoutName, highlightKey, params } = resolution.route;
+  const { pageId, layoutChain, highlightKey, params } = resolution.route;
 
   return (
-    // key 只随布局名变化：切换导航（同布局）时布局常驻，
-    // 仅 PageOutlet 内的页面随路由重建
+    // key 只随最外层布局名变化：布局链共享前缀时外层布局常驻，
+    // 仅分叉的内层布局与 PageOutlet 内页面随路由重建
     <NavHighlightContext.Provider value={highlightKey}>
       <SitemapLayout
-        key={layoutName}
+        key={layoutChain[0]}
         sitemap={sitemap}
         registry={registry}
         pageId={pageId}
-        layoutName={layoutName}
+        layoutChain={layoutChain}
         pathname={pathname}
         query={query}
         navigate={navigate}
@@ -290,7 +293,7 @@ function SitemapLayout({
   sitemap,
   registry,
   pageId,
-  layoutName,
+  layoutChain,
   pathname,
   query,
   navigate: hostNavigate,
@@ -300,14 +303,14 @@ function SitemapLayout({
   sitemap: SitemapResource;
   registry: MenuRegistry;
   pageId: string;
-  layoutName: string;
+  /** 布局嵌套链（最外层在前），由 resolveLayoutChain 产出 */
+  layoutChain: string[];
   pathname: string;
   query: Record<string, string>;
   navigate: (to: string) => void;
   routeParams: Record<string, string>;
   props: SitemapAppProps;
 }) {
-  const { t } = useI18n();
   const sessionService = props.sessionService ?? 'session.context';
   const session: SitemapSessionContext = useMemo(
     () => ({
@@ -361,31 +364,6 @@ function SitemapLayout({
     [props.actions],
   );
 
-  const layoutDsl = sitemap.layouts[layoutName];
-  // LayoutDsl → 合成 PageDsl：注入 session dataSource（${data.session.*}）。
-  // memo 保持引用稳定——PactorPage 以 pageDsl 为依赖重建运行时
-  const layoutPage: PageDsl | null = useMemo(() => {
-    if (layoutDsl === undefined) {
-      return null;
-    }
-    return {
-      dsl: layoutDsl.dsl,
-      page: { id: `layout:${layoutName}`, title: layoutName },
-      dataSources: {
-        session: { type: 'service', service: sessionService, autoLoad: true },
-      },
-      body: layoutDsl.body,
-    };
-  }, [layoutDsl, layoutName, sessionService]);
-
-  if (layoutDsl === undefined || layoutPage === null) {
-    return (
-      <Centered>
-        {t('pactor.sitemap.layoutMissing', { name: layoutName })}
-      </Centered>
-    );
-  }
-
   // 语言配置（设计 D7）：locale/messages 变化时经工厂重建 PactorPage——
   // PactorPage 直接形态首次渲染组装一次，切换语言必须产生新工厂
   // （组件类型变化触发卸载重建）。messages 按值签名参与依赖：
@@ -422,6 +400,9 @@ function SitemapLayout({
   const layoutFactory = useMemo(
     () =>
       createPactorPage({
+        // loader 注入使布局运行时的 OverlayHost 支持 page 类型弹层
+        //（布局内按钮经 overlay.open 打开懒加载表单页，如创建实例）
+        loader,
         services,
         actions,
         navigate,
@@ -433,6 +414,7 @@ function SitemapLayout({
       }),
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [
+      loader,
       services,
       actions,
       navigate,
@@ -444,11 +426,15 @@ function SitemapLayout({
     ],
   );
   const Page = pageFactory;
-  const LayoutPage = layoutFactory;
 
   return (
-    <OutletContext.Provider
-      value={
+    <LayoutLevel
+      sitemap={sitemap}
+      chain={layoutChain}
+      index={0}
+      sessionService={sessionService}
+      layoutFactory={layoutFactory}
+      outlet={
         // 页面实例：key 随 pageId + pathname 变化（route 参数变化需重建，
         // PactorPage 的 route prop 不参与运行时重建）——布局保持挂载
         <Page
@@ -457,8 +443,81 @@ function SitemapLayout({
           route={{ params: routeParams, query }}
         />
       }
+    />
+  );
+}
+
+/**
+ * 布局嵌套链递归渲染：第 index 层布局 DSL 中的 PageOutlet 渲染下一层
+ * 布局，最内层的 PageOutlet 渲染路由页面（outlet）。每级布局是独立
+ * 页面运行时（独立 state / lifecycle / 弹层宿主），按布局名 key——
+ * 链共享前缀时外层布局跨导航常驻（state / 折叠态保持），分叉层重建。
+ */
+function LayoutLevel({
+  sitemap,
+  chain,
+  index,
+  sessionService,
+  layoutFactory,
+  outlet,
+}: {
+  sitemap: SitemapResource;
+  chain: string[];
+  index: number;
+  sessionService: string;
+  layoutFactory: ComponentType<PactorPageProps>;
+  outlet: ReactNode;
+}) {
+  const { t } = useI18n();
+  const layoutName = chain[index]!;
+  const layoutDsl = sitemap.layouts[layoutName];
+  // LayoutDsl → 合成 PageDsl：注入 session dataSource（${data.session.*}）。
+  // memo 保持引用稳定——PactorPage 以 pageDsl 为依赖重建运行时
+  const layoutPage: PageDsl | null = useMemo(() => {
+    if (layoutDsl === undefined) {
+      return null;
+    }
+    return {
+      dsl: layoutDsl.dsl,
+      page: { id: `layout:${layoutName}`, title: layoutName },
+      // 布局级 state / lifecycle 透传（布局运行时常驻，state 跨页面保持）
+      state: layoutDsl.state,
+      lifecycle: layoutDsl.lifecycle,
+      dataSources: {
+        session: { type: 'service', service: sessionService, autoLoad: true },
+      },
+      body: layoutDsl.body,
+    };
+  }, [layoutDsl, layoutName, sessionService]);
+
+  if (layoutDsl === undefined || layoutPage === null) {
+    return (
+      <Centered>
+        {t('pactor.sitemap.layoutMissing', { name: layoutName })}
+      </Centered>
+    );
+  }
+
+  const LayoutPage = layoutFactory;
+  return (
+    <OutletContext.Provider
+      value={
+        index === chain.length - 1 ? (
+          outlet
+        ) : (
+          <LayoutLevel
+            key={chain[index + 1]}
+            sitemap={sitemap}
+            chain={chain}
+            index={index + 1}
+            sessionService={sessionService}
+            layoutFactory={layoutFactory}
+            outlet={outlet}
+          />
+        )
+      }
     >
-      <LayoutPage pageDsl={layoutPage} />
+      <LayoutPage key={layoutName} pageDsl={layoutPage} />
     </OutletContext.Provider>
   );
 }

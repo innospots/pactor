@@ -201,6 +201,17 @@ describe('字段自动包装', () => {
     // label 文本不受星号干扰（htmlFor 关联仍可 getByLabelText）
     expect(screen.getByLabelText('关键词')).toBeTruthy();
     expect(screen.getByLabelText('备注')).toBeTruthy();
+    // 星号与 label 同字号同行高（text-sm leading-normal），label 行高度
+    // 不因必填星号而高于非必填项
+    const star = requiredItem!.querySelector('[aria-hidden]')!;
+    const requiredLabel = requiredItem!.querySelector('label')!;
+    for (const cls of ['text-sm', 'leading-normal']) {
+      expect(star.className).toContain(cls);
+      expect(requiredLabel.className).toContain(cls);
+    }
+    expect(plainItem!.querySelector('label')!.className).toContain(
+      'leading-normal',
+    );
     // 根节点为 Base UI Field Root（自动嵌套 Field，保留 form-item 槽名）
     expect(requiredItem!.getAttribute('data-slot')).toBe('form-item');
   });
