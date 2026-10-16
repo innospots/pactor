@@ -252,7 +252,7 @@ export { Label } from './components/Label/index.js';
 export type { LabelProps } from './components/Label/index.js';
 export { Field } from './components/Field/index.js';
 export type { FieldProps } from './components/Field/index.js';
-export { ChatInput } from './components/ChatInput/index.js';
+export { ChatInput, useOptionalRenderer } from './components/ChatInput/index.js';
 export type { ChatInputProps } from './components/ChatInput/index.js';
 
 // 数据组件
@@ -355,69 +355,6 @@ export { DiffViewer, diffLines } from './components/DiffViewer/index.js';
 export type { DiffViewerProps } from './components/DiffViewer/index.js';
 export { JSONViewer } from './components/JSONViewer/index.js';
 export type { JSONViewerProps } from './components/JSONViewer/index.js';
-
-// AI 与会话类扩展组件（第八批：chat 子目录）
-export { Bubble } from './chat/Bubble/index.js';
-export type { BubbleProps, BubbleVariant } from './chat/Bubble/index.js';
-export { Sender } from './chat/Sender/index.js';
-export type { SenderProps } from './chat/Sender/index.js';
-export { Thinking } from './chat/Thinking/index.js';
-export type { ThinkingProps, ThinkingStatus } from './chat/Thinking/index.js';
-export { AgentStatus } from './chat/AgentStatus/index.js';
-export type { AgentStatusProps, AgentStatusType } from './chat/AgentStatus/index.js';
-export { StreamingText } from './chat/StreamingText/index.js';
-export type { StreamingTextProps } from './chat/StreamingText/index.js';
-export { Suggestion } from './chat/Suggestion/index.js';
-export type { SuggestionItem, SuggestionProps } from './chat/Suggestion/index.js';
-export { Prompt } from './chat/Prompt/index.js';
-export type { PromptProps } from './chat/Prompt/index.js';
-export { Welcome } from './chat/Welcome/index.js';
-export type { WelcomePromptItem, WelcomeProps } from './chat/Welcome/index.js';
-export { Citation } from './chat/Citation/index.js';
-export type { CitationItem, CitationProps } from './chat/Citation/index.js';
-export { Attachment } from './chat/Attachment/index.js';
-export type { AttachmentItemData, AttachmentProps } from './chat/Attachment/index.js';
-export { ToolCall } from './chat/ToolCall/index.js';
-export type { ToolCallProps, ToolCallStatus } from './chat/ToolCall/index.js';
-export { ChatMessage } from './chat/ChatMessage/index.js';
-export type {
-  ChatMessageActionItem,
-  ChatMessageAgent,
-  ChatMessagePart,
-  ChatMessageProps,
-  ChatMessageStatus,
-} from './chat/ChatMessage/index.js';
-export { MessageList } from './chat/MessageList/index.js';
-export type { MessageListItem, MessageListProps } from './chat/MessageList/index.js';
-export { Composer } from './chat/Composer/index.js';
-export type {
-  ComposerContextItem,
-  ComposerContextSource,
-  ComposerModelOption,
-  ComposerProps,
-} from './chat/Composer/index.js';
-export { ConversationList } from './chat/ConversationList/index.js';
-export type { ConversationItemData, ConversationListProps } from './chat/ConversationList/index.js';
-export { StepsPanel } from './chat/StepsPanel/index.js';
-export type { StepsPanelItemData, StepsPanelProps } from './chat/StepsPanel/index.js';
-export { ArtifactPanel } from './chat/ArtifactPanel/index.js';
-export type {
-  ArtifactPanelProps,
-  ArtifactViewer,
-  ArtifactViewers,
-} from './chat/ArtifactPanel/index.js';
-export { buildArtifactTree } from './chat/ArtifactPanel/artifact.js';
-export type {
-  ArtifactTreeNode,
-  ChatPageArtifact,
-} from './chat/ArtifactPanel/artifact.js';
-export { ChatPage } from './chat/ChatPage/index.js';
-export type {
-  ChatPageBrand,
-  ChatPageMenuItem,
-  ChatPageProps,
-  ConversationRailItem,
-} from './chat/ChatPage/index.js';
 
 // 复合组件共享基建（@pactor-app/blocks 等下游包复用）：hover 清除按钮
 export { ClearHoverButton } from './clearable.js';

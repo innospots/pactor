@@ -1,10 +1,11 @@
 /**
- * AI 与会话分类完整详情（第八批组件，packages/ui 真实实现已核对）。
- * 15 个组件统一实现于 packages/ui/src/components/chat/ 子目录，
- * apiProps 均核对自对应 index.tsx；渲染层唯一实现，@pactor-app/chat
- * 产品层（store / transport / 消息状态机）消费本批组件做组合。
- * - component.chat-message：本目录版本为 ui 承接版（覆盖 component-details.ts
- *   中基于 chat 消息模型的早期条目）；dsl / artifact 段仍由 chat 产品层承接。
+ * AI 与会话分类完整详情（18 个 chat 展示组件，packages/chat 真实实现已核对）。
+ * 组件统一实现于 packages/chat/src/components/（自 packages/ui 迁入，
+ * 经 @pactor-app/chat/components 导出，DSL 类型经 registerChatComponents
+ * 注册），apiProps 均核对自对应 index.tsx；chat 产品层
+ * （store / transport / 消息状态机）组合本批组件。
+ * - component.chat-message：dsl / artifact 段仍由 chat 产品层
+ *   （PartRenderer）承接。
  */
 import type { ComponentDetailContent } from './component-details.ts';
 

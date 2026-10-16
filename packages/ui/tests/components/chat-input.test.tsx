@@ -201,4 +201,27 @@ describe('ChatInput（spec: shadcn-extended-components / ChatInput 聊天输入�
     // 受控：显示值仍取自 props（draft 未变），组件不清空
     expect(getTextarea().value).toBe('受控文本');
   });
+
+  it('streaming 时发送钮切换为停止钮：空文本也可点击，点击经 onStop 传出且不触发 onSubmit、不清空输入', async () => {
+    const { context } = renderDsl({
+      type: 'ChatInput',
+      props: { streaming: true },
+      events: {
+        onStop: { action: 'setState', params: { stopped: true } },
+        onSubmit: { action: 'setState', params: { sent: '${event}' } },
+      },
+    });
+
+    // 空文本下停止钮仍可用（发送语义被抑制）
+    const stopButton = screen.getByRole('button', { name: '停止生成' }) as HTMLButtonElement;
+    expect(stopButton.disabled).toBe(false);
+    fireEvent.click(stopButton);
+    await expectEventState(context, 'stopped', true);
+    expect(context.state.get('sent')).toBeUndefined();
+
+    // 输入保留：streaming 不阻断编辑，Enter 发送语义不变
+    fireEvent.change(getTextarea(), { target: { value: '继续输入' } });
+    fireEvent.keyDown(getTextarea(), { key: 'Enter' });
+    await expectEventState(context, 'sent', '继续输入');
+  });
 });

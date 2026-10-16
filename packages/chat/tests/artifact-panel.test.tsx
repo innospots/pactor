@@ -62,7 +62,7 @@ describe('ArtifactPanel（spec: chat-artifact-panel / ArtifactPanel 视图与内
     expect(header.textContent).toContain('markdown');
   });
 
-  it('code 产出物：只读代码块 + language 角标', () => {
+  it('code 产出物：只读代码块（language 供高亮，header 展示 kind 角标）', () => {
     const { container } = render(
       <ArtifactPanel
         artifact={{
@@ -74,12 +74,11 @@ describe('ArtifactPanel（spec: chat-artifact-panel / ArtifactPanel 视图与内
         }}
       />,
     );
-    const pre = container.querySelector('.pactor-chat-inspector__body pre')!;
+    const pre = container.querySelector('[data-slot=artifact-panel] pre')!;
     expect(pre.textContent).toContain('SELECT 1;');
-    expect(
-      container.querySelector('.pactor-chat-inspector__code-lang')
-        ?.textContent,
-    ).toBe('sql');
+    // header kind 角标
+    const header = document.querySelector('.pactor-chat-inspector__header')!;
+    expect(header.textContent).toContain('code');
   });
 
   it('text 产出物：预格式文本', () => {
@@ -88,7 +87,7 @@ describe('ArtifactPanel（spec: chat-artifact-panel / ArtifactPanel 视图与内
         artifact={{ id: 'a3', kind: 'text', title: '纪要', content: '第一行\n第二行' }}
       />,
     );
-    const pre = container.querySelector('.pactor-chat-inspector__body pre')!;
+    const pre = container.querySelector('[data-slot=artifact-panel-text]')!;
     expect(pre.textContent).toBe('第一行\n第二行');
   });
 
@@ -255,7 +254,7 @@ describe('ArtifactPanel（spec: chat-artifact-panel / ArtifactPanel 视图与内
         safeRegistry={createPanelSafeRegistry()}
       />,
     );
-    await screen.findByText(/该组件不允许在 Chat 中使用/);
+    await screen.findByText(/该组件不允许在产物预览中使用/);
     expect(screen.queryByText('越权按钮')).toBeNull();
   });
 
@@ -276,7 +275,7 @@ describe('ArtifactPanel（spec: chat-artifact-panel / ArtifactPanel 视图与内
         })}
       />,
     );
-    await screen.findByText(/DSL 产出物渲染失败/);
+    await screen.findByText(/DSL 产物渲染失败/);
     error.mockRestore();
   });
 
@@ -1097,12 +1096,12 @@ describe('ArtifactPanel 多产物（tabs / 目录列表视图）', () => {
       />,
     );
     // 内容视图：markdown 正文在，列表不在
-    expect(document.querySelector('.pactor-chat-inspector__list')).toBeNull();
+    expect(document.querySelector('[data-slot=artifact-panel-list]')).toBeNull();
 
     fireEvent.click(screen.getByRole('button', { name: '产物目录' }));
     // 列表视图：目录树渲染（reports 目录 + 根层产物）；
     // 返回钮隐藏，文件名处显示"产物目录"，kind 角标隐藏
-    expect(document.querySelector('.pactor-chat-inspector__list')).toBeTruthy();
+    expect(document.querySelector('[data-slot=artifact-panel-list]')).toBeTruthy();
     expect(screen.getByText('reports')).toBeTruthy();
     expect(
       document.querySelector('.pactor-chat-inspector__list-toggle'),
@@ -1117,14 +1116,14 @@ describe('ArtifactPanel 多产物（tabs / 目录列表视图）', () => {
       ),
     ).toBeNull();
     const listTitles = [
-      ...document.querySelectorAll('.pactor-chat-inspector__list-item-title'),
-    ].map((el) => el.textContent);
-    expect(listTitles).toContain('分析报告');
+      ...document.querySelectorAll('[data-slot=artifact-panel-list-item]'),
+    ].map((el) => el.textContent ?? '');
+    expect(listTitles.some((text) => text.includes('分析报告'))).toBe(true);
 
     // 目录展开（默认展开）：嵌套产物可见，点击触发切换
     const nested = [
-      ...document.querySelectorAll('.pactor-chat-inspector__list-item-title'),
-    ].find((el) => el.textContent === 'Q3 月报')!;
+      ...document.querySelectorAll('[data-slot=artifact-panel-list-item]'),
+    ].find((el) => el.textContent?.includes('Q3 月报'))!;
     fireEvent.click(nested.closest('button')!);
     expect(onSelect).toHaveBeenCalledWith(NESTED_ARTIFACT);
   });
@@ -1145,7 +1144,7 @@ describe('ArtifactPanel 多产物（tabs / 目录列表视图）', () => {
       />,
     );
     fireEvent.click(screen.getByRole('button', { name: '产物目录' }));
-    expect(document.querySelector('.pactor-chat-inspector__list')).toBeTruthy();
+    expect(document.querySelector('[data-slot=artifact-panel-list]')).toBeTruthy();
 
     rerender(
       <ArtifactPanel
@@ -1155,8 +1154,11 @@ describe('ArtifactPanel 多产物（tabs / 目录列表视图）', () => {
         onSelectArtifact={() => {}}
       />,
     );
-    expect(document.querySelector('.pactor-chat-inspector__list')).toBeNull();
-    expect(screen.getByText('echo hi')).toBeTruthy();
+    expect(document.querySelector('[data-slot=artifact-panel-list]')).toBeNull();
+    // CodeBlock 高亮会把代码拆成多个 span，按容器文本断言
+    expect(
+      document.querySelector('[data-slot=artifact-panel]')!.textContent,
+    ).toContain('echo hi');
   });
 
   it('非受控组合层：多产物经内部 store 驱动下拉切换', async () => {
@@ -1199,7 +1201,7 @@ describe('ArtifactPanel 常见文件预览与自定义查看器', () => {
         artifact={{ id: 'f1', kind: 'text', title: '说明.txt', content: '纯文本内容' }}
       />,
     );
-    const pre = document.querySelector('.pactor-chat-inspector__text')!;
+    const pre = document.querySelector('[data-slot=artifact-panel-text]')!;
     expect(pre.textContent).toBe('纯文本内容');
   });
 
@@ -1215,13 +1217,13 @@ describe('ArtifactPanel 常见文件预览与自定义查看器', () => {
       />,
     );
     const img = document.querySelector(
-      '.pactor-chat-inspector__image img',
+      '[data-slot=artifact-panel-image] img',
     ) as HTMLImageElement;
     expect(img).toBeTruthy();
     expect(img.src).toBe('https://example.com/arch.png');
     expect(img.alt).toBe('架构图.png');
     // 不再按 text 预格式渲染
-    expect(document.querySelector('.pactor-chat-inspector__text')).toBeNull();
+    expect(document.querySelector('[data-slot=artifact-panel-text]')).toBeNull();
   });
 
   it('显式 fileType 优先于 title；svg 原始标记经 data URL 呈现', () => {
@@ -1238,7 +1240,7 @@ describe('ArtifactPanel 常见文件预览与自定义查看器', () => {
       />,
     );
     const img = document.querySelector(
-      '.pactor-chat-inspector__image img',
+      '[data-slot=artifact-panel-image] img',
     ) as HTMLImageElement;
     expect(img.src.startsWith('data:image/svg+xml;utf8,')).toBe(true);
     expect(decodeURIComponent(img.src)).toContain('<svg');
@@ -1261,7 +1263,7 @@ describe('ArtifactPanel 常见文件预览与自定义查看器', () => {
     expect(screen.getByTestId('custom-png').textContent).toContain(
       '数据.png 自定义预览',
     );
-    expect(document.querySelector('.pactor-chat-inspector__image')).toBeNull();
+    expect(document.querySelector('[data-slot=artifact-panel-image]')).toBeNull();
   });
 
   it('自定义查看器按 kind 命中；扩展名键优先于 kind 键', () => {

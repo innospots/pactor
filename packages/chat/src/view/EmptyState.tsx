@@ -1,3 +1,6 @@
+import { Suggestion } from '../components/Suggestion/index.js';
+import { Welcome } from '../components/Welcome/index.js';
+
 import { ChromeSlot } from './chrome/ChromeSlot.js';
 import { buildEmptyStateFragment } from './chrome/empty-state.js';
 
@@ -8,10 +11,12 @@ import { buildEmptyStateFragment } from './chrome/empty-state.js';
  * 点击建议经 `onSuggestionClick` 回调交还调用方（ChatView 接入时
  * 复用 Composer 的同一条发送路径）。
  *
+ * 展示由 @pactor-app/ui 的 Welcome + Suggestion 组合承载（回退路径；
+ * greeting 经 titleClassName 复用 chat 皮肤的 display 衬线字体栈）。
  * chrome DSL 渲染层（spec: chat-chrome-dsl）：元素层在页面运行时内
- * 优先经 ChromeSlot 以宿主组件（Typography / Text / Button）DSL 组合
- * 渲染，建议点击经 chat.sendSuggestion 内建动作接回同一发送路径；
- * 无 renderer 环境或类型缺失时回退下方手写实现（EmptyStateFallback）。
+ * 优先经 ChromeSlot 以宿主组件（Typography / Text / Suggestion）DSL
+ * 组合渲染，建议点击经 chat.sendSuggestion 内建动作接回同一发送路径；
+ * 无 renderer 环境或类型缺失时回退 ui 组合实现（EmptyStateFallback）。
  */
 export type ChatSuggestion = string | { label: string; prompt?: string };
 
@@ -39,7 +44,7 @@ function suggestionPrompt(suggestion: ChatSuggestion): string {
     : (suggestion.prompt ?? suggestion.label);
 }
 
-/** 手写实现：无 renderer / 类型缺失环境的回退路径 */
+/** ui Welcome + Suggestion 组合实现：无 renderer / 类型缺失环境的回退路径 */
 function EmptyStateFallback({
   subtitle,
   suggestions,
@@ -48,21 +53,23 @@ function EmptyStateFallback({
 }: Required<Pick<EmptyStateProps, 'greeting'>> & EmptyStateProps) {
   return (
     <>
-      <div className="pactor-chat-empty__greeting">{greeting}</div>
-      {subtitle && <div className="pactor-chat-empty__subtitle">{subtitle}</div>}
+      <Welcome
+        title={greeting}
+        description={subtitle}
+        icon={null}
+        titleClassName="pactor-chat-empty__greeting"
+        descriptionClassName="pactor-chat-empty__subtitle"
+      />
       {suggestions && suggestions.length > 0 && (
-        <div className="pactor-chat-empty__suggestions">
-          {suggestions.map((suggestion) => (
-            <button
-              key={suggestionLabel(suggestion)}
-              type="button"
-              className="pactor-chat-empty__suggestion"
-              onClick={() => onSuggestionClick?.(suggestionPrompt(suggestion))}
-            >
-              {suggestionLabel(suggestion)}
-            </button>
-          ))}
-        </div>
+        <Suggestion
+          items={suggestions.map((suggestion) => ({
+            label: suggestionLabel(suggestion),
+            value: suggestionPrompt(suggestion),
+          }))}
+          justify="center"
+          className="pactor-chat-empty__suggestions"
+          onSelect={(value) => onSuggestionClick?.(value)}
+        />
       )}
     </>
   );

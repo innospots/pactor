@@ -1,7 +1,7 @@
 /**
- * 组件运行态预览注册表（AI 与会话批）：chat 子目录 15 个组件
- * 的代表形态；Composer 依赖 Renderer 上下文（内部 ChatInput 经
- * useRenderer），以 DslPreview 真实 DSL 渲染。
+ * 组件运行态预览注册表（AI 与会话批）：chat 展示组件（@pactor-app/chat/components）
+ * 的代表形态；统一以 DslPreview 真实 DSL 渲染（Composer / ChatInput
+ * 的 DSL 槽位需 Renderer 上下文，纯 React 宿主可直接传 React 元素槽）。
  */
 import { useState, type ReactElement } from 'react';
 import {
@@ -19,7 +19,7 @@ import {
   Thinking,
   ToolCall,
   Welcome,
-} from '@pactor-app/ui/components';
+} from '@pactor-app/chat/components';
 import DslPreview from './DslPreview';
 
 const columnStyle = { display: 'flex', flexDirection: 'column', gap: 12 } as const;

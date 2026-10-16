@@ -1,6 +1,7 @@
 import { useRef, useState } from 'react';
 
-import { Icon } from '@pactor-app/ui/components';
+import { Bubble } from '../components/Bubble/index.js';
+import { Sender } from '../components/Sender/index.js';
 
 import type { ChatArtifact } from '../artifact.js';
 import type {
@@ -51,11 +52,11 @@ export function groupArtifactParts(
 
 /**
  * MessageBubble：按 role 区分呈现（参考 DeepTutor web 消息区设计）——
- * user 右侧圆角气泡；assistant 左侧通栏排版：顶部活动轨迹区
- * （ActivityTrace：状态头 + thinking + 配对工具轨迹），正文 parts 按序
- * 渲染；hover 操作条（MessageActions：复制 / 重新生成 / 编辑 / 重试）；
- * system 居中弱提示。
- * 颜色经 `--pactor-chat-*` 变量表达。
+ * user 右侧气泡（ui Bubble，tinted 变体）；assistant 左侧通栏排版：
+ * 顶部 Agent 身份行（ui Sender）+ 活动轨迹区（ActivityTrace：状态头 +
+ * thinking + 配对工具轨迹），正文 parts 按序渲染；hover 操作条
+ * （MessageActions：复制 / 重新生成 / 编辑 / 重试）；system 居中弱提示。
+ * 颜色经 `--pactor-chat-*` 变量与 ui 语义令牌表达。
  */
 export interface MessageBubbleProps {
   message: ChatMessage;
@@ -169,25 +170,23 @@ function isAgentIconUrl(icon: string): boolean {
   return /^(https?:|data:|\/)/.test(icon);
 }
 
-/** assistant 消息顶部的 Agent 身份行：图标 + 加粗名称 */
+/** assistant 消息顶部的 Agent 身份行：ui Sender（头像位 + 加粗名称） */
 function AgentHeader({ agent }: { agent: ChatAgentIdentity }) {
   return (
-    <div className="pactor-chat-message__agent">
-      {agent.icon !== undefined &&
-        (isAgentIconUrl(agent.icon) ? (
-          <img
-            className="pactor-chat-message__agent-icon"
-            src={agent.icon}
-            alt=""
-            aria-hidden
-          />
-        ) : (
-          <span className="pactor-chat-message__agent-icon" aria-hidden>
-            <Icon name={agent.icon} />
-          </span>
-        ))}
-      <span className="pactor-chat-message__agent-name">{agent.name}</span>
-    </div>
+    <Sender
+      name={agent.name}
+      avatar={
+        agent.icon !== undefined && isAgentIconUrl(agent.icon)
+          ? agent.icon
+          : undefined
+      }
+      icon={
+        agent.icon !== undefined && !isAgentIconUrl(agent.icon)
+          ? agent.icon
+          : undefined
+      }
+      hideAvatar={agent.icon === undefined}
+    />
   );
 }
 
@@ -236,6 +235,38 @@ export function MessageBubble({
   // assistant 消息顶部的 Agent 身份行：消息自带身份优先，会话级兜底在后
   const agentIdentity =
     message.role === 'assistant' ? (message.agent ?? agent) : undefined;
+  // 正文内容块（身份行 / 活动轨迹 / parts 序列）；user 消息整体包进
+  // ui Bubble 右侧气泡，assistant / system 通栏排版
+  const bodyContent = (
+    <div className="pactor-chat-message__body">
+      {agentIdentity && <AgentHeader agent={agentIdentity} />}
+      {showTrace && <ActivityTrace message={message} />}
+      {message.parts.length === 0 &&
+      message.status === 'pending' &&
+      message.role !== 'assistant' ? (
+        <span className="pactor-chat-message__pending">…</span>
+      ) : (
+        groupArtifactParts(message.parts).map((segment, index) =>
+          Array.isArray(segment) ? (
+            <ChromeSlot
+              key={`artifacts:${segment[0]!.id}`}
+              fragment={buildArtifactCardGroupFragment(segment)}
+              components={ARTIFACT_CARD_INTERNAL_COMPONENTS}
+              fallback={<ChatArtifactCardGroup artifacts={segment} />}
+            />
+          ) : (
+            <PartRenderer
+              key={segment.id ?? index}
+              part={segment}
+              runtime={runtime}
+              scope={bubbleScope}
+              streaming={streaming}
+            />
+          ),
+        )
+      )}
+    </div>
+  );
   return (
     <div
       className={`pactor-chat-message pactor-chat-message--${message.role}`}
@@ -251,37 +282,13 @@ export function MessageBubble({
           }}
           onCancel={() => setEditing(false)}
         />
+      ) : message.role === 'user' ? (
+        <Bubble align="end" variant="tinted">
+          {bodyContent}
+        </Bubble>
       ) : (
-        <div className="pactor-chat-message__body">
-          {agentIdentity && <AgentHeader agent={agentIdentity} />}
-          {showTrace && <ActivityTrace message={message} />}
-          {message.parts.length === 0 &&
-          message.status === 'pending' &&
-          message.role !== 'assistant' ? (
-            <span className="pactor-chat-message__pending">…</span>
-          ) : (
-            groupArtifactParts(message.parts).map((segment, index) =>
-              Array.isArray(segment) ? (
-                <ChromeSlot
-                  key={`artifacts:${segment[0]!.id}`}
-                  fragment={buildArtifactCardGroupFragment(segment)}
-                  components={ARTIFACT_CARD_INTERNAL_COMPONENTS}
-                  fallback={<ChatArtifactCardGroup artifacts={segment} />}
-                />
-              ) : (
-                <PartRenderer
-                  key={segment.id ?? index}
-                  part={segment}
-                  runtime={runtime}
-                  scope={bubbleScope}
-                  streaming={streaming}
-                />
-              ),
-            )
-          )}
-        </div>
-      )}
-      {!editing &&
+        bodyContent
+      )}      {!editing &&
         (showTime ? (
           <div className="pactor-chat-message__footer">
             <MessageActions

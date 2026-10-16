@@ -70,7 +70,7 @@ function formatSize(bytes: number): string {
   return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
 }
 
-/** 附件卡片行（fallback 与 ChatComposerHeader 共用） */
+/** 附件卡片行（ChatComposerHeader 用；fallback 路径由 ui Composer 内建附件区承担） */
 export function ComposerAttachments({
   attachments,
   onRemove,

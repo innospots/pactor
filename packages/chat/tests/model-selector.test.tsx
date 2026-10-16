@@ -87,12 +87,9 @@ describe('内建模型 chip（spec: chat-model-selector / 模型列表配置与�
     expect(options).toHaveLength(2);
     expect(options[0]!.getAttribute('aria-selected')).toBe('true');
     expect(options[1]!.getAttribute('aria-selected')).toBe('false');
-    expect(
-      options[0]!.querySelector('.pactor-chat-popover__item-check'),
-    ).toBeTruthy();
-    expect(
-      options[1]!.querySelector('.pactor-chat-popover__item-check'),
-    ).toBeNull();
+    // 选中标记（ui Composer 弹层：选中项带 check 图标）
+    expect(options[0]!.querySelector('.lucide-check')).toBeTruthy();
+    expect(options[1]!.querySelector('.lucide-check')).toBeNull();
   });
 });
 
@@ -196,7 +193,7 @@ describe('模型选择位置配置 modelPlacement（spec: chat-model-selector / 
     ).toBeTruthy();
     // Composer 工具栏不再渲染模型 chip（不重复）
     expect(
-      document.querySelector('.pactor-chat-composer .pactor-chat-model-chip'),
+      document.querySelector('.pactor-chat-composer [aria-label="选择模型"]'),
     ).toBeNull();
   });
 
@@ -210,7 +207,7 @@ describe('模型选择位置配置 modelPlacement（spec: chat-model-selector / 
     expect(header.querySelector('.pactor-chat-model-chip')).toBeTruthy();
     expect(header.querySelector('.pactor-chat-workspace__header-actions')).toBeNull();
     expect(
-      document.querySelector('.pactor-chat-composer .pactor-chat-model-chip'),
+      document.querySelector('.pactor-chat-composer [aria-label="选择模型"]'),
     ).toBeNull();
   });
 
@@ -222,7 +219,7 @@ describe('模型选择位置配置 modelPlacement（spec: chat-model-selector / 
       </ChatServicesProvider>,
     );
     expect(
-      document.querySelector('.pactor-chat-composer .pactor-chat-model-chip'),
+      document.querySelector('.pactor-chat-composer [aria-label="选择模型"]'),
     ).toBeTruthy();
     expect(
       document.querySelector('.pactor-chat-workspace__header .pactor-chat-model-chip'),

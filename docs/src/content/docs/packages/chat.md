@@ -9,7 +9,27 @@ description: AI 对话工作区——消息协议与流式渲染、Composer、�
 pnpm add @pactor-app/chat @pactor-app/runtime @pactor-app/markdown react
 ```
 
-`react >= 18` 为 peer dependency；样式表 `@pactor-app/chat/styles.css` 使用前必须引入。
+`react >= 18` 为 peer dependency；样式表 `@pactor-app/chat/styles.css` 使用前必须引入（含 chat 展示组件的 Tailwind 工具类与 `--pactor-chat-*` / `--pactor-chat-rail-*` 令牌，经包内 Tailwind 编译分发，不依赖 `@pactor-app/ui/styles.css` 提供工具类）。
+
+## Chat 展示组件（/components 子路径）
+
+18 个 chat 展示组件（AgentStatus / ArtifactPanel / Attachment / Bubble / ChatMessage / ChatPage / Citation / Composer / ConversationList / MessageList / Prompt / Sender / StepsPanel / StreamingText / Suggestion / Thinking / ToolCall / Welcome）归属本包，经子路径导出——纯展示、props 驱动，可脱离会话运行时单用：
+
+```tsx
+import { Bubble, Composer, ChatPage } from '@pactor-app/chat/components';
+```
+
+在页面 DSL 中声明这些组件（如 `{ type: 'ChatPage' }` 的模板页）需显式注册（同名不覆盖，与 `registerChatComponent` 并存）：
+
+```tsx
+import { createComponentRegistry } from '@pactor-app/ui/components';
+import { registerChatComponents } from '@pactor-app/chat/components';
+
+const registry = createComponentRegistry();
+registerChatComponents(registry);
+```
+
+注意：根入口的 `Composer` / `ArtifactPanel` 是接线后的组合层（发送状态机 / ArtifactStore 装配），`/components` 子路径的同名组件是纯展示实现，两者各司其职。
 
 ## 快速开始
 
@@ -79,7 +99,7 @@ const safeRegistry = createSafeRegistry(createComponentRegistry(), [
 
 `Chat` 是与 Button / Input 同级的 DSL 组件：`registerChatComponent(registry)` 注册一次，页面 DSL 即可声明完整聊天工作区。运行时服务（`transport` 必填、Safe Registry、附件回调、服务桥等）由宿主在根部经 `ChatServicesProvider` 注入一次。
 
-与 pactor-app 集成时可用便捷工厂 `createChatComponentRegistry()`（含全部内置组件 + Chat / ChatShell），直接作为 `createPactorApplication` 的 `componentRegistry` 选项：
+与 pactor-app 集成时可用便捷工厂 `createChatComponentRegistry()`（含 ui 全部内置组件 + chat 展示组件 + Chat / ChatShell），直接作为 `createPactorApplication` 的 `componentRegistry` 选项：
 
 ```tsx
 import { createChatComponentRegistry } from '@pactor-app/chat';

@@ -168,7 +168,7 @@ describe('内建 "+" 菜单（spec: chat-context-sources）', () => {
     const store = new ConversationStore();
     render(<ChatView store={store} contexts={PLUS_SOURCES} />);
 
-    fireEvent.click(screen.getByRole('button', { name: '更多功能' }));
+    fireEvent.click(screen.getByRole('button', { name: '添加上下文' }));
     expect(screen.getByRole('listbox')).toBeTruthy();
     expect(screen.getByText('产品文档')).toBeTruthy();
   });
@@ -184,7 +184,7 @@ describe('内建 "+" 菜单（spec: chat-context-sources）', () => {
       />,
     );
 
-    fireEvent.click(screen.getByRole('button', { name: '更多功能' }));
+    fireEvent.click(screen.getByRole('button', { name: '添加上下文' }));
     fireEvent.click(screen.getByText('产品文档'));
 
     expect(getChips()).toEqual(['产品文档']);
@@ -196,7 +196,7 @@ describe('内建 "+" 菜单（spec: chat-context-sources）', () => {
   it('contexts 仅含 trigger "@" 时不渲染 "+" 按钮（spec: 无 + 配置无入口）', () => {
     const store = new ConversationStore();
     render(<ChatView store={store} contexts={AGENTS} />);
-    expect(screen.queryByRole('button', { name: '更多功能' })).toBeNull();
+    expect(screen.queryByRole('button', { name: '添加上下文' })).toBeNull();
   });
 });
 
@@ -282,7 +282,7 @@ describe('调用方回调优先（spec: chat-context-sources / 调用方回调�
       />,
     );
 
-    fireEvent.click(screen.getByRole('button', { name: '更多功能' }));
+    fireEvent.click(screen.getByRole('button', { name: '添加上下文' }));
     expect(onPlusMenu).toHaveBeenCalledTimes(1);
     expect(screen.queryByRole('listbox')).toBeNull();
   });

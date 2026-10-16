@@ -14,6 +14,7 @@ import {
 import { createComponentRegistry } from '@pactor-app/ui/components';
 import { registerChartComponents } from '@pactor-app/chart';
 import { registerBlockComponents } from '@pactor-app/blocks';
+import { registerChatComponents } from '@pactor-app/chat/components';
 import {
   createUiBridge,
   InteractionProvider,
@@ -36,10 +37,12 @@ export default function DslPreview({
 }): ReactElement {
   const context = useMemo(() => {
     const ctx = createRuntimeContext({ components: createComponentRegistry(), state });
-    // 图表 / 区块组件集已拆为 @pactor-app/chart、@pactor-app/blocks 独立包，
-    // 这里合并进主注册表（线框模板 dashboard 图表、chat-page RecordingPage 等 DSL 依赖）
+    // 图表 / 区块 / chat 展示组件集已拆为 @pactor-app/chart、@pactor-app/blocks、
+    // @pactor-app/chat 独立包，这里合并进主注册表（线框模板 dashboard 图表、
+    // chat-page RecordingPage、AI 会话组件 DSL 预览等依赖）
     registerChartComponents(ctx.components);
     registerBlockComponents(ctx.components);
+    registerChatComponents(ctx.components);
     for (const [name, comp] of Object.entries(extraComponents ?? {})) {
       ctx.components.register(name, comp);
     }

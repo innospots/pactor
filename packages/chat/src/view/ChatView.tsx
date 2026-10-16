@@ -28,7 +28,7 @@ import {
   runRegenerateTurn,
   type ChatTransport,
 } from '../transport.js';
-import { Composer, type ComposerProps } from './Composer.js';
+import { Composer, type ComposerProps } from './ChatComposer.js';
 import { setChatChromeHandlers } from './chrome/actions.js';
 import type { CallChatService } from './context-sources.js';
 import { EmptyState, type ChatSuggestion } from './EmptyState.js';

@@ -15,6 +15,7 @@ import {
   registerChatComponent,
   type ChatServices,
 } from '../src/index.js';
+import { registerChatComponents } from '../src/components/index.js';
 
 afterEach(cleanup);
 
@@ -26,6 +27,7 @@ afterEach(cleanup);
 
 function fullRegistry(): Registry<unknown> {
   const registry = createComponentRegistry();
+  registerChatComponents(registry);
   registerChatComponent(registry);
   return registry;
 }
@@ -56,14 +58,15 @@ describe('Composer 槽位（spec: chat-composer-slots）', () => {
         composerFooter={<span>工作空间：默认</span>}
       />,
     );
-    const footer = document.querySelector('.pactor-chat-composer__footer');
+    // ui ChatInput footer 槽（分隔线容器）
+    const footer = document.querySelector('[data-slot=chat-input] > .border-t');
     expect(footer).not.toBeNull();
     expect(footer!.textContent).toContain('工作空间：默认');
     unmount();
 
     render(<ChatView store={new ConversationStore()} />);
     expect(
-      document.querySelector('.pactor-chat-composer__footer'),
+      document.querySelector('[data-slot=chat-input] > .border-t'),
     ).toBeNull();
   });
 
@@ -129,10 +132,12 @@ describe('Composer 槽位（spec: chat-composer-slots）', () => {
       />,
     );
     // 配置了 onAttachFiles 本会出现工具栏行；hideToolbar 整体抑制
-    expect(document.querySelector('.pactor-chat-composer__toolbar')).toBeNull();
+    expect(
+      document.querySelector('[data-slot=chat-input] > .flex.items-center'),
+    ).toBeNull();
     expect(screen.queryByRole('button', { name: '发送' })).toBeNull();
     expect(
-      document.querySelector('.pactor-chat-composer__footer'),
+      document.querySelector('[data-slot=chat-input] > .border-t'),
     ).not.toBeNull();
   });
 

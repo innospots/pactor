@@ -37,13 +37,14 @@ export {
   type ChatArtifact,
 } from './artifact.js';
 
-// 产物下载（spec: chat-artifact-panel / 产物下载）
+// 产物下载（spec: chat-artifact-panel / 产物下载）：单一实现归属包内
+// 展示组件层（components/ArtifactPanel/download），此处再导出保持导出面稳定
 export {
   buildArtifactBlob,
   downloadArtifact,
   resolveArtifactFilename,
   saveBlob,
-} from './artifact-download.js';
+} from './components/ArtifactPanel/download.js';
 
 // Streaming 事件模型与 reducer（零 React）
 export { applyChatEvent, type ChatEvent } from './events.js';
@@ -136,7 +137,7 @@ export {
   type ArtifactTreeNode,
   type ArtifactViewer,
   type ArtifactViewers,
-} from './view/ArtifactPanel.js';
+} from './view/ChatArtifactPanel.js';
 export {
   artifactCardMeta,
   ChatArtifactCard,
@@ -175,7 +176,7 @@ export {
   PartRenderer,
   type PartRendererProps,
 } from './view/PartRenderer.js';
-export { Composer, type ComposerProps } from './view/Composer.js';
+export { Composer, type ComposerProps } from './view/ChatComposer.js';
 export {
   CHAT_LAYOUT_TYPE,
   ChatLayout,

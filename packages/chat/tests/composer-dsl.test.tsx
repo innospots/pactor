@@ -14,6 +14,7 @@ import {
   registerChatComponent,
   type ChatServices,
 } from '../src/index.js';
+import { registerChatComponents } from '../src/components/index.js';
 
 afterEach(cleanup);
 
@@ -27,6 +28,7 @@ afterEach(cleanup);
 
 function fullRegistry(): Registry<unknown> {
   const registry = createComponentRegistry();
+  registerChatComponents(registry);
   registerChatComponent(registry);
   return registry;
 }

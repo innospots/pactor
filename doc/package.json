@@ -19,6 +19,7 @@
     "@astrojs/react": "^6.0.6",
     "@pactor-app/blocks": "workspace:*",
     "@pactor-app/chart": "workspace:*",
+    "@pactor-app/chat": "workspace:*",
     "@pactor-app/core": "workspace:*",
     "@pactor-app/runtime": "workspace:*",
     "@pactor-app/ui": "workspace:*",
