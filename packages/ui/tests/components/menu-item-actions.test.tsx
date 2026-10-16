@@ -183,4 +183,28 @@ describe('Menu 项级操作', () => {
       'menu-item-chevron',
     );
   });
+
+  it('空组（children: []）同样是目录：不可选中、无 chevron、不触发 onSelect', () => {
+    const { container, context } = renderDsl({
+      type: 'Menu',
+      props: {
+        items: [{ key: 'empty-inst', label: '空实例', children: [] }],
+        collapsible: true,
+        selectedKey: 'empty-inst',
+      },
+      events: {
+        onSelect: { action: 'setState', params: { selected: '${event}' } },
+      },
+    });
+    const button = container.querySelector(
+      '[data-slot=menu-entry][data-key="empty-inst"] [data-slot=menu-item]',
+    )!;
+    // 无选中态、无 chevron
+    expect(button.getAttribute('aria-current')).toBeNull();
+    expect(
+      button.querySelector('[data-slot=menu-item-chevron]'),
+    ).toBeNull();
+    fireEvent.click(button);
+    expect(context.state.get('selected')).toBeUndefined();
+  });
 });

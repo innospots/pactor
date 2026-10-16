@@ -65,6 +65,7 @@ export function Textarea({
       <FieldShell
         layout={form.layout}
         label={label}
+        rules={rules}
         htmlFor={controlId}
         error={form.errors[name]}
         className={className}

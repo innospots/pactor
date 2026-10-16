@@ -1,4 +1,4 @@
-import type { CSSProperties, ReactNode } from 'react';
+import { createContext, type CSSProperties, type ReactNode } from 'react';
 
 import { cn } from '../../../lib/utils.js';
 import {
@@ -8,6 +8,13 @@ import {
   FieldLabel,
 } from '../../../ui/field.js';
 import { useFormContext } from '../Form/context.js';
+
+/**
+ * 嵌套标记：Field 内部为 true。Form 内控件自动嵌套的 FieldShell 检测到
+ * 已处于 Field 中时会去掉自身的外层间距（mb-2 / min-h-9），避免与手动
+ * Field 的垂直间距叠加（升级兼容：旧 DSL 手动包 Field 的写法不塌陷）。
+ */
+export const FieldNestContext = createContext(false);
 
 export interface FieldProps {
   /** 表单项标签 */
@@ -88,59 +95,61 @@ export function Field({
       )}
       style={style}
     >
-      {label || labelHint ? (
+      <FieldNestContext.Provider value={true}>
+        {label || labelHint ? (
+          <div
+            className={cn(
+              'flex min-h-3.5 items-center gap-2',
+              inline ? 'shrink-0' : 'w-full justify-between',
+            )}
+          >
+            {label ? (
+              <FieldLabel className={labelClassName} style={labelStyle}>
+                {required ? (
+                  <span aria-hidden className="text-destructive">
+                    *{' '}
+                  </span>
+                ) : null}
+                {label}
+              </FieldLabel>
+            ) : (
+              <span />
+            )}
+            {labelHint ? (
+              <span
+                data-slot="field-label-hint"
+                className={cn(
+                  'shrink-0 text-xs leading-none text-muted-foreground',
+                  labelHintClassName,
+                )}
+                style={labelHintStyle}
+              >
+                {labelHint}
+              </span>
+            ) : null}
+          </div>
+        ) : null}
         <div
-          className={cn(
-            'flex min-h-3.5 items-center gap-2',
-            inline ? 'shrink-0' : 'w-full justify-between',
-          )}
+          data-slot="field-control"
+          className={cn('[&>button+button]:ml-2', controlClassName)}
+          style={controlStyle}
         >
-          {label ? (
-            <FieldLabel className={labelClassName} style={labelStyle}>
-              {required ? (
-                <span aria-hidden className="text-destructive">
-                  *{' '}
-                </span>
-              ) : null}
-              {label}
-            </FieldLabel>
-          ) : (
-            <span />
-          )}
-          {labelHint ? (
-            <span
-              data-slot="field-label-hint"
-              className={cn(
-                'shrink-0 text-xs leading-none text-muted-foreground',
-                labelHintClassName,
-              )}
-              style={labelHintStyle}
-            >
-              {labelHint}
-            </span>
-          ) : null}
+          {children}
         </div>
-      ) : null}
-      <div
-        data-slot="field-control"
-        className={cn('[&>button+button]:ml-2', controlClassName)}
-        style={controlStyle}
-      >
-        {children}
-      </div>
-      {description ? (
-        <FieldDescription
-          className={descriptionClassName}
-          style={descriptionStyle}
-        >
-          {description}
-        </FieldDescription>
-      ) : null}
-      {error ? (
-        <FieldError match className={errorClassName} style={errorStyle}>
-          {error}
-        </FieldError>
-      ) : null}
+        {description ? (
+          <FieldDescription
+            className={descriptionClassName}
+            style={descriptionStyle}
+          >
+            {description}
+          </FieldDescription>
+        ) : null}
+        {error ? (
+          <FieldError match className={errorClassName} style={errorStyle}>
+            {error}
+          </FieldError>
+        ) : null}
+      </FieldNestContext.Provider>
     </ShadcnField>
   );
 }

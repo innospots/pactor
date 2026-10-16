@@ -145,6 +145,7 @@ export function Segmented({
       <FieldShell
         layout={form.layout}
         label={label}
+        rules={rules}
         error={form.errors[name]}
         className={className}
         style={style}

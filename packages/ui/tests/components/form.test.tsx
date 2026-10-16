@@ -173,6 +173,74 @@ describe('字段自动包装', () => {
     // 事件回调收到 string 而非原生 event
     expect(onChange).toHaveBeenCalledWith('y');
   });
+
+  it('rules 含 required 时 label 自动渲染必填星号（Field 语义）', () => {
+    const { container } = renderDsl({
+      type: 'Form',
+      children: [
+        {
+          type: 'Input',
+          props: {
+            name: 'keyword',
+            label: '关键词',
+            rules: [{ required: true, message: '必填' }],
+          },
+        },
+        { type: 'Input', props: { name: 'remark', label: '备注' } },
+      ],
+    });
+
+    const [requiredItem, plainItem] = [
+      ...container.querySelectorAll('[data-slot=form-item]'),
+    ];
+    // 必填项：label 同级前有 aria-hidden 星号；非必填项无
+    expect(
+      requiredItem!.querySelector('[aria-hidden]')?.textContent,
+    ).toBe('*');
+    expect(plainItem!.querySelector('[aria-hidden]')).toBeNull();
+    // label 文本不受星号干扰（htmlFor 关联仍可 getByLabelText）
+    expect(screen.getByLabelText('关键词')).toBeTruthy();
+    expect(screen.getByLabelText('备注')).toBeTruthy();
+    // 根节点为 Base UI Field Root（自动嵌套 Field，保留 form-item 槽名）
+    expect(requiredItem!.getAttribute('data-slot')).toBe('form-item');
+  });
+
+  it('手动 Field 嵌套（旧写法）升级兼容：label 不重复、外层间距不叠加、校验错误照常', async () => {
+    const { container } = renderDsl({
+      type: 'Form',
+      props: { name: 'nested' },
+      children: [
+        {
+          type: 'Field',
+          props: { label: '金额', description: '单位：元' },
+          children: [
+            {
+              type: 'Input',
+              props: {
+                name: 'amount',
+                placeholder: '请输入金额',
+                rules: [{ required: true, message: '请输入金额' }],
+              },
+            },
+          ],
+        },
+        { type: 'Button', props: { text: '提交', submit: true } },
+      ],
+    });
+
+    // label 只渲染一次（Field 的；控件未声明 label，内层 form-item 无 label）
+    expect(screen.getAllByText('金额').length).toBe(1);
+    expect(screen.getByText('单位：元')).toBeTruthy();
+    // 内层自动 form-item 检测到手Field 后去掉 mb-2 外层间距（防叠加）
+    const inner = container.querySelector('[data-slot=form-item]')!;
+    expect(inner.className).not.toContain('mb-2');
+
+    // 校验错误仍在内层 form-item 展示
+    fireEvent.click(screen.getByText('提交'));
+    await vi.waitFor(() => {
+      expect(screen.getByText('请输入金额')).toBeTruthy();
+    });
+  });
 });
 
 describe('输入类型 type', () => {
