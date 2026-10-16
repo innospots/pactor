@@ -1,6 +1,6 @@
 # 线框图区域 → pactor 组件映射表
 
-按线框图的「区域」反查组件。只列稳定组件与常用 props 模式；**以 packages 当前导出为准**（内置组件见 `packages/ui/src/components/register.ts`，业务组件见 `@pactor-app/blocks`，图表见 `@pactor-app/chart`），新增/改名时同步本表。
+按线框图的「区域」反查组件。只列稳定组件与常用 props 模式；**以 packages 当前导出为准**（内置组件见 `packages/ui/src/components/register.ts`，chat 展示组件见 `@pactor-app/chat` 的 `/components` 子路径，业务组件见 `@pactor-app/blocks`，图表见 `@pactor-app/chart`），新增/改名时同步本表。
 
 | 线框图区域 | pactor 组件 | 常用模式 |
 | --- | --- | --- |
@@ -19,6 +19,7 @@
 | 权限控制显隐（无权限隐藏新建卡等） | 表达式 `hidden` / `if` 动作 | 绑 `${data.session.permissions}` 等，按会话裁剪 |
 | 统计数字卡 | `Statistic` + `Card` | 仪表盘顶部指标行，`Grid` 排布 |
 | 录音工作区（录音列表 + 转写详情 + 播放条） | `RecordingPage`（`@pactor-app/blocks`） | 数据化 props（`groups` / `tabs` / `segments` / `summary` / `insight` / `memory` / `translation` / `player`），事件 `onSelectRecording` / `onTabChange` / `onNewRecording` 等；常作 `ChatPage` 的 `content` 槽 |
+| 聊天工作页（导航 + 会话列表 + 消息流 + 产物栏） | `ChatPage`（`@pactor-app/chat/components`，模板已注册） | 数据化 props（`menuItems` / `conversations` / `messages` / `artifacts` 等），事件 `onSend` / `onMessageAction` / `onMenuSelect` 等；右侧主区域可经 `content` 槽整体替换（如 RecordingPage） |
 | 趋势/占比图 | `@pactor-app/chart` 的 LineChart / PieChart 等 | 需 `registerChartComponents` 注册；图表随肤切换由库内建，无需额外处理 |
 | 描述列表（详情字段） | `Descriptions` | `items` 由 detail 接口下发或静态声明 |
 | 详情 Tab | `Tabs` | `items: [{key, label}]`；线框图为纵向分区时改用多个 `Card` 顺序排布 |

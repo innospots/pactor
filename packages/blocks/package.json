@@ -35,7 +35,9 @@
     },
     "./styles.css": "./styles.css"
   },
-  "sideEffects": false,
+  "sideEffects": [
+    "./styles.css"
+  ],
   "engines": {
     "node": ">=18"
   },

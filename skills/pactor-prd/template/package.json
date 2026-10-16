@@ -12,6 +12,7 @@
   },
   "dependencies": {
     "@pactor-app/blocks": "latest",
+    "@pactor-app/chat": "latest",
     "@pactor-app/core": "latest",
     "@pactor-app/runtime": "latest",
     "@pactor-app/ui": "latest",

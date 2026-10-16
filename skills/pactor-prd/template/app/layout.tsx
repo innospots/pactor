@@ -2,13 +2,12 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { PactorApp } from "@/pactor/App";
 // 顺序约定：globals（本项目 tailwind 工具类 + 皮肤无关的外壳规则）→
-// ui 预建样式（同层冲突时 ui 胜出，保证其内部 base/响应式变体排序生效，
-// 如 Sidebar 的 hidden md:block）→ blocks 业务组件样式（Login 等，独立
-// 编译产物）。主题令牌由 public/skins/<skin>.css
+// pactor-app 聚合样式（单入口：ui 基线 → blocks → chart → chat 构建产物
+// 已按级联序内联，preflight 与语义令牌由 ui 段提供）。
+// 主题令牌由 public/skins/<skin>.css
 // 经下方内联脚本在首屏注入（link 后加载者胜出）。
 import "./globals.css";
-import "@pactor-app/ui/styles.css";
-import "@pactor-app/blocks/styles.css";
+import "pactor-app/styles.css";
 
 export const metadata: Metadata = {
   title: "Pactor Console",

@@ -75,7 +75,8 @@
         "default": "./dist/ui/index.cjs"
       }
     },
-    "./styles.css": "./styles.css"
+    "./styles.css": "./styles.css",
+    "./theme-bridge.css": "./src/theme-bridge.css"
   },
   "sideEffects": [
     "./styles.css"
@@ -85,7 +86,8 @@
   },
   "files": [
     "dist",
-    "styles.css"
+    "styles.css",
+    "src/theme-bridge.css"
   ],
   "scripts": {
     "build": "tsup && pnpm build:styles",

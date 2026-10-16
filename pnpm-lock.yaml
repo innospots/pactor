@@ -120,6 +120,9 @@ importers:
       '@pactor-app/ui':
         specifier: workspace:*
         version: link:../../packages/ui
+      pactor-app:
+        specifier: workspace:*
+        version: link:../../packages/pactor
       react:
         specifier: ^19.2.8
         version: 19.2.8
@@ -614,6 +617,12 @@ importers:
       '@pactor-app/app':
         specifier: workspace:*
         version: link:../app
+      '@pactor-app/blocks':
+        specifier: workspace:*
+        version: link:../blocks
+      '@pactor-app/chart':
+        specifier: workspace:*
+        version: link:../chart
       '@pactor-app/chat':
         specifier: workspace:*
         version: link:../chat
