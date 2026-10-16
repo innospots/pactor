@@ -3605,13 +3605,21 @@
     border-top-right-radius: calc(var(--radius) * 0.8);
     border-bottom-right-radius: calc(var(--radius) * 0.8);
   }
+  .\[\&\>\[data-slot\=button\]\]\:first-of-type\:rounded-l-md > [data-slot=button]:first-of-type {
+    border-top-left-radius: calc(var(--radius) * 0.8);
+    border-bottom-left-radius: calc(var(--radius) * 0.8);
+  }
+  .\[\&\>\[data-slot\=button\]\]\:last-of-type\:rounded-r-md > [data-slot=button]:last-of-type {
+    border-top-right-radius: calc(var(--radius) * 0.8);
+    border-bottom-right-radius: calc(var(--radius) * 0.8);
+  }
   .\[\&\>\[data-slot\=button\]\:not\(\:first-child\)\]\:-ml-px > [data-slot=button]:not(:first-child) {
     margin-left: -1px;
   }
   .\[\&\>\[data-slot\=dropdown-menu-trigger\]\]\:rounded-none > [data-slot=dropdown-menu-trigger] {
     border-radius: 0;
   }
-  .\[\&\>\[data-slot\=dropdown-menu-trigger\]\]\:last\:rounded-r-md > [data-slot=dropdown-menu-trigger]:last-child {
+  .\[\&\>\[data-slot\=dropdown-menu-trigger\]\]\:last-of-type\:rounded-r-md > [data-slot=dropdown-menu-trigger]:last-of-type {
     border-top-right-radius: calc(var(--radius) * 0.8);
     border-bottom-right-radius: calc(var(--radius) * 0.8);
   }

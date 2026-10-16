@@ -490,7 +490,7 @@ export function ChatPage({
     >
       <div
         data-slot="chat-page-conversation-header"
-        className="flex h-10 shrink-0 items-center justify-between border-b border-border px-4"
+        className="flex h-14 shrink-0 items-center justify-between border-b border-border px-4"
       >
         <Text text={conversationTitle} strong />
         {conversationHeaderAction ? (

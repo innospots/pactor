@@ -1,4 +1,4 @@
-import type { MenuRegistry } from '@pactor-app/router';
+import { match as matchPath, type MenuRegistry } from '@pactor-app/router';
 
 import type {
   SitemapMenuItem,
@@ -34,6 +34,14 @@ export function resolveSitemapRoute(
     menu.layout ?? sitemap.layout ?? Object.keys(sitemap.layouts)[0] ?? '';
   const highlightId = menu.activeMenu ?? menu.id;
   const highlightItem = registry.findById(highlightId);
+  // 菜单显式 path 只是导航目标，可能与引用页面的路径模式不同（如一级
+  // 菜单落到 /workbench/1 静态地址，页面模式是 /workbench/:id）——
+  // 此时路由参数按页面模式重新匹配，否则 ${route.params.*} 取不到值
+  const page = sitemap.pages.find((p) => p.id === menu.pageId);
+  const params =
+    page !== undefined && page.path !== menu.path
+      ? (matchPath(page.path, pathname)?.params ?? match.params)
+      : match.params;
   return {
     menu,
     route: {
@@ -41,7 +49,7 @@ export function resolveSitemapRoute(
       layoutName,
       layoutChain: resolveLayoutChain(sitemap, layoutName),
       highlightKey: highlightItem?.path ?? highlightId,
-      params: match.params,
+      params,
     },
   };
 }

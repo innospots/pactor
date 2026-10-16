@@ -207,8 +207,8 @@
   .h-8 {
     height: calc(var(--spacing) * 8);
   }
-  .h-10 {
-    height: calc(var(--spacing) * 10);
+  .h-14 {
+    height: calc(var(--spacing) * 14);
   }
   .h-full {
     height: 100%;
