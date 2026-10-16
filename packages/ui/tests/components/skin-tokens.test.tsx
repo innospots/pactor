@@ -76,8 +76,6 @@ describe('皮肤令牌契约', () => {
       '--flex-gap-md',
       '--flex-gap-lg',
       '--grid-gap',
-      '--pactor-chat-rail-width',
-      '--pactor-chat-rail-popover-width',
     ];
     for (const token of tokens) {
       expect(stylesSource).toContain(`${token}:`);

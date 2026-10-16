@@ -107,15 +107,16 @@ describe('ChatView（Agent 身份行）', () => {
     render(
       <ChatView store={store} agent={{ name: '数据资产', icon: 'database' }} />,
     );
+    // 身份行经 ui Sender 呈现（图标头像位 + 加粗名称）
     const header = document.querySelector(
-      '.pactor-chat-message--assistant .pactor-chat-message__agent',
+      '.pactor-chat-message--assistant [data-slot=sender]',
     );
     expect(header).toBeTruthy();
-    const name = header!.querySelector('.pactor-chat-message__agent-name')!;
+    const name = header!.querySelector('[data-slot=sender-name]')!;
     expect(name.textContent).toBe('数据资产');
-    expect(header!.querySelector('.pactor-chat-message__agent-icon')).toBeTruthy();
+    expect(header!.querySelector('[data-slot=sender-icon]')).toBeTruthy();
     expect(
-      document.querySelector('.pactor-chat-message--user .pactor-chat-message__agent'),
+      document.querySelector('.pactor-chat-message--user [data-slot=sender]'),
     ).toBeNull();
   });
 
@@ -139,13 +140,13 @@ describe('ChatView（Agent 身份行）', () => {
       <ChatView store={store} agent={{ name: '数据资产' }} />,
     );
     const names = Array.from(
-      document.querySelectorAll('.pactor-chat-message__agent-name'),
+      document.querySelectorAll('[data-slot=sender-name]'),
     ).map((node) => node.textContent);
     expect(names).toEqual(['批量值班', '数据资产']);
     unmount();
 
     render(<ChatView store={createStore()} />);
-    expect(document.querySelector('.pactor-chat-message__agent')).toBeNull();
+    expect(document.querySelector('[data-slot=sender]')).toBeNull();
   });
 });
 
@@ -390,7 +391,8 @@ describe('ChatView 透传 Composer 扩展 props（spec: chat-composer-extensions
     );
     expect(screen.getByText('report.pdf')).toBeTruthy();
     expect(screen.getByText('1.5 KB')).toBeTruthy();
-    expect(document.querySelector('[data-attachment-id="att-1"]')).toBeTruthy();
+    // ui Attachment 卡片（data-slot 标记）
+    expect(document.querySelector('[data-slot=attachment-item]')).toBeTruthy();
   });
 
   it('toolbarEnd 内容渲染在内建 Composer 工具栏区', () => {
@@ -401,18 +403,18 @@ describe('ChatView 透传 Composer 扩展 props（spec: chat-composer-extensions
         toolbarEnd={<span data-testid="chat-view-chip">模型 chip</span>}
       />,
     );
-    const toolbar = document.querySelector('.pactor-chat-composer__toolbar')!;
+    const toolbar = document.querySelector('[data-slot=chat-input] .flex.items-center')!;
     expect(toolbar).toBeTruthy();
-    expect(screen.getByTestId('chat-view-chip')).toBeTruthy();
+    expect(toolbar.contains(screen.getByTestId('chat-view-chip'))).toBe(true);
   });
 
   it('未传 onPlusMenu：内建 Composer 不渲染 "+" 按钮；传入后渲染', () => {
     const store = createStore();
     const { rerender } = render(<ChatView store={store} />);
-    expect(screen.queryByRole('button', { name: '更多功能' })).toBeNull();
+    expect(screen.queryByRole('button', { name: '添加上下文' })).toBeNull();
 
     rerender(<ChatView store={store} onPlusMenu={() => {}} />);
-    expect(screen.getByRole('button', { name: '更多功能' })).toBeTruthy();
+    expect(screen.getByRole('button', { name: '添加上下文' })).toBeTruthy();
   });
 });
 

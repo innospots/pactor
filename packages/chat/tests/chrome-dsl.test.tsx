@@ -15,6 +15,7 @@ import {
   type ChatMessage,
   type ChatServices,
 } from '../src/index.js';
+import { registerChatComponents } from '../src/components/index.js';
 
 afterEach(cleanup);
 
@@ -26,6 +27,7 @@ afterEach(cleanup);
 
 function fullRegistry(): Registry<unknown> {
   const registry = createComponentRegistry();
+  registerChatComponents(registry);
   registerChatComponent(registry);
   return registry;
 }
@@ -107,10 +109,10 @@ describe('chrome DSL 渲染层（spec: chat-chrome-dsl）', () => {
       { components: chatOnly },
     );
 
-    // 回退：无 chrome 容器，手写按钮渲染且可点击
+    // 回退：无 chrome 容器，ui Welcome + Suggestion 组合渲染且建议可点击
     expect(document.querySelector('.pactor-chat-chrome')).toBeNull();
     expect(
-      document.querySelector('.pactor-chat-empty__suggestion'),
+      document.querySelector('.pactor-chat-empty__suggestions [data-slot=suggestion-item]'),
     ).not.toBeNull();
     expect(warn.mock.calls.some((args) => String(args[0]).includes('组件类型缺失'))).toBe(
       true,

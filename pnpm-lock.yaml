@@ -43,6 +43,9 @@ importers:
       '@pactor-app/chart':
         specifier: workspace:*
         version: link:../packages/chart
+      '@pactor-app/chat':
+        specifier: workspace:*
+        version: link:../packages/chat
       '@pactor-app/core':
         specifier: workspace:*
         version: link:../packages/core
@@ -484,7 +487,16 @@ importers:
       '@pactor-app/ui':
         specifier: workspace:*
         version: link:../ui
+      clsx:
+        specifier: ^2.1.1
+        version: 2.1.1
+      tailwind-merge:
+        specifier: ^3.6.0
+        version: 3.6.0
     devDependencies:
+      '@tailwindcss/cli':
+        specifier: ^4.3.3
+        version: 4.3.3
       '@testing-library/dom':
         specifier: ^10.4.1
         version: 10.4.1
@@ -506,6 +518,9 @@ importers:
       react-dom:
         specifier: ^19.2.8
         version: 19.2.8(react@19.2.8)
+      tailwindcss:
+        specifier: ^4.3.3
+        version: 4.3.3
 
   packages/cli:
     dependencies:

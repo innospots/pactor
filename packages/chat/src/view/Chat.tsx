@@ -5,6 +5,7 @@ import { Fragment, useEffect, useRef, type ReactNode } from 'react';
 import { ChatComposition, resolveSlot } from '../chat-composition.js';
 import { useChatServices } from '../chat-services.js';
 import type { ChatArtifact } from '../artifact.js';
+import { registerChatComponents } from '../components/index.js';
 import type {
   BuiltinMessageAction,
   ChatAgentIdentity,
@@ -534,7 +535,8 @@ export function registerChatComponent(registry: Registry<unknown>): void {
 }
 
 /**
- * 便捷工厂：创建含全部内置组件 + Chat / ChatShell 的组件注册表，
+ * 便捷工厂：创建含全部内置组件（ui 内置 + chat 展示组件）+
+ * Chat / ChatShell 的组件注册表，
  * 直接作为 createPactorApplication 的 componentRegistry 选项：
  *
  * ```ts
@@ -548,6 +550,7 @@ export function registerChatComponent(registry: Registry<unknown>): void {
  */
 export function createChatComponentRegistry(): Registry<unknown> {
   const registry = createComponentRegistry();
+  registerChatComponents(registry);
   registerChatComponent(registry);
   return registry;
 }

@@ -25,7 +25,7 @@ import type {
 } from './model.js';
 import { ConversationStore } from './store.js';
 import { AppShell } from './view/AppShell.js';
-import { ArtifactPanel } from './view/ArtifactPanel.js';
+import { ArtifactPanel } from './view/ChatArtifactPanel.js';
 import { ChatView } from './view/ChatView.js';
 import type { ChatSuggestion } from './view/EmptyState.js';
 import { ModelSelect } from './view/ModelChip.js';

@@ -1,7 +1,9 @@
 /**
  * 令牌元数据防漂移测试（spec: theme-studio / 令牌清单与 ui 包对齐）：
- * 解析 packages/ui/src/styles.css 的 `:root` 自定义属性集合，
- * 与 src/tokens.ts 清单双向比对——缺失或多余即失败。
+ * 解析 packages/ui/src/styles.css 与 packages/chat/src/styles.css
+ * （chat 展示组件迁入后，`--pactor-chat-rail-*` 令牌归属 chat 包）
+ * 的 `:root` 自定义属性集合，与 src/tokens.ts 清单双向比对——
+ * 缺失或多余即失败。
  */
 import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
@@ -10,9 +12,14 @@ import { describe, expect, it } from 'vitest';
 
 import { TOKEN_GROUPS, TOKEN_NAMES } from '../src/tokens';
 
-const stylesPath = fileURLToPath(
-  new URL('../../../packages/ui/src/styles.css', import.meta.url),
-);
+const stylesPaths = [
+  fileURLToPath(
+    new URL('../../../packages/ui/src/styles.css', import.meta.url),
+  ),
+  fileURLToPath(
+    new URL('../../../packages/chat/src/styles.css', import.meta.url),
+  ),
+];
 
 /** 提取顶层 `:root { ... }` 块（brace 配对）声明的自定义属性名集合 */
 function extractRootCustomProperties(css: string): Set<string> {
@@ -43,7 +50,12 @@ function extractRootCustomProperties(css: string): Set<string> {
 }
 
 describe('tokens.ts 与 styles.css :root 令牌清单一致性', () => {
-  const actual = extractRootCustomProperties(readFileSync(stylesPath, 'utf8'));
+  const actual = new Set<string>();
+  for (const path of stylesPaths) {
+    for (const name of extractRootCustomProperties(readFileSync(path, 'utf8'))) {
+      actual.add(name);
+    }
+  }
 
   it('tokens.ts 不含 styles.css 缺失的令牌（多余即失败）', () => {
     const extra = TOKEN_NAMES.filter((name) => !actual.has(name));

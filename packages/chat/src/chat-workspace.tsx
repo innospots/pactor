@@ -2,7 +2,7 @@ import type { DslNode, Registry } from '@pactor-app/core';
 import type { ReactNode } from 'react';
 
 import type { ArtifactStore, ChatArtifact } from './artifact.js';
-import type { ArtifactViewers } from './view/ArtifactPanel.js';
+import type { ArtifactViewers } from './view/ChatArtifactPanel.js';
 import type {
   ChatCapabilityRegistry,
   ChatConfirm,

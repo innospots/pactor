@@ -182,7 +182,7 @@ async function* artifactPageTurn(messageId: string): AsyncGenerator<ChatEvent> {
 async function* multiFileTurn(messageId: string): AsyncGenerator<ChatEvent> {
   yield* streamThinking(messageId, '用户需要一组文件，整理为多个产出物连续下发……');
   await sleep(400);
-  const files: Array<{ id: string; kind: 'markdown' | 'code' | 'text'; title: string; content: string; meta?: Record<string, unknown> }> = [
+  const files: Array<{ id: string; kind: 'markdown' | 'code' | 'text'; title: string; content: string; language?: string; meta?: Record<string, unknown> }> = [
     { id: 'art-batch-readme', kind: 'markdown', title: 'README.md', content: '# 批量产物\n\n本产物由 mock 批量意图生成。', meta: { size: 3584 } },
     { id: 'art-batch-data', kind: 'text', title: '月度数据.csv', content: '月份,营收\n1,128.6', meta: { size: 20480 } },
     { id: 'art-batch-app', kind: 'code', title: 'app.ts', content: "export const main = () => 'hi';", language: 'ts', meta: { size: 512 } },

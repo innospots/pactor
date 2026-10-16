@@ -1,7 +1,7 @@
 import type { DslNode } from '@pactor-app/core';
 import { useI18n } from '@pactor-app/runtime';
 import { useRenderer } from '@pactor-app/runtime';
-import { ArrowUp } from 'lucide-react';
+import { ArrowUp, Square } from 'lucide-react';
 import {
   isValidElement,
   useRef,
@@ -16,8 +16,20 @@ import { cn } from '../../../lib/utils.js';
 import { Button as ShadcnButton } from '../../../ui/button.js';
 import { Textarea as ShadcnTextarea } from '../../../ui/textarea.js';
 
-export interface ChatInputProps {
-  /** 受控值（提供即受控：变更只经 onChange 传出，显示值取自 props） */
+/**
+ * Renderer 上下文可选探测：无 DslRenderer 环境（纯 React 宿主直连）
+ * 返回 null——useRenderer 的 throw 发生在 useContext 注册之后，
+ * hooks 数量恒定；无 renderer 时 DslNode 槽位不渲染（React 元素槽不受影响）
+ */
+export function useOptionalRenderer(): ReturnType<typeof useRenderer> | null {
+  try {
+    return useRenderer();
+  } catch {
+    return null;
+  }
+}
+
+export interface ChatInputProps {  /** 受控值（提供即受控：变更只经 onChange 传出，显示值取自 props） */
   value?: string;
   placeholder?: string;
   disabled?: boolean;
@@ -28,6 +40,10 @@ export interface ChatInputProps {
    * hideSend 且左右槽均未提供时工具栏行整体零渲染
    */
   hideSend?: boolean;
+  /** 流式生成中：发送钮切换为停止钮（不禁用），点击经 onStop 传出 */
+  streaming?: boolean;
+  /** 停止事件（streaming 时点击停止钮） */
+  onStop?: () => void;
   /** 工具栏左端槽（DslNode 子树经 Renderer 渲染；React 宿主可直接传元素） */
   toolbarStart?: DslNode | ReactNode;
   /** 工具栏右端槽（发送钮之前） */
@@ -62,7 +78,8 @@ export interface ChatInputProps {
  *
  * 发送语义：点击发送钮或 Enter（Shift+Enter 换行；IME 合成中 Enter
  * 不发送；trim 后空白禁发且发送钮禁用）；非受控发送后自动清空，
- * 受控模式由调用方在 onSubmit 闭环里清空。
+ * 受控模式由调用方在 onSubmit 闭环里清空。streaming 时发送钮切换为
+ * 停止钮（不禁用、不阻断输入），点击经 onStop 传出。
  *
  * 定位为通用结构构件：transport / 附件 / 提及等对话领域能力请使用
  * @pactor-app/chat 的 Composer。
@@ -73,6 +90,8 @@ export function ChatInput({
   disabled,
   rows = 3,
   hideSend,
+  streaming = false,
+  onStop,
   toolbarStart,
   toolbarEnd,
   header,
@@ -83,7 +102,7 @@ export function ChatInput({
   className,
   style,
 }: ChatInputProps) {
-  const { renderChildren } = useRenderer();
+  const renderer = useOptionalRenderer();
   const controlled = value !== undefined;
   const [draft, setDraft] = useState('');
   const { t } = useI18n();
@@ -92,11 +111,11 @@ export function ChatInput({
   // 自定义输入区（field）模式：编辑面由调用方自持，此处不维护草稿
   const customField = field !== undefined && field !== null;
 
-  // 槽位渲染：React 元素直接渲染，其余按 DslNode 走 Renderer
+  // 槽位渲染：React 元素直接渲染，DslNode 经 Renderer（无 Renderer 上下文不渲染）
   const renderSlot = (slot: DslNode | ReactNode): ReactNode =>
     isValidElement(slot) || typeof slot !== 'object' || slot === null
       ? slot
-      : renderChildren([slot as DslNode]);
+      : (renderer?.renderChildren([slot as DslNode]) ?? null);
 
   // IME 合成守卫（chat Composer 同语义）：合成中 Enter 不发送
   const composingRef = useRef(false);
@@ -170,12 +189,12 @@ export function ChatInput({
             <ShadcnButton
               type="button"
               size="icon"
-              aria-label={t('pactor.chatInput.send')}
-              disabled={!canSubmit}
-              onClick={submit}
+              aria-label={streaming ? t('pactor.chatInput.stop') : t('pactor.chatInput.send')}
+              disabled={streaming ? false : !canSubmit}
+              onClick={streaming ? () => onStop?.() : submit}
               className="size-8 rounded-full"
             >
-              <ArrowUp />
+              {streaming ? <Square /> : <ArrowUp />}
             </ShadcnButton>
           )}
         </div>

@@ -29,4 +29,28 @@ if (typeof window !== 'undefined') {
   if (!window.scrollTo) {
     window.scrollTo = () => {};
   }
+
+  // embla-carousel 等依赖 IntersectionObserver，jsdom 未实现
+  if (!window.IntersectionObserver) {
+    window.IntersectionObserver = class {
+      observe() {}
+      unobserve() {}
+      disconnect() {}
+      takeRecords() {
+        return [];
+      }
+    } as unknown as typeof IntersectionObserver;
+  }
+
+  // Base UI 弹层（Select/Popover/DropdownMenu 等）依赖 Pointer Capture /
+  // scrollIntoView，jsdom 未实现
+  if (!HTMLElement.prototype.hasPointerCapture) {
+    HTMLElement.prototype.hasPointerCapture = () => false;
+    HTMLElement.prototype.setPointerCapture = () => {};
+    HTMLElement.prototype.releasePointerCapture = () => {};
+  }
+
+  if (!Element.prototype.scrollIntoView) {
+    Element.prototype.scrollIntoView = () => {};
+  }
 }

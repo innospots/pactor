@@ -119,27 +119,6 @@ import { Upload } from './components/Upload/index.js';
 import { Video } from './components/Video/index.js';
 import { Watermark } from './components/Watermark/index.js';
 
-// AI 与会话类扩展组件（chat 子目录）
-import { AgentStatus } from './chat/AgentStatus/index.js';
-import { ArtifactPanel } from './chat/ArtifactPanel/index.js';
-import { Attachment } from './chat/Attachment/index.js';
-import { Bubble } from './chat/Bubble/index.js';
-import { ChatMessage } from './chat/ChatMessage/index.js';
-import { ChatPage } from './chat/ChatPage/index.js';
-import { Citation } from './chat/Citation/index.js';
-import { Composer } from './chat/Composer/index.js';
-import { ConversationList } from './chat/ConversationList/index.js';
-import { MessageList } from './chat/MessageList/index.js';
-import { Prompt } from './chat/Prompt/index.js';
-import { Sender } from './chat/Sender/index.js';
-import { StepsPanel } from './chat/StepsPanel/index.js';
-import { StreamingText } from './chat/StreamingText/index.js';
-import { Suggestion } from './chat/Suggestion/index.js';
-import { Thinking } from './chat/Thinking/index.js';
-import { ToolCall } from './chat/ToolCall/index.js';
-import { Welcome } from './chat/Welcome/index.js';
-
-
 
 /**
  * 内置组件表：DSL 类型名 → 组件适配器。
@@ -276,25 +255,6 @@ export const builtinComponents = {
   CodeBlock,
   DiffViewer,
   JSONViewer,
-  // AI 与会话类扩展组件（第八批：chat 子目录）
-  Bubble,
-  Sender,
-  Thinking,
-  AgentStatus,
-  StreamingText,
-  Suggestion,
-  Prompt,
-  Welcome,
-  Citation,
-  Attachment,
-  ToolCall,
-  ChatMessage,
-  ChatPage,
-  ArtifactPanel,
-  MessageList,
-  Composer,
-  ConversationList,
-  StepsPanel,
 } as const;
 
 /** 把全部 V1 内置组件按 DSL 类型名注册到给定 ComponentRegistry */
