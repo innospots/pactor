@@ -11,12 +11,50 @@ description: 导航类 DSL 组件——Menu / Link / Breadcrumb / Pagination / T
 
 | prop | 类型 | 说明 |
 | --- | --- | --- |
-| `items` | `{ key, label, icon?, badge?, dot?, group?, disabled?, children? }[]` | 菜单树（如 `${data.menus}`；`icon` 为图标名（Icon 白名单，kebab/Pascal 均可），渲染于文字前；`badge` 为角标、`dot` 为 danger 系状态圆点、`group` 为分组标题（相邻同组只渲染一次）、`disabled` 置灰不可选） |
+| `items` | `{ key, label, icon?, badge?, dot?, group?, disabled?, trailing?, actions?, children? }[]` | 菜单树（如 `${data.menus}`；`icon` 为图标名（Icon 白名单，kebab/Pascal 均可），渲染于文字前；`badge` 为角标、`dot` 为 danger 系状态圆点、`group` 为分组标题（相邻同组只渲染一次）、`disabled` 置灰不可选；`trailing` 为右端弱提示文本（如创建时间）、`actions` 为右端操作按钮组，见下方「项级操作」；inline 模式下含 `children` 的目录项不可选中——无选中态、点击不触发 `onSelect`） |
 | `mode` | `inline`（默认）\| `horizontal` | inline 用于 Sider，horizontal 用于 Header |
-| `selectedKey` | string | 受控选中项 |
-| `collapsible` | boolean（默认 `false`） | 仅 inline 模式生效：含 `children` 的目录项可折叠——点击只展开/收起（不触发 `onSelect`），右端 chevron 指示（展开时旋转 180°）；展开状态组件内部维护，初始为 `defaultExpandedKeys` ∪ `selectedKey` 的祖先目录链（挂载时算一次，`selectedKey` 后续变化不重置手动状态） |
-| `defaultExpandedKeys` | string[] | 初始额外展开的目录 key |
+| `selectedKey` | string | 受控选中项（仅叶子项；目录项不参与选中） |
+| `collapsible` | boolean（默认 `false`） | 仅 inline 模式生效：含 `children` 的目录项可折叠——点击只展开/收起（不触发 `onSelect`），右端 chevron 指示（展开时旋转 180°）；未开启时目录静态展开、点击为空操作。展开状态组件内部维护 |
+| `defaultExpandedKeys` | string[] | 初始展开的目录 key（与 `selectedKey` 祖先链合并，挂载时算一次，`selectedKey` 后续变化不重置手动状态） |
+| `defaultExpandAll` | boolean（默认 `false`） | 仅配合 `collapsible`：初始展开全部目录，运行时动态新增的目录同样默认展开（适合数据驱动的树）；用户手动折叠后保持 |
+| `chevronPlacement` | `'right'`（默认）\| `'left'` | 仅配合 `collapsible`：目录项 chevron 展开指示的位置，`left` 渲染在图标/文字前（树形风格），`right` 渲染在行内右端 |
 | 事件 `onSelect` | — | 点选传出 key（典型接 `navigate` 或 `setState`） |
+| 事件 `onItemAction` | — | 项操作事件，传出 `{ key, action }`（见下方「项级操作」） |
+
+项级操作（`trailing` / `actions`，仅非折叠态渲染；操作点击不触发 `onSelect` 与目录 toggle；与文字处于同一行容器，悬浮 / 选中底色覆盖整行）：
+
+- `trailing`：右端弱提示文本（如创建时间），位于操作按钮前。
+- `actions`：`{ key, icon, tooltip?, menu? }[]`——纯图标按钮点击上报 `action = key`；`menu`（`{ label, value, icon?, danger? }[]`）提供时按钮为下拉触发器，选择后上报 `action = "${key}:${value}"`。
+
+```yaml
+- type: Menu
+  props:
+    items:
+      - key: inst-1
+        label: 实例一
+        actions:
+          - { key: add, icon: plus, tooltip: 添加 }
+          - key: more
+            icon: ellipsis
+            tooltip: 更多
+            menu:
+              - { label: 重命名, value: rename }
+              - { label: 删除, value: delete, danger: true }
+        children:
+          - key: inst-1/conv-1
+            label: 会话一
+            trailing: 10:30
+            actions:
+              - key: more
+                icon: ellipsis
+                menu:
+                  - { label: 重命名, value: rename }
+                  - { label: 删除, value: delete, danger: true }
+  events:
+    onItemAction:
+      - action: message
+        params: { messageType: info, text: "${event.key} → ${event.action}" }
+```
 
 可折叠子菜单示例：
 

@@ -219,7 +219,12 @@ export type { ContentProps } from './components/Content/index.js';
 export { Footer } from './components/Footer/index.js';
 export type { FooterProps } from './components/Footer/index.js';
 export { Menu } from './components/Menu/index.js';
-export type { MenuItem, MenuProps } from './components/Menu/index.js';
+export type {
+  MenuItem,
+  MenuItemAction,
+  MenuItemActionEvent,
+  MenuProps,
+} from './components/Menu/index.js';
 export { Link } from './components/Link/index.js';
 export type { LinkProps } from './components/Link/index.js';
 
