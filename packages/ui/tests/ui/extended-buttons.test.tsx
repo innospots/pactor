@@ -212,8 +212,25 @@ describe('SplitButton 分体式按钮', () => {
     // 需同按钮规则并入 ButtonGroup 相连表面，否则保留四角 rounded-md
     const cls = group!.className;
     expect(cls).toContain('[&>[data-slot=dropdown-menu-trigger]]:rounded-none');
-    expect(cls).toContain('[&>[data-slot=dropdown-menu-trigger]]:last:rounded-r-md');
+    expect(cls).toContain('[&>[data-slot=dropdown-menu-trigger]]:last-of-type:rounded-r-md');
     expect(cls).toContain('[&>[data-slot=dropdown-menu-trigger]:not(:first-child)]:-ml-px');
+  });
+
+  it('展开回归：Base UI focus-guard span 注入组内后，触发钮仍保持右端圆角', async () => {
+    const user = userEvent.setup();
+    render(<SplitButton options={options}>保存</SplitButton>);
+    const group = document.querySelector('[data-slot="split-button"]')!;
+    const trigger = screen.getByRole('button', { name: '更多选项' });
+    await user.click(trigger);
+    await screen.findByRole('menu');
+    // 展开时 Base UI 在组内注入 focus-guard span（position:fixed），
+    // :last-child 判定会失效；:last-of-type 保证末位规则不受注入影响
+    const guards = group.querySelectorAll('[data-base-ui-focus-guard]');
+    expect(guards.length).toBeGreaterThan(0);
+    // 触发钮不是 last-child（末位被 guard 占据），但仍是最后一个 button
+    expect(group.lastElementChild!.tagName).toBe('SPAN');
+    expect(trigger.matches(':last-of-type')).toBe(true);
+    expect(trigger.matches(':last-child')).toBe(false);
   });
 });
 

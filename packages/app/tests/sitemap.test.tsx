@@ -270,6 +270,32 @@ describe('resolveSitemapRoute', () => {
     expect(res.route!.params).toEqual({ id: '42' });
   });
 
+  it('菜单显式 path 与页面参数模式不同：params 按页面 path 重新匹配', () => {
+    // 一级菜单落到静态地址（/reports/1）作默认页，页面模式是 /reports/:id
+    const sitemap = createSitemap({
+      menus: [
+        { id: 'home', type: 'page', pageId: 'home', title: '首页', order: 1 },
+        {
+          id: 'reports',
+          type: 'page',
+          pageId: 'detail',
+          path: '/reports/1',
+          title: '报表',
+          order: 2,
+        },
+        { id: 'detail', type: 'page', pageId: 'detail', title: '详情', hidden: true, activeMenu: 'reports' },
+      ],
+    });
+    // 菜单静态地址命中：pageId 来自菜单，params 按页面模式重匹配
+    const landing = resolve(sitemap, '/reports/1')!;
+    expect(landing.route!.pageId).toBe('detail');
+    expect(landing.route!.params).toEqual({ id: '1' });
+    // 其他参数地址命中隐藏菜单（页面继承的 :id 模式）
+    const other = resolve(sitemap, '/reports/42')!;
+    expect(other.route!.params).toEqual({ id: '42' });
+    expect(other.route!.highlightKey).toBe('/reports/1');
+  });
+
   it('布局嵌套链：无 parent 时仅自身；parent 上溯成链（最外层在前）', () => {
     // 无 parent → 链为自身
     expect(resolve(createSitemap(), '/')!.route!.layoutChain).toEqual(['admin']);
