@@ -5,7 +5,7 @@
  */
 
 /* ============================================================
- * @pactor-app/ui@1.44.0（构建产物内联，源顺序：ui → blocks → chart → chat）
+ * @pactor-app/ui@1.46.0（构建产物内联，源顺序：ui → blocks → chart → chat）
  * ============================================================ */
 /*! tailwindcss v4.3.3 | MIT License | https://tailwindcss.com */
 @layer properties;
@@ -4570,7 +4570,7 @@
 }
 
 /* ============================================================
- * @pactor-app/blocks@1.44.0（构建产物内联，源顺序：ui → blocks → chart → chat）
+ * @pactor-app/blocks@1.46.0（构建产物内联，源顺序：ui → blocks → chart → chat）
  * ============================================================ */
 /*! tailwindcss v4.3.3 | MIT License | https://tailwindcss.com */
 @layer properties;
@@ -5914,7 +5914,7 @@
 }
 
 /* ============================================================
- * @pactor-app/chart@1.44.0（构建产物内联，源顺序：ui → blocks → chart → chat）
+ * @pactor-app/chart@1.46.0（构建产物内联，源顺序：ui → blocks → chart → chat）
  * ============================================================ */
 /*! tailwindcss v4.3.3 | MIT License | https://tailwindcss.com */
 @layer properties;
@@ -6173,16 +6173,12 @@
 }
 
 /* ============================================================
- * @pactor-app/chat@1.44.0（构建产物内联，源顺序：ui → blocks → chart → chat）
+ * @pactor-app/chat@1.46.0（构建产物内联，源顺序：ui → blocks → chart → chat）
  * ============================================================ */
 /*! tailwindcss v4.3.3 | MIT License | https://tailwindcss.com */
 @layer properties;
 @layer theme {
   :root, :host {
-    --font-sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', 'Noto Sans', Arial,
-    sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
-    --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New',
-    monospace;
     --spacing: 0.25rem;
     --container-xl: 36rem;
     --text-xs: 0.75rem;
