@@ -3,6 +3,7 @@
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { Suspense } from "react";
 import { SitemapApp } from "pactor-app";
+import { Login } from "@pactor-app/blocks";
 
 import { apiBaseUrl, pageEndpoint, sitemapSources } from "./config";
 import { pactorActions } from "./actions";
@@ -18,6 +19,10 @@ import { pactorComponents } from "./components";
  * 页面数据全部走 http 数据源（/api/d/*），经转发层
  *（app/api/d/[...parts]/route.ts）原样转发到 serverBaseUrl（见 config.ts）；
  * 没有服务层接口时转发层返回空数据，页面按空态渲染。
+ *
+ * 业务区块组件（@pactor-app/blocks）不进 ui 内置注册表：login 页 DSL 的
+ * `type: Login` 经 `components` prop 注册（样式见 layout.tsx 的
+ * blocks/styles.css）。
  *
  * 登录 / 登出是普通 HTTP 调用，由 DSL 中的内置 request 动作直接表达
  *（见 src/server/yaml/ 的登录页 / 布局 DSL），无需客户端注册服务。
@@ -48,7 +53,7 @@ function PactorAppInner() {
       pathname={pathname}
       query={Object.fromEntries(searchParams.entries())}
       navigate={(to) => router.push(to)}
-      components={pactorComponents}
+      components={{ ...pactorComponents, Login }}
       actions={pactorActions}
       pageEndpoint={pageEndpoint}
     />

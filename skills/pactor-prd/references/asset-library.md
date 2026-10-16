@@ -32,14 +32,14 @@
 
 **阶段 3 · 业务组件**
 - `components/business.ts` 有 26 个文档条目，但 **catalog 的 `integration` 字段不可信**（文档规范条目也标 integrated）；
-- **只有 `details/business-details.ts` 中存在条目的 9 个**（Login / EntityCard / CardList / ExpressionEditor / FieldCondition / RuleConfig / RuleExpression / ScriptEditor / SearchableSelect）是 `packages/ui` 真实实现、可直接用；
+- 业务组件已从 `packages/ui` 拆出为 **`@pactor-app/blocks`**（不进 ui 内置注册表，接入方用 `registerBlockComponents` 合并）。**真实导出的 10 个**（Login / EntityCard / CardList / RecordingPage / SiteFooter / ExpressionEditor / FieldCondition / RuleConfig / RuleExpression / ScriptEditor）可直接用；`SearchableSelect` 已转为内部实现（`internal/`），不对外导出；
 - 其余条目（高级表格、人员选择器等）只有产品文档定义、无实现——线框图命中时用基础组件组合近似，并在交付说明中标注差距。
 
 **阶段 4 · 样式**：主题家族与令牌定义在 `assets-data/themes/` / `tokens/`，与 `references/theme-and-style.md` 配合。
 
 ## 权威顺序与核对
 
-1. `packages/ui` 当前导出（`src/components/`，含 `register.ts` 的 DSL 类型注册）——最终以代码为准；
+1. packages 当前导出（`packages/ui/src/components/register.ts` 内置注册表 + `@pactor-app/blocks` / `@pactor-app/chart` 导出）——最终以代码为准；
 2. `details/*-details.ts` 的 `dsl` 示例——已按真实实现核对过；
 3. `components/*.ts` catalog 描述——仅作选型参考。
 

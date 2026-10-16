@@ -1,6 +1,6 @@
 # 页面 YAML 模板
 
-常用页面模板。占位符：`{{kebab-id}}` 页面 id、`{{页面标题}}`、`{{模块名}}`、`{{resource}}` 数据接口名（单段，见 data-api.md）、`{{实体名}}` 业务实体中文名。DSL 语法细节以 `pactor-dsl` skill 与 packages/ui 当前导出为准。
+常用页面模板。占位符：`{{kebab-id}}` 页面 id、`{{页面标题}}`、`{{模块名}}`、`{{resource}}` 数据接口名（单段，见 data-api.md）、`{{实体名}}` 业务实体中文名。DSL 语法细节以 `pactor-dsl` skill 与 packages 当前导出（ui 内置注册表 / `@pactor-app/blocks` / `@pactor-app/chart`）为准。
 
 **数据列表页（搜索 + 表格 + 新建/编辑）默认套用「数据列表标准模型」**；仅当新建/编辑是独立路由表单页时才用轻量变体。
 
@@ -338,7 +338,7 @@ body:
 - **条件显隐**：`onValuesChange` 把字段值镜像到 state（`"${event.x != null ? event.x : state.x}"` 保持其他字段变化时原值），再用 `when` 控制显隐；编辑时关键字段 `disabled: ${state.editingId != ''}`
 - 空 `editingId` 时后端 detail 接口须返回空对象而非 404（转发层本身对 404 也回退空对象，但真实后端仍建议遵守该约定）
 
-## 登录页（Login 业务组件）
+## 登录页（Login 业务组件，`@pactor-app/blocks`）
 
 登录页一律用 DSL `type: Login` 业务组件，禁止手写 Card+Form+自定义 CSS。**样板即模板工程的 `template/src/server/yaml/common/login.yaml`**（可直接运行预览），核心结构：
 
@@ -382,7 +382,7 @@ body:
 
 - **布局是产品决策**：原型未明确布局时必须向用户提问（5 种 `layout` + `brandSide`/`brandRatio`/`authVariant` 等修饰），用户不答默认 `split` + `card`；原型可判定则不提问
 - 页面布局（sitemap `layouts`）用纯 PageOutlet 外壳（模板为 `login` 布局），组件自带整页渐变、背景装饰与品牌面板，不要再套自定义背景容器
-- 可配置项权威定义见 `openspec/specs/ui-login-component` 与组件源码（`packages/ui/src/components/business/Login/`）；未配置的可选元素不渲染
+- 可配置项权威定义见 `openspec/specs/ui-login-component` 与组件源码（`packages/blocks/src/components/Login/`）；未配置的可选元素不渲染
 - 校验失败由组件内部 Form rules 就地提示；登录失败/成功分支在 DSL 动作链用 `if` + `message` 实现
 
 ## 列表页（轻量变体：新建/编辑跳独立表单页）
