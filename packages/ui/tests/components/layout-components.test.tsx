@@ -336,7 +336,7 @@ describe('Menu', () => {
     expect(screen.queryByText('客户列表')).toBeNull();
   });
 
-  it('缺省 collapsible：子菜单静态展开，目录项点击照常触发 onSelect', async () => {
+  it('缺省 collapsible：子菜单静态展开，目录项不可选中（点击不触发 onSelect）', async () => {
     const user = userEvent.setup();
     const { context } = renderDsl({
       type: 'Menu',
@@ -348,7 +348,10 @@ describe('Menu', () => {
 
     expect(screen.getByText('客户列表')).toBeDefined();
     await user.click(screen.getByText('客户管理'));
-    await expectEventState(context, 'selected', 'customer');
+    // 目录项不参与选中：点击为空操作，叶子项照常触发 onSelect
+    expect(context.state.get('selected')).toBeUndefined();
+    await user.click(screen.getByText('客户列表'));
+    await expectEventState(context, 'selected', 'customer-list');
   });
 
   /** 渲染 collapsed(icon rail)侧栏内的 Menu：Sidebar content 槽 DSL + 点击收起触发器 */
