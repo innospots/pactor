@@ -15,6 +15,7 @@
     "@pactor-app/core": "workspace:*",
     "@pactor-app/resource": "workspace:*",
     "@pactor-app/ui": "workspace:*",
+    "pactor-app": "workspace:*",
     "react": "^19.2.8",
     "react-dom": "^19.2.8",
     "react-router-dom": "^7.18.2"

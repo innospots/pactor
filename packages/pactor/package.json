@@ -33,17 +33,21 @@
         "types": "./dist/index.d.cts",
         "default": "./dist/index.cjs"
       }
-    }
+    },
+    "./styles.css": "./styles.css"
   },
-  "sideEffects": false,
+  "sideEffects": [
+    "./styles.css"
+  ],
   "engines": {
     "node": ">=18"
   },
   "files": [
-    "dist"
+    "dist",
+    "styles.css"
   ],
   "scripts": {
-    "build": "tsup",
+    "build": "tsup && node scripts/build-styles.mjs",
     "typecheck": "tsc --noEmit",
     "prepublishOnly": "pnpm build"
   },
@@ -52,6 +56,8 @@
   },
   "dependencies": {
     "@pactor-app/app": "workspace:*",
+    "@pactor-app/blocks": "workspace:*",
+    "@pactor-app/chart": "workspace:*",
     "@pactor-app/chat": "workspace:*",
     "@pactor-app/cli": "workspace:*",
     "@pactor-app/core": "workspace:*",

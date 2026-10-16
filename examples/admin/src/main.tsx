@@ -5,14 +5,12 @@ import {
   registerChatComponent,
   type ChatServices,
 } from "@pactor-app/chat";
-// Chat 一等组件（AI 工作区页）的皮肤样式表
-import "@pactor-app/chat/styles.css";
 import { StaticDslLoader } from "@pactor-app/resource";
-// 默认 UI 为 @pactor-app/ui 内置实现，样式表导入为必需步骤
-import "@pactor-app/ui/styles.css";
 import { createComponentRegistry } from "@pactor-app/ui/components";
 import type { ReactNode } from "react";
-// 示例皮肤：换肤契约参考实现（须在 @pactor-app/ui/styles.css 之后导入）
+// 聚合样式单入口：ui 基线 → blocks → chart → chat 已按级联序内联
+import "pactor-app/styles.css";
+// 示例皮肤：换肤契约参考实现（须在 pactor-app 聚合样式之后导入）
 import "./theme.css";
 // 皮肤 store：模块加载即把持久化的皮肤应用到 DOM（data-pactor-theme 等），
 // 须在首屏渲染前执行

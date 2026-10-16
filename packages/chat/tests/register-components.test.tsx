@@ -70,18 +70,25 @@ describe('registerChatComponents（spec: chat-ui-components / 展示组件 DSL �
 });
 
 describe('样式独立分发（spec: chat-ui-components / 样式独立分发）', () => {
-  it('样式源文件含 Tailwind 编译头与 rail 令牌；编译产物含迁移组件工具类', () => {
+  it('样式源文件为 lean 形式（无 preflight / 桥接 import）；编译产物含迁移组件工具类', () => {
     const src = readFileSync(join(__dirname, '../src/styles.css'), 'utf8');
-    expect(src).toContain("@import 'tailwindcss'");
+    // lean 模式（与 blocks/chart 同一契约）：theme + utilities 层，无 preflight
+    expect(src).toContain("@import 'tailwindcss/theme.css' layer(theme)");
+    expect(src).toContain("@import 'tailwindcss/utilities.css' layer(utilities)");
+    // 语义令牌桥全仓单源：无 @theme inline 拷贝
+    expect(src).toContain("@import '@pactor-app/ui/theme-bridge.css'");
+    expect(src).not.toContain('@theme inline');
     expect(src).toContain('--pactor-chat-rail-width:');
     expect(src).toContain('--pactor-chat-rail-popover-width:');
-    // 语义令牌 → 工具类桥接（迁移组件的 bg-accent / text-muted-foreground 等经此生成）
-    expect(src).toContain('--color-accent: var(--accent)');
 
-    // 编译产物（build:styles 输出）：迁移组件工具类与 rail 令牌随包分发
+    // 编译产物（build:styles 输出）：迁移组件工具类与 rail 令牌随包分发；
+    // preflight 由 ui 提供，chat 产物不含盒模型基线
     const built = readFileSync(join(__dirname, '../styles.css'), 'utf8');
     expect(built).toContain('--pactor-chat-rail-width:');
     expect(built).toContain('scrollbar-subtle');
     expect(built).toContain('rounded-xl');
+    expect(built).not.toContain('@layer base {');
+    // 桥接内联：bg-background 等语义工具类可用
+    expect(built).toContain('bg-background');
   });
 });
