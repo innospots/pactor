@@ -5,7 +5,7 @@
  */
 
 /* ============================================================
- * @pactor-app/ui@1.48.0（构建产物内联，源顺序：ui → blocks → chart → chat）
+ * @pactor-app/ui@1.48.1（构建产物内联，源顺序：ui → blocks → chart → chat）
  * ============================================================ */
 /*! tailwindcss v4.3.3 | MIT License | https://tailwindcss.com */
 @layer properties;
@@ -3614,13 +3614,21 @@
     border-top-right-radius: calc(var(--radius) * 0.8);
     border-bottom-right-radius: calc(var(--radius) * 0.8);
   }
+  .\[\&\>\[data-slot\=button\]\]\:first-of-type\:rounded-l-md > [data-slot=button]:first-of-type {
+    border-top-left-radius: calc(var(--radius) * 0.8);
+    border-bottom-left-radius: calc(var(--radius) * 0.8);
+  }
+  .\[\&\>\[data-slot\=button\]\]\:last-of-type\:rounded-r-md > [data-slot=button]:last-of-type {
+    border-top-right-radius: calc(var(--radius) * 0.8);
+    border-bottom-right-radius: calc(var(--radius) * 0.8);
+  }
   .\[\&\>\[data-slot\=button\]\:not\(\:first-child\)\]\:-ml-px > [data-slot=button]:not(:first-child) {
     margin-left: -1px;
   }
   .\[\&\>\[data-slot\=dropdown-menu-trigger\]\]\:rounded-none > [data-slot=dropdown-menu-trigger] {
     border-radius: 0;
   }
-  .\[\&\>\[data-slot\=dropdown-menu-trigger\]\]\:last\:rounded-r-md > [data-slot=dropdown-menu-trigger]:last-child {
+  .\[\&\>\[data-slot\=dropdown-menu-trigger\]\]\:last-of-type\:rounded-r-md > [data-slot=dropdown-menu-trigger]:last-of-type {
     border-top-right-radius: calc(var(--radius) * 0.8);
     border-bottom-right-radius: calc(var(--radius) * 0.8);
   }
@@ -4605,7 +4613,7 @@
 }
 
 /* ============================================================
- * @pactor-app/blocks@1.48.0（构建产物内联，源顺序：ui → blocks → chart → chat）
+ * @pactor-app/blocks@1.48.1（构建产物内联，源顺序：ui → blocks → chart → chat）
  * ============================================================ */
 /*! tailwindcss v4.3.3 | MIT License | https://tailwindcss.com */
 @layer properties;
@@ -5949,7 +5957,7 @@
 }
 
 /* ============================================================
- * @pactor-app/chart@1.48.0（构建产物内联，源顺序：ui → blocks → chart → chat）
+ * @pactor-app/chart@1.48.1（构建产物内联，源顺序：ui → blocks → chart → chat）
  * ============================================================ */
 /*! tailwindcss v4.3.3 | MIT License | https://tailwindcss.com */
 @layer properties;
@@ -6208,7 +6216,7 @@
 }
 
 /* ============================================================
- * @pactor-app/chat@1.48.0（构建产物内联，源顺序：ui → blocks → chart → chat）
+ * @pactor-app/chat@1.48.1（构建产物内联，源顺序：ui → blocks → chart → chat）
  * ============================================================ */
 /*! tailwindcss v4.3.3 | MIT License | https://tailwindcss.com */
 @layer properties;
@@ -6419,8 +6427,8 @@
   .h-8 {
     height: calc(var(--spacing) * 8);
   }
-  .h-10 {
-    height: calc(var(--spacing) * 10);
+  .h-14 {
+    height: calc(var(--spacing) * 14);
   }
   .h-full {
     height: 100%;
