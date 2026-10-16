@@ -5,7 +5,7 @@
  */
 
 /* ============================================================
- * @pactor-app/ui@1.46.0（构建产物内联，源顺序：ui → blocks → chart → chat）
+ * @pactor-app/ui@1.47.0（构建产物内联，源顺序：ui → blocks → chart → chat）
  * ============================================================ */
 /*! tailwindcss v4.3.3 | MIT License | https://tailwindcss.com */
 @layer properties;
@@ -491,6 +491,9 @@
   }
   .-mr-0\.5 {
     margin-right: calc(var(--spacing) * -0.5);
+  }
+  .mr-0\.5 {
+    margin-right: calc(var(--spacing) * 0.5);
   }
   .mb-1 {
     margin-bottom: var(--spacing);
@@ -1608,6 +1611,9 @@
   .p-0 {
     padding: 0px;
   }
+  .p-0\.5 {
+    padding: calc(var(--spacing) * 0.5);
+  }
   .p-1 {
     padding: var(--spacing);
   }
@@ -1712,6 +1718,9 @@
   }
   .pt-4 {
     padding-top: calc(var(--spacing) * 4);
+  }
+  .pr-1\.5 {
+    padding-right: calc(var(--spacing) * 1.5);
   }
   .pr-2 {
     padding-right: calc(var(--spacing) * 2);
@@ -4570,7 +4579,7 @@
 }
 
 /* ============================================================
- * @pactor-app/blocks@1.46.0（构建产物内联，源顺序：ui → blocks → chart → chat）
+ * @pactor-app/blocks@1.47.0（构建产物内联，源顺序：ui → blocks → chart → chat）
  * ============================================================ */
 /*! tailwindcss v4.3.3 | MIT License | https://tailwindcss.com */
 @layer properties;
@@ -5914,7 +5923,7 @@
 }
 
 /* ============================================================
- * @pactor-app/chart@1.46.0（构建产物内联，源顺序：ui → blocks → chart → chat）
+ * @pactor-app/chart@1.47.0（构建产物内联，源顺序：ui → blocks → chart → chat）
  * ============================================================ */
 /*! tailwindcss v4.3.3 | MIT License | https://tailwindcss.com */
 @layer properties;
@@ -6173,7 +6182,7 @@
 }
 
 /* ============================================================
- * @pactor-app/chat@1.46.0（构建产物内联，源顺序：ui → blocks → chart → chat）
+ * @pactor-app/chat@1.47.0（构建产物内联，源顺序：ui → blocks → chart → chat）
  * ============================================================ */
 /*! tailwindcss v4.3.3 | MIT License | https://tailwindcss.com */
 @layer properties;
