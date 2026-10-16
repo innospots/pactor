@@ -62,13 +62,13 @@ export function FieldShell({
         // 不占 label 文本内容与可访问名，视觉仍在 label 前
         <span className="flex items-center">
           {required ? (
-            <span aria-hidden className="mr-0.5 text-destructive">
+            <span aria-hidden className="mr-0.5 text-sm leading-normal text-destructive">
               *
             </span>
           ) : null}
           <label
             htmlFor={htmlFor}
-            className="shrink-0 text-sm leading-none font-medium whitespace-nowrap"
+            className="shrink-0 text-sm leading-normal font-medium whitespace-nowrap"
           >
             {label}
           </label>

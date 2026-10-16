@@ -210,3 +210,31 @@ describe('InteractionProvider：confirm 动作经 shadcn Dialog 确认框', () =
     });
   });
 });
+
+describe('InteractionProvider：多 Provider 共存（布局嵌套共享 UiBridge）', () => {
+  it('bridge 指向最后挂载者；卸载栈顶回退到存活实现，全部卸载才清空', async () => {
+    const bridge = createUiBridge();
+    const first = render(<InteractionProvider bridge={bridge} />);
+    await vi.waitFor(() => {
+      expect(bridge.message).toBeDefined();
+    });
+    const firstImpl = bridge.message;
+
+    const second = render(<InteractionProvider bridge={bridge} />);
+    await vi.waitFor(() => {
+      expect(bridge.message).not.toBe(firstImpl);
+    });
+    const secondImpl = bridge.message;
+
+    // 卸载内层（栈顶）：回退到外层实现而非清空
+    second.unmount();
+    expect(bridge.message).toBe(firstImpl);
+    expect(bridge.modal).toBeDefined();
+
+    // 外层也卸载：清空
+    first.unmount();
+    expect(bridge.message).toBeUndefined();
+    expect(bridge.modal).toBeUndefined();
+    expect(secondImpl).toBeDefined();
+  });
+});

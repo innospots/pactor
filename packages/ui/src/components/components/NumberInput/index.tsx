@@ -4,7 +4,7 @@ import { useEffect, useId, useState, type CSSProperties } from 'react';
 
 import { cn } from '../../../lib/utils.js';
 import { Input as ShadcnInput } from '../../../ui/input.js';
-import { CLEARABLE_ICON_HIDE, ClearHoverButton } from '../../clearable.js';
+import { CLEARABLE_OVERLAY_HIDE, ClearHoverButton } from '../../clearable.js';
 import { CONTROL_SIZE_BOX, type ControlSize } from '../../control-size.js';
 import { useFormContext } from '../Form/context.js';
 import { FieldShell } from '../Form/form-item.js';
@@ -203,7 +203,7 @@ export function NumberInput({
       <span
         className={cn(
           'absolute inset-y-0 right-0 flex w-7 flex-col divide-y divide-input border-l border-input',
-          showClear && CLEARABLE_ICON_HIDE,
+          showClear && CLEARABLE_OVERLAY_HIDE,
         )}
       >
         <button

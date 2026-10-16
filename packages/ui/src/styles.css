@@ -367,6 +367,25 @@
   }
 }
 
+/* clearable 悬浮清除按钮（见 clearable.tsx）：专用类替代 hidden +
+   group-hover:inline-flex / group-hover:hidden 工具类组合——消费方以命名
+   @layer 叠加多个预编译产物（pactor-ui / pactor-blocks）时，后加载层的基础
+   .hidden/.flex 会覆盖先加载层的状态变体，导致 × 恒不显示或图标恒不隐藏；
+   专用类无跨层同名冲突，visibility 亦不与 display 竞争 */
+.pactor-clearable {
+  display: none;
+}
+
+@media (hover: hover) {
+  .group:hover .pactor-clearable {
+    display: inline-flex;
+  }
+
+  .group:hover .pactor-clearable-ghost {
+    visibility: hidden;
+  }
+}
+
 /* 官方 base layer：默认边框色/焦点环色 + 页面底色与文字色 */
 @layer base {
   * {

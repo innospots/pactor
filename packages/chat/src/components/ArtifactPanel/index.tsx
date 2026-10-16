@@ -380,7 +380,7 @@ export function ArtifactPanel({
       {header !== undefined && header !== null ? (
         header
       ) : (
-        <div className="flex shrink-0 items-center gap-1 border-b border-border px-2 py-2.5">
+        <div className="flex h-10 shrink-0 items-center gap-1 border-b border-border px-2">
           {hasArtifacts ? (
             <Button
               icon="list"

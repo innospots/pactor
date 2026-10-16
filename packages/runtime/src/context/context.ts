@@ -102,6 +102,12 @@ export interface RuntimeContext {
   locale: string;
   /** i18n 上下文：提供 `t(key, params?)` 翻译函数 */
   i18n: I18nContext;
+  /**
+   * 子运行时指回创建它的宿主运行时上下文（如 OverlayHost 为 page
+   * 类型弹层创建的子 PageRuntime）。交互归属（overlay 在哪个宿主的
+   * OverlayHost 渲染）沿此链上溯到根运行时；普通页面运行时不设置。
+   */
+  parentRuntime?: RuntimeContext;
 }
 
 export interface CreateRuntimeContextOptions {

@@ -270,6 +270,37 @@ describe('resolveSitemapRoute', () => {
     expect(res.route!.params).toEqual({ id: '42' });
   });
 
+  it('布局嵌套链：无 parent 时仅自身；parent 上溯成链（最外层在前）', () => {
+    // 无 parent → 链为自身
+    expect(resolve(createSitemap(), '/')!.route!.layoutChain).toEqual(['admin']);
+    // agent.parent = admin → ['admin', 'agent']，layoutName 仍是最内层
+    const nested = createSitemap({
+      layouts: {
+        admin: simpleLayout,
+        agent: { ...simpleLayout, parent: 'admin' },
+      },
+      menus: [{ id: 'home', type: 'page', pageId: 'home', title: '首页', layout: 'agent' }],
+    });
+    const res = resolve(nested, '/')!.route!;
+    expect(res.layoutName).toBe('agent');
+    expect(res.layoutChain).toEqual(['admin', 'agent']);
+  });
+
+  it('布局嵌套链：parent 成环 / 悬空时截断，有限终止', () => {
+    const cyclic = createSitemap({
+      layouts: {
+        a: { ...simpleLayout, parent: 'b' },
+        b: { ...simpleLayout, parent: 'a' },
+      },
+      layout: 'a',
+    });
+    expect(resolve(cyclic, '/')!.route!.layoutChain).toEqual(['b', 'a']);
+    const dangling = createSitemap({
+      layouts: { admin: { ...simpleLayout, parent: 'ghost' } },
+    });
+    expect(resolve(dangling, '/')!.route!.layoutChain).toEqual(['admin']);
+  });
+
   it('未命中路径：menu 与 route 均为 null', () => {
     expect(resolve(createSitemap(), '/nope')).toEqual({ menu: null, route: null });
   });
@@ -400,8 +431,209 @@ describe('SitemapApp', () => {
     await screen.findByText('首页');
   });
 
-  it('public 页匿名可访问（登录页）', async () => {
-    const navigate = renderApp(createSitemap(), '/login');
+  it('布局级 state / lifecycle：onInit 写 state，布局 DSL 绑定渲染', async () => {
+    renderApp(
+      {
+        ...createSitemap(),
+        user: { name: 'A' },
+        layouts: {
+          admin: {
+            dsl: '1.0',
+            state: { brand: '初始' },
+            lifecycle: {
+              onInit: [{ action: 'setState', params: { brand: '布局品牌' } }],
+            },
+            body: {
+              type: 'Flex',
+              children: [
+                { type: 'Text', props: { text: '${state.brand}' } },
+                { type: 'PageOutlet' },
+              ],
+            },
+          },
+        },
+      },
+      '/',
+    );
+    // onInit 执行后 state 更新 → 布局绑定文本刷新；页面内容正常渲染
+    await screen.findByText('布局品牌');
+    await screen.findByText('首页内容');
+  });
+
+  it('布局运行时的 page 类型弹层：overlay.open 经 loader 解析 pageId 渲染', async () => {
+    const base = createSitemap();
+    renderApp(
+      {
+        ...base,
+        user: { name: 'A' },
+        pages: [
+          ...base.pages,
+          {
+            id: 'form-page',
+            path: '/form',
+            title: '表单',
+            version: 1,
+            pageDsl: textPage('form-page', '弹层表单内容'),
+          },
+        ],
+        layouts: {
+          admin: {
+            dsl: '1.0',
+            body: {
+              type: 'Flex',
+              children: [
+                {
+                  type: 'Button',
+                  props: { text: '布局按钮' },
+                  events: {
+                    onClick: {
+                      action: 'overlay.open',
+                      params: {
+                        overlay: {
+                          type: 'modal',
+                          title: '创建',
+                          page: { pageId: 'form-page' },
+                        },
+                      },
+                    },
+                  },
+                },
+                { type: 'PageOutlet' },
+              ],
+            },
+          },
+        },
+      },
+      '/',
+    );
+    fireEvent.click(await screen.findByRole('button', { name: '布局按钮' }));
+    // 布局运行时注入了 loader → page 弹层经 resolvePage 加载并渲染
+    expect(await screen.findByText('弹层表单内容')).toBeDefined();
+  });
+
+  it('嵌套内层布局的 overlay.open：单次点击只弹一个层', async () => {
+    const base = createSitemap();
+    renderApp(
+      {
+        ...base,
+        user: { name: 'A' },
+        layouts: {
+          admin: {
+            dsl: '1.0',
+            body: {
+              type: 'Flex',
+              children: [
+                { type: 'Text', props: { text: '外层外壳' } },
+                { type: 'PageOutlet' },
+              ],
+            },
+          },
+          inner: {
+            dsl: '1.0',
+            parent: 'admin',
+            body: {
+              type: 'Flex',
+              children: [
+                {
+                  type: 'Button',
+                  props: { text: '内层按钮' },
+                  events: {
+                    onClick: {
+                      action: 'overlay.open',
+                      params: {
+                        overlay: { type: 'modal', title: '内层弹层' },
+                      },
+                    },
+                  },
+                },
+                { type: 'PageOutlet' },
+              ],
+            },
+          },
+        },
+        menus: [
+          { id: 'login', type: 'page', pageId: 'login', title: '登录', public: true, hidden: true },
+          { id: 'home', type: 'page', pageId: 'home', title: '首页', layout: 'inner' },
+        ],
+      },
+      '/',
+    );
+    fireEvent.click(await screen.findByRole('button', { name: '内层按钮' }));
+    await screen.findByText('内层弹层');
+    expect(document.querySelectorAll('[role="dialog"]')).toHaveLength(1);
+  });
+
+  it('布局嵌套：内外层包裹页面渲染；导航分叉时外层运行时常驻（state 保持）', async () => {
+    const base = createSitemap();
+    const sitemap: SitemapResource = {
+      ...base,
+      user: { name: 'A' },
+      layouts: {
+        admin: {
+          dsl: '1.0',
+          state: { brand: '初始' },
+          body: {
+            type: 'Flex',
+            children: [
+              {
+                type: 'Button',
+                props: { text: '改名' },
+                events: {
+                  onClick: { action: 'setState', params: { brand: '已改' } },
+                },
+              },
+              { type: 'Text', props: { text: '${state.brand}' } },
+              { type: 'PageOutlet' },
+            ],
+          },
+        },
+        agent: {
+          dsl: '1.0',
+          parent: 'admin',
+          body: {
+            type: 'Flex',
+            children: [
+              { type: 'Text', props: { text: '内层侧栏' } },
+              { type: 'PageOutlet' },
+            ],
+          },
+        },
+      },
+      pages: [
+        ...base.pages,
+        { id: 'a', path: '/a', title: 'A', version: 1, pageDsl: textPage('a', '页面A') },
+        { id: 'b', path: '/b', title: 'B', version: 1, pageDsl: textPage('b', '页面B') },
+      ],
+      menus: [
+        ...base.menus,
+        { id: 'a', type: 'page', pageId: 'a', title: 'A', layout: 'agent', hidden: true },
+        { id: 'b', type: 'page', pageId: 'b', title: 'B', layout: 'admin', hidden: true },
+      ],
+    };
+    const fetcher = (async () => jsonResponse(sitemap)) as unknown as typeof fetch;
+    // navigate 需稳定引用（宿主应以 useCallback / 模块级常量传入）：
+    // 新引用会重建页面工厂导致布局运行时卸载
+    const navigate = vi.fn();
+    const { rerender } = render(
+      <SitemapApp sources={['/api/sitemap']} pathname="/a" navigate={navigate} fetcher={fetcher} />,
+    );
+    // 嵌套渲染：外层品牌 + 内层侧栏 + 页面内容同屏
+    await screen.findByText('初始');
+    await screen.findByText('内层侧栏');
+    await screen.findByText('页面A');
+    // 改外层布局 state
+    fireEvent.click(screen.getByRole('button', { name: '改名' }));
+    await screen.findByText('已改');
+    // 导航到仅用外层布局的页面：内层布局卸载，外层运行时常驻（state 不重置）
+    rerender(
+      <SitemapApp sources={['/api/sitemap']} pathname="/b" navigate={navigate} fetcher={fetcher} />,
+    );
+    await screen.findByText('页面B');
+    expect(screen.queryByText('内层侧栏')).toBeNull();
+    expect(screen.getByText('已改')).toBeDefined();
+  });
+
+  it('public 页匿名可访问（登录页）', async () => {    const navigate = renderApp(createSitemap(), '/login');
     await screen.findByText('登录页');
     expect(navigate).not.toHaveBeenCalled();
   });

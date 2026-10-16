@@ -39,10 +39,37 @@ export function resolveSitemapRoute(
     route: {
       pageId: menu.pageId,
       layoutName,
+      layoutChain: resolveLayoutChain(sitemap, layoutName),
       highlightKey: highlightItem?.path ?? highlightId,
       params: match.params,
     },
   };
+}
+
+/**
+ * 布局嵌套链（最外层在前）：自布局名沿 LayoutDsl.parent 上溯至无外层。
+ * parent 悬空（未定义的布局名）或成环时截断，保证有限终止。
+ */
+export function resolveLayoutChain(
+  sitemap: SitemapResource,
+  layoutName: string,
+): string[] {
+  const chain = [layoutName];
+  const seen = new Set(chain);
+  let current = layoutName;
+  for (;;) {
+    const parent = sitemap.layouts[current]?.parent;
+    if (
+      parent === undefined ||
+      seen.has(parent) ||
+      sitemap.layouts[parent] === undefined
+    ) {
+      return chain;
+    }
+    chain.unshift(parent);
+    seen.add(parent);
+    current = parent;
+  }
 }
 
 /** 守卫判定：放行或重定向 */

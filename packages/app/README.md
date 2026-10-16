@@ -124,6 +124,8 @@ import { SitemapApp } from '@pactor-app/app';
 
 内置能力（无需自行拼装）：多源拉取合并（冲突后源覆盖前源）、`menus × pages` 继承（`path` / `title` 缺省自引用页面）、MenuRegistry 路由解析（含 `:param`）、访问守卫（缺省匿名守卫：非 `public` 且无 user → `navigate(auth.loginPath)`，`guard` prop 可替换为角色鉴权等策略）、DSL 布局渲染（`PageOutlet` 页面出口、`SitemapMenu` 选中态与 `activeMenu` 高亮）、页面内联 / 懒加载（`id@version` 缓存，`pageEndpoint` 可配）、`session.context` 服务桥（DSL 经 `${data.session.*}` 读 user / app / menus）、缺省动作（`app.reload` 整页重载、`service.call` 服务调用，宿主 `actions` 同名覆盖）、布局常驻（同布局名切换导航仅内容区重建）。布局名解析链：`menu.layout` → 顶层 `layout` → `layouts` 首键。
 
+布局可声明 `state` / `lifecycle`（布局运行时常驻，state 跨页面保持）；`LayoutDsl.parent` 引用另一布局形成**嵌套链**——如 `agent.parent = 'admin'` 时渲染为 `admin`（其 `PageOutlet` 渲染 `agent` 布局，`agent` 的 `PageOutlet` 渲染页面）。每级布局是独立运行时（独立 state / lifecycle / 弹层宿主），导航时链共享前缀的外层布局保持挂载（一级外壳不重建），仅分叉层重建；`parent` 悬空或成环时链截断兜底。隐藏页（不进菜单的路由页）用菜单条目的 `activeMenu` 指向一级菜单 id，访问时外层导航菜单保持对应选中态。
+
 | Props | 说明 |
 | --- | --- |
 | `sources`（必填） | sitemap 接口 URL 列表（相对路径以 `baseUrl` 补全） |
@@ -139,7 +141,7 @@ import { SitemapApp } from '@pactor-app/app';
 | `sessionService` | 会话桥服务名（缺省 `session.context`） |
 | `loading` / `renderError` / `renderNotFound` | 状态视图定制 |
 
-配套导出（高级用法）：`fetchSitemap`、`createSitemapLoader`、`mergeSitemapMenus`、`toSitemapNavItems`、`resolveSitemapRoute`、`defaultSitemapGuard`、`defaultSitemapActions`、`createHttpHooks`、`withHttpHooks`、`createSitemapSessionServices` 与类型 `SitemapResource` / `SitemapMenuItem` / `SitemapPageEntry` / `LayoutDsl` / `SitemapRouteMatch` / `SitemapRouteResolution` / `SitemapGuard` / `SitemapSessionContext`。完整示例工程见 `starters/next-app-starter`（宿主路由模式）与 `starters/spa-starter`（纯前端内置路由模式）。
+配套导出（高级用法）：`fetchSitemap`、`createSitemapLoader`、`mergeSitemapMenus`、`toSitemapNavItems`、`resolveSitemapRoute`、`resolveLayoutChain`、`defaultSitemapGuard`、`defaultSitemapActions`、`createHttpHooks`、`withHttpHooks`、`createSitemapSessionServices` 与类型 `SitemapResource` / `SitemapMenuItem` / `SitemapPageEntry` / `LayoutDsl` / `SitemapRouteMatch` / `SitemapRouteResolution` / `SitemapGuard` / `SitemapSessionContext`。完整示例工程见 `starters/next-app-starter`（宿主路由模式）与 `starters/spa-starter`（纯前端内置路由模式）。
 
 ## 文档
 

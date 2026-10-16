@@ -201,6 +201,20 @@ describe('SplitButton 分体式按钮', () => {
     await user.click(main);
     expect(onClick).not.toHaveBeenCalled();
   });
+
+  it('相连表面：下拉触发钮并入去圆角与边框重叠规则（左侧不显圆角）', () => {
+    const { container } = render(
+      <SplitButton options={options}>保存</SplitButton>,
+    );
+    const group = container.querySelector('[data-slot="split-button"]');
+    expect(group).not.toBeNull();
+    // 触发钮 data-slot 为 dropdown-menu-trigger（非 button），
+    // 需同按钮规则并入 ButtonGroup 相连表面，否则保留四角 rounded-md
+    const cls = group!.className;
+    expect(cls).toContain('[&>[data-slot=dropdown-menu-trigger]]:rounded-none');
+    expect(cls).toContain('[&>[data-slot=dropdown-menu-trigger]]:last:rounded-r-md');
+    expect(cls).toContain('[&>[data-slot=dropdown-menu-trigger]:not(:first-child)]:-ml-px');
+  });
 });
 
 describe('CopyButton 复制确认按钮', () => {

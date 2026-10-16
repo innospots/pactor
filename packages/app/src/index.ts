@@ -46,6 +46,7 @@ export {
 export type { SitemapNavItem } from './sitemap/merge.js';
 export {
   defaultSitemapGuard,
+  resolveLayoutChain,
   resolveSitemapRoute,
 } from './sitemap/route.js';
 export type {

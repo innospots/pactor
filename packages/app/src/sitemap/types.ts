@@ -9,9 +9,20 @@ import type { MenuItem } from '@pactor-app/router';
  */
 
 /** 布局定义：DSL 描述外壳结构，PageOutlet 组件为页面内容出口。
- * 不套 PageDsl 的 page 包装——id 即 layouts 的键，无重复声明 */
+ * 不套 PageDsl 的 page 包装——id 即 layouts 的键，无重复声明。
+ * state / lifecycle 可选：布局运行时在相同布局名导航间常驻（key 不变
+ * 不重建），其中的 state 跨页面保持（如侧栏选中 / 折叠态），onInit
+ * 随布局运行时创建执行一次。
+ * parent 可选：引用另一布局作为外层外壳，形成布局嵌套链（如
+ * agent.parent = admin → 渲染 admin(PageOutlet=agent(PageOutlet=页面))）。
+ * 每级布局是独立运行时；跨页面导航时共享前缀的外层布局保持挂载，
+ * 其 state 不受内层布局 / 页面切换影响 */
 export interface LayoutDsl {
   dsl: string;
+  /** 外层布局名，引用 layouts 的键；缺省无外层（自身为最外层） */
+  parent?: string;
+  state?: PageDsl['state'];
+  lifecycle?: PageDsl['lifecycle'];
   body: DslNode;
 }
 
@@ -51,7 +62,10 @@ export interface SitemapResource extends BootstrapResource {
 /** 可渲染路由匹配结果（resolveSitemapRoute 产物） */
 export interface SitemapRouteMatch {
   pageId: string;
+  /** 页面直接布局名（布局链的最内层） */
   layoutName: string;
+  /** 布局嵌套链（最外层在前）：沿 LayoutDsl.parent 上溯，含自身 */
+  layoutChain: string[];
   /** 菜单高亮 key：activeMenu 指向的菜单项 path（缺省自身 path） */
   highlightKey: string;
   params: Record<string, string>;

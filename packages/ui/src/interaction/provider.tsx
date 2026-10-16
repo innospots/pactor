@@ -53,6 +53,16 @@ const toastTypeClass: Record<ToastType, string> = {
 };
 
 /**
+ * 多 Provider 共存（布局嵌套链的每级运行时各挂一个 InteractionProvider，
+ * 共享装配级 UiBridge）时的实现栈：挂载入栈、卸载出栈，bridge 始终指向
+ * 栈顶实现——内层卸载不再误清外层注入。按 bridge 对象隔离（WeakMap）。
+ */
+const bridgeStacks = new WeakMap<
+  UiBridge,
+  Array<{ modal: UiModal; message: UiMessage }>
+>();
+
+/**
  * InteractionProvider：mount 时向 UiBridge 注入自绘实现：
  *
  * - `modal.confirm({ title, content, onOk, onCancel })`：vendored shadcn
@@ -62,7 +72,8 @@ const toastTypeClass: Record<ToastType, string> = {
  * - `message.{success,error,info,warning}`：toast 栈（容器固定右上角，
  *   自动约 3s 消失，类型色条读语义令牌）。
  *
- * unmount 时清空 bridge，动作退化为受控失败。
+ * 多 Provider 共存时 bridge 指向最后挂载者（栈顶），卸载后回退到上一
+ * 实现；全部卸载后动作退化为受控失败。
  */
 export function InteractionProvider({
   bridge,
@@ -99,11 +110,28 @@ export function InteractionProvider({
   }, []);
 
   useEffect(() => {
+    let stack = bridgeStacks.get(bridge);
+    if (stack === undefined) {
+      stack = [];
+      bridgeStacks.set(bridge, stack);
+    }
+    const impl = { modal, message };
+    stack.push(impl);
     bridge.modal = modal;
     bridge.message = message;
     return () => {
-      bridge.modal = undefined;
-      bridge.message = undefined;
+      const list = bridgeStacks.get(bridge);
+      if (list === undefined) {
+        return;
+      }
+      const index = list.indexOf(impl);
+      if (index !== -1) {
+        list.splice(index, 1);
+      }
+      // 回退到栈顶存活实现；空栈才清空
+      const top = list[list.length - 1];
+      bridge.modal = top?.modal;
+      bridge.message = top?.message;
     };
   }, [bridge, modal, message]);
 
