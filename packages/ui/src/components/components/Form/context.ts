@@ -1,5 +1,5 @@
-import type { FieldRule } from '../Input/index.js';
-import { createContext, useContext } from 'react';
+import type { FieldRule } from "../Input/index.js";
+import { createContext, useContext } from "react";
 
 /**
  * Form 容器上下文（shadcn kit）：Form 组件维护受控 values / 校验错误
@@ -10,7 +10,7 @@ export interface FormContextValue {
   /** 标记后代字段处于 Form 容器内 */
   inForm: true;
   /** 表单布局（表单项排布 class 由字段侧按此生成） */
-  layout: 'horizontal' | 'vertical' | 'inline';
+  layout: "horizontal" | "vertical" | "inline";
   /** 当前表单 values（受控） */
   values: Record<string, unknown>;
   /** 校验错误（字段名 → 错误文案） */
@@ -24,7 +24,11 @@ export interface FormContextValue {
    * `initialValue` 为字段级初始值（value prop），仅在该字段首次注册时合并
    * 进 values（字段级优先于 Form initialValues；已有合并结果不覆盖）
    */
-  registerField(name: string, rules?: FieldRule[], initialValue?: unknown): void;
+  registerField(
+    name: string,
+    rules?: FieldRule[],
+    initialValue?: unknown,
+  ): void;
   /** 注销字段 */
   unregisterField(name: string): void;
 }
@@ -41,13 +45,13 @@ export function useFormContext(): FormContextValue | null {
 /** 表单项排布 class（按 Form layout 生成；label/控件/错误的间距由 gap 承担；
  *  统一 min-h-9（36px）并垂直居中，无 label 行的项（如裸按钮）与有 label 的
  *  项在行内保持同高同基线） */
-export function formItemClass(layout: FormContextValue['layout']): string {
+export function formItemClass(layout: FormContextValue["layout"]): string {
   switch (layout) {
-    case 'horizontal':
-      return 'mb-2 flex min-h-9 items-center gap-2';
-    case 'inline':
-      return 'flex min-h-9 items-center gap-2';
+    case "horizontal":
+      return "mb-2 flex min-h-9 items-center gap-2";
+    case "inline":
+      return "flex min-h-9 items-center gap-2";
     default:
-      return 'mb-2 flex min-h-9 flex-col justify-center gap-1.5';
+      return "mb-2 flex min-h-9 flex-col justify-center gap-1.5";
   }
 }

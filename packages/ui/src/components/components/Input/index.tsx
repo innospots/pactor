@@ -5,7 +5,8 @@ import { cn } from '../../../lib/utils.js';
 import { Input as ShadcnInput } from '../../../ui/input.js';
 import { ClearHoverButton } from '../../clearable.js';
 import { CONTROL_SIZE_BOX, type ControlSize } from '../../control-size.js';
-import { formItemClass, useFormContext } from '../Form/context.js';
+import { useFormContext } from '../Form/context.js';
+import { FieldShell } from '../Form/form-item.js';
 
 /** DSL 校验规则（框架级协议，当前支持 required + message） */
 export interface FieldRule {
@@ -139,28 +140,18 @@ export function Input({
     );
 
   if (inForm && form && name) {
-    const error = form.errors[name];
     return (
-      <div
-        data-slot="form-item"
-        className={cn(formItemClass(form.layout), className)}
+      <FieldShell
+        layout={form.layout}
+        label={label}
+        htmlFor={controlId}
+        rules={rules}
+        error={form.errors[name]}
+        className={className}
         style={style}
       >
-        {label ? (
-          <label
-            htmlFor={controlId}
-            className="shrink-0 text-sm leading-none font-medium whitespace-nowrap"
-          >
-            {label}
-          </label>
-        ) : null}
         {control}
-        {error ? (
-          <div data-slot="form-error" className="text-sm text-destructive">
-            {error}
-          </div>
-        ) : null}
-      </div>
+      </FieldShell>
     );
   }
 

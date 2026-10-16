@@ -257,10 +257,10 @@ function MenuEntry({
   onToggle?: (key: string) => void;
 }) {
   const hasChildren = (item.children?.length ?? 0) > 0;
-  // inline 非折叠下含 children 的项为目录：不可选中（无选中态、不触发
-  // onSelect）；collapsible 提供折叠能力，未开启时静态展开、点击为空操作
-  const isDirectory = hasChildren && mode === 'inline' && !collapsed;
-  const canToggle = collapsible && isDirectory;
+  // inline 非折叠下带 children 字段的项即为目录（含空数组：空组同样是组）：
+  // 不可选中（无选中态、不触发 onSelect）；collapsible 且有子项时才可折叠
+  const isDirectory = item.children !== undefined && mode === 'inline' && !collapsed;
+  const canToggle = collapsible && isDirectory && hasChildren;
   const expanded = canToggle && isExpanded?.(item.key) === true;
   const selected = !isDirectory && item.key === selectedKey;
   // icon rail 下的目录项：子菜单经右侧滑出浮层展示（不平铺仅图标按钮）

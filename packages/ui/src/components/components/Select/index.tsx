@@ -9,7 +9,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from '../../../ui/select.js';
-import { formItemClass, useFormContext } from '../Form/context.js';
+import { useFormContext } from '../Form/context.js';
+import { FieldShell } from '../Form/form-item.js';
 import { CLEARABLE_GROUP, CLEARABLE_ICON_HIDE, ClearHoverButton } from '../../clearable.js';
 import {
   CONTROL_SIZE_SELECT_ATTR,
@@ -209,28 +210,18 @@ export function Select({
   );
 
   if (inForm && form && name) {
-    const error = form.errors[name];
     return (
-      <div
-        data-slot="form-item"
-        className={cn(formItemClass(form.layout), className)}
+      <FieldShell
+        layout={form.layout}
+        label={label}
+        htmlFor={controlId}
+        rules={rules}
+        error={form.errors[name]}
+        className={className}
         style={style}
       >
-        {label ? (
-          <label
-            htmlFor={controlId}
-            className="shrink-0 text-sm leading-none font-medium whitespace-nowrap"
-          >
-            {label}
-          </label>
-        ) : null}
         {select}
-        {error ? (
-          <div data-slot="form-error" className="text-sm text-destructive">
-            {error}
-          </div>
-        ) : null}
-      </div>
+      </FieldShell>
     );
   }
 

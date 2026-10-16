@@ -19,6 +19,8 @@ import {
   OverlayHost,
   type ResolvePageFn,
 } from '../../src/interaction/index.js';
+import { Form } from '../../src/components/components/Form/index.js';
+import { Input } from '../../src/components/components/Input/index.js';
 
 afterEach(cleanup);
 
@@ -294,5 +296,148 @@ describe('page overlay 动态加载', () => {
     expect(alert.textContent).toContain('user-edit');
     // 受控：可正常关闭
     manager.close();
+  });
+});
+
+describe('footer 底部按钮区', () => {
+  it('未声明 footer：不渲染按钮区', async () => {
+    const { manager } = setupHost();
+
+    void manager.open({ type: 'modal', title: '无按钮' });
+    await screen.findByText('无按钮');
+
+    expect(document.querySelector('[data-slot=overlay-modal-footer]')).toBeNull();
+  });
+
+  it('footer: {} 缺省展示取消/确认（i18n 文案）；确认未命中表单时以 { success: true } 关闭', async () => {
+    const { manager } = setupHost();
+
+    const opened = manager.open({
+      type: 'modal',
+      title: '带按钮',
+      footer: {},
+    });
+    await screen.findByText('带按钮');
+
+    const cancel = screen.getByRole('button', { name: '取消' });
+    const confirm = screen.getByRole('button', { name: '确认' });
+    expect(cancel).toBeTruthy();
+    expect(confirm).toBeTruthy();
+
+    fireEvent.click(confirm);
+    await expect(opened).resolves.toEqual({ success: true });
+    expect(manager.stack()).toHaveLength(0);
+  });
+
+  it('取消按钮 = 取消语义关闭；文字覆盖与隐藏生效', async () => {
+    const { manager } = setupHost();
+
+    const opened = manager.open({
+      type: 'modal',
+      title: '自定义',
+      footer: { cancelText: '再想想', hideConfirm: true },
+    });
+    await screen.findByText('自定义');
+
+    expect(screen.queryByRole('button', { name: '确认' })).toBeNull();
+    fireEvent.click(screen.getByRole('button', { name: '再想想' }));
+    await expect(opened).resolves.toEqual({ success: false });
+  });
+
+  it('confirmDisabled / confirmLoading：确认键禁用，loading 时取消键联动禁用', async () => {
+    const { manager } = setupHost();
+
+    void manager.open({
+      type: 'modal',
+      title: '状态',
+      footer: { confirmText: '保存', confirmLoading: true },
+    });
+    await screen.findByText('状态');
+
+    const confirm = screen.getByRole('button', { name: '保存' }) as HTMLButtonElement;
+    const cancel = screen.getByRole('button', { name: '取消' }) as HTMLButtonElement;
+    expect(confirm.disabled).toBe(true);
+    expect(cancel.disabled).toBe(true);
+    expect(confirm.querySelector('svg.animate-spin')).toBeTruthy();
+  });
+
+  it('确认键桥接 overlay 内命名表单：requestSubmit 走校验与 onSubmit 链', async () => {
+    const { context, manager } = setupHost();
+    context.components.register('Form', Form);
+    context.components.register('Input', Input);
+
+    const opened = manager.open({
+      type: 'modal',
+      title: '桥接',
+      footer: { confirmText: '保存' },
+      content: {
+        type: 'Form',
+        props: { name: 'default' },
+        events: {
+          onSubmit: [
+            { action: 'setState', params: { saved: '${event.name}' } },
+            { action: 'overlay.close', params: { payload: { success: true } } },
+          ],
+        },
+        children: [
+          {
+            type: 'Input',
+            props: {
+              name: 'name',
+              label: '名称',
+              rules: [{ required: true, message: '请输入名称' }],
+            },
+          },
+        ],
+      },
+    });
+    const save = await screen.findByRole('button', { name: '保存' });
+
+    // 空提交：校验错误展示，弹层保持打开
+    fireEvent.click(save);
+    await screen.findByText('请输入名称');
+    expect(manager.stack()).toHaveLength(1);
+
+    // 填写后提交：onSubmit 链执行（写 state + 携带 payload 关闭）
+    fireEvent.change(screen.getByLabelText('名称'), { target: { value: '张三' } });
+    fireEvent.click(save);
+    await expect(opened).resolves.toEqual({ success: true });
+    expect(context.state.get('saved')).toBe('张三');
+  });
+
+  it('confirmForm 指定表单名；page overlay 桥接子运行时的表单', async () => {
+    const formPage: PageDsl = {
+      dsl: '1.0',
+      page: { id: 'form-page', title: '表单页' },
+      body: {
+        type: 'Form',
+        props: { name: 'edit' },
+        events: {
+          onSubmit: [
+            { action: 'overlay.close', params: { payload: { success: true } } },
+          ],
+        },
+        children: [
+          { type: 'Input', props: { name: 'name', label: '名称' } },
+        ],
+      },
+    };
+    const { context, manager } = setupHost(async () => formPage);
+    context.components.register('Form', Form);
+    context.components.register('Input', Input);
+
+    const opened = manager.open({
+      type: 'modal',
+      title: '页表单',
+      page: { pageId: 'form-page' },
+      footer: { confirmText: '确定', confirmForm: 'edit' },
+    });
+    const confirm = await screen.findByRole('button', { name: '确定' });
+    // 等子运行时表单挂载（label 出现即 Form 已注册句柄）
+    await screen.findByText('名称');
+
+    fireEvent.click(confirm);
+    await expect(opened).resolves.toEqual({ success: true });
+    expect(manager.stack()).toHaveLength(0);
   });
 });

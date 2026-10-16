@@ -11,10 +11,10 @@ description: 导航类 DSL 组件——Menu / Link / Breadcrumb / Pagination / T
 
 | prop | 类型 | 说明 |
 | --- | --- | --- |
-| `items` | `{ key, label, icon?, badge?, dot?, group?, disabled?, trailing?, actions?, children? }[]` | 菜单树（如 `${data.menus}`；`icon` 为图标名（Icon 白名单，kebab/Pascal 均可），渲染于文字前；`badge` 为角标、`dot` 为 danger 系状态圆点、`group` 为分组标题（相邻同组只渲染一次）、`disabled` 置灰不可选；`trailing` 为右端弱提示文本（如创建时间）、`actions` 为右端操作按钮组，见下方「项级操作」；inline 模式下含 `children` 的目录项不可选中——无选中态、点击不触发 `onSelect`） |
+| `items` | `{ key, label, icon?, badge?, dot?, group?, disabled?, trailing?, actions?, children? }[]` | 菜单树（如 `${data.menus}`；`icon` 为图标名（Icon 白名单，kebab/Pascal 均可），渲染于文字前；`badge` 为角标、`dot` 为 danger 系状态圆点、`group` 为分组标题（相邻同组只渲染一次）、`disabled` 置灰不可选；`trailing` 为右端弱提示文本（如创建时间）、`actions` 为右端操作按钮组，见下方「项级操作」；inline 模式下带 `children` 字段的即为目录项（含空数组——空组同样是组）：不可选中（无选中态、点击不触发 `onSelect`） |
 | `mode` | `inline`（默认）\| `horizontal` | inline 用于 Sider，horizontal 用于 Header |
 | `selectedKey` | string | 受控选中项（仅叶子项；目录项不参与选中） |
-| `collapsible` | boolean（默认 `false`） | 仅 inline 模式生效：含 `children` 的目录项可折叠——点击只展开/收起（不触发 `onSelect`），右端 chevron 指示（展开时旋转 180°）；未开启时目录静态展开、点击为空操作。展开状态组件内部维护 |
+| `collapsible` | boolean（默认 `false`） | 仅 inline 模式生效：有子项的目录项可折叠——点击只展开/收起（不触发 `onSelect`），右端 chevron 指示（展开时旋转 180°，`chevronPlacement` 可换到左侧）；空组无 chevron。未开启时目录静态展开、点击为空操作。展开状态组件内部维护 |
 | `defaultExpandedKeys` | string[] | 初始展开的目录 key（与 `selectedKey` 祖先链合并，挂载时算一次，`selectedKey` 后续变化不重置手动状态） |
 | `defaultExpandAll` | boolean（默认 `false`） | 仅配合 `collapsible`：初始展开全部目录，运行时动态新增的目录同样默认展开（适合数据驱动的树）；用户手动折叠后保持 |
 | `chevronPlacement` | `'right'`（默认）\| `'left'` | 仅配合 `collapsible`：目录项 chevron 展开指示的位置，`left` 渲染在图标/文字前（树形风格），`right` 渲染在行内右端 |

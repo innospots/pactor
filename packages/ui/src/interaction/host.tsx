@@ -1,4 +1,4 @@
-import { XIcon } from 'lucide-react';
+import { Loader2, XIcon } from 'lucide-react';
 import type { PageDsl } from '@pactor-app/core';
 import {
   createPageRuntime,
@@ -8,9 +8,10 @@ import {
   type PageRuntime,
   type RendererContextValue,
 } from '@pactor-app/runtime';
-import { useEffect, useState, useSyncExternalStore, type ReactNode } from 'react';
+import { useEffect, useRef, useState, useSyncExternalStore, type ReactNode } from 'react';
 
 import { cn } from '../lib/utils.js';
+import { Button } from '../ui/button.js';
 import {
   Dialog,
   DialogClose,
@@ -25,7 +26,11 @@ import {
   DrawerHeader,
   DrawerTitle,
 } from '../ui/drawer.js';
-import type { OverlayEntry, OverlayManager } from './manager.js';
+import type {
+  OverlayEntry,
+  OverlayFooterConfig,
+  OverlayManager,
+} from './manager.js';
 
 // props 契约类型（本地定义）
 /**
@@ -111,8 +116,25 @@ function OverlayEntryView({
   resolvePage,
 }: OverlayEntryViewProps) {
   const { t } = useI18n();
+  // page overlay 的子运行时句柄（footer 确认键桥接表单提交用）
+  const childRuntimeRef = useRef<PageRuntime | null>(null);
   // UI 取消（X / 遮罩 / Escape）：取消语义 close
   const handleCancel = () => manager.close(entry.id);
+
+  // footer 确认：桥接 overlay 内容里命名表单的 requestSubmit（校验通过后
+  // 走表单自身 onSubmit 链）；未命中表单时以 { success: true } 关闭
+  const handleConfirm = () => {
+    const footer = entry.footer ?? {};
+    const forms = entry.page
+      ? childRuntimeRef.current?.context.forms
+      : renderer.context.forms;
+    const handle = forms?.get(footer.confirmForm ?? 'default');
+    if (handle?.submit) {
+      handle.submit();
+      return;
+    }
+    manager.close(entry.id, { success: true });
+  };
 
   let body: ReactNode = null;
   if (entry.content) {
@@ -127,13 +149,25 @@ function OverlayEntryView({
         entry={entry}
         renderer={renderer}
         resolvePage={resolvePage}
+        onRuntime={(runtime) => {
+          childRuntimeRef.current = runtime;
+        }}
       />
     );
   }
 
+  const footer = entry.footer ? (
+    <OverlayFooter
+      footer={entry.footer}
+      slot={entry.type === 'drawer' ? 'drawer-footer' : 'overlay-modal-footer'}
+      onCancel={handleCancel}
+      onConfirm={handleConfirm}
+    />
+  ) : null;
+
   if (entry.type === 'drawer') {
     return (
-      <ShadcnDrawerView entry={entry} onCancel={handleCancel}>
+      <ShadcnDrawerView entry={entry} onCancel={handleCancel} footer={footer}>
         {body}
       </ShadcnDrawerView>
     );
@@ -174,8 +208,62 @@ function OverlayEntryView({
           />
         </DialogHeader>
         <div data-slot="overlay-modal-body">{body}</div>
+        {footer}
       </DialogContent>
     </Dialog>
+  );
+}
+
+/**
+ * Overlay 底部按钮区（modal / drawer 共用）：取消 / 确认缺省都展示，
+ * 可分别隐藏；确认支持禁用 / loading。取消 = 取消语义关闭；确认 =
+ * 桥接命名表单提交（未命中表单时以 { success: true } 关闭）。
+ */
+function OverlayFooter({
+  footer,
+  slot,
+  onCancel,
+  onConfirm,
+}: {
+  footer: OverlayFooterConfig;
+  slot: string;
+  onCancel: () => void;
+  onConfirm: () => void;
+}) {
+  const { t } = useI18n();
+  if (footer.hideCancel && footer.hideConfirm) {
+    return null;
+  }
+  const confirmBusy = footer.confirmLoading === true;
+  return (
+    <div
+      data-slot={slot}
+      className={cn(
+        'flex items-center justify-end gap-2',
+        slot === 'drawer-footer' && 'border-t border-border px-6 py-4',
+      )}
+    >
+      {footer.hideCancel ? null : (
+        <Button
+          variant="outline"
+          disabled={confirmBusy}
+          onClick={onCancel}
+          data-slot="overlay-cancel"
+        >
+          {footer.cancelText ?? t('pactor.overlay.cancel')}
+        </Button>
+      )}
+      {footer.hideConfirm ? null : (
+        <Button
+          disabled={footer.confirmDisabled === true || confirmBusy}
+          onClick={onConfirm}
+          data-slot="overlay-confirm"
+        >
+          {confirmBusy ? <Loader2 className="animate-spin" /> : null}
+          {footer.confirmText ?? t('pactor.overlay.confirm')}
+        </Button>
+      )}
+    </div>
   );
 }
 
@@ -187,10 +275,12 @@ function OverlayEntryView({
 function ShadcnDrawerView({
   entry,
   onCancel,
+  footer,
   children,
 }: {
   entry: OverlayEntry;
   onCancel: () => void;
+  footer?: ReactNode;
   children?: ReactNode;
 }) {
   const { t } = useI18n();
@@ -244,6 +334,7 @@ function ShadcnDrawerView({
         <div data-slot="drawer-body" className="flex-1 overflow-auto p-6">
           {children}
         </div>
+        {footer}
       </DrawerContent>
     </Drawer>
   );
@@ -260,10 +351,13 @@ function PageOverlayBody({
   entry,
   renderer,
   resolvePage,
+  onRuntime,
 }: {
   entry: OverlayEntry;
   renderer: RendererContextValue;
   resolvePage?: ResolvePageFn;
+  /** 子运行时就绪/销毁回调（footer 确认键桥接表单提交用） */
+  onRuntime?: (runtime: PageRuntime | null) => void;
 }) {
   const [child, setChild] = useState<PageRuntime | null>(null);
   const [error, setError] = useState<Error | null>(null);
@@ -298,6 +392,7 @@ function PageOverlayBody({
           route: { params: entry.params ?? {} },
         });
         setChild(created);
+        onRuntime?.(created);
       } catch (cause) {
         if (!cancelled) {
           setError(cause instanceof Error ? cause : new Error(String(cause)));
@@ -306,6 +401,7 @@ function PageOverlayBody({
     })();
     return () => {
       cancelled = true;
+      onRuntime?.(null);
       void created?.destroy();
     };
     // 每个条目（id 唯一）只加载一次

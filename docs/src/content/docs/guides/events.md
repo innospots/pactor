@@ -187,6 +187,28 @@ events:
 
 要点：overlay 内容的表达式在 **overlay 作用域**求值——`${params.x}` 取注入参数，`${parent.x}` 取父页面作用域快照，`${state.x}` / `${data.x}` 照常可用且**随 store 变化自动重渲染**（这是联动写法在抽屉里同样成立的前提）。
 
+### 弹层底部按钮区（footer）
+
+弹层里的表单不必再手写「取消 / 确认」按钮行：`overlay` 配置加 `footer` 即启用内建按钮区（modal / drawer 通用），两个按钮缺省都展示：
+
+```yaml
+- id: editResult
+  action: overlay.open
+  params:
+    overlay:
+      type: modal
+      title: 编辑客户
+      page: { pageId: customer-edit }
+      footer:
+        confirmText: 保存          # 缺省「确认」（i18n）
+        cancelText: 再想想         # 缺省「取消」；点击 = 取消语义关闭
+        confirmForm: edit          # 确认键要提交的表单名（overlay 内 Form 的 name，缺省 default）
+        # hideCancel / hideConfirm: true   # 分别隐藏取消 / 确认
+        # confirmDisabled / confirmLoading: true   # 确认键禁用 / loading（求值时机同 title）
+```
+
+确认键点击 = 桥接该表单的 `requestSubmit`（校验通过后走表单自身 `onSubmit` 链，典型以 `overlay.close` 携带表单值收尾）；overlay 内没有该表单时，确认以 `{ success: true }` 关闭。表单页因此只需写字段，不用再写按钮行。
+
 ## 表单联动
 
 按联动目标分三层，由浅到深：

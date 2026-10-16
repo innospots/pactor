@@ -5,6 +5,8 @@ description: 表单类 DSL 组件——Form / Input / NumberInput / Select / Tex
 
 Form 容器与录入控件。全部录入组件可在 `Form` 内按 `name` 参与值收集与校验（`label` / `rules` 生效，值为字段初始值，优先于 Form 的 `initialValues`），也可独立使用（`value` 为受控值）。
 
+Form 内的控件**自动嵌套 Field 表单项结构**（根节点为 Base UI Field Root，`data-slot="form-item"`）：`label` 渲染标签（htmlFor 关联控件）、`rules` 含 `required` 时自动在 label 前渲染必填星号、校验错误展示在控件下方——无需手动包 `Field`。需要 `description` / `labelHint` / 按钮组间距等完整能力时，仍可显式用 `Field` 手动包裹（见本页 [Field](#field)）。
+
 ### Form
 
 | prop | 类型 | 说明 |
@@ -235,6 +237,8 @@ AI 对话输入框的通用结构构件：外层圆角容器（focus-within 高�
 ### Field
 
 通用表单项容器（上下结构：label 在上、控件容器在下）：`label` / `description` / `error` 为框架级 props，`error` 声明式强制展示；children 为控件 DSL 子树，包在控件容器（`[data-slot=field-control]`）内——有 label 时容器默认 `mt-2` 间距。四个节点均可独立加 `xxxClassName` / `xxxStyle` 样式（`label` / `control` / `description` / `error`，与内置样式合并）。
+
+> **与 Form 自动嵌套的关系**：Form 内的控件已自动嵌套 Field 结构（label / required 星号 / 校验错误），常规场景直接写控件即可。手动包 `Field` 只用于需要 `description` / `labelHint` / 按钮组间距的场景。**旧版本手动嵌套的写法升级后兼容**：内层自动表单项检测到外圈 Field 后不再叠加外层间距（mb-2 / min-h-9）；注意 `label` 只在 Field 或控件其中一处声明，两处都写会出现双标签。
 
 | prop | 类型 | 缺省 | 说明 |
 | --- | --- | --- | --- |

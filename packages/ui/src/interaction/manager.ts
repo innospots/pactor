@@ -1,6 +1,31 @@
 import type { DslNode } from '@pactor-app/core';
 
 /**
+ * Overlay 底部按钮区配置（modal / drawer 通用）。声明 `footer` 即启用按钮区；
+ * 取消 / 确认两个按钮缺省都展示，可分别隐藏。
+ */
+export interface OverlayFooterConfig {
+  /** 取消按钮文案（缺省 i18n「取消」）；点击 = 取消语义关闭（{ success: false }） */
+  cancelText?: string;
+  /** 确认按钮文案（缺省 i18n「确认」） */
+  confirmText?: string;
+  /** 隐藏取消按钮 */
+  hideCancel?: boolean;
+  /** 隐藏确认按钮 */
+  hideConfirm?: boolean;
+  /** 确认按钮禁用 */
+  confirmDisabled?: boolean;
+  /** 确认按钮 loading（加载中并禁用；求值时机同 title 等配置字段） */
+  confirmLoading?: boolean;
+  /**
+   * 确认键要提交的表单名（overlay 内容里 Form 的 name，缺省 'default'）：
+   * 命中 = requestSubmit（校验通过后走表单自身 onSubmit 链，典型以
+   * overlay.close 携带表单值收尾）；未命中 = 以 `{ success: true }` 关闭
+   */
+  confirmForm?: string;
+}
+
+/**
  * Overlay 打开配置（设计文档第 45 节，决策 D1）。
  *
  * 统一 `overlay.open`：modal / drawer 共用同一配置结构；
@@ -19,6 +44,8 @@ export interface OverlayConfig {
   page?: { pageId: string };
   /** 传入 overlay 内容作用域的 `params` 键 */
   params?: Record<string, unknown>;
+  /** 底部按钮区（缺省不渲染；声明后取消/确认缺省都展示） */
+  footer?: OverlayFooterConfig;
 }
 
 /** 堆栈条目：配置 + 生成的 id */

@@ -860,6 +860,7 @@ events:
 | `content` | DslNode | 内联 DSL 内容（与 `page` 二选一） |
 | `page` | `{ pageId }` | 动态页面引用（与 `content` 二选一） |
 | `params` | object | 注入 overlay 内容作用域的 `params` 键 |
+| `footer` | object | 底部按钮区（modal / drawer 通用）：声明即启用，取消 / 确认缺省都展示——`cancelText` / `confirmText` 文案（缺省 i18n 取消 / 确认）、`hideCancel` / `hideConfirm` 分别隐藏、`confirmDisabled` / `confirmLoading` 确认键禁用 / loading、`confirmForm` 确认键要提交的表单名（overlay 内 Form 的 name，缺省 `default`；命中 = requestSubmit 走校验与 onSubmit 链，未命中 = 以 `{ success: true }` 关闭）。取消点击 = 取消语义关闭（`{ success: false }`） |
 
 overlay 内容的表达式以 overlay 作用域求值（`${params.x}` 取注入参数，`${parent.x}` 取父页面作用域快照）；绑定 state / data 的表达式随 store 变化自动重渲染。关闭时 `overlay.close` 的 payload 作为 `overlay.open` 的结果 data 返回（命名后 `${actions.xxx}` 读取）：
 
