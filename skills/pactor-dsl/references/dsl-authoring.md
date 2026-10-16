@@ -508,9 +508,9 @@ state:
         disabled: ${state.cityOptions.length === 0}
 ```
 
-### 8.6 Card list page (CardList / EntityCard business components)
+### 8.6 Card list page (`CardList` / `EntityCard` — @pactor-app/blocks business components)
 
-`CardList` renders a grid of `EntityCard` summary cards in one node — no `For` + nested `Flex`/`Text`/`Tag` scaffolding. Item fields mirror `EntityCard` props; extra business fields ride along and come back in event payloads.
+`CardList` renders a grid of `EntityCard` summary cards in one node — no `For` + nested `Flex`/`Text`/`Tag` scaffolding. Business components live in `@pactor-app/blocks` and are **not** in the builtin registry: merge them with `registerBlockComponents`. Item fields mirror `EntityCard` props; extra business fields ride along and come back in event payloads.
 
 ```yaml
 state:

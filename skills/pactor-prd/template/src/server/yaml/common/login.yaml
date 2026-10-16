@@ -1,4 +1,5 @@
-# 登录页 DSL：type: Login 业务组件（packages/ui components/business/Login/），
+# 登录页 DSL：type: Login 业务组件（@pactor-app/blocks，经 App.tsx 的
+# components prop 注册；样式在 app/layout.tsx 挂载 blocks/styles.css），
 # 布局（layout: split / centered / brand-card / overlap / backdrop）与修饰
 # （brandSide / brandRatio / authVariant / brandPanelBackground / decor）正交组合，
 # 品牌区/文案/辅助入口/页脚全部 props 化，样式走语义令牌（深浅色/换肤自适应），

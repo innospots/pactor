@@ -11,6 +11,7 @@
     "build:test": "node scripts/build.mjs test"
   },
   "dependencies": {
+    "@pactor-app/blocks": "latest",
     "@pactor-app/core": "latest",
     "@pactor-app/runtime": "latest",
     "@pactor-app/ui": "latest",

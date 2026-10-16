@@ -48,6 +48,8 @@ Activate when the user works with **Pactor DSL or runtime APIs** in a project th
 | `packages/router` | `@pactor-app/router` | Dynamic routing, Path Matcher, menu registry |
 | `packages/permission` | `@pactor-app/permission` | Page/menu/component/action guards |
 | `packages/ui` | `@pactor-app/ui` | Built-in default UI implementation, shadcn style (components + prebuilt stylesheet + interaction core) |
+| `packages/blocks` | `@pactor-app/blocks` | Composite business blocks (Login, CardList, EntityCard, RecordingPage, SiteFooter, …) with own stylesheet; NOT in the builtin registry — merge via `registerBlockComponents` |
+| `packages/chart` | `@pactor-app/chart` | ECharts-based charts (LineChart, ColumnChart, PieChart, MetricCard, …); register via `registerChartComponents` |
 | `packages/markdown` | `@pactor-app/markdown` | Markdown + DSL Part rendering |
 | `packages/chat` | `@pactor-app/chat` | AI conversation: message protocol, streaming, ChatView, `Chat`/`ChatShell` DSL components, artifact panel |
 | `packages/vite-plugin` | `@pactor-app/vite-plugin` | Vite YAML modules, build-time validation, HMR |
@@ -381,7 +383,8 @@ pnpm pactor create my-app
 - **Do not** write `if (type === 'Button')` branches in a Renderer; use `ComponentRegistry`.
 - **Do not** inject JavaScript from the server into DSL; register actions/services/capabilities in the frontend.
 - **Do not** rely on frontend permission checks for security; enforce authorization on backend APIs.
-- **Do not** forget to import `@pactor-app/ui/styles.css` when using the default shadcn kit (`@pactor-app/chat/styles.css` additionally for chat surfaces).
+- **Do not** expect `@pactor-app/blocks` / `@pactor-app/chart` components to be in the builtin registry; merge them explicitly (`registerBlockComponents` / `registerChartComponents` into the existing `ComponentRegistry`).
+- **Do not** forget to import `@pactor-app/ui/styles.css` when using the default shadcn kit (`@pactor-app/chat/styles.css` / `@pactor-app/blocks/styles.css` / `@pactor-app/chart/styles.css` additionally for chat / blocks / chart surfaces).
 - **Do not** put a `type` key in action `params` (see the events workflow pitfall).
 - **Do not** place bare form controls directly under `Form`; wrap every control (including search-bar buttons) in a `Field`.
 - **Do not** expect DslNode slots (sidebar / toolbar / inspector / …) to render outside a page runtime; in pure React hosts pass ReactNode instead.

@@ -34,7 +34,7 @@ version: 1.6.0
 6. **列表页操作列规范**：操作列按钮样式统一 `Button variant: link`；「编辑」与「新建」指向同一个表单（同一路由页或同一弹窗），唯一区别是编辑以行数据预填（路由页 `initialValues: ${data.detail}`，弹窗/内嵌面板 `form.setValues`）；**数据列表页（搜索 + 表格 + 新建/编辑）以 `template/src/server/yaml/models/data-list.yaml` 为标准骨架生成**（结构与要点见 `references/page-templates.md`「数据列表标准模型」）
 7. **文案以线框图为准**：标题、按钮、空态文案逐字取自线框图/PRD
 8. **登录页用 `Login` 业务组件**：PRD 含登录页时，以模板 `yaml/common/login.yaml`（`type: Login`）为样板生成，禁止手写 Card+Form+自定义 CSS；**原型未明确布局方式时必须向用户提问**选择 `layout`（`split` 左右分栏 / `centered` 居中 / `brand-card` 品牌卡片 / `overlap` 卡片叠加 / `backdrop` 整页渐变背景，附效果简述，必要时含 `brandSide`/`brandRatio`/`authVariant` 修饰项），原型可判定布局则直接用、不提问；用户不答默认 `split` + `authVariant: card`；品牌区文案/logo/插画取自 PRD，提交闭环沿用 `onSubmit` → `request` + `message` + `app.reload` 模式
-9. DSL 语法细节（组件 props、表达式、动作）以 `pactor-dsl` skill 与 packages/ui 当前导出为准，本 skill 只约定流程与产出物
+9. DSL 语法细节（组件 props、表达式、动作）以 `pactor-dsl` skill 与 packages 当前导出（ui 内置注册表 / `@pactor-app/blocks` / `@pactor-app/chart`）为准，本 skill 只约定流程与产出物
 
 ## 流程总览
 
@@ -73,7 +73,7 @@ version: 1.6.0
 - **增量**：仅 **add** 新建文件；**update** 改已有 yaml；**deprecate** 删文件并改 sitemap（须用户确认）
 - 校验见 `page-inventory-and-files.md`（全量）或 `incremental-wireframe-delta.md`（增量）
 - 按 `references/component-mapping.md` 映射组件；按 `references/page-templates.md` 选列表/详情/表单模板（**数据列表页直接复制 `yaml/models/data-list.yaml` 替换占位符**）；表单一律 `Form` 包裹
-- **组件/模板/业务组件拿不准时先查资产库**（`references/asset-library.md`）：组件详情含可套用的 DSL 示例与 whenToUse，线框模板含可渲染的提炼 DSL；业务组件以 details 条目 + packages/ui 导出为准（catalog 的 integration 字段不可信）
+- **组件/模板/业务组件拿不准时先查资产库**（`references/asset-library.md`）：组件详情含可套用的 DSL 示例与 whenToUse，线框模板含可渲染的提炼 DSL；业务组件以 details 条目 + `@pactor-app/blocks` 导出为准（catalog 的 integration 字段不可信）
 - 同步更新 `sitemap.yaml` 的 `pages` + `menus`（hidden 详情/编辑带 `activeMenu`）
 - 每页 dataSources 全部 `type: http`：**有接口文档 → url 取文档接口地址**；无 → 按 `references/data-api.md` 命名约定写 `/api/d/...`（转发层空数据回退，无需 mock）；交互 events + actions 闭环
 
