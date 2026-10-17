@@ -94,8 +94,8 @@ function TimePickerPreview() {
   const [short, setShort] = useState('18:45');
   return (
     <div style={rowStyle}>
-      <TimePicker value={value} onChange={setValue} />
-      <TimePicker value={short} onChange={setShort} format="HH:mm" />
+      <TimePicker value={value} onChange={(next) => setValue(next ?? '')} />
+      <TimePicker value={short} onChange={(next) => setShort(next ?? '')} format="HH:mm" />
     </div>
   );
 }
@@ -189,7 +189,7 @@ const CASCADER_OPTIONS = [
 function CascaderPreview() {
   const [value, setValue] = useState<(string | number)[]>([]);
   return (
-    <Cascader options={CASCADER_OPTIONS} value={value} onChange={setValue} placeholder="选择地区" />
+    <Cascader options={CASCADER_OPTIONS} value={value} onChange={(next) => setValue(next ?? [])} placeholder="选择地区" />
   );
 }
 

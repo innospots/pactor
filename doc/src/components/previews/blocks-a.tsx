@@ -38,7 +38,7 @@ function EntityCardPreview() {
         icon="cube"
         title="客户实体"
         subtitle="cust_profile"
-        tags={[{ text: '启用', color: 'green' }]}
+        tags={[{ text: '启用', color: 'success' }]}
         description="客户画像主实体，含基础属性与扩展属性，用于导入决策与规则配置。"
         meta="创建于 2026-09-01"
         actions={ENTITY_ACTIONS}
@@ -58,7 +58,7 @@ const CARD_ITEMS: CardListItem[] = [
     icon: 'code',
     title: '规则引擎',
     subtitle: 'v1.2.0',
-    tags: [{ text: '已发布', color: 'green' }],
+    tags: [{ text: '已发布', color: 'success' }],
     description: '可视化规则配置与评分引擎。',
     meta: '更新于 2 小时前',
     actions: [{ text: '配置', key: 'config' }],
@@ -67,7 +67,7 @@ const CARD_ITEMS: CardListItem[] = [
     icon: 'database',
     title: '数据源管理',
     subtitle: 'v0.9.1',
-    tags: [{ text: '灰度', color: 'orange' }],
+    tags: [{ text: '灰度', color: 'warning' }],
     description: '数据源接入与字段元数据维护。',
     actions: [{ text: '配置', key: 'config' }],
   },
@@ -75,7 +75,7 @@ const CARD_ITEMS: CardListItem[] = [
     icon: 'workflow',
     title: '消息网关',
     subtitle: 'v0.5.0',
-    tags: [{ text: '开发中', color: 'blue' }],
+    tags: [{ text: '开发中', color: 'info' }],
     description: '通过节点和连线配置业务流程。',
     actions: [{ text: '配置', key: 'config' }],
   },

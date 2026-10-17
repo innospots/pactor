@@ -86,6 +86,14 @@ const EXTENDED_TYPES = [
   'InputGroup',
   'Item',
   'Typography',
+  // 扩展按钮族（spec: extended-button-components DSL 层登记）
+  'ActionButton',
+  'SplitButton',
+  'FloatingButtonGroup',
+  'ExpandingButtonGroup',
+  'CopyButton',
+  'IconMorph',
+  'ConfirmMorph',
   // 第四批：页面级组合类
   'Sidebar',
   'DataTable',

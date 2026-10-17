@@ -2,6 +2,7 @@ import { Registry } from '@pactor-app/core';
 import type { ComponentRegistry } from '@pactor-app/runtime';
 
 import { Accordion } from './components/Accordion/index.js';
+import { ActionButton } from './components/ActionButton/index.js';
 import { Affix } from './components/Affix/index.js';
 import { Alert } from './components/Alert/index.js';
 import { AlertDialog } from './components/AlertDialog/index.js';
@@ -27,9 +28,11 @@ import { ColorPicker } from './components/ColorPicker/index.js';
 import { Combobox } from './components/Combobox/index.js';
 import { Command } from './components/Command/index.js';
 import { ChatInput } from './components/ChatInput/index.js';
+import { ConfirmMorph } from './components/ConfirmMorph/index.js';
 import { Container } from './components/Container/index.js';
 import { Content } from './components/Content/index.js';
 import { ContextMenu } from './components/ContextMenu/index.js';
+import { CopyButton } from './components/CopyButton/index.js';
 import { DataTable } from './components/DataTable/index.js';
 import { DatePicker } from './components/DatePicker/index.js';
 import { Descriptions } from './components/Descriptions/index.js';
@@ -39,9 +42,11 @@ import { DocumentPreview } from './components/DocumentPreview/index.js';
 import { Drawer } from './components/Drawer/index.js';
 import { DropdownMenu } from './components/DropdownMenu/index.js';
 import { Empty } from './components/Empty/index.js';
+import { ExpandingButtonGroup } from './components/ExpandingButtonGroup/index.js';
 import { Field } from './components/Field/index.js';
 import { FilePreview } from './components/FilePreview/index.js';
 import { Flex } from './components/Flex/index.js';
+import { FloatingButtonGroup } from './components/FloatingButtonGroup/index.js';
 import { Footer } from './components/Footer/index.js';
 import { Gallery } from './components/Gallery/index.js';
 import { Form } from './components/Form/index.js';
@@ -52,6 +57,7 @@ import { Col } from './components/Col/index.js';
 import { Header } from './components/Header/index.js';
 import { HoverCard } from './components/HoverCard/index.js';
 import { Icon } from './components/Icon/index.js';
+import { IconMorph } from './components/IconMorph/index.js';
 import { Image } from './components/Image/index.js';
 import { ImageViewer } from './components/ImageViewer/index.js';
 import { Input } from './components/Input/index.js';
@@ -92,6 +98,7 @@ import { Sheet } from './components/Sheet/index.js';
 import { Sidebar } from './components/Sidebar/index.js';
 import { Sider } from './components/Sider/index.js';
 import { Skeleton } from './components/Skeleton/index.js';
+import { SplitButton } from './components/SplitButton/index.js';
 import { Slider } from './components/Slider/index.js';
 import { Sonner } from './components/Sonner/index.js';
 import { Space } from './components/Space/index.js';
@@ -206,6 +213,14 @@ export const builtinComponents = {
   InputGroup,
   Item,
   Typography,
+  // 扩展按钮族（spec: extended-button-components DSL 层登记）
+  ActionButton,
+  SplitButton,
+  FloatingButtonGroup,
+  ExpandingButtonGroup,
+  CopyButton,
+  IconMorph,
+  ConfirmMorph,
   // 页面级组合类扩展组件（第四批）
   Sidebar,
   DataTable,

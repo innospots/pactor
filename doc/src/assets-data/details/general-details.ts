@@ -9,9 +9,9 @@
  * - 按钮族 8 个（ButtonGroup / ActionButton / SplitButton / CopyButton /
  *   IconMorph / ConfirmMorph / FloatingButtonGroup / ExpandingButtonGroup）：
  *   API 属性核对自 packages/ui/src/ui/ 下同名组件源码（扩展按钮组件，
- *   交互设计参考 arc-library，Tailwind 实现）；ButtonGroup 的 DSL 结构核对自
- *   packages/ui/src/components/components/ButtonGroup/index.tsx（已注册
- *   builtinComponents），其余 7 个 DSL 注册为后续变更，无 dsl 字段；
+ *   交互设计参考 arc-library，Tailwind 实现）；8 个均已有 DSL 适配器
+ *   （packages/ui/src/components/components/ 下同名目录，已注册
+ *   builtinComponents），DSL 结构核对自对应适配器；
  *   运行态预览见 doc/src/components/previews/buttons-a.tsx。
  */
 import type { ComponentDetailContent } from './component-details.ts';
@@ -66,6 +66,23 @@ export const generalDetailContents: Record<string, ComponentDetailContent> = {
     ],
   },
   'component.action-button': {
+    dsl: {
+      "type": "ActionButton",
+      "props": {
+        "icon": "save",
+        "label": "保存",
+        "tooltip": "保存（⌘S）",
+        "variant": "outline"
+      },
+      "events": {
+        "onClick": {
+          "action": "setState",
+          "params": {
+            "saved": true
+          }
+        }
+      }
+    },
     whenToUse: [
       '**何时使用**',
       '',
@@ -98,7 +115,7 @@ export const generalDetailContents: Record<string, ComponentDetailContent> = {
       { name: 'className / style', type: 'string / CSSProperties', defaultValue: '—', description: '通用：根节点 class 合并 / 内联样式' },
     ],
     guidelines: [
-      '- DSL 注册（builtinComponents）为后续变更，当前从 `@pactor-app/ui/ui` 直接导入使用。',
+      '- DSL 已注册 builtinComponents（`type: "ActionButton"`）：icon 传 Icon 白名单名；icon-only 用法给 tooltip 或 ariaLabel，至少其一作为可访问名称。',
       '- icon-only 必须给 aria-label 或 tooltip，二者至少其一作为可访问名称。',
       '- 工具栏内统一用 ghost 或 outline 一档，不混用多种 variant 造成权重混乱。',
       '- label 不超过 4 个字；需要更长说明时放进 tooltip。',
@@ -113,6 +130,30 @@ export const generalDetailContents: Record<string, ComponentDetailContent> = {
     ],
   },
   'component.split-button': {
+    dsl: {
+      "type": "SplitButton",
+      "props": {
+        "text": "保存",
+        "options": [
+          { "value": "save-draft", "label": "存为草稿", "icon": "file" },
+          { "value": "save-copy", "label": "存为副本", "icon": "copy" }
+        ]
+      },
+      "events": {
+        "onClick": {
+          "action": "setState",
+          "params": {
+            "saved": true
+          }
+        },
+        "onSelect": {
+          "action": "setState",
+          "params": {
+            "savedAs": "${event}"
+          }
+        }
+      }
+    },
     whenToUse: [
       '**何时使用**',
       '',
@@ -144,7 +185,7 @@ export const generalDetailContents: Record<string, ComponentDetailContent> = {
       { name: 'className / style', type: 'string / CSSProperties', defaultValue: '—', description: '通用：作用于 ButtonGroup 根节点' },
     ],
     guidelines: [
-      '- DSL 注册（builtinComponents）为后续变更，当前从 `@pactor-app/ui/ui` 直接导入使用。',
+      '- DSL 已注册 builtinComponents（`type: "SplitButton"`）：text 为主按钮文字，options 的 icon 传 Icon 白名单名，onSelect 经 events 接收 `${event}` 语义值。',
       '- 主操作必须是最高频路径；备选操作与主操作同源（如同一保存动作的不同形态）。',
       '- 备选项 2–5 个为宜，更多说明信息架构有问题，应收进独立菜单。',
       '- 主操作与备选共享 loading / 成功反馈语义时，由调用方按 value 分支处理 onSelect。',
@@ -159,6 +200,28 @@ export const generalDetailContents: Record<string, ComponentDetailContent> = {
     ],
   },
   'component.copy-button': {
+    dsl: {
+      "type": "CopyButton",
+      "props": {
+        "value": "${state.projectId}",
+        "label": "复制",
+        "copiedLabel": "已复制"
+      },
+      "events": {
+        "onCopy": {
+          "action": "setState",
+          "params": {
+            "copiedValue": "${event}"
+          }
+        },
+        "onError": {
+          "action": "setState",
+          "params": {
+            "copyFailed": true
+          }
+        }
+      }
+    },
     whenToUse: [
       '**何时使用**',
       '',
@@ -188,7 +251,7 @@ export const generalDetailContents: Record<string, ComponentDetailContent> = {
       { name: 'className / style', type: 'string / CSSProperties', defaultValue: '—', description: '通用：根节点 class 合并 / 内联样式' },
     ],
     guidelines: [
-      '- DSL 注册（builtinComponents）为后续变更，当前从 `@pactor-app/ui/ui` 直接导入使用。',
+      '- DSL 已注册 builtinComponents（`type: "CopyButton"`）：value 支持状态表达式，onCopy / onError 经 events 绑定动作。',
       '- 必须处理 onError：非安全上下文（http）或权限拒绝时给用户可见反馈，不静默失败。',
       '- value 为敏感信息（Token、密钥）时，copiedLabel 不回显内容本身。',
       '- icon-only 用法补 aria-label（如「复制链接」）。',
@@ -203,6 +266,13 @@ export const generalDetailContents: Record<string, ComponentDetailContent> = {
     ],
   },
   'component.icon-morph': {
+    dsl: {
+      "type": "IconMorph",
+      "props": {
+        "morph": "menu-close",
+        "state": "${state.menuOpen ? 'a' : 'b'}"
+      }
+    },
     whenToUse: [
       '**何时使用**',
       '',
@@ -229,7 +299,7 @@ export const generalDetailContents: Record<string, ComponentDetailContent> = {
       { name: 'className / style', type: 'string / CSSProperties', defaultValue: '—', description: '通用：根节点 class 合并 / 内联样式（尺寸经 size-* 覆盖）' },
     ],
     guidelines: [
-      '- DSL 注册（builtinComponents）为后续变更，当前从 `@pactor-app/ui/ui` 直接导入使用。',
+      '- DSL 已注册 builtinComponents（`type: "IconMorph"`）：state 用状态表达式绑定（如 `${state.open ? "a" : "b"}`）。',
       '- state 由父组件受控驱动（如菜单 open 态），组件自身不管理切换。',
       '- 图标对语义必须互斥且可逆（开 / 关、播放 / 暂停），不用于表达进度或流程。',
       '- 需要新增图标对时在 MORPH_PAIRS 登记（静态导入 lucide，可 tree-shake）。',
@@ -244,6 +314,22 @@ export const generalDetailContents: Record<string, ComponentDetailContent> = {
     ],
   },
   'component.confirm-morph': {
+    dsl: {
+      "type": "ConfirmMorph",
+      "props": {
+        "label": "删除项目",
+        "confirmLabel": "确认删除",
+        "successLabel": "已删除"
+      },
+      "events": {
+        "onConfirm": {
+          "action": "setState",
+          "params": {
+            "deleted": true
+          }
+        }
+      }
+    },
     whenToUse: [
       '**何时使用**',
       '',
@@ -279,7 +365,7 @@ export const generalDetailContents: Record<string, ComponentDetailContent> = {
       { name: 'className / style', type: 'string / CSSProperties', defaultValue: '—', description: '通用：根节点 class 合并 / 内联样式' },
     ],
     guidelines: [
-      '- DSL 注册（builtinComponents）为后续变更，当前从 `@pactor-app/ui/ui` 直接导入使用。',
+      '- DSL 已注册 builtinComponents（`type: "ConfirmMorph"`）：onConfirm / onUndo 经 events 绑定动作；events 路径确认后直接 success（pending 的 Promise 流转为 ui 层直用能力）。',
       '- confirmLabel 写明动作与后果（「确认删除」），不用裸「确定」。',
       '- onConfirm 返回 Promise 才有 pending / error 语义；同步回调视为立即成功。',
       '- error 撤销（onUndo）只负责回退 UI 状态，业务回滚由调用方自行处理。',
@@ -295,6 +381,24 @@ export const generalDetailContents: Record<string, ComponentDetailContent> = {
     ],
   },
   'component.floating-button-group': {
+    dsl: {
+      "type": "FloatingButtonGroup",
+      "props": {
+        "value": "${state.view}",
+        "options": [
+          { "value": "list", "label": "列表", "icon": "list" },
+          { "value": "grid", "label": "网格", "icon": "grid" }
+        ]
+      },
+      "events": {
+        "onSelect": {
+          "action": "setState",
+          "params": {
+            "view": "${event}"
+          }
+        }
+      }
+    },
     whenToUse: [
       '**何时使用**',
       '',
@@ -320,7 +424,7 @@ export const generalDetailContents: Record<string, ComponentDetailContent> = {
       { name: 'className / style', type: 'string / CSSProperties', defaultValue: '—', description: '通用：根节点 class 合并 / 内联样式' },
     ],
     guidelines: [
-      '- DSL 注册（builtinComponents）为后续变更，当前从 `@pactor-app/ui/ui` 直接导入使用。',
+      '- DSL 已注册 builtinComponents（`type: "FloatingButtonGroup"`）：value 受控可用状态表达式绑定，onSelect 经 events 接收 `${event}` 语义值。',
       '- 选项 2–5 个、label 极短（或纯 icon + aria 语义），托盘宽度随行内内容自适应。',
       '- 受控用法（value + onSelect）是推荐形态：选中结果由调用方持有，组件只做指示。',
       '- 纯 icon 选项补可访问名称（label 缺省时经 aria 属性或外围 Tooltip）。',
@@ -335,6 +439,29 @@ export const generalDetailContents: Record<string, ComponentDetailContent> = {
     ],
   },
   'component.expanding-button-group': {
+    dsl: {
+      "type": "ExpandingButtonGroup",
+      "props": {
+        "options": [
+          { "value": "edit", "label": "编辑", "icon": "pencil" },
+          {
+            "value": "delete",
+            "label": "删除",
+            "icon": "trash",
+            "confirm": true,
+            "confirmLabel": "确认删除"
+          }
+        ]
+      },
+      "events": {
+        "onSelect": {
+          "action": "setState",
+          "params": {
+            "picked": "${event}"
+          }
+        }
+      }
+    },
     whenToUse: [
       '**何时使用**',
       '',
@@ -359,7 +486,7 @@ export const generalDetailContents: Record<string, ComponentDetailContent> = {
       { name: 'className / style', type: 'string / CSSProperties', defaultValue: '—', description: '通用：根节点 class 合并 / 内联样式' },
     ],
     guidelines: [
-      '- DSL 注册（builtinComponents）为后续变更，当前从 `@pactor-app/ui/ui` 直接导入使用。',
+      '- DSL 已注册 builtinComponents（`type: "ExpandingButtonGroup"`）：confirm 选项的二次点击由组件状态机承载，onSelect 经 events 接收语义值。',
       '- 组内 2–4 个选项为宜；label 2–4 字，避免展开时整组让位幅度过大。',
       '- 危险操作必须声明 confirm（如「删除」），普通操作保持单次点击直达。',
       '- 图标本身要能区分（不堆叠近似图形），因为常态只有图标可见。',
