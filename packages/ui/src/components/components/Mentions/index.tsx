@@ -1,3 +1,4 @@
+import { useI18n } from '@pactor-app/runtime';
 import {
   useEffect,
   useId,
@@ -93,6 +94,7 @@ export function Mentions({
   style,
 }: MentionsProps) {
   const form = useFormContext();
+  const { t } = useI18n();
   const controlId = useId();
   const inForm = form?.inForm === true && typeof name === 'string' && name !== '';
   const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -188,7 +190,7 @@ export function Mentions({
         data-slot="mentions"
         value={currentValue}
         rows={rows}
-        placeholder={placeholder}
+        placeholder={placeholder ?? t('pactor.input.placeholder')}
         disabled={disabled}
         className={CONTROL_SIZE_AREA[size]}
         onChange={handleChange}
