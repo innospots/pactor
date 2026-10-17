@@ -12,12 +12,51 @@ Form 内的控件**自动嵌套 Field 表单项结构**（根节点为 Base UI F
 | prop | 类型 | 说明 |
 | --- | --- | --- |
 | `name` | string（默认 `'default'`） | 表单名，`form.setValues` 联动动作按名寻址；同页多表单（如页面表单 + 抽屉表单）需显式命名避免重复注册 |
-| `layout` | `vertical`（默认）\| `horizontal` \| `inline` | 表单布局 |
+| `layout` | `vertical`（默认）\| `horizontal` \| `inline` | 表单布局：vertical 标签在上；horizontal 标签与控件同行、逐行排布；inline 同行流式排布 |
 | `initialValues` | object | 表单初始值（字段级 `value` 优先于此处的同名字段） |
 | 事件 `onSubmit` | — | 校验通过后触发，`event` 为表单 values，同时写入 `${form.<field>}` |
 | 事件 `onValuesChange` | — | 字段变化，`event` 为变化字段单键对象 `{ <field>: <newValue> }` |
 
 Form 内声明 `name` 的 Input / NumberInput / Select 及本页其余录入组件（Textarea / Checkbox / RadioGroup / Switch / Slider / Calendar / DatePicker / InputOTP / Combobox / Rate / TimePicker / ColorPicker / Upload / TreeSelect / Cascader / Transfer / Mentions）自动成为表单项（label / rules 生效，值由 Form 托管）。
+
+布局语义：`vertical`（缺省）表单项上下排布、标签在控件上方；`horizontal` 标签与控件同行、逐行排布（每项一行）；`inline` 同行流式排布（多项一行、自动换行）。手动 `Field` 与自动嵌套表单项均按 `layout` 排布（见 [Field](#field)）。
+
+```yaml
+# 筛选表单：horizontal 布局，标签与控件同行、逐行排布
+- type: Form
+  props:
+    layout: horizontal
+  children:
+    - type: Field
+      props: { label: 类型 }
+      children:
+        - type: ChipFilter
+          props:
+            value: ${state.category}
+            items: ${data.chips}
+          events:
+            onChange:
+              - action: setState
+                params: { category: "${event}" }
+              - action: reload
+                params: { dataSource: catalog }
+    - type: Field
+      props: { label: 关键字 }
+      children:
+        - type: Input
+          props:
+            value: ${state.keyword}
+            placeholder: 按名称、说明搜索
+            className: w-64
+          events:
+            onChange:
+              - action: setState
+                params: { keyword: "${event}" }
+              - action: reload
+                params: { dataSource: catalog }
+```
+
+横向布局的筛选表单：`ChipFilter` 等无提交语义的控件也放进 `Field` 取标签，`Input` 不声明 `name`（不走表单值托管、不进校验，筛选状态由 `setState` + 数据源 `reload` 承担）。
 
 ### Input
 
@@ -236,7 +275,7 @@ AI 对话输入框的通用结构构件：外层圆角容器（focus-within 高�
 
 ### Field
 
-通用表单项容器（上下结构：label 在上、控件容器在下）：`label` / `description` / `error` 为框架级 props，`error` 声明式强制展示；children 为控件 DSL 子树，包在控件容器（`[data-slot=field-control]`）内——有 label 时容器默认 `mt-2` 间距。四个节点均可独立加 `xxxClassName` / `xxxStyle` 样式（`label` / `control` / `description` / `error`，与内置样式合并）。
+通用表单项容器（上下结构：label 在上、控件容器在下；Form `layout: horizontal` / `inline` 时 label 与控件同一行）：`label` / `description` / `error` 为框架级 props，`error` 声明式强制展示；children 为控件 DSL 子树，包在控件容器（`[data-slot=field-control]`）内——有 label 时容器默认 `mt-2` 间距。四个节点均可独立加 `xxxClassName` / `xxxStyle` 样式（`label` / `control` / `description` / `error`，与内置样式合并）。
 
 > **与 Form 自动嵌套的关系**：Form 内的控件已自动嵌套 Field 结构（label / required 星号 / 校验错误），常规场景直接写控件即可。手动包 `Field` 只用于需要 `description` / `labelHint` / 按钮组间距的场景。**旧版本手动嵌套的写法升级后兼容**：内层自动表单项检测到外圈 Field 后不再叠加外层间距（mb-2 / min-h-9）；注意 `label` 只在 Field 或控件其中一处声明，两处都写会出现双标签。
 
@@ -249,7 +288,7 @@ AI 对话输入框的通用结构构件：外层圆角容器（focus-within 高�
 | `error` | string | — | 错误文案（声明式展示，如校验失败信息） |
 | `labelClassName` / `labelStyle` | string / CSSProperties | — | label 节点样式（必填星号随 label 节点） |
 | `labelHintClassName` / `labelHintStyle` | string / CSSProperties | — | label 行右侧提示节点样式 |
-| `controlClassName` / `controlStyle` | string / CSSProperties | — | 控件容器样式（label 下方，即 children 包裹节点） |
+| `controlClassName` / `controlStyle` | string / CSSProperties | — | 控件容器样式（children 包裹节点；vertical 布局在 label 下方，horizontal / inline 在 label 右侧） |
 | `descriptionClassName` / `descriptionStyle` | string / CSSProperties | — | 辅助说明节点样式 |
 | `errorClassName` / `errorStyle` | string / CSSProperties | — | 错误节点样式 |
 | children | DslNode[] | — | 控件 DSL 子树（经 Renderer children 机制渲染） |
@@ -260,6 +299,24 @@ AI 对话输入框的通用结构构件：外层圆角容器（focus-within 高�
   children:
     - type: Input
       props: { name: amount }
+```
+
+Form `layout: horizontal` 时 Field 的 label 与控件同一行（label 在左、控件在右，逐行排布；垂直方向与控件容器对齐）：
+
+```yaml
+- type: Form
+  props: { layout: horizontal }
+  children:
+    - type: Field
+      props: { label: 金额, description: 单位：元 }
+      children:
+        - type: Input
+          props: { name: amount }
+    - type: Field
+      props: { label: 备注 }
+      children:
+        - type: Input
+          props: { name: remark, placeholder: 请输入备注 }
 ```
 
 ### Calendar

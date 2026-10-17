@@ -59,9 +59,9 @@ export interface FieldProps {
  * 承担，五个节点（label / labelHint / 控件容器 / description / error）
  * 均可独立加样式。控件容器为相邻的直接子按钮自动加间距
  * （`[&>button+button]:ml-2`，如同一 Field 放查询/重置）。
- * 处于 layout=vertical 的 Form 内时根节点自动加 mb-2
- * （表单项纵向间距）；处于 layout=inline 的 Form 内时 label 与控件同一行
- * （覆盖默认上下结构）；horizontal 布局或 Form 外不加。
+ * 处于 layout=vertical / horizontal 的 Form 内时根节点自动加 mb-2
+ * （表单项纵向间距）；处于 layout=horizontal / inline 的 Form 内时
+ * label 与控件同一行（覆盖默认上下结构）；Form 外不加。
  */
 export function Field({
   label,
@@ -84,13 +84,15 @@ export function Field({
   errorStyle,
 }: FieldProps) {
   const form = useFormContext();
-  const inline = form?.layout === 'inline';
+  const layout = form?.layout;
+  // horizontal / inline：label 与控件同一行（覆盖 ShadcnField 默认
+  // flex-col 上下结构）；vertical 保持上下结构
+  const rowLayout = layout === 'horizontal' || layout === 'inline';
   return (
     <ShadcnField
       className={cn(
-        form?.layout === 'vertical' && 'mb-2',
-        // inline Form：label 与控件同一行（覆盖默认 flex-col）
-        inline && 'flex-row items-center',
+        (layout === 'vertical' || layout === 'horizontal') && 'mb-2',
+        rowLayout && 'flex-row items-center',
         className,
       )}
       style={style}
@@ -100,7 +102,7 @@ export function Field({
           <div
             className={cn(
               'flex min-h-3.5 items-center gap-2',
-              inline ? 'shrink-0' : 'w-full justify-between',
+              rowLayout ? 'shrink-0' : 'w-full justify-between',
             )}
           >
             {label ? (
