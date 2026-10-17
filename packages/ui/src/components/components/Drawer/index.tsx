@@ -21,8 +21,8 @@ export interface DrawerProps {
   open?: boolean;
   /** 滑出方向，缺省 right */
   placement?: DrawerPlacement;
-  /** 是否允许按住面板拖拽关闭；缺省 false（仅底部抽屉的把手可拖拽），
-   *  遮罩点击 / Escape 关闭不受影响 */
+  /** 是否允许按住面板拖拽关闭；缺省 false（完全禁止拖拽关闭，
+   *  含底部把手），true 才开启面板拖拽；遮罩点击 / Escape 关闭不受影响 */
   draggable?: boolean;
   /** 右上角关闭图标；缺省 true */
   closable?: boolean;
@@ -95,7 +95,8 @@ export function Drawer({
       // 抽屉内 Select/DatePicker 等 portal 弹层随之不可点击；
       // 遮罩仍覆盖全屏，点击关闭由遮罩 onClick 承担
       modal={false}
-      // 缺省禁止按住面板拖拽关闭（handleOnly：仅把手可拖）；
+      // 缺省禁止拖拽关闭：handleOnly 下仅 vaul Handle 可拖，
+      // 本内容不含 Handle，即全面板（含底部把手）均不可拖；
       // draggable=true 恢复自由拖拽
       handleOnly={draggable !== true}
       open={(open ?? false) && !dismissed}

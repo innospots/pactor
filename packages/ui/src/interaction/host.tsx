@@ -277,8 +277,9 @@ function OverlayFooter({
 
 /**
  * Drawer overlay：vendored drawer 原语（vaul，与 DSL Drawer 适配器同一套
- * src/ui 原语，design D4）——固定右侧面板 + 遮罩；Escape / 遮罩点击 /
- * 拖拽关闭由 vaul 触发 onOpenChange(false)，统一走取消语义 close。
+ * src/ui 原语，design D4）——固定右侧面板 + 遮罩；Escape / 遮罩点击由
+ * vaul 触发 onOpenChange(false)，统一走取消语义 close；拖拽关闭缺省禁止
+ * （handleOnly，与 DSL Drawer 适配器缺省一致）。
  */
 function ShadcnDrawerView({
   entry,
@@ -307,6 +308,9 @@ function ShadcnDrawerView({
       // Select/DatePicker 等 portal 弹层（挂在 body 下）随之不可点击；
       // 非 modal 时遮罩仍覆盖全屏，点击关闭改由遮罩 onClick 承担
       modal={false}
+      // 缺省禁止拖拽关闭（与 DSL Drawer 适配器一致）：handleOnly 下仅
+      // vaul Handle 可拖，本面板无 Handle，即不可拖拽关闭
+      handleOnly
       open
       onOpenChange={(open: boolean) => {
         if (!open) {
