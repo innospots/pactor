@@ -678,8 +678,8 @@ describe('Field 在 Form 内的布局间距', () => {
     );
   });
 
-  it('inline / horizontal Form 与 Form 外的 Field 不带 mb-2', () => {
-    for (const layout of ['inline', 'horizontal'] as const) {
+  it('inline Form 与 Form 外的 Field 不带 mb-2；horizontal 逐行排布带 mb-2', () => {
+    for (const layout of ['inline'] as const) {
       const { container, unmount } = renderDsl({
         type: 'Form',
         props: { layout },
@@ -696,6 +696,22 @@ describe('Field 在 Form 内的布局间距', () => {
       ).not.toContain('mb-2');
       unmount();
     }
+
+    // horizontal：label 与控件同行、逐行排布，Field 之间需要行距
+    const horizontal = renderDsl({
+      type: 'Form',
+      props: { layout: 'horizontal' },
+      children: [
+        {
+          type: 'Field',
+          props: { label: '名称' },
+          children: [{ type: 'Input', props: { name: 'a' } }],
+        },
+      ],
+    });
+    expect(
+      horizontal.container.querySelector('[data-slot=field]')?.className,
+    ).toContain('mb-2');
 
     const outside = renderDsl({
       type: 'Field',
