@@ -224,6 +224,8 @@ export const blocksDetailContents: Record<string, ComponentDetailContent> = {
         }
       }
     },
+    previewNote:
+      '静态结构：品牌展示区（logo / 名称 / 标语 / 插画）与认证表单（用户名 + 密码 + 记住我 + 注册 / 忘记密码链接）组合；layout 结构模式 5 档（split / centered / brand-card / overlap / backdrop）与 authVariant 认证区容器 3 档（plain / card / float）可组合。详情页整节由 LoginPreviewSection 岛承载（状态胶囊页签切换结构模式，预览与 DSL / YAML 联动）。',
     whenToUse: [
       '**何时使用**',
       '',
