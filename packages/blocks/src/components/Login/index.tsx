@@ -201,7 +201,7 @@ function BgDecor({ className }: { className?: string }) {
 }
 
 /**
- * Login 登录业务组件（business 目录）：
+ * Login 登录业务组件（区块组件）：
  * 品牌区 + 认证区 + 辅助入口 + 页脚的整页组合，内部复用 Form/Input/Button。
  * 结构模式（layout）与修饰配置（方向/比例/卡片样式/背景/装饰）正交组合；
  * 认证区内容支持 children 插槽替换内置表单（可内嵌 Tabs 切换多种登录方式）；

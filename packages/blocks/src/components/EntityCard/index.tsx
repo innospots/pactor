@@ -56,7 +56,7 @@ export interface EntityCardProps {
 }
 
 /**
- * EntityCard 实体摘要卡（business 目录）：上（图标+标题+副文案 / 标签组）、
+ * EntityCard 实体摘要卡（区块组件）：上（图标+标题+副文案 / 标签组）、
  * 中（描述 / 维护信息）、下（浅底栏操作按钮组）三层结构；按钮点击独立于
  * 整卡点击（stopPropagation）。组件不内置请求，交互由 DSL events 编排。
  */
