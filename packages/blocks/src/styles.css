@@ -12,3 +12,8 @@
 /* 语义令牌 → 工具类桥接（全仓单一定义，编译期内联；运行时解析 var()，
  * 令牌实体由 ui styles.css 的 :root 提供，皮肤/暗色覆盖自动跟随） */
 @import '@pactor-app/ui/theme-bridge.css';
+
+.ace_editor .ace_placeholder {
+  font-size: 14px;
+  transform: none;
+}

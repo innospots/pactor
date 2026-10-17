@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef } from 'react';
 import type { Ace } from 'ace-builds';
 
 import { cn } from '../../lib/utils.js';
@@ -123,12 +123,31 @@ export function buildScriptCompletions(
  * 因此这里把 snippets 模块一并 import，提前注册到 ace 模块表。
  */
 const MODE_LOADERS: Record<string, () => Promise<unknown>> = {
+  javascript: () =>
+    Promise.all([
+      import('ace-builds/src-noconflict/mode-javascript'),
+      import('ace-builds/src-noconflict/snippets/javascript'),
+    ]),
+  json: () =>
+    Promise.all([
+      import('ace-builds/src-noconflict/mode-json'),
+      import('ace-builds/src-noconflict/snippets/json'),
+    ]),
   python: () =>
     Promise.all([
       import('ace-builds/src-noconflict/mode-python'),
       import('ace-builds/src-noconflict/snippets/python'),
     ]),
+  sql: () =>
+    Promise.all([
+      import('ace-builds/src-noconflict/mode-sql'),
+      import('ace-builds/src-noconflict/snippets/sql'),
+    ]),
 };
+
+function getScriptMode(language: string): string {
+  return MODE_LOADERS[language] ? `ace/mode/${language}` : 'ace/mode/text';
+}
 
 export function ScriptEditor({
   id,
@@ -146,7 +165,6 @@ export function ScriptEditor({
   const editorRef = useRef<Ace.Editor | null>(null);
   const onChangeRef = useRef(onChange);
   onChangeRef.current = onChange;
-  const [isEmpty, setIsEmpty] = useState(!value);
 
   // 挂载编辑器（仅执行一次）；ace 依赖 window，动态 import 规避 SSR
   useEffect(() => {
@@ -164,7 +182,8 @@ export function ScriptEditor({
       const editor = ace.edit(containerRef.current, {
         value: value ?? '',
         theme: 'ace/theme/textmate',
-        mode: MODE_LOADERS[language] ? `ace/mode/${language}` : 'ace/mode/text',
+        mode: getScriptMode(language),
+        placeholder: placeholder ?? '',
         showPrintMargin: false,
         highlightActiveLine: true,
         tabSize: 4,
@@ -178,9 +197,7 @@ export function ScriptEditor({
       editor.session.setUseWorker(false);
 
       editor.on('change', () => {
-        const current = editor.getValue();
-        setIsEmpty(current === '');
-        onChangeRef.current?.(current);
+        onChangeRef.current?.(editor.getValue());
       });
 
       editorRef.current = editor;
@@ -203,9 +220,31 @@ export function ScriptEditor({
     const next = value ?? '';
     if (editor.getValue() !== next) {
       editor.setValue(next, -1);
-      setIsEmpty(next === '');
     }
   }, [value]);
+
+  // 语言变化时按需加载语法模块（不重建编辑器）
+  useEffect(() => {
+    const editor = editorRef.current;
+    if (!editor) return;
+    let disposed = false;
+
+    (async () => {
+      await MODE_LOADERS[language]?.();
+      if (!disposed) editor.session.setMode(getScriptMode(language));
+    })().catch(() => {
+      // 语言模块加载失败时保留当前模式
+    });
+
+    return () => {
+      disposed = true;
+    };
+  }, [language]);
+
+  // placeholder 使用 Ace 原生正文内渲染
+  useEffect(() => {
+    editorRef.current?.setOption('placeholder', placeholder ?? '');
+  }, [placeholder]);
 
   // functions / variables 变化时更新联想（不重建编辑器）
   useEffect(() => {
@@ -228,11 +267,6 @@ export function ScriptEditor({
       )}
     >
       <div ref={containerRef} id={id} style={{ height }} className="w-full" />
-      {isEmpty && placeholder && (
-        <div className="absolute top-0 left-0 px-3 py-2 text-sm text-muted-foreground pointer-events-none z-10">
-          {placeholder}
-        </div>
-      )}
     </div>
   );
 }
