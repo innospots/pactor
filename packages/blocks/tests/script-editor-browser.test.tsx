@@ -1,5 +1,5 @@
 // @vitest-environment jsdom
-import { readFileSync } from 'node:fs';
+import { existsSync, readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { cleanup, render, waitFor } from '@testing-library/react';
 import { afterEach, describe, expect, it } from 'vitest';
@@ -7,8 +7,18 @@ import { afterEach, describe, expect, it } from 'vitest';
 import { ScriptEditor } from '../src/components/ScriptEditor/index.js';
 import './setup.js';
 
+// 兼容包内 / 仓库根两种 vitest 启动 cwd（jsdom 下 import.meta.url
+// 非 file scheme，不可用作路径基准）
+const stylesCandidates = [
+  resolve(process.cwd(), 'styles.css'),
+  resolve(process.cwd(), 'packages/blocks/styles.css'),
+];
+const stylesPath = stylesCandidates.find((path) => existsSync(path));
+if (!stylesPath) {
+  throw new Error(`blocks styles.css not found from cwd ${process.cwd()}`);
+}
 const blocksStyles = document.createElement('style');
-blocksStyles.textContent = readFileSync(resolve(process.cwd(), 'styles.css'), 'utf8');
+blocksStyles.textContent = readFileSync(stylesPath, 'utf8');
 document.head.appendChild(blocksStyles);
 
 afterEach(cleanup);
