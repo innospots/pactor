@@ -150,6 +150,23 @@ describe('Modal / Drawer 渲染（shadcn 实现）', () => {
     expect(manager.stack()).toHaveLength(0);
   });
 
+  it('Drawer 缺省禁止拖拽关闭（与 DSL Drawer 适配器一致）', async () => {
+    const { manager } = setupHost();
+
+    void manager.open({ type: 'drawer', title: '编辑面板' });
+    await screen.findByText('编辑面板');
+
+    const panel = document.querySelector('[data-slot=drawer-panel]')!;
+    fireEvent.pointerDown(panel, { clientX: 300, clientY: 300 });
+    fireEvent.pointerMove(document, { clientX: 80, clientY: 300 });
+    fireEvent.pointerUp(document, { clientX: 80, clientY: 300 });
+
+    // 拖拽不触发关闭（handleOnly：本面板无 vaul Handle，全面板不可拖）
+    await new Promise((resolve) => setTimeout(resolve, 300));
+    expect(manager.stack()).toHaveLength(1);
+    expect(screen.getByText('编辑面板')).toBeTruthy();
+  });
+
   it('width 应用到 Modal（number 转 px）', async () => {
     const { manager } = setupHost();
 

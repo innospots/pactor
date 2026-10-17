@@ -89,7 +89,7 @@ description: 反馈与弹层类 DSL 组件——Alert / Dialog / AlertDialog / D
 | `title` | string | — | 抽屉标题 |
 | `open` | boolean | `false` | 受控开关（可绑 `${state.x}` 表达式） |
 | `placement` | `left` \| `right` \| `top` \| `bottom` | `right` | 滑出方向 |
-| `draggable` | boolean | `false` | 允许按住面板拖拽关闭（遮罩 / Escape 关闭不受影响） |
+| `draggable` | boolean | `false` | 允许按住面板拖拽关闭；缺省完全禁止拖拽关闭（遮罩 / Escape 关闭不受影响） |
 | `closable` | boolean | `true` | 右上角展示关闭图标（点击关闭并触发 `onClose`） |
 | `footer` | DslNode \| `false` | 默认按钮组 | 底部操作栏：`false` 不展示；DslNode 自定义内容；缺省为 [取消, 确定]，右对齐、固定于抽屉底部（内容区独立滚动） |
 | `cancelText` | string | `取消` | 默认 footer「取消」按钮文案（触发 `onClose`） |
