@@ -252,6 +252,34 @@ describe('字段自动包装', () => {
       expect(screen.getByText('请输入金额')).toBeTruthy();
     });
   });
+
+  it('layout: horizontal 时手动 Field 的 label 与控件同行展示（逐行排布）', () => {
+    const { container } = renderDsl({
+      type: 'Form',
+      props: { layout: 'horizontal' },
+      children: [
+        {
+          type: 'Field',
+          props: { label: '类型' },
+          children: [{ type: 'Input', props: { placeholder: 'x' } }],
+        },
+        {
+          type: 'Field',
+          props: { label: '关键字' },
+          children: [{ type: 'Input', props: { placeholder: 'y' } }],
+        },
+      ],
+    });
+
+    // 同行排布：Field 根节点覆盖默认 flex-col 为 flex-row；逐行带 mb-2
+    const fields = [...container.querySelectorAll('[data-slot=field]')];
+    expect(fields).toHaveLength(2);
+    for (const field of fields) {
+      expect(field!.className).toContain('flex-row');
+      expect(field!.className).toContain('items-center');
+      expect(field!.className).toContain('mb-2');
+    }
+  });
 });
 
 describe('输入类型 type', () => {
