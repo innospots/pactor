@@ -243,6 +243,7 @@ function MenuEntry({
   chevronPlacement = 'right',
   isExpanded,
   onToggle,
+  indent,
 }: {
   item: MenuItem;
   mode: 'inline' | 'horizontal';
@@ -255,6 +256,8 @@ function MenuEntry({
   chevronPlacement?: 'left' | 'right';
   isExpanded?: (key: string) => boolean;
   onToggle?: (key: string) => void;
+  /** 父级传入的左内边距（文字起点对齐）；缺省按 depth 递进（12 + depth×16） */
+  indent?: number;
 }) {
   const hasChildren = (item.children?.length ?? 0) > 0;
   // inline 非折叠下带 children 字段的项即为目录（含空数组：空组同样是组）：
@@ -296,6 +299,15 @@ function MenuEntry({
     </span>
   ) : null;
 
+  // 左内边距：父级经 indent 指定（文字对齐）时优先，否则按深度递进
+  const selfPaddingLeft = depth > 0 ? (indent ?? 12 + depth * 16) : 12;
+  // 左侧有 chevron（16px）+ gap（8px）的目录：子级左内边距补偿到本项
+  // 文字起点，使子菜单文字与组文字对齐（而非只按深度递进）
+  const childIndent =
+    chevronPlacement === 'left' && chevron !== null
+      ? selfPaddingLeft + 24
+      : undefined;
+
   const button = (
     <button
       type="button"
@@ -322,7 +334,11 @@ function MenuEntry({
               item.disabled && 'cursor-not-allowed opacity-50 hover:bg-transparent hover:text-muted-foreground',
             ),
       )}
-      style={mode === 'inline' && depth > 0 && !collapsed ? { paddingLeft: 12 + depth * 16 } : undefined}
+      style={
+        mode === 'inline' && depth > 0 && !collapsed
+          ? { paddingLeft: selfPaddingLeft }
+          : undefined
+      }
       onMouseEnter={railDirectory ? flyoutOpenNow : undefined}
       onMouseLeave={railDirectory ? flyoutCloseLater : undefined}
       onClick={() => {
@@ -440,7 +456,8 @@ function MenuEntry({
       ) : (
         button
       )}
-      {/* collapsible 目录：收起时不渲染子菜单；rail 目录走 flyout；其余静态展开 */}
+      {/* collapsible 目录：收起时不渲染子菜单；rail 目录走 flyout；其余静态展开。
+          indent 下传本项文字起点，使子菜单文字与带左侧 chevron 的组文字对齐 */}
       {railDirectory || (canToggle && !expanded)
         ? null
         : item.children?.map((child) => (
@@ -457,6 +474,7 @@ function MenuEntry({
               chevronPlacement={chevronPlacement}
               isExpanded={isExpanded}
               onToggle={onToggle}
+              indent={childIndent}
             />
           ))}
     </div>
