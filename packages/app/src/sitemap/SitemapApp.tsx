@@ -19,7 +19,7 @@ import {
   type ReactNode,
 } from 'react';
 
-import { createPactorPage, type PactorPageProps } from '../embedded.js';
+import { createPactorPage, type PactorPageOptions, type PactorPageProps } from '../embedded.js';
 import type { PactorHttpHooks } from '../assembly.js';
 
 import { defaultSitemapActions } from './actions.js';
@@ -91,6 +91,10 @@ export interface SitemapAppProps {
   actions?: Record<string, ActionHandler>;
   /** 业务组件（同名覆盖内建；PageOutlet / SitemapMenu 为布局保留名） */
   components?: Record<string, unknown>;
+  /** 组件注册表工厂（缺省 @pactor-app/ui 内置组件；如
+   * createChatComponentRegistry 可附加 chat 展示组件族 / Chat / ChatShell），
+   * 页面与布局工厂共用 */
+  componentRegistry?: PactorPageOptions['componentRegistry'];
   /** HTTP 钩子：所有 HTTP 出口（sitemap 源 / 页面端点 / 页面运行时）的统一加工（跨域改写 / 拆包） */
   httpAdapter?: PactorHttpHooks;
   /** fetch 实现（缺省全局 fetch；SSR / 测试可注入） */
@@ -379,6 +383,7 @@ function SitemapLayout({
         httpAdapter: props.httpAdapter,
         permissions: sitemap.permissions ?? [],
         components: props.components,
+        componentRegistry: props.componentRegistry,
         locale: props.locale,
         defaultLocale: props.defaultLocale,
         messages: props.messages,
@@ -391,6 +396,7 @@ function SitemapLayout({
       navigate,
       props.httpAdapter,
       props.components,
+      props.componentRegistry,
       sitemap,
       props.locale,
       props.defaultLocale,
@@ -408,6 +414,7 @@ function SitemapLayout({
         navigate,
         httpAdapter: props.httpAdapter,
         components: { PageOutlet, SitemapMenu, ...props.components },
+        componentRegistry: props.componentRegistry,
         locale: props.locale,
         defaultLocale: props.defaultLocale,
         messages: props.messages,
@@ -420,6 +427,7 @@ function SitemapLayout({
       navigate,
       props.httpAdapter,
       props.components,
+      props.componentRegistry,
       props.locale,
       props.defaultLocale,
       messagesSignature,

@@ -1,7 +1,7 @@
 /**
  * @pactor-app/blocks：由 @pactor-app/ui 原语组合的复合区块组件集
- *（自 packages/ui/src/components/business 拆出并更名 blocks）。
- * 不再进 ui 主注册表；需要的接入方用 registerBlockComponents 合并进既有
+ *（自 ui 包业务组件集迁出独立成包）。
+ * 不进 ui 主注册表；接入方用 registerBlockComponents 合并进既有
  * ComponentRegistry，或用 createBlockComponentRegistry 创建纯区块注册表。
  */
 import { Registry } from '@pactor-app/core';

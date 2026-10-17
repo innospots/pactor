@@ -55,7 +55,7 @@ export interface CardListProps {
 }
 
 /**
- * CardList 卡片列表（business 目录）：响应式网格渲染实体摘要卡，
+ * CardList 卡片列表（区块组件）：响应式网格渲染实体摘要卡，
  * 支持首格新建占位卡、空状态与结果计数；交互经 events 编排
  * （onItemClick / onItemAction / onCreateClick，参数经 ${event} 读取）。
  */

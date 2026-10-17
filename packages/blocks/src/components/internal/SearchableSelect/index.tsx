@@ -1,6 +1,6 @@
 /**
  * 内部组件（不导出、不注册 DSL）：可搜索下拉选择器。
- * 仅供 business 复合组件内嵌使用（ExpressionEditor / FieldCondition）。
+ * 仅供 blocks 复合组件内嵌使用（ExpressionEditor / FieldCondition）。
  */
 import { Check, ChevronsUpDown, X } from 'lucide-react';
 import * as React from 'react';

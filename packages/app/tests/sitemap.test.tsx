@@ -7,6 +7,7 @@ import { act, cleanup, fireEvent, render, screen, waitFor } from '@testing-libra
 import { StrictMode } from 'react';
 import type { PageDsl } from '@pactor-app/core';
 import { MenuRegistry } from '@pactor-app/router';
+import { createComponentRegistry } from '@pactor-app/ui/components';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import {
@@ -693,8 +694,36 @@ describe('SitemapApp', () => {
     });
   });
 
-  it('纯前端模式：未注入路由 props 时用内置浏览器路由', async () => {
+  it('componentRegistry：自定义注册表工厂生效（页面 DSL 可用其中组件）', async () => {
     window.history.pushState(null, '', '/');
+    const sitemap = createSitemap();
+    // 页面 body 引用内置注册表之外的类型名
+    sitemap.pages[1] = {
+      ...sitemap.pages[1]!,
+      pageDsl: {
+        dsl: '1.0',
+        page: { id: 'home', title: '首页' },
+        body: { type: 'MarkerX', props: { text: 'marker-content' } },
+      },
+    };
+    const fetcher = (async () =>
+      jsonResponse({ ...sitemap, user: { name: 'A' } })) as unknown as typeof fetch;
+    const MarkerX = ({ text }: { text?: string }) => <div>{text}</div>;
+    render(
+      <SitemapApp
+        sources={['/api/sitemap']}
+        fetcher={fetcher}
+        componentRegistry={() => {
+          const registry = createComponentRegistry();
+          registry.register('MarkerX', MarkerX);
+          return registry;
+        }}
+      />,
+    );
+    await screen.findByText('marker-content');
+  });
+
+  it('纯前端模式：未注入路由 props 时用内置浏览器路由', async () => {    window.history.pushState(null, '', '/');
     const fetcher = (async () =>
       jsonResponse({ ...createSitemap(), user: { name: 'A' } })
     ) as unknown as typeof fetch;

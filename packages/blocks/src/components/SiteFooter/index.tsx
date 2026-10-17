@@ -47,7 +47,7 @@ export interface SiteFooterProps {
 }
 
 /**
- * SiteFooter 站点页脚（business 级组合组件）：
+ * SiteFooter 站点页脚（区块组件）：
  * 上层左侧品牌区（logo / 名称 / 描述）+ 右侧链接列组（标题 + 链接），
  * 底部版权栏（copyright 左、辅助链接右，border 分隔）；
  * 与 Layout 子区域 Footer 区分（后者为页面骨架槽位，本组件为独立站点页脚资产）。

@@ -1,7 +1,9 @@
 // @vitest-environment jsdom
 /**
- * blocks 目录表单类组件的 DSL 渲染契约：
- * 经 createComponentRegistry 按类型名解析渲染，事件经 events.onChange + ${event} 回写状态。
+ * blocks 区块组件的 DSL 注册与渲染契约：
+ * 类型名经 createBlockComponentRegistry 注册可解析；渲染经
+ * registerBlockComponents 合并进 ui 的 createComponentRegistry 后按类型名
+ * 解析，事件经 events.onChange + ${event} 回写状态。
  */
 import { fireEvent, screen } from '@testing-library/react';
 import { describe, expect, it } from 'vitest';
