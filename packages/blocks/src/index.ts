@@ -23,6 +23,7 @@ export type { LoginBrandInfo, LoginLink, LoginProps, LoginVariant } from './comp
 export { EntityCard } from './components/EntityCard/index.js';
 export type {
   EntityCardAction,
+  EntityCardExpandingAction,
   EntityCardProps,
   EntityCardTag,
 } from './components/EntityCard/index.js';

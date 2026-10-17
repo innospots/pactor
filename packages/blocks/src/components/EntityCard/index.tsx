@@ -3,6 +3,10 @@ import type { CSSProperties } from 'react';
 import { cn } from '../../lib/utils.js';
 import { Button, type ButtonVariant } from '@pactor-app/ui/components';
 import { Card } from '@pactor-app/ui/components';
+import {
+  ExpandingButtonGroup,
+  type ExpandingButtonGroupOption,
+} from '@pactor-app/ui/components';
 import { Icon } from '@pactor-app/ui/components';
 import { Tag, type TagColor } from '@pactor-app/ui/components';
 import { Text } from '@pactor-app/ui/components';
@@ -22,6 +26,9 @@ export interface EntityCardAction {
   danger?: boolean;
 }
 
+/** 下层左侧展开式图标操作组选项（透传 ExpandingButtonGroup） */
+export type EntityCardExpandingAction = ExpandingButtonGroupOption;
+
 export interface EntityCardProps {
   /** 图标名（Icon 白名单）；与 logo 二选一，logo 优先 */
   icon?: string;
@@ -39,6 +46,8 @@ export interface EntityCardProps {
   meta?: string;
   /** 下层操作按钮组（居右）；不配置则不渲染下层 */
   actions?: EntityCardAction[];
+  /** 下层左侧展开式图标操作组（ExpandingButtonGroup）；与 actions 并存时居左、actions 居右 */
+  expandingActions?: EntityCardExpandingAction[];
   /** 下层是否带浅底栏背景，默认 true */
   footerBackground?: boolean;
   /** 整卡可点：手型 + hover 边框/背景高亮，常配 events.onClick */
@@ -53,12 +62,15 @@ export interface EntityCardProps {
   onClick?: () => void;
   /** 操作按钮点击，参数 { key, text, index } */
   onAction?: (event: { key: string; text: string; index: number }) => void;
+  /** 展开式操作组选中（confirm 选项需二次点击），参数为选项 value */
+  onExpandingAction?: (value: string) => void;
 }
 
 /**
  * EntityCard 实体摘要卡（区块组件）：上（图标+标题+副文案 / 标签组）、
- * 中（描述 / 维护信息）、下（浅底栏操作按钮组）三层结构；按钮点击独立于
- * 整卡点击（stopPropagation）。组件不内置请求，交互由 DSL events 编排。
+ * 中（描述 / 维护信息）、下（浅底栏：左 展开式图标操作组（可选）/
+ * 右 操作按钮组）三层结构；按钮点击独立于整卡点击（stopPropagation）。
+ * 组件不内置请求，交互由 DSL events 编排。
  */
 export function EntityCard({
   icon,
@@ -69,6 +81,7 @@ export function EntityCard({
   description,
   meta,
   actions,
+  expandingActions,
   footerBackground = true,
   hoverable,
   className,
@@ -76,6 +89,7 @@ export function EntityCard({
   style,
   onClick,
   onAction,
+  onExpandingAction,
 }: EntityCardProps) {
   return (
     <Card
@@ -128,8 +142,8 @@ export function EntityCard({
             ) : null}
           </div>
         ) : null}
-        {/* 下层·居右：操作按钮组（浅底栏可选） */}
-        {actions?.length ? (
+        {/* 下层：左 展开式图标操作组（可选），右 操作按钮组（浅底栏可选） */}
+        {actions?.length || expandingActions?.length ? (
           <div
             data-slot="entity-card-footer"
             className={cn(
@@ -138,7 +152,17 @@ export function EntityCard({
             )}
             onClick={(event) => event.stopPropagation()}
           >
-            {actions.map((action, index) => (
+            {expandingActions?.length ? (
+              <>
+                <ExpandingButtonGroup
+                  options={expandingActions}
+                  onSelect={onExpandingAction}
+                />
+                {/* 与 actions 并存时弹性占位：操作组居左、按钮组居右 */}
+                {actions?.length ? <span className="flex-1" /> : null}
+              </>
+            ) : null}
+            {actions?.map((action, index) => (
               <Button
                 key={`${action.key ?? action.text}-${index}`}
                 text={action.text}

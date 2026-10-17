@@ -70,6 +70,61 @@ describe('EntityCard 业务组件', () => {
     fireEvent.click(screen.getByText('用户管理'));
     await expectEventState(context, 'clicked', true);
   });
+
+  it('expandingActions 渲染展开式图标操作组；无 actions 时也渲染下层', () => {
+    const { container } = renderDsl({
+      type: 'EntityCard',
+      props: {
+        icon: 'database',
+        title: '订单生产库',
+        expandingActions: [
+          { value: 'edit', label: '编辑', icon: 'search' },
+          { value: 'delete', label: '删除', icon: 'zap', confirm: true },
+        ],
+      },
+    });
+
+    expect(container.querySelector('[data-slot=entity-card-footer]')).not.toBeNull();
+    expect(container.querySelector('[data-slot=expanding-button-group]')).not.toBeNull();
+    expect(screen.getByRole('button', { name: '编辑' })).toBeTruthy();
+    expect(screen.getByRole('button', { name: '删除' })).toBeTruthy();
+  });
+
+  it('expandingActions 与 actions 并存互不影响；onExpandingAction 回传 value，confirm 选项二次点击才触发且不触发整卡 onClick', async () => {
+    const { container, context } = renderDsl({
+      type: 'EntityCard',
+      props: {
+        ...item,
+        hoverable: true,
+        expandingActions: [
+          { value: 'edit', label: '编辑', icon: 'search' },
+          { value: 'delete', label: '删除', icon: 'zap', confirm: true },
+        ],
+      },
+      events: {
+        onClick: { action: 'setState', params: { clicked: true } },
+        onExpandingAction: { action: 'setState', params: { picked: '${event}' } },
+      },
+    });
+
+    // actions 原样渲染
+    expect(screen.getByRole('button', { name: '配置' })).toBeTruthy();
+    expect(screen.getByRole('button', { name: '停用' })).toBeTruthy();
+
+    // 普通选项单击即触发
+    fireEvent.click(screen.getByRole('button', { name: '编辑' }));
+    await expectEventState(context, 'picked', 'edit');
+    expect(context.state.get('clicked')).toBeUndefined();
+
+    // confirm 选项：首次点击进入确认态，再次点击才触发
+    const del = screen.getByRole('button', { name: '删除' });
+    fireEvent.click(del);
+    expect(context.state.get('picked')).toBe('edit');
+    expect(container.querySelector('[data-confirming]')).not.toBeNull();
+    fireEvent.click(screen.getByRole('button', { name: '确认' }));
+    await expectEventState(context, 'picked', 'delete');
+    expect(context.state.get('clicked')).toBeUndefined();
+  });
 });
 
 describe('CardList 业务组件', () => {
@@ -130,5 +185,32 @@ describe('CardList 业务组件', () => {
 
     fireEvent.click(screen.getByText('数据同步'));
     await expectEventState(context, 'picked', { item: items[1], index: 1 });
+  });
+
+  it('item.expandingActions 透传 EntityCard；onItemExpandingAction 参数 { value, item, index }', async () => {
+    const expandingItems = [
+      {
+        title: '订单生产库',
+        expandingActions: [
+          { value: 'edit', label: '编辑', icon: 'square-pen' },
+          { value: 'toggle', label: '停用', icon: 'square' },
+        ],
+      },
+    ];
+    const { container, context } = renderDsl({
+      type: 'CardList',
+      props: { items: expandingItems },
+      events: {
+        onItemExpandingAction: { action: 'setState', params: { acted: '${event}' } },
+      },
+    });
+
+    expect(container.querySelector('[data-slot=expanding-button-group]')).not.toBeNull();
+    fireEvent.click(screen.getByRole('button', { name: '停用' }));
+    await expectEventState(context, 'acted', {
+      value: 'toggle',
+      item: expandingItems[0],
+      index: 0,
+    });
   });
 });

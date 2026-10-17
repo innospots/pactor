@@ -9,6 +9,7 @@ import { Text } from '@pactor-app/ui/components';
 import {
   EntityCard,
   type EntityCardAction,
+  type EntityCardExpandingAction,
   type EntityCardTag,
 } from '../EntityCard/index.js';
 
@@ -22,6 +23,7 @@ export interface CardListItem {
   description?: string;
   meta?: string;
   actions?: EntityCardAction[];
+  expandingActions?: EntityCardExpandingAction[];
   [key: string]: unknown;
 }
 
@@ -50,6 +52,8 @@ export interface CardListProps {
   onItemClick?: (event: { item: CardListItem; index: number }) => void;
   /** 卡内操作按钮点击，参数 { key, text, item, index } */
   onItemAction?: (event: { key: string; text: string; item: CardListItem; index: number }) => void;
+  /** 卡内展开式操作组选中（confirm 选项需二次点击），参数 { value, item, index } */
+  onItemExpandingAction?: (event: { value: string; item: CardListItem; index: number }) => void;
   /** 新建占位卡点击 */
   onCreateClick?: () => void;
 }
@@ -72,6 +76,7 @@ export function CardList({
   style,
   onItemClick,
   onItemAction,
+  onItemExpandingAction,
   onCreateClick,
 }: CardListProps) {
   const { t } = useI18n();
@@ -109,11 +114,17 @@ export function CardList({
               description={item.description}
               meta={item.meta}
               actions={item.actions}
+              expandingActions={item.expandingActions}
               hoverable={hoverable}
               onClick={onItemClick ? () => onItemClick({ item, index }) : undefined}
               onAction={
                 onItemAction
                   ? ({ key, text }) => onItemAction({ key, text, item, index })
+                  : undefined
+              }
+              onExpandingAction={
+                onItemExpandingAction
+                  ? (value) => onItemExpandingAction({ value, item, index })
                   : undefined
               }
             />
