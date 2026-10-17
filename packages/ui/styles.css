@@ -1444,6 +1444,9 @@
   .border-l-warning {
     border-left-color: var(--warning);
   }
+  .bg-\(--input-background\) {
+    background-color: var(--input-background);
+  }
   .bg-\(--menu-active-background\) {
     background-color: var(--menu-active-background);
   }
@@ -1875,6 +1878,9 @@
   }
   .whitespace-pre-wrap {
     white-space: pre-wrap;
+  }
+  .text-\(--input-foreground\) {
+    color: var(--input-foreground);
   }
   .text-\(--menu-active-foreground\) {
     color: var(--menu-active-foreground);
@@ -4053,6 +4059,8 @@
   --card-shadow: none;
   --shadow-color: oklch(0 0 0 / 10%);
   --overlay-background: oklch(0 0 0 / 50%);
+  --input-background: var(--card);
+  --input-foreground: var(--card-foreground);
   --switch-track: var(--input);
   --switch-track-checked: var(--primary);
   --switch-thumb: var(--card);
@@ -4120,6 +4128,8 @@
   --chart-5: oklch(0.645 0.246 16.439);
   --sidebar-primary: oklch(0.488 0.243 264.376);
   --sidebar-primary-foreground: oklch(0.985 0 0);
+  --input-background: var(--card);
+  --input-foreground: var(--card-foreground);
   --bubble-background: oklch(from var(--primary) 0.3 calc(c * 0.4) h);
   --bubble-hover-background: oklch(
     from var(--primary) 0.35 calc(c * 0.5) h
@@ -4157,6 +4167,8 @@
     --chart-5: oklch(0.645 0.246 16.439);
     --sidebar-primary: oklch(0.488 0.243 264.376);
     --sidebar-primary-foreground: oklch(0.985 0 0);
+    --input-background: var(--card);
+    --input-foreground: var(--card-foreground);
     --bubble-background: oklch(from var(--primary) 0.3 calc(c * 0.4) h);
     --bubble-hover-background: oklch(
       from var(--primary) 0.35 calc(c * 0.5) h
