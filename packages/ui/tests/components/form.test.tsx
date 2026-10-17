@@ -766,7 +766,12 @@ describe('Select 宽度', () => {
     const standaloneTrigger = standalone.container.querySelector(
       '[data-slot=select-trigger]',
     );
-    expect(standaloneTrigger?.className).toContain('w-fit');
-    expect(standaloneTrigger?.className).not.toContain('w-full');
+    // 触发器恒为 w-full（tailwind-merge 覆盖基类 w-fit）；独立渲染时
+    // 外层包裹节点为内容尺寸（inline-flex），w-full 退化为自然宽度
+    expect(standaloneTrigger?.className).toContain('w-full');
+    expect(standaloneTrigger?.className).not.toContain('w-fit');
+    expect(standaloneTrigger?.closest('span')?.className).toContain(
+      'inline-flex',
+    );
   });
 });
