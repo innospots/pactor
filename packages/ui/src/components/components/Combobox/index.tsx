@@ -138,11 +138,13 @@ export function Combobox({
         )}
         style={inForm ? undefined : style}
       >
-        {selected ? selected.label : (placeholder ?? '')}
+        {selected ? selected.label : (placeholder ?? t('pactor.select.placeholder'))}
       </ComboboxTrigger>
       <ComboboxContent>
         <Command>
-          {searchable ? <CommandInput placeholder={placeholder} /> : null}
+          {searchable ? (
+            <CommandInput placeholder={placeholder ?? t('pactor.select.placeholder')} />
+          ) : null}
           <CommandList>
             <CommandEmpty>{t('pactor.command.empty')}</CommandEmpty>
             <CommandGroup>

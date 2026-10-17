@@ -58,11 +58,13 @@ describe('组件族与导出', () => {
       string,
       unknown
     >;
+    // ExpandingButtonGroup 为唯一例外：blocks 下游包（EntityCard /
+    // CardList 的 expandingActions）经 components 层按需导出
+    //（见 src/components/index.ts「扩展按钮族」导出注释）
     for (const name of [
       'ActionButton',
       'SplitButton',
       'FloatingButtonGroup',
-      'ExpandingButtonGroup',
       'CopyButton',
       'IconMorph',
       'ConfirmMorph',

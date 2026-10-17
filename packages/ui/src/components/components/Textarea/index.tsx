@@ -1,3 +1,4 @@
+import { useI18n } from '@pactor-app/runtime';
 import { useEffect, useId, type CSSProperties } from 'react';
 
 import { cn } from '../../../lib/utils.js';
@@ -48,6 +49,7 @@ export function Textarea({
   style,
 }: TextareaProps) {
   const form = useFormContext();
+  const { t } = useI18n();
   const controlId = useId();
   const inForm = form?.inForm === true && typeof name === 'string' && name !== '';
 
@@ -74,7 +76,7 @@ export function Textarea({
         <ShadcnTextarea
           id={controlId}
           value={typeof fieldValue === 'string' ? fieldValue : ''}
-          placeholder={placeholder}
+          placeholder={placeholder ?? t('pactor.input.placeholder')}
           rows={rows}
           disabled={disabled}
           className={CONTROL_SIZE_AREA[size]}
@@ -90,7 +92,7 @@ export function Textarea({
   return (
     <ShadcnTextarea
       value={value ?? ''}
-      placeholder={placeholder}
+      placeholder={placeholder ?? t('pactor.input.placeholder')}
       rows={rows}
       disabled={disabled}
       className={cn(CONTROL_SIZE_AREA[size], className)}

@@ -100,7 +100,7 @@ export function Input({
       id={controlId}
       type={type}
       value={currentValue}
-      placeholder={placeholder}
+      placeholder={placeholder ?? t('pactor.input.placeholder')}
       disabled={disabled}
       className={cn(
         CONTROL_SIZE_BOX[size],

@@ -160,7 +160,7 @@ export function Select({
             CLEARABLE_GROUP,
           )}
         >
-          <SelectValue placeholder={placeholder} />
+          <SelectValue placeholder={placeholder ?? t('pactor.select.placeholder')} />
           {showClear ? (
             <ClearHoverButton
               label={t('pactor.select.clear')}
