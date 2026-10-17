@@ -46,6 +46,8 @@ describe('皮肤令牌契约', () => {
       '--card-shadow',
       '--shadow-color',
       '--overlay-background',
+      '--input-background',
+      '--input-foreground',
       '--switch-track',
       '--switch-track-checked',
       '--switch-thumb',
@@ -82,7 +84,7 @@ describe('皮肤令牌契约', () => {
     }
   });
 
-  it('暗色块与跟随系统媒体查询块同步覆盖 bubble 令牌', () => {
+  it('暗色块与跟随系统媒体查询块同步覆盖组件令牌', () => {
     const darkBlock = stylesSource.match(
       /\[data-pactor-theme='dark'\]\s*\{([\s\S]*?)\n\}/,
     );
@@ -91,6 +93,8 @@ describe('皮肤令牌契约', () => {
     );
     for (const block of [darkBlock?.[1], mediaBlock?.[1]]) {
       expect(block).toBeTruthy();
+      expect(block).toContain('--input-background: var(--card)');
+      expect(block).toContain('--input-foreground: var(--card-foreground)');
       expect(block).toContain('--bubble-background:');
       expect(block).toContain('--bubble-hover-background:');
     }
@@ -105,6 +109,8 @@ describe('皮肤令牌契约', () => {
   });
 
   it('组件级令牌默认值经 var() 回退到语义令牌', () => {
+    expect(stylesSource).toContain('--input-background: var(--card)');
+    expect(stylesSource).toContain('--input-foreground: var(--card-foreground)');
     expect(stylesSource).toContain('--switch-track-checked: var(--primary)');
     expect(stylesSource).toContain('--menu-hover-background: var(--accent)');
     expect(stylesSource).toContain('--menu-active-background: var(--accent)');

@@ -181,6 +181,7 @@ document.documentElement.removeAttribute('data-pactor-theme');
 
 | token | 默认值 | 说明 |
 | --- | --- | --- |
+| `--input-background` / `--input-foreground` | `--card` / `--card-foreground` | Input、Textarea、Select 等输入控件表面 / 其上文字 |
 | `--switch-track` / `--switch-track-checked` | `--input` / `--primary` | Switch 轨道（未选中 / 选中） |
 | `--switch-thumb` | `--card` | Switch 滑块 |
 | `--slider-track` / `--slider-range` | `--muted` / `--primary` | Slider 轨道 / 已选进度 |

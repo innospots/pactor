@@ -177,7 +177,7 @@ export function ChatInput({
           onKeyDown={handleKeyDown}
           onCompositionStart={handleComposition}
           onCompositionEnd={handleComposition}
-          className="min-h-[60px] resize-none border-0 px-4 pt-3 pb-1 shadow-none focus-visible:border-transparent focus-visible:ring-0"
+          className="min-h-[60px] resize-none border-0 bg-transparent px-4 pt-3 pb-1 text-card-foreground shadow-none focus-visible:border-transparent focus-visible:ring-0"
         />
       )}
       {toolbarStart || toolbarEnd || !hideSend ? (

@@ -92,6 +92,8 @@
 
   /* 组件级皮肤令牌（命名 --<component>-<part>-<state>，默认值经 var()
      回退到语义令牌——只覆盖语义令牌时组件仍有合理视觉） */
+  --input-background: var(--card);
+  --input-foreground: var(--card-foreground);
   --switch-track: var(--input);
   --switch-track-checked: var(--primary);
   --switch-thumb: var(--card);
@@ -167,7 +169,10 @@
   --sidebar-primary: oklch(0.488 0.243 264.376);
   --sidebar-primary-foreground: oklch(0.985 0 0);
 
-  /* 暗色下的组件级皮肤令牌覆盖（其余经 var() 引用语义令牌自动适配） */
+  /* 暗色下的组件级皮肤令牌覆盖；输入别名在当前作用域重绑，
+     避免嵌套暗色容器继承 :root 已解析的亮色值 */
+  --input-background: var(--card);
+  --input-foreground: var(--card-foreground);
   --bubble-background: oklch(from var(--primary) 0.3 calc(c * 0.4) h);
   --bubble-hover-background: oklch(
     from var(--primary) 0.35 calc(c * 0.5) h
@@ -214,6 +219,8 @@
     --sidebar-primary-foreground: oklch(0.985 0 0);
 
     /* 与上方 [data-pactor-theme='dark'] 块保持一致的组件级令牌覆盖 */
+    --input-background: var(--card);
+    --input-foreground: var(--card-foreground);
     --bubble-background: oklch(from var(--primary) 0.3 calc(c * 0.4) h);
     --bubble-hover-background: oklch(
       from var(--primary) 0.35 calc(c * 0.5) h
