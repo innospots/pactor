@@ -184,6 +184,39 @@ describe('Menu 项级操作', () => {
     );
   });
 
+  it('子菜单文字与组文字对齐：组左侧 chevron 时子项缩进补偿到组文字起点', () => {
+    const getPadding = (
+      container: HTMLElement,
+      key: string,
+    ): string =>
+      (
+        container.querySelector(
+          `[data-slot=menu-entry][data-key="${key}"] [data-slot=menu-item]`,
+        )! as HTMLElement
+      ).style.paddingLeft;
+
+    // chevronPlacement: left —— 组文字起点 = 12(px-3) + 16(chevron) + 8(gap)，
+    // 子项 paddingLeft 与之对齐
+    const left = renderDsl({
+      type: 'Menu',
+      props: {
+        items: ITEMS,
+        collapsible: true,
+        defaultExpandAll: true,
+        chevronPlacement: 'left',
+      },
+    });
+    expect(getPadding(left.container, 'inst-1')).toBe('');
+    expect(getPadding(left.container, 'inst-1/conv-1')).toBe('36px');
+
+    // 缺省（右端 chevron / 无 chevron）：保持深度递进 12 + depth×16
+    const right = renderDsl({
+      type: 'Menu',
+      props: { items: ITEMS, collapsible: true, defaultExpandAll: true },
+    });
+    expect(getPadding(right.container, 'inst-1/conv-1')).toBe('28px');
+  });
+
   it('空组（children: []）同样是目录：不可选中、无 chevron、不触发 onSelect', () => {
     const { container, context } = renderDsl({
       type: 'Menu',
