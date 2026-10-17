@@ -8,11 +8,11 @@ import {
   type ChatServices,
   type ChatTransport,
 } from '@pactor-app/chat';
-// Chat 一等组件（画廊页 chat 系验收面）的皮肤样式表
-import '@pactor-app/chat/styles.css';
-import { StaticDslLoader } from '@pactor-app/resource';
 // 默认 UI 为 @pactor-app/ui 内置实现，样式表导入为必需步骤
 import '@pactor-app/ui/styles.css';
+import { StaticDslLoader } from '@pactor-app/resource';
+// Chat 一等组件（画廊页 chat 系验收面）的皮肤样式表
+import '@pactor-app/chat/styles.css';
 // 工作室局部样式微调（须在 ui / chat 样式表之后加载）
 import './studio.css';
 import { createComponentRegistry } from '@pactor-app/ui/components';

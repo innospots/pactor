@@ -13,7 +13,7 @@ function InputGroup({ className, ...props }: React.ComponentProps<'div'>) {
       data-slot="input-group"
       role="group"
       className={cn(
-        'group/input-group relative flex w-full items-center rounded-md border border-input shadow-xs transition-colors outline-none focus-within:border-ring focus-within:ring-[3px] focus-within:ring-ring/50 has-disabled:opacity-50',
+        'group/input-group relative flex w-full items-center rounded-md border border-input bg-(--input-background) text-(--input-foreground) shadow-xs transition-colors outline-none focus-within:border-ring focus-within:ring-[3px] focus-within:ring-ring/50 has-disabled:opacity-50',
         // 消化 DSL 子元素：Input 去边框/焦点环并伸展；Text 作前后缀；Button 贴边去圆角
         '[&_[data-slot=input]]:min-w-0 [&_[data-slot=input]]:flex-1 [&_[data-slot=input]]:border-0 [&_[data-slot=input]]:shadow-none [&_[data-slot=input]]:focus-visible:ring-0',
         '[&>[data-slot=text]]:shrink-0 [&>[data-slot=text]]:px-3 [&>[data-slot=text]]:text-sm [&>[data-slot=text]]:text-muted-foreground',

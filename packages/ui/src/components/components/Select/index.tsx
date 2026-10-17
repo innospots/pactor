@@ -156,7 +156,11 @@ export function Select({
           iconClassName={showClear ? CLEARABLE_ICON_HIDE : undefined}
           className={cn(
             CONTROL_SIZE_TRIGGER_TEXT[size],
-            inFormRoot ? 'w-full' : undefined,
+            // 触发器恒撑满控件包裹节点：基类 w-fit 会让选择框宽度随
+            // 选中值标签浮动，消费方经 className / controlClassName
+            // 传入的宽度（如 w-28）必须落到触发器上才能真正固定；
+            // 自然宽度场景包裹节点为内容尺寸，w-full 退化为 auto
+            'w-full',
             CLEARABLE_GROUP,
           )}
         >
@@ -179,7 +183,7 @@ export function Select({
                 value={query}
                 placeholder={t('pactor.select.search')}
                 aria-label={t('pactor.select.search')}
-                className="h-8 w-full rounded-md border border-border bg-transparent px-2 text-sm outline-none placeholder:text-muted-foreground focus:border-primary"
+                className="h-8 w-full rounded-md border border-border bg-(--input-background) px-2 text-sm text-(--input-foreground) outline-none placeholder:text-muted-foreground focus:border-primary"
                 onChange={(event) => setQuery(event.target.value)}
                 onKeyDown={(event) => {
                   // 字符键拦截列表 typeahead；导航/确认/关闭键放行给列表处理

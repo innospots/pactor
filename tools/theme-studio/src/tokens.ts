@@ -88,6 +88,8 @@ export const TOKEN_GROUPS: TokenGroup[] = [
       { name: '--sidebar-accent-foreground', type: 'color', description: '侧栏强调文字', defaultValue: 'var(--accent-foreground)' },
       { name: '--sidebar-border', type: 'color', description: '侧栏边框', defaultValue: 'var(--border)' },
       { name: '--sidebar-ring', type: 'color', description: '侧栏焦点环', defaultValue: 'var(--ring)' },
+      { name: '--input-background', type: 'color', description: '输入控件表面背景', defaultValue: 'var(--card)' },
+      { name: '--input-foreground', type: 'color', description: '输入控件表面文字', defaultValue: 'var(--card-foreground)' },
       { name: '--switch-track', type: 'color', description: 'Switch 轨道', defaultValue: 'var(--input)' },
       { name: '--switch-track-checked', type: 'color', description: 'Switch 轨道（选中）', defaultValue: 'var(--primary)' },
       { name: '--switch-thumb', type: 'color', description: 'Switch 滑块', defaultValue: 'var(--card)' },

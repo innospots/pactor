@@ -206,7 +206,7 @@ export function Upload({
       type="button"
       data-slot="upload-button"
       disabled={disabled}
-      className="inline-flex h-9 cursor-pointer items-center gap-2 rounded-md border border-input bg-transparent px-3 text-sm shadow-xs hover:bg-accent disabled:cursor-not-allowed disabled:opacity-50"
+      className="inline-flex h-9 cursor-pointer items-center gap-2 rounded-md border border-input bg-(--input-background) px-3 text-sm text-(--input-foreground) shadow-xs hover:bg-accent disabled:cursor-not-allowed disabled:opacity-50"
       onClick={() => inputRef.current?.click()}
     >
       <UploadIcon className="size-4" />

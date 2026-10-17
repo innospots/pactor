@@ -405,7 +405,7 @@ export function DatePicker(props: DatePickerProps) {
         disabled={disabled}
         data-slot="datepicker-trigger"
         className={cn(
-          'flex h-9 w-full min-w-0 cursor-pointer items-center justify-between gap-2 rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-xs transition-colors outline-none hover:bg-accent focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:cursor-not-allowed disabled:opacity-50',
+          'flex h-9 w-full min-w-0 cursor-pointer items-center justify-between gap-2 rounded-md border border-input bg-(--input-background) px-3 py-1 text-sm text-(--input-foreground) shadow-xs transition-colors outline-none hover:bg-accent focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:cursor-not-allowed disabled:opacity-50',
           CONTROL_SIZE_BOX[size],
           CLEARABLE_GROUP,
           displayText === '' && 'text-muted-foreground',
