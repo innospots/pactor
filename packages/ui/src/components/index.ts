@@ -172,6 +172,12 @@ export { ButtonGroup } from './components/ButtonGroup/index.js';
 export type { ButtonGroupProps } from './components/ButtonGroup/index.js';
 export { InputGroup } from './components/InputGroup/index.js';
 export type { InputGroupProps } from './components/InputGroup/index.js';
+// 扩展按钮族（blocks 等下游包按需导出；其余成员经 DSL 注册表使用）
+export { ExpandingButtonGroup } from './components/ExpandingButtonGroup/index.js';
+export type {
+  ExpandingButtonGroupOption,
+  ExpandingButtonGroupProps,
+} from './components/ExpandingButtonGroup/index.js';
 export { Item } from './components/Item/index.js';
 export type { ItemProps } from './components/Item/index.js';
 export { Typography } from './components/Typography/index.js';

@@ -78,6 +78,28 @@ describe('Tabs 容器', () => {
     expect(list?.getAttribute('data-variant')).toBe('default');
     expect(list?.className).toContain('bg-muted');
   });
+
+  it('胶囊触发器带专用手型类 pactor-tabs-pill（line 变体不带）', () => {
+    const pill = renderDsl({
+      type: 'Tabs',
+      props: { items: [{ key: 'a', label: '页签A' }] },
+    });
+    const line = renderDsl({
+      type: 'Tabs',
+      props: { variant: 'line', items: [{ key: 'a', label: '页签A' }] },
+    });
+
+    expect(
+      pill.container
+        .querySelector('[data-slot=tabs-trigger]')
+        ?.className.split(/\s+/),
+    ).toContain('pactor-tabs-pill');
+    expect(
+      line.container
+        .querySelector('[data-slot=tabs-trigger]')
+        ?.className.split(/\s+/),
+    ).not.toContain('pactor-tabs-pill');
+  });
 });
 
 describe('Tabs 内容区样式', () => {

@@ -80,7 +80,14 @@ export function Tabs({
         }
       >
         {items.map((item) => (
-          <TabsTrigger key={item.key} value={item.key}>
+          <TabsTrigger
+            key={item.key}
+            value={item.key}
+            // 胶囊变体挂专用手写类（styles.css 中 .pactor-tabs-pill）：
+            // 消费方多层样式叠加 / 全局 button cursor 重置会击败 tailwind
+            // 的 .cursor-pointer 工具类，专用类保证胶囊页签恒显手型
+            className={variant === 'line' ? undefined : 'pactor-tabs-pill'}
+          >
             {item.label}
           </TabsTrigger>
         ))}

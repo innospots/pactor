@@ -376,6 +376,14 @@
   display: none;
 }
 
+/* 胶囊页签触发器恒显手型：消费方以命名 @layer 叠加多个预编译产物
+   （pactor-ui / pactor-chart / pactor-blocks）或自带全局 button cursor
+   重置时，后加载层的基础规则可能覆盖 tailwind 的 .cursor-pointer 工具类，
+   导致胶囊页签悬停无手型；专用类无跨层同名冲突（同 pactor-clearable 思路）。 */
+.pactor-tabs-pill {
+  cursor: pointer;
+}
+
 @media (hover: hover) {
   .group:hover .pactor-clearable {
     display: inline-flex;

@@ -4174,6 +4174,9 @@
 .pactor-clearable {
   display: none;
 }
+.pactor-tabs-pill {
+  cursor: pointer;
+}
 @media (hover: hover) {
   .group:hover .pactor-clearable {
     display: inline-flex;

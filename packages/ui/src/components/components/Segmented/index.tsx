@@ -1,10 +1,16 @@
-import { useEffect, useLayoutEffect, useRef, useState, type CSSProperties } from 'react';
+import {
+  useEffect,
+  useLayoutEffect,
+  useRef,
+  useState,
+  type CSSProperties,
+} from "react";
 
-import { cn } from '../../../lib/utils.js';
-import { useFormContext } from '../Form/context.js';
-import { FieldShell } from '../Form/form-item.js';
-import { Icon } from '../Icon/index.js';
-import type { FieldRule } from '../Input/index.js';
+import { cn } from "../../../lib/utils.js";
+import { useFormContext } from "../Form/context.js";
+import { FieldShell } from "../Form/form-item.js";
+import { Icon } from "../Icon/index.js";
+import type { FieldRule } from "../Input/index.js";
 
 /** 分段选项；`icon` 为 Icon 白名单图标名（kebab-case 或 PascalCase） */
 export interface SegmentedOption {
@@ -52,8 +58,11 @@ export function Segmented({
   style,
 }: SegmentedProps) {
   const form = useFormContext();
-  const inForm = form?.inForm === true && typeof name === 'string' && name !== '';
-  const [innerValue, setInnerValue] = useState<string | number | undefined>(value);
+  const inForm =
+    form?.inForm === true && typeof name === "string" && name !== "";
+  const [innerValue, setInnerValue] = useState<string | number | undefined>(
+    value,
+  );
 
   useEffect(() => {
     if (inForm && form && name) {
@@ -63,7 +72,8 @@ export function Segmented({
     return undefined;
   });
 
-  const current = inForm && form && name ? form.values[name] : (value ?? innerValue);
+  const current =
+    inForm && form && name ? form.values[name] : (value ?? innerValue);
 
   const handleChange = (option: SegmentedOption) => {
     if (disabled || option.disabled) return;
@@ -77,7 +87,10 @@ export function Segmented({
 
   // 滑动指示块：量取选中按钮的位置与宽度，left/width 过渡平滑移动
   const itemRefs = useRef<(HTMLButtonElement | null)[]>([]);
-  const [indicator, setIndicator] = useState<{ left: number; width: number } | null>(null);
+  const [indicator, setIndicator] = useState<{
+    left: number;
+    width: number;
+  } | null>(null);
   const activeIndex = options.findIndex((option) => option.value === current);
 
   useLayoutEffect(() => {
@@ -86,8 +99,8 @@ export function Segmented({
       setIndicator(el ? { left: el.offsetLeft, width: el.offsetWidth } : null);
     };
     measure();
-    window.addEventListener('resize', measure);
-    return () => window.removeEventListener('resize', measure);
+    window.addEventListener("resize", measure);
+    return () => window.removeEventListener("resize", measure);
   }, [activeIndex, options]);
 
   const control = (
@@ -95,8 +108,8 @@ export function Segmented({
       data-slot="segmented"
       role="radiogroup"
       className={cn(
-        'relative inline-flex items-center gap-1 rounded-full bg-muted p-1',
-        disabled && 'cursor-not-allowed opacity-50',
+        "relative inline-flex items-center gap-1 rounded-full bg-muted p-1",
+        disabled && "cursor-not-allowed opacity-50",
         inForm ? undefined : className,
       )}
       style={inForm ? undefined : style}
@@ -125,11 +138,11 @@ export function Segmented({
             disabled={disabled === true || option.disabled === true}
             onClick={() => handleChange(option)}
             className={cn(
-              'relative inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-sm whitespace-nowrap transition-colors',
+              "relative inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-sm whitespace-nowrap transition-colors",
               active
-                ? 'font-medium text-foreground'
-                : 'text-muted-foreground hover:text-foreground',
-              'disabled:cursor-not-allowed disabled:opacity-50',
+                ? "font-medium text-foreground"
+                : "text-muted-foreground hover:text-foreground cursor-pointer",
+              "disabled:cursor-not-allowed disabled:opacity-50",
             )}
           >
             {option.icon ? <Icon name={option.icon} size="sm" /> : null}
