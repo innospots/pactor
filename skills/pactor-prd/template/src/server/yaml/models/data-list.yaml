@@ -14,7 +14,7 @@ state:
   status: all
   editingId: ""
   # 表单条件显隐镜像（onValuesChange 写入；按页面需要增减，可多个）
-  fType: ""
+  fKind: ""
 dataSources:
   list:
     type: http
@@ -67,7 +67,7 @@ body:
               - action: setState # 清空编辑态与显隐镜像
                 params:
                   editingId: ""
-                  fType: ""
+                  fKind: ""
               - action: reload # 清空 editing 数据（editingId 为空 → 空对象）
                 params:
                   dataSource: editing
@@ -88,9 +88,10 @@ body:
                         onValuesChange:
                           - action: setState
                             params:
-                              fType: "${event.type != null ? event.type : state.fType}"
+                              fKind: "${event.kind != null ? event.kind : state.fKind}"
                         onSubmit:
-                          - action: request
+                          - id: saveResult
+                            action: request
                             params:
                               method: POST
                               url: /api/d/ops/data-list-save
@@ -98,247 +99,271 @@ body:
                                 id: ${state.editingId}
                                 name: ${event.name}
                                 code: ${event.code}
-                                type: ${event.type}
+                                kind: ${event.kind}
                                 extra: ${event.extra}
                                 sort: ${event.sort}
                                 status: ${event.status}
-                          - action: message
+                          - action: if
                             params:
-                              messageType: success
-                              text: 已保存（演示）
-                          - action: overlay.close
+                              condition: ${actions.saveResult != null && actions.saveResult.ok == true}
+                              then:
+                                - action: message
+                                  params:
+                                    messageType: success
+                                    text: 已保存
+                                - action: overlay.close
+                              else:
+                                - action: message
+                                  params:
+                                    messageType: error
+                                    text: 保存失败，请检查接口后重试
                       children:
-                        # 分区结构：标题 → 分割线 → 字段组（不用 Card）；多个分区重复此结构
+                        # 分区与底部按钮共用纵向 Flex/gap，不用临时 margin 修间距
                         - type: Flex
                           props:
                             direction: vertical
                             gap: middle
                           children:
-                            - type: Text
-                              props:
-                                text: 基本信息
-                                strong: true
-                            - type: Separator
+                            # 分区结构：标题 → 分割线 → 字段组（不用 Card）；多个分区重复此结构
                             - type: Flex
                               props:
                                 direction: vertical
-                                gap: small
+                                gap: middle
                               children:
-                                - type: Field
+                                - type: Text
                                   props:
-                                    label: 名称
-                                    required: true
-                                  children:
-                                    - type: Input
-                                      props:
-                                        name: name
-                                        placeholder: 请输入名称
-                                        rules:
-                                          - required: true
-                                            message: 请输入名称
-                                # 编辑时禁用关键字段
-                                - type: Field
+                                    text: 基本信息
+                                    strong: true
+                                - type: Separator
+                                - type: Flex
                                   props:
-                                    label: 编码
-                                    required: true
-                                  children:
-                                    - type: Input
-                                      props:
-                                        name: code
-                                        placeholder: 大写字母 + 下划线，如 DEMO_ITEM
-                                        disabled: ${state.editingId != ''}
-                                        rules:
-                                          - required: true
-                                            message: 请输入编码
-                                # 成对字段用 Grid 两列
-                                - type: Grid
-                                  props:
-                                    columns: 2
-                                    gap: 16
+                                    direction: vertical
+                                    gap: small
                                   children:
                                     - type: Field
                                       props:
-                                        label: 类型
+                                        label: 名称
                                         required: true
                                       children:
-                                        - type: Select
+                                        - type: Input
                                           props:
-                                            name: type
-                                            placeholder: 请选择类型
-                                            options: ${data.list.filters.type}
+                                            name: name
+                                            placeholder: 请输入名称
                                             rules:
                                               - required: true
-                                                message: 请选择类型
+                                                message: 请输入名称
+                                    # 编辑时禁用关键字段
                                     - type: Field
                                       props:
-                                        label: 状态
+                                        label: 编码
+                                        required: true
                                       children:
-                                        - type: Select
+                                        - type: Input
                                           props:
-                                            name: status
-                                            value: 启用
-                                            options: ${data.list.filters.status}
-                                - type: Grid
-                                  props:
-                                    columns: 2
-                                    gap: 16
-                                  children:
-                                    - type: Field
+                                            name: code
+                                            placeholder: 大写字母 + 下划线，如 DEMO_ITEM
+                                            disabled: ${state.editingId != ''}
+                                            rules:
+                                              - required: true
+                                                message: 请输入编码
+                                    # 成对字段用 Row / Col：窄屏单列，md 起两列
+                                    - type: Row
                                       props:
-                                        label: 排序
+                                        gutter: [16, 16]
                                       children:
-                                        - type: NumberInput
-                                          props:
-                                            name: sort
-                                            className: w-full
-                                            min: 0
-                                            precision: 0
-                                # 条件显隐字段：依赖镜像 state
-                                - when: ${state.fType == '高级'}
-                                  type: Field
-                                  props:
-                                    label: 扩展说明
-                                  children:
-                                    - type: Input
+                                        - type: Col
+                                          props: { span: 24, md: 12 }
+                                          children:
+                                            - type: Field
+                                              props:
+                                                label: 类型
+                                                required: true
+                                              children:
+                                                - type: Select
+                                                  props:
+                                                    name: kind
+                                                    controlClassName: w-full
+                                                    placeholder: 请选择类型
+                                                    options: ${data.list.filters.kind}
+                                                    rules:
+                                                      - required: true
+                                                        message: 请选择类型
+                                        - type: Col
+                                          props: { span: 24, md: 12 }
+                                          children:
+                                            - type: Field
+                                              props:
+                                                label: 状态
+                                              children:
+                                                - type: Select
+                                                  props:
+                                                    name: status
+                                                    controlClassName: w-full
+                                                    value: 启用
+                                                    options: ${data.list.filters.status}
+                                    # 单字段保留桌面半宽，窄屏单列
+                                    - type: Row
                                       props:
-                                        name: extra
-                                        placeholder: 高级类型的扩展配置说明
-                        # 底部按钮：取消关抽屉，保存触发 Form onSubmit
-                        - type: Flex
-                          props:
-                            justify: end
-                            gap: small
-                            className: mt-4
-                          children:
-                            - type: Button
+                                        gutter: [16, 16]
+                                      children:
+                                        - type: Col
+                                          props: { span: 24, md: 12 }
+                                          children:
+                                            - type: Field
+                                              props:
+                                                label: 排序
+                                              children:
+                                                - type: NumberInput
+                                                  props:
+                                                    name: sort
+                                                    className: w-full
+                                                    min: 0
+                                                    precision: 0
+                                    # 条件显隐字段：依赖镜像 state
+                                    - when: ${state.fKind == '高级'}
+                                      type: Field
+                                      props:
+                                        label: 扩展说明
+                                      children:
+                                        - type: Input
+                                          props:
+                                            name: extra
+                                            placeholder: 高级类型的扩展配置说明
+                            # 底部按钮：取消关抽屉，保存触发 Form onSubmit
+                            - type: Flex
                               props:
-                                text: 取消
-                              events:
-                                onClick:
-                                  - action: overlay.close
-                            - type: Button
-                              props:
-                                text: 保存
-                                variant: primary
-                                submit: true
-                                htmlType: submit
+                                justify: end
+                                gap: small
+                              children:
+                                - type: Button
+                                  props:
+                                    text: 取消
+                                  events:
+                                    onClick:
+                                      - action: overlay.close
+                                - type: Button
+                                  props:
+                                    text: 保存
+                                    variant: primary
+                                    submit: true
               - action: reload # overlay.open 阻塞到关闭，关闭后刷新列表
                 params:
                   dataSource: list
     # 搜索栏：Form(layout: inline) + Field 包裹控件
     - type: Card
       children:
-        - type: Form
+        - type: Flex
           props:
-            name: search
-            layout: inline
-          events:
-            onSubmit:
-              - action: setState
-                params:
-                  keyword: ${event.keyword}
-                  status: ${event.status}
-              - action: reload
-                params:
-                  dataSource: list
+            direction: vertical
+            gap: middle
           children:
-            - type: Field
+            - type: Form
               props:
-                label: 编码/名称
+                name: search
+                layout: inline
+              events:
+                onSubmit:
+                  - action: setState
+                    params:
+                      keyword: ${event.keyword}
+                      status: ${event.status}
+                  - action: reload
+                    params:
+                      dataSource: list
               children:
-                - type: Input
+                - type: Field
                   props:
-                    name: keyword
-                    placeholder: 支持模糊查询
-            - type: Field
-              props:
-                label: 状态
-              children:
-                - type: Select
-                  props:
-                    name: status
-                    placeholder: 请选择状态
-                    options: ${data.list.filters.status} # 选项由接口下发
-            # 按钮也放进 Field：label 为 U+00A0 不间断空格（普通空格会被压缩），与左侧控件基线对齐
-            - type: Field
-              props:
-                label: " "
-              children:
-                - type: Flex
-                  props:
-                    gap: small
-                    align: center
+                    label: 编码/名称
                   children:
-                    - type: Button
+                    - type: Input
                       props:
-                        text: 查询
-                        submit: true
-                        htmlType: submit
-                    - type: Button
+                        name: keyword
+                        placeholder: 支持模糊查询
+                - type: Field
+                  props:
+                    label: 状态
+                  children:
+                    - type: Select
                       props:
-                        text: 重置
+                        name: status
+                        controlClassName: w-40
+                        placeholder: 请选择状态
+                        options: ${data.list.filters.status} # 选项由接口下发
+                # 按钮组也放进 Field；inline 布局由 Form/Field 对齐，无需空格伪 label
+                - type: Field
+                  children:
+                    - type: Flex
+                      props:
+                        gap: small
+                        align: center
+                      children:
+                        - type: Button
+                          props:
+                            text: 查询
+                            submit: true
+                        - type: Button
+                          props:
+                            text: 重置
+                          events:
+                            onClick:
+                              - action: form.setValues
+                                params:
+                                  form: search
+                                  values:
+                                    keyword: ""
+                                    status: all
+                              - action: setState
+                                params:
+                                  keyword: ""
+                                  status: all
+                              - action: reload
+                                params:
+                                  dataSource: list
+            # 表格：名称列/操作列按钮统一 variant: link size: small
+            - type: Table
+              props:
+                dataSource: ${data.list.items}
+                rowKey: id
+                pagination: false
+                columns:
+                  - title: 名称
+                    cell:
+                      type: Button
+                      props:
+                        text: ${row.name}
+                        variant: link
+                        size: small
                       events:
-                        onClick:
-                          - action: form.setValues
+                        onClick: &editRow # 行点击 = 编辑，锚点在此定义
+                          - action: setState # 写入编辑 id + 显隐镜像（取自行数据，不等 editing 接口）
                             params:
-                              form: search
-                              values:
-                                keyword: ""
-                                status: all
-                          - action: setState
+                              editingId: ${row.id}
+                              fKind: ${row.kind}
+                          - action: reload
                             params:
-                              keyword: ""
-                              status: all
+                              dataSource: editing
+                          - action: overlay.open
+                            params:
+                              overlay: *entityDrawer
                           - action: reload
                             params:
                               dataSource: list
-        # 表格：名称列/操作列按钮统一 variant: link size: small
-        - type: Table
-          props:
-            dataSource: ${data.list.items}
-            rowKey: id
-            pagination: false
-            className: mt-4
-            columns:
-              - title: 名称
-                cell:
-                  type: Button
-                  props:
-                    text: ${row.name}
-                    variant: link
-                    size: small
-                  events:
-                    onClick: &editRow # 行点击 = 编辑，锚点在此定义
-                      - action: setState # 写入编辑 id + 显隐镜像（取自行数据，不等 editing 接口）
-                        params:
-                          editingId: ${row.id}
-                          fType: ${row.type}
-                      - action: reload
-                        params:
-                          dataSource: editing
-                      - action: overlay.open
-                        params:
-                          overlay: *entityDrawer
-                      - action: reload
-                        params:
-                          dataSource: list
-              - title: 编码
-                dataIndex: code
-              - title: 类型
-                dataIndex: type
-              - title: 状态
-                dataIndex: status
-              - title: 操作
-                cell:
-                  type: Button
-                  props:
-                    text: 编辑
-                    variant: link
-                    size: small
-                  events:
-                    onClick: *editRow # 与名称列同一动作
-        - type: Text
-          props:
-            text: 共 ${data.list.total} 条
-            type: secondary
-            className: mt-3
+                  - title: 编码
+                    dataIndex: code
+                  - title: 类型
+                    dataIndex: kind
+                  - title: 状态
+                    dataIndex: status
+                  - title: 操作
+                    cell:
+                      type: Button
+                      props:
+                        text: 编辑
+                        variant: link
+                        size: small
+                      events:
+                        onClick: *editRow # 与名称列同一动作
+            - type: Text
+              props:
+                text: 共 ${data.list.total} 条
+                type: secondary

@@ -153,96 +153,14 @@ body {
   opacity: 0.65;
 }
 
-/* ── 调试台（客户端调试 / 模型调试）：左右分栏 ────────────────────
-   ≥64rem 时左对话区 + 右 400px 配置/明细栏，窄屏上下堆叠。
-   不用 Tailwind 响应式工具类（lg:flex-row 等）：pactor 预编译样式
-   加载在本文件之后，同优先级的基础类会覆盖本文件中的响应式规则；
-   分栏容器直接挂在 pactor Flex 上（其自带方向/间距类同为单类
-   选择器），故 .debug-split 以双类选择器提升优先级压过它们。 */
-.debug-split.debug-split {
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-}
-
-.debug-split-main {
-  min-width: 0;
-}
-
-.debug-split-side {
-  width: 100%;
-  flex-shrink: 0;
-}
-
-@media (min-width: 64rem) {
-  .debug-split.debug-split {
-    /* 吃掉 page-content 剩余高度；交叉轴默认 stretch → 双列等高 */
-    flex: 1;
-    min-height: 0;
-    flex-direction: row;
+/* 聚合样式中后续裸 .hidden 会覆盖响应式 display；提高 Sidebar/Login 既有选择器优先级。 */
+@media (min-width: 48rem) {
+  [data-slot="sidebar"].md\:block {
+    display: block;
   }
 
-  .debug-split-main {
-    flex: 1;
-    min-height: 0;
-  }
-
-  .debug-split-side {
-    width: 400px;
-    min-height: 0;
-    /* 右列内容超出时列内滚动（不产生页面级滚动条） */
-    overflow-y: auto;
-  }
-
-  /* 右列等高：末位卡片吃掉剩余高度，与左列卡片底边对齐 */
-  .debug-split-side > [data-slot="card"]:last-child {
-    flex: 1;
-    min-height: 0;
-  }
-}
-
-/* ── 调试台：双列等高、撑满标题以下区域、页面不出滚动条 ──────────
-   高度链：Page 根（撑满 Content）→ page-content（flex 列）→
-   .debug-split（行模式 flex:1）→ 左列 Card / 对话面板（flex:1 传递高度）→
-   消息列表列内滚动。以下为未分层自定义规则，优先于 Tailwind 分层工具类。 */
-.debug-page {
-  min-height: 100%;
-  display: flex;
-  flex-direction: column;
-}
-
-.debug-page [data-slot="page-content"] {
-  flex: 1;
-  min-height: 0;
-  display: flex;
-  flex-direction: column;
-}
-
-.debug-chat-card,
-.debug-chat-card [data-slot="card-content"] {
-  display: flex;
-  flex-direction: column;
-}
-
-@media (min-width: 64rem) {
-  /* 行模式下锁死页面高度（而非 min-height），高度链硬约束：
-     内容超出时由列内滚动吸收，页面级不出滚动条 */
-  .debug-page {
-    height: 100%;
-  }
-
-  .debug-chat-card,
-  .debug-chat-card [data-slot="card-content"],
-  .debug-chat-root {
-    flex: 1;
-    min-height: 0;
-  }
-
-  /* 行模式下列高确定：消息列表吃掉剩余高度并内部滚动（覆盖组件
-     内 h-[52vh] 兜底——窄屏上下堆叠时仍按 52vh 展示） */
-  .debug-chat-list {
-    flex: 1;
-    height: auto;
-    min-height: 0;
+  [data-slot="sidebar"] > .md\:flex,
+  [data-slot="login"] > .md\:flex {
+    display: flex;
   }
 }

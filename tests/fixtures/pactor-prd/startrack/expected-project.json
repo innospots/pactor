@@ -1,0 +1,52 @@
+{
+  "brand": {
+    "packageName": "startrack-project-hub",
+    "appTitle": "星轨项目台",
+    "appDescription": "让项目进度沿清晰轨道持续推进"
+  },
+  "pages": [
+    {
+      "id": "login",
+      "path": "/login",
+      "menu": "login",
+      "hidden": true,
+      "activeMenu": null
+    },
+    {
+      "id": "dashboard",
+      "path": "/",
+      "menu": "home",
+      "hidden": false,
+      "activeMenu": null
+    },
+    {
+      "id": "project-list",
+      "path": "/projects",
+      "menu": "projects",
+      "hidden": false,
+      "activeMenu": null
+    },
+    {
+      "id": "project-detail",
+      "path": "/projects/:id",
+      "menu": "project-detail",
+      "hidden": true,
+      "activeMenu": "projects"
+    }
+  ],
+  "forbiddenResiduals": [
+    "Pactor Console",
+    "GateWeave",
+    "pactor123",
+    "guest123",
+    "chenwunaifu",
+    "taijingshenlin",
+    "xuanzhimoyun",
+    "api.example.com",
+    "api-test.example.com",
+    "provider-",
+    "route-",
+    "data-list",
+    "页面骨架"
+  ]
+}

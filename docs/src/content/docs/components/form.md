@@ -72,7 +72,7 @@ Form 内声明 `name` 的 Input / NumberInput / Select 及本页其余录入组�
 | `controlClassName` | string | 控件本体 class：独立渲染时与 `className` 同点合并；Form 内 `className` 挂 form-item 容器、本 prop 仍挂控件节点（Form 内精确设置控件样式，如宽度，时使用） |
 | 事件 `onChange` | — | 传出 string 值 |
 
-> **className 挂载点约定**：全部录入组件的 `className` / `style` 在 Form 内挂 `form-item` 容器（影响整项布局），独立渲染时挂控件本体；Input / NumberInput / Select 另提供 `controlClassName` 作为 Form 内直达控件本体的精确通道。
+> **className 挂载点约定**：全部录入组件的 `className` / `style` 在 Form 内挂 `form-item` 容器（影响整项布局），独立渲染时挂控件本体（Select 为控件包裹节点）；Input / NumberInput / Select 另提供 `controlClassName` 作为 Form 内直达控件本体 / 包裹节点的精确通道。
 
 ### NumberInput
 
@@ -109,8 +109,39 @@ Form 内声明 `name` 的 Input / NumberInput / Select 及本页其余录入组�
 | `value` | string \| number \| boolean | 同 Input 的初始值语义 |
 | `allowClear` | boolean | 可清空 |
 | `showSearch` | boolean | 选项搜索：`true` 始终展示搜索框，`false` 禁止；缺省选项数 > 10 时自动展示。按 label 包含匹配过滤（大小写不敏感），弹层关闭后搜索词自动清空 |
-| `controlClassName` | string | 控件本体 class（挂载规则同 Input） |
+| `controlClassName` | string | 控件包裹节点 class；Form 内需要精确设置控件宽度时使用，独立渲染时与 `className` 同点合并 |
 | 事件 `onChange` | — | 传出选中 value |
+
+Select 的 trigger 已内置 `w-full`，实际宽度由控件包裹节点决定，不需要添加 wrapper / trigger 宽度选择器：
+
+- **Form 内**：`className` 挂 form-item wrapper，`controlClassName` 挂 Select 控件包裹节点。固定宽度应写 `controlClassName`，如 `w-40`（10rem）或 `w-full`。
+- **独立渲染**：`className` 直接挂控件包裹节点，写 `className: w-48` 即可固定为 12rem；trigger 随包裹节点铺满。
+
+```yaml
+# Form 内：控件包裹固定为 10rem，trigger 自动铺满
+- type: Form
+  props: { layout: inline }
+  children:
+    - type: Select
+      props:
+        name: status
+        label: 状态
+        controlClassName: w-40
+        options:
+          - { label: 启用, value: ENABLED }
+          - { label: 停用, value: DISABLED }
+```
+
+```yaml
+# 独立渲染：className 直接固定控件包裹为 12rem
+- type: Select
+  props:
+    className: w-48
+    placeholder: 请选择状态
+    options:
+      - { label: 启用, value: ENABLED }
+      - { label: 停用, value: DISABLED }
+```
 
 ### Textarea
 

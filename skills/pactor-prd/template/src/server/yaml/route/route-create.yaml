@@ -40,13 +40,28 @@ body:
           healthFilter: on
       events:
         onSubmit:
-          - action: message
+          - id: saveResult
+            action: request
             params:
-              messageType: success
-              text: 路由「${event.name}」已创建并启用（演示）
-          - action: navigate
+              method: POST
+              url: /api/d/ops/route-save
+              body: ${event}
+          - action: if
             params:
-              to: /routes
+              condition: ${actions.saveResult != null && actions.saveResult.ok == true}
+              then:
+                - action: message
+                  params:
+                    messageType: success
+                    text: 路由「${event.name}」已创建并启用
+                - action: navigate
+                  params:
+                    to: /routes
+              else:
+                - action: message
+                  params:
+                    messageType: error
+                    text: 路由创建失败，请检查接口后重试
       children:
         - type: Flex
           props:
@@ -122,7 +137,7 @@ body:
                       children:
                         - type: Input
                           props:
-                            name: tags
+                            name: tagsText
                             className: w-full
                             placeholder: 逗号分隔：reasoning, premium
                     - type: Field
@@ -164,7 +179,7 @@ body:
                         - type: Select
                           props:
                             name: protocol
-                            className: w-full [&>span]:w-full [&_[data-slot=select-trigger]]:w-full
+                            controlClassName: w-full
                             options:
                               - label: OpenAI / Chat Completions
                                 value: OpenAI / Chat Completions
@@ -280,7 +295,7 @@ body:
                                                 - type: Select
                                                   props:
                                                     name: model
-                                                    className: w-full [&>span]:w-full [&_[data-slot=select-trigger]]:w-full
+                                                    controlClassName: w-full
                                                     options:
                                                       - label: GPT-5（gpt-5）
                                                         value: gpt-5
@@ -311,7 +326,7 @@ body:
                                                 - type: Select
                                                   props:
                                                     name: priority
-                                                    className: w-full [&>span]:w-full [&_[data-slot=select-trigger]]:w-full
+                                                    controlClassName: w-full
                                                     options:
                                                       - label: P0
                                                         value: P0
@@ -377,7 +392,7 @@ body:
                                 - action: message
                                   params:
                                     messageType: success
-                                    text: 模型已添加（演示：不落库）
+                                    text: 模型已添加
                 - type: Grid
                   props:
                     columns: 2
@@ -392,7 +407,7 @@ body:
                         - type: Select
                           props:
                             name: strategy
-                            className: w-full [&>span]:w-full [&_[data-slot=select-trigger]]:w-full
+                            controlClassName: w-full
                             options:
                               - label: 加权轮询 (WEIGHTED)
                                 value: WEIGHTED
@@ -470,20 +485,12 @@ body:
                       - action: message
                         params:
                           messageType: info
-                          text: 模拟调用：用当前未保存配置演算命中模型与策略（演示）
+                          text: 模拟调用：用当前未保存配置演算命中模型与策略
                 - type: Button
                   props:
-                    text: 保存草稿
+                    text: 保存草稿（接入后可用）
                     icon: save
-                  events:
-                    onClick:
-                      - action: message
-                        params:
-                          messageType: success
-                          text: 草稿已保存（演示：静态页面不落库）
-                      - action: navigate
-                        params:
-                          to: /routes
+                    disabled: true
                 - type: Button
                   props:
                     text: 保存并启用

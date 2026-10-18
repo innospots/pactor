@@ -29,8 +29,75 @@
 
 - dataSources 一律 `type: http`；有接口文档时 url 取文档接口地址（方法/返回形状对齐），否则按命名约定写 `/api/d/...` 最终路径
 - 列表接口返回形状约定 `{ items, total, filters? }`；详情接口对空 id 返回空对象而非 404（新建预填链路依赖）
+- 需要预整形的编辑表单（如 `route-edit`）由详情接口整体返回 `form` 对象，DSL 只写 `initialValues: ${data.detail.form}`。`route` 详情的 `form` 必须完整包含 `code/name/type/alias/tagsText/description/path/protocol/operation/strategy/stickySession/healthFilter`；其中 `stickySession/healthFilter` 由接口预先转换为字符串 `on/off`。必须保留后端 `type`，不要在 `initialValues` 下用含 `type` 的对象字面量逐字段拼接；整体单表达式模式与 ActionEngine params 的边界见下节
 - 选项类接口（如下拉的操作人列表）用单段路径，页面 `options: ${data.xxx}` 绑定
-- 写操作走 `ops/` 前缀 POST，页面提交闭环（request → message → reload）不依赖返回体内容
+- 写操作走 `ops/` 前缀 POST。`request` 必须命名 `id`，只有 `actions.<id>.ok == true` 时才执行 success message 与 navigate/reload；请求失败、返回空数据或 `ok != true` 时留在当前页面/表单并 message error
+- ops 上游成功响应必须为 HTTP 2xx，且经默认 `{ code, data, message }` 拆包后是 JSON `{ "ok": true }`：可直接返回 `{ "ok": true }`，或返回 `{ "code": 0, "data": { "ok": true } }`。2xx 空响应、`{}`、`{ "ok": false }` 都不算成功；500 及其他非 2xx 响应即使携带 `{ "ok": true }` 也按失败处理
+
+## ActionEngine params 的 isOpaque 边界
+
+`resolveDeep` 本身只在调用方显式提供 `isOpaque` 回调时跳过对象子树，**没有**默认的 `type` 跳过行为。本条只描述 ActionEngine 执行动作、解析 `action.params` 时注入的回调：它逐个检查普通对象，只要对象的 `action`、`type` 或 `component` 任一字段是字符串，就把**该对象及整棵子树原样保留**。`${...}` 表达式字符串也是 string，因此 `type: ${event.type}` 同样命中。
+
+这意味着 `request.params.body` 或 `form.setValues.params.values` 中，含后端 `type` 的对象字面量会让兄弟 `${...}` 不再求值。后端字段名必须保留时，不改字段名，改为由接口或 Form 事件预先组成完整对象，再用**整体单表达式**绑定：
+
+- Form 回填：`initialValues: ${data.detail.form}`。
+- `form.setValues`：`params: { form: routeForm, values: ${data.detail.form} }`。
+- Form 提交：`body: ${event}`，整体 event 一次求值并保留 `event.type`，不要在 body 下逐字段拼含 `type` 的对象。
+- `message` 参数使用 `messageType`，让 `text` 中的表达式仍按 ActionEngine 规则求值。
+
+```yaml
+- type: Form
+  props:
+    name: routeForm
+    initialValues: ${data.detail.form}   # 完整 form 含后端 type
+  events:
+    onSubmit:
+      - id: saveResult
+        action: request
+        params:
+          method: POST
+          url: /api/d/ops/route-save
+          body: ${event}                 # 整体提交，含 event.type
+      - action: if
+        params:
+          condition: ${actions.saveResult != null && actions.saveResult.ok == true}
+          then:
+            - action: message
+              params: { messageType: success, text: 已保存 }
+          else:
+            - action: message
+              params: { messageType: error, text: 保存失败 }
+```
+
+## 组件数据预整形契约
+
+接口按消费组件分别返回字段；不要把某个组件的选项数组直接交给另一个组件。
+
+| 消费方 | 精确字段契约 | 验收点 |
+| --- | --- | --- |
+| `CardList.items` | `CardListItem` 按 EntityCard：`icon/logo/title/subtitle/tags/description/meta/actions/expandingActions` 均可选；可携带额外业务字段。没有统一必填 key | `onItemClick` / `onItemAction` 回传的 item 保留扩展字段；`tags` 项用 text/color，`actions` 项用 text/key?/variant?/danger? |
+| `ChipFilter.items` | `ChipFilterItem` 为 `{ value, text, dot? }`；value/text 必填，dot 为可选 CSS 颜色值 | text 是最终展示文案，计数预先写入 text；组件没有 label、key 或 count 字段，也不会替接口计数 |
+| `Tabs.items` | 每项必填 `{ key, label }`，可选 `children/extra/className/style` | key 用于 activeKey/onChange；label 是页签文案；extra 行为见 component-mapping |
+| `Segmented.options` | 每项必填 `{ label, value }`，value 为 string/number；可选 `icon/disabled` | onChange 传出所选 value；不把 ChipFilter 的 text 或 Tabs 的 key 写进来 |
+
+### ChipFilter 计数由数据侧计算
+
+计数范围是 **keyword + chip**，不是组件能力。设当前 `keyword=支付`：
+
+- `all` 的计数 = 只应用 `keyword=支付` 的记录数；本例为 8。
+- `ENABLED` 的计数 = 同时应用 `keyword=支付` 与该 chip 的记录数；本例为 5。
+- `DISABLED` 的计数 = 同时应用 `keyword=支付` 与该 chip 的记录数；本例为 3。
+- 当前列表再按 `keyword + 当前选中 chip` 查询。各 chip 计数独立预计算，不能把当前列表 total 复制到每个 chip。
+
+```yaml
+filters:
+  statusChips:
+    - { value: all, text: "全部 8" }
+    - { value: ENABLED, text: "启用 5", dot: "var(--primary)" }
+    - { value: DISABLED, text: "停用 3", dot: "var(--muted-foreground)" }
+```
+
+ChipFilter 只渲染 `value/text/dot` 并在 onChange 抛出新 value；关键词、chip 过滤和计数都在数据侧完成。
 
 ## 替换为真实接口
 

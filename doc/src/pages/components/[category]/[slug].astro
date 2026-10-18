@@ -91,7 +91,6 @@ const markdownSource = buildComponentMarkdown(component, detail);
       body: ComponentPreviewDslSection,
       bodyProps: {
         componentId: component.id,
-        previewNote: detail?.previewNote,
         previewNotApplicable: isPreviewable(component.id)
           ? undefined
           : (detail?.previewNote ??

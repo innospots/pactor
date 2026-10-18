@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
 import { PactorApp } from "@/pactor/App";
 // 顺序约定：globals（本项目 tailwind 工具类 + 皮肤无关的外壳规则）→
 // pactor-app 聚合样式（单入口：ui 基线 → blocks → chart → chat 构建产物
@@ -10,8 +9,8 @@ import "./globals.css";
 import "pactor-app/styles.css";
 
 export const metadata: Metadata = {
-  title: "Pactor Console",
-  description: "Pactor Console 管理台",
+  title: "{{APP_TITLE}}",
+  description: "{{APP_DESCRIPTION}}",
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
@@ -30,7 +29,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
             // localStorage（mc-skin / mc-mode），由 Header 的 ThemeSwitcher 写入；
             // mc-mode 缺省时跟随系统并监听变化。
             // suppressHydrationWarning 容忍 data-pactor-theme 造成的 hydration 差异。
-            __html: `(function(){var root=document.documentElement;var skin=localStorage.getItem("mc-skin")||"chenwunaifu";var link=document.createElement("link");link.rel="stylesheet";link.href="/skins/"+skin+".css";link.setAttribute("data-pactor-skin",skin);document.head.appendChild(link);var m=window.matchMedia("(prefers-color-scheme: dark)");function apply(){var mode=localStorage.getItem("mc-mode");var dark=mode?mode==="dark":m.matches;if(dark){root.setAttribute("data-pactor-theme","dark")}else{root.removeAttribute("data-pactor-theme")}}apply();m.addEventListener("change",apply)})()`,
+            __html: `(function(){var root=document.documentElement;var skin=localStorage.getItem("mc-skin");if(skin!=="neutral"){skin="neutral"}var link=document.createElement("link");link.rel="stylesheet";link.href="/skins/"+skin+".css";link.setAttribute("data-pactor-skin",skin);document.head.appendChild(link);var m=window.matchMedia("(prefers-color-scheme: dark)");function apply(){var mode=localStorage.getItem("mc-mode");var dark=mode?mode==="dark":m.matches;if(dark){root.setAttribute("data-pactor-theme","dark")}else{root.removeAttribute("data-pactor-theme")}}apply();m.addEventListener("change",apply)})()`,
           }}
         />
       </head>

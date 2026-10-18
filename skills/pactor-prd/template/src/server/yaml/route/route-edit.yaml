@@ -42,28 +42,31 @@ body:
       when: ${data.detail != null}
       props:
         layout: vertical
-        initialValues:
-          code: ${data.detail.code}
-          name: ${data.detail.name}
-          type: ${data.detail.type}
-          alias: ${data.detail.alias}
-          tags: ${data.detail.tagsText}
-          description: ${data.detail.description}
-          path: ${data.detail.path}
-          protocol: ${data.detail.protocol}
-          operation: ${data.detail.operation}
-          strategy: ${data.detail.strategy}
-          stickySession: "${data.detail.stickySession ? 'on' : 'off'}"
-          healthFilter: "${data.detail.healthFilter ? 'on' : 'off'}"
+        initialValues: ${data.detail.form}
       events:
         onSubmit:
-          - action: message
+          - id: saveResult
+            action: request
             params:
-              messageType: success
-              text: 路由已保存并启用（演示：静态页面不落库）
-          - action: navigate
+              method: POST
+              url: /api/d/ops/route-save
+              body: ${event}
+          - action: if
             params:
-              to: /routes/${route.params.code}
+              condition: ${actions.saveResult != null && actions.saveResult.ok == true}
+              then:
+                - action: message
+                  params:
+                    messageType: success
+                    text: 路由已保存并启用
+                - action: navigate
+                  params:
+                    to: /routes/${route.params.code}
+              else:
+                - action: message
+                  params:
+                    messageType: error
+                    text: 路由保存失败，请检查接口后重试
       children:
         - type: Flex
           props:
@@ -139,7 +142,7 @@ body:
                       children:
                         - type: Input
                           props:
-                            name: tags
+                            name: tagsText
                             className: w-full
                             placeholder: 逗号分隔：reasoning, premium
                     - type: Field
@@ -181,7 +184,7 @@ body:
                         - type: Select
                           props:
                             name: protocol
-                            className: w-full [&>span]:w-full [&_[data-slot=select-trigger]]:w-full
+                            controlClassName: w-full
                             options:
                               - label: OpenAI / Chat Completions
                                 value: OpenAI / Chat Completions
@@ -297,7 +300,7 @@ body:
                                                 - type: Select
                                                   props:
                                                     name: model
-                                                    className: w-full [&>span]:w-full [&_[data-slot=select-trigger]]:w-full
+                                                    controlClassName: w-full
                                                     options:
                                                       - label: GPT-5（gpt-5）
                                                         value: gpt-5
@@ -328,7 +331,7 @@ body:
                                                 - type: Select
                                                   props:
                                                     name: priority
-                                                    className: w-full [&>span]:w-full [&_[data-slot=select-trigger]]:w-full
+                                                    controlClassName: w-full
                                                     options:
                                                       - label: P0
                                                         value: P0
@@ -394,7 +397,7 @@ body:
                                 - action: message
                                   params:
                                     messageType: success
-                                    text: 模型已添加（演示：不落库）
+                                    text: 模型已添加
                 - type: Grid
                   props:
                     columns: 2
@@ -409,7 +412,7 @@ body:
                         - type: Select
                           props:
                             name: strategy
-                            className: w-full [&>span]:w-full [&_[data-slot=select-trigger]]:w-full
+                            controlClassName: w-full
                             options:
                               - label: 加权轮询 (WEIGHTED)
                                 value: WEIGHTED
@@ -542,7 +545,7 @@ body:
                                                         - type: Select
                                                           props:
                                                             name: model
-                                                            className: w-full [&>span]:w-full [&_[data-slot=select-trigger]]:w-full
+                                                            controlClassName: w-full
                                                             options:
                                                               - label: GPT-5（gpt-5）
                                                                 value: gpt-5
@@ -573,7 +576,7 @@ body:
                                                         - type: Select
                                                           props:
                                                             name: priority
-                                                            className: w-full [&>span]:w-full [&_[data-slot=select-trigger]]:w-full
+                                                            controlClassName: w-full
                                                             options:
                                                               - label: P0
                                                                 value: P0
@@ -643,7 +646,7 @@ body:
                                   - action: message
                                     params:
                                       messageType: info
-                                      text: 移除模型：${row.modelName}（演示：不落库）
+                                      text: 移除模型：${row.modelName}
                 - type: Text
                   props:
                     text: 权重合计 ${data.detail.weightTotal}（启用项） · 建议 WEIGHTED 时合计 100
@@ -719,17 +722,33 @@ body:
                                         params:
                                           payload:
                                             ok: true
+                  - id: deleteResult
+                    action: request
+                    condition: ${actions.delCfm.ok}
+                    params:
+                      method: POST
+                      url: /api/d/ops/route-delete
+                      body:
+                        code: ${route.params.code}
                   - action: if
                     params:
-                      condition: ${actions.delCfm.ok}
+                      condition: ${actions.delCfm.ok && actions.deleteResult != null && actions.deleteResult.ok == true}
                       then:
                         - action: message
                           params:
                             messageType: success
-                            text: 路由已删除（演示）
+                            text: 路由已删除
                         - action: navigate
                           params:
                             to: /routes
+                  - action: if
+                    params:
+                      condition: ${actions.delCfm.ok && (actions.deleteResult == null || actions.deleteResult.ok != true)}
+                      then:
+                        - action: message
+                          params:
+                            messageType: error
+                            text: 路由删除失败，请检查接口后重试
             - type: Flex
               props:
                 align: center
@@ -753,20 +772,12 @@ body:
                       - action: message
                         params:
                           messageType: info
-                          text: 模拟调用：用当前未保存配置演算命中模型与策略（演示）
+                          text: 模拟调用：用当前未保存配置演算命中模型与策略
                 - type: Button
                   props:
-                    text: 保存草稿
+                    text: 保存草稿（接入后可用）
                     icon: save
-                  events:
-                    onClick:
-                      - action: message
-                        params:
-                          messageType: success
-                          text: 草稿已保存（演示：静态页面不落库）
-                      - action: navigate
-                        params:
-                          to: /routes/${route.params.code}
+                    disabled: true
                 - type: Button
                   props:
                     text: 保存并启用

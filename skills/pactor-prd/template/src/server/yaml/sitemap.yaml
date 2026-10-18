@@ -12,7 +12,7 @@ id: site
 resourceType: sitemap
 version: 1
 dslVersion: "1.0"
-app: { name: Pactor Console }
+app: { name: "{{APP_TITLE}}" }
 auth: { loginPath: /login }
 
 pages:
@@ -190,7 +190,7 @@ menus:
 # 布局 DSL（PageOutlet 为页面内容出口）。
 # 布局 body 内 ${data.session.*} 由客户端注入的 session dataSource 提供
 #（user / app / menus）。登录 / 登出是普通 HTTP 调用，DSL 用内置 request
-# 动作表达（跨域绝对地址，客户端 httpHooks 自动改写进项目内代理前缀）。
+# 动作表达（同源相对地址，由当前 Next 应用的认证路由处理）。
 layouts:
   # 管理端外壳：Sidebar（品牌 + SitemapMenu 导航）> Header（ThemeSwitcher
   # 换肤 + 语言 + 用户菜单）+ Content（PageOutlet 页面出口）
@@ -203,7 +203,7 @@ layouts:
         - type: Sidebar
           props:
             className: shell-main
-            brand: { title: Pactor Console, logo: /next.svg }
+            brand: { title: "{{APP_TITLE}}", logo: /logo.svg }
             collapsible: true
             content:
               type: SitemapMenu
@@ -223,7 +223,7 @@ layouts:
                   - { label: 中文, value: zh-CN }
                   - { label: English, value: en-US }
                 user:
-                  name: ${data.session.user.name}
+                  name: "${data.session.user.name || '用户'}"
                   items:
                     - { label: 个人中心, value: profile, icon: user }
                     - { label: 退出登录, value: logout, icon: log-out }
@@ -236,19 +236,19 @@ layouts:
                         - action: request
                           params:
                             method: POST
-                            url: http://localhost:9011/api/auth/logout
+                            url: /api/auth/logout
                         - action: app.reload
                           params: { to: /login }
                       else:
                         - action: message
                           params:
                             messageType: info
-                            text: 打开个人中心（演示）
+                            text: 打开个人中心
                 onLocaleChange:
                   - action: message
                     params:
                       messageType: info
-                      text: 语言切换为 ${event}（演示：应用层桥接后整页生效）
+                      text: 语言切换为 ${event}
               children:
                 - type: ThemeSwitcher
             - type: Content

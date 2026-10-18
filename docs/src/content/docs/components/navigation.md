@@ -169,12 +169,64 @@ body:
 
 | prop | 类型 | 说明 |
 | --- | --- | --- |
-| `items` | `{ key, label, children?: DslNode[], className?, style? }[]` | 页签列表，pane 内容为 DSL 子树；`className` / `style` 为该页签内容区样式（叠加在 `contentClassName` / `contentStyle` 之后） |
-| `activeKey` | string | 当前激活 key（可绑表达式） |
+| `items` | `{ key, label, children?: DslNode[], extra?: DslNode[], className?, style? }[]` | 页签列表；`children` 为 pane 内容，`extra` 为页签栏右端扩展区，均为 DSL 子树；`className` / `style` 为该页签内容区样式（叠加在 `contentClassName` / `contentStyle` 之后） |
+| `activeKey` | string | 受控当前激活 key（可绑表达式）；未传时默认激活首项 |
 | `variant` | `default`（缺省）\| `line` | 页签栏样式：胶囊 / 下划线（`line` 页签栏默认通栏，下划线轨道占满容器宽） |
+| `tabPosition` | `top`（缺省）\| `left` | 顶部横排 / 左侧竖排页签 |
 | `contentClassName` | string | 页签内容区 class（全部 pane 共用，与内置样式合并） |
 | `contentStyle` | CSSProperties | 页签内容区内联样式（同 `contentClassName` 的挂载规则） |
 | 事件 `onChange` | — | 切换时传出新 key |
+
+`TabItem.extra` 的渲染规则：
+
+- `tabPosition: top` 时渲染当前项的 `extra`。受控 `activeKey` 会随当前 key 切换扩展区；需通过 `onChange → setState` 回写同一状态。
+- 非受控（未传 `activeKey`）时虽然内容默认激活首项且可在组件内部切换，但 `extra` 始终取首项；需要扩展区跟随切换时必须使用受控模式。
+- `tabPosition: left` 没有页签栏右端槽位，所有 `extra` 均不渲染；面板操作请放进对应项的 `children`。
+- 单页签 top Tabs 会持续渲染首项 `extra`，但不得因此把单页签 Tabs 当作默认分区容器；只有标题和操作区时使用 Card / Flex。
+
+下面是可直接复制的受控示例，两个页签各自显示当前项扩展区：
+
+```yaml
+dsl: '1.0'
+page:
+  id: tabs-extra
+  title: 页签扩展区
+state:
+  detailTab: overview
+body:
+  type: Tabs
+  props:
+    activeKey: ${state.detailTab}
+    items:
+      - key: overview
+        label: 概览
+        extra:
+          - type: Button
+            props: { text: 概览操作, variant: link }
+            events:
+              onClick:
+                action: message
+                params: { messageType: info, text: 已触发概览操作 }
+        children:
+          - type: Text
+            props: { text: 概览内容 }
+      - key: changes
+        label: 变更记录
+        extra:
+          - type: Button
+            props: { text: 变更操作, variant: link }
+            events:
+              onClick:
+                action: message
+                params: { messageType: info, text: 已触发变更操作 }
+        children:
+          - type: Text
+            props: { text: 变更记录内容 }
+  events:
+    onChange:
+      action: setState
+      params: { detailTab: "${event}" }
+```
 
 ### Menubar
 

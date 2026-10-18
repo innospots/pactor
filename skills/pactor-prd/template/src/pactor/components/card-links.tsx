@@ -6,11 +6,11 @@ import { CirclePlay, Ban } from "lucide-react";
 
 /**
  * 卡片链接与行内操作组件（列表页卡片常用内联定义，
- * ProviderCardLink / ModelCardLink / RouteCardLink / TemplateCardLink 四份
+ * ProviderCardLink / ModelCardLink / RouteCardLink 三份
  * 实现完全相同，此处合并为一个 CardLink 并以别名注册）。
  */
 
-/** DSL `type: "ProviderCardLink" | "ModelCardLink" | "RouteCardLink" | "TemplateCardLink"`：
+/** DSL `type: "ProviderCardLink" | "ModelCardLink" | "RouteCardLink"`：
  *  整卡点击跳详情（hover 手型/阴影见 globals.css .provider-card / .model-card）；
  *  内部按钮/开关/链接的点击经 closest 检测屏蔽，不触发跳转 */
 export function CardLink({

@@ -31,8 +31,6 @@ import {
   Welcome,
 } from "@pactor-app/chat/components";
 import { StatusBadge } from "./status-badge";
-import { LogStatus } from "./log-status";
-import { DebugChat } from "./debug-chat";
 import { CardLink, StatusToggleIcon, TextLink } from "./card-links";
 import { ThemeSwitcher } from "./theme-switcher";
 
@@ -60,12 +58,9 @@ const chatComponents: Record<string, unknown> = {
 export const pactorComponents: Record<string, unknown> = {
   ...chatComponents,
   StatusBadge,
-  LogStatus,
-  DebugChat,
   ProviderCardLink: CardLink,
   ModelCardLink: CardLink,
   RouteCardLink: CardLink,
-  TemplateCardLink: CardLink,
   TextLink,
   StatusToggleIcon,
   ThemeSwitcher,

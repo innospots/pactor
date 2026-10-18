@@ -165,7 +165,7 @@ body:
                                 - action: message
                                   params:
                                     messageType: success
-                                    text: 状态已切换（演示）
+                                    text: 状态已切换
                     - type: Button
                       props:
                         text: 模拟调用
@@ -231,7 +231,7 @@ body:
                                                 params:
                                                   messageType: success
                                                   text: 命中模型：${data.detail.models[0].modelName} ·
-                                                    策略：${data.detail.strategyLabel}（演示）
+                                                    策略：${data.detail.strategyLabel}
                     - type: DropdownMenu
                       props:
                         items:
@@ -246,7 +246,7 @@ body:
                           - action: message
                             params:
                               messageType: info
-                              text: 操作：${event}（演示）
+                              text: 操作：${event}
                       children:
                         - type: Button
                           props:
