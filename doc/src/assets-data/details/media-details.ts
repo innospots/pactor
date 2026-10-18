@@ -12,13 +12,15 @@ import type { ComponentDetailContent } from './component-details.ts';
 export const mediaDetailContents: Record<string, ComponentDetailContent> = {
   'component.image-viewer': {
     dsl: {
-      "type": "ImageViewer",
-      "props": {
-        "src": "https://example.com/diagram.png",
-        "alt": "架构图",
-        "preview": true
-      }
-    },
+  "type": "ImageViewer",
+  "props": {
+    "src": "data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22480%22%20height%3D%22180%22%3E%3Crect%20width%3D%22480%22%20height%3D%22180%22%20fill%3D%22%2360a5fa%22%2F%3E%3Ctext%20x%3D%22240%22%20y%3D%2296%22%20font-size%3D%2216%22%20text-anchor%3D%22middle%22%20fill%3D%22%23ffffff%22%3E%E7%82%B9%E5%87%BB%E6%9F%A5%E7%9C%8B%E7%81%AF%E7%AE%B1%3C%2Ftext%3E%3C%2Fsvg%3E",
+    "alt": "示例图片",
+    "style": {
+      "maxWidth": 360
+    }
+  }
+},
     whenToUse: [
       '**何时使用**',
       '',
@@ -59,23 +61,29 @@ export const mediaDetailContents: Record<string, ComponentDetailContent> = {
   },
   'component.gallery': {
     dsl: {
-      "type": "Gallery",
-      "props": {
-        "columns": 3,
-        "items": [
-          {
-            "src": "https://example.com/photo-1.png",
-            "alt": "照片 1",
-            "caption": "办公区"
-          },
-          {
-            "src": "https://example.com/photo-2.png",
-            "alt": "照片 2",
-            "caption": "会议室"
-          }
-        ]
+  "type": "Gallery",
+  "props": {
+    "columns": 4,
+    "items": [
+      {
+        "src": "data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22480%22%20height%3D%22180%22%3E%3Crect%20width%3D%22480%22%20height%3D%22180%22%20fill%3D%22%2360a5fa%22%2F%3E%3Ctext%20x%3D%22240%22%20y%3D%2296%22%20font-size%3D%2216%22%20text-anchor%3D%22middle%22%20fill%3D%22%23ffffff%22%3E%E5%9B%BE%E4%B8%80%3C%2Ftext%3E%3C%2Fsvg%3E",
+        "caption": "晨会现场"
+      },
+      {
+        "src": "data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22480%22%20height%3D%22180%22%3E%3Crect%20width%3D%22480%22%20height%3D%22180%22%20fill%3D%22%2334d399%22%2F%3E%3Ctext%20x%3D%22240%22%20y%3D%2296%22%20font-size%3D%2216%22%20text-anchor%3D%22middle%22%20fill%3D%22%23ffffff%22%3E%E5%9B%BE%E4%BA%8C%3C%2Ftext%3E%3C%2Fsvg%3E",
+        "caption": "产品评审"
+      },
+      {
+        "src": "data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22480%22%20height%3D%22180%22%3E%3Crect%20width%3D%22480%22%20height%3D%22180%22%20fill%3D%22%23fbbf24%22%2F%3E%3Ctext%20x%3D%22240%22%20y%3D%2296%22%20font-size%3D%2216%22%20text-anchor%3D%22middle%22%20fill%3D%22%23ffffff%22%3E%E5%9B%BE%E4%B8%89%3C%2Ftext%3E%3C%2Fsvg%3E",
+        "caption": "团建合影"
+      },
+      {
+        "src": "data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22480%22%20height%3D%22180%22%3E%3Crect%20width%3D%22480%22%20height%3D%22180%22%20fill%3D%22%23f472b6%22%2F%3E%3Ctext%20x%3D%22240%22%20y%3D%2296%22%20font-size%3D%2216%22%20text-anchor%3D%22middle%22%20fill%3D%22%23ffffff%22%3E%E5%9B%BE%E5%9B%9B%3C%2Ftext%3E%3C%2Fsvg%3E",
+        "caption": "发布会"
       }
-    },
+    ]
+  }
+},
     whenToUse: [
       '**何时使用**',
       '',
@@ -116,14 +124,14 @@ export const mediaDetailContents: Record<string, ComponentDetailContent> = {
   },
   'component.video': {
     dsl: {
-      "type": "Video",
-      "props": {
-        "src": "https://example.com/intro.mp4",
-        "poster": "https://example.com/intro-poster.png",
-        "controls": true,
-        "loop": true
-      }
-    },
+  "type": "Video",
+  "props": {
+    "poster": "data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22480%22%20height%3D%22180%22%3E%3Crect%20width%3D%22480%22%20height%3D%22180%22%20fill%3D%22%2394a3b8%22%2F%3E%3Ctext%20x%3D%22240%22%20y%3D%2296%22%20font-size%3D%2216%22%20text-anchor%3D%22middle%22%20fill%3D%22%23ffffff%22%3E%E8%A7%86%E9%A2%91%E5%B0%81%E9%9D%A2%EF%BC%88%E6%9C%AA%E9%85%8D%E7%BD%AE%20src%EF%BC%89%3C%2Ftext%3E%3C%2Fsvg%3E",
+    "style": {
+      "maxWidth": 480
+    }
+  }
+},
     whenToUse: [
       '**何时使用**',
       '',
@@ -167,12 +175,13 @@ export const mediaDetailContents: Record<string, ComponentDetailContent> = {
   },
   'component.audio': {
     dsl: {
-      "type": "Audio",
-      "props": {
-        "src": "https://example.com/meeting-notes.mp3",
-        "controls": true
-      }
-    },
+  "type": "Audio",
+  "props": {
+    "style": {
+      "maxWidth": 480
+    }
+  }
+},
     whenToUse: [
       '**何时使用**',
       '',
@@ -211,14 +220,33 @@ export const mediaDetailContents: Record<string, ComponentDetailContent> = {
   },
   'component.file-preview': {
     dsl: {
+  "type": "Flex",
+  "props": {
+    "direction": "vertical",
+    "gap": 12
+  },
+  "children": [
+    {
       "type": "FilePreview",
       "props": {
-        "name": "月度经营分析.pdf",
-        "fileSize": 2485760,
-        "fileType": "application/pdf",
-        "src": "https://example.com/monthly.pdf"
+        "name": "发布说明.md",
+        "fileSize": 2048,
+        "fileType": ".md",
+        "src": "#",
+        "content": "## v1.20.0\n\n- 新增媒体与内容类组件\n- 修复导航菜单图标换行"
       }
     },
+    {
+      "type": "FilePreview",
+      "props": {
+        "name": "架构图.png",
+        "fileSize": 156672,
+        "fileType": "image/png",
+        "src": "data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22480%22%20height%3D%22180%22%3E%3Crect%20width%3D%22480%22%20height%3D%22180%22%20fill%3D%22%23818cf8%22%2F%3E%3Ctext%20x%3D%22240%22%20y%3D%2296%22%20font-size%3D%2216%22%20text-anchor%3D%22middle%22%20fill%3D%22%23ffffff%22%3E%E6%9E%B6%E6%9E%84%E5%9B%BE%3C%2Ftext%3E%3C%2Fsvg%3E"
+      }
+    }
+  ]
+},
     whenToUse: [
       '**何时使用**',
       '',
@@ -263,19 +291,21 @@ export const mediaDetailContents: Record<string, ComponentDetailContent> = {
   },
   'component.document-preview': {
     dsl: {
-      "type": "DocumentPreview",
-      "props": {
-        "pages": [
-          {
-            "content": "第一页：项目背景与目标"
-          },
-          {
-            "content": "第二页：实施计划"
-          }
-        ],
-        "currentPage": 1
+  "type": "DocumentPreview",
+  "props": {
+    "pages": [
+      {
+        "content": "第一章 总则\n\n第一条 为规范动态页面的开发与接入，制定本规范。\n第二条 本规范适用于全部 DSL 页面。"
+      },
+      {
+        "content": "第二章 组件\n\n第三条 页面应优先使用内置组件；自定义组件需注册适配器。\n第四条 涉及状态的组件应支持受控模式。"
+      },
+      {
+        "content": "第三章 附则\n\n第五条 本规范自发布之日起施行。"
       }
-    },
+    ]
+  }
+},
     whenToUse: [
       '**何时使用**',
       '',
@@ -317,11 +347,11 @@ export const mediaDetailContents: Record<string, ComponentDetailContent> = {
   },
   'component.rich-text': {
     dsl: {
-      "type": "RichText",
-      "props": {
-        "html": "<p>富文本正文，<strong>加粗</strong>与<a href=\"#\">链接</a>。</p>"
-      }
-    },
+  "type": "RichText",
+  "props": {
+    "html": "<h3 style=\"margin:0 0 8px\">富文本内容</h3><p style=\"margin:0\">支持 <strong>加粗</strong>、<em>斜体</em>、<a href=\"#\">链接</a> 等内联格式；渲染前经白名单消毒。</p>"
+  }
+},
     whenToUse: [
       '**何时使用**',
       '',
@@ -358,11 +388,11 @@ export const mediaDetailContents: Record<string, ComponentDetailContent> = {
   },
   'component.markdown': {
     dsl: {
-      "type": "Markdown",
-      "props": {
-        "content": "# 文档标题\n\n正文段落，支持 **加粗** 与 [链接](https://example.com)。"
-      }
-    },
+  "type": "Markdown",
+  "props": {
+    "content": "## 发布清单\n\n- [x] 组件实现\n- [x] 契约测试\n- [ ] 版本发布\n\n`pnpm --filter @pactor-app/ui build`"
+  }
+},
     whenToUse: [
       '**何时使用**',
       '',
@@ -400,13 +430,12 @@ export const mediaDetailContents: Record<string, ComponentDetailContent> = {
   },
   'component.code-block': {
     dsl: {
-      "type": "CodeBlock",
-      "props": {
-        "code": "export const hello = () => console.log(\"hello\");",
-        "language": "ts",
-        "copyable": true
-      }
-    },
+  "type": "CodeBlock",
+  "props": {
+    "language": "ts",
+    "code": "interface User {\n  id: string;\n  name: string;\n}\n\nexport function greet(user: User): string {\n  return `你好，${user.name}`;\n}"
+  }
+},
     whenToUse: [
       '**何时使用**',
       '',
@@ -446,15 +475,12 @@ export const mediaDetailContents: Record<string, ComponentDetailContent> = {
   },
   'component.diff-viewer': {
     dsl: {
-      "type": "DiffViewer",
-      "props": {
-        "oldText": "const title = \"旧版本\";",
-        "newText": "const title = \"新版本\";",
-        "split": true,
-        "oldTitle": "上一版",
-        "newTitle": "当前版"
-      }
-    },
+  "type": "DiffViewer",
+  "props": {
+    "oldText": "export const title = \"资产库\";\nexport const version = \"1.19.0\";\nexport const stable = false;",
+    "newText": "export const title = \"资产库\";\nexport const version = \"1.20.0\";\nexport const stable = true;"
+  }
+},
     whenToUse: [
       '**何时使用**',
       '',
@@ -495,24 +521,26 @@ export const mediaDetailContents: Record<string, ComponentDetailContent> = {
   },
   'component.json-viewer': {
     dsl: {
-      "type": "JSONViewer",
-      "props": {
-        "data": {
-          "code": 0,
-          "data": {
-            "total": 128,
-            "items": [
-              {
-                "id": 1,
-                "name": "示例"
-              }
-            ]
-          }
-        },
-        "expandedDepth": 2,
-        "copyable": true
-      }
+  "type": "JSONViewer",
+  "props": {
+    "data": {
+      "name": "@pactor-app/ui",
+      "version": "1.20.0",
+      "components": 148,
+      "stable": true,
+      "deps": {
+        "react": "19",
+        "tailwind": "4"
+      },
+      "tags": [
+        "dsl",
+        "sdui"
+      ],
+      "extra": null
     },
+    "expandedDepth": 1
+  }
+},
     whenToUse: [
       '**何时使用**',
       '',

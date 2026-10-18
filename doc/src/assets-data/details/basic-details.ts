@@ -12,21 +12,62 @@ import type { ComponentDetailContent } from './component-details.ts';
 export const basicDetailContents: Record<string, ComponentDetailContent> = {
   'component.tag': {
     dsl: {
+  "type": "Space",
+  "props": {
+    "wrap": true
+  },
+  "children": [
+    {
+      "type": "Tag",
+      "props": {
+        "text": "默认"
+      }
+    },
+    {
       "type": "Tag",
       "props": {
         "text": "已发布",
-        "color": "success",
-        "closable": true
-      },
-      "events": {
-        "onClose": {
-          "action": "setState",
-          "params": {
-            "published": false
-          }
-        }
+        "color": "success"
       }
     },
+    {
+      "type": "Tag",
+      "props": {
+        "text": "待审核",
+        "color": "warning"
+      }
+    },
+    {
+      "type": "Tag",
+      "props": {
+        "text": "已驳回",
+        "color": "error"
+      }
+    },
+    {
+      "type": "Tag",
+      "props": {
+        "text": "进行中",
+        "color": "info"
+      }
+    },
+    {
+      "type": "Tag",
+      "props": {
+        "text": "可移除",
+        "color": "info",
+        "closable": true
+      }
+    },
+    {
+      "type": "Tag",
+      "props": {
+        "text": "带图标",
+        "icon": "flag"
+      }
+    }
+  ]
+},
     whenToUse: [
       '**何时使用**',
       '',
@@ -74,12 +115,49 @@ export const basicDetailContents: Record<string, ComponentDetailContent> = {
   },
   'component.status': {
     dsl: {
+  "type": "Space",
+  "props": {
+    "size": "large",
+    "wrap": true
+  },
+  "children": [
+    {
+      "type": "Status",
+      "props": {
+        "status": "success",
+        "text": "运行正常"
+      }
+    },
+    {
       "type": "Status",
       "props": {
         "status": "processing",
         "text": "同步中"
       }
     },
+    {
+      "type": "Status",
+      "props": {
+        "status": "error",
+        "text": "服务异常"
+      }
+    },
+    {
+      "type": "Status",
+      "props": {
+        "status": "warning",
+        "text": "即将过期"
+      }
+    },
+    {
+      "type": "Status",
+      "props": {
+        "status": "default",
+        "text": "未启用"
+      }
+    }
+  ]
+},
     whenToUse: [
       '**何时使用**',
       '',
@@ -123,27 +201,40 @@ export const basicDetailContents: Record<string, ComponentDetailContent> = {
   },
   'component.space': {
     dsl: {
-      "type": "Space",
+  "type": "Space",
+  "props": {
+    "wrap": true
+  },
+  "children": [
+    {
+      "type": "Button",
       "props": {
-        "direction": "horizontal",
-        "size": "middle"
-      },
-      "children": [
-        {
-          "type": "Button",
-          "props": {
-            "text": "取消"
-          }
-        },
-        {
-          "type": "Button",
-          "props": {
-            "text": "保存",
-            "variant": "primary"
-          }
-        }
-      ]
+        "text": "主要操作",
+        "variant": "primary"
+      }
     },
+    {
+      "type": "Button",
+      "props": {
+        "text": "次要操作"
+      }
+    },
+    {
+      "type": "Button",
+      "props": {
+        "text": "文字按钮",
+        "variant": "link"
+      }
+    },
+    {
+      "type": "Tag",
+      "props": {
+        "text": "标签",
+        "color": "success"
+      }
+    }
+  ]
+},
     whenToUse: [
       '**何时使用**',
       '',
@@ -187,19 +278,22 @@ export const basicDetailContents: Record<string, ComponentDetailContent> = {
   },
   'component.container': {
     dsl: {
-      "type": "Container",
+  "type": "Container",
+  "props": {
+    "size": "md"
+  },
+  "children": [
+    {
+      "type": "Alert",
       "props": {
-        "size": "lg"
-      },
-      "children": [
-        {
-          "type": "Text",
-          "props": {
-            "text": "页面内容区"
-          }
-        }
-      ]
-    },
+        "variant": "info",
+        "showIcon": true,
+        "message": "Container md 居中限宽",
+        "description": "两侧留白由 Container 统一建立，内部可放任意 DSL 子树。"
+      }
+    }
+  ]
+},
     whenToUse: [
       '**何时使用**',
       '',
@@ -242,22 +336,56 @@ export const basicDetailContents: Record<string, ComponentDetailContent> = {
   },
   'component.steps': {
     dsl: {
+  "type": "Flex",
+  "props": {
+    "direction": "vertical",
+    "gap": 12
+  },
+  "children": [
+    {
       "type": "Steps",
       "props": {
+        "current": 1,
         "items": [
           {
-            "title": "提交申请"
+            "title": "提交订单",
+            "description": "已完成"
           },
           {
-            "title": "审核中"
+            "title": "支付",
+            "description": "进行中"
+          },
+          {
+            "title": "发货",
+            "description": "等待"
           },
           {
             "title": "完成"
           }
-        ],
-        "current": 1
+        ]
       }
     },
+    {
+      "type": "Steps",
+      "props": {
+        "current": 2,
+        "items": [
+          {
+            "title": "提交"
+          },
+          {
+            "title": "审核"
+          },
+          {
+            "title": "支付",
+            "status": "error",
+            "description": "支付失败，请重试"
+          }
+        ]
+      }
+    }
+  ]
+},
     whenToUse: [
       '**何时使用**',
       '',
@@ -301,21 +429,42 @@ export const basicDetailContents: Record<string, ComponentDetailContent> = {
   },
   'component.anchor': {
     dsl: {
-      "type": "Anchor",
-      "props": {
-        "items": [
+  "type": "Anchor",
+  "props": {
+    "activeKey": "${state.active}",
+    "items": [
+      {
+        "href": "#basic",
+        "title": "基础信息",
+        "children": [
           {
-            "href": "#sec-basic",
-            "title": "基础信息"
-          },
-          {
-            "href": "#sec-log",
-            "title": "操作日志"
+            "href": "#basic-contact",
+            "title": "联系方式"
           }
-        ],
-        "offsetTop": 72
+        ]
+      },
+      {
+        "href": "#security",
+        "title": "安全设置"
+      },
+      {
+        "href": "#notify",
+        "title": "通知偏好"
       }
-    },
+    ],
+    "style": {
+      "maxWidth": 220
+    }
+  },
+  "events": {
+    "onChange": {
+      "action": "setState",
+      "params": {
+        "active": "${event}"
+      }
+    }
+  }
+},
     whenToUse: [
       '**何时使用**',
       '',
@@ -360,11 +509,11 @@ export const basicDetailContents: Record<string, ComponentDetailContent> = {
   },
   'component.back-top': {
     dsl: {
-      "type": "BackTop",
-      "props": {
-        "visibilityHeight": 400
-      }
-    },
+  "type": "BackTop",
+  "props": {
+    "visibilityHeight": -1
+  }
+},
     whenToUse: [
       '**何时使用**',
       '',
@@ -404,19 +553,22 @@ export const basicDetailContents: Record<string, ComponentDetailContent> = {
   },
   'component.affix': {
     dsl: {
-      "type": "Affix",
+  "type": "Affix",
+  "props": {
+    "offsetTop": 0
+  },
+  "children": [
+    {
+      "type": "Alert",
       "props": {
-        "offsetTop": 72
-      },
-      "children": [
-        {
-          "type": "Button",
-          "props": {
-            "text": "吸顶操作区"
-          }
-        }
-      ]
-    },
+        "variant": "warning",
+        "showIcon": true,
+        "message": "Affix 吸附条",
+        "description": "基于 sticky：在滚动祖先内滚动越过 offsetTop 后保持吸附（本预览为静态形态）。"
+      }
+    }
+  ]
+},
     whenToUse: [
       '**何时使用**',
       '',

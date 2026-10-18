@@ -82,21 +82,96 @@ export interface ComponentDetailContent {
 export const componentDetailContents: Record<string, ComponentDetailContent> = {
   'component.button': {
     dsl: {
-      "type": "Button",
+  "type": "Flex",
+  "props": {
+    "direction": "vertical",
+    "gap": 12
+  },
+  "children": [
+    {
+      "type": "Flex",
       "props": {
-        "text": "提交订单",
-        "variant": "primary",
-        "size": "large"
+        "gap": 12,
+        "align": "center"
       },
-      "events": {
-        "onClick": {
-          "action": "setState",
-          "params": {
-            "submitted": true
+      "children": [
+        {
+          "type": "Button",
+          "props": {
+            "text": "主要操作",
+            "variant": "primary"
+          }
+        },
+        {
+          "type": "Button",
+          "props": {
+            "text": "默认按钮"
+          }
+        },
+        {
+          "type": "Button",
+          "props": {
+            "text": "虚线按钮",
+            "variant": "dashed"
+          }
+        },
+        {
+          "type": "Button",
+          "props": {
+            "text": "链接按钮",
+            "variant": "link"
+          }
+        },
+        {
+          "type": "Button",
+          "props": {
+            "text": "文字按钮",
+            "variant": "text"
           }
         }
-      }
+      ]
     },
+    {
+      "type": "Flex",
+      "props": {
+        "gap": 12,
+        "align": "center"
+      },
+      "children": [
+        {
+          "type": "Button",
+          "props": {
+            "text": "危险操作",
+            "variant": "primary",
+            "danger": true
+          }
+        },
+        {
+          "type": "Button",
+          "props": {
+            "text": "加载中",
+            "variant": "primary",
+            "loading": true
+          }
+        },
+        {
+          "type": "Button",
+          "props": {
+            "text": "已禁用",
+            "disabled": true
+          }
+        },
+        {
+          "type": "Button",
+          "props": {
+            "text": "小尺寸",
+            "size": "small"
+          }
+        }
+      ]
+    }
+  ]
+},
     whenToUse: [
       '**何时使用**',
       '',

@@ -41,14 +41,6 @@ export const navigationDetailContents: Record<string, ComponentDetailContent> = 
             "disabled": true
           }
         ]
-      },
-      "events": {
-        "onSelect": {
-          "action": "setState",
-          "params": {
-            "selected": "${event}"
-          }
-        }
       }
     },
     whenToUse: [
@@ -341,14 +333,6 @@ export const navigationDetailContents: Record<string, ComponentDetailContent> = 
             "danger": true
           }
         ]
-      },
-      "events": {
-        "onSelect": {
-          "action": "setState",
-          "params": {
-            "selected": "${event}"
-          }
-        }
       },
       "children": [
         {

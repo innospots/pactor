@@ -19,13 +19,61 @@ import type { ComponentDetailContent } from './component-details.ts';
 export const generalDetailContents: Record<string, ComponentDetailContent> = {
   'component.button-group': {
     dsl: {
+  "type": "Flex",
+  "props": {
+    "direction": "vertical",
+    "gap": 12
+  },
+  "children": [
+    {
       "type": "ButtonGroup",
       "children": [
-        { "type": "Button", "props": { "text": "年" } },
-        { "type": "Button", "props": { "text": "季", "variant": "primary" } },
-        { "type": "Button", "props": { "text": "月" } }
+        {
+          "type": "Button",
+          "props": {
+            "text": "年"
+          }
+        },
+        {
+          "type": "Button",
+          "props": {
+            "text": "季",
+            "variant": "primary"
+          }
+        },
+        {
+          "type": "Button",
+          "props": {
+            "text": "月"
+          }
+        }
       ]
     },
+    {
+      "type": "ButtonGroup",
+      "children": [
+        {
+          "type": "Button",
+          "props": {
+            "text": "左对齐"
+          }
+        },
+        {
+          "type": "Button",
+          "props": {
+            "text": "居中"
+          }
+        },
+        {
+          "type": "Button",
+          "props": {
+            "text": "右对齐"
+          }
+        }
+      ]
+    }
+  ]
+},
     whenToUse: [
       '**何时使用**',
       '',
@@ -67,22 +115,45 @@ export const generalDetailContents: Record<string, ComponentDetailContent> = {
   },
   'component.action-button': {
     dsl: {
+  "type": "Flex",
+  "props": {
+    "gap": 12,
+    "align": "center"
+  },
+  "children": [
+    {
       "type": "ActionButton",
       "props": {
         "icon": "save",
-        "label": "保存",
-        "tooltip": "保存（⌘S）",
-        "variant": "outline"
-      },
-      "events": {
-        "onClick": {
-          "action": "setState",
-          "params": {
-            "saved": true
-          }
-        }
+        "label": "保存"
       }
     },
+    {
+      "type": "ActionButton",
+      "props": {
+        "icon": "download",
+        "label": "导出",
+        "variant": "outline"
+      }
+    },
+    {
+      "type": "ActionButton",
+      "props": {
+        "icon": "settings",
+        "variant": "ghost",
+        "tooltip": "偏好设置"
+      }
+    },
+    {
+      "type": "ActionButton",
+      "props": {
+        "icon": "trash",
+        "variant": "ghost",
+        "tooltip": "删除"
+      }
+    }
+  ]
+},
     whenToUse: [
       '**何时使用**',
       '',
@@ -131,29 +202,28 @@ export const generalDetailContents: Record<string, ComponentDetailContent> = {
   },
   'component.split-button': {
     dsl: {
-      "type": "SplitButton",
-      "props": {
-        "text": "保存",
-        "options": [
-          { "value": "save-draft", "label": "存为草稿", "icon": "file" },
-          { "value": "save-copy", "label": "存为副本", "icon": "copy" }
-        ]
+  "type": "SplitButton",
+  "props": {
+    "text": "保存",
+    "options": [
+      {
+        "value": "save-draft",
+        "label": "存为草稿",
+        "icon": "file-text"
       },
-      "events": {
-        "onClick": {
-          "action": "setState",
-          "params": {
-            "saved": true
-          }
-        },
-        "onSelect": {
-          "action": "setState",
-          "params": {
-            "savedAs": "${event}"
-          }
-        }
+      {
+        "value": "save-copy",
+        "label": "另存副本",
+        "icon": "copy"
+      },
+      {
+        "value": "save-template",
+        "label": "存为模板",
+        "icon": "bookmark"
       }
-    },
+    ]
+  }
+},
     whenToUse: [
       '**何时使用**',
       '',
@@ -201,27 +271,27 @@ export const generalDetailContents: Record<string, ComponentDetailContent> = {
   },
   'component.copy-button': {
     dsl: {
+  "type": "Flex",
+  "props": {
+    "gap": 12,
+    "align": "center"
+  },
+  "children": [
+    {
       "type": "CopyButton",
       "props": {
-        "value": "${state.projectId}",
-        "label": "复制",
-        "copiedLabel": "已复制"
-      },
-      "events": {
-        "onCopy": {
-          "action": "setState",
-          "params": {
-            "copiedValue": "${event}"
-          }
-        },
-        "onError": {
-          "action": "setState",
-          "params": {
-            "copyFailed": true
-          }
-        }
+        "value": "npm install @pactor-app/ui",
+        "label": "复制安装命令"
       }
     },
+    {
+      "type": "CopyButton",
+      "props": {
+        "value": "https://pactor-docs.xp-java.workers.dev"
+      }
+    }
+  ]
+},
     whenToUse: [
       '**何时使用**',
       '',
@@ -267,12 +337,50 @@ export const generalDetailContents: Record<string, ComponentDetailContent> = {
   },
   'component.icon-morph': {
     dsl: {
+  "type": "Flex",
+  "props": {
+    "gap": 12,
+    "align": "center"
+  },
+  "children": [
+    {
+      "type": "Button",
+      "props": {
+        "text": "切换状态",
+        "size": "small"
+      },
+      "events": {
+        "onClick": {
+          "action": "setState",
+          "params": {
+            "morph": "${state.morph == 'a' ? 'b' : 'a'}"
+          }
+        }
+      }
+    },
+    {
       "type": "IconMorph",
       "props": {
         "morph": "menu-close",
-        "state": "${state.menuOpen ? 'a' : 'b'}"
+        "state": "${state.morph}"
       }
     },
+    {
+      "type": "IconMorph",
+      "props": {
+        "morph": "play-pause",
+        "state": "${state.morph}"
+      }
+    },
+    {
+      "type": "IconMorph",
+      "props": {
+        "morph": "plus-minus",
+        "state": "${state.morph}"
+      }
+    }
+  ]
+},
     whenToUse: [
       '**何时使用**',
       '',
@@ -315,21 +423,30 @@ export const generalDetailContents: Record<string, ComponentDetailContent> = {
   },
   'component.confirm-morph': {
     dsl: {
+  "type": "Flex",
+  "props": {
+    "gap": 12,
+    "align": "center"
+  },
+  "children": [
+    {
       "type": "ConfirmMorph",
       "props": {
-        "label": "删除项目",
+        "label": "删除",
         "confirmLabel": "确认删除",
         "successLabel": "已删除"
-      },
-      "events": {
-        "onConfirm": {
-          "action": "setState",
-          "params": {
-            "deleted": true
-          }
-        }
       }
     },
+    {
+      "type": "ConfirmMorph",
+      "props": {
+        "label": "清空",
+        "confirmLabel": "确认清空",
+        "variant": "outline"
+      }
+    }
+  ]
+},
     whenToUse: [
       '**何时使用**',
       '',
@@ -382,23 +499,36 @@ export const generalDetailContents: Record<string, ComponentDetailContent> = {
   },
   'component.floating-button-group': {
     dsl: {
-      "type": "FloatingButtonGroup",
-      "props": {
-        "value": "${state.view}",
-        "options": [
-          { "value": "list", "label": "列表", "icon": "list" },
-          { "value": "grid", "label": "网格", "icon": "grid" }
-        ]
+  "type": "FloatingButtonGroup",
+  "props": {
+    "value": "${state.view}",
+    "options": [
+      {
+        "value": "list",
+        "label": "列表",
+        "icon": "list"
       },
-      "events": {
-        "onSelect": {
-          "action": "setState",
-          "params": {
-            "view": "${event}"
-          }
-        }
+      {
+        "value": "grid",
+        "label": "网格",
+        "icon": "grid"
+      },
+      {
+        "value": "chart",
+        "label": "图表",
+        "icon": "chart"
       }
-    },
+    ]
+  },
+  "events": {
+    "onSelect": {
+      "action": "setState",
+      "params": {
+        "view": "${event}"
+      }
+    }
+  }
+},
     whenToUse: [
       '**何时使用**',
       '',
@@ -440,28 +570,34 @@ export const generalDetailContents: Record<string, ComponentDetailContent> = {
   },
   'component.expanding-button-group': {
     dsl: {
-      "type": "ExpandingButtonGroup",
-      "props": {
-        "options": [
-          { "value": "edit", "label": "编辑", "icon": "pencil" },
-          {
-            "value": "delete",
-            "label": "删除",
-            "icon": "trash",
-            "confirm": true,
-            "confirmLabel": "确认删除"
-          }
-        ]
+  "type": "ExpandingButtonGroup",
+  "props": {
+    "options": [
+      {
+        "value": "edit",
+        "label": "编辑",
+        "icon": "pencil"
       },
-      "events": {
-        "onSelect": {
-          "action": "setState",
-          "params": {
-            "picked": "${event}"
-          }
-        }
+      {
+        "value": "share",
+        "label": "分享",
+        "icon": "share"
+      },
+      {
+        "value": "download",
+        "label": "下载",
+        "icon": "download"
+      },
+      {
+        "value": "delete",
+        "label": "删除",
+        "icon": "trash",
+        "confirm": true,
+        "confirmLabel": "确认删除"
       }
-    },
+    ]
+  }
+},
     whenToUse: [
       '**何时使用**',
       '',
@@ -502,13 +638,43 @@ export const generalDetailContents: Record<string, ComponentDetailContent> = {
   },
   'component.icon': {
     dsl: {
+  "type": "Flex",
+  "props": {
+    "gap": 12,
+    "align": "center"
+  },
+  "children": [
+    {
+      "type": "Icon",
+      "props": {
+        "name": "search",
+        "size": "small"
+      }
+    },
+    {
+      "type": "Icon",
+      "props": {
+        "name": "settings"
+      }
+    },
+    {
+      "type": "Icon",
+      "props": {
+        "name": "heart",
+        "size": "large",
+        "color": "#e0245e"
+      }
+    },
+    {
       "type": "Icon",
       "props": {
         "name": "download",
         "size": 28,
         "color": "#1677ff"
       }
-    },
+    }
+  ]
+},
     whenToUse: [
       '**何时使用**',
       '',
@@ -556,12 +722,42 @@ export const generalDetailContents: Record<string, ComponentDetailContent> = {
   },
   'component.typography': {
     dsl: {
+  "type": "Flex",
+  "props": {
+    "direction": "vertical",
+    "gap": 12
+  },
+  "children": [
+    {
       "type": "Typography",
       "props": {
         "variant": "h3",
         "text": "三级标题 H3"
       }
     },
+    {
+      "type": "Typography",
+      "props": {
+        "variant": "p",
+        "text": "正文段落：用于常规阅读文本，行高宽松。"
+      }
+    },
+    {
+      "type": "Typography",
+      "props": {
+        "variant": "muted",
+        "text": "弱化文本：用于辅助说明与次要信息。"
+      }
+    },
+    {
+      "type": "Typography",
+      "props": {
+        "variant": "inline-code",
+        "text": "const total = 95"
+      }
+    }
+  ]
+},
     whenToUse: [
       '**何时使用**',
       '',
@@ -607,13 +803,28 @@ export const generalDetailContents: Record<string, ComponentDetailContent> = {
   },
   'component.link': {
     dsl: {
+  "type": "Flex",
+  "props": {
+    "gap": 16
+  },
+  "children": [
+    {
       "type": "Link",
       "props": {
-        "href": "https://example.com/docs",
-        "text": "查看文档",
-        "target": "_blank"
+        "href": "/components",
+        "text": "站内链接（SPA 导航）"
       }
     },
+    {
+      "type": "Link",
+      "props": {
+        "href": "https://example.com",
+        "text": "外部链接（新窗口）",
+        "target": "_blank"
+      }
+    }
+  ]
+},
     whenToUse: [
       '**何时使用**',
       '',
@@ -658,11 +869,66 @@ export const generalDetailContents: Record<string, ComponentDetailContent> = {
   },
   'component.separator': {
     dsl: {
-      "type": "Separator",
+  "type": "Flex",
+  "props": {
+    "direction": "vertical",
+    "gap": 12
+  },
+  "children": [
+    {
+      "type": "Typography",
       "props": {
-        "orientation": "horizontal"
+        "variant": "p",
+        "text": "上方内容区块"
       }
     },
+    {
+      "type": "Separator"
+    },
+    {
+      "type": "Flex",
+      "props": {
+        "gap": 12,
+        "align": "center"
+      },
+      "children": [
+        {
+          "type": "Typography",
+          "props": {
+            "variant": "p",
+            "text": "条目一"
+          }
+        },
+        {
+          "type": "Separator",
+          "props": {
+            "orientation": "vertical"
+          }
+        },
+        {
+          "type": "Typography",
+          "props": {
+            "variant": "p",
+            "text": "条目二"
+          }
+        },
+        {
+          "type": "Separator",
+          "props": {
+            "orientation": "vertical"
+          }
+        },
+        {
+          "type": "Typography",
+          "props": {
+            "variant": "p",
+            "text": "条目三"
+          }
+        }
+      ]
+    }
+  ]
+},
     whenToUse: [
       '**何时使用**',
       '',
@@ -704,13 +970,34 @@ export const generalDetailContents: Record<string, ComponentDetailContent> = {
   },
   'component.avatar': {
     dsl: {
+  "type": "Flex",
+  "props": {
+    "gap": 12,
+    "align": "center"
+  },
+  "children": [
+    {
       "type": "Avatar",
       "props": {
         "src": "https://i.pravatar.cc/64",
-        "alt": "用户头像",
-        "fallback": "张"
+        "alt": "用户头像"
       }
     },
+    {
+      "type": "Avatar",
+      "props": {
+        "src": "https://i.pravatar.cc/64?img=5",
+        "alt": "成员头像"
+      }
+    },
+    {
+      "type": "Avatar",
+      "props": {
+        "fallback": "张"
+      }
+    }
+  ]
+},
     whenToUse: [
       '**何时使用**',
       '',
@@ -755,12 +1042,41 @@ export const generalDetailContents: Record<string, ComponentDetailContent> = {
   },
   'component.badge': {
     dsl: {
+  "type": "Flex",
+  "props": {
+    "gap": 12,
+    "align": "center"
+  },
+  "children": [
+    {
+      "type": "Badge",
+      "props": {
+        "text": "默认"
+      }
+    },
+    {
       "type": "Badge",
       "props": {
         "text": "次要",
         "variant": "secondary"
       }
     },
+    {
+      "type": "Badge",
+      "props": {
+        "text": "危险",
+        "variant": "destructive"
+      }
+    },
+    {
+      "type": "Badge",
+      "props": {
+        "text": "描边",
+        "variant": "outline"
+      }
+    }
+  ]
+},
     whenToUse: [
       '**何时使用**',
       '',

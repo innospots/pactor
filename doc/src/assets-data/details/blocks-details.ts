@@ -12,36 +12,40 @@ import type { ComponentDetailContent } from './component-details.ts';
 export const blocksDetailContents: Record<string, ComponentDetailContent> = {
   'component.entity-card': {
     dsl: {
-      "type": "EntityCard",
-      "props": {
-        "icon": "cube",
-        "title": "客户实体",
-        "subtitle": "cust_profile",
-        "tags": [
-          { "text": "启用", "color": "green" }
-        ],
-        "description": "客户画像主实体，含基础属性与扩展属性。",
-        "meta": "创建于 2026-09-01",
-        "actions": [
-          { "text": "编辑", "key": "edit" },
-          { "text": "删除", "key": "remove", "variant": "text", "danger": true }
-        ]
-      },
-      "events": {
-        "onClick": {
-          "action": "navigate",
-          "params": {
-            "to": "/entity/detail"
-          }
-        },
-        "onAction": {
-          "action": "setState",
-          "params": {
-            "lastAction": "edit"
-          }
-        }
+  "type": "EntityCard",
+  "props": {
+    "icon": "cube",
+    "title": "客户实体",
+    "subtitle": "cust_profile",
+    "tags": [
+      {
+        "text": "启用",
+        "color": "success"
       }
-    },
+    ],
+    "description": "客户画像主实体，含基础属性与扩展属性，用于导入决策与规则配置。",
+    "meta": "创建于 2026-09-01",
+    "actions": [
+      {
+        "text": "编辑",
+        "key": "edit",
+        "variant": "outline"
+      },
+      {
+        "text": "资源",
+        "key": "resources",
+        "variant": "outline"
+      },
+      {
+        "text": "删除",
+        "key": "remove",
+        "variant": "text",
+        "danger": true
+      }
+    ],
+    "hoverable": true
+  }
+},
     whenToUse: [
       '**何时使用**',
       '',
@@ -95,52 +99,70 @@ export const blocksDetailContents: Record<string, ComponentDetailContent> = {
 
   'component.card-list': {
     dsl: {
-      "type": "CardList",
-      "props": {
-        "columns": 3,
-        "createText": "新建插件",
-        "items": [
+  "type": "CardList",
+  "props": {
+    "items": [
+      {
+        "icon": "code",
+        "title": "规则引擎",
+        "subtitle": "v1.2.0",
+        "tags": [
           {
-            "icon": "code",
-            "title": "规则引擎",
-            "subtitle": "v1.2.0",
-            "tags": [
-              { "text": "已发布", "color": "green" }
-            ],
-            "description": "可视化规则配置与评分引擎。",
-            "actions": [
-              { "text": "配置", "key": "config" }
-            ]
-          },
+            "text": "已发布",
+            "color": "success"
+          }
+        ],
+        "description": "可视化规则配置与评分引擎。",
+        "meta": "更新于 2 小时前",
+        "actions": [
           {
-            "icon": "database",
-            "title": "数据源管理",
-            "subtitle": "v0.9.1",
-            "tags": [
-              { "text": "灰度", "color": "orange" }
-            ],
-            "description": "数据源接入与字段元数据维护。",
-            "actions": [
-              { "text": "配置", "key": "config" }
-            ]
+            "text": "配置",
+            "key": "config"
           }
         ]
       },
-      "events": {
-        "onItemClick": {
-          "action": "navigate",
-          "params": {
-            "to": "/plugins/detail"
+      {
+        "icon": "database",
+        "title": "数据源管理",
+        "subtitle": "v0.9.1",
+        "tags": [
+          {
+            "text": "灰度",
+            "color": "warning"
           }
-        },
-        "onCreateClick": {
-          "action": "navigate",
-          "params": {
-            "to": "/plugins/create"
+        ],
+        "description": "数据源接入与字段元数据维护。",
+        "actions": [
+          {
+            "text": "配置",
+            "key": "config"
           }
-        }
+        ]
+      },
+      {
+        "icon": "workflow",
+        "title": "消息网关",
+        "subtitle": "v0.5.0",
+        "tags": [
+          {
+            "text": "开发中",
+            "color": "info"
+          }
+        ],
+        "description": "通过节点和连线配置业务流程。",
+        "actions": [
+          {
+            "text": "配置",
+            "key": "config"
+          }
+        ]
       }
-    },
+    ],
+    "columns": 3,
+    "createText": "新建插件",
+    "showCount": true
+  }
+},
     whenToUse: [
       '**何时使用**',
       '',
@@ -284,26 +306,35 @@ export const blocksDetailContents: Record<string, ComponentDetailContent> = {
 
   'component.expression-editor': {
     dsl: {
-      "type": "ExpressionEditor",
-      "props": {
-        "label": "周期表达式",
-        "required": true,
-        "value": "${state.formula}",
-        "valueTemplate": "return ft.period({{start}}, {{end}})",
-        "valueMapping": {
-          "start": { "label": "起始周期", "type": "number", "default": 1, "required": true },
-          "end": { "label": "结束周期", "type": "number", "default": 12, "required": true }
-        }
+  "type": "ExpressionEditor",
+  "props": {
+    "value": "${state.expression}",
+    "variables": [
+      {
+        "code": "a",
+        "name": "起始周期",
+        "type": "number",
+        "default": 1,
+        "required": true
       },
-      "events": {
-        "onChange": {
-          "action": "setState",
-          "params": {
-            "formula": "${event}"
-          }
-        }
+      {
+        "code": "b",
+        "name": "结束周期",
+        "type": "number",
+        "default": 12,
+        "required": true
       }
-    },
+    ]
+  },
+  "events": {
+    "onChange": {
+      "action": "setState",
+      "params": {
+        "expression": "${event}"
+      }
+    }
+  }
+},
     whenToUse: [
       '**何时使用**',
       '',
@@ -361,24 +392,41 @@ export const blocksDetailContents: Record<string, ComponentDetailContent> = {
 
   'component.field-condition': {
     dsl: {
-      "type": "FieldCondition",
-      "props": {
-        "value": "${state.condition}",
-        "fields": [
-          { "featureCode": "age", "featureName": "年龄", "fieldType": "NUMBER" },
-          { "featureCode": "name", "featureName": "姓名", "fieldType": "STRING" },
-          { "featureCode": "registerTime", "featureName": "注册时间", "fieldType": "DATE" }
-        ]
+  "type": "FieldCondition",
+  "props": {
+    "value": "${state.condition}",
+    "fields": [
+      {
+        "featureCode": "age",
+        "featureName": "年龄",
+        "fieldType": "NUMBER"
       },
-      "events": {
-        "onChange": {
-          "action": "setState",
-          "params": {
-            "condition": "${event}"
-          }
-        }
+      {
+        "featureCode": "name",
+        "featureName": "姓名",
+        "fieldType": "STRING"
+      },
+      {
+        "featureCode": "registerTime",
+        "featureName": "注册时间",
+        "fieldType": "DATE"
+      },
+      {
+        "featureCode": "isVip",
+        "featureName": "是否会员",
+        "fieldType": "BOOLEAN"
       }
-    },
+    ]
+  },
+  "events": {
+    "onChange": {
+      "action": "setState",
+      "params": {
+        "condition": "${event}"
+      }
+    }
+  }
+},
     whenToUse: [
       '**何时使用**',
       '',
@@ -424,19 +472,41 @@ export const blocksDetailContents: Record<string, ComponentDetailContent> = {
 
   'component.rule-config': {
     dsl: {
-      "type": "RuleConfig",
-      "props": {
-        "value": "${state.rule}"
+  "type": "RuleConfig",
+  "props": {
+    "value": "${state.ruleConfig}",
+    "fields": [
+      {
+        "featureCode": "age",
+        "featureName": "年龄",
+        "fieldType": "NUMBER"
       },
-      "events": {
-        "onChange": {
-          "action": "setState",
-          "params": {
-            "rule": "${event}"
-          }
-        }
+      {
+        "featureCode": "name",
+        "featureName": "姓名",
+        "fieldType": "STRING"
+      },
+      {
+        "featureCode": "registerTime",
+        "featureName": "注册时间",
+        "fieldType": "DATE"
+      },
+      {
+        "featureCode": "isVip",
+        "featureName": "是否会员",
+        "fieldType": "BOOLEAN"
       }
-    },
+    ]
+  },
+  "events": {
+    "onChange": {
+      "action": "setState",
+      "params": {
+        "ruleConfig": "${event}"
+      }
+    }
+  }
+},
     whenToUse: [
       '**何时使用**',
       '',
@@ -544,28 +614,55 @@ export const blocksDetailContents: Record<string, ComponentDetailContent> = {
 
   'component.script-editor': {
     dsl: {
-      "type": "ScriptEditor",
-      "props": {
-        "value": "${state.script}",
-        "language": "python",
-        "height": 200,
-        "placeholder": "输入脚本，函数 / 变量自动联想",
-        "functions": [
-          { "name": "SUM", "description": "求和", "parameters": [{ "name": "field", "type": "string" }] }
-        ],
-        "variables": [
-          { "name": "order_amount", "type": "number", "description": "订单金额" }
+  "type": "ScriptEditor",
+  "props": {
+    "value": "${state.script}",
+    "language": "python",
+    "placeholder": "输入脚本，函数 / 变量自动联想",
+    "functions": [
+      {
+        "name": "SUM",
+        "description": "求和",
+        "parameters": [
+          {
+            "name": "field",
+            "type": "string"
+          }
         ]
       },
-      "events": {
-        "onChange": {
-          "action": "setState",
-          "params": {
-            "script": "${event}"
+      {
+        "name": "COUNT",
+        "description": "计数",
+        "parameters": [
+          {
+            "name": "field",
+            "type": "string"
           }
-        }
+        ]
       }
-    },
+    ],
+    "variables": [
+      {
+        "name": "order_amount",
+        "type": "number",
+        "description": "订单金额"
+      },
+      {
+        "name": "user_level",
+        "type": "string",
+        "description": "用户等级"
+      }
+    ]
+  },
+  "events": {
+    "onChange": {
+      "action": "setState",
+      "params": {
+        "script": "${event}"
+      }
+    }
+  }
+},
     whenToUse: [
       '**何时使用**',
       '',
@@ -614,42 +711,55 @@ export const blocksDetailContents: Record<string, ComponentDetailContent> = {
 
   'component.site-footer': {
     dsl: {
-      "type": "SiteFooter",
-      "props": {
-        "brand": {
-          "name": "Pactor",
-          "description": "DSL 驱动的应用构建平台"
-        },
-        "groups": [
+  "type": "SiteFooter",
+  "props": {
+    "brand": {
+      "name": "Pactor",
+      "description": "DSL 驱动的应用构建平台，组件 / 模板 / 规范一站式管理。"
+    },
+    "groups": [
+      {
+        "title": "产品",
+        "links": [
           {
-            "title": "产品",
-            "links": [
-              { "text": "组件库", "href": "/components" },
-              { "text": "模板中心", "href": "/templates" }
-            ]
+            "text": "组件库",
+            "href": "/components"
           },
           {
-            "title": "资源",
-            "links": [
-              { "text": "反馈问题", "href": "/feedback" }
-            ]
+            "text": "模板中心",
+            "href": "/templates"
+          },
+          {
+            "text": "主题生成器",
+            "href": "/themes"
           }
-        ],
-        "copyright": "© 2026 Pactor",
-        "bottomLinks": [
-          { "text": "隐私协议", "href": "/privacy" },
-          { "text": "服务条款" }
         ]
       },
-      "events": {
-        "onLinkClick": {
-          "action": "setState",
-          "params": {
-            "lastLink": "服务条款"
+      {
+        "title": "资源",
+        "links": [
+          {
+            "text": "文档",
+            "href": "/"
+          },
+          {
+            "text": "反馈问题"
           }
-        }
+        ]
+      },
+      {
+        "title": "支持",
+        "links": [
+          {
+            "text": "更新日志",
+            "href": "/"
+          }
+        ]
       }
-    },
+    ],
+    "copyright": "© 2026 Pactor"
+  }
+},
     whenToUse: [
       '**何时使用**',
       '',

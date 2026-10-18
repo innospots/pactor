@@ -9,23 +9,31 @@ import type { ComponentDetailContent } from './component-details.ts';
 export const dataDisplayDetailContents: Record<string, ComponentDetailContent> = {
   'component.list': {
     dsl: {
-      "type": "List",
-      "props": {
-        "items": [
-          {
-            "key": "1",
-            "title": "订单 #PO20260922001",
-            "description": "金额 ¥1,280.00 · 已支付"
-          },
-          {
-            "key": "2",
-            "title": "订单 #PO20260922002",
-            "description": "金额 ¥356.00 · 待审核"
-          }
-        ],
-        "split": true
+  "type": "List",
+  "props": {
+    "bordered": true,
+    "items": [
+      {
+        "key": "1",
+        "title": "月度运营报告",
+        "description": "2026-08 月报 · 已发布",
+        "extra": "查看"
+      },
+      {
+        "key": "2",
+        "title": "客户分层方案",
+        "description": "运营部 · 草稿",
+        "extra": "编辑"
+      },
+      {
+        "key": "3",
+        "title": "Q3 投放复盘",
+        "description": "市场部 · 审核中",
+        "extra": "查看"
       }
-    },
+    ]
+  }
+},
     whenToUse: [
       '**何时使用**',
       '',
@@ -78,41 +86,43 @@ export const dataDisplayDetailContents: Record<string, ComponentDetailContent> =
 
   'component.tree': {
     dsl: {
-      "type": "Tree",
-      "props": {
-        "treeData": [
+  "type": "Tree",
+  "props": {
+    "treeData": [
+      {
+        "key": "root",
+        "title": "产品部",
+        "children": [
           {
-            "key": "org",
-            "title": "组织架构",
-            "children": [
-              {
-                "key": "dev",
-                "title": "研发部",
-                "children": [
-                  {
-                    "key": "frontend",
-                    "title": "前端组"
-                  },
-                  {
-                    "key": "backend",
-                    "title": "后端组"
-                  }
-                ]
-              },
-              {
-                "key": "design",
-                "title": "设计部"
-              }
-            ]
+            "key": "a",
+            "title": "平台组"
+          },
+          {
+            "key": "b",
+            "title": "商业化组"
           }
-        ],
-        "defaultExpandedKeys": [
-          "org",
-          "dev"
-        ],
-        "checkable": true
+        ]
+      },
+      {
+        "key": "design",
+        "title": "设计部",
+        "children": [
+          {
+            "key": "c",
+            "title": "体验设计组"
+          }
+        ]
       }
-    },
+    ],
+    "defaultExpandedKeys": [
+      "root"
+    ],
+    "checkable": true,
+    "defaultCheckedKeys": [
+      "a"
+    ]
+  }
+},
     whenToUse: [
       '**何时使用**',
       '',
@@ -174,30 +184,35 @@ export const dataDisplayDetailContents: Record<string, ComponentDetailContent> =
 
   'component.descriptions': {
     dsl: {
-      "type": "Descriptions",
-      "props": {
-        "title": "客户信息",
-        "column": 2,
-        "items": [
-          {
-            "label": "客户名称",
-            "value": "杭州云杉科技有限公司"
-          },
-          {
-            "label": "联系人",
-            "value": "陈晨"
-          },
-          {
-            "label": "联系电话",
-            "value": "0571-8800-1234"
-          },
-          {
-            "label": "状态",
-            "value": "合作中"
-          }
-        ]
+  "type": "Descriptions",
+  "props": {
+    "title": "客户信息",
+    "bordered": true,
+    "column": 3,
+    "items": [
+      {
+        "label": "姓名",
+        "value": "张三"
+      },
+      {
+        "label": "角色",
+        "value": "管理员"
+      },
+      {
+        "label": "部门",
+        "value": "平台组"
+      },
+      {
+        "label": "手机",
+        "value": "138****0000"
+      },
+      {
+        "label": "状态",
+        "value": "在职"
       }
-    },
+    ]
+  }
+},
     whenToUse: [
       '**何时使用**',
       '',
@@ -248,25 +263,27 @@ export const dataDisplayDetailContents: Record<string, ComponentDetailContent> =
 
   'component.timeline': {
     dsl: {
-      "type": "Timeline",
-      "props": {
-        "items": [
-          {
-            "content": "提交采购申请",
-            "time": "09-20 10:24"
-          },
-          {
-            "content": "主管审批通过",
-            "time": "09-20 14:02"
-          },
-          {
-            "content": "财务付款中",
-            "time": "09-21 09:15"
-          }
-        ],
-        "pending": "待收货确认"
+  "type": "Timeline",
+  "props": {
+    "items": [
+      {
+        "content": "创建订单",
+        "time": "09:12",
+        "color": "green"
+      },
+      {
+        "content": "支付成功",
+        "time": "09:15",
+        "color": "green"
+      },
+      {
+        "content": "仓库拣货",
+        "time": "10:02"
       }
-    },
+    ],
+    "pending": "等待出库"
+  }
+},
     whenToUse: [
       '**何时使用**',
       '',
@@ -315,14 +332,14 @@ export const dataDisplayDetailContents: Record<string, ComponentDetailContent> =
 
   'component.image': {
     dsl: {
-      "type": "Image",
-      "props": {
-        "src": "https://example.com/report-cover.png",
-        "alt": "报表封面",
-        "width": 240,
-        "preview": true
-      }
-    },
+  "type": "Image",
+  "props": {
+    "src": "data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22200%22%20height%3D%22120%22%3E%3Crect%20width%3D%22200%22%20height%3D%22120%22%20fill%3D%22%23e2e8f0%22%2F%3E%3Ctext%20x%3D%22100%22%20y%3D%2266%22%20font-size%3D%2214%22%20text-anchor%3D%22middle%22%20fill%3D%22%2364748b%22%3E%E7%A4%BA%E4%BE%8B%E5%9B%BE%E7%89%87%3C%2Ftext%3E%3C%2Fsvg%3E",
+    "alt": "示例图片",
+    "width": 200,
+    "height": 120
+  }
+},
     whenToUse: [
       '**何时使用**',
       '',
@@ -375,13 +392,13 @@ export const dataDisplayDetailContents: Record<string, ComponentDetailContent> =
 
   'component.qrcode': {
     dsl: {
-      "type": "QRCode",
-      "props": {
-        "value": "https://pactor.example.com/invite/8f2k",
-        "size": 128,
-        "bordered": true
-      }
-    },
+  "type": "QRCode",
+  "props": {
+    "value": "https://pactor-docs.xp-java.workers.dev",
+    "size": 112,
+    "bordered": true
+  }
+},
     whenToUse: [
       '**何时使用**',
       '',
@@ -434,30 +451,33 @@ export const dataDisplayDetailContents: Record<string, ComponentDetailContent> =
 
   'component.segmented': {
     dsl: {
-      "type": "Segmented",
-      "props": {
-        "name": "period",
-        "value": "month",
-        "options": [
-          {
-            "label": "日",
-            "value": "day"
-          },
-          {
-            "label": "周",
-            "value": "week"
-          },
-          {
-            "label": "月",
-            "value": "month"
-          },
-          {
-            "label": "年",
-            "value": "year"
-          }
-        ]
+  "type": "Segmented",
+  "props": {
+    "value": "${state.view}",
+    "options": [
+      {
+        "label": "日",
+        "value": "day"
+      },
+      {
+        "label": "周",
+        "value": "week"
+      },
+      {
+        "label": "月",
+        "value": "month"
       }
-    },
+    ]
+  },
+  "events": {
+    "onChange": {
+      "action": "setState",
+      "params": {
+        "view": "${event}"
+      }
+    }
+  }
+},
     whenToUse: [
       '**何时使用**',
       '',
@@ -514,11 +534,19 @@ export const dataDisplayDetailContents: Record<string, ComponentDetailContent> =
 
   'component.card': {
     dsl: {
-      "type": "Card",
+  "type": "Card",
+  "props": {
+    "title": "月度运营报告",
+    "style": {
+      "maxWidth": 360
+    }
+  },
+  "children": [
+    {
+      "type": "Flex",
       "props": {
-        "title": "月度运营报告",
-        "rounded": "lg",
-        "bordered": true
+        "direction": "vertical",
+        "gap": 12
       },
       "children": [
         {
@@ -527,9 +555,19 @@ export const dataDisplayDetailContents: Record<string, ComponentDetailContent> =
             "text": "2026-08 月报已生成，覆盖 12 项核心指标，较上月提升 8.4%。",
             "type": "secondary"
           }
+        },
+        {
+          "type": "Button",
+          "props": {
+            "text": "查看详情",
+            "variant": "primary",
+            "size": "small"
+          }
         }
       ]
-    },
+    }
+  ]
+},
     whenToUse: [
       '**何时使用**',
       '',
@@ -579,54 +617,54 @@ export const dataDisplayDetailContents: Record<string, ComponentDetailContent> =
 
   'component.table': {
     dsl: {
-      "type": "Table",
-      "props": {
-        "columns": [
-          {
-            "title": "名称",
-            "dataIndex": "name"
-          },
-          {
-            "title": "负责人",
-            "dataIndex": "owner"
-          },
-          {
-            "title": "状态",
-            "dataIndex": "status",
-            "align": "center"
-          }
-        ],
-        "dataSource": [
-          {
-            "id": 1,
-            "name": "月度运营报告",
-            "owner": "张三",
-            "status": "已发布"
-          },
-          {
-            "id": 2,
-            "name": "客户分层方案",
-            "owner": "李四",
-            "status": "草稿"
-          },
-          {
-            "id": 3,
-            "name": "Q3 投放复盘",
-            "owner": "王五",
-            "status": "审核中"
-          },
-          {
-            "id": 4,
-            "name": "渠道增长分析",
-            "owner": "赵六",
-            "status": "已发布"
-          }
-        ],
-        "pagination": {
-          "pageSize": 5
-        }
+  "type": "Table",
+  "props": {
+    "columns": [
+      {
+        "title": "名称",
+        "dataIndex": "name"
+      },
+      {
+        "title": "负责人",
+        "dataIndex": "owner"
+      },
+      {
+        "title": "状态",
+        "dataIndex": "status",
+        "align": "center"
       }
-    },
+    ],
+    "dataSource": [
+      {
+        "id": 1,
+        "name": "月度运营报告",
+        "owner": "张三",
+        "status": "已发布"
+      },
+      {
+        "id": 2,
+        "name": "客户分层方案",
+        "owner": "李四",
+        "status": "草稿"
+      },
+      {
+        "id": 3,
+        "name": "Q3 投放复盘",
+        "owner": "王五",
+        "status": "审核中"
+      },
+      {
+        "id": 4,
+        "name": "渠道增长分析",
+        "owner": "赵六",
+        "status": "已发布"
+      }
+    ],
+    "pagination": {
+      "pageSize": 5
+    }
+  }
+},
     whenToUse: [
       '**何时使用**',
       '',
@@ -681,6 +719,13 @@ export const dataDisplayDetailContents: Record<string, ComponentDetailContent> =
 
   'component.statistic': {
     dsl: {
+  "type": "Flex",
+  "props": {
+    "gap": 12,
+    "align": "center"
+  },
+  "children": [
+    {
       "type": "Statistic",
       "props": {
         "title": "本月销售额",
@@ -689,6 +734,16 @@ export const dataDisplayDetailContents: Record<string, ComponentDetailContent> =
         "suffix": "元"
       }
     },
+    {
+      "type": "Statistic",
+      "props": {
+        "title": "活跃用户",
+        "value": 8932,
+        "suffix": "人"
+      }
+    }
+  ]
+},
     whenToUse: [
       '**何时使用**',
       '',
@@ -739,14 +794,19 @@ export const dataDisplayDetailContents: Record<string, ComponentDetailContent> =
 
   'component.calendar': {
     dsl: {
-      "type": "Calendar",
-      "props": {
-        "name": "checkDate",
-        "label": "核对日期",
-        "mode": "single",
-        "value": "2026-09-21"
+  "type": "Calendar",
+  "props": {
+    "value": "${state.date}"
+  },
+  "events": {
+    "onChange": {
+      "action": "setState",
+      "params": {
+        "date": "${event}"
       }
-    },
+    }
+  }
+},
     whenToUse: [
       '**何时使用**',
       '',
@@ -800,48 +860,48 @@ export const dataDisplayDetailContents: Record<string, ComponentDetailContent> =
 
   'component.accordion': {
     dsl: {
-      "type": "Accordion",
-      "props": {
-        "items": [
+  "type": "Accordion",
+  "props": {
+    "items": [
+      {
+        "key": "intro",
+        "title": "产品简介",
+        "children": [
           {
-            "key": "intro",
-            "title": "产品简介",
-            "children": [
-              {
-                "type": "Text",
-                "props": {
-                  "text": "Pactor 是一套 DSL 驱动的动态页面框架。"
-                }
-              }
-            ]
-          },
+            "type": "Text",
+            "props": {
+              "text": "Pactor 是一套 DSL 驱动的动态页面框架。"
+            }
+          }
+        ]
+      },
+      {
+        "key": "usage",
+        "title": "使用方式",
+        "children": [
           {
-            "key": "usage",
-            "title": "使用方式",
-            "children": [
-              {
-                "type": "Text",
-                "props": {
-                  "text": "以 YAML/JSON 描述页面结构，经运行时渲染为真实组件。"
-                }
-              }
-            ]
-          },
+            "type": "Text",
+            "props": {
+              "text": "以 YAML/JSON 描述页面结构，经运行时渲染为真实组件。"
+            }
+          }
+        ]
+      },
+      {
+        "key": "faq",
+        "title": "常见问题",
+        "children": [
           {
-            "key": "faq",
-            "title": "常见问题",
-            "children": [
-              {
-                "type": "Text",
-                "props": {
-                  "text": "表达式、数据源与动作均可组合使用，详见使用文档。"
-                }
-              }
-            ]
+            "type": "Text",
+            "props": {
+              "text": "表达式、数据源与动作均可组合使用，详见使用文档。"
+            }
           }
         ]
       }
-    },
+    ]
+  }
+},
     whenToUse: [
       '**何时使用**',
       '',
@@ -890,26 +950,25 @@ export const dataDisplayDetailContents: Record<string, ComponentDetailContent> =
 
   'component.carousel': {
     dsl: {
-      "type": "Carousel",
-      "props": {
-        "loop": true,
-        "autoplay": 3000,
-        "items": [
-          {
-            "src": "https://example.com/banner-ops.png",
-            "alt": "运营看板"
-          },
-          {
-            "src": "https://example.com/banner-growth.png",
-            "alt": "增长分析"
-          },
-          {
-            "src": "https://example.com/banner-insight.png",
-            "alt": "客户洞察"
-          }
-        ]
+  "type": "Carousel",
+  "props": {
+    "loop": true,
+    "items": [
+      {
+        "src": "data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22640%22%20height%3D%22240%22%3E%3Crect%20width%3D%22640%22%20height%3D%22240%22%20fill%3D%22%231677ff%22%2F%3E%3Ctext%20x%3D%22320%22%20y%3D%22128%22%20font-size%3D%2220%22%20text-anchor%3D%22middle%22%20fill%3D%22%23ffffff%22%3E%E8%BF%90%E8%90%A5%E7%9C%8B%E6%9D%BF%3C%2Ftext%3E%3C%2Fsvg%3E",
+        "alt": "运营看板"
+      },
+      {
+        "src": "data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22640%22%20height%3D%22240%22%3E%3Crect%20width%3D%22640%22%20height%3D%22240%22%20fill%3D%22%2352c41a%22%2F%3E%3Ctext%20x%3D%22320%22%20y%3D%22128%22%20font-size%3D%2220%22%20text-anchor%3D%22middle%22%20fill%3D%22%23ffffff%22%3E%E5%A2%9E%E9%95%BF%E5%88%86%E6%9E%90%3C%2Ftext%3E%3C%2Fsvg%3E",
+        "alt": "增长分析"
+      },
+      {
+        "src": "data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22640%22%20height%3D%22240%22%3E%3Crect%20width%3D%22640%22%20height%3D%22240%22%20fill%3D%22%23722ed1%22%2F%3E%3Ctext%20x%3D%22320%22%20y%3D%22128%22%20font-size%3D%2220%22%20text-anchor%3D%22middle%22%20fill%3D%22%23ffffff%22%3E%E5%AE%A2%E6%88%B7%E6%B4%9E%E5%AF%9F%3C%2Ftext%3E%3C%2Fsvg%3E",
+        "alt": "客户洞察"
       }
-    },
+    ]
+  }
+},
     whenToUse: [
       '**何时使用**',
       '',
@@ -958,22 +1017,22 @@ export const dataDisplayDetailContents: Record<string, ComponentDetailContent> =
 
   'component.empty': {
     dsl: {
-      "type": "Empty",
+  "type": "Empty",
+  "props": {
+    "title": "暂无数据",
+    "description": "当前筛选条件下没有匹配的记录，可调整条件后重试。"
+  },
+  "children": [
+    {
+      "type": "Button",
       "props": {
-        "title": "暂无数据",
-        "description": "当前筛选条件下没有匹配的记录，可调整条件后重试。"
-      },
-      "children": [
-        {
-          "type": "Button",
-          "props": {
-            "text": "新建记录",
-            "variant": "primary",
-            "size": "small"
-          }
-        }
-      ]
-    },
+        "text": "新建记录",
+        "variant": "primary",
+        "size": "small"
+      }
+    }
+  ]
+},
     whenToUse: [
       '**何时使用**',
       '',
@@ -1022,60 +1081,60 @@ export const dataDisplayDetailContents: Record<string, ComponentDetailContent> =
 
   'component.data-table': {
     dsl: {
-      "type": "DataTable",
-      "props": {
-        "columns": [
-          {
-            "key": "name",
-            "title": "页面"
-          },
-          {
-            "key": "visits",
-            "title": "访问量",
-            "sortable": true
-          },
-          {
-            "key": "trend",
-            "title": "趋势"
-          }
-        ],
-        "rows": [
-          {
-            "id": 1,
-            "name": "首页",
-            "visits": 12840,
-            "trend": "上升"
-          },
-          {
-            "id": 2,
-            "name": "列表页",
-            "visits": 8932,
-            "trend": "持平"
-          },
-          {
-            "id": 3,
-            "name": "详情页",
-            "visits": 6420,
-            "trend": "上升"
-          },
-          {
-            "id": 4,
-            "name": "设置页",
-            "visits": 2180,
-            "trend": "下降"
-          },
-          {
-            "id": 5,
-            "name": "帮助中心",
-            "visits": 1546,
-            "trend": "持平"
-          }
-        ],
-        "pagination": {
-          "pageSize": 3
-        }
+  "type": "DataTable",
+  "props": {
+    "columns": [
+      {
+        "key": "name",
+        "title": "页面"
+      },
+      {
+        "key": "visits",
+        "title": "访问量",
+        "sortable": true
+      },
+      {
+        "key": "trend",
+        "title": "趋势"
       }
-    },
+    ],
+    "rows": [
+      {
+        "id": 1,
+        "name": "首页",
+        "visits": 12840,
+        "trend": "上升"
+      },
+      {
+        "id": 2,
+        "name": "列表页",
+        "visits": 8932,
+        "trend": "持平"
+      },
+      {
+        "id": 3,
+        "name": "详情页",
+        "visits": 6420,
+        "trend": "上升"
+      },
+      {
+        "id": 4,
+        "name": "设置页",
+        "visits": 2180,
+        "trend": "下降"
+      },
+      {
+        "id": 5,
+        "name": "帮助中心",
+        "visits": 1546,
+        "trend": "持平"
+      }
+    ],
+    "pagination": {
+      "pageSize": 3
+    }
+  }
+},
     whenToUse: [
       '**何时使用**',
       '',
