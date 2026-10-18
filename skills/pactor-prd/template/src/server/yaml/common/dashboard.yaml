@@ -3,11 +3,11 @@ page:
   id: dashboard
   title: 仪表盘
   name: dashboard
-  description: GateWeave 运营概览：核心指标、趋势分析、用量构成
+  description: 运营概览：核心指标、趋势分析、用量构成
 state:
   range:
-    start: 2026-09-22
-    end: 2026-09-28
+    start: "{{DEMO_DATE_START}}"
+    end: "{{DEMO_DATE_END}}"
   trendMetric: requests
 dataSources:
   dashboard:
@@ -39,7 +39,7 @@ body:
             - type: Typography
               props:
                 variant: muted
-                text: GateWeave — 运营概览
+                text: 运营概览
         - type: Flex
           props:
             align: center
@@ -108,123 +108,135 @@ body:
       props:
         variant: h4
         text: 核心概览 · ${state.range.start} — ${state.range.end}
-    - type: Grid
+    - type: Row
       props:
-        columns: 4
-        gap: 16
+        gutter: [16, 16]
+        align: stretch
       children:
-        - type: Card
-          props:
-            className: stat-card
+        - type: Col
+          props: { span: 24, md: 12, xl: 6 }
           children:
-            - type: Flex
+            - type: Card
               props:
-                justify: space-between
-                align: start
+                className: stat-card
               children:
-                - type: Statistic
+                - type: Flex
                   props:
-                    title: 请求量
-                    value: ${data.dashboard.stats.requests}
-                - type: Icon
+                    justify: space-between
+                    align: start
+                  children:
+                    - type: Statistic
+                      props:
+                        title: 请求量
+                        value: ${data.dashboard.stats.requests}
+                    - type: Icon
+                      props:
+                        name: chart
+                        size: lg
+                        className: stat-card-icon
+                - type: Typography
                   props:
-                    name: chart
-                    size: lg
-                    className: stat-card-icon
-            - type: Typography
-              props:
-                variant: muted
-                text: ${data.dashboard.stats.activeClients} 位活跃客户端 ·
-                  ${data.dashboard.stats.tokens} Token
-        - type: Card
-          props:
-            className: stat-card
+                    variant: muted
+                    text: ${data.dashboard.stats.activeClients} 位活跃客户端 ·
+                      ${data.dashboard.stats.tokens} Token
+        - type: Col
+          props: { span: 24, md: 12, xl: 6 }
           children:
-            - type: Flex
+            - type: Card
               props:
-                justify: space-between
-                align: start
+                className: stat-card
               children:
-                - type: Statistic
+                - type: Flex
                   props:
-                    title: 成功率
-                    value: ${data.dashboard.stats.successRate}
-                    suffix: "%"
-                - type: Icon
+                    justify: space-between
+                    align: start
+                  children:
+                    - type: Statistic
+                      props:
+                        title: 成功率
+                        value: ${data.dashboard.stats.successRate}
+                        suffix: "%"
+                    - type: Icon
+                      props:
+                        name: check-circle
+                        size: lg
+                        className: stat-card-icon
+                - type: Button
                   props:
-                    name: check-circle
-                    size: lg
-                    className: stat-card-icon
-            - type: Button
-              props:
-                text: ${data.dashboard.stats.failures} 个失败 · 错误率
-                  ${data.dashboard.stats.errorRate}%
-                variant: link
-                size: small
-                style:
-                  alignSelf: flex-start
-                className: p-0
-              events:
-                onClick:
-                  - action: message
-                    params:
-                      messageType: info
-                      text: 跳转调用日志（失败筛选，演示：目标页建设中）
-        - type: Card
-          props:
-            className: stat-card
+                    text: ${data.dashboard.stats.failures} 个失败 · 错误率
+                      ${data.dashboard.stats.errorRate}%
+                    variant: link
+                    size: small
+                    style:
+                      alignSelf: flex-start
+                    className: p-0
+                  events:
+                    onClick:
+                      - action: message
+                        params:
+                          messageType: info
+                          text: 跳转调用日志（失败筛选）
+        - type: Col
+          props: { span: 24, md: 12, xl: 6 }
           children:
-            - type: Flex
+            - type: Card
               props:
-                justify: space-between
-                align: start
+                className: stat-card
               children:
-                - type: Statistic
+                - type: Flex
                   props:
-                    title: 平均响应时间
-                    value: ${data.dashboard.stats.avgLatency}
-                    suffix: " ms"
-                - type: Icon
+                    justify: space-between
+                    align: start
+                  children:
+                    - type: Statistic
+                      props:
+                        title: 平均响应时间
+                        value: ${data.dashboard.stats.avgLatency}
+                        suffix: " ms"
+                    - type: Icon
+                      props:
+                        name: clock
+                        size: lg
+                        className: stat-card-icon
+                - type: Button
                   props:
-                    name: clock
-                    size: lg
-                    className: stat-card-icon
-            - type: Button
-              props:
-                text: 查看可靠性分析 →
-                variant: link
-                size: small
-                style:
-                  alignSelf: flex-start
-                className: p-0
-              events:
-                onClick:
-                  - action: message
-                    params:
-                      messageType: info
-                      text: 跳转供应商可用性（演示：目标页建设中）
-        - type: Card
-          props:
-            className: stat-card
+                    text: 查看可靠性分析 →
+                    variant: link
+                    size: small
+                    style:
+                      alignSelf: flex-start
+                    className: p-0
+                  events:
+                    onClick:
+                      - action: message
+                        params:
+                          messageType: info
+                          text: 跳转供应商可用性
+        - type: Col
+          props: { span: 24, md: 12, xl: 6 }
           children:
-            - type: Flex
+            - type: Card
               props:
-                justify: space-between
-                align: start
+                className: stat-card
               children:
-                - type: Statistic
+                - type: Flex
                   props:
-                    title: 计费金额
-                    value: ${data.dashboard.stats.cost}
-                - type: Icon
+                    justify: space-between
+                    align: start
+                  children:
+                    - type: Statistic
+                      props:
+                        title: 计费金额
+                        value: ${data.dashboard.stats.cost}
+                    - type: Icon
+                      props:
+                        name: credit-card
+                        size: lg
+                        className: stat-card-icon
+                - type: Typography
                   props:
-                    name: credit-card
-                    size: lg
-                    className: stat-card-icon
-            - type: Typography
-              props:
-                variant: muted
-                text: 平均每次 ${data.dashboard.stats.avgCost}
+                    variant: muted
+                    text: 平均每次 ${data.dashboard.stats.avgCost}
     - type: Card
       props:
         title: 趋势分析
@@ -263,236 +275,242 @@ body:
             yKeys: ${data.dashboard.metricKeys[state.trendMetric]}
             style:
               height: 320
-    - type: Grid
+    - type: Row
       props:
-        columns: 2
-        gap: 16
+        gutter: [16, 16]
+        align: stretch
       children:
-        - type: Card
-          props:
-            title: 用量构成 · 模型
+        - type: Col
+          props: { span: 24, md: 12 }
           children:
-            - type: Typography
+            - type: Card
               props:
-                variant: muted
-                text: 按请求量分布，识别主要模型流量来源
-            - type: Flex
-              props:
-                align: center
-                gap: middle
+                title: 用量构成 · 模型
               children:
-                - type: Text
+                - type: Typography
                   props:
-                    text: ${data.dashboard.models[0].name}
-                    style:
-                      width: 110
-                - type: Progress
+                    variant: muted
+                    text: 按请求量分布，识别主要模型流量来源
+                - type: Flex
                   props:
-                    value: ${data.dashboard.models[0].percent}
-                    style:
-                      flex: 1
-                - type: Text
+                    align: center
+                    gap: middle
+                  children:
+                    - type: Text
+                      props:
+                        text: ${data.dashboard.models[0].name}
+                        style:
+                          width: 110
+                    - type: Progress
+                      props:
+                        value: ${data.dashboard.models[0].percent}
+                        style:
+                          flex: 1
+                    - type: Text
+                      props:
+                        text: ${data.dashboard.models[0].percent}%
+                        type: secondary
+                        className: tabular-nums
+                        style:
+                          width: 40
+                          textAlign: right
+                - type: Flex
                   props:
-                    text: ${data.dashboard.models[0].percent}%
-                    type: secondary
-                    className: tabular-nums
-                    style:
-                      width: 40
-                      textAlign: right
-            - type: Flex
-              props:
-                align: center
-                gap: middle
-              children:
-                - type: Text
+                    align: center
+                    gap: middle
+                  children:
+                    - type: Text
+                      props:
+                        text: ${data.dashboard.models[1].name}
+                        style:
+                          width: 110
+                    - type: Progress
+                      props:
+                        value: ${data.dashboard.models[1].percent}
+                        style:
+                          flex: 1
+                    - type: Text
+                      props:
+                        text: ${data.dashboard.models[1].percent}%
+                        type: secondary
+                        className: tabular-nums
+                        style:
+                          width: 40
+                          textAlign: right
+                - type: Flex
                   props:
-                    text: ${data.dashboard.models[1].name}
-                    style:
-                      width: 110
-                - type: Progress
+                    align: center
+                    gap: middle
+                  children:
+                    - type: Text
+                      props:
+                        text: ${data.dashboard.models[2].name}
+                        style:
+                          width: 110
+                    - type: Progress
+                      props:
+                        value: ${data.dashboard.models[2].percent}
+                        style:
+                          flex: 1
+                    - type: Text
+                      props:
+                        text: ${data.dashboard.models[2].percent}%
+                        type: secondary
+                        className: tabular-nums
+                        style:
+                          width: 40
+                          textAlign: right
+                - type: Flex
                   props:
-                    value: ${data.dashboard.models[1].percent}
-                    style:
-                      flex: 1
-                - type: Text
+                    align: center
+                    gap: middle
+                  children:
+                    - type: Text
+                      props:
+                        text: ${data.dashboard.models[3].name}
+                        style:
+                          width: 110
+                    - type: Progress
+                      props:
+                        value: ${data.dashboard.models[3].percent}
+                        style:
+                          flex: 1
+                    - type: Text
+                      props:
+                        text: ${data.dashboard.models[3].percent}%
+                        type: secondary
+                        className: tabular-nums
+                        style:
+                          width: 40
+                          textAlign: right
+                - type: Button
                   props:
-                    text: ${data.dashboard.models[1].percent}%
-                    type: secondary
-                    className: tabular-nums
+                    text: 查看全部 → 模型用量
+                    variant: link
+                    size: small
                     style:
-                      width: 40
-                      textAlign: right
-            - type: Flex
-              props:
-                align: center
-                gap: middle
-              children:
-                - type: Text
-                  props:
-                    text: ${data.dashboard.models[2].name}
-                    style:
-                      width: 110
-                - type: Progress
-                  props:
-                    value: ${data.dashboard.models[2].percent}
-                    style:
-                      flex: 1
-                - type: Text
-                  props:
-                    text: ${data.dashboard.models[2].percent}%
-                    type: secondary
-                    className: tabular-nums
-                    style:
-                      width: 40
-                      textAlign: right
-            - type: Flex
-              props:
-                align: center
-                gap: middle
-              children:
-                - type: Text
-                  props:
-                    text: ${data.dashboard.models[3].name}
-                    style:
-                      width: 110
-                - type: Progress
-                  props:
-                    value: ${data.dashboard.models[3].percent}
-                    style:
-                      flex: 1
-                - type: Text
-                  props:
-                    text: ${data.dashboard.models[3].percent}%
-                    type: secondary
-                    className: tabular-nums
-                    style:
-                      width: 40
-                      textAlign: right
-            - type: Button
-              props:
-                text: 查看全部 → 模型用量
-                variant: link
-                size: small
-                style:
-                  alignSelf: flex-start
-                className: p-0
-              events:
-                onClick:
-                  - action: message
-                    params:
-                      messageType: info
-                      text: 跳转模型用量（演示：目标页建设中）
-        - type: Card
-          props:
-            title: 用量构成 · 客户端
+                      alignSelf: flex-start
+                    className: p-0
+                  events:
+                    onClick:
+                      - action: message
+                        params:
+                          messageType: info
+                          text: 跳转模型用量
+        - type: Col
+          props: { span: 24, md: 12 }
           children:
-            - type: Typography
+            - type: Card
               props:
-                variant: muted
-                text: 按请求量分布，识别主要客户端流量来源
-            - type: Flex
-              props:
-                align: center
-                gap: middle
+                title: 用量构成 · 客户端
               children:
-                - type: Text
+                - type: Typography
                   props:
-                    text: ${data.dashboard.clients[0].name}
-                    style:
-                      width: 110
-                - type: Progress
+                    variant: muted
+                    text: 按请求量分布，识别主要客户端流量来源
+                - type: Flex
                   props:
-                    value: ${data.dashboard.clients[0].percent}
-                    style:
-                      flex: 1
-                - type: Text
+                    align: center
+                    gap: middle
+                  children:
+                    - type: Text
+                      props:
+                        text: ${data.dashboard.clients[0].name}
+                        style:
+                          width: 110
+                    - type: Progress
+                      props:
+                        value: ${data.dashboard.clients[0].percent}
+                        style:
+                          flex: 1
+                    - type: Text
+                      props:
+                        text: ${data.dashboard.clients[0].percent}%
+                        type: secondary
+                        className: tabular-nums
+                        style:
+                          width: 40
+                          textAlign: right
+                - type: Flex
                   props:
-                    text: ${data.dashboard.clients[0].percent}%
-                    type: secondary
-                    className: tabular-nums
-                    style:
-                      width: 40
-                      textAlign: right
-            - type: Flex
-              props:
-                align: center
-                gap: middle
-              children:
-                - type: Text
+                    align: center
+                    gap: middle
+                  children:
+                    - type: Text
+                      props:
+                        text: ${data.dashboard.clients[1].name}
+                        style:
+                          width: 110
+                    - type: Progress
+                      props:
+                        value: ${data.dashboard.clients[1].percent}
+                        style:
+                          flex: 1
+                    - type: Text
+                      props:
+                        text: ${data.dashboard.clients[1].percent}%
+                        type: secondary
+                        className: tabular-nums
+                        style:
+                          width: 40
+                          textAlign: right
+                - type: Flex
                   props:
-                    text: ${data.dashboard.clients[1].name}
-                    style:
-                      width: 110
-                - type: Progress
+                    align: center
+                    gap: middle
+                  children:
+                    - type: Text
+                      props:
+                        text: ${data.dashboard.clients[2].name}
+                        style:
+                          width: 110
+                    - type: Progress
+                      props:
+                        value: ${data.dashboard.clients[2].percent}
+                        style:
+                          flex: 1
+                    - type: Text
+                      props:
+                        text: ${data.dashboard.clients[2].percent}%
+                        type: secondary
+                        className: tabular-nums
+                        style:
+                          width: 40
+                          textAlign: right
+                - type: Flex
                   props:
-                    value: ${data.dashboard.clients[1].percent}
-                    style:
-                      flex: 1
-                - type: Text
+                    align: center
+                    gap: middle
+                  children:
+                    - type: Text
+                      props:
+                        text: ${data.dashboard.clients[3].name}
+                        style:
+                          width: 110
+                    - type: Progress
+                      props:
+                        value: ${data.dashboard.clients[3].percent}
+                        style:
+                          flex: 1
+                    - type: Text
+                      props:
+                        text: ${data.dashboard.clients[3].percent}%
+                        type: secondary
+                        className: tabular-nums
+                        style:
+                          width: 40
+                          textAlign: right
+                - type: Button
                   props:
-                    text: ${data.dashboard.clients[1].percent}%
-                    type: secondary
-                    className: tabular-nums
+                    text: 查看全部 → 客户端用量
+                    variant: link
+                    size: small
                     style:
-                      width: 40
-                      textAlign: right
-            - type: Flex
-              props:
-                align: center
-                gap: middle
-              children:
-                - type: Text
-                  props:
-                    text: ${data.dashboard.clients[2].name}
-                    style:
-                      width: 110
-                - type: Progress
-                  props:
-                    value: ${data.dashboard.clients[2].percent}
-                    style:
-                      flex: 1
-                - type: Text
-                  props:
-                    text: ${data.dashboard.clients[2].percent}%
-                    type: secondary
-                    className: tabular-nums
-                    style:
-                      width: 40
-                      textAlign: right
-            - type: Flex
-              props:
-                align: center
-                gap: middle
-              children:
-                - type: Text
-                  props:
-                    text: ${data.dashboard.clients[3].name}
-                    style:
-                      width: 110
-                - type: Progress
-                  props:
-                    value: ${data.dashboard.clients[3].percent}
-                    style:
-                      flex: 1
-                - type: Text
-                  props:
-                    text: ${data.dashboard.clients[3].percent}%
-                    type: secondary
-                    className: tabular-nums
-                    style:
-                      width: 40
-                      textAlign: right
-            - type: Button
-              props:
-                text: 查看全部 → 客户端用量
-                variant: link
-                size: small
-                style:
-                  alignSelf: flex-start
-                className: p-0
-              events:
-                onClick:
-                  - action: message
-                    params:
-                      messageType: info
-                      text: 跳转客户端用量（演示：目标页建设中）
+                      alignSelf: flex-start
+                    className: p-0
+                  events:
+                    onClick:
+                      - action: message
+                        params:
+                          messageType: info
+                          text: 跳转客户端用量

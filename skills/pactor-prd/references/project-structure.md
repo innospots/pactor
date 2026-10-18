@@ -1,31 +1,49 @@
 # 目标项目目录结构约定
 
-基于 `pnpm create pactor-app`（next-app 模板）扩展。加 ✅ 的是模板自带，➕ 的是本流程新增/改造。
+以 `skills/pactor-prd/template/` 的实际文件为准。下面列出关键接线；构建配置、锁文件和 workspace 文件随模板完整保留。
 
 ```
 <project>/
 ├── app/
-│   ├── [[...slug]]/            ✅ pactor 动态路由承载页（不改）
+│   ├── [[...slug]]/                 pactor 动态路由承载页（不改）
 │   ├── api/
-│   │   ├── sitemap/route.ts           ✅ 返回 sitemap 入口数据（由 src/server/sitemap.ts 组装）
-│   │   ├── public/pages/[id]/route.ts ➕ 懒加载页面端点，返回单页 envelope（id/resourceType/version/dslVersion/schema/updatedAt）
-│   │   ├── auth/ · users/             ✅ 模板自带（演示账号，按需保留）
-│   │   └── d/[...parts]/route.ts      ➕ 数据统一入口（纯转发 → $NEXT_PUBLIC_API_BASE_URL；无后端返回空数据，见 data-api.md）
-│   ├── globals.css             ✅ 全局样式（皮肤导入处）
-│   ├── layout.tsx              ✅ 根布局（自定义页面 CSS 在这里挂载）
-│   └── theme.css               ✅ 主题令牌（样式移植的主战场）
+│   │   ├── sitemap/route.ts         返回 sitemap 入口数据（由 src/server/sitemap.ts 组装）
+│   │   ├── public/pages/[id]/route.ts  懒加载页面端点，返回单页 envelope
+│   │   ├── auth/ · users/           登录、登出与用户接口（演示账号由 values 提供）
+│   │   └── d/[...parts]/route.ts    数据统一入口（纯转发；无后端返回空数据，见 data-api.md）
+│   ├── globals.css                  全局样式与模板通用 CSS
+│   ├── icon.svg                     Next.js 文件约定的浏览器 icon
+│   └── layout.tsx                   根布局；导入 pactor-app/styles.css，注入首屏皮肤与明暗脚本
+├── public/
+│   ├── logo.svg                     品牌 logo（sitemap 品牌区引用）
+│   └── skins/
+│       └── neutral.css              neutral 默认皮肤的亮色、暗色语义令牌
 ├── src/
 │   ├── pactor/
-│   │   ├── config.ts           ✅ pactor 运行时配置（sitemapSources / baseUrl / pageEndpoint）
-│   │   └── App.tsx             ✅ 客户端入口（SitemapApp 接线、注册自定义组件/动作处）
+│   │   ├── config.ts                pactor 运行时配置（sitemapSources / baseUrl / pageEndpoint）
+│   │   ├── skin.ts                  已注册皮肤、默认皮肤与运行时换肤
+│   │   └── App.tsx                  客户端入口（SitemapApp 接线、自定义组件/动作注册）
 │   └── server/
-│       ├── sitemap.ts          ➕ 递归收集 yaml/ 模块子目录建 id→路径索引、按会话裁剪（只加过滤，不拼接业务字段）
+│       ├── sitemap.ts               递归收集 yaml/ 模块子目录建 id→路径索引、按会话裁剪
 │       └── yaml/
-│           ├── sitemap.yaml    ✅ 布局 DSL：app / auth / layouts / pages / menus
-│           └── <模块>/         ➕ 页面按 PRD 模块分目录存放（如 user/ order/ project/）
-│               └── <id>.yaml      每页一个文件，页面 id = 文件名（不含 .yaml）
-└── package.json
+│           ├── sitemap.yaml         布局 DSL：app / auth / layouts / pages / menus
+│           └── <模块>/              页面按 PRD 模块分目录存放（如 user/ order/ project/）
+│               └── <id>.yaml        每页一个文件，页面 id = 文件名（不含 .yaml）
+└── package.json                     工程名等占位由 render 写入
 ```
+
+## 占位清单与安全替换
+
+- 清单位于 **`skills/pactor-prd/template-placeholders.json`**，记录全部可用键、含义和冒烟示例值。values JSON 必须是 flat object，键恰好等于清单登记的全部键，且每个值都是字符串。
+- 复制模板后，在包含 `skills/` 的仓库根目录执行：
+
+  ```bash
+  node skills/scripts/prd-template.mjs render <project> --values <values.json>
+  node skills/scripts/prd-template.mjs check <project> --rendered
+  ```
+
+- `render` 是唯一安全替换入口：它先校验源模板和 values，再以 JSON 编码替换完整字符串字面量。不要手工逐文件替换或只修改 `package.json`。
+- rendered check 通过后才执行 install/dev 冒烟；冒烟通过后再生成页面。**任何占位未替换时禁止进入页面生成。**
 
 ## sitemap.yaml 骨架
 
@@ -37,8 +55,7 @@ id: site
 resourceType: sitemap
 version: 1
 dslVersion: "1.0"
-app: { name: <产品名，取自 PRD> }
-layout: admin
+app: { name: <render 写入的产品名> }
 auth: { loginPath: /login }
 
 pages:
@@ -65,19 +82,18 @@ layouts:
     body: # 管理端外壳（侧边导航 + PageOutlet），模板自带，按需调整
   login:
     dsl: "1.0"
-    body: # 登录页布局（居中单栏），与原产品登录页结构对齐
+    body: # 登录页布局，与 PRD 登录页结构对齐
 ```
 
 ## 约定
 
-- 页面按 PRD 模块树分目录：`yaml/<模块>/<id>.yaml`（如 `yaml/user/user-list.yaml`）；模块目录名用 kebab-case 英文域，按 PRD 模块树划分（如 user / order / report）
-- 页面 id kebab-case，= 文件名（不含 `.yaml`）；`pages:` 注册、`menus:` 引用、文件名三者一致
-- 模板自带的 `yaml/pages/*.page.yaml` 平铺写法仅适合页面极少的 demo；模块 ≥2 或页面 >5 时一律按模块分目录（模板目录可整体替换）。批量建文件与清单对齐见 **`page-inventory-and-files.md`**；与官方脚手架平铺模式对比见 **`pactor-dsl/references/page-catalog-and-layout.md`**
-- 列表/详情/编辑成组路径：`/projects`、`/projects/:code`、`/projects/:code/edit`、`/projects/new`
-- 详情/编辑页不进菜单（`hidden: true`），用 `activeMenu` 保持列表菜单高亮
-- 菜单图标仅一级菜单配置（目录 group 与「首页」这类独立页面项都要配），用 pactor Icon 白名单 kebab-case 名；二级及以下菜单项一律不配图标
-- 登录/注册页 `public: true` + `layout: login`；其余默认需登录
-- `src/server/sitemap.ts` 只按会话过滤（public/permission），不要在代码里拼接业务字段——数据归 yaml
+- 页面按 PRD 模块树分目录：`src/server/yaml/<模块>/<id>.yaml`（如 `src/server/yaml/user/user-list.yaml`）；模块目录名用 kebab-case 英文域，按 PRD 模块树划分（如 user / order / report）。批量建文件与清单对齐见 **`page-inventory-and-files.md`**。
+- 页面 id kebab-case，= 文件名（不含 `.yaml`）；`pages:` 注册、`menus:` 引用、文件名三者一致。
+- 列表/详情/编辑成组路径：`/projects`、`/projects/:code`、`/projects/:code/edit`、`/projects/new`。
+- 详情/编辑页不进菜单（`hidden: true`），用 `activeMenu` 保持列表菜单高亮。
+- 菜单图标仅一级菜单配置（目录 group 与「首页」这类独立页面项都要配），用 pactor Icon 白名单 kebab-case 名；二级及以下菜单项一律不配图标。
+- 登录/注册页 `public: true` + `layout: login`；其余默认需登录。
+- `src/server/sitemap.ts` 只按会话过滤（public/permission），不要在代码里拼接业务字段——数据归 YAML。
 - 懒加载页面端点放 `app/api/public/pages/[id]/route.ts`；框架缺省请求 `/api/pages/{id}`，因此**必须**在 `src/pactor/config.ts` 显式配置并传给 SitemapApp，否则客户端请求错路径：
 
 ```ts

@@ -43,24 +43,28 @@ body:
             }
       events:
         onSubmit:
-          - id: cfm
-            action: confirm
-            condition: "false"
+          - id: saveResult
+            action: request
             params:
-              title: 确认停用 Provider
-              content: 停用后，该 Provider 将无法被新建 Model / Target 引用。⚠ 存在 ONLINE Target
-                引用时，建议先完成切换再停用。（演示）
+              method: POST
+              url: /api/d/ops/provider-save
+              body: ${event}
           - action: if
             params:
-              condition: "true"
+              condition: ${actions.saveResult != null && actions.saveResult.ok == true}
               then:
                 - action: message
                   params:
                     messageType: success
-                    text: Provider「${event.name}」已创建。建议下一步：注册模型（演示）
+                    text: Provider「${event.name}」已创建。建议下一步：注册模型
                 - action: navigate
                   params:
                     to: /providers
+              else:
+                - action: message
+                  params:
+                    messageType: error
+                    text: Provider 创建失败，请检查接口后重试
       children:
         - type: Flex
           props:
@@ -113,7 +117,7 @@ body:
                         - type: Select
                           props:
                             name: providerType
-                            className: w-full [&>span]:w-full [&_[data-slot=select-trigger]]:w-full
+                            controlClassName: w-full
                             options:
                               - label: 商业
                                 value: 商业
@@ -134,7 +138,7 @@ body:
                         - type: Select
                           props:
                             name: protocol
-                            className: w-full [&>span]:w-full [&_[data-slot=select-trigger]]:w-full
+                            controlClassName: w-full
                             options:
                               - label: OpenAI Compatible
                                 value: OpenAI Compatible
@@ -253,14 +257,9 @@ body:
                       children:
                         - type: Button
                           props:
-                            text: 测试连接
+                            text: 测试连接（接入后可用）
                             className: mt-[2px]
-                          events:
-                            onClick:
-                              - action: message
-                                params:
-                                  messageType: success
-                                  text: 连接测试成功：HTTP 200, 128ms（演示：不持久化未保存字段）
+                            disabled: true
                         - type: Text
                           props:
                             text: 保存前建议先测试 Base URL 与 API Key 是否有效

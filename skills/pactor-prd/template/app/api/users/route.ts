@@ -1,19 +1,17 @@
 import { cookies } from "next/headers";
 
-import { findUserBySession, SESSION_COOKIE } from "@/server/accounts";
+import { DEMO_ACCOUNTS, findUserBySession, SESSION_COOKIE } from "@/server/accounts";
 import { corsHeaders, corsPreflight } from "@/server/cors";
 
 /** 演示用户数据（mock）：真实项目由后端用户体系提供 */
-const MOCK_USERS = [
-  { id: "u-1", username: "admin", name: "演示管理员", role: "admin", email: "admin@example.com", createdAt: "2026-01-05" },
-  { id: "u-2", username: "guest", name: "访客", role: "guest", email: "guest@example.com", createdAt: "2026-02-11" },
-  { id: "u-3", username: "zhangwei", name: "张伟", role: "member", email: "zhangwei@example.com", createdAt: "2026-03-02" },
-  { id: "u-4", username: "liuyang", name: "刘洋", role: "member", email: "liuyang@example.com", createdAt: "2026-03-18" },
-  { id: "u-5", username: "chenjing", name: "陈静", role: "member", email: "chenjing@example.com", createdAt: "2026-04-07" },
-  { id: "u-6", username: "wangfang", name: "王芳", role: "member", email: "wangfang@example.com", createdAt: "2026-05-21" },
-  { id: "u-7", username: "zhaolei", name: "赵磊", role: "guest", email: "zhaolei@example.com", createdAt: "2026-06-13" },
-  { id: "u-8", username: "sunna", name: "孙娜", role: "member", email: "sunna@example.com", createdAt: "2026-07-30" },
-];
+const MOCK_USERS = DEMO_ACCOUNTS.map((account, index) => ({
+  id: account.id,
+  username: account.username,
+  name: account.name,
+  role: account.roles[0],
+  email: `${account.username}@example.com`,
+  createdAt: index === 0 ? "2025-03-01" : "2025-04-01",
+}));
 
 /**
  * 用户列表：用户列表页的 http 数据源。

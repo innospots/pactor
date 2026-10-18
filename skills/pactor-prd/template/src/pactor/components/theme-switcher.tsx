@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useSyncExternalStore } from "react";
 import { Icon } from "@pactor-app/ui";
 import {
   DropdownMenu,
@@ -11,13 +11,16 @@ import {
 import {
   applySkinStylesheet,
   DEFAULT_SKIN,
+  DEFAULT_SKIN_OPTION,
+  resolveSkin,
   SKINS,
   SKIN_STORAGE_KEY,
+  type SkinValue,
 } from "../skin";
 
 /**
  * 外壳 Header 右侧的皮肤切换器：
- * - 皮肤下拉：三套 Theme Studio 皮肤（色点 + 名称，当前项打勾），
+ * - 皮肤下拉：可用皮肤（色点 + 名称，当前项打勾），
  *   切换即换 <link data-pactor-skin> 皮肤样式表（app/skin.ts）并持久化
  *   localStorage(mc-skin)；
  * - 明暗切换：太阳/月亮按钮，写 `<html data-pactor-theme="dark">` 并
@@ -25,67 +28,105 @@ import {
  * 首屏皮肤 link 与明暗属性由 layout.tsx 内联脚本预置，组件挂载后接管切换。
  */
 
-type SkinValue = (typeof SKINS)[number]["value"];
 type Mode = "light" | "dark" | "system";
 
-function isDarkMode(mode: Mode) {
-  return (
-    mode === "dark" ||
-    (mode === "system" &&
-      window.matchMedia("(prefers-color-scheme: dark)").matches)
-  );
+const MODE_STORAGE_KEY = "mc-mode";
+const PREFERENCES_CHANGE_EVENT = "pactor-preferences-change";
+const DARK_MODE_QUERY = "(prefers-color-scheme: dark)";
+
+function subscribePreferences(onChange: () => void) {
+  window.addEventListener("storage", onChange);
+  window.addEventListener(PREFERENCES_CHANGE_EVENT, onChange);
+  return () => {
+    window.removeEventListener("storage", onChange);
+    window.removeEventListener(PREFERENCES_CHANGE_EVENT, onChange);
+  };
 }
 
-function applyMode(mode: Mode) {
+function notifyPreferencesChanged() {
+  window.dispatchEvent(new Event(PREFERENCES_CHANGE_EVENT));
+}
+
+function getSkinSnapshot(): SkinValue {
+  return resolveSkin(localStorage.getItem(SKIN_STORAGE_KEY));
+}
+
+function getDefaultSkinSnapshot(): SkinValue {
+  return DEFAULT_SKIN;
+}
+
+function getModeSnapshot(): Mode {
+  return (localStorage.getItem(MODE_STORAGE_KEY) ?? "system") as Mode;
+}
+
+function getDefaultModeSnapshot(): Mode {
+  return "system";
+}
+
+function subscribeSystemDark(onChange: () => void) {
+  const media = window.matchMedia(DARK_MODE_QUERY);
+  media.addEventListener("change", onChange);
+  return () => media.removeEventListener("change", onChange);
+}
+
+function getSystemDarkSnapshot() {
+  return window.matchMedia(DARK_MODE_QUERY).matches;
+}
+
+function getDefaultSystemDarkSnapshot() {
+  return false;
+}
+
+function applyDark(dark: boolean) {
   const root = document.documentElement;
-  const dark = isDarkMode(mode);
   if (dark) {
     root.setAttribute("data-pactor-theme", "dark");
   } else {
     root.removeAttribute("data-pactor-theme");
   }
-  return dark;
 }
 
 const triggerClass =
   "flex items-center gap-1.5 rounded-md px-2 py-1.5 text-sm text-muted-foreground transition-colors hover:bg-accent/50 hover:text-foreground outline-hidden cursor-pointer";
 
 export function ThemeSwitcher() {
-  const [skin, setSkin] = useState<SkinValue>(DEFAULT_SKIN);
-  const [mode, setMode] = useState<Mode>("system");
-  const [dark, setDark] = useState(false);
+  const skin = useSyncExternalStore(
+    subscribePreferences,
+    getSkinSnapshot,
+    getDefaultSkinSnapshot,
+  );
+  const mode = useSyncExternalStore(
+    subscribePreferences,
+    getModeSnapshot,
+    getDefaultModeSnapshot,
+  );
+  const systemDark = useSyncExternalStore(
+    subscribeSystemDark,
+    getSystemDarkSnapshot,
+    getDefaultSystemDarkSnapshot,
+  );
+  const dark = mode === "dark" || (mode === "system" && systemDark);
 
-  // 挂载后读取持久化偏好并接管系统深浅色监听（mode 为 system 时）
   useEffect(() => {
-    const savedSkin = (localStorage.getItem(SKIN_STORAGE_KEY) ??
-      DEFAULT_SKIN) as SkinValue;
-    const savedMode = (localStorage.getItem("mc-mode") ?? "system") as Mode;
-    setSkin(savedSkin);
-    setMode(savedMode);
-    setDark(applyMode(savedMode));
+    applySkinStylesheet(skin);
+  }, [skin]);
 
-    const media = window.matchMedia("(prefers-color-scheme: dark)");
-    const onSystemChange = () => {
-      if (savedMode === "system") setDark(applyMode("system"));
-    };
-    media.addEventListener("change", onSystemChange);
-    return () => media.removeEventListener("change", onSystemChange);
-  }, []);
+  useEffect(() => {
+    applyDark(dark);
+  }, [dark]);
 
   const selectSkin = (value: SkinValue) => {
-    setSkin(value);
     localStorage.setItem(SKIN_STORAGE_KEY, value);
-    applySkinStylesheet(value);
+    notifyPreferencesChanged();
   };
 
   const toggleMode = () => {
     const next: Mode = dark ? "light" : "dark";
-    setMode(next);
-    localStorage.setItem("mc-mode", next);
-    setDark(applyMode(next));
+    localStorage.setItem(MODE_STORAGE_KEY, next);
+    notifyPreferencesChanged();
   };
 
-  const current = SKINS.find((s) => s.value === skin) ?? SKINS[0];
+  const current = SKINS.find((s) => s.value === skin) ?? DEFAULT_SKIN_OPTION;
 
   return (
     <div data-slot="theme-switcher" className="ml-auto flex items-center gap-1">

@@ -2,7 +2,7 @@
 
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { Suspense } from "react";
-import { SitemapApp } from "pactor-app";
+import { createHttpHooks, SitemapApp } from "pactor-app";
 import { Login } from "@pactor-app/blocks";
 
 import { apiBaseUrl, pageEndpoint, sitemapSources } from "./config";
@@ -15,14 +15,14 @@ import { pactorComponents } from "./components";
  * session.context 桥 / 缺省动作（app.reload / service.call）全部由
  * @pactor-app/app 内置；此处只提供：sitemap 源、宿主路由
  * （pathname / navigate）、HTTP 钩子，以及页面 DSL 依赖的运行时支撑层——
- * 自定义组件（components/）与调试台自定义动作（actions.ts）。
+ * 自定义组件（components/）与自定义动作（actions.ts）。
  * 页面数据全部走 http 数据源（/api/d/*），经转发层
  *（app/api/d/[...parts]/route.ts）原样转发到 serverBaseUrl（见 config.ts）；
  * 没有服务层接口时转发层返回空数据，页面按空态渲染。
  *
  * 业务区块组件（@pactor-app/blocks）不进 ui 内置注册表：login 页 DSL 的
- * `type: Login` 经 `components` prop 注册（样式见 layout.tsx 的
- * blocks/styles.css）。
+ * `type: Login` 经 `components` prop 注册（样式由 app/layout.tsx 导入的
+ * pactor-app/styles.css 聚合入口统一加载）。
  *
  * 登录 / 登出是普通 HTTP 调用，由 DSL 中的内置 request 动作直接表达
  *（见 src/server/yaml/ 的登录页 / 布局 DSL），无需客户端注册服务。
@@ -33,6 +33,8 @@ import { pactorComponents } from "./components";
  * 后端包裹协议不同 / 需公共头注入时传 options，需要代理改写时传
  * proxyPrefix，或自行实现 PactorHttpHooks。
  */
+
+const httpAdapter = createHttpHooks();
 
 export function PactorApp() {
   return (
@@ -56,6 +58,7 @@ function PactorAppInner() {
       components={{ ...pactorComponents, Login }}
       actions={pactorActions}
       pageEndpoint={pageEndpoint}
+      httpAdapter={httpAdapter}
     />
   );
 }

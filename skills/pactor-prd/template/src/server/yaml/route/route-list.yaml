@@ -329,7 +329,7 @@ body:
                                     - action: message
                                       params:
                                         messageType: success
-                                        text: "${data.routes.items[0].status == 'enabled' ? '已停用' : '已启用'}（演示：静态页面不落库）"
+                                        text: "${data.routes.items[0].status == 'enabled' ? '已停用' : '已启用'}"
                     - type: Tooltip
                       props:
                         content: 编辑
@@ -529,7 +529,7 @@ body:
                                     - action: message
                                       params:
                                         messageType: success
-                                        text: "${data.routes.items[1].status == 'enabled' ? '已停用' : '已启用'}（演示：静态页面不落库）"
+                                        text: "${data.routes.items[1].status == 'enabled' ? '已停用' : '已启用'}"
                     - type: Tooltip
                       props:
                         content: 编辑
@@ -729,7 +729,7 @@ body:
                                     - action: message
                                       params:
                                         messageType: success
-                                        text: "${data.routes.items[2].status == 'enabled' ? '已停用' : '已启用'}（演示：静态页面不落库）"
+                                        text: "${data.routes.items[2].status == 'enabled' ? '已停用' : '已启用'}"
                     - type: Tooltip
                       props:
                         content: 编辑
@@ -929,7 +929,7 @@ body:
                                     - action: message
                                       params:
                                         messageType: success
-                                        text: "${data.routes.items[3].status == 'enabled' ? '已停用' : '已启用'}（演示：静态页面不落库）"
+                                        text: "${data.routes.items[3].status == 'enabled' ? '已停用' : '已启用'}"
                     - type: Tooltip
                       props:
                         content: 编辑
@@ -1129,7 +1129,7 @@ body:
                                     - action: message
                                       params:
                                         messageType: success
-                                        text: "${data.routes.items[4].status == 'enabled' ? '已停用' : '已启用'}（演示：静态页面不落库）"
+                                        text: "${data.routes.items[4].status == 'enabled' ? '已停用' : '已启用'}"
                     - type: Tooltip
                       props:
                         content: 编辑
@@ -1329,7 +1329,7 @@ body:
                                     - action: message
                                       params:
                                         messageType: success
-                                        text: "${data.routes.items[5].status == 'enabled' ? '已停用' : '已启用'}（演示：静态页面不落库）"
+                                        text: "${data.routes.items[5].status == 'enabled' ? '已停用' : '已启用'}"
                     - type: Tooltip
                       props:
                         content: 编辑
@@ -1529,7 +1529,7 @@ body:
                                     - action: message
                                       params:
                                         messageType: success
-                                        text: "${data.routes.items[6].status == 'enabled' ? '已停用' : '已启用'}（演示：静态页面不落库）"
+                                        text: "${data.routes.items[6].status == 'enabled' ? '已停用' : '已启用'}"
                     - type: Tooltip
                       props:
                         content: 编辑
@@ -1729,7 +1729,7 @@ body:
                                     - action: message
                                       params:
                                         messageType: success
-                                        text: "${data.routes.items[7].status == 'enabled' ? '已停用' : '已启用'}（演示：静态页面不落库）"
+                                        text: "${data.routes.items[7].status == 'enabled' ? '已停用' : '已启用'}"
                     - type: Tooltip
                       props:
                         content: 编辑

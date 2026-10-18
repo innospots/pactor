@@ -177,7 +177,7 @@ body:
                           - action: message
                             params:
                               messageType: info
-                              text: 模板导入流程（演示：选择内置/社区模板 → 生成草稿 → 引导填密钥）
+                              text: 模板导入流程
                     - type: Button
                       props:
                         text: 新建
@@ -355,7 +355,7 @@ body:
                                       params:
                                         messageType: success
                                         text: "${data.providers.items[0].status == 'enabled' ? '已停用' :
-                                          '已启用'}（演示：静态页面不落库）"
+                                          '已启用'}"
                     - type: Tooltip
                       props:
                         content: 编辑
@@ -579,7 +579,7 @@ body:
                                       params:
                                         messageType: success
                                         text: "${data.providers.items[1].status == 'enabled' ? '已停用' :
-                                          '已启用'}（演示：静态页面不落库）"
+                                          '已启用'}"
                     - type: Tooltip
                       props:
                         content: 编辑
@@ -803,7 +803,7 @@ body:
                                       params:
                                         messageType: success
                                         text: "${data.providers.items[2].status == 'enabled' ? '已停用' :
-                                          '已启用'}（演示：静态页面不落库）"
+                                          '已启用'}"
                     - type: Tooltip
                       props:
                         content: 编辑
@@ -1027,7 +1027,7 @@ body:
                                       params:
                                         messageType: success
                                         text: "${data.providers.items[3].status == 'enabled' ? '已停用' :
-                                          '已启用'}（演示：静态页面不落库）"
+                                          '已启用'}"
                     - type: Tooltip
                       props:
                         content: 编辑
@@ -1251,7 +1251,7 @@ body:
                                       params:
                                         messageType: success
                                         text: "${data.providers.items[4].status == 'enabled' ? '已停用' :
-                                          '已启用'}（演示：静态页面不落库）"
+                                          '已启用'}"
                     - type: Tooltip
                       props:
                         content: 编辑
@@ -1475,7 +1475,7 @@ body:
                                       params:
                                         messageType: success
                                         text: "${data.providers.items[5].status == 'enabled' ? '已停用' :
-                                          '已启用'}（演示：静态页面不落库）"
+                                          '已启用'}"
                     - type: Tooltip
                       props:
                         content: 编辑
@@ -1699,7 +1699,7 @@ body:
                                       params:
                                         messageType: success
                                         text: "${data.providers.items[6].status == 'enabled' ? '已停用' :
-                                          '已启用'}（演示：静态页面不落库）"
+                                          '已启用'}"
                     - type: Tooltip
                       props:
                         content: 编辑
@@ -1923,7 +1923,7 @@ body:
                                       params:
                                         messageType: success
                                         text: "${data.providers.items[7].status == 'enabled' ? '已停用' :
-                                          '已启用'}（演示：静态页面不落库）"
+                                          '已启用'}"
                     - type: Tooltip
                       props:
                         content: 编辑
@@ -1987,3 +1987,18 @@ body:
       props:
         title: 无匹配供应商
         description: 调整搜索关键词或筛选条件后重试
+      children:
+        - type: Button
+          props:
+            text: 清除筛选
+            variant: primary
+          events:
+            onClick:
+              - action: setState
+                params:
+                  keyword: ""
+                  statusChip: all
+                  typeChips: []
+              - action: reload
+                params:
+                  dataSource: providers

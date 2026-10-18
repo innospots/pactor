@@ -1,9 +1,9 @@
 ---
 title: 组件参考
-description: 全部 72 个 DSL 组件（@pactor-app/ui 注册的 71 个 registry 组件 + @pactor-app/markdown 注册的 Markdown）的逐组件 props 契约与 DSL 示例，按布局与页面 / 展示 / 表单 / 数据 / 导航 / 反馈与弹层 / 复合与其他七类分页
+description: DSL 组件的逐组件 props 契约与 DSL 示例，按布局与页面 / 展示 / 表单 / 数据 / 导航 / 反馈与弹层 / 复合与其他七类分页
 ---
 
-DSL 的 `type` 引用 Component Registry 注册名。`@pactor-app/ui`（shadcn kit）注册 71 个组件类型，`@pactor-app/markdown` 另行注册 `Markdown`；全部 72 个组件按功能分 7 个分类页逐组件展示（props 表 + 最小 YAML 示例）。业务组件注册见[自定义组件](/guides/custom-components/)。
+DSL 的 `type` 引用 Component Registry 注册名。本参考按功能分 7 个分类页逐组件展示 props 表与 DSL 示例；`@pactor-app/markdown` 另行注册 `Markdown`。业务组件注册见[自定义组件](/guides/custom-components/)。
 
 ## 通用约定
 
@@ -88,5 +88,7 @@ DSL 的 `type` 引用 Component Registry 注册名。`@pactor-app/ui`（shadcn k
 | [Toggle](/components/composite/#toggle) | 复合与其他 |
 | [ToggleGroup](/components/composite/#togglegroup) | 复合与其他 |
 | [ButtonGroup](/components/composite/#buttongroup) | 复合与其他 |
+| [ExpandingButtonGroup](/components/composite/#expandingbuttongroup) | 复合与其他 |
+| [FloatingButtonGroup](/components/composite/#floatingbuttongroup) | 复合与其他 |
 | [InputGroup](/components/composite/#inputgroup) | 复合与其他 |
 | [Markdown](/components/composite/#markdown) | 复合与其他 |

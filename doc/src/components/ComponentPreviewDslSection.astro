@@ -4,6 +4,7 @@
  * YAML 由构建期把 DSL JSON 经 yaml 包序列化得到。
  * 预览未接入 / DSL 未接入时在对应页签内渲染「不适用」说明，
  * 不静默省略（与原独立章节的口径一致）。
+ * 原「静态结构」说明（previewNote）已从预览页签移除，不再经此传入。
  * Login 特殊化：整节由 LoginPreviewSection 岛承载——组件状态胶囊页签置于
  * 页签栏右端，切换状态时预览与 DSL / YAML 内容联动更新。
  */
@@ -16,8 +17,6 @@ import LoginPreviewSection from './previews/LoginPreviewSection';
 interface Props {
   /** 资产规范 id（component.*） */
   componentId: string;
-  /** 实现结构说明文本 */
-  previewNote?: string;
   /** 预览不可用时的原因说明 */
   previewNotApplicable?: string;
   /** JSON.stringify(dsl, null, 2) 后的字符串 */
@@ -26,7 +25,7 @@ interface Props {
   dslNotApplicable?: string;
 }
 
-const { componentId, previewNote, previewNotApplicable, dslJson, dslNotApplicable } =
+const { componentId, previewNotApplicable, dslJson, dslNotApplicable } =
   Astro.props;
 
 const dslYaml = dslJson !== undefined ? YAML.stringify(JSON.parse(dslJson)) : undefined;
@@ -48,7 +47,6 @@ const dslYaml = dslJson !== undefined ? YAML.stringify(JSON.parse(dslJson)) : un
       <ComponentPreviewSection
         slot="preview"
         componentId={componentId}
-        note={previewNote}
       />
     )
   }

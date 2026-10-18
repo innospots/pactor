@@ -17,43 +17,22 @@ import type { ComponentDetailContent } from './component-details.ts';
 export const dataEntryDetailContents: Record<string, ComponentDetailContent> = {
   'component.rate': {
     dsl: {
-  "type": "Flex",
-  "props": {
-    "direction": "vertical",
-    "gap": 12
-  },
-  "children": [
-    {
       "type": "Rate",
       "props": {
-        "value": "${state.rate}"
-      },
-      "events": {
-        "onChange": {
-          "action": "setState",
-          "params": {
-            "rate": "${event}"
-          }
-        }
-      }
-    },
-    {
-      "type": "Rate",
-      "props": {
-        "value": "${state.rateHalf}",
+        "name": "satisfaction",
+        "value": 4,
+        "count": 5,
         "allowHalf": true
       },
       "events": {
         "onChange": {
           "action": "setState",
           "params": {
-            "rateHalf": "${event}"
+            "satisfaction": "${event}"
           }
         }
       }
-    }
-  ]
-},
+    },
     whenToUse: [
       '**何时使用**',
       '',
@@ -108,43 +87,13 @@ export const dataEntryDetailContents: Record<string, ComponentDetailContent> = {
 
   'component.time-picker': {
     dsl: {
-  "type": "Flex",
-  "props": {
-    "gap": 12,
-    "align": "center"
-  },
-  "children": [
-    {
       "type": "TimePicker",
       "props": {
-        "value": "${state.time}"
-      },
-      "events": {
-        "onChange": {
-          "action": "setState",
-          "params": {
-            "time": "${event}"
-          }
-        }
+        "name": "meetingTime",
+        "format": "HH:mm",
+        "placeholder": "请选择时间"
       }
     },
-    {
-      "type": "TimePicker",
-      "props": {
-        "value": "${state.timeShort}",
-        "format": "HH:mm"
-      },
-      "events": {
-        "onChange": {
-          "action": "setState",
-          "params": {
-            "timeShort": "${event}"
-          }
-        }
-      }
-    }
-  ]
-},
     whenToUse: [
       '**何时使用**',
       '',
@@ -200,27 +149,18 @@ export const dataEntryDetailContents: Record<string, ComponentDetailContent> = {
 
   'component.color-picker': {
     dsl: {
-  "type": "ColorPicker",
-  "props": {
-    "value": "${state.color}",
-    "presets": [
-      "#1677ff",
-      "#52c41a",
-      "#faad14",
-      "#f5222d",
-      "#722ed1",
-      "#13c2c2"
-    ]
-  },
-  "events": {
-    "onChange": {
-      "action": "setState",
-      "params": {
-        "color": "${event}"
+      "type": "ColorPicker",
+      "props": {
+        "name": "brandColor",
+        "value": "#1677ff",
+        "presets": [
+          "#1677ff",
+          "#52c41a",
+          "#faad14",
+          "#ff4d4f"
+        ]
       }
-    }
-  }
-},
+    },
     whenToUse: [
       '**何时使用**',
       '',
@@ -274,22 +214,17 @@ export const dataEntryDetailContents: Record<string, ComponentDetailContent> = {
 
   'component.upload': {
     dsl: {
-  "type": "Upload",
-  "props": {
-    "value": "${state.files}",
-    "multiple": true,
-    "maxCount": 5,
-    "tip": "最多 5 个文件；选择/移除实时生效"
-  },
-  "events": {
-    "onChange": {
-      "action": "setState",
-      "params": {
-        "files": "${event}"
+      "type": "Upload",
+      "props": {
+        "name": "attachments",
+        "multiple": true,
+        "accept": "image/*,.pdf",
+        "maxSize": 5242880,
+        "maxCount": 3,
+        "drag": true,
+        "tip": "支持图片与 PDF，单文件不超过 5MB"
       }
-    }
-  }
-},
+    },
     whenToUse: [
       '**何时使用**',
       '',
@@ -348,51 +283,32 @@ export const dataEntryDetailContents: Record<string, ComponentDetailContent> = {
 
   'component.tree-select': {
     dsl: {
-  "type": "TreeSelect",
-  "props": {
-    "value": "${state.city}",
-    "searchable": true,
-    "placeholder": "选择城市（可搜索）",
-    "options": [
-      {
-        "label": "华东大区",
-        "value": "east",
-        "children": [
+      "type": "TreeSelect",
+      "props": {
+        "name": "department",
+        "placeholder": "请选择部门",
+        "options": [
           {
-            "label": "上海",
-            "value": "sh"
+            "label": "华东大区",
+            "value": "east",
+            "children": [
+              {
+                "label": "杭州分公司",
+                "value": "hz"
+              },
+              {
+                "label": "上海分公司",
+                "value": "sh"
+              }
+            ]
           },
           {
-            "label": "杭州",
-            "value": "hz"
-          }
-        ]
-      },
-      {
-        "label": "华南大区",
-        "value": "south",
-        "children": [
-          {
-            "label": "广州",
-            "value": "gz"
-          },
-          {
-            "label": "深圳",
-            "value": "sz"
+            "label": "华南大区",
+            "value": "south"
           }
         ]
       }
-    ]
-  },
-  "events": {
-    "onChange": {
-      "action": "setState",
-      "params": {
-        "city": "${event}"
-      }
-    }
-  }
-},
+    },
     whenToUse: [
       '**何时使用**',
       '',
@@ -449,58 +365,34 @@ export const dataEntryDetailContents: Record<string, ComponentDetailContent> = {
 
   'component.cascader': {
     dsl: {
-  "type": "Cascader",
-  "props": {
-    "value": "${state.region}",
-    "placeholder": "选择地区",
-    "options": [
-      {
-        "label": "浙江省",
-        "value": "zj",
-        "children": [
+      "type": "Cascader",
+      "props": {
+        "name": "region",
+        "placeholder": "请选择省市区",
+        "options": [
           {
-            "label": "杭州市",
-            "value": "hz",
+            "label": "浙江省",
+            "value": "zj",
             "children": [
               {
-                "label": "西湖区",
-                "value": "xihu"
-              },
-              {
-                "label": "余杭区",
-                "value": "yuhang"
-              }
-            ]
-          }
-        ]
-      },
-      {
-        "label": "江苏省",
-        "value": "js",
-        "children": [
-          {
-            "label": "南京市",
-            "value": "nj",
-            "children": [
-              {
-                "label": "玄武区",
-                "value": "xuanwu"
+                "label": "杭州市",
+                "value": "hangzhou",
+                "children": [
+                  {
+                    "label": "西湖区",
+                    "value": "xihu"
+                  },
+                  {
+                    "label": "滨江区",
+                    "value": "binjiang"
+                  }
+                ]
               }
             ]
           }
         ]
       }
-    ]
-  },
-  "events": {
-    "onChange": {
-      "action": "setState",
-      "params": {
-        "region": "${event}"
-      }
-    }
-  }
-},
+    },
     whenToUse: [
       '**何时使用**',
       '',
@@ -556,46 +448,33 @@ export const dataEntryDetailContents: Record<string, ComponentDetailContent> = {
 
   'component.transfer': {
     dsl: {
-  "type": "Transfer",
-  "props": {
-    "value": "${state.selected}",
-    "titles": [
-      "候选",
-      "已选"
-    ],
-    "options": [
-      {
-        "label": "选项 A",
-        "value": "a"
-      },
-      {
-        "label": "选项 B",
-        "value": "b"
-      },
-      {
-        "label": "选项 C",
-        "value": "c"
-      },
-      {
-        "label": "选项 D（禁用）",
-        "value": "d",
-        "disabled": true
-      },
-      {
-        "label": "选项 E",
-        "value": "e"
+      "type": "Transfer",
+      "props": {
+        "name": "owners",
+        "titles": [
+          "候选成员",
+          "已选成员"
+        ],
+        "options": [
+          {
+            "label": "陈晨",
+            "value": "u-01"
+          },
+          {
+            "label": "林晚",
+            "value": "u-02"
+          },
+          {
+            "label": "苏叶",
+            "value": "u-03"
+          },
+          {
+            "label": "周屿",
+            "value": "u-04"
+          }
+        ]
       }
-    ]
-  },
-  "events": {
-    "onChange": {
-      "action": "setState",
-      "params": {
-        "selected": "${event}"
-      }
-    }
-  }
-},
+    },
     whenToUse: [
       '**何时使用**',
       '',
@@ -649,35 +528,24 @@ export const dataEntryDetailContents: Record<string, ComponentDetailContent> = {
 
   'component.mentions': {
     dsl: {
-  "type": "Mentions",
-  "props": {
-    "value": "${state.comment}",
-    "rows": 3,
-    "placeholder": "输入 @ 提及成员",
-    "options": [
-      {
-        "label": "张三",
-        "value": "zhangsan"
-      },
-      {
-        "label": "李四",
-        "value": "lisi"
-      },
-      {
-        "label": "王五",
-        "value": "wangwu"
+      "type": "Mentions",
+      "props": {
+        "name": "comment",
+        "trigger": "@",
+        "rows": 3,
+        "placeholder": "输入 @ 提及成员",
+        "options": [
+          {
+            "label": "陈晨",
+            "value": "chenchen"
+          },
+          {
+            "label": "林晚",
+            "value": "linwan"
+          }
+        ]
       }
-    ]
-  },
-  "events": {
-    "onChange": {
-      "action": "setState",
-      "params": {
-        "comment": "${event}"
-      }
-    }
-  }
-},
+    },
     whenToUse: [
       '**何时使用**',
       '',
@@ -734,49 +602,14 @@ export const dataEntryDetailContents: Record<string, ComponentDetailContent> = {
 
   'component.input': {
     dsl: {
-  "type": "Flex",
-  "props": {
-    "direction": "vertical",
-    "gap": 12,
-    "style": {
-      "maxWidth": 320
-    }
-  },
-  "children": [
-    {
       "type": "Input",
       "props": {
-        "value": "${state.keyword}",
+        "name": "keyword",
+        "label": "关键词",
         "placeholder": "请输入关键词",
         "allowClear": true
-      },
-      "events": {
-        "onChange": {
-          "action": "setState",
-          "params": {
-            "keyword": "${event}"
-          }
-        }
       }
     },
-    {
-      "type": "Input",
-      "props": {
-        "value": "${state.secret}",
-        "type": "password",
-        "placeholder": "请输入密码"
-      },
-      "events": {
-        "onChange": {
-          "action": "setState",
-          "params": {
-            "secret": "${event}"
-          }
-        }
-      }
-    }
-  ]
-},
     whenToUse: [
       '**何时使用**',
       '',
@@ -834,24 +667,14 @@ export const dataEntryDetailContents: Record<string, ComponentDetailContent> = {
 
   'component.textarea': {
     dsl: {
-  "type": "Textarea",
-  "props": {
-    "value": "${state.remark}",
-    "rows": 3,
-    "placeholder": "请输入备注说明",
-    "style": {
-      "maxWidth": 420
-    }
-  },
-  "events": {
-    "onChange": {
-      "action": "setState",
-      "params": {
-        "remark": "${event}"
+      "type": "Textarea",
+      "props": {
+        "name": "remark",
+        "label": "备注说明",
+        "rows": 3,
+        "placeholder": "请输入备注说明"
       }
-    }
-  }
-},
+    },
     whenToUse: [
       '**何时使用**',
       '',
@@ -906,22 +729,16 @@ export const dataEntryDetailContents: Record<string, ComponentDetailContent> = {
 
   'component.number-input': {
     dsl: {
-  "type": "NumberInput",
-  "props": {
-    "value": "${state.qty}",
-    "min": 0,
-    "max": 10,
-    "step": 1
-  },
-  "events": {
-    "onChange": {
-      "action": "setState",
-      "params": {
-        "qty": "${event}"
+      "type": "NumberInput",
+      "props": {
+        "name": "quantity",
+        "label": "数量",
+        "value": 2,
+        "min": 0,
+        "max": 10,
+        "step": 1
       }
-    }
-  }
-},
+    },
     whenToUse: [
       '**何时使用**',
       '',
@@ -983,39 +800,33 @@ export const dataEntryDetailContents: Record<string, ComponentDetailContent> = {
 
   'component.select': {
     dsl: {
-  "type": "Select",
-  "props": {
-    "value": "${state.status}",
-    "placeholder": "选择状态",
-    "options": [
-      {
-        "label": "全部",
-        "value": "all"
-      },
-      {
-        "label": "进行中",
-        "value": "doing"
-      },
-      {
-        "label": "已完成",
-        "value": "done"
-      },
-      {
-        "label": "已归档（禁用）",
-        "value": "archived",
-        "disabled": true
+      "type": "Select",
+      "props": {
+        "name": "status",
+        "label": "状态",
+        "className": "w-48",
+        "placeholder": "选择状态",
+        "options": [
+          {
+            "label": "全部",
+            "value": "all"
+          },
+          {
+            "label": "进行中",
+            "value": "doing"
+          },
+          {
+            "label": "已完成",
+            "value": "done"
+          },
+          {
+            "label": "已归档（禁用）",
+            "value": "archived",
+            "disabled": true
+          }
+        ]
       }
-    ]
-  },
-  "events": {
-    "onChange": {
-      "action": "setState",
-      "params": {
-        "status": "${event}"
-      }
-    }
-  }
-},
+    },
     whenToUse: [
       '**何时使用**',
       '',
@@ -1031,7 +842,7 @@ export const dataEntryDetailContents: Record<string, ComponentDetailContent> = {
       '- 需要多选：当前实现为单选，多选用 Checkbox 组或 Transfer。',
     ].join('\n'),
     previewNote:
-      '静态结构：Select 为触发器（vendored shadcn Select，data-slot="select-trigger"，内 data-slot="select-value" 显示选中项 label 或 placeholder）+ 弹层（data-slot="select-content" 内 data-slot="select-item" 列表，选项级 disabled 灰化不可选）。选中值经 Root 的 items 映射回 label，表单初始值回填、弹层尚未渲染过时触发器同样显示 label。allowClear 且已有选中值且未禁用时启用 hover 清除：悬停触发器时下拉箭头隐藏（group-hover:hidden）、原位替换为 × 清除按钮（点击清空并触发 onChange(undefined)）。Form 内声明非空 name 时外层为 data-slot="form-item" 容器（label 经 htmlFor 关联控件 useId + data-slot="form-error"），不走 FieldShell。',
+      '静态结构：Select 为控件包裹 span + 触发器（vendored shadcn Select，data-slot="select-trigger"，内 data-slot="select-value" 显示选中项 label 或 placeholder）+ 弹层（data-slot="select-content" 内 data-slot="select-item" 列表）。trigger 内置 w-full，实际宽度由控件包裹节点决定。选中值经 Root 的 items 映射回 label；allowClear 且已有选中值且未禁用时支持 hover 清除。Form 内声明非空 name 时经 FieldShell 自动包裹 data-slot="form-item" 容器（label 经 htmlFor 关联控件 useId + data-slot="form-error"）：className 挂 form-item，controlClassName 挂控件包裹；独立渲染时 className 直接挂控件包裹，controlClassName 与其同点合并。',
     variants: [
       { name: '默认（单选）', visual: '描边触发器 + 下拉选项列表', scene: '常规枚举单选' },
       { name: '选项级 disabled', visual: '单个选项灰化不可选', scene: '无权限 / 不可用的候选项（如已归档状态）' },
@@ -1050,9 +861,9 @@ export const dataEntryDetailContents: Record<string, ComponentDetailContent> = {
       { name: 'disabled', type: 'boolean', defaultValue: 'false', description: '禁用触发器；选项级禁用用 options 项的 disabled' },
       { name: 'allowClear', type: 'boolean', defaultValue: 'true', description: 'hover 清除（缺省开启，传 false 关闭）：已选值时悬停触发器，× 原位替换下拉箭头，点击清空为 undefined' },
       { name: 'onChange', type: '(value: unknown) => void', defaultValue: '—', description: '选中变化事件，传出选中项的原始 value；清空传出 undefined（Renderer 绑定 events.onChange；DSL 语义值）' },
-      { name: 'controlClassName', type: 'string', defaultValue: '—', description: '控件本体 class（无论是否在 Form 内都挂控件包裹节点；独立渲染时与 className 同点合并）' },
+      { name: 'controlClassName', type: 'string', defaultValue: '—', description: '控件包裹节点 class；Form 内精确设置控件宽度时使用，独立渲染时与 className 同点合并' },
       { name: 'size', type: "'small' | 'middle' | 'large'", defaultValue: "'middle'", description: '控件尺寸令牌：small h-8 / middle h-9（默认）/ large h-10，与全部表单控件同一令牌，同行混排保持高度一致' },
-      { name: 'className / style', type: 'string / CSSProperties', defaultValue: '—', description: '通用：根节点 class 合并 / 内联样式（Form 内为 form-item 容器，独立渲染时为控件包裹节点）' },
+      { name: 'className / style', type: 'string / CSSProperties', defaultValue: '—', description: '通用：根节点 class 合并 / 内联样式（Form 内为 form-item 容器，独立渲染时为控件包裹节点；独立固定宽度用 className）' },
     ],
     guidelines: [
       '- 候选少且固定用 Select；候选多、需要输入过滤改用 Combobox——不要给 Select 塞几十个选项让用户翻找。',
@@ -1060,6 +871,7 @@ export const dataEntryDetailContents: Record<string, ComponentDetailContent> = {
       '- 选项文案完整可读（如「进行中」而非「3」）；状态码到文案的映射在 options 层完成。',
       '- 禁用选项需说明原因（如「已归档（不可选）」），不要让用户反复尝试点不开的项。',
       '- Form 内声明非空 name 才注册字段；初始值回填依赖 items 映射，options 必须在首次渲染时可用。',
+      '- 固定宽度不需要 wrapper / trigger 选择器：Form 内写 controlClassName: w-40（或 w-full），独立渲染写 className: w-48；trigger 已内置 w-full。',
     ].join('\n'),
     examplesDo: [
       '筛选项「状态」：options 枚举全部业务状态，非必填配 allowClear，change 后刷新列表。',
@@ -1075,39 +887,32 @@ export const dataEntryDetailContents: Record<string, ComponentDetailContent> = {
 
   'component.combobox': {
     dsl: {
-  "type": "Combobox",
-  "props": {
-    "value": "${state.member}",
-    "searchable": true,
-    "placeholder": "搜索并选择成员",
-    "options": [
-      {
-        "label": "张三",
-        "value": "zhangsan"
-      },
-      {
-        "label": "李四",
-        "value": "lisi"
-      },
-      {
-        "label": "王五",
-        "value": "wangwu"
-      },
-      {
-        "label": "赵六",
-        "value": "zhaoliu"
+      "type": "Combobox",
+      "props": {
+        "name": "owner",
+        "label": "负责人",
+        "searchable": true,
+        "placeholder": "搜索并选择成员",
+        "options": [
+          {
+            "label": "张三",
+            "value": "zhangsan"
+          },
+          {
+            "label": "李四",
+            "value": "lisi"
+          },
+          {
+            "label": "王五",
+            "value": "wangwu"
+          },
+          {
+            "label": "赵六",
+            "value": "zhaoliu"
+          }
+        ]
       }
-    ]
-  },
-  "events": {
-    "onChange": {
-      "action": "setState",
-      "params": {
-        "member": "${event}"
-      }
-    }
-  }
-},
+    },
     whenToUse: [
       '**何时使用**',
       '',
@@ -1167,20 +972,13 @@ export const dataEntryDetailContents: Record<string, ComponentDetailContent> = {
 
   'component.checkbox': {
     dsl: {
-  "type": "Checkbox",
-  "props": {
-    "label": "订阅版本更新通知",
-    "value": "${state.checked}"
-  },
-  "events": {
-    "onChange": {
-      "action": "setState",
-      "params": {
-        "checked": "${event}"
+      "type": "Checkbox",
+      "props": {
+        "name": "subscribe",
+        "label": "订阅版本更新通知",
+        "value": true
       }
-    }
-  }
-},
+    },
     whenToUse: [
       '**何时使用**',
       '',
@@ -1232,34 +1030,28 @@ export const dataEntryDetailContents: Record<string, ComponentDetailContent> = {
 
   'component.radio-group': {
     dsl: {
-  "type": "RadioGroup",
-  "props": {
-    "value": "${state.period}",
-    "direction": "horizontal",
-    "options": [
-      {
-        "label": "按日",
-        "value": "day"
-      },
-      {
-        "label": "按周",
+      "type": "RadioGroup",
+      "props": {
+        "name": "period",
+        "label": "统计周期",
+        "direction": "horizontal",
+        "options": [
+          {
+            "label": "按日",
+            "value": "day"
+          },
+          {
+            "label": "按周",
+            "value": "week"
+          },
+          {
+            "label": "按月",
+            "value": "month"
+          }
+        ],
         "value": "week"
-      },
-      {
-        "label": "按月",
-        "value": "month"
       }
-    ]
-  },
-  "events": {
-    "onChange": {
-      "action": "setState",
-      "params": {
-        "period": "${event}"
-      }
-    }
-  }
-},
+    },
     whenToUse: [
       '**何时使用**',
       '',
@@ -1315,20 +1107,13 @@ export const dataEntryDetailContents: Record<string, ComponentDetailContent> = {
 
   'component.switch': {
     dsl: {
-  "type": "Switch",
-  "props": {
-    "label": "开启自动保存",
-    "value": "${state.autoSave}"
-  },
-  "events": {
-    "onChange": {
-      "action": "setState",
-      "params": {
-        "autoSave": "${event}"
+      "type": "Switch",
+      "props": {
+        "name": "autoSave",
+        "label": "开启自动保存",
+        "value": true
       }
-    }
-  }
-},
+    },
     whenToUse: [
       '**何时使用**',
       '',
@@ -1380,25 +1165,16 @@ export const dataEntryDetailContents: Record<string, ComponentDetailContent> = {
 
   'component.slider': {
     dsl: {
-  "type": "Slider",
-  "props": {
-    "value": "${state.volume}",
-    "min": 0,
-    "max": 100,
-    "step": 5,
-    "style": {
-      "maxWidth": 420
-    }
-  },
-  "events": {
-    "onChange": {
-      "action": "setState",
-      "params": {
-        "volume": "${event}"
+      "type": "Slider",
+      "props": {
+        "name": "threshold",
+        "label": "告警阈值",
+        "value": 40,
+        "min": 0,
+        "max": 100,
+        "step": 5
       }
-    }
-  }
-},
+    },
     whenToUse: [
       '**何时使用**',
       '',
@@ -1454,43 +1230,17 @@ export const dataEntryDetailContents: Record<string, ComponentDetailContent> = {
 
   'component.date-picker': {
     dsl: {
-  "type": "Flex",
-  "props": {
-    "gap": 12,
-    "align": "center"
-  },
-  "children": [
-    {
       "type": "DatePicker",
       "props": {
-        "value": "${state.date}"
-      },
-      "events": {
-        "onChange": {
-          "action": "setState",
-          "params": {
-            "date": "${event}"
-          }
+        "name": "statDate",
+        "label": "统计区间",
+        "mode": "range",
+        "value": {
+          "start": "2026-09-01",
+          "end": "2026-09-21"
         }
       }
     },
-    {
-      "type": "DatePicker",
-      "props": {
-        "mode": "range",
-        "value": "${state.range}"
-      },
-      "events": {
-        "onChange": {
-          "action": "setState",
-          "params": {
-            "range": "${event}"
-          }
-        }
-      }
-    }
-  ]
-},
     whenToUse: [
       '**何时使用**',
       '',
@@ -1549,56 +1299,56 @@ export const dataEntryDetailContents: Record<string, ComponentDetailContent> = {
 
   'component.form': {
     dsl: {
-  "type": "Form",
-  "events": {
-    "onSubmit": {
-      "action": "setState",
-      "params": {
-        "result": "${event}"
-      }
-    }
-  },
-  "children": [
-    {
-      "type": "Input",
-      "props": {
-        "name": "keyword",
-        "label": "关键词",
-        "placeholder": "输入关键词"
-      }
-    },
-    {
-      "type": "Select",
-      "props": {
-        "name": "status",
-        "label": "状态",
-        "placeholder": "选择状态",
-        "options": [
-          {
-            "label": "全部",
-            "value": "all"
-          },
-          {
-            "label": "进行中",
-            "value": "doing"
-          },
-          {
-            "label": "已完成",
-            "value": "done"
+      "type": "Form",
+      "events": {
+        "onSubmit": {
+          "action": "setState",
+          "params": {
+            "result": "${event}"
           }
-        ]
-      }
+        }
+      },
+      "children": [
+        {
+          "type": "Input",
+          "props": {
+            "name": "keyword",
+            "label": "关键词",
+            "placeholder": "输入关键词"
+          }
+        },
+        {
+          "type": "Select",
+          "props": {
+            "name": "status",
+            "label": "状态",
+            "placeholder": "选择状态",
+            "options": [
+              {
+                "label": "全部",
+                "value": "all"
+              },
+              {
+                "label": "进行中",
+                "value": "doing"
+              },
+              {
+                "label": "已完成",
+                "value": "done"
+              }
+            ]
+          }
+        },
+        {
+          "type": "Button",
+          "props": {
+            "text": "提交",
+            "variant": "primary",
+            "submit": true
+          }
+        }
+      ]
     },
-    {
-      "type": "Button",
-      "props": {
-        "text": "提交",
-        "variant": "primary",
-        "submit": true
-      }
-    }
-  ]
-},
     whenToUse: [
       '**何时使用**',
       '',

@@ -166,7 +166,7 @@ body:
                                 - action: message
                                   params:
                                     messageType: success
-                                    text: 状态已切换（演示）
+                                    text: 状态已切换
                     - type: Button
                       props:
                         text: 查看模型
@@ -177,7 +177,7 @@ body:
                           - action: message
                             params:
                               messageType: info
-                              text: 跳转 Model 列表（演示：目标页建设中）
+                              text: 跳转 Model 列表
                     - type: DropdownMenu
                       props:
                         items:
@@ -192,7 +192,7 @@ body:
                           - action: message
                             params:
                               messageType: info
-                              text: 操作：${event}（演示）
+                              text: 操作：${event}
                       children:
                         - type: Button
                           props:
@@ -434,10 +434,25 @@ body:
                                   icon: zap
                                 events:
                                   onClick:
-                                    - action: message
+                                    - id: connectionResult
+                                      action: request
                                       params:
-                                        messageType: success
-                                        text: 连接测试成功：HTTP 200, 128ms（演示）
+                                        method: POST
+                                        url: /api/d/ops/provider-test-connection
+                                        body: ${data.detail}
+                                    - action: if
+                                      params:
+                                        condition: ${actions.connectionResult != null && actions.connectionResult.ok == true}
+                                        then:
+                                          - action: message
+                                            params:
+                                              messageType: success
+                                              text: 连接测试成功
+                                        else:
+                                          - action: message
+                                            params:
+                                              messageType: error
+                                              text: 连接测试失败，请检查配置后重试
                               - type: Button
                                 props:
                                   text: 编辑连接配置
@@ -543,10 +558,27 @@ body:
                                                       variant: primary
                                                     events:
                                                       onClick:
-                                                        - action: overlay.close
+                                                        - id: pullSaveResult
+                                                          action: request
                                                           params:
-                                                            payload:
-                                                              ok: true
+                                                            method: POST
+                                                            url: /api/d/ops/provider-model-pull
+                                                            body:
+                                                              providerCode: ${data.detail.code}
+                                                              models: ${data.upstream}
+                                                        - action: if
+                                                          params:
+                                                            condition: ${actions.pullSaveResult != null && actions.pullSaveResult.ok == true}
+                                                            then:
+                                                              - action: overlay.close
+                                                                params:
+                                                                  payload:
+                                                                    ok: true
+                                                            else:
+                                                              - action: message
+                                                                params:
+                                                                  messageType: error
+                                                                  text: Model 批量创建失败，请检查接口后重试
                                     - action: if
                                       params:
                                         condition: ${actions.pullResult.ok}
@@ -554,7 +586,7 @@ body:
                                           - action: message
                                             params:
                                               messageType: success
-                                              text: 已为选中项批量创建 Model（演示）
+                                              text: 已为选中项批量创建 Model
                                           - action: reload
                                             params:
                                               dataSource: detail
@@ -578,10 +610,27 @@ body:
                                               name: importModel
                                             events:
                                               onSubmit:
-                                                - action: overlay.close
+                                                - id: importSaveResult
+                                                  action: request
                                                   params:
-                                                    payload:
-                                                      ok: true
+                                                    method: POST
+                                                    url: /api/d/ops/provider-model-import
+                                                    body:
+                                                      providerCode: ${data.detail.code}
+                                                      model: ${event}
+                                                - action: if
+                                                  params:
+                                                    condition: ${actions.importSaveResult != null && actions.importSaveResult.ok == true}
+                                                    then:
+                                                      - action: overlay.close
+                                                        params:
+                                                          payload:
+                                                            ok: true
+                                                    else:
+                                                      - action: message
+                                                        params:
+                                                          messageType: error
+                                                          text: Model 草稿创建失败，请检查接口后重试
                                             children:
                                               - type: Field
                                                 props:
@@ -624,7 +673,7 @@ body:
                                                           value: Image
                                                         - label: Audio
                                                           value: Audio
-                                                      controlClassName: w-full [&_[data-slot=select-trigger]]:w-full
+                                                      controlClassName: w-full
                                               - type: Field
                                                 props:
                                                   label: Model Code
@@ -656,7 +705,7 @@ body:
                                           - action: message
                                             params:
                                               messageType: success
-                                              text: 已创建 Model 草稿（演示：可去编辑补全定价与参数）
+                                              text: 已创建 Model 草稿
                                           - action: reload
                                             params:
                                               dataSource: detail
@@ -670,7 +719,7 @@ body:
                                     - action: message
                                       params:
                                         messageType: info
-                                        text: 跳转 Model 列表（带 Provider 筛选，演示：目标页建设中）
+                                        text: 跳转 Model 列表（带 Provider 筛选）
                       - type: Table
                         props:
                           dataSource: ${data.detail.models}
@@ -709,7 +758,7 @@ body:
                                     - action: message
                                       params:
                                         messageType: info
-                                        text: 跳转模型详情：${row.code}（演示：目标页建设中）
+                                        text: 跳转模型详情：${row.code}
                   - key: relations
                     label: 引用关系
                     className: p-2
@@ -752,7 +801,7 @@ body:
                                     - action: message
                                       params:
                                         messageType: info
-                                        text: 展开全部（演示）
+                                        text: 展开全部
                               - type: Button
                                 props:
                                   text: 导出关系图
@@ -762,7 +811,7 @@ body:
                                     - action: message
                                       params:
                                         messageType: info
-                                        text: 导出关系图（演示）
+                                        text: 导出关系图
     - type: Empty
       when: ${data.detail == null && !dataStatus.detail.loading}
       props:

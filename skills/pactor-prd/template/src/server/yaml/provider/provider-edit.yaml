@@ -62,18 +62,33 @@ body:
             params:
               title: 确认停用 Provider
               content: 停用后，该 Provider 将无法被新建 Model / Target 引用。⚠ 存在 ONLINE Target
-                引用时，建议先完成切换再停用。（演示）
+                引用时，建议先完成切换再停用。
+          - id: saveResult
+            action: request
+            condition: ${event.status != 'disabled' || actions.cfm}
+            params:
+              method: POST
+              url: /api/d/ops/provider-save
+              body: ${event}
           - action: if
             params:
-              condition: ${event.status != 'disabled' || actions.cfm}
+              condition: ${(event.status != 'disabled' || actions.cfm) && actions.saveResult != null && actions.saveResult.ok == true}
               then:
                 - action: message
                   params:
                     messageType: success
-                    text: Provider 已保存（演示：静态页面不落库）
+                    text: Provider 已保存
                 - action: navigate
                   params:
                     to: /providers/${route.params.code}
+          - action: if
+            params:
+              condition: ${(event.status != 'disabled' || actions.cfm) && (actions.saveResult == null || actions.saveResult.ok != true)}
+              then:
+                - action: message
+                  params:
+                    messageType: error
+                    text: Provider 保存失败，请检查接口后重试
       children:
         - type: Flex
           props:
@@ -126,7 +141,7 @@ body:
                         - type: Select
                           props:
                             name: providerType
-                            className: w-full [&>span]:w-full [&_[data-slot=select-trigger]]:w-full
+                            controlClassName: w-full
                             options:
                               - label: 商业
                                 value: 商业
@@ -147,7 +162,7 @@ body:
                         - type: Select
                           props:
                             name: protocol
-                            className: w-full [&>span]:w-full [&_[data-slot=select-trigger]]:w-full
+                            controlClassName: w-full
                             options:
                               - label: OpenAI Compatible
                                 value: OpenAI Compatible
@@ -264,14 +279,9 @@ body:
                       children:
                         - type: Button
                           props:
-                            text: 测试连接
+                            text: 测试连接（接入后可用）
                             className: mt-[2px]
-                          events:
-                            onClick:
-                              - action: message
-                                params:
-                                  messageType: success
-                                  text: 连接测试成功：HTTP 200, 128ms（演示：不持久化未保存字段）
+                            disabled: true
                         - type: Text
                           props:
                             text: 保存前建议先测试 Base URL 与 API Key 是否有效

@@ -5,8 +5,8 @@
  *   NavigationMenu；
  * - 运行态预览核对自 doc/src/components/previews/basic-a.tsx（同一文件注册
  *   component.menu / tabs / breadcrumb / pagination / dropdown-menu /
- *   navigation-menu）；其中 component.tabs 的 dsl 复用预览 TABS_NODE、
- *   component.breadcrumb 复用 BREADCRUMB_NODE。
+ *   navigation-menu）；其中 component.breadcrumb 的 dsl 复用 BREADCRUMB_NODE，
+ *   component.tabs 的 dsl 另展示受控 activeKey 与 TabItem.extra。
  */
 import type { ComponentDetailContent } from './component-details.ts';
 
@@ -41,6 +41,14 @@ export const navigationDetailContents: Record<string, ComponentDetailContent> = 
             "disabled": true
           }
         ]
+      },
+      "events": {
+        "onSelect": {
+          "action": "setState",
+          "params": {
+            "selected": "${event}"
+          }
+        }
       }
     },
     whenToUse: [
@@ -96,10 +104,23 @@ export const navigationDetailContents: Record<string, ComponentDetailContent> = 
     dsl: {
       "type": "Tabs",
       "props": {
+        "activeKey": "${state.detailTab}",
         "items": [
           {
             "key": "overview",
             "label": "概览",
+            "extra": [
+              {
+                "type": "Button",
+                "props": { "text": "刷新概览", "variant": "link" },
+                "events": {
+                  "onClick": {
+                    "action": "message",
+                    "params": { "messageType": "info", "text": "已刷新概览" }
+                  }
+                }
+              }
+            ],
             "children": [
               {
                 "type": "Text",
@@ -116,6 +137,18 @@ export const navigationDetailContents: Record<string, ComponentDetailContent> = 
           {
             "key": "detail",
             "label": "明细",
+            "extra": [
+              {
+                "type": "Button",
+                "props": { "text": "导出明细", "variant": "link" },
+                "events": {
+                  "onClick": {
+                    "action": "message",
+                    "params": { "messageType": "info", "text": "已导出明细" }
+                  }
+                }
+              }
+            ],
             "children": [
               {
                 "type": "Alert",
@@ -144,6 +177,12 @@ export const navigationDetailContents: Record<string, ComponentDetailContent> = 
             ]
           }
         ]
+      },
+      "events": {
+        "onChange": {
+          "action": "setState",
+          "params": { "detailTab": "${event}" }
+        }
       }
     },
     whenToUse: [
@@ -160,17 +199,19 @@ export const navigationDetailContents: Record<string, ComponentDetailContent> = 
       '- 页签数量过多（超过 6~7 个）：改用 Select / Segmented 或拆分页面。',
     ].join('\n'),
     previewNote:
-      '静态结构：Tabs 渲染为 data-slot="tabs"（flex flex-col gap-2）→ 页签栏 TabsList（data-slot="tabs-list" data-variant，default 为 bg-muted 胶囊容器 / line 为通栏下划线轨道）+ 触发器 TabsTrigger（data-slot="tabs-trigger"，激活态由 data-active 驱动：default 变体为卡片底 + 边框 + 阴影，line 变体为底部 2px 主色线）+ 内容面板 TabsContent（data-slot="tabs-content"，flex-1）；每个页签内容经 renderChildren 渲染 DSL 子树，内容区 class / 样式由 contentClassName / contentStyle 与 item.className / item.style 合并（item 在后）；未传 activeKey 时缺省激活第一个页签。本条 dsl 复用预览 TABS_NODE（概览 / 明细 / 设置三页签，明细页内放 Alert）。',
+      '静态结构：Tabs 渲染为 data-slot="tabs"（flex flex-col gap-2）→ 页签栏 TabsList（data-slot="tabs-list" data-variant，default 为 bg-muted 胶囊容器 / line 为通栏下划线轨道）+ 触发器 TabsTrigger（data-slot="tabs-trigger"，激活态由 data-active 驱动）+ 内容面板 TabsContent（data-slot="tabs-content"，flex-1）；每个页签内容经 renderChildren 渲染 DSL 子树，内容区 class / 样式由 contentClassName / contentStyle 与 item.className / item.style 合并（item 在后）。top 模式可在页签栏右端渲染 data-slot="tabs-extra"；left 竖排无此槽位。未传 activeKey 时缺省激活第一个页签。运行态预览复用 TABS_NODE（概览 / 明细 / 设置三页签）；上方 DSL 额外展示受控 activeKey 与当前项 extra。',
     variants: [
       { name: 'default 胶囊', visual: '灰底容器 + 激活项卡片底阴影', scene: '区块内视图切换（卡片、面板里）' },
       { name: 'line 下划线', visual: '通栏下划线轨道 + 激活项主色线', scene: '页面级主视图切换' },
       { name: '受控切换', visual: 'activeKey 绑 state，onChange 回写', scene: '需要与路由 / 外部状态联动的页签' },
+      { name: '当前项 extra', visual: 'top 页签栏右端显示当前项扩展区', scene: '当前面板专属的轻量操作' },
       { name: '异质内容', visual: '页签内容放任意 DSL 子树（表格 / 表单 / 图表）', scene: '详情页不同视角的内容组织' },
     ],
     apiProps: [
-      { name: 'items', type: 'TabItem[]', defaultValue: '[]', description: '页签定义：{ key, label, children?（DSL 子树）, className?, style? }' },
-      { name: 'activeKey', type: 'string', defaultValue: '—', description: '当前激活页签 key（可绑表达式）；缺省激活第一个页签' },
+      { name: 'items', type: 'TabItem[]', defaultValue: '[]', description: '页签定义：{ key, label, children?（pane DSL 子树）, extra?（页签栏右端 DSL 子树）, className?, style? }' },
+      { name: 'activeKey', type: 'string', defaultValue: '—', description: '受控当前激活页签 key（可绑表达式）；缺省激活第一个页签' },
       { name: 'variant', type: "'default' | 'line'", defaultValue: "'default'", description: '页签栏样式：胶囊 / 下划线' },
+      { name: 'tabPosition', type: "'top' | 'left'", defaultValue: "'top'", description: '顶部横排 / 左侧竖排；left 不渲染任何 item extra' },
       { name: 'onChange', type: '(key: string) => void', defaultValue: '—', description: '页签切换事件，传出新激活 key（Renderer 绑定 events.onChange）' },
       { name: 'contentClassName', type: 'string', defaultValue: '—', description: '页签内容区 class（TabsContent 根节点，与内置样式合并）' },
       { name: 'contentStyle', type: 'CSSProperties', defaultValue: '—', description: '页签内容区内联样式（同 contentClassName 挂载规则）' },
@@ -178,6 +219,9 @@ export const navigationDetailContents: Record<string, ComponentDetailContent> = 
     ],
     guidelines: [
       '- 页签数量 2 ~ 6 个，标签用 2 ~ 4 字名词短语（「概览」「明细」），等长等权排列。',
+      '- extra 属于 TabItem 而非 Tabs 根节点；受控 activeKey 时经 onChange → setState 回写后跟随当前项，非受控时始终取首项，即使用户已在内部切换页签。',
+      '- tabPosition: left 不渲染 extra；需要面板操作时放入对应项 children。',
+      '- 单页签 top Tabs 虽会持续渲染首项 extra，但不得借此作为默认分区容器；只有标题和操作区时使用 Card / Flex。',
       '- 页签切换不改变页面 URL 与面包屑；需要路由变化时改用导航组件。',
       '- 各页签内容首屏高度接近，避免切换时页面高度剧烈跳动。',
       '- 页签内容惰性 / 性能敏感时按需在内容区放 Skeleton，避免一次渲染全部面板。',
@@ -333,6 +377,14 @@ export const navigationDetailContents: Record<string, ComponentDetailContent> = 
             "danger": true
           }
         ]
+      },
+      "events": {
+        "onSelect": {
+          "action": "setState",
+          "params": {
+            "selected": "${event}"
+          }
+        }
       },
       "children": [
         {

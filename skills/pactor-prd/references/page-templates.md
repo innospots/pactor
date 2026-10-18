@@ -20,7 +20,7 @@ state:
   status: all
   editingId: ""
   # 表单条件显隐镜像（onValuesChange 写入；按线框图需要增减，可多个）
-  fType: ""
+  fKind: ""
 dataSources:
   list:
     type: http
@@ -73,7 +73,7 @@ body:
               - action: setState           # 清空编辑态与显隐镜像
                 params:
                   editingId: ""
-                  fType: ""
+                  fKind: ""
               - action: reload             # 清空 editing 数据（${state.editingId} 为空 → 接口返回空对象）
                 params:
                   dataSource: editing
@@ -94,21 +94,32 @@ body:
                         onValuesChange:
                           - action: setState
                             params:
-                              fType: "${event.type != null ? event.type : state.fType}"
+                              fKind: "${event.kind != null ? event.kind : state.fKind}"
                         onSubmit:
-                          - action: request
+                          - id: saveResult
+                            action: request
                             params:
                               method: POST
                               url: /api/d/ops/{{resource}}-save
                               body:
                                 id: ${state.editingId}
                                 name: ${event.name}
+                                kind: ${event.kind}
                                 # ... 其余字段照抄 event
-                          - action: message
+                          - action: if
                             params:
-                              messageType: success
-                              text: 已保存（演示）
-                          - action: overlay.close
+                              condition: ${actions.saveResult != null && actions.saveResult.ok == true}
+                              then:
+                                - action: message
+                                  params:
+                                    messageType: success
+                                    text: 已保存
+                                - action: overlay.close
+                              else:
+                                - action: message
+                                  params:
+                                    messageType: error
+                                    text: 保存失败，请检查接口后重试
                       children:
                         # 分区结构：标题 → 分割线 → 字段组（不用 Card）
                         - type: Flex
@@ -137,37 +148,43 @@ body:
                                         rules:
                                           - required: true
                                             message: 请输入名称
-                                # 成对字段用 Grid 两列
-                                - type: Grid
+                                # 成对字段用 Row / Col：窄屏单列，md 起两列
+                                - type: Row
                                   props:
-                                    columns: 2
-                                    gap: 16
+                                    gutter: [16, 16]
                                   children:
-                                    - type: Field
-                                      props:
-                                        label: 类型
-                                        required: true
+                                    - type: Col
+                                      props: { span: 24, md: 12 }
                                       children:
-                                        - type: Select
+                                        - type: Field
                                           props:
-                                            name: type
-                                            placeholder: 请选择类型
-                                            options: ${data.list.filters.type}
-                                            rules:
-                                              - required: true
-                                                message: 请选择类型
-                                    - type: Field
-                                      props:
-                                        label: 排序
+                                            label: 类型
+                                            required: true
+                                          children:
+                                            - type: Select
+                                              props:
+                                                name: kind
+                                                controlClassName: w-full
+                                                placeholder: 请选择类型
+                                                options: ${data.list.filters.kind}
+                                                rules:
+                                                  - required: true
+                                                    message: 请选择类型
+                                    - type: Col
+                                      props: { span: 24, md: 12 }
                                       children:
-                                        - type: NumberInput
+                                        - type: Field
                                           props:
-                                            name: sort
-                                            className: w-full
-                                            min: 0
-                                            precision: 0
+                                            label: 排序
+                                          children:
+                                            - type: NumberInput
+                                              props:
+                                                name: sort
+                                                className: w-full
+                                                min: 0
+                                                precision: 0
                                 # 条件显隐字段：依赖镜像 state
-                                - when: ${state.fType == 'XXX'}
+                                - when: ${state.fKind == 'XXX'}
                                   type: Field
                                   props:
                                     label: 条件字段
@@ -193,7 +210,6 @@ body:
                           props:
                             justify: end
                             gap: small
-                            className: mt-4
                           children:
                             - type: Button
                               props:
@@ -206,7 +222,6 @@ body:
                                 text: 保存
                                 variant: primary
                                 submit: true
-                                htmlType: submit
               - action: reload             # overlay.open 阻塞到关闭，关闭后刷新列表
                 params:
                   dataSource: list
@@ -242,12 +257,11 @@ body:
                 - type: Select
                   props:
                     name: status
+                    controlClassName: w-40
                     placeholder: 请选择状态
                     options: ${data.list.filters.status}   # 选项由接口下发
-            # 按钮也放进 Field：label 用不间断空格（U+00A0）占位，与左侧控件底部对齐
+            # 按钮组也放进 Field；inline 布局由 Form/Field 对齐，无需空格伪 label
             - type: Field
-              props:
-                label: " "
               children:
                 - type: Flex
                   props:
@@ -258,7 +272,6 @@ body:
                       props:
                         text: 查询
                         submit: true
-                        htmlType: submit
                     - type: Button
                       props:
                         text: 重置
@@ -297,7 +310,7 @@ body:
                       - action: setState   # 写入编辑 id + 显隐镜像（取自行数据）
                         params:
                           editingId: ${row.id}
-                          fType: ${row.type}
+                          fKind: ${row.kind}
                       - action: reload
                         params:
                           dataSource: editing
@@ -331,9 +344,10 @@ body:
 
 - **新建/编辑共用同一抽屉**：YAML 锚点 `&entityDrawer` 在「新建」按钮的 `overlay.open` 中定义（必须先出现），表格行内 `*entityDrawer` 引用；`title` 用 `${state.editingId == '' ? ... }` 三元切换；唯一区别是编辑以 `initialValues: ${data.editing}` 预填
 - **抽屉宽度 720**（`overlay.open type: drawer` 的 `width` 生效）；抽屉内分区**不用 Card**：`Text(strong) 标题 → Separator → 字段组`，多个分区重复此结构
-- **搜索栏按钮对齐**：查询/重置放进 `Field`，其 `label` 用不间断空格 U+00A0（直接敲 `" "` 普通空格可能被压缩），与左侧控件基线对齐
+- **搜索栏按钮对齐**：查询/重置放进无 `label` 的 `Field`，由 `Form layout: inline` 与 `Field` 负责对齐；不使用 U+00A0 或普通空格伪 label
+- **Select 宽度**：Form 内用 `controlClassName` 限定控件包裹，trigger 由组件内置 `w-full` 铺满；搜索栏用 `controlClassName: w-40` 固定 10rem，抽屉整列用 `controlClassName: w-full`。独立 Select 用 `className: w-40`，不再添加 wrapper / trigger 选择器
 - **Form 不能嵌套**（渲染原生 `<form>`，submit 冒泡）：抽屉内只用一个 Form；主从多值（如字典项）的子项编辑在**同一 Form** 内做「子 Table + 行下展开表单」，`onSubmit` 用 `if` 动作按 state 分流提交目标（子项保存走独立 ops 接口 + `reload editing`）；表达式不支持数组方法/箭头函数，子项草稿必须走服务端接口不能前端拼
-- **编辑预填链路**：`setState(editingId + 显隐镜像)` → `reload editing` → `overlay.open`；镜像值取自行数据（`${row.type}`），不要等 editing 接口
+- **编辑预填链路**：`setState(editingId + 显隐镜像)` → `reload editing` → `overlay.open`；镜像值取自行数据（`${row.kind}`），不要等 editing 接口
 - **overlay.open 阻塞到关闭**，关闭后 `reload list`；新建按钮同理（先重置 state 再 reload editing 清空）
 - **条件显隐**：`onValuesChange` 把字段值镜像到 state（`"${event.x != null ? event.x : state.x}"` 保持其他字段变化时原值），再用 `when` 控制显隐；编辑时关键字段 `disabled: ${state.editingId != ''}`
 - 空 `editingId` 时后端 detail 接口须返回空对象而非 404（转发层本身对 404 也回退空对象，但真实后端仍建议遵守该约定）
@@ -423,32 +437,44 @@ body:
           props: { variant: h3, text: {{页面标题}} }
         - type: Typography
           props: { variant: muted, text: 页面副标题（取自线框图说明文字） }
-    # 搜索栏：Form(layout: inline) 包裹，字段 name 绑定；查询 submit: true，重置 form.setValues
+    # 搜索栏：Form(layout: inline) + Field；查询 submit: true，重置 form.setValues
     - type: Card
       children:
         - type: Form
           props: { name: filter, layout: inline }
           children:
-            - type: Input
-              props: { name: keyword, placeholder: 搜索关键词 }
-            - type: Select
-              props:
-                name: status
-                placeholder: 状态
-                options: ${data.list.filters.status}   # 选项也可由接口下发
-                allowClear: true
-            - type: Button
-              props: { text: 查询, variant: primary, submit: true }
-            - type: Button
-              props: { text: 重置 }
-              events:
-                onClick:
-                  - action: form.setValues
-                    params: { form: filter, values: { keyword: "", status: "" } }
-                  - action: setState
-                    params: { keyword: "", status: "" }
-                  - action: reload
-                    params: { dataSource: list }
+            - type: Field
+              props: { label: 关键词 }
+              children:
+                - type: Input
+                  props: { name: keyword, placeholder: 搜索关键词 }
+            - type: Field
+              props: { label: 状态 }
+              children:
+                - type: Select
+                  props:
+                    name: status
+                    controlClassName: w-40
+                    placeholder: 状态
+                    options: ${data.list.filters.statusOptions}   # Select：label/value
+                    allowClear: true
+            - type: Field
+              children:
+                - type: Flex
+                  props: { gap: small, align: center }
+                  children:
+                    - type: Button
+                      props: { text: 查询, variant: primary, submit: true }
+                    - type: Button
+                      props: { text: 重置 }
+                      events:
+                        onClick:
+                          - action: form.setValues
+                            params: { form: filter, values: { keyword: "", status: "" } }
+                          - action: setState
+                            params: { keyword: "", status: "" }
+                          - action: reload
+                            params: { dataSource: list }
           events:
             onSubmit:
               - action: setState
@@ -467,7 +493,7 @@ body:
           props:
             mode: single
             value: ${state.statusChip}
-            items: ${data.list.filters.status}
+            items: ${data.list.filters.statusChips}   # ChipFilterItem：value/text/dot，计数由数据侧写入 text
           events:
             onChange:
               - action: setState
@@ -481,17 +507,17 @@ body:
         dataSource: ${data.list.items}
       events:
         onRowClick:
-          - action: router.push
-            params: { path: "/{{resource}}/${event.code}" }
+          - action: navigate
+            params: { to: "/{{resource}}/${event.code}" }
 ```
 
 要点：
 
-- 搜索栏（关键词 + 下拉筛选 + 查询/重置）走 `Form layout: inline`：字段 `name` 绑定，查询按钮 `submit: true`，`onSubmit` 中 `setState` + `reload`；重置 = `form.setValues` 清空 + `setState` 复位 + `reload`
+- 搜索栏（关键词 + 下拉筛选 + 查询/重置）走 `Form layout: inline`：控件沿用 data-list 的 Field 结构，字段 `name` 绑定，查询按钮 `submit: true`，`onSubmit` 中 `setState` + `reload`；重置 = `form.setValues` 清空 + `setState` 复位 + `reload`
 - 即点即生效的筛选（ChipFilter 快筛行）没有提交语义，不是表单，仍可独立绑 state、onChange 即 reload
 - 表格操作列按钮样式统一 `Button variant: link`（编辑/删除/详情等），不混用 text/default 或 TextLink
-- 「新建」→ `router.push` 到表单页（或弹窗表单）；操作列「编辑」与「新建」指向**同一个表单**（同一路由页或同一弹窗），唯一区别是编辑以行数据预填：路由页用 `initialValues: ${data.detail}`，弹窗/内嵌面板用 `form.setValues` 写入行数据
-- 空态、加载态不手写，组件内置；但线框图有空态文案时用 props 覆盖
+- 「新建」→ `navigate` 到表单页（或弹窗表单）；操作列「编辑」与「新建」指向**同一个表单**（同一路由页或同一弹窗），唯一区别是编辑以行数据预填：路由页通常用 `initialValues: ${data.detail}`，route 等预整形接口按 `data-api.md` 使用 `${data.detail.form}`，弹窗/内嵌面板用 `form.setValues` 写入行数据
+- empty / loading 优先使用组件内建能力并按 UI 计划显式接线；读取失败按 `ui-quality.md` 使用 Alert + retry，不把 error 当成 empty
 
 ## 详情页（面包屑 + 描述列表 + Tab/分区）
 
@@ -501,6 +527,8 @@ page:
   id: {{kebab-id}}
   title: {{页面标题}}
   name: {{camelName}}
+state:
+  detailTab: overview
 dataSources:
   detail:
     type: http
@@ -521,19 +549,37 @@ body:
       props:
         title: 基本信息
         items: ${data.detail.fields}
-    # 线框图为 Tab 时用 Tabs；为纵向分区时用多个 Card + Descriptions 顺序排布
+    # 线框图为两个以上同层 Tab 时用 Tabs；纵向分区改用多个 Card + Descriptions
     - type: Tabs
       props:
+        activeKey: ${state.detailTab}
         items:
-          - { key: overview, label: 概览 }
-          - { key: changes, label: 变更记录 }
-      children: []   # 各 Tab 内容按线框图分区填充
+          - key: overview
+            label: 概览
+            children: []   # 按线框图填充概览面板
+            extra:
+              - type: Button
+                props: { text: 刷新概览, variant: link }
+                events:
+                  onClick:
+                    - action: reload
+                      params: { dataSource: detail }
+          - key: changes
+            label: 变更记录
+            children: []   # 按线框图填充变更面板；本项无 extra
+      events:
+        onChange:
+          - action: setState
+            params: { detailTab: ${event} }
 ```
 
 要点：
 
 - 路径参数（`/projects/:code`）经 `${route.params.code}` 拼进 url
 - 头部操作（启用/停用、编辑、删除）按线框图摆放在标题行右侧，点击后确认弹窗 + 操作成功 message + reload
+- `extra` 位于当前 TabItem 而非 Tabs 根节点。上例受控 `activeKey` 跟随 `detailTab`：切到 changes 后 overview 的 extra 不再渲染；未传 activeKey 时固定取首项 extra，即使内部页签已切换
+- `tabPosition: left` 不渲染任何 extra；需要面板操作时把按钮放进该 TabItem 的 `children`
+- 不得为了放 extra 而生成单页签 Tabs；只有标题 / 操作区时用 Card / Flex，纵向分区沿用多个 Card + Descriptions
 
 ## 表单页（新增/编辑：校验 + 提交闭环）
 
@@ -563,7 +609,9 @@ body:
           - label: {{页面标题}}
     - type: Form
       props:
-        initialValues: ${data.detail}   # 新增页省略
+        name: entityForm
+        layout: vertical
+        initialValues: ${data.detail}   # 新增页省略；route 等预整形接口用 ${data.detail.form}
       children:
         # 字段按线框图分区；required / 校验规则照抄线框图字段说明
         # 字段一律用 Field 包裹：label / 必填星号(required) / 行右提示(labelHint) 由 Field 渲染，
@@ -576,25 +624,52 @@ body:
                 name: name
                 rules:
                   - { required: true, message: 请输入名称 }
+        - type: Flex
+          props: { justify: end, gap: small }
+          children:
+            - type: Button
+              props: { text: 取消 }
+              events:
+                onClick:
+                  - action: navigate
+                    params: { to: /{{resource}} }
+            - type: Button
+              props:
+                text: 保存
+                variant: primary
+                submit: true
+                loading: ${state.submitting}
+                disabled: ${state.submitting}
       events:
         onSubmit:
           - action: setState
             params: { submitting: true }
-          - action: http.post            # 指向 /api/d/{{resource}}（无后端时转发层返回 { ok: true }）
+          - id: saveResult
+            action: request
             params:
-              url: /api/d/{{resource}}
+              method: POST
+              url: /api/d/ops/{{resource}}-save
               body: ${event}
-          - action: message
-            params: { messageType: success, text: 保存成功 }
-          - action: router.push
-            params: { path: /{{resource}} }
+          - action: setState
+            params: { submitting: false }
+          - action: if
+            params:
+              condition: ${actions.saveResult != null && actions.saveResult.ok == true}
+              then:
+                - action: message
+                  params: { messageType: success, text: 保存成功 }
+                - action: navigate
+                  params: { to: /{{resource}} }
+              else:
+                - action: message
+                  params: { messageType: error, text: 保存失败，请检查接口后重试 }
 ```
 
 要点：
 
-- 提交中禁用按钮（`submitting` state），失败分支 `messageType: error` 提示
-- 新增/编辑**共用同一表单**（同一路由页或同一弹窗），按 `${route.params.code}` 是否存在区分（`if` 动作分支）；编辑仅比新建多一步预填：`initialValues: ${data.detail}`
-- 取消按钮 → `router.back` 或返回列表页
+- 提交中按钮使用 `submitting` state 显示 loading 并禁用；只有 `actions.saveResult.ok == true` 才成功跳转，失败留在当前表单并保留输入
+- 新增/编辑**共用同一表单**（同一路由页或同一弹窗），按 `${route.params.code}` 是否存在区分（`if` 动作分支）；编辑仅比新建多一步预填：`initialValues: ${data.detail}`，route 等预整形接口按 `data-api.md` 使用 `${data.detail.form}`
+- 取消按钮通过 `navigate` 返回列表页
 
 ## 内嵌表单面板（列表/树旁的编辑表单、弹窗/抽屉表单）
 
@@ -668,4 +743,4 @@ body:
 
 - 页面 id kebab-case，与 sitemap.yaml 注册一致；文件按模块分目录存放 `src/server/yaml/<模块>/{{kebab-id}}.yaml`（见 project-structure.md）
 - 表达式：`${state.x}` / `${data.x}` / `${route.params.x}` / `${event}`；支持 `.length`、比较、`&&`/`||`、三元
-- 任何「点击后请求并刷新」的交互都是同一闭环：`setState`（可选）→ http/service 调用 → `reload dataSource` / `router.push`
+- 任何「点击后请求并刷新」的交互都是同一闭环：`setState`（可选）→ `request` / http 数据源 → `reload dataSource` / `navigate`

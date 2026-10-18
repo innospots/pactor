@@ -1,9 +1,9 @@
 ---
 title: 复合与其他组件
-description: 复合与其他 DSL 组件——Button / Accordion / Collapsible / Command / Toggle / ToggleGroup / ButtonGroup / InputGroup / Markdown 的 props 契约与 DSL 示例
+description: 复合与其他 DSL 组件——Button / Accordion / Collapsible / Command / Toggle / ToggleGroup / ButtonGroup / ExpandingButtonGroup / FloatingButtonGroup / InputGroup / Markdown 的 props 契约与 DSL 示例
 ---
 
-不易归入单一职能的组件：交互按钮（Button）、折叠与命令面板（Accordion / Collapsible / Command）、切换与组合控件（Toggle / ToggleGroup / ButtonGroup / InputGroup），以及由 `@pactor-app/markdown` 注册的 Markdown 渲染组件。
+不易归入单一职能的组件：交互按钮（Button / ExpandingButtonGroup / FloatingButtonGroup）、折叠与命令面板（Accordion / Collapsible / Command）、切换与组合控件（Toggle / ToggleGroup / ButtonGroup / InputGroup），以及由 `@pactor-app/markdown` 注册的 Markdown 渲染组件。
 
 ### Button
 
@@ -158,6 +158,50 @@ description: 复合与其他 DSL 组件——Button / Accordion / Collapsible / 
       props: { text: 中 }
     - type: Button
       props: { text: 右 }
+```
+
+### ExpandingButtonGroup
+
+展开式图标操作组：hover / 聚焦时原地展开当前按钮的 label，其余按钮保持图标态。每项 `value` / `label` / `icon` 均必填；组件没有受控 `value` prop。
+
+| prop | 类型 | 说明 |
+| --- | --- | --- |
+| `options` | `{ value: string, label: string, icon: string, confirm?: boolean, confirmLabel?: string, disabled?: boolean }[]` | 选项列表；`icon` 为 Icon 白名单名；`confirm: true` 时首次点击进入原地确认态，再次点击才触发 `onSelect`，确认文案缺省为「确认」，可由 `confirmLabel` 覆盖；移出 / 失焦取消确认态 |
+| 事件 `onSelect` | — | 选中时触发，`${event}` 为选项 `value`（string）；confirm 选项需第二次点击才触发 |
+
+```yaml
+- type: ExpandingButtonGroup
+  props:
+    options:
+      - { value: edit, label: 编辑, icon: pencil }
+      - { value: delete, label: 删除, icon: trash, confirm: true, confirmLabel: 确认删除 }
+  events:
+    onSelect:
+      action: setState
+      params: { lastAction: "${event}" }
+```
+
+### FloatingButtonGroup
+
+托盘式按钮组：共享高亮块跟随 hover / focus-visible；提供受控 `value` 时，高亮恒定位于当前项。每项仅 `value` 必填，`label` / `icon` 均可选；没有 `confirm` / `confirmLabel` 配置。
+
+| prop | 类型 | 说明 |
+| --- | --- | --- |
+| `options` | `{ value: string, label?: string, icon?: string, disabled?: boolean }[]` | 选项列表；`icon` 为 Icon 白名单名 |
+| `value` | string | 受控当前项；点击后应在 `onSelect` 中回写同一状态 |
+| 事件 `onSelect` | — | 点击选项时触发，`${event}` 为选项 `value`（string） |
+
+```yaml
+- type: FloatingButtonGroup
+  props:
+    value: ${state.view}
+    options:
+      - { value: list, label: 列表, icon: list }
+      - { value: grid, label: 网格, icon: grid }
+  events:
+    onSelect:
+      action: setState
+      params: { view: "${event}" }
 ```
 
 ### InputGroup
