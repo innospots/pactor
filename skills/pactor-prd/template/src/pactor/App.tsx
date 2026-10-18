@@ -1,7 +1,7 @@
 "use client";
 
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { Suspense } from "react";
+import { usePathname, useRouter } from "next/navigation";
+import { Suspense, useCallback, useSyncExternalStore } from "react";
 import { createHttpHooks, SitemapApp } from "pactor-app";
 import { Login } from "@pactor-app/blocks";
 
@@ -36,6 +36,30 @@ import { pactorComponents } from "./components";
 
 const httpAdapter = createHttpHooks();
 
+// 稳定引用（模块级）：SitemapApp 的 components / actions 参与工厂 memo，
+// 内联对象会在每次渲染生成新身份 → 布局与页面运行时随导航整体重挂载
+// （丢失布局常驻语义、侧栏折叠态重置，且首帧 session 未就绪时 Header
+// 用户区更易撞上空数据）。提为常量后仅路由页面随导航重建。
+const appComponents = { ...pactorComponents, Login };
+
+// 免挂起查询参数：useSearchParams 在客户端导航时会触发 Suspense，
+// 使外层 fallback=null 卸载整棵应用树。改从 location 同步读取，
+// popstate 后经 useSyncExternalStore 通知更新。
+function subscribeToUrl(callback: () => void): () => void {
+  window.addEventListener("popstate", callback);
+  return () => {
+    window.removeEventListener("popstate", callback);
+  };
+}
+
+function useLocationSearch(): string {
+  return useSyncExternalStore(
+    subscribeToUrl,
+    () => window.location.search,
+    () => "",
+  );
+}
+
 export function PactorApp() {
   return (
     <Suspense fallback={null}>
@@ -46,16 +70,21 @@ export function PactorApp() {
 
 function PactorAppInner() {
   const pathname = usePathname();
-  const searchParams = useSearchParams();
+  const search = useLocationSearch();
   const router = useRouter();
+  const query = Object.fromEntries(new URLSearchParams(search).entries());
+  // navigate 参与 SitemapApp 内部工厂 memo：内联箭头每次渲染都是新身份
+  // → 布局/页面工厂重建 → 布局随导航整体重挂载。useRouter 返回稳定引用，
+  // navigate 随之稳定，布局跨导航常驻。
+  const navigate = useCallback((to: string) => router.push(to), [router]);
   return (
     <SitemapApp
       sources={sitemapSources}
       baseUrl={apiBaseUrl}
       pathname={pathname}
-      query={Object.fromEntries(searchParams.entries())}
-      navigate={(to) => router.push(to)}
-      components={{ ...pactorComponents, Login }}
+      query={query}
+      navigate={navigate}
+      components={appComponents}
       actions={pactorActions}
       pageEndpoint={pageEndpoint}
       httpAdapter={httpAdapter}
