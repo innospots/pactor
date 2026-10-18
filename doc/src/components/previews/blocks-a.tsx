@@ -3,7 +3,7 @@
  * 9 个组件均已从包入口导出并在 register.ts 注册 DSL；Login / SiteFooter
  * 内部经 Form / Link 依赖 Renderer 上下文（useRenderer），与 basic-a 的
  * Layout / Tabs 同类，经 DslPreview 以真实 DSL 渲染；其余组件为
- * 纯受控 React 组件，局部 state 受控 + 事件回显。
+ * 纯受控 React 组件，局部 state 受控。
  */
 import { useState, type ReactElement } from 'react';
 import type { DslNode } from '@pactor-app/core';
@@ -23,7 +23,6 @@ import {
 import DslPreview from './DslPreview';
 
 const columnStyle = { display: 'flex', flexDirection: 'column', gap: 12 } as const;
-const echoStyle = { fontSize: 12, color: 'var(--muted-foreground)' } as const;
 
 const ENTITY_ACTIONS = [
   { text: '编辑', key: 'edit' },
@@ -31,7 +30,6 @@ const ENTITY_ACTIONS = [
 ];
 
 function EntityCardPreview() {
-  const [lastAction, setLastAction] = useState('');
   return (
     <div style={columnStyle}>
       <EntityCard
@@ -43,12 +41,7 @@ function EntityCardPreview() {
         meta="创建于 2026-09-01"
         actions={ENTITY_ACTIONS}
         hoverable
-        onClick={() => setLastAction('整卡点击')}
-        onAction={(e) => setLastAction(`操作：${e.key}`)}
       />
-      <span style={echoStyle}>
-        事件回显：{lastAction || '点击卡片或操作按钮'}
-      </span>
     </div>
   );
 }
@@ -82,7 +75,6 @@ const CARD_ITEMS: CardListItem[] = [
 ];
 
 function CardListPreview() {
-  const [lastEvent, setLastEvent] = useState('');
   return (
     <div style={columnStyle}>
       <CardList
@@ -90,13 +82,7 @@ function CardListPreview() {
         columns={3}
         createText="新建插件"
         showCount
-        onItemClick={(e) => setLastEvent(`整卡点击：${e.item.title}（index ${e.index}）`)}
-        onItemAction={(e) => setLastEvent(`操作：${e.key}（${e.item.title}）`)}
-        onCreateClick={() => setLastEvent('新建占位卡点击')}
       />
-      <span style={echoStyle}>
-        事件回显：{lastEvent || '点击卡片、操作按钮或新建占位卡'}
-      </span>
     </div>
   );
 }
@@ -301,11 +287,6 @@ export function LoginPreviewFrame({
       >
         <DslPreview node={buildLoginPreviewNode(mode, stateKey)} />
       </div>
-      {fill ? null : (
-        <span style={echoStyle}>
-          结构模式：{LOGIN_MODE_LABELS[mode] ?? '分栏'}（左侧 Login 组子菜单切换）；右上方页签切换组件状态
-        </span>
-      )}
     </div>
   );
 }
@@ -342,7 +323,6 @@ function FieldConditionPreview() {
   return (
     <div style={columnStyle}>
       <FieldCondition value={value} onChange={setValue} fields={CONDITION_FIELDS} />
-      <span style={echoStyle}>事件回显：{JSON.stringify(value)}</span>
     </div>
   );
 }
@@ -362,7 +342,6 @@ function ExpressionEditorPreview() {
           b: { label: '结束周期', type: 'number', default: 12, required: true },
         }}
       />
-      <span style={echoStyle}>事件回显：{value}</span>
     </div>
   );
 }
@@ -375,7 +354,6 @@ function RuleConfigPreview() {
   return (
     <div style={columnStyle}>
       <RuleConfig value={value} onChange={setValue} />
-      <span style={echoStyle}>事件回显：{JSON.stringify(value)}</span>
     </div>
   );
 }
@@ -400,9 +378,6 @@ function RuleExpressionPreview() {
         onChange={setValue}
         placeholder="输入字段名匹配候选，Enter 选中为 chip"
       />
-      <span style={echoStyle}>
-        事件回显：{value ? `${value.expression}（字段：${value.sourceField.join(', ') || '无'}）` : '—'}
-      </span>
     </div>
   );
 }
@@ -425,7 +400,6 @@ function ScriptEditorPreview() {
           { name: 'user_level', type: 'string', description: '用户等级' },
         ]}
       />
-      <span style={echoStyle}>事件回显：{code.length} 字符</span>
     </div>
   );
 }

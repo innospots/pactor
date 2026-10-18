@@ -23,7 +23,6 @@ import {
 import DslPreview from './DslPreview';
 
 const columnStyle = { display: 'flex', flexDirection: 'column', gap: 12 } as const;
-const noteStyle = { fontSize: 12, color: 'var(--muted-text)' } as const;
 
 function BubblePreview() {
   return (
@@ -86,7 +85,6 @@ function SuggestionPreview() {
       <Suggestion
         items={['换个角度分析', { label: '生成表格', value: 'to-table', icon: 'list' }, '展开第三点']}
       />
-      <span style={noteStyle}>点击 chip 经 onSelect 传出 value（预览未绑定动作）。</span>
     </div>
   );
 }

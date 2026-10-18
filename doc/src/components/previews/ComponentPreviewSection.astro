@@ -1,21 +1,19 @@
 ---
 /**
- * 「预览」章节片段：运行态预览岛（真实 @pactor-app/ui 组件，client-only）
- * + 实现结构说明（previewNote，已剔除历史「待接入」前缀）。
+ * 「预览」章节片段：运行态预览岛（真实 @pactor-app/ui 组件，client-only）。
+ * 原「静态结构」说明（previewNote）已按需求从组件详情页移除；
+ * previewNote 数据仍用于未接入组件的「不适用」说明（见详情页 fallback）。
  */
 import ComponentPreview from './ComponentPreview';
 
 interface Props {
   /** 资产规范 id（component.*） */
   componentId: string;
-  /** 实现结构说明文本 */
-  note?: string;
 }
 
-const { componentId, note } = Astro.props;
+const { componentId } = Astro.props;
 ---
 
 <div class="component-preview-box">
   <ComponentPreview componentId={componentId} client:only="react" />
 </div>
-{note && <div class="preview-note">{note}</div>}

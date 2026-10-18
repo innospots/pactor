@@ -21,7 +21,6 @@ import {
 
 const rowStyle = { display: 'flex', flexWrap: 'wrap', gap: 12, alignItems: 'center' } as const;
 const columnStyle = { display: 'flex', flexDirection: 'column', gap: 12 } as const;
-const noteStyle = { fontSize: 13, color: 'var(--muted-foreground)' } as const;
 
 function ButtonGroupPreview() {
   return (
@@ -62,12 +61,9 @@ function ActionButtonPreview() {
 }
 
 function SplitButtonPreview() {
-  const [last, setLast] = useState('');
   return (
     <div style={rowStyle}>
       <SplitButton
-        onClick={() => setLast('已触发主操作：保存')}
-        onSelect={(value) => setLast(`已选择备选：${value}`)}
         options={[
           { value: 'save-draft', label: '存为草稿', icon: <Icon name="file-text" size={16} /> },
           { value: 'save-copy', label: '另存副本', icon: <Icon name="copy" size={16} /> },
@@ -76,7 +72,6 @@ function SplitButtonPreview() {
       >
         保存
       </SplitButton>
-      <span style={noteStyle}>{last || '点击主按钮或展开下拉选择备选操作'}</span>
     </div>
   );
 }
@@ -93,7 +88,6 @@ function CopyButtonPreview() {
         value="https://pactor-docs.xp-java.workers.dev"
         aria-label="复制文档地址"
       />
-      <span style={noteStyle}>npm install @pactor-app/ui</span>
     </div>
   );
 }
@@ -112,7 +106,6 @@ function IconMorphPreview() {
       <IconMorph morph="menu-close" state={state} className="size-5" />
       <IconMorph morph="play-pause" state={state} className="size-5" />
       <IconMorph morph="plus-minus" state={state} className="size-5" />
-      <span style={noteStyle}>当前 state = {state}（受控驱动）</span>
     </div>
   );
 }
@@ -133,7 +126,6 @@ function ConfirmMorphPreview() {
         onConfirm={() => new Promise((_, reject) => setTimeout(reject, 800))}
         onUndo={() => {}}
       />
-      <span style={noteStyle}>左侧演示成功流程，右侧演示失败后可撤销</span>
     </div>
   );
 }
@@ -151,17 +143,14 @@ function FloatingButtonGroupPreview() {
           { value: 'chart', label: '图表', icon: <Icon name="chart" size={16} /> },
         ]}
       />
-      <span style={noteStyle}>当前视图：{value}（悬停高亮跟随，点击落定）</span>
     </div>
   );
 }
 
 function ExpandingButtonGroupPreview() {
-  const [last, setLast] = useState('');
   return (
     <div style={rowStyle}>
       <ExpandingButtonGroup
-        onSelect={(value) => setLast(`已触发：${value}`)}
         options={[
           { value: 'edit', label: '编辑', icon: <Icon name="pencil" size={16} /> },
           { value: 'share', label: '分享', icon: <Icon name="share" size={16} /> },
@@ -175,7 +164,6 @@ function ExpandingButtonGroupPreview() {
           },
         ]}
       />
-      <span style={noteStyle}>{last || '悬停展开 label；「删除」需二次点击确认'}</span>
     </div>
   );
 }

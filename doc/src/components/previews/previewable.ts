@@ -1,7 +1,7 @@
 /**
- * 可预览组件清单（单一来源）：详情页「预览」章节据此决定渲染
- * 运行态预览岛还是 previewNote 说明。组件 id 与 ComponentPreview.tsx
- * 注册表保持一致。
+ * 可预览组件清单（单一来源）：详情页「预览」页签据此决定渲染
+ * 运行态预览岛还是「不适用」说明（说明文案取 previewNote 兜底）。
+ * 组件 id 与 ComponentPreview.tsx 注册表保持一致。
  */
 export const PREVIEWABLE_IDS: readonly string[] = [
   'component.button',
