@@ -134,7 +134,11 @@ export function Header({
   const dropdownRight = dropdown !== undefined && dropdown.position === 'right';
   const hasMenu = menu !== undefined && menu.length > 0;
   const hasLocales = locales !== undefined && locales.length > 0;
-  const hasUser = user !== undefined;
+  // name / avatar 均缺省时视为用户数据未就绪（如布局 DSL 的
+  // ${data.session.user.*} 在 session dataSource 解析完成前渲染）：
+  // 不渲染用户区，避免 HeaderUserArea 对 name.charAt(0) 抛错。
+  const hasUser =
+    user !== undefined && (user.name !== undefined || user.avatar !== undefined);
 
   const rootClass = cn(
     'flex h-14 shrink-0 items-center gap-4 border-b bg-card px-4',
@@ -316,7 +320,7 @@ function HeaderUserArea({
         {user.avatar !== undefined && (
           <AvatarImage src={user.avatar} alt={user.name} />
         )}
-        <AvatarFallback>{user.name.charAt(0)}</AvatarFallback>
+        <AvatarFallback>{(user.name ?? '').charAt(0)}</AvatarFallback>
       </Avatar>
       <span className="text-sm">{user.name}</span>
     </>
