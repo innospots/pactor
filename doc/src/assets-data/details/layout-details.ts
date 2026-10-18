@@ -15,15 +15,36 @@ import type { ComponentDetailContent } from './component-details.ts';
 export const layoutDetailContents: Record<string, ComponentDetailContent> = {
   'component.layout': {
     dsl: {
+  "type": "Layout",
+  "children": [
+    {
+      "type": "Header",
+      "children": [
+        {
+          "type": "Text",
+          "props": {
+            "text": "Header 顶部区",
+            "style": {
+              "display": "block",
+              "padding": 8
+            }
+          }
+        }
+      ]
+    },
+    {
       "type": "Layout",
       "children": [
         {
-          "type": "Header",
+          "type": "Sider",
+          "props": {
+            "width": 120
+          },
           "children": [
             {
               "type": "Text",
               "props": {
-                "text": "Header 顶部区",
+                "text": "Sider 侧边",
                 "style": {
                   "display": "block",
                   "padding": 8
@@ -33,50 +54,12 @@ export const layoutDetailContents: Record<string, ComponentDetailContent> = {
           ]
         },
         {
-          "type": "Layout",
-          "children": [
-            {
-              "type": "Sider",
-              "props": {
-                "width": 120
-              },
-              "children": [
-                {
-                  "type": "Text",
-                  "props": {
-                    "text": "Sider 侧边",
-                    "style": {
-                      "display": "block",
-                      "padding": 8
-                    }
-                  }
-                }
-              ]
-            },
-            {
-              "type": "Content",
-              "children": [
-                {
-                  "type": "Text",
-                  "props": {
-                    "text": "Content 内容区",
-                    "style": {
-                      "display": "block",
-                      "padding": 8
-                    }
-                  }
-                }
-              ]
-            }
-          ]
-        },
-        {
-          "type": "Footer",
+          "type": "Content",
           "children": [
             {
               "type": "Text",
               "props": {
-                "text": "Footer 底部区",
+                "text": "Content 内容区",
                 "style": {
                   "display": "block",
                   "padding": 8
@@ -87,6 +70,23 @@ export const layoutDetailContents: Record<string, ComponentDetailContent> = {
         }
       ]
     },
+    {
+      "type": "Footer",
+      "children": [
+        {
+          "type": "Text",
+          "props": {
+            "text": "Footer 底部区",
+            "style": {
+              "display": "block",
+              "padding": 8
+            }
+          }
+        }
+      ]
+    }
+  ]
+},
     whenToUse: [
       '**何时使用**',
       '',
@@ -131,56 +131,86 @@ export const layoutDetailContents: Record<string, ComponentDetailContent> = {
   },
   'component.grid': {
     dsl: {
-      "type": "Grid",
+  "type": "Grid",
+  "props": {
+    "columns": 3,
+    "gap": 12
+  },
+  "children": [
+    {
+      "type": "Text",
       "props": {
-        "columns": 3,
-        "gap": 12
-      },
-      "children": [
-        {
-          "type": "Card",
-          "props": {
-            "title": "活跃用户"
-          },
-          "children": [
-            {
-              "type": "Text",
-              "props": {
-                "text": "1,284"
-              }
-            }
-          ]
-        },
-        {
-          "type": "Card",
-          "props": {
-            "title": "订单数"
-          },
-          "children": [
-            {
-              "type": "Text",
-              "props": {
-                "text": "356"
-              }
-            }
-          ]
-        },
-        {
-          "type": "Card",
-          "props": {
-            "title": "转化率"
-          },
-          "children": [
-            {
-              "type": "Text",
-              "props": {
-                "text": "12.4%"
-              }
-            }
-          ]
+        "text": "",
+        "style": {
+          "display": "block",
+          "height": 48,
+          "borderRadius": 6,
+          "background": "#dbeafe"
         }
-      ]
+      }
     },
+    {
+      "type": "Text",
+      "props": {
+        "text": "",
+        "style": {
+          "display": "block",
+          "height": 48,
+          "borderRadius": 6,
+          "background": "#dcfce7"
+        }
+      }
+    },
+    {
+      "type": "Text",
+      "props": {
+        "text": "",
+        "style": {
+          "display": "block",
+          "height": 48,
+          "borderRadius": 6,
+          "background": "#fef3c7"
+        }
+      }
+    },
+    {
+      "type": "Text",
+      "props": {
+        "text": "",
+        "style": {
+          "display": "block",
+          "height": 48,
+          "borderRadius": 6,
+          "background": "#fee2e2"
+        }
+      }
+    },
+    {
+      "type": "Text",
+      "props": {
+        "text": "",
+        "style": {
+          "display": "block",
+          "height": 48,
+          "borderRadius": 6,
+          "background": "#ede9fe"
+        }
+      }
+    },
+    {
+      "type": "Text",
+      "props": {
+        "text": "",
+        "style": {
+          "display": "block",
+          "height": 48,
+          "borderRadius": 6,
+          "background": "#cffafe"
+        }
+      }
+    }
+  ]
+},
     whenToUse: [
       '**何时使用**',
       '',
@@ -224,33 +254,57 @@ export const layoutDetailContents: Record<string, ComponentDetailContent> = {
   },
   'component.flex': {
     dsl: {
-      "type": "Flex",
+  "type": "Flex",
+  "props": {
+    "justify": "space-between",
+    "align": "center",
+    "gap": 12,
+    "style": {
+      "width": "100%"
+    }
+  },
+  "children": [
+    {
+      "type": "Text",
       "props": {
-        "justify": "space-between",
-        "align": "center",
-        "gap": 12
-      },
-      "children": [
-        {
-          "type": "Text",
-          "props": {
-            "text": "左区"
-          }
-        },
-        {
-          "type": "Text",
-          "props": {
-            "text": "中区"
-          }
-        },
-        {
-          "type": "Text",
-          "props": {
-            "text": "右区"
-          }
+        "text": "左",
+        "style": {
+          "display": "block",
+          "padding": 16,
+          "borderRadius": 8,
+          "border": "1px solid var(--border)",
+          "background": "#dbeafe"
         }
-      ]
+      }
     },
+    {
+      "type": "Text",
+      "props": {
+        "text": "中",
+        "style": {
+          "display": "block",
+          "padding": 16,
+          "borderRadius": 8,
+          "border": "1px solid var(--border)",
+          "background": "#dcfce7"
+        }
+      }
+    },
+    {
+      "type": "Text",
+      "props": {
+        "text": "右",
+        "style": {
+          "display": "block",
+          "padding": 16,
+          "borderRadius": 8,
+          "border": "1px solid var(--border)",
+          "background": "#fef3c7"
+        }
+      }
+    }
+  ]
+},
     whenToUse: [
       '**何时使用**',
       '',
@@ -297,81 +351,83 @@ export const layoutDetailContents: Record<string, ComponentDetailContent> = {
   },
   'component.row': {
     dsl: {
-      "type": "Row",
+  "type": "Row",
+  "props": {
+    "gutter": [
+      16,
+      12
+    ],
+    "justify": "center",
+    "style": {
+      "width": "100%"
+    }
+  },
+  "children": [
+    {
+      "type": "Col",
       "props": {
-        "gutter": [16, 12],
-        "justify": "center",
-        "align": "middle"
+        "span": 6
       },
       "children": [
         {
-          "type": "Col",
+          "type": "Text",
           "props": {
-            "span": 6
-          },
-          "children": [
-            {
-              "type": "Card",
-              "props": {
-                "title": "左"
-              },
-              "children": [
-                {
-                  "type": "Text",
-                  "props": {
-                    "text": "span 6"
-                  }
-                }
-              ]
+            "text": "Col 1",
+            "style": {
+              "display": "block",
+              "height": 48,
+              "borderRadius": 6,
+              "background": "#dbeafe",
+              "padding": "0 8px"
             }
-          ]
-        },
-        {
-          "type": "Col",
-          "props": {
-            "span": 8
-          },
-          "children": [
-            {
-              "type": "Card",
-              "props": {
-                "title": "中"
-              },
-              "children": [
-                {
-                  "type": "Text",
-                  "props": {
-                    "text": "span 8"
-                  }
-                }
-              ]
-            }
-          ]
-        },
-        {
-          "type": "Col",
-          "props": {
-            "span": 8
-          },
-          "children": [
-            {
-              "type": "Card",
-              "props": {
-                "title": "右"
-              },
-              "children": [
-                {
-                  "type": "Text",
-                  "props": {
-                    "text": "span 8"
-                  }
-                }
-              ]
-            }
-          ]
+          }
         }
       ]
     },
+    {
+      "type": "Col",
+      "props": {
+        "span": 8
+      },
+      "children": [
+        {
+          "type": "Text",
+          "props": {
+            "text": "Col 2",
+            "style": {
+              "display": "block",
+              "height": 48,
+              "borderRadius": 6,
+              "background": "#dcfce7",
+              "padding": "0 8px"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "type": "Col",
+      "props": {
+        "span": 8
+      },
+      "children": [
+        {
+          "type": "Text",
+          "props": {
+            "text": "Col 3",
+            "style": {
+              "display": "block",
+              "height": 48,
+              "borderRadius": 6,
+              "background": "#fef3c7",
+              "padding": "0 8px"
+            }
+          }
+        }
+      ]
+    }
+  ]
+},
     whenToUse: [
       '**何时使用**',
       '',
@@ -416,62 +472,79 @@ export const layoutDetailContents: Record<string, ComponentDetailContent> = {
   },
   'component.col': {
     dsl: {
-      "type": "Row",
+  "type": "Row",
+  "props": {
+    "style": {
+      "width": "100%"
+    }
+  },
+  "children": [
+    {
+      "type": "Col",
       "props": {
-        "gutter": 16
+        "span": 8
       },
       "children": [
         {
-          "type": "Col",
+          "type": "Text",
           "props": {
-            "span": 24,
-            "md": {
-              "span": 8,
-              "offset": 2
+            "text": "span 8",
+            "style": {
+              "display": "block",
+              "height": 48,
+              "borderRadius": 6,
+              "background": "#dbeafe"
             }
-          },
-          "children": [
-            {
-              "type": "Card",
-              "props": {
-                "title": "左侧内容"
-              },
-              "children": [
-                {
-                  "type": "Text",
-                  "props": {
-                    "text": "移动端整行，md 起占 8 栏并偏移 2 栏"
-                  }
-                }
-              ]
-            }
-          ]
-        },
-        {
-          "type": "Col",
-          "props": {
-            "span": 24,
-            "md": 14
-          },
-          "children": [
-            {
-              "type": "Card",
-              "props": {
-                "title": "右侧内容"
-              },
-              "children": [
-                {
-                  "type": "Text",
-                  "props": {
-                    "text": "md 起占 14 栏"
-                  }
-                }
-              ]
-            }
-          ]
+          }
         }
       ]
     },
+    {
+      "type": "Col",
+      "props": {
+        "span": 8,
+        "offset": 4
+      },
+      "children": [
+        {
+          "type": "Text",
+          "props": {
+            "text": "span 8 + offset 4",
+            "style": {
+              "display": "block",
+              "height": 48,
+              "borderRadius": 6,
+              "background": "#dcfce7"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "type": "Col",
+      "props": {
+        "span": 4,
+        "style": {
+          "order": 3
+        }
+      },
+      "children": [
+        {
+          "type": "Text",
+          "props": {
+            "text": "order 3",
+            "style": {
+              "display": "block",
+              "height": 48,
+              "borderRadius": 6,
+              "background": "#fef3c7"
+            }
+          }
+        }
+      ]
+    }
+  ]
+},
     whenToUse: [
       '**何时使用**',
       '',
@@ -518,41 +591,41 @@ export const layoutDetailContents: Record<string, ComponentDetailContent> = {
   },
   'component.splitter': {
     dsl: {
-      "type": "Resizable",
-      "props": {
-        "panels": [
+  "type": "Resizable",
+  "props": {
+    "panels": [
+      {
+        "defaultSize": 40,
+        "children": [
           {
-            "defaultSize": 40,
-            "children": [
-              {
-                "type": "Text",
-                "props": {
-                  "text": "左侧面板",
-                  "style": {
-                    "display": "block",
-                    "padding": 8
-                  }
-                }
+            "type": "Text",
+            "props": {
+              "text": "左侧面板",
+              "style": {
+                "display": "block",
+                "padding": 8
               }
-            ]
-          },
+            }
+          }
+        ]
+      },
+      {
+        "children": [
           {
-            "children": [
-              {
-                "type": "Text",
-                "props": {
-                  "text": "右侧面板（拖动手柄调整）",
-                  "style": {
-                    "display": "block",
-                    "padding": 8
-                  }
-                }
+            "type": "Text",
+            "props": {
+              "text": "右侧面板（拖动手柄调整）",
+              "style": {
+                "display": "block",
+                "padding": 8
               }
-            ]
+            }
           }
         ]
       }
-    },
+    ]
+  }
+},
     whenToUse: [
       '**何时使用**',
       '',
@@ -597,57 +670,57 @@ export const layoutDetailContents: Record<string, ComponentDetailContent> = {
   },
   'component.resizable': {
     dsl: {
-      "type": "Resizable",
-      "props": {
-        "direction": "vertical",
-        "panels": [
+  "type": "Resizable",
+  "props": {
+    "direction": "vertical",
+    "panels": [
+      {
+        "defaultSize": 30,
+        "children": [
           {
-            "defaultSize": 30,
-            "children": [
-              {
-                "type": "Text",
-                "props": {
-                  "text": "面板一",
-                  "style": {
-                    "display": "block",
-                    "padding": 8
-                  }
-                }
+            "type": "Text",
+            "props": {
+              "text": "面板一",
+              "style": {
+                "display": "block",
+                "padding": 8
               }
-            ]
-          },
+            }
+          }
+        ]
+      },
+      {
+        "children": [
           {
-            "children": [
-              {
-                "type": "Text",
-                "props": {
-                  "text": "面板二（纵向排列，手柄可拖拽）",
-                  "style": {
-                    "display": "block",
-                    "padding": 8
-                  }
-                }
+            "type": "Text",
+            "props": {
+              "text": "面板二（纵向排列，手柄可拖拽）",
+              "style": {
+                "display": "block",
+                "padding": 8
               }
-            ]
-          },
+            }
+          }
+        ]
+      },
+      {
+        "defaultSize": 25,
+        "children": [
           {
-            "defaultSize": 25,
-            "children": [
-              {
-                "type": "Text",
-                "props": {
-                  "text": "面板三",
-                  "style": {
-                    "display": "block",
-                    "padding": 8
-                  }
-                }
+            "type": "Text",
+            "props": {
+              "text": "面板三",
+              "style": {
+                "display": "block",
+                "padding": 8
               }
-            ]
+            }
           }
         ]
       }
-    },
+    ]
+  }
+},
     whenToUse: [
       '**何时使用**',
       '',
@@ -691,21 +764,30 @@ export const layoutDetailContents: Record<string, ComponentDetailContent> = {
   },
   'component.aspect-ratio': {
     dsl: {
-      "type": "AspectRatio",
+  "type": "AspectRatio",
+  "props": {
+    "ratio": "16/9"
+  },
+  "children": [
+    {
+      "type": "Text",
       "props": {
-        "ratio": "16/9"
-      },
-      "children": [
-        {
-          "type": "Image",
-          "props": {
-            "src": "https://example.com/cover.png",
-            "alt": "封面图",
-            "preview": false
-          }
+        "text": "16 / 9",
+        "style": {
+          "display": "flex",
+          "width": "100%",
+          "height": "100%",
+          "borderRadius": 8,
+          "background": "#dbeafe",
+          "alignItems": "center",
+          "justifyContent": "center",
+          "fontSize": 13,
+          "color": "#1e40af"
         }
-      ]
-    },
+      }
+    }
+  ]
+},
     whenToUse: [
       '**何时使用**',
       '',

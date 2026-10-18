@@ -17,9 +17,33 @@ const COMMON_EVENT_NOTE =
 export const chartDetailContents: Record<string, ComponentDetailContent> = {
   'component.metric-card': {
     dsl: {
-      type: 'MetricCard',
-      props: { title: '月收入', value: 12800, prefix: '¥', trend: 12.5, trendLabel: '较上月' },
+  "type": "Flex",
+  "props": {
+    "gap": 12,
+    "align": "center"
+  },
+  "children": [
+    {
+      "type": "MetricCard",
+      "props": {
+        "title": "月收入",
+        "value": 12800,
+        "prefix": "¥",
+        "trend": 12.5,
+        "trendLabel": "较上月"
+      }
     },
+    {
+      "type": "MetricCard",
+      "props": {
+        "title": "退款率",
+        "value": "1.8%",
+        "trend": -0.6,
+        "trendLabel": "较上月"
+      }
+    }
+  ]
+},
     whenToUse: [
       '**何时使用**',
       '',
@@ -56,10 +80,49 @@ export const chartDetailContents: Record<string, ComponentDetailContent> = {
 
   'component.line-chart': {
     dsl: {
-      type: 'LineChart',
-      props: { data: '${data.visits}', xKey: 'month', yKeys: ['visits', 'signups'], smooth: true },
-      events: { onSelect: { action: 'setState', params: { picked: '${event}' } } },
-    },
+  "type": "LineChart",
+  "props": {
+    "data": [
+      {
+        "month": "1月",
+        "visits": 320,
+        "signups": 120
+      },
+      {
+        "month": "2月",
+        "visits": 452,
+        "signups": 168
+      },
+      {
+        "month": "3月",
+        "visits": 398,
+        "signups": 155
+      },
+      {
+        "month": "4月",
+        "visits": 560,
+        "signups": 210
+      },
+      {
+        "month": "5月",
+        "visits": 480,
+        "signups": 190
+      },
+      {
+        "month": "6月",
+        "visits": 612,
+        "signups": 256
+      }
+    ],
+    "xKey": "month",
+    "yKeys": [
+      "visits",
+      "signups"
+    ],
+    "smooth": true,
+    "title": "访问与注册趋势"
+  }
+},
     whenToUse: [
       '**何时使用**',
       '',
@@ -100,9 +163,47 @@ export const chartDetailContents: Record<string, ComponentDetailContent> = {
 
   'component.column-chart': {
     dsl: {
-      type: 'ColumnChart',
-      props: { data: '${data.sales}', xKey: 'city', yKeys: ['amount'], stacked: true },
-    },
+  "type": "ColumnChart",
+  "props": {
+    "data": [
+      {
+        "month": "1月",
+        "visits": 320,
+        "signups": 120
+      },
+      {
+        "month": "2月",
+        "visits": 452,
+        "signups": 168
+      },
+      {
+        "month": "3月",
+        "visits": 398,
+        "signups": 155
+      },
+      {
+        "month": "4月",
+        "visits": 560,
+        "signups": 210
+      },
+      {
+        "month": "5月",
+        "visits": 480,
+        "signups": 190
+      },
+      {
+        "month": "6月",
+        "visits": 612,
+        "signups": 256
+      }
+    ],
+    "xKey": "month",
+    "yKeys": [
+      "visits"
+    ],
+    "title": "月度访问"
+  }
+},
     whenToUse: [
       '**何时使用**',
       '',
@@ -141,9 +242,37 @@ export const chartDetailContents: Record<string, ComponentDetailContent> = {
 
   'component.bar-chart': {
     dsl: {
-      type: 'BarChart',
-      props: { data: '${data.channels}', yKey: 'channel', xKeys: ['clicks'], title: '渠道点击' },
-    },
+  "type": "BarChart",
+  "props": {
+    "data": [
+      {
+        "channel": "直接访问",
+        "count": 420
+      },
+      {
+        "channel": "搜索引擎",
+        "count": 315
+      },
+      {
+        "channel": "社交媒体",
+        "count": 238
+      },
+      {
+        "channel": "外部链接",
+        "count": 146
+      },
+      {
+        "channel": "邮件推广",
+        "count": 92
+      }
+    ],
+    "yKey": "channel",
+    "xKeys": [
+      "count"
+    ],
+    "title": "渠道访问 Top5"
+  }
+},
     whenToUse: [
       '**何时使用**',
       '',
@@ -170,9 +299,49 @@ export const chartDetailContents: Record<string, ComponentDetailContent> = {
 
   'component.area-chart': {
     dsl: {
-      type: 'AreaChart',
-      props: { data: '${data.daily}', xKey: 'date', yKeys: ['pv', 'uv'], stacked: true, fillOpacity: 0.3 },
-    },
+  "type": "AreaChart",
+  "props": {
+    "data": [
+      {
+        "month": "1月",
+        "visits": 320,
+        "signups": 120
+      },
+      {
+        "month": "2月",
+        "visits": 452,
+        "signups": 168
+      },
+      {
+        "month": "3月",
+        "visits": 398,
+        "signups": 155
+      },
+      {
+        "month": "4月",
+        "visits": 560,
+        "signups": 210
+      },
+      {
+        "month": "5月",
+        "visits": 480,
+        "signups": 190
+      },
+      {
+        "month": "6月",
+        "visits": 612,
+        "signups": 256
+      }
+    ],
+    "xKey": "month",
+    "yKeys": [
+      "visits",
+      "signups"
+    ],
+    "stacked": true,
+    "title": "访问构成"
+  }
+},
     whenToUse: [
       '**何时使用**',
       '',
@@ -202,9 +371,35 @@ export const chartDetailContents: Record<string, ComponentDetailContent> = {
 
   'component.pie-chart': {
     dsl: {
-      type: 'PieChart',
-      props: { data: '${data.traffic}', nameKey: 'channel', valueKey: 'visits', showLabel: true },
-    },
+  "type": "PieChart",
+  "props": {
+    "data": [
+      {
+        "channel": "直接访问",
+        "count": 420
+      },
+      {
+        "channel": "搜索引擎",
+        "count": 315
+      },
+      {
+        "channel": "社交媒体",
+        "count": 238
+      },
+      {
+        "channel": "外部链接",
+        "count": 146
+      },
+      {
+        "channel": "邮件推广",
+        "count": 92
+      }
+    ],
+    "nameKey": "channel",
+    "valueKey": "count",
+    "title": "流量来源"
+  }
+},
     whenToUse: [
       '**何时使用**',
       '',
@@ -234,9 +429,37 @@ export const chartDetailContents: Record<string, ComponentDetailContent> = {
 
   'component.donut-chart': {
     dsl: {
-      type: 'DonutChart',
-      props: { data: '${data.usage}', nameKey: 'type', valueKey: 'size', centerLabel: '总容量', centerValue: '1.2T' },
-    },
+  "type": "DonutChart",
+  "props": {
+    "data": [
+      {
+        "channel": "直接访问",
+        "count": 420
+      },
+      {
+        "channel": "搜索引擎",
+        "count": 315
+      },
+      {
+        "channel": "社交媒体",
+        "count": 238
+      },
+      {
+        "channel": "外部链接",
+        "count": 146
+      },
+      {
+        "channel": "邮件推广",
+        "count": 92
+      }
+    ],
+    "nameKey": "channel",
+    "valueKey": "count",
+    "centerLabel": "总访问",
+    "centerValue": "1211",
+    "title": "流量来源"
+  }
+},
     whenToUse: [
       '**何时使用**',
       '',
@@ -265,9 +488,41 @@ export const chartDetailContents: Record<string, ComponentDetailContent> = {
 
   'component.scatter-chart': {
     dsl: {
-      type: 'ScatterChart',
-      props: { data: '${data.campaigns}', xKey: 'cost', yKey: 'roi', seriesKey: 'channel' },
-    },
+  "type": "ScatterChart",
+  "props": {
+    "data": [
+      {
+        "cost": 120,
+        "roi": 2.1,
+        "channel": "搜索"
+      },
+      {
+        "cost": 200,
+        "roi": 1.6,
+        "channel": "搜索"
+      },
+      {
+        "cost": 150,
+        "roi": 3.2,
+        "channel": "社交"
+      },
+      {
+        "cost": 260,
+        "roi": 2.4,
+        "channel": "社交"
+      },
+      {
+        "cost": 90,
+        "roi": 1.2,
+        "channel": "邮件"
+      }
+    ],
+    "xKey": "cost",
+    "yKey": "roi",
+    "seriesKey": "channel",
+    "title": "成本-ROI 分布"
+  }
+},
     whenToUse: [
       '**何时使用**',
       '',
@@ -297,9 +552,41 @@ export const chartDetailContents: Record<string, ComponentDetailContent> = {
 
   'component.bubble-chart': {
     dsl: {
-      type: 'BubbleChart',
-      props: { data: '${data.products}', xKey: 'price', yKey: 'sales', sizeKey: 'profit' },
-    },
+  "type": "BubbleChart",
+  "props": {
+    "data": [
+      {
+        "price": 99,
+        "sales": 820,
+        "profit": 18
+      },
+      {
+        "price": 199,
+        "sales": 460,
+        "profit": 52
+      },
+      {
+        "price": 299,
+        "sales": 210,
+        "profit": 76
+      },
+      {
+        "price": 399,
+        "sales": 96,
+        "profit": 95
+      },
+      {
+        "price": 159,
+        "sales": 350,
+        "profit": 40
+      }
+    ],
+    "xKey": "price",
+    "yKey": "sales",
+    "sizeKey": "profit",
+    "title": "价格-销量-利润"
+  }
+},
     whenToUse: [
       '**何时使用**',
       '',
@@ -328,17 +615,38 @@ export const chartDetailContents: Record<string, ComponentDetailContent> = {
 
   'component.radar-chart': {
     dsl: {
-      type: 'RadarChart',
-      props: {
-        data: [
-          { skill: '研发', alice: 90, bob: 70 },
-          { skill: '市场', alice: 60, bob: 85 },
-          { skill: '管理', alice: 75, bob: 65 },
-        ],
-        indicatorKey: 'skill',
-        yKeys: ['alice', 'bob'],
+  "type": "RadarChart",
+  "props": {
+    "data": [
+      {
+        "skill": "研发",
+        "alice": 90,
+        "bob": 70
       },
-    },
+      {
+        "skill": "市场",
+        "alice": 60,
+        "bob": 85
+      },
+      {
+        "skill": "管理",
+        "alice": 75,
+        "bob": 65
+      },
+      {
+        "skill": "设计",
+        "alice": 65,
+        "bob": 80
+      }
+    ],
+    "indicatorKey": "skill",
+    "yKeys": [
+      "alice",
+      "bob"
+    ],
+    "title": "能力对比"
+  }
+},
     whenToUse: [
       '**何时使用**',
       '',
@@ -368,9 +676,31 @@ export const chartDetailContents: Record<string, ComponentDetailContent> = {
 
   'component.funnel-chart': {
     dsl: {
-      type: 'FunnelChart',
-      props: { data: '${data.funnel}', nameKey: 'stage', valueKey: 'users' },
-    },
+  "type": "FunnelChart",
+  "props": {
+    "data": [
+      {
+        "stage": "访问",
+        "value": 10000
+      },
+      {
+        "stage": "注册",
+        "value": 3200
+      },
+      {
+        "stage": "激活",
+        "value": 1500
+      },
+      {
+        "stage": "付费",
+        "value": 860
+      }
+    ],
+    "nameKey": "stage",
+    "valueKey": "value",
+    "title": "注册转化漏斗"
+  }
+},
     whenToUse: [
       '**何时使用**',
       '',
@@ -400,9 +730,27 @@ export const chartDetailContents: Record<string, ComponentDetailContent> = {
 
   'component.gauge-chart': {
     dsl: {
-      type: 'GaugeChart',
-      props: { value: 72, min: 0, max: 100, unit: '%', thresholds: [{ value: 60, color: 'var(--success)' }, { value: 90, color: 'var(--warning)' }, { value: 100, color: 'var(--destructive)' }] },
-    },
+  "type": "GaugeChart",
+  "props": {
+    "value": 72,
+    "unit": "%",
+    "thresholds": [
+      {
+        "value": 60,
+        "color": "var(--success)"
+      },
+      {
+        "value": 90,
+        "color": "var(--warning)"
+      },
+      {
+        "value": 100,
+        "color": "var(--destructive)"
+      }
+    ],
+    "title": "服务健康度"
+  }
+},
     whenToUse: [
       '**何时使用**',
       '',
@@ -432,9 +780,116 @@ export const chartDetailContents: Record<string, ComponentDetailContent> = {
 
   'component.heatmap': {
     dsl: {
-      type: 'Heatmap',
-      props: { data: '${data.punch}', xKey: 'hour', yKey: 'weekday', valueKey: 'commits' },
-    },
+  "type": "Heatmap",
+  "props": {
+    "data": [
+      {
+        "hour": "9时",
+        "day": "周一",
+        "commits": 7
+      },
+      {
+        "hour": "12时",
+        "day": "周一",
+        "commits": 14
+      },
+      {
+        "hour": "15时",
+        "day": "周一",
+        "commits": 21
+      },
+      {
+        "hour": "18时",
+        "day": "周一",
+        "commits": 28
+      },
+      {
+        "hour": "9时",
+        "day": "周二",
+        "commits": 20
+      },
+      {
+        "hour": "12时",
+        "day": "周二",
+        "commits": 27
+      },
+      {
+        "hour": "15时",
+        "day": "周二",
+        "commits": 34
+      },
+      {
+        "hour": "18时",
+        "day": "周二",
+        "commits": 41
+      },
+      {
+        "hour": "9时",
+        "day": "周三",
+        "commits": 33
+      },
+      {
+        "hour": "12时",
+        "day": "周三",
+        "commits": 40
+      },
+      {
+        "hour": "15时",
+        "day": "周三",
+        "commits": 7
+      },
+      {
+        "hour": "18时",
+        "day": "周三",
+        "commits": 14
+      },
+      {
+        "hour": "9时",
+        "day": "周四",
+        "commits": 6
+      },
+      {
+        "hour": "12时",
+        "day": "周四",
+        "commits": 13
+      },
+      {
+        "hour": "15时",
+        "day": "周四",
+        "commits": 20
+      },
+      {
+        "hour": "18时",
+        "day": "周四",
+        "commits": 27
+      },
+      {
+        "hour": "9时",
+        "day": "周五",
+        "commits": 19
+      },
+      {
+        "hour": "12时",
+        "day": "周五",
+        "commits": 26
+      },
+      {
+        "hour": "15时",
+        "day": "周五",
+        "commits": 33
+      },
+      {
+        "hour": "18时",
+        "day": "周五",
+        "commits": 40
+      }
+    ],
+    "xKey": "hour",
+    "yKey": "day",
+    "valueKey": "commits",
+    "title": "提交热力"
+  }
+},
     whenToUse: [
       '**何时使用**',
       '',
@@ -462,22 +917,47 @@ export const chartDetailContents: Record<string, ComponentDetailContent> = {
 
   'component.tree-chart': {
     dsl: {
-      type: 'TreeChart',
-      props: {
-        data: [
+  "type": "TreeChart",
+  "props": {
+    "data": [
+      {
+        "name": "总经理",
+        "children": [
           {
-            name: '总经理',
-            children: [
-              { name: '技术部', children: [{ name: '前端组' }, { name: '后端组' }] },
-              { name: '市场部' },
-            ],
+            "name": "技术部",
+            "children": [
+              {
+                "name": "前端组"
+              },
+              {
+                "name": "后端组"
+              },
+              {
+                "name": "测试组"
+              }
+            ]
           },
-        ],
-        orient: 'vertical',
-        edgeShape: 'curve',
-        initialTreeDepth: -1,
-      },
-    },
+          {
+            "name": "市场部",
+            "children": [
+              {
+                "name": "品牌组"
+              },
+              {
+                "name": "渠道组"
+              }
+            ]
+          },
+          {
+            "name": "运营部"
+          }
+        ]
+      }
+    ],
+    "title": "组织架构",
+    "initialTreeDepth": -1
+  }
+},
     whenToUse: [
       '**何时使用**',
       '',
@@ -514,15 +994,47 @@ export const chartDetailContents: Record<string, ComponentDetailContent> = {
 
   'component.sankey-chart': {
     dsl: {
-      type: 'SankeyChart',
-      props: {
-        nodes: [{ name: '首页' }, { name: '详情' }, { name: '下单' }],
-        links: [
-          { source: '首页', target: '详情', value: 60 },
-          { source: '详情', target: '下单', value: 25 },
-        ],
+  "type": "SankeyChart",
+  "props": {
+    "nodes": [
+      {
+        "name": "首页"
       },
-    },
+      {
+        "name": "详情"
+      },
+      {
+        "name": "下单"
+      },
+      {
+        "name": "流失"
+      }
+    ],
+    "links": [
+      {
+        "source": "首页",
+        "target": "详情",
+        "value": 60
+      },
+      {
+        "source": "首页",
+        "target": "流失",
+        "value": 40
+      },
+      {
+        "source": "详情",
+        "target": "下单",
+        "value": 25
+      },
+      {
+        "source": "详情",
+        "target": "流失",
+        "value": 35
+      }
+    ],
+    "title": "用户路径"
+  }
+},
     whenToUse: [
       '**何时使用**',
       '',
@@ -551,9 +1063,106 @@ export const chartDetailContents: Record<string, ComponentDetailContent> = {
 
   'component.map-chart': {
     dsl: {
-      type: 'MapChart',
-      props: { mapName: 'china', geoJsonUrl: '/maps/china.json', data: '${data.region}', nameKey: 'province', valueKey: 'orders' },
+  "type": "Flex",
+  "props": {
+    "direction": "vertical",
+    "gap": 24
+  },
+  "children": [
+    {
+      "type": "MapChart",
+      "props": {
+        "mapName": "asset-china",
+        "geoJsonUrl": "/maps/china.json",
+        "data": [
+          {
+            "name": "北京",
+            "value": 980
+          },
+          {
+            "name": "上海",
+            "value": 850
+          },
+          {
+            "name": "广东",
+            "value": 920
+          },
+          {
+            "name": "浙江",
+            "value": 720
+          },
+          {
+            "name": "江苏",
+            "value": 760
+          },
+          {
+            "name": "四川",
+            "value": 480
+          },
+          {
+            "name": "湖北",
+            "value": 430
+          },
+          {
+            "name": "陕西",
+            "value": 360
+          },
+          {
+            "name": "辽宁",
+            "value": 320
+          },
+          {
+            "name": "新疆",
+            "value": 180
+          }
+        ],
+        "title": "中国地图"
+      }
     },
+    {
+      "type": "MapChart",
+      "props": {
+        "mapName": "asset-world",
+        "geoJsonUrl": "/maps/world.json",
+        "data": [
+          {
+            "name": "China",
+            "value": 980
+          },
+          {
+            "name": "United States",
+            "value": 860
+          },
+          {
+            "name": "Russia",
+            "value": 640
+          },
+          {
+            "name": "Brazil",
+            "value": 520
+          },
+          {
+            "name": "India",
+            "value": 700
+          },
+          {
+            "name": "Australia",
+            "value": 380
+          },
+          {
+            "name": "Germany",
+            "value": 420
+          },
+          {
+            "name": "Japan",
+            "value": 450
+          }
+        ],
+        "title": "世界地图"
+      }
+    }
+  ]
+},
     whenToUse: [
       '**何时使用**',
       '',
@@ -589,16 +1198,57 @@ export const chartDetailContents: Record<string, ComponentDetailContent> = {
 
   'component.composed-chart': {
     dsl: {
-      type: 'ComposedChart',
-      props: {
-        data: '${data.monthly}',
-        xKey: 'month',
-        series: [
-          { type: 'bar', dataKey: 'orders' },
-          { type: 'line', dataKey: 'revenue', yAxisIndex: 1, name: '营收' },
-        ],
+  "type": "ComposedChart",
+  "props": {
+    "data": [
+      {
+        "month": "1月",
+        "visits": 320,
+        "signups": 120
       },
-    },
+      {
+        "month": "2月",
+        "visits": 452,
+        "signups": 168
+      },
+      {
+        "month": "3月",
+        "visits": 398,
+        "signups": 155
+      },
+      {
+        "month": "4月",
+        "visits": 560,
+        "signups": 210
+      },
+      {
+        "month": "5月",
+        "visits": 480,
+        "signups": 190
+      },
+      {
+        "month": "6月",
+        "visits": 612,
+        "signups": 256
+      }
+    ],
+    "xKey": "month",
+    "series": [
+      {
+        "type": "bar",
+        "dataKey": "visits",
+        "name": "访问量"
+      },
+      {
+        "type": "line",
+        "dataKey": "signups",
+        "yAxisIndex": 1,
+        "name": "注册量"
+      }
+    ],
+    "title": "访问 × 注册"
+  }
+},
     whenToUse: [
       '**何时使用**',
       '',

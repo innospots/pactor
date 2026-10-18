@@ -13,13 +13,36 @@ import type { ComponentDetailContent } from './component-details.ts';
 export const feedbackDetailContents: Record<string, ComponentDetailContent> = {
   'component.message': {
     dsl: {
-      "type": "Message",
+  "type": "Flex",
+  "props": {
+    "gap": 12,
+    "align": "center"
+  },
+  "children": [
+    {
+      "type": "Button",
       "props": {
-        "content": "保存成功",
-        "variant": "success",
-        "duration": 3000
+        "text": "触发成功消息",
+        "variant": "primary"
+      },
+      "events": {
+        "onClick": {
+          "action": "setState",
+          "params": {
+            "msg": "已保存"
+          }
+        }
       }
     },
+    {
+      "type": "Message",
+      "props": {
+        "content": "${state.msg}",
+        "variant": "success"
+      }
+    }
+  ]
+},
     whenToUse: [
       '**何时使用**',
       '',
@@ -71,14 +94,37 @@ export const feedbackDetailContents: Record<string, ComponentDetailContent> = {
 
   'component.notification': {
     dsl: {
-      "type": "Notification",
+  "type": "Flex",
+  "props": {
+    "gap": 12,
+    "align": "center"
+  },
+  "children": [
+    {
+      "type": "Button",
       "props": {
-        "title": "版本更新",
-        "description": "v2.4 已发布，包含 12 项改进。",
-        "variant": "info",
-        "duration": 5000
+        "text": "触发一条通知",
+        "variant": "primary"
+      },
+      "events": {
+        "onClick": {
+          "action": "setState",
+          "params": {
+            "title": "审批已通过"
+          }
+        }
       }
     },
+    {
+      "type": "Notification",
+      "props": {
+        "title": "${state.title}",
+        "description": "你提交的月报已通过审批，可在列表查看。",
+        "variant": "info"
+      }
+    }
+  ]
+},
     whenToUse: [
       '**何时使用**',
       '',
@@ -129,30 +175,23 @@ export const feedbackDetailContents: Record<string, ComponentDetailContent> = {
 
   'component.popconfirm': {
     dsl: {
-      "type": "Popconfirm",
+  "type": "Popconfirm",
+  "props": {
+    "title": "确认删除该记录？",
+    "description": "删除后不可恢复",
+    "danger": true
+  },
+  "children": [
+    {
+      "type": "Button",
       "props": {
-        "title": "删除该条记录？",
-        "description": "删除后不可恢复。",
+        "text": "删除",
+        "variant": "primary",
         "danger": true
-      },
-      "children": [
-        {
-          "type": "Button",
-          "props": {
-            "text": "删除",
-            "danger": true
-          }
-        }
-      ],
-      "events": {
-        "onConfirm": {
-          "action": "setState",
-          "params": {
-            "deleted": true
-          }
-        }
       }
-    },
+    }
+  ]
+},
     whenToUse: [
       '**何时使用**',
       '',
@@ -207,28 +246,37 @@ export const feedbackDetailContents: Record<string, ComponentDetailContent> = {
 
   'component.result': {
     dsl: {
-      "type": "Result",
+  "type": "Result",
+  "props": {
+    "status": "success",
+    "title": "支付成功",
+    "subTitle": "订单号 PO20260921001，预计 24 小时内发货"
+  },
+  "children": [
+    {
+      "type": "Flex",
       "props": {
-        "status": "success",
-        "title": "提交成功",
-        "subTitle": "审批流程已发起，预计 2 小时内完成。"
+        "gap": 12,
+        "align": "center"
       },
       "children": [
         {
           "type": "Button",
           "props": {
-            "text": "返回列表"
+            "text": "查看订单",
+            "variant": "primary"
           }
         },
         {
           "type": "Button",
           "props": {
-            "text": "查看详情",
-            "variant": "primary"
+            "text": "返回列表"
           }
         }
       ]
-    },
+    }
+  ]
+},
     whenToUse: [
       '**何时使用**',
       '',
@@ -282,20 +330,29 @@ export const feedbackDetailContents: Record<string, ComponentDetailContent> = {
 
   'component.loading-overlay': {
     dsl: {
-      "type": "LoadingOverlay",
+  "type": "LoadingOverlay",
+  "props": {
+    "loading": true,
+    "text": "加载中…"
+  },
+  "children": [
+    {
+      "type": "Text",
       "props": {
-        "loading": true,
-        "text": "正在加载数据…"
-      },
-      "children": [
-        {
-          "type": "Table",
-          "props": {
-            "title": "数据表格"
-          }
+        "text": "被覆盖的区块内容：loading 期间无法交互，加载完成后恢复。",
+        "style": {
+          "display": "block",
+          "padding": 16,
+          "borderRadius": 8,
+          "border": "1px solid var(--border)",
+          "background": "var(--card)",
+          "color": "var(--card-foreground)",
+          "fontSize": 13
         }
-      ]
-    },
+      }
+    }
+  ]
+},
     whenToUse: [
       '**何时使用**',
       '',
@@ -345,25 +402,31 @@ export const feedbackDetailContents: Record<string, ComponentDetailContent> = {
 
   'component.watermark': {
     dsl: {
-      "type": "Watermark",
+  "type": "Watermark",
+  "props": {
+    "content": [
+      "Pactor 资产库",
+      "内部资料"
+    ]
+  },
+  "children": [
+    {
+      "type": "Text",
       "props": {
-        "content": "Pactor 内部资料",
-        "rotate": -22,
-        "gap": [
-          100,
-          100
-        ],
-        "opacity": 0.15
-      },
-      "children": [
-        {
-          "type": "Text",
-          "props": {
-            "text": "被覆盖的正文内容"
-          }
+        "text": "带水印的内容区块：水印平铺于表面，不影响文本选择与点击。",
+        "style": {
+          "display": "block",
+          "padding": 16,
+          "borderRadius": 8,
+          "border": "1px solid var(--border)",
+          "background": "var(--card)",
+          "color": "var(--card-foreground)",
+          "fontSize": 13
         }
-      ]
-    },
+      }
+    }
+  ]
+},
     whenToUse: [
       '**何时使用**',
       '',
@@ -414,23 +477,94 @@ export const feedbackDetailContents: Record<string, ComponentDetailContent> = {
 
   'component.tour': {
     dsl: {
-      "type": "Tour",
+  "type": "Flex",
+  "props": {
+    "direction": "vertical",
+    "gap": 12
+  },
+  "children": [
+    {
+      "type": "Flex",
       "props": {
-        "open": true,
-        "steps": [
-          {
-            "target": "#top-nav",
-            "title": "全局导航",
-            "content": "在这里切换资产库五大分类。"
-          },
-          {
-            "target": "#sidebar",
-            "title": "侧边导航",
-            "content": "分类内的子菜单与条目数。"
+        "gap": 12,
+        "align": "center"
+      },
+      "children": [
+        {
+          "type": "Text",
+          "props": {
+            "text": "功能入口 A",
+            "style": {
+              "display": "block",
+              "padding": 16,
+              "borderRadius": 8,
+              "border": "1px solid var(--border)",
+              "background": "var(--card)",
+              "color": "var(--card-foreground)",
+              "fontSize": 13
+            }
           }
-        ]
+        },
+        {
+          "type": "Text",
+          "props": {
+            "text": "功能入口 B",
+            "style": {
+              "display": "block",
+              "padding": 16,
+              "borderRadius": 8,
+              "border": "1px solid var(--border)",
+              "background": "var(--card)",
+              "color": "var(--card-foreground)",
+              "fontSize": 13
+            }
+          }
+        }
+      ]
+    },
+    {
+      "type": "Button",
+      "props": {
+        "text": "开始引导",
+        "variant": "primary"
+      },
+      "events": {
+        "onClick": {
+          "action": "setState",
+          "params": {
+            "open": true
+          }
+        }
       }
     },
+    {
+      "type": "Tour",
+      "props": {
+        "open": "${state.open}",
+        "steps": [
+          {
+            "target": "#tour-demo-a",
+            "title": "第一步",
+            "content": "这里是功能入口 A，点击可进入对应模块。"
+          },
+          {
+            "target": "#tour-demo-b",
+            "title": "第二步",
+            "content": "这里是功能入口 B，展示关键业务信息。"
+          }
+        ]
+      },
+      "events": {
+        "onClose": {
+          "action": "setState",
+          "params": {
+            "open": false
+          }
+        }
+      }
+    }
+  ]
+},
     whenToUse: [
       '**何时使用**',
       '',
@@ -483,6 +617,13 @@ export const feedbackDetailContents: Record<string, ComponentDetailContent> = {
 
   'component.alert': {
     dsl: {
+  "type": "Flex",
+  "props": {
+    "direction": "vertical",
+    "gap": 12
+  },
+  "children": [
+    {
       "type": "Alert",
       "props": {
         "variant": "success",
@@ -491,6 +632,35 @@ export const feedbackDetailContents: Record<string, ComponentDetailContent> = {
         "description": "所有更改已同步至云端。"
       }
     },
+    {
+      "type": "Alert",
+      "props": {
+        "variant": "info",
+        "showIcon": true,
+        "message": "版本更新",
+        "description": "v2.4 已发布，包含 12 项改进。"
+      }
+    },
+    {
+      "type": "Alert",
+      "props": {
+        "variant": "warning",
+        "showIcon": true,
+        "message": "配额即将用尽",
+        "description": "本月 API 调用已达 90%。"
+      }
+    },
+    {
+      "type": "Alert",
+      "props": {
+        "variant": "error",
+        "showIcon": true,
+        "message": "提交失败",
+        "description": "网络异常，请稍后重试。"
+      }
+    }
+  ]
+},
     whenToUse: [
       '**何时使用**',
       '',
@@ -544,16 +714,27 @@ export const feedbackDetailContents: Record<string, ComponentDetailContent> = {
 
   'component.dialog': {
     dsl: {
-      "type": "Dialog",
+  "type": "Dialog",
+  "props": {
+    "title": "编辑成员",
+    "description": "修改后将立即生效",
+    "trigger": {
+      "type": "Button",
       "props": {
-        "title": "编辑成员",
-        "description": "修改后将立即生效",
-        "trigger": { "type": "Button", "props": { "text": "打开对话框", "variant": "primary" } }
-      },
-      "children": [
-        { "type": "Text", "props": { "text": "在这里放置表单或其他内容子树；关闭（X / 遮罩 / Escape）由组件内部状态自管理。" } }
-      ]
-    },
+        "text": "打开对话框",
+        "variant": "primary"
+      }
+    }
+  },
+  "children": [
+    {
+      "type": "Text",
+      "props": {
+        "text": "在这里放置表单或其他内容子树；关闭（X / 遮罩 / Escape）由组件内部状态自管理。"
+      }
+    }
+  ]
+},
     whenToUse: [
       '**何时使用**',
       '',
@@ -607,11 +788,29 @@ export const feedbackDetailContents: Record<string, ComponentDetailContent> = {
 
   'component.drawer': {
     dsl: {
+  "type": "Flex",
+  "children": [
+    {
+      "type": "Button",
+      "props": {
+        "text": "打开抽屉",
+        "variant": "primary"
+      },
+      "events": {
+        "onClick": {
+          "action": "setState",
+          "params": {
+            "drawerOpen": true
+          }
+        }
+      }
+    },
+    {
       "type": "Drawer",
       "props": {
-        "open": true,
         "title": "订单详情",
-        "placement": "right"
+        "placement": "right",
+        "open": "${state.drawerOpen}"
       },
       "events": {
         "onClose": {
@@ -623,13 +822,36 @@ export const feedbackDetailContents: Record<string, ComponentDetailContent> = {
       },
       "children": [
         {
-          "type": "Text",
+          "type": "Flex",
           "props": {
-            "text": "抽屉内容：订单号、金额、收货地址等详情字段。"
-          }
+            "direction": "vertical",
+            "gap": "middle"
+          },
+          "children": [
+            {
+              "type": "Text",
+              "props": {
+                "text": "订单号：PO20260921001"
+              }
+            },
+            {
+              "type": "Text",
+              "props": {
+                "text": "金额：¥1,280.00 · 已支付"
+              }
+            },
+            {
+              "type": "Text",
+              "props": {
+                "text": "收货地址：杭州市西湖区文三路 100 号"
+              }
+            }
+          ]
         }
       ]
-    },
+    }
+  ]
+},
     whenToUse: [
       '**何时使用**',
       '',
@@ -644,49 +866,71 @@ export const feedbackDetailContents: Record<string, ComponentDetailContent> = {
       '- 页面级常驻的导航 / 目录：使用布局组件，Drawer 是临时面板。',
     ].join('\n'),
     previewNote:
-      '静态结构：经 vaul 原语渲染——根节点为受控 Drawer（open 缺省按 false 处理），弹层经 Portal 挂到 body：遮罩（data-slot="drawer-overlay"，fixed inset-0 z-50、半透明覆盖色）+ 抽屉面板（data-slot="drawer-content"，fixed z-50、bg-popover，按 placement 映射 vaul direction 定位：right / left 贴边全高、宽 3/4 且 sm 以上最大 sm，top / bottom 贴边全宽、max-h-[80vh]），bottom 方向额外渲染顶部拖拽把手（h-2 圆条）；title 提供时渲染头部（data-slot="drawer-header" > data-slot="drawer-title"），其后为内容容器（flex-1 overflow-auto p-4）承载 children。遮罩 / Escape / 拖拽关闭经 onOpenChange(false) 触发 onClose。',
+      '静态结构：经 vaul 原语渲染（modal=false，抽屉内 Select / DatePicker 等 portal 弹层可正常点击）——根节点为受控 Drawer（open 缺省按 false 处理；未 wiring onClose 时 UI 途径关闭先走内部 dismissed 回退式自闭合，open 再次置 true 复位），弹层经 Portal 挂到 body：遮罩（data-slot="drawer-overlay"，fixed inset-0 z-50、半透明覆盖色，onPointerDown 关闭）+ 抽屉面板（data-slot="drawer-content"，fixed z-50、bg-popover，按 placement 映射 vaul direction 定位：right / left 贴边全高、宽 3/4 且 sm 以上最大 sm，top / bottom 贴边全宽、max-h-[80vh]）；右上角关闭图标（data-slot="drawer-close-icon"，closable 缺省渲染，absolute top-4 right-4）；title 提供时渲染头部（data-slot="drawer-header" > data-slot="drawer-title"），其后为内容容器（flex-1 overflow-auto p-4）承载 children；footer 不为 false 时渲染底部操作栏（border-t 固定底部、右对齐）：缺省 [取消, 确定]，可经 DslNode 自定义内容。拖拽关闭缺省完全禁止（draggable=false），开启后含底部把手；遮罩点击 / Escape 关闭不受影响。',
     variants: [
       { name: 'right 右侧（默认）', visual: '右侧贴边全高滑出，宽 3/4（sm 以上最大 sm）', scene: '详情查看、编辑表单等最常见用法' },
       { name: 'left 左侧', visual: '左侧贴边全高滑出', scene: '导航、目录、过滤器面板' },
       { name: 'top 顶部', visual: '顶部贴边全宽滑出，max-h-[80vh]', scene: '顶部工具面板、全局筛选' },
-      { name: 'bottom 底部', visual: '底部贴边全宽滑出、max-h-[80vh]、带拖拽把手', scene: '移动端友好（可拖拽关闭）、快捷操作面板' },
-      { name: '仅标题 / 无标题', visual: 'title 缺省时不渲染头部，内容直接铺满', scene: '内容自带标题或纯容器场景' },
+      { name: 'bottom 底部', visual: '底部贴边全宽滑出、max-h-[80vh]', scene: '移动端友好（可拖拽关闭）、快捷操作面板' },
+      { name: '默认底部操作栏', visual: '缺省 [取消, 确定] 右对齐固定底部；footer: false 隐藏，传 DslNode 自定义（容器右对齐，声明 w-full 可自行控制对齐）', scene: '表单确认、取消 / 保存闭环' },
+      { name: '无标题 / 无关闭图标', visual: 'title 缺省不渲染头部；closable: false 隐藏右上角关闭图标', scene: '内容自带标题或仅靠操作栏关闭的场景' },
     ],
     apiProps: [
       { name: 'title', type: 'string', defaultValue: '—', description: '抽屉标题，渲染为 DrawerTitle；缺省时不渲染头部' },
       { name: 'open', type: 'boolean', defaultValue: 'false', description: '受控开关（可绑 ${state.x} 表达式）；缺省按 false 处理，组件无 trigger 属性' },
       { name: 'placement', type: "'left' | 'right' | 'top' | 'bottom'", defaultValue: "'right'", description: '滑出方向，映射 vaul direction' },
-      { name: 'onClose', type: '() => void', defaultValue: '—', description: '关闭事件（遮罩 / Escape / 拖拽关闭时触发，仅关闭回调；Renderer 绑定 events.onClose）' },
+      { name: 'draggable', type: 'boolean', defaultValue: 'false', description: '是否允许按住面板拖拽关闭；缺省完全禁止（含底部把手），true 才开启面板拖拽；遮罩点击 / Escape 关闭不受影响' },
+      { name: 'closable', type: 'boolean', defaultValue: 'true', description: '右上角关闭图标；false 隐藏' },
+      { name: 'footer', type: 'DslNode | false', defaultValue: '缺省 [取消, 确定]', description: '底部操作栏：false 不展示；DslNode 自定义内容（容器右对齐，内容声明 w-full 可自行控制对齐）；固定底部，内容区独立滚动不随内容滚走' },
+      { name: 'cancelText', type: 'string', defaultValue: 'i18n pactor.alertDialog.cancel', description: '默认 footer「取消」按钮文案' },
+      { name: 'okText', type: 'string', defaultValue: 'i18n pactor.alertDialog.confirm', description: '默认 footer「确定」按钮文案' },
+      { name: 'onClose', type: '() => void', defaultValue: '—', description: '关闭事件（关闭图标 / 遮罩 / Escape / 拖拽关闭 / 默认 footer「取消」时触发；Renderer 绑定 events.onClose）。未绑定时 UI 途径关闭仍生效（回退式自闭合），但受控 state 不会回写' },
+      { name: 'onOk', type: '() => void', defaultValue: '—', description: '确定事件（默认 footer「确定」按钮触发，Renderer 绑定 events.onOk）' },
       { name: 'children', type: 'ReactNode', defaultValue: '—', description: '内容（DSL 子树，经 Renderer children 机制渲染，置于 flex-1 overflow-auto p-4 容器内）' },
       { name: 'className / style', type: 'string / CSSProperties', defaultValue: '—', description: '通用：抽屉内容根节点 class 合并 / 内联样式' },
     ],
     guidelines: [
-      '- Drawer 无 trigger 属性：始终受控，open 绑状态表达式并在 onClose 写回 false，否则用户关不掉。',
+      '- Drawer 无 trigger 属性：始终受控，open 绑状态表达式并经 onClose 写回 false——未绑 onClose 时虽可自闭合，但 state 不回写会导致再次打开逻辑错乱。',
       '- 方向按任务选：详情 / 表单用 right（默认，符合阅读与操作顺序），导航用 left，移动端次要面板用 bottom。',
+      '- 底部操作栏三态：默认 [取消, 确定]（取消走 onClose、确定走 onOk）；自定义内容传 footer DslNode；完全不要传 footer: false。',
+      '- 拖拽关闭默认关闭（draggable=false）：表单类抽屉避免误触丢内容；确需拖拽（移动端快捷面板）才显式开 draggable: true。',
       '- 内容容器已自带滚动（flex-1 overflow-auto）：长表单直接纵向排布，不要再嵌套滚动容器。',
       '- 抽屉宽度固定（right / left 为 3/4、sm 以上最大 sm）：放不下的宽表改用整页路由或 Dialog 承载。',
       '- 与 Dialog 的分工：需要用户停下来先处理完用 Dialog；边看列表边补详情用 Drawer。',
     ].join('\n'),
     examplesDo: [
       '列表行「查看详情」：placement=right、title 为对象名，内容纵向排布字段说明。',
+      '表单抽屉：默认 footer [取消, 确定]，onClose 取消、onOk 提交，okText 按语义自定义（如「保存」）。',
       '后台配置面板：placement=left 放导航与过滤器，不遮挡主内容区。',
-      '移动端快捷操作：placement=bottom（带拖拽把手），下滑即可关闭。',
+      '移动端快捷操作：placement=bottom + draggable: true（拖拽关闭），下滑即可收起。',
     ],
     examplesDont: [
       '用 Drawer 承载必须立即处理的确认（应使用 Dialog，居中模态更能拉回注意力）。',
-      '声明了 open 却不处理 onClose，抽屉只能靠刷新页面消失。',
+      '声明了 open 却不处理 onClose：抽屉可自闭合但受控 state 未回写，再次打开会异常。',
       '在抽屉内再嵌入抽屉或 Dialog 做多层叠加（层级混乱，应先关闭再进入）。',
     ],
   },
 
   'component.popover': {
     dsl: {
-      "type": "Popover",
+  "type": "Popover",
+  "props": {
+    "content": {
+      "type": "Text",
       "props": {
-        "content": { "type": "Text", "props": { "text": "浮层内容：可放任意 DSL 子树，点击外部关闭。" } }
-      },
-      "children": [{ "type": "Button", "props": { "text": "打开浮层", "variant": "default" } }]
-    },
+        "text": "浮层内容：可放任意 DSL 子树，点击外部关闭。"
+      }
+    }
+  },
+  "children": [
+    {
+      "type": "Button",
+      "props": {
+        "text": "打开浮层"
+      }
+    }
+  ]
+},
     whenToUse: [
       '**何时使用**',
       '',
@@ -734,11 +978,32 @@ export const feedbackDetailContents: Record<string, ComponentDetailContent> = {
 
   'component.progress': {
     dsl: {
+  "type": "Flex",
+  "props": {
+    "direction": "vertical",
+    "gap": 12
+  },
+  "children": [
+    {
+      "type": "Progress",
+      "props": {
+        "value": 30
+      }
+    },
+    {
       "type": "Progress",
       "props": {
         "value": 70
       }
     },
+    {
+      "type": "Progress",
+      "props": {
+        "value": 100
+      }
+    }
+  ]
+},
     whenToUse: [
       '**何时使用**',
       '',
@@ -786,12 +1051,79 @@ export const feedbackDetailContents: Record<string, ComponentDetailContent> = {
 
   'component.skeleton': {
     dsl: {
+  "type": "Flex",
+  "props": {
+    "direction": "vertical",
+    "gap": 12,
+    "style": {
+      "padding": 16,
+      "borderRadius": 8,
+      "border": "1px solid var(--border)",
+      "background": "var(--card)",
+      "color": "var(--card-foreground)",
+      "fontSize": 13,
+      "maxWidth": 360
+    }
+  },
+  "children": [
+    {
+      "type": "Flex",
+      "props": {
+        "gap": 12,
+        "align": "center"
+      },
+      "children": [
+        {
+          "type": "Skeleton",
+          "props": {
+            "shape": "circle",
+            "width": 40,
+            "height": 40
+          }
+        },
+        {
+          "type": "Flex",
+          "props": {
+            "direction": "vertical",
+            "gap": 8,
+            "style": {
+              "flex": 1
+            }
+          },
+          "children": [
+            {
+              "type": "Skeleton",
+              "props": {
+                "shape": "line",
+                "width": "60%"
+              }
+            },
+            {
+              "type": "Skeleton",
+              "props": {
+                "shape": "line",
+                "width": "40%"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
       "type": "Skeleton",
       "props": {
-        "shape": "line",
-        "width": "60%"
+        "shape": "rect",
+        "height": 96
       }
     },
+    {
+      "type": "Skeleton",
+      "props": {
+        "shape": "line"
+      }
+    }
+  ]
+},
     whenToUse: [
       '**何时使用**',
       '',
@@ -842,11 +1174,26 @@ export const feedbackDetailContents: Record<string, ComponentDetailContent> = {
 
   'component.spinner': {
     dsl: {
+  "type": "Flex",
+  "props": {
+    "gap": 12,
+    "align": "center"
+  },
+  "children": [
+    {
       "type": "Spinner",
       "props": {
-        "size": "default"
+        "size": "sm"
       }
     },
+    {
+      "type": "Spinner",
+      "props": {
+        "size": "lg"
+      }
+    }
+  ]
+},
     whenToUse: [
       '**何时使用**',
       '',
