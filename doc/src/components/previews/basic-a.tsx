@@ -254,17 +254,11 @@ function BreadcrumbPreview() {
 function PaginationPreview() {
   const [page, setPage] = useState(1);
   return (
-    <div style={columnStyle}>
-      <Pagination total={95} pageSize={10} page={page} onChange={setPage} />
-      <div style={{ fontSize: 13, color: 'var(--muted-foreground)' }}>
-        当前第 {page} 页 · 共 95 条
-      </div>
-    </div>
+    <Pagination total={95} pageSize={10} page={page} onChange={setPage} />
   );
 }
 
 function DropdownPreview() {
-  const [selected, setSelected] = useState('');
   return (
     <div style={rowStyle}>
       <DropdownMenu
@@ -273,13 +267,9 @@ function DropdownPreview() {
           { label: '分享', value: 'share', icon: 'share' },
           { label: '删除', value: 'delete', icon: 'trash', danger: true },
         ]}
-        onSelect={setSelected}
       >
         <Button text="打开菜单" variant="default" />
       </DropdownMenu>
-      <span style={{ fontSize: 13, color: 'var(--muted-foreground)' }}>
-        {selected ? `已选择：${selected}` : '点击按钮打开下拉菜单'}
-      </span>
     </div>
   );
 }
@@ -535,9 +525,6 @@ function AnchorPreview() {
         }}
         state={{ active: '#basic' }}
       />
-      <span style={{ display: 'block', marginTop: 8, fontSize: 12, color: 'var(--muted-text)' }}>
-        受控演示：activeKey 绑定 state.active，点击经 onChange 回写（本站无对应锚点，仅切换高亮）。
-      </span>
     </div>
   );
 }
@@ -552,9 +539,6 @@ function BackTopPreview() {
   return (
     <div style={columnStyle}>
       <DslPreview node={BACKTOP_NODE} />
-      <span style={{ fontSize: 12, color: 'var(--muted-text)' }}>
-        按钮悬浮于视口右下角（本预览以负阈值强制展示）；页面滚动超过 visibilityHeight（默认 400px）后出现，点击平滑回顶。
-      </span>
     </div>
   );
 }

@@ -147,7 +147,6 @@ function SliderPreview() {
       <div style={{ flex: 1, minWidth: 200 }}>
         <Slider value={value} onChange={setValue} min={0} max={100} step={5} />
       </div>
-      <span style={{ fontSize: 13, color: 'var(--muted-foreground)' }}>当前值：{value}</span>
     </div>
   );
 }
@@ -203,9 +202,6 @@ function CalendarPreview() {
       <div style={blockStyle}>
         <Calendar value={value} onChange={setValue} />
       </div>
-      <span style={{ fontSize: 13, color: 'var(--muted-foreground)' }}>
-        已选日期：{value ?? '未选择'}
-      </span>
     </div>
   );
 }
@@ -244,13 +240,6 @@ const FORM_NODE: DslNode = {
         },
         { type: 'Button', props: { text: '提交', variant: 'primary', submit: true } },
       ],
-    },
-    {
-      type: 'Text',
-      props: {
-        text: '提交结果：关键词 ${state.result.keyword}，状态 ${state.result.status}',
-        type: 'secondary',
-      },
     },
   ],
 };
