@@ -194,15 +194,6 @@ export type {
   SidebarNavItem,
   SidebarProps,
 } from './components/Sidebar/index.js';
-export { DataTable } from './components/DataTable/index.js';
-export type {
-  DataTableColumn,
-  DataTablePagination,
-  DataTableProps,
-  DataTableSort,
-  DataTableSortOrder,
-} from './components/DataTable/index.js';
-
 // 布局组件（页面级自由组合，见 spec: layout-components）
 export { Layout } from './components/Layout/index.js';
 export type { LayoutProps } from './components/Layout/index.js';

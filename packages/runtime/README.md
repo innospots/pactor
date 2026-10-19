@@ -1,6 +1,6 @@
 # @pactor-app/runtime
 
-[Pactor](https://github.com/426-330/pactor) 的运行时引擎包：把 PageDsl 运行起来——RuntimeContext 组装、StateStore、DataSource 运行时、Action 引擎、React Renderer 与 PageRuntime 完整链路。
+[Pactor](https://github.com/innospots/pactor) 的运行时引擎包：把 PageDsl 运行起来——RuntimeContext 组装、StateStore、DataSource 运行时、Action 引擎、React Renderer 与 PageRuntime 完整链路。
 
 ## 安装
 
@@ -47,7 +47,7 @@ await runtime.destroy();
 
 ## 文档
 
-完整文档见 <https://github.com/426-330/pactor/tree/main/docs>（`pnpm docs:dev` 本地启动文档站）。
+完整文档见 <https://github.com/innospots/pactor/tree/main/docs>（`pnpm docs:dev` 本地启动文档站）。
 
 ## License
 

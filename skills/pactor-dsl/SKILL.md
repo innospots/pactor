@@ -129,7 +129,7 @@ The built-in shadcn-style UI (`@pactor-app/ui`) registers these DSL component ty
 
 - **Page & layout**: `Page`, `Layout` / `Header` / `Sider` / `Content` / `Footer`, `Grid`, `Flex`, `Card`, `Sidebar`, `For`（数据驱动循环渲染，行作用域 `${row}`/`${rowIndex}`）
 - **Basic**: `Button`, `Alert`, `Statistic`, `Menu`, `Link`, `Text`, `Typography`, `Icon`
-- **Data**: `Table`, `Tabs`, `DataTable`, `Chart`
+- **Data**: `Table`, `Tabs`, `Chart`
 - **Form**: `Form`, `Input`, `NumberInput`, `Select`, `Textarea`, `Checkbox`, `RadioGroup`, `Switch`, `Slider`, `Label`, `Field`, `ChatInput`, `DatePicker`
 - **Display**: `Badge`, `Avatar`, `Skeleton`, `Separator`, `Kbd`, `Spinner`, `Empty`, `AspectRatio`, `Progress`, `Calendar`, `Carousel`, `Item`
 - **Navigation**: `Breadcrumb`, `Pagination`, `Menubar`, `NavigationMenu`, `DropdownMenu`, `ContextMenu`
@@ -213,7 +213,7 @@ Facts that are NOT guessable and must be followed:
 - `navigate` takes `to`; `message` takes `text` + `messageType` (a `type` key in action `params` disables expression evaluation).
 - Query linkage = `onSubmit: [setState, reload]`; the data source's `params` referencing `${state.x}` pick up new values on reload.
 
-**Full DSL grammar, action catalog, expression/scopes tables, and copy-paste recipes: read `references/dsl-authoring.md`.** Page count, folders, and sitemap: **`references/page-catalog-and-layout.md`**. Component props: bundled dsl-authoring + [Pactor docs](https://github.com/426-330/pactor/tree/main/docs/src/content/docs/components) when online.
+**Full DSL grammar, action catalog, expression/scopes tables, and copy-paste recipes: read `references/dsl-authoring.md`.** Page count, folders, and sitemap: **`references/page-catalog-and-layout.md`**. Component props: bundled dsl-authoring + [Pactor docs](https://github.com/innospots/pactor/tree/main/docs/src/content/docs/components) when online.
 
 ## Workflow: custom component
 
@@ -396,7 +396,7 @@ pnpm pactor create my-app
 - **New repository**: sibling `pactor-project` (`../pactor-project/SKILL.md`)
 - **PRD full-site generation**: sibling `pactor-prd` (`../pactor-prd/SKILL.md`)
 
-Online (optional): [getting started](https://github.com/426-330/pactor/blob/main/docs/src/content/docs/guides/getting-started.md), [DSL reference](https://github.com/426-330/pactor/blob/main/docs/src/content/docs/reference/dsl.md), [framework design](https://github.com/426-330/pactor/blob/main/docs/src/content/docs/framework-design.md).
+Online (optional): [getting started](https://github.com/innospots/pactor/blob/main/docs/src/content/docs/guides/getting-started.md), [DSL reference](https://github.com/innospots/pactor/blob/main/docs/src/content/docs/reference/dsl.md), [framework design](https://github.com/innospots/pactor/blob/main/docs/src/content/docs/framework-design.md).
 
 ## How to use this skill
 

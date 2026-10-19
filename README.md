@@ -5,7 +5,6 @@
 用 YAML/JSON 写页面，浏览器里一套公共 Runtime 负责渲染、数据、权限和交互；**换页面往往不用重新打包前端**，适合后台、运营台、可配置工作台和 AI 对话类产品。
 
 - 环境：Node.js ≥ 18，pnpm ≥ 9（npm / yarn 亦可）
-- 详细文档：克隆后执行 `pnpm docs:dev` → http://localhost:4334，或阅读 [框架设计](docs/src/content/docs/framework-design.md)
 
 ---
 
@@ -57,10 +56,8 @@ cd my-app && pnpm install && pnpm dev
 其他模板：
 
 ```bash
-pnpm create pactor-app my-app -t spa   # 纯前端 Vite，dev :9012（需另起 :9011 的 API，见模板 README）
+pnpm create pactor-app my-app -t spa   # 纯前端 Vite，dev :9012（需另起 :9011 的 API）
 ```
-
-完整说明：[快速开始指南](docs/src/content/docs/guides/getting-started.md)。
 
 ---
 
@@ -123,7 +120,7 @@ body:
             params: { text: 来自 DSL, messageType: success }
 ```
 
-校验：`npx pactor validate 'src/**/*.page.yaml'` · 字段手册：[DSL 参考](docs/src/content/docs/reference/dsl.md)
+校验：`npx pactor validate 'src/**/*.page.yaml'`
 
 ### ③ 对接服务端
 
@@ -134,7 +131,7 @@ createPactorApplication({
 }).mount('#root');
 ```
 
-后端需提供 `bootstrap`（应用、用户、权限、菜单、布局）与 `pages/{id}`（页面 DSL），协议见 [@pactor-app/resource](docs/src/content/docs/packages/resource.md)。全栈参考 next-app 模板中的 `SitemapApp`。
+后端需提供 `bootstrap`（应用、用户、权限、菜单、布局）与 `pages/{id}`（页面 DSL）。全栈参考 next-app 模板中的 `SitemapApp`。
 
 安装聚合包亦可：`pnpm add pactor-app`（meta 包，转发 `@pactor-app/app`）。
 
@@ -151,27 +148,10 @@ createPactorApplication({
 
 ---
 
-## 文档与学习路径
-
-| 我想… | 去看 |
-| --- | --- |
-| 从 0 搭工程 | [guides/getting-started.md](docs/src/content/docs/guides/getting-started.md) |
-| 已有项目接入 | [guides/manual-setup.md](docs/src/content/docs/guides/manual-setup.md) |
-| 写页面、查组件 props | [reference/dsl.md](docs/src/content/docs/reference/dsl.md) · [components/](docs/src/content/docs/components/) |
-| 数据从哪来、怎么刷新 | [guides/data-flow.md](docs/src/content/docs/guides/data-flow.md) |
-| 表单与按钮联动 | [guides/events.md](docs/src/content/docs/guides/events.md) |
-| 自定义 React 组件 | [guides/custom-components.md](docs/src/content/docs/guides/custom-components.md) |
-| AI 对话页 | [packages/chat.md](docs/src/content/docs/packages/chat.md) |
-| Agent 写 DSL / 搭脚手架 / PRD 生成 | 仓库根目录 [`skills/`](skills/)（`pactor-dsl`、`pactor-project`、`pactor-prd`） |
-
-本地文档站：`pnpm docs:dev`（:4334）。新增 `docs/src/content/docs/**` 文件后需重启 dev，否则侧边栏 slug 报错。
-
----
-
 ## 在本仓库开发（贡献者）
 
 ```bash
-git clone https://github.com/426-330/pactor.git && cd pactor
+git clone https://github.com/innospots/pactor.git && cd pactor
 pnpm install && pnpm build    # 示例依赖各包 dist
 pnpm test && pnpm typecheck
 ```
@@ -194,15 +174,13 @@ packages/     @pactor-app/* 运行时与工具（core → runtime → app / ui /
 skills/       @pactor-app/skills — Agent 技能（DSL / 脚手架 / PRD 生成）
 starters/     pnpm create pactor-app 的模板源码
 examples/     仓库内联调示例
-docs/         用户文档站（Starlight）
-doc/          UI 资产库（pnpm asset:dev → :4336）
 tools/        内部工具（如 theme-studio）
 ```
 
 主要 npm 包：`@pactor-app/app`（入口 `createPactorApplication`）、`@pactor-app/ui`（内置组件 + `styles.css`）、`pactor-app`（meta 全量依赖）、`create-pactor-app`（脚手架）、`@pactor-app/cli`（`pactor validate`）。
 
 依赖方向：`core ← schema ← expression ← runtime ← {permission, resource, router, ui, …} ← app`。  
-目录名与包名分离；`@company/dsl-*` 仅文档占位。完整模块表见 [工程结构说明](docs/src/content/docs/framework-design.md) 或下文展开。
+目录名与包名分离。完整模块表见下文展开。
 
 <details>
 <summary>展开：packages 模块一览</summary>
