@@ -7,6 +7,7 @@
 import { Registry } from '@pactor-app/core';
 import type { ComponentRegistry } from '@pactor-app/runtime';
 
+import { HeroSection } from './components/HeroSection/index.js';
 import { Login } from './components/Login/index.js';
 import { EntityCard } from './components/EntityCard/index.js';
 import { CardList } from './components/CardList/index.js';
@@ -18,6 +19,14 @@ import { RuleConfig } from './components/RuleConfig/index.js';
 import { RuleExpression } from './components/RuleExpression/index.js';
 import { ScriptEditor } from './components/ScriptEditor/index.js';
 
+export { HeroSection } from './components/HeroSection/index.js';
+export type {
+  HeroSectionAction,
+  HeroSectionAnnouncement,
+  HeroSectionLogo,
+  HeroSectionProps,
+  HeroSectionVariant,
+} from './components/HeroSection/index.js';
 export { Login } from './components/Login/index.js';
 export type { LoginBrandInfo, LoginLink, LoginProps, LoginVariant } from './components/Login/index.js';
 export { EntityCard } from './components/EntityCard/index.js';
@@ -108,6 +117,7 @@ export type {
  * 读写 ${event}。
  */
 export const blockComponents = {
+  HeroSection,
   Login,
   EntityCard,
   CardList,

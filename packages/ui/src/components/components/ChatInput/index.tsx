@@ -173,6 +173,7 @@ export function ChatInput({
           placeholder={placeholder}
           disabled={disabled}
           rows={rows}
+          autoSize={{ minRows: rows }}
           onChange={(event) => handleChange(event.target.value)}
           onKeyDown={handleKeyDown}
           onCompositionStart={handleComposition}

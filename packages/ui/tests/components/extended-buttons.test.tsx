@@ -94,6 +94,43 @@ describe('SplitButton', () => {
     await user.click(screen.getByRole('menuitem', { name: '存为草稿' }));
     await expectEventState(context, 'sel', 'save-draft');
   });
+
+  it('separator 渲染分隔符、section 渲染小字分区标题、href 项新窗口打开且不触发 onSelect', async () => {
+    const user = userEvent.setup();
+    const open = vi.fn();
+    vi.stubGlobal('open', open);
+    const { context } = renderDsl({
+      type: 'SplitButton',
+      props: {
+        text: '分享',
+        options: [
+          { value: 'a', label: '复制链接', description: 'For LLMs and notes' },
+          { value: 'divider', separator: true },
+          { value: 'sec', section: 'Ask about this block' },
+          { value: 'ask', label: 'Open in Claude', href: 'https://claude.ai/new?q=x' },
+        ],
+      },
+      events: { onSelect: { action: 'setState', params: { sel: '${event}' } } },
+    });
+
+    await user.click(screen.getByRole('button', { name: '更多选项' }));
+    await screen.findByRole('menu');
+    // 分隔符 + 分区标题 + 第二行小灰字
+    expect(screen.getByRole('separator')).not.toBeNull();
+    expect(screen.getByText('Ask about this block')).not.toBeNull();
+    expect(screen.getByText('For LLMs and notes')).not.toBeNull();
+    // 外跳项右端渲染 lucide arrow-up-right（点击前断言：点击后菜单关闭）
+    const askItem = screen.getByRole('menuitem', { name: 'Open in Claude' });
+    expect(askItem.querySelector('svg.lucide-arrow-up-right')).not.toBeNull();
+    // href 项：window.open(_blank) 且不触发 onSelect
+    await user.click(askItem);
+    expect(open).toHaveBeenCalledWith(
+      'https://claude.ai/new?q=x',
+      '_blank',
+      'noopener,noreferrer',
+    );
+    expect(context.state.get('sel')).toBeUndefined();
+  });
 });
 
 describe('CopyButton', () => {
