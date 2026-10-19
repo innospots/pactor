@@ -12,11 +12,11 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/426-330/pactor.git",
+    "url": "git+https://github.com/innospots/pactor.git",
     "directory": "packages/markdown"
   },
-  "homepage": "https://github.com/426-330/pactor/tree/main/packages/markdown",
-  "bugs": "https://github.com/426-330/pactor/issues",
+  "homepage": "https://github.com/innospots/pactor/tree/main/packages/markdown",
+  "bugs": "https://github.com/innospots/pactor/issues",
   "type": "module",
   "main": "./dist/index.cjs",
   "module": "./dist/index.js",

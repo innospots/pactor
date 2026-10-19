@@ -1,6 +1,6 @@
 # @pactor-app/router
 
-[Pactor](https://github.com/426-330/pactor) 的路由模块：菜单模型与 MenuRegistry、极简路径匹配（PathMatcher）、导航桥接（NavigationBridge / MemoryNavigation）、@pactor-app/runtime RouterAdapter 桥接，以及 React Router 动态路由绑定（`<DynamicDslRoute>`）。
+[Pactor](https://github.com/innospots/pactor) 的路由模块：菜单模型与 MenuRegistry、极简路径匹配（PathMatcher）、导航桥接（NavigationBridge / MemoryNavigation）、@pactor-app/runtime RouterAdapter 桥接，以及 React Router 动态路由绑定（`<DynamicDslRoute>`）。
 
 菜单声明 `path` + `pageId`（不绑定 React 组件），Dynamic Router 把 URL 解析为 pageId 与路由上下文；页面资源加载（pageId → loadPage）由应用组合层串联，不在本包。
 
@@ -87,7 +87,7 @@ import { Route, Routes } from 'react-router-dom';
 
 ## 文档
 
-完整文档见 <https://github.com/426-330/pactor/tree/main/docs>（`pnpm docs:dev` 本地启动文档站）。
+完整文档见 <https://github.com/innospots/pactor/tree/main/docs>（`pnpm docs:dev` 本地启动文档站）。
 
 ## License
 

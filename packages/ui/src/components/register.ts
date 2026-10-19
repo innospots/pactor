@@ -33,7 +33,6 @@ import { Container } from './components/Container/index.js';
 import { Content } from './components/Content/index.js';
 import { ContextMenu } from './components/ContextMenu/index.js';
 import { CopyButton } from './components/CopyButton/index.js';
-import { DataTable } from './components/DataTable/index.js';
 import { DatePicker } from './components/DatePicker/index.js';
 import { Descriptions } from './components/Descriptions/index.js';
 import { Dialog } from './components/Dialog/index.js';
@@ -223,7 +222,6 @@ export const builtinComponents = {
   ConfirmMorph,
   // 页面级组合类扩展组件（第四批）
   Sidebar,
-  DataTable,
   // 图标（lucide 白名单）
   Icon,
   // 业务刚需类扩展组件（第五批：数据录入 / 数据展示 / 反馈）

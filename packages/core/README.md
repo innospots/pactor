@@ -1,6 +1,6 @@
 # @pactor-app/core
 
-[Pactor](https://github.com/426-330/pactor) 的核心协议包：DSL 类型定义与通用 Registry。零运行时依赖，与 React 无关，可用于浏览器、Node 与构建工具等任意环境。
+[Pactor](https://github.com/innospots/pactor) 的核心协议包：DSL 类型定义与通用 Registry。零运行时依赖，与 React 无关，可用于浏览器、Node 与构建工具等任意环境。
 
 ## 安装
 
@@ -37,7 +37,7 @@ components.get('Missing'); // undefined（不抛错）
 
 ## 文档
 
-完整文档见 <https://github.com/426-330/pactor/tree/main/docs>（`pnpm docs:dev` 本地启动文档站）。
+完整文档见 <https://github.com/innospots/pactor/tree/main/docs>（`pnpm docs:dev` 本地启动文档站）。
 
 ## License
 

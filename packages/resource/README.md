@@ -1,6 +1,6 @@
 # @pactor-app/resource
 
-[Pactor](https://github.com/426-330/pactor) 的资源加载包：DSL 资源 Envelope 模型、HTTP / Static 两种资源加载器、带版本控制与 ETag 条件请求的内存缓存。
+[Pactor](https://github.com/innospots/pactor) 的资源加载包：DSL 资源 Envelope 模型、HTTP / Static 两种资源加载器、带版本控制与 ETag 条件请求的内存缓存。
 
 ## 安装
 
@@ -39,7 +39,7 @@ const staticLoader = new StaticDslLoader({
 
 ## 文档
 
-完整文档见 <https://github.com/426-330/pactor/tree/main/docs>（`pnpm docs:dev` 本地启动文档站）。
+完整文档见 <https://github.com/innospots/pactor/tree/main/docs>（`pnpm docs:dev` 本地启动文档站）。
 
 ## License
 
