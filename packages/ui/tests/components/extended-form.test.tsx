@@ -28,8 +28,31 @@ describe('Textarea', () => {
     });
 
     const textarea = screen.getByPlaceholderText('请输入备注');
+    // 默认 autoSize=false：固定行高，无 field-sizing（防横向撑爆），可拖拽调高
+    expect(textarea.className).not.toContain('field-sizing');
+    expect(textarea.className).toContain('w-full');
+    expect(textarea.className).not.toContain('resize-none');
+    expect(textarea.getAttribute('rows')).toBe('3');
     fireEvent.change(textarea, { target: { value: '多行文本' } });
     await expectEventState(context, 'note', '多行文本');
+  });
+
+  it('autoSize=true / 对象形态：不可拖拽调整，rows 属性保留', () => {
+    const { container: c1 } = renderDsl({
+      type: 'Textarea',
+      props: { autoSize: true },
+    });
+    const t1 = c1.querySelector('textarea')!;
+    expect(t1.className).toContain('resize-none');
+    expect(t1.className).not.toContain('field-sizing');
+
+    const { container: c2 } = renderDsl({
+      type: 'Textarea',
+      props: { autoSize: { minRows: 2, maxRows: 6 }, rows: 2 },
+    });
+    const t2 = c2.querySelector('textarea')!;
+    expect(t2.className).toContain('resize-none');
+    expect(t2.getAttribute('rows')).toBe('2');
   });
 
   it('Form 内声明 name 自动包装为表单项，输入值参与提交', async () => {

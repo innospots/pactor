@@ -236,6 +236,7 @@ describe('Menu', () => {
     expect(container.querySelectorAll('[data-slot=menu-group]')).toHaveLength(1);
     expect(screen.getByText('最近')).toBeDefined();
 
+
     // 普通项可选；disabled 项不触发 onSelect
     await user.click(screen.getByText('对话'));
     expect(context.state.get('selected')).toBe('chat');
