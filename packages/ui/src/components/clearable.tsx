@@ -5,9 +5,11 @@ import { cn } from '../lib/utils.js';
 /**
  * 盒式表单控件统一的 hover 清除（clearable）约定：
  * 控件容器/触发器加 `CLEARABLE_GROUP`（group），`allowClear` 且有值且未禁用时——
- * - 无右侧图标的控件（Input / NumberInput）：× 以绝对定位浮在控件右缘悬浮显示；
+ * - Input：× 以绝对定位浮在控件右缘悬浮显示；
  * - 有右侧图标的控件（Select 下拉箭头 / DatePicker 日历 / TimePicker 时钟等）：
  *   原图标加 `CLEARABLE_ICON_HIDE`（group-hover:hidden），× 在原位置替换显示。
+ * - NumberInput：步进按钮列保持可见可用，× 浮在步进按钮左侧（右缘预留双倍
+ *   内边距），点击清空不影响步进操作。
  *
  * × 的显隐不用 Tailwind 的 `hidden` + `group-hover:inline-flex` 组合，而用专用类
  * `pactor-clearable`（样式在 styles.css 手写）：消费方以命名 @layer 叠加多个
@@ -29,7 +31,8 @@ export const CLEARABLE_GROUP = 'group';
 export const CLEARABLE_ICON_HIDE = 'group-hover:hidden';
 
 /** 有值时原右侧图标在 hover 时以 visibility 隐藏（保留布局，供 × 绝对定位覆盖；
- *  用于自带 display 工具类的图标容器，如 NumberInput 步进按钮列） */
+ *  用于自带 display 工具类的图标容器（NumberInput 步进按钮列已不再隐藏，
+ *  此约定保留给未来有覆盖需求的自带 display 工具类图标容器） */
 export const CLEARABLE_OVERLAY_HIDE = 'pactor-clearable-ghost';
 
 export interface ClearHoverButtonProps {

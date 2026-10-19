@@ -753,7 +753,7 @@ export const dataEntryDetailContents: Record<string, ComponentDetailContent> = {
       '- 编号、手机号等「数字形态的标识」：使用 Input，它们不做数值运算。',
     ].join('\n'),
     previewNote:
-      '静态结构：NumberInput 的控件为包裹节点 data-slot="number-input"（relative block），内嵌原生 number input（隐藏浏览器原生步进箭头）+ 右侧绝对定位的竖排双按钮列（上 / 下 Chevron 图标，按 step 增减并以 min / max 钳制；到达边界或 disabled 时对应按钮禁用）。输入过程保留中间文本（如 "-" / "1."），可解析时传出钳制 + precision 规整后的 number，清空传出 undefined。Form 内声明非空 name 时经 FieldShell 包裹（label + 校验错误行）。allowClear 且有值时悬停控件，右侧步进按钮组原位替换为 × 清除按钮（点击清空传出 undefined）。',
+      '静态结构：NumberInput 的控件为包裹节点 data-slot="number-input"（relative block），内嵌原生 number input（隐藏浏览器原生步进箭头）+ 右侧绝对定位的竖排双按钮列（上 / 下 Chevron 图标，按 step 增减并以 min / max 钳制；到达边界或 disabled 时对应按钮禁用）。输入过程保留中间文本（如 "-" / "1."），可解析时传出钳制 + precision 规整后的 number，清空传出 undefined。Form 内声明非空 name 时经 FieldShell 包裹（label + 校验错误行）。allowClear 且有值时悬停控件，步进按钮左侧浮出 × 清除按钮（点击清空传出 undefined；步进按钮保持可见可用，不被替换或隐藏）。',
     variants: [
       { name: '默认', visual: '描边数字输入框 + 右侧上 / 下步进按钮', scene: '常规数值录入' },
       { name: 'min / max 钳制', visual: '越界输入被钳制，边界处对应按钮禁用', scene: '有明确取值范围的字段（如 0-100 分）' },
@@ -775,7 +775,7 @@ export const dataEntryDetailContents: Record<string, ComponentDetailContent> = {
       { name: 'disabled', type: 'boolean', defaultValue: 'false', description: '禁用输入与步进按钮' },
       { name: 'onChange', type: '(value: number | undefined) => void', defaultValue: '—', description: '输入事件，传出 number，清空时传出 undefined（Renderer 绑定 events.onChange；DSL 语义值）' },
       { name: 'controlClassName', type: 'string', defaultValue: '—', description: '控件本体（input）class（无论是否在 Form 内都挂 input 节点）' },
-      { name: 'allowClear', type: 'boolean', defaultValue: 'true', description: 'hover 清除（缺省开启，传 false 关闭）：有值时悬停控件，右缘浮出 ×（有右侧图标的控件在原图标位置替换），点击清空' },
+      { name: 'allowClear', type: 'boolean', defaultValue: 'true', description: 'hover 清除（缺省开启，传 false 关闭）：有值时悬停控件，步进按钮左侧浮出 ×（步进按钮不受影响），点击清空' },
       { name: 'size', type: "'small' | 'middle' | 'large'", defaultValue: "'middle'", description: '控件尺寸令牌：small h-8 / middle h-9（默认）/ large h-10，与全部表单控件同一令牌，同行混排保持高度一致' },
       { name: 'className / style', type: 'string / CSSProperties', defaultValue: '—', description: '通用：根节点 class 合并 / 内联样式（Form 内为 form-item 容器，独立渲染时为控件包裹节点）' },
     ],

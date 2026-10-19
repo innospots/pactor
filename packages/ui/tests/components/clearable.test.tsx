@@ -4,8 +4,8 @@
  * 盒式表单项有值且未禁用时，悬停控件右缘浮出 × 清除按钮（专用类 pactor-clearable，
  * 见 clearable.tsx 的跨层冲突说明），本身有右侧图标的组件（Select 下拉箭头 /
  * DatePicker 日历 / TimePicker 时钟 / Cascader / TreeSelect 箭头、Combobox 上下箭头）
- * 在原图标位置替换（原图标带 group-hover:hidden；NumberInput 步进按钮列自带 flex，
- * 改用 visibility 隐藏的 pactor-clearable-ghost）；点击清空并传出空值。
+ * 在原图标位置替换（原图标带 group-hover:hidden）；NumberInput 的步进按钮列保持
+ * 可见可用，× 浮在步进按钮左侧；点击清空并传出空值。
  */
 import { screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -36,16 +36,25 @@ describe('hover 清除 allowClear', () => {
     expect(screen.queryByLabelText(CLEAR_LABEL)).toBeNull();
   });
 
-  it('NumberInput：有值悬停时步进按钮隐藏、原位替换为 ×，点击清空传出 undefined', async () => {
+  it('NumberInput：有值时 × 浮在步进按钮左侧（不隐藏步进按钮），步进与清空互不影响', async () => {
     const user = userEvent.setup();
     renderDsl({ type: 'NumberInput', props: { value: 42, allowClear: true } });
     const steppers = screen.getByLabelText('增加').parentElement!;
-    expect(steppers.className).toContain('pactor-clearable-ghost');
+    // 步进按钮列不再被 ghost 隐藏（× 与步进按钮并存）
+    expect(steppers.className).not.toContain('pactor-clearable-ghost');
+    const input = document.querySelector('input') as HTMLInputElement;
+    // 有值时文本预留双倍右内边距（步进列 + × 区域），避免被 × 遮挡
+    expect(input.className).toContain('pr-14');
     const clear = screen.getByLabelText(CLEAR_LABEL);
     expect(clear.className).toContain('pactor-clearable');
+    // × 存在时步进按钮照常可用
+    await user.click(screen.getByLabelText('增加'));
+    expect(input.value).toBe('43');
+    // 点击 × 清空（步进列仍在原处）
     await user.click(clear);
-    expect((document.querySelector('input') as HTMLInputElement).value).toBe('');
+    expect(input.value).toBe('');
     expect(screen.queryByLabelText(CLEAR_LABEL)).toBeNull();
+    expect(steppers.className).not.toContain('pactor-clearable-ghost');
   });
 
   it('Select：有选中值时下拉箭头 hover 隐藏，× 原位替换；点击清空选中', async () => {
