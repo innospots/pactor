@@ -29,6 +29,7 @@ const ITEMS = [
       {
         key: 'inst-1/conv-1',
         label: '会话一',
+        icon: 'message-square',
         trailing: '10:30',
         actions: [
           {
@@ -184,7 +185,7 @@ describe('Menu 项级操作', () => {
     );
   });
 
-  it('子菜单文字与组文字对齐：组左侧 chevron 时子项缩进补偿到组文字起点', () => {
+  it('子菜单缩进由左侧竖线容器承载：子项 padding 归零、wrapper 带 border-l', () => {
     const getPadding = (
       container: HTMLElement,
       key: string,
@@ -195,8 +196,6 @@ describe('Menu 项级操作', () => {
         )! as HTMLElement
       ).style.paddingLeft;
 
-    // chevronPlacement: left —— 组文字起点 = 12(px-3) + 16(chevron) + 8(gap)，
-    // 子项 paddingLeft 与之对齐
     const left = renderDsl({
       type: 'Menu',
       props: {
@@ -207,14 +206,65 @@ describe('Menu 项级操作', () => {
       },
     });
     expect(getPadding(left.container, 'inst-1')).toBe('');
-    expect(getPadding(left.container, 'inst-1/conv-1')).toBe('36px');
+    // 目录项（带子菜单的父菜单）文字加粗
+    expect(
+      left.container
+        .querySelector(
+          '[data-slot=menu-entry][data-key="inst-1"] [data-slot=menu-item] span.truncate',
+        )!
+        .className,
+    ).toContain('font-semibold');
+    // 缩进由 menu-children 容器（ml-5 对准父项图标中心 + pl-4）承担，
+    // 子项自身 padding 归零（内联样式不写）
+    expect(getPadding(left.container, 'inst-1/conv-1')).toBe('');
+    const leftLine = left.container.querySelector(
+      '[data-slot=menu-entry][data-key="inst-1"] [data-slot=menu-children]',
+    )!;
+    expect(leftLine).not.toBeNull();
+    expect(leftLine.className).toContain('border-l');
+    expect(leftLine.className).toContain('ml-5');
+    // 条目与竖线间距 4px 由容器 pl-1 承担
+    expect(leftLine.className).toContain('pl-1');
+    // 子项与竖线间距 4px（pl-1），hover 右移（hover:pl-2）
+    const childBtn = left.container.querySelector(
+      '[data-slot=menu-entry][data-key="inst-1/conv-1"] [data-slot=menu-item]',
+    )!;
+    expect(childBtn.className).toContain('pl-1');
+    expect(childBtn.className).toContain('hover:pl-2');
+    // 图标弱化一档（SVG className 在 jsdom 不可靠，用 attribute）
+    expect(
+      childBtn.querySelector('[data-slot=icon]')!.getAttribute('class'),
+    ).toContain('text-muted-foreground');
 
-    // 缺省（右端 chevron / 无 chevron）：保持深度递进 12 + depth×16
     const right = renderDsl({
       type: 'Menu',
       props: { items: ITEMS, collapsible: true, defaultExpandAll: true },
     });
-    expect(getPadding(right.container, 'inst-1/conv-1')).toBe('28px');
+    expect(getPadding(right.container, 'inst-1/conv-1')).toBe('');
+    // 目录内子项之间纵向间距（对齐一级菜单 gap-0.5）
+    expect(
+      right.container
+        .querySelector('[data-slot=menu-entry][data-key="inst-1"] [data-slot=menu-children]')!
+        .className,
+    ).toContain('gap-0.5');
+
+    // 选中态保留 hover 同款右移（pl-2）
+    const selected = renderDsl({
+      type: 'Menu',
+      props: {
+        items: ITEMS,
+        collapsible: true,
+        defaultExpandAll: true,
+        selectedKey: 'inst-1/conv-1',
+      },
+    });
+    expect(
+      selected.container
+        .querySelector(
+          '[data-slot=menu-entry][data-key="inst-1/conv-1"] [data-slot=menu-item]',
+        )!
+        .className,
+    ).toContain('pl-2');
   });
 
   it('空组（children: []）同样是目录：不可选中、无 chevron、不触发 onSelect', () => {

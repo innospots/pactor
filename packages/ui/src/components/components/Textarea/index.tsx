@@ -2,7 +2,7 @@ import { useI18n } from '@pactor-app/runtime';
 import { useEffect, useId, type CSSProperties } from 'react';
 
 import { cn } from '../../../lib/utils.js';
-import { Textarea as ShadcnTextarea } from '../../../ui/textarea.js';
+import { Textarea as ShadcnTextarea, type TextareaAutoSize } from '../../../ui/textarea.js';
 import { CONTROL_SIZE_AREA, type ControlSize } from '../../control-size.js';
 import { useFormContext } from '../Form/context.js';
 import { FieldShell } from '../Form/form-item.js';
@@ -18,8 +18,10 @@ export interface TextareaProps {
   /** 受控值（独立渲染时生效）；Form 内作为字段初始值（优先于 Form initialValues） */
   value?: string;
   placeholder?: string;
-  /** 行数（缺省由内容自适应） */
+  /** 行数（缺省 3）；autoSize 开启时作为内容不足时的下限行数 */
   rows?: number;
+  /** 高度随内容自适应：true 无上限；{ minRows, maxRows } 限定行数区间（超上限内部滚动）；缺省 false 固定 rows 行高（可拖拽调高） */
+  autoSize?: boolean | TextareaAutoSize;
   disabled?: boolean;
   /** 控件尺寸（默认 middle；影响内边距与字号，高度仍由行数/内容决定） */
   size?: ControlSize;
@@ -33,7 +35,8 @@ export interface TextareaProps {
 
 /**
  * Textarea 适配器（shadcn kit）：Form 内声明 `name` 自动成为表单项；
- * onChange 传出 string（非原生 event）。
+ * onChange 传出 string（非原生 event）；autoSize（缺省 false）开启后
+ * 高度随内容自适应（{ minRows, maxRows } 限定行数区间）。
  */
 export function Textarea({
   name,
@@ -42,6 +45,7 @@ export function Textarea({
   value,
   placeholder,
   rows,
+  autoSize,
   disabled,
   size = 'middle',
   onChange,
@@ -78,6 +82,7 @@ export function Textarea({
           value={typeof fieldValue === 'string' ? fieldValue : ''}
           placeholder={placeholder ?? t('pactor.input.placeholder')}
           rows={rows}
+          autoSize={autoSize}
           disabled={disabled}
           className={CONTROL_SIZE_AREA[size]}
           onChange={(event) => {
@@ -94,6 +99,7 @@ export function Textarea({
       value={value ?? ''}
       placeholder={placeholder ?? t('pactor.input.placeholder')}
       rows={rows}
+      autoSize={autoSize}
       disabled={disabled}
       className={cn(CONTROL_SIZE_AREA[size], className)}
       style={style}

@@ -190,6 +190,7 @@ export function Mentions({
         data-slot="mentions"
         value={currentValue}
         rows={rows}
+        autoSize={{ minRows: rows ?? 3 }}
         placeholder={placeholder ?? t('pactor.input.placeholder')}
         disabled={disabled}
         className={CONTROL_SIZE_AREA[size]}
