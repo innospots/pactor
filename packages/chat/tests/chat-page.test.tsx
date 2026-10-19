@@ -408,3 +408,96 @@ describe('ChatPage 对话图标栏（conversation rail）', () => {
     expect(container.querySelector('[data-slot=chat-page-rail-panel]')).toBeNull();
   });
 });
+
+describe('ChatPage 右端固定块（side panel）', () => {
+  it('未提供 sidePanel 时不渲染固定块', () => {
+    const { container } = renderChatPage({ defaultArtifactOpen: false });
+    expect(container.querySelector('[data-slot=chat-page-side-panel]')).toBeNull();
+  });
+
+  it('展开：DSL 内容经槽渲染，位于 ConversationRail 左侧，宽度可配', () => {
+    const { container } = renderChatPage({
+      defaultArtifactOpen: false,
+      sidePanel: { type: 'Text', props: { text: '今日任务' } },
+      sidePanelOpen: true,
+      sidePanelWidth: 320,
+    });
+    const panel = container.querySelector<HTMLElement>(
+      '[data-slot=chat-page-side-panel]',
+    )!;
+    expect(panel).not.toBeNull();
+    expect(panel.getAttribute('data-state')).toBe('open');
+    expect(panel.style.width).toBe('320px');
+    expect(panel.style.opacity).toBe('1');
+    expect(panel.style.transition).toContain('width');
+    expect(screen.getByText('今日任务')).not.toBeNull();
+
+    // 与对话图标栏同处右端容器（aside），且位于图标栏之前（左侧）
+    const rail = container.querySelector('[data-slot=chat-page-conv-rail]')!;
+    const aside = container.querySelector('[data-slot=chat-page-aside]')!;
+    expect(aside).not.toBeNull();
+    expect(panel.parentElement).toBe(aside);
+    expect(rail.parentElement).toBe(aside);
+    expect(aside.getAttribute('data-state')).toBe('open');
+    expect(
+      panel.compareDocumentPosition(rail) & Node.DOCUMENT_POSITION_FOLLOWING,
+    ).toBeTruthy();
+
+    // 背景色引用 chat 皮肤令牌（跟随当前页面皮肤）
+    expect(panel.getAttribute('style')).toContain(
+      '--pactor-chat-side-panel-bg',
+    );
+
+    // 内层保持目标宽度：动画推进时内容不重排
+    const body = panel.querySelector<HTMLElement>(
+      '[data-slot=chat-page-side-panel-body]',
+    )!;
+    expect(body.style.width).toBe('320px');
+  });
+
+  it('收起：宽度 0 / 透明 / aria-hidden + inert，内容保留以支持过渡', () => {
+    const { container } = renderChatPage({
+      defaultArtifactOpen: false,
+      sidePanel: { type: 'Text', props: { text: '今日任务' } },
+      sidePanelOpen: false,
+    });
+    const panel = container.querySelector<HTMLElement>(
+      '[data-slot=chat-page-side-panel]',
+    )!;
+    expect(
+      container
+        .querySelector('[data-slot=chat-page-aside]')!
+        .getAttribute('data-state'),
+    ).toBe('closed');
+    expect(panel.getAttribute('data-state')).toBe('closed');
+    expect(panel.style.width).toBe('0px');
+    expect(panel.style.opacity).toBe('0');
+    expect(panel.getAttribute('aria-hidden')).toBe('true');
+    expect(panel.hasAttribute('inert')).toBe(true);
+    // 内容仍在 DOM（宽度动画结束前不卸载）
+    expect(screen.getByText('今日任务')).not.toBeNull();
+  });
+
+  it('ReactNode 内容直出；缺省宽度 280px', () => {
+    const { container } = renderChatPage({
+      defaultArtifactOpen: false,
+      sidePanel: <strong>自定义任务元素</strong>,
+      sidePanelOpen: true,
+    });
+    expect(screen.getByText('自定义任务元素')).not.toBeNull();
+    const panel = container.querySelector<HTMLElement>(
+      '[data-slot=chat-page-side-panel]',
+    )!;
+    expect(panel.style.width).toBe('280px');
+  });
+
+  it('content 槽替换主区域时不渲染右端固定块', () => {
+    const { container } = renderChatPage({
+      sidePanel: { type: 'Text', props: { text: '今日任务' } },
+      sidePanelOpen: true,
+      content: { type: 'Text', props: { text: '自定义主体' } },
+    });
+    expect(screen.getByText('自定义主体')).not.toBeNull();
+    expect(container.querySelector('[data-slot=chat-page-side-panel]')).toBeNull();
+  });
+});

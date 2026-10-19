@@ -88,6 +88,9 @@
      逗号后为 pactor-ui 缺席时的 chat 品牌默认 */
   --pactor-chat-bg: var(--background, #f7f6f4);
   --pactor-chat-sidebar-bg: var(--sidebar, #efedea);
+  /* ChatPage 右端固定块（sidePanel）背景：默认跟随侧栏皮肤，
+     皮肤可直接覆盖本令牌单独精调 */
+  --pactor-chat-side-panel-bg: var(--pactor-chat-sidebar-bg);
   --pactor-chat-fg: var(--foreground, #1a1d26);
   --pactor-chat-muted: var(--muted, #f4f4f6);
   --pactor-chat-muted-fg: var(--muted-foreground, #6b7180);
