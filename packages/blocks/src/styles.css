@@ -17,3 +17,38 @@
   font-size: 14px;
   transform: none;
 }
+
+/* HeroSection 入场与网格动画（参考 Arc UI hero-section）：
+   keyframes 顶层声明（不入层），消费方以任意值工具类
+   animate-[pactor-hero-*_…] 引用；motion-reduce:animate-none 静止 */
+@keyframes pactor-hero-fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes pactor-hero-rise {
+  from {
+    opacity: 0;
+    transform: perspective(1200px) rotateX(10deg) translateY(28px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: perspective(1200px) rotateX(0deg) translateY(0) scale(1);
+  }
+}
+
+@keyframes pactor-hero-mesh-drift {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0) scale(1.05);
+  }
+  50% {
+    transform: translate3d(2.5%, -3%, 0) scale(1.12);
+  }
+}
