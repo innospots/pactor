@@ -1,6 +1,6 @@
 # pactor-app
 
-[Pactor](https://github.com/426-330/pactor) 的聚合安装包（meta package）：一次安装完整的 Server-Driven UI + AI-Native 运行时栈，入口转发 `@pactor-app/app` 的一站式 API（`createPactorApplication`）。
+[Pactor](https://github.com/innospots/pactor) 的聚合安装包（meta package）：一次安装完整的 Server-Driven UI + AI-Native 运行时栈，入口转发 `@pactor-app/app` 的一站式 API（`createPactorApplication`）。
 
 ## 安装
 
@@ -36,4 +36,4 @@ npm install @pactor-app/vite-plugin  # Vite 插件：.page.yaml 编译 + HMR
 npm install @pactor-app/cli          # DSL 工具链（validate / inspect / lint / build / create）
 ```
 
-各模块说明见 [packages 文档](https://github.com/426-330/pactor/tree/main/packages)。
+各模块说明见 [packages 文档](https://github.com/innospots/pactor/tree/main/packages)。

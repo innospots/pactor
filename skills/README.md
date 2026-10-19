@@ -1,6 +1,6 @@
 # @pactor-app/skills
 
-面向 AI Agent 的 [Pactor](https://github.com/426-330/pactor) 开发技能集。技能目录均以 **`pactor-`** 为前缀，与 npm 脚手架包 `create-pactor-app` 区分。
+面向 AI Agent 的 [Pactor](https://github.com/innospots/pactor) 开发技能集。技能目录均以 **`pactor-`** 为前缀，与 npm 脚手架包 `create-pactor-app` 区分。
 
 本仓库路径：**根目录 `skills/`**（pnpm workspace 包 `@pactor-app/skills`）。
 

@@ -3,7 +3,7 @@ page:
   id: extended-components
   title: 扩展组件演示
   name: extendedComponents
-  description: 'shadcn 扩展组件集中演示（spec: shadcn-extended-components）：展示 / 表单 / 反馈弹层 / 复合 / 页面级组合（Sidebar、DataTable、Chart）'
+  description: 'shadcn 扩展组件集中演示（spec: shadcn-extended-components）：展示 / 表单 / 反馈弹层 / 复合 / 页面级组合（Sidebar、Table、Chart）'
   permission: customer:view
 
 meta:
@@ -17,7 +17,7 @@ state:
   cmd: ''
 
 dataSources:
-  # Chart / DataTable 数据（静态数据源，表达式注入）
+  # Chart / Table 数据（静态数据源，表达式注入）
   sales:
     type: static
     autoLoad: true
@@ -46,7 +46,7 @@ body:
       props:
         variant: info
         message: shadcn 扩展组件（四批 48 个类型）集中演示
-        description: 展示类 Badge/Progress/Tooltip、表单类 Switch、弹层类 Dialog/AlertDialog/Accordion、复合类 Carousel/Command、页面级组合 DataTable/Chart/Sidebar
+        description: 展示类 Badge/Progress/Tooltip、表单类 Switch、弹层类 Dialog/AlertDialog/Accordion、复合类 Carousel/Command、页面级组合 Table/Chart/Sidebar
 
     # 展示类
     - type: Card
@@ -180,38 +180,34 @@ body:
                 text: 已选命令：${state.cmd}
                 type: secondary
 
-    # 页面级组合：DataTable + Chart
+    # 页面级组合：Table + Chart
     - type: Card
       props:
-        title: 页面级组合：DataTable（排序 / 筛选 / 分页）
+        title: 页面级组合：Table（列对齐 / 排序 / 分页）
       children:
-        - type: DataTable
+        - type: Table
           props:
-            rows: ${data.members}
+            dataSource: ${data.members}
             pagination: { pageSize: 3 }
             columns:
-              - { key: name, title: 姓名, filterable: true }
-              - { key: role, title: 角色, filterable: true }
-              - { key: age, title: 年龄, sortable: true }
+              - { title: 姓名, dataIndex: name }
+              - { title: 角色, dataIndex: role }
+              - { title: 年龄, dataIndex: age, sorter: true, align: right }
           events:
-            onSort:
+            onChange:
               action: setState
               params:
-                sortInfo: ${event}
-            onPageChange:
-              action: setState
-              params:
-                pageNo: ${event}
+                tableInfo: ${event}
         - type: Flex
           props: { gap: 16 }
           children:
             - type: Text
               props:
-                text: 排序：${state.sortInfo}
+                text: 排序：${state.tableInfo.field} ${state.tableInfo.order}
                 type: secondary
             - type: Text
               props:
-                text: 页码：${state.pageNo}
+                text: 页码：${state.tableInfo.current}
                 type: secondary
 
     - type: Card

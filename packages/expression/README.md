@@ -1,6 +1,6 @@
 # @pactor-app/expression
 
-[Pactor](https://github.com/426-330/pactor) 的受控表达式引擎：解析与求值 DSL 中的 `${...}` 表达式。基于受控 AST —— **不使用 `eval` / `new Function`，无法访问全局对象**。
+[Pactor](https://github.com/innospots/pactor) 的受控表达式引擎：解析与求值 DSL 中的 `${...}` 表达式。基于受控 AST —— **不使用 `eval` / `new Function`，无法访问全局对象**。
 
 ## 安装
 
@@ -39,7 +39,7 @@ evaluateExpression("!permission('customer:edit')", scope, {
 
 ## 文档
 
-完整文档见 <https://github.com/426-330/pactor/tree/main/docs>（`pnpm docs:dev` 本地启动文档站）。
+完整文档见 <https://github.com/innospots/pactor/tree/main/docs>（`pnpm docs:dev` 本地启动文档站）。
 
 ## License
 

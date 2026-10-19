@@ -1,6 +1,6 @@
 # @pactor-app/markdown
 
-[Pactor](https://github.com/426-330/pactor) 的 Markdown 模块：安全的 Markdown 渲染器（`MarkdownRenderer`）与 DSL Markdown 组件适配（`type: Markdown`）。Chat 消息与 Page/Overlay DSL 共用同一渲染器。
+[Pactor](https://github.com/innospots/pactor) 的 Markdown 模块：安全的 Markdown 渲染器（`MarkdownRenderer`）与 DSL Markdown 组件适配（`type: Markdown`）。Chat 消息与 Page/Overlay DSL 共用同一渲染器。
 
 ## 安装
 
@@ -61,7 +61,7 @@ props:
 
 ## 文档
 
-完整文档见 <https://github.com/426-330/pactor/tree/main/docs>（`pnpm docs:dev` 本地启动文档站）。
+完整文档见 <https://github.com/innospots/pactor/tree/main/docs>（`pnpm docs:dev` 本地启动文档站）。
 
 ## License
 
