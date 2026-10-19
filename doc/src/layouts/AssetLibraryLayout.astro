@@ -5,9 +5,9 @@
  * 站点页脚（SiteFooter 区块组件）位于 main 内随内容滚动，
  * 底部栏展示构建期注入的真实构建版本 / 最近同步时间 / Git 提交号。
  */
-import '@pactor-app/ui/styles.css';
-import '@pactor-app/chart/styles.css';
-import '@pactor-app/blocks/styles.css';
+// 统一样式入口：pactor-app 聚合样式（含跨包 utilities 层重排，
+// 分表加载会因各包独立 utilities 层破坏响应式变体级联，见 build-styles 规格）
+import 'pactor-app/styles.css';
 import '../styles/asset-library.css';
 import TopNav from '../components/TopNav.astro';
 import SideNav from '../components/SideNav.astro';

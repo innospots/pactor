@@ -4,9 +4,9 @@
  * 无站点外壳的裸页面，整视口渲染落盘的提炼 DSL（previews/NN.yaml），
  * 供模板详情页以 iframe 嵌入（外壳布局的 fixed/100dvh 在 iframe 内自然生效）。
  */
-import '@pactor-app/ui/styles.css';
-import '@pactor-app/chart/styles.css';
-import '@pactor-app/blocks/styles.css';
+// 统一样式入口（勿改回分表加载：各包独立 utilities 层会使
+// 后加载包的基础类覆盖先加载包的响应式变体，如 .hidden 压过 .md\:block）
+import 'pactor-app/styles.css';
 import TemplateDslPreview from '../../../../components/previews/TemplateDslPreview';
 import { wireframeTemplates, findWireframePreview } from '../../../../assets-data/wireframe-templates';
 import type { DslNode } from '@pactor-app/core';

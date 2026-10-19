@@ -4,7 +4,7 @@ import { useEffect, useId, useState, type CSSProperties } from 'react';
 
 import { cn } from '../../../lib/utils.js';
 import { Input as ShadcnInput } from '../../../ui/input.js';
-import { CLEARABLE_OVERLAY_HIDE, ClearHoverButton } from '../../clearable.js';
+import { ClearHoverButton } from '../../clearable.js';
 import { CONTROL_SIZE_BOX, type ControlSize } from '../../control-size.js';
 import { useFormContext } from '../Form/context.js';
 import { FieldShell } from '../Form/form-item.js';
@@ -31,7 +31,7 @@ export interface NumberInputProps {
   disabled?: boolean;
   /** 控件尺寸（默认 middle，即现行 h-9 尺寸） */
   size?: ControlSize;
-  /** hover 清除（缺省开启，传 false 关闭）：有值时悬停控件，右侧步进按钮替换为 ×，点击清空（传出 undefined） */
+  /** hover 清除（缺省开启，传 false 关闭）：有值时悬停控件，步进按钮左侧浮出 ×，点击清空（传出 undefined）；步进按钮不受影响 */
   allowClear?: boolean;
   /** 输入事件，传出 number；清空时传出 undefined */
   onChange?: (value: number | undefined) => void;
@@ -160,7 +160,7 @@ export function NumberInput({
 
   const stepperClass =
     'flex flex-1 cursor-pointer items-center justify-center text-muted-foreground transition-colors hover:text-foreground disabled:cursor-not-allowed disabled:opacity-50';
-  // hover 清除：有值且未禁用时，悬停把控件右侧步进按钮替换为 ×
+  // hover 清除：有值且未禁用时，悬停在步进按钮左侧浮出 ×（步进按钮保持可见可用）
   const showClear = allowClear !== false && disabled !== true && text !== '';
   const handleClear = () => {
     setText('');
@@ -185,7 +185,9 @@ export function NumberInput({
         disabled={disabled}
         className={cn(
           CONTROL_SIZE_BOX[size],
-          'pr-7 [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none',
+          // × 悬浮在步进按钮左侧（right-7 宽 28px），有值时文本预留双倍右内边距避免遮挡
+          showClear ? 'pr-14' : 'pr-7',
+          '[appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none',
           controlClassName,
         )}
         onChange={(event) => {
@@ -200,12 +202,7 @@ export function NumberInput({
           commit(applyPrecision(clamp(parsed, min, max), precision));
         }}
       />
-      <span
-        className={cn(
-          'absolute inset-y-0 right-0 flex w-7 flex-col divide-y divide-input border-l border-input',
-          showClear && CLEARABLE_OVERLAY_HIDE,
-        )}
-      >
+      <span className="absolute inset-y-0 right-0 flex w-7 flex-col divide-y divide-input border-l border-input">
         <button
           type="button"
           tabIndex={-1}
@@ -230,7 +227,7 @@ export function NumberInput({
       {showClear ? (
         <ClearHoverButton
           label={t('pactor.control.clear')}
-          className="absolute inset-y-0 right-0 w-7"
+          className="absolute inset-y-0 right-7 w-7"
           onClear={handleClear}
         />
       ) : null}
