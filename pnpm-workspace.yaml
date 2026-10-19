@@ -4,7 +4,6 @@ packages:
   - tools/*
   - skills
   - docs
-  - doc
 
 allowBuilds:
   '@parcel/watcher': set this to true or false
