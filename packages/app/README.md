@@ -1,6 +1,6 @@
 # @pactor-app/app
 
-[Pactor](https://github.com/426-330/pactor) 的一站式组合层（设计文档第 86–89 节）。业务工程只调 `createPactorApplication({ appId, api }).mount('#root')` 即可完成：DSL 资源加载（loader）→ bootstrap 编排（权限 / 菜单 / 布局）→ 共享 registries（内置组件 + 交互动作 + 业务扩展）→ react-router 动态路由 → 布局外壳 → PageRuntime 页面渲染 → Overlay/Provider 集成 → 启动与页面错误兜底。
+[Pactor](https://github.com/innospots/pactor) 的一站式组合层（设计文档第 86–89 节）。业务工程只调 `createPactorApplication({ appId, api }).mount('#root')` 即可完成：DSL 资源加载（loader）→ bootstrap 编排（权限 / 菜单 / 布局）→ 共享 registries（内置组件 + 交互动作 + 业务扩展）→ react-router 动态路由 → 布局外壳 → PageRuntime 页面渲染 → Overlay/Provider 集成 → 启动与页面错误兜底。
 
 ## 安装
 
@@ -145,7 +145,7 @@ import { SitemapApp } from '@pactor-app/app';
 
 ## 文档
 
-完整文档见 <https://github.com/426-330/pactor/tree/main/docs>（`pnpm docs:dev` 本地启动文档站）。
+完整文档见 <https://github.com/innospots/pactor/tree/main/docs>（`pnpm docs:dev` 本地启动文档站）。
 
 ## License
 

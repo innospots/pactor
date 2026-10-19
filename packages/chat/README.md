@@ -1,6 +1,6 @@
 # @pactor-app/chat
 
-[Pactor](https://github.com/426-330/pactor) 的 Chat 包：AI Message Rendering Protocol（消息模型 / Streaming reducer / Safe Registry / capability 动作）与 Chat Runtime 视图（`<ChatView>` / `<MessageBubble>` / `<PartRenderer>` / `<Composer>` / chat 布局）。核心是"协议 + Runtime"而非单个组件；model / store / events / reducer / safe-registry / capability 零 React，可纯 Node 测试。
+[Pactor](https://github.com/innospots/pactor) 的 Chat 包：AI Message Rendering Protocol（消息模型 / Streaming reducer / Safe Registry / capability 动作）与 Chat Runtime 视图（`<ChatView>` / `<MessageBubble>` / `<PartRenderer>` / `<Composer>` / chat 布局）。核心是"协议 + Runtime"而非单个组件；model / store / events / reducer / safe-registry / capability 零 React，可纯 Node 测试。
 
 ## 安装
 
@@ -226,7 +226,7 @@ body:
 
 ## 文档
 
-完整文档见 <https://github.com/426-330/pactor/tree/main/docs>（`pnpm docs:dev` 本地启动文档站）。
+完整文档见 <https://github.com/innospots/pactor/tree/main/docs>（`pnpm docs:dev` 本地启动文档站）。
 
 ## License
 

@@ -4,7 +4,7 @@
 
 ## 项目定位
 
-**Pactor**（仓库 `github.com/426-330/pactor`）：基于 YAML/JSON DSL 的企业级 Server-Driven UI + AI-Native 前端运行时框架。Monorepo（pnpm workspace + tsup + vitest），设计文档：`docs/src/content/docs/framework-design.md`（中文，约 4400 行，唯一权威设计来源）。
+**Pactor**（仓库 `github.com/innospots/pactor`）：基于 YAML/JSON DSL 的企业级 Server-Driven UI + AI-Native 前端运行时框架。Monorepo（pnpm workspace + tsup + vitest），设计文档：`docs/src/content/docs/framework-design.md`（中文，约 4400 行，唯一权威设计来源）。
 
 核心原则：DSL 是协议、Runtime 是核心、动态 DSL 静态能力（禁 eval/远程 JS）、Registry 管理一切可扩展点、前端权限只管 UI。
 

@@ -14,10 +14,10 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/426-330/pactor.git"
+    "url": "git+https://github.com/innospots/pactor.git"
   },
-  "homepage": "https://github.com/426-330/pactor",
-  "bugs": "https://github.com/426-330/pactor/issues",
+  "homepage": "https://github.com/innospots/pactor",
+  "bugs": "https://github.com/innospots/pactor/issues",
   "engines": {
     "node": ">=18",
     "pnpm": ">=9"
@@ -29,9 +29,6 @@
     "docs:dev": "pnpm --filter pactor-docs dev",
     "docs:build": "pnpm --filter pactor-docs build",
     "docs:preview": "pnpm --filter pactor-docs preview",
-    "asset:dev": "pnpm --filter pactor-asset-library dev",
-    "asset:build": "pnpm --filter pactor-asset-library build",
-    "asset:preview": "pnpm --filter pactor-asset-library preview",
     "release": "pnpm -r --filter \"./packages/*\" --filter \"./skills\" --if-present build && pnpm -r --filter \"./packages/*\" --filter \"./skills\" --if-present test && vitest run tests/ && pnpm -r --filter \"./packages/*\" --filter \"./skills\" publish"
   },
   "devDependencies": {

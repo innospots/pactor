@@ -1,6 +1,6 @@
 # @pactor-app/schema
 
-[Pactor](https://github.com/426-330/pactor) 的 Schema 校验包：DSL 版本常量、Page DSL 与 DslNode 的 JSON Schema、基于 Ajv 的结构化校验器。
+[Pactor](https://github.com/innospots/pactor) 的 Schema 校验包：DSL 版本常量、Page DSL 与 DslNode 的 JSON Schema、基于 Ajv 的结构化校验器。
 
 ## 安装
 
@@ -35,7 +35,7 @@ if (!result.valid) {
 
 ## 文档
 
-完整文档见 <https://github.com/426-330/pactor/tree/main/docs>（`pnpm docs:dev` 本地启动文档站）。
+完整文档见 <https://github.com/innospots/pactor/tree/main/docs>（`pnpm docs:dev` 本地启动文档站）。
 
 ## License
 

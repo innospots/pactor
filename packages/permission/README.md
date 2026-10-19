@@ -1,6 +1,6 @@
 # @pactor-app/permission
 
-[Pactor](https://github.com/426-330/pactor) 的权限模块：权限码集合存储（PermissionStore）、适配 @pactor-app/runtime 的权限适配器、Menu / Page 守卫纯函数与表达式函数 `permission(code)`。
+[Pactor](https://github.com/innospots/pactor) 的权限模块：权限码集合存储（PermissionStore）、适配 @pactor-app/runtime 的权限适配器、Menu / Page 守卫纯函数与表达式函数 `permission(code)`。
 
 浏览器只持有 Permission Set，DSL 中不出现 Role；前端权限只控制 UI（隐藏 / 禁用 / 拦截），后端必须再次鉴权。
 
@@ -60,7 +60,7 @@ const off = store.subscribe(() => {/* 重新过滤菜单等 */});
 
 ## 文档
 
-完整文档见 <https://github.com/426-330/pactor/tree/main/docs>（`pnpm docs:dev` 本地启动文档站）。
+完整文档见 <https://github.com/innospots/pactor/tree/main/docs>（`pnpm docs:dev` 本地启动文档站）。
 
 ## License
 

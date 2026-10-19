@@ -9,3 +9,5 @@ coverage/
 .wrangler
 /.idea/
 .cursor
+openspec
+design

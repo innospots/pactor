@@ -1,6 +1,6 @@
 # @pactor-app/vite-plugin
 
-[Pactor](https://github.com/426-330/pactor) 的 Vite 插件：把 `.page.yaml` / `.fragment.yaml` DSL 文件在构建期转换为 JS 模块（Parse → Validate → Compile），支持 HMR。校验复用 @pactor-app/schema 的 `validatePageDsl`。
+[Pactor](https://github.com/innospots/pactor) 的 Vite 插件：把 `.page.yaml` / `.fragment.yaml` DSL 文件在构建期转换为 JS 模块（Parse → Validate → Compile），支持 HMR。校验复用 @pactor-app/schema 的 `validatePageDsl`。
 
 ## 安装
 
@@ -90,7 +90,7 @@ const loader = new StaticDslLoader({
 
 ## 文档
 
-完整文档见 <https://github.com/426-330/pactor/tree/main/docs>（`pnpm docs:dev` 本地启动文档站）。
+完整文档见 <https://github.com/innospots/pactor/tree/main/docs>（`pnpm docs:dev` 本地启动文档站）。
 
 ## License
 

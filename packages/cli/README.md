@@ -1,6 +1,6 @@
 # @pactor-app/cli
 
-[Pactor](https://github.com/426-330/pactor) 的命令行工具（bin `pactor`）：本地 DSL 开发工具链，覆盖校验、结构摘要、静态检查、Schema 导出、编译为 Runtime Envelope JSON 与脚手架生成。
+[Pactor](https://github.com/innospots/pactor) 的命令行工具（bin `pactor`）：本地 DSL 开发工具链，覆盖校验、结构摘要、静态检查、Schema 导出、编译为 Runtime Envelope JSON 与脚手架生成。
 
 ## 安装
 
@@ -40,7 +40,7 @@ lint 规则：
 
 ## 文档
 
-完整文档见 <https://github.com/426-330/pactor/tree/main/docs>（`pnpm docs:dev` 本地启动文档站）。
+完整文档见 <https://github.com/innospots/pactor/tree/main/docs>（`pnpm docs:dev` 本地启动文档站）。
 
 ## License
 
