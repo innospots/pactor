@@ -39,7 +39,8 @@ const actionOrArraySchema = {
   ],
 } as const;
 
-const dataSourceSchema = {
+/** DataSource 配置 Schema（页面 dataSources 与片段载荷 dataSources 共用） */
+export const dataSourceSchema = {
   type: 'object',
   required: ['type'],
   properties: {

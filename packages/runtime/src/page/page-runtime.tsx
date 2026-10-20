@@ -1,6 +1,7 @@
 import type { DslChildrenItem, DslNode, LifecycleEventName, PageDsl } from '@pactor-app/core';
-import { isDslSourceRef, resolveRootNodes } from '@pactor-app/core';
+import { isDslFragmentPayload, isDslSourceRef, resolveRootNodes } from '@pactor-app/core';
 import {
+  validateDslFragmentPayload,
   validateDslNodes,
   validatePageDsl,
   type DslValidationError,
@@ -214,6 +215,24 @@ function renderResolvedRoots(
   engine: ActionEngine,
   children?: ReactNode,
 ): ReactNode {
+  // 片段载荷形态：dataSources / state 副作用已由 DslSourceBoundary 应用，
+  // 此处校验载荷结构并渲染 children 子树
+  if (isDslFragmentPayload(content)) {
+    const fragmentErrors = validateDslFragmentPayload(content);
+    if (fragmentErrors.length > 0) {
+      console.warn(
+        '[@pactor-app/runtime] 根级 children 动态引用返回的片段载荷未通过校验',
+        fragmentErrors,
+      );
+      return <>{children ?? null}</>;
+    }
+    return renderRootItems(
+      content.children as DslChildrenItem[],
+      context,
+      engine,
+      children,
+    );
+  }
   const errors = validateDslNodes(content);
   if (errors.length > 0) {
     console.warn(

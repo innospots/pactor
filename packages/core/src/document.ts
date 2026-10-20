@@ -147,6 +147,29 @@ export interface FragmentDsl {
   body: DslNode;
 }
 
+/**
+ * 片段载荷：DslSourceRef 动态引用除裸 DslNode 数组外可返回的扩展形态——
+ * 除 `children` 子树外可携带 `dataSources` 与 `state`，由渲染边界在解析成功后
+ * 注册到当前页面运行时（数据源运行时注册、state 合并），卸载时注销其注册的数据源
+ */
+export interface DslFragmentPayload {
+  children: DslChildren;
+  dataSources?: Record<string, DataSourceConfig>;
+  state?: Record<string, unknown>;
+}
+
+/** DslFragmentPayload 类型守卫：记录形态且 `children` 为数组 */
+export function isDslFragmentPayload(
+  value: unknown,
+): value is DslFragmentPayload {
+  return (
+    typeof value === 'object' &&
+    value !== null &&
+    !Array.isArray(value) &&
+    Array.isArray((value as { children?: unknown }).children)
+  );
+}
+
 /** Application DSL（第 9.1 节） */
 export interface ApplicationDsl {
   dsl: DslVersion;
