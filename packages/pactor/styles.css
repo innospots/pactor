@@ -3402,6 +3402,9 @@ button.pactor-chat-trace__header:hover, .pactor-chat-trace__entry-header:hover, 
 .right-7 {
     right: calc(var(--spacing) * 7);
   }
+.right-8 {
+    right: calc(var(--spacing) * 8);
+  }
 .right-10 {
     right: calc(var(--spacing) * 10);
   }
@@ -4973,8 +4976,14 @@ button.pactor-chat-trace__header:hover, .pactor-chat-trace__entry-header:hover, 
 .pr-8 {
     padding-right: calc(var(--spacing) * 8);
   }
+.pr-8\! {
+    padding-right: calc(var(--spacing) * 8) !important;
+  }
 .pr-14 {
     padding-right: calc(var(--spacing) * 14);
+  }
+.pr-14\! {
+    padding-right: calc(var(--spacing) * 14) !important;
   }
 .pb-1 {
     padding-bottom: var(--spacing);
