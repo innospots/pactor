@@ -298,3 +298,300 @@ describe('动态 DSL 引用（DslSourceRef）', () => {
     await runtime.destroy();
   });
 });
+
+describe('片段载荷（DslFragmentPayload）', () => {
+  it('片段携带 state：合并进页面 state 后渲染 children 子树', async () => {
+    const services = new Registry<ServiceHandler>('ServiceRegistry');
+    services.register('dsl.frag', async () => ({
+      children: [{ type: 'Label', props: { text: '${state.greeting} 世界' } }],
+      state: { greeting: '你好' },
+    }));
+    const runtime = createPageRuntime(
+      minimalDsl({
+        body: {
+          type: 'Page',
+          children: { source: { type: 'service', service: 'dsl.frag' } },
+        },
+      }),
+      { services },
+    );
+    registerLabel(runtime);
+
+    render(<PageRuntimeView runtime={runtime} />);
+    await flushAsync();
+
+    expect(screen.getByText('你好 世界')).toBeTruthy();
+    expect(runtime.context.state.get('greeting')).toBe('你好');
+    await runtime.destroy();
+  });
+
+  it('片段携带 dataSources：autoLoad 源自动加载，reload 对运行时注册源生效', async () => {
+    let l2Loads = 0;
+    const services = new Registry<ServiceHandler>('ServiceRegistry');
+    services.register('dsl.frag', async () => ({
+      children: [
+        { type: 'Label', props: { text: 'L2: ${data.level2}' } },
+      ],
+      dataSources: {
+        level2: { type: 'service', service: 'svc.l2', autoLoad: true },
+      },
+    }));
+    services.register('svc.l2', async () => `v${++l2Loads}`);
+    const runtime = createPageRuntime(
+      minimalDsl({
+        body: {
+          type: 'Page',
+          children: { source: { type: 'service', service: 'dsl.frag' } },
+        },
+      }),
+      { services },
+    );
+    registerLabel(runtime);
+
+    render(<PageRuntimeView runtime={runtime} />);
+    await flushAsync();
+
+    // autoLoad：注册后即触发一次加载（页面 init 已过）
+    expect(l2Loads).toBe(1);
+    expect(screen.getByText('L2: v1')).toBeTruthy();
+
+    // reload 对 init 之后注册的源生效
+    await act(async () => {
+      await runtime.context.data.reload('level2');
+    });
+    expect(l2Loads).toBe(2);
+    expect(screen.getByText('L2: v2')).toBeTruthy();
+    await runtime.destroy();
+  });
+
+  it('片段数据源 URL 的 ${state.*} 按加载时的实时作用域求值', async () => {
+    const http = {
+      request: vi.fn(async (config: { url: string }) => ({ url: config.url })),
+    };
+    const services = new Registry<ServiceHandler>('ServiceRegistry');
+    services.register('dsl.frag', async () => ({
+      children: [{ type: 'Label', props: { text: 'frag' } }],
+      state: { l1: 'a' },
+      dataSources: {
+        level2: {
+          type: 'http',
+          autoLoad: false,
+          request: { url: '/api/l2/${state.l1}' },
+        },
+      },
+    }));
+    const runtime = createPageRuntime(
+      minimalDsl({
+        body: {
+          type: 'Page',
+          children: { source: { type: 'service', service: 'dsl.frag' } },
+        },
+      }),
+      { services, http },
+    );
+    registerLabel(runtime);
+
+    render(<PageRuntimeView runtime={runtime} />);
+    await flushAsync();
+
+    // autoLoad: false 不自动加载
+    expect(http.request).not.toHaveBeenCalled();
+
+    // 片段 state 已合并，加载时按当前作用域求值
+    await act(async () => {
+      await runtime.context.data.load('level2');
+    });
+    expect(http.request).toHaveBeenLastCalledWith(
+      expect.objectContaining({ url: '/api/l2/a' }),
+    );
+
+    // state 变化后再次加载按新作用域求值
+    await act(async () => {
+      runtime.context.state.set('l1', 'b');
+    });
+    await act(async () => {
+      await runtime.context.data.load('level2');
+    });
+    expect(http.request).toHaveBeenLastCalledWith(
+      expect.objectContaining({ url: '/api/l2/b' }),
+    );
+    await runtime.destroy();
+  });
+
+  it('数据源名冲突：告警并跳过，页面级配置不受影响', async () => {
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
+    const services = new Registry<ServiceHandler>('ServiceRegistry');
+    services.register('dsl.frag', async () => ({
+      children: [{ type: 'Label', props: { text: 'frag' } }],
+      dataSources: {
+        shared: { type: 'static', value: 'frag-value' },
+      },
+    }));
+    const runtime = createPageRuntime(
+      minimalDsl({
+        dataSources: {
+          shared: { type: 'static', value: 'page-value' },
+        },
+        body: {
+          type: 'Page',
+          children: { source: { type: 'service', service: 'dsl.frag' } },
+        },
+      }),
+      { services },
+    );
+    registerLabel(runtime);
+
+    render(<PageRuntimeView runtime={runtime} />);
+    await flushAsync();
+
+    expect(warn).toHaveBeenCalled();
+    expect(screen.getByText('frag')).toBeTruthy();
+    // 冲突名跳过：仍是页面级配置
+    await act(async () => {
+      await runtime.context.data.load('shared');
+    });
+    expect(runtime.context.data.getData('shared')).toBe('page-value');
+    warn.mockRestore();
+    await runtime.destroy();
+  });
+
+  it('卸载时注销本边界注册的数据源', async () => {
+    const services = new Registry<ServiceHandler>('ServiceRegistry');
+    services.register('dsl.frag', async () => ({
+      children: [{ type: 'Label', props: { text: 'frag' } }],
+      dataSources: {
+        temp: { type: 'static', value: 1 },
+      },
+    }));
+    const runtime = createPageRuntime(
+      minimalDsl({
+        body: {
+          type: 'Page',
+          children: { source: { type: 'service', service: 'dsl.frag' } },
+        },
+      }),
+      { services },
+    );
+    registerLabel(runtime);
+
+    const { unmount } = render(<PageRuntimeView runtime={runtime} />);
+    await flushAsync();
+    await act(async () => {
+      await runtime.context.data.load('temp');
+    });
+    expect(runtime.context.data.getData('temp')).toBe(1);
+
+    unmount();
+
+    // 卸载后注销：按未知源抛错
+    await expect(runtime.context.data.load('temp')).rejects.toThrow('temp');
+    await runtime.destroy();
+  });
+
+  it('无效载荷（children 非数组）：按既有校验路径告警并渲染空', async () => {
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
+    const services = new Registry<ServiceHandler>('ServiceRegistry');
+    services.register('dsl.bad', async () => ({ children: 'not-an-array' }));
+    const runtime = createPageRuntime(
+      minimalDsl({
+        body: {
+          type: 'Page',
+          children: [
+            { type: 'Label', props: { text: 'before' } },
+            { type: 'Page', children: { source: { type: 'service', service: 'dsl.bad' } } },
+            { type: 'Label', props: { text: 'after' } },
+          ],
+        },
+      }),
+      { services },
+    );
+    registerLabel(runtime);
+
+    render(<PageRuntimeView runtime={runtime} />);
+    await flushAsync();
+
+    expect(warn).toHaveBeenCalled();
+    expect(screen.getByText('before')).toBeTruthy();
+    expect(screen.getByText('after')).toBeTruthy();
+    warn.mockRestore();
+    await runtime.destroy();
+  });
+
+  it('片段 children 内含非法节点：校验失败告警并渲染空', async () => {
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
+    const services = new Registry<ServiceHandler>('ServiceRegistry');
+    services.register('dsl.badfrag', async () => ({
+      children: [{ props: { text: '缺 type' } }],
+      state: { x: 1 },
+    }));
+    const runtime = createPageRuntime(
+      minimalDsl({
+        body: {
+          type: 'Page',
+          children: { source: { type: 'service', service: 'dsl.badfrag' } },
+        },
+      }),
+      { services },
+    );
+    registerLabel(runtime);
+
+    const { container } = render(<PageRuntimeView runtime={runtime} />);
+    await flushAsync();
+
+    expect(warn).toHaveBeenCalled();
+    expect(container.innerHTML).not.toContain('缺 type');
+    warn.mockRestore();
+    await runtime.destroy();
+  });
+
+  it('裸数组响应行为不变：无副作用、无告警', async () => {
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
+    const services = new Registry<ServiceHandler>('ServiceRegistry');
+    services.register('dsl.plain', async () => [
+      { type: 'Label', props: { text: '裸数组' } },
+    ]);
+    const runtime = createPageRuntime(
+      minimalDsl({
+        body: {
+          type: 'Page',
+          children: { source: { type: 'service', service: 'dsl.plain' } },
+        },
+      }),
+      { services },
+    );
+    registerLabel(runtime);
+
+    render(<PageRuntimeView runtime={runtime} />);
+    await flushAsync();
+
+    expect(screen.getByText('裸数组')).toBeTruthy();
+    expect(warn).not.toHaveBeenCalled();
+    warn.mockRestore();
+    await runtime.destroy();
+  });
+
+  it('根级 children 引用返回片段载荷：注册数据源并渲染 children 子树', async () => {
+    const services = new Registry<ServiceHandler>('ServiceRegistry');
+    services.register('dsl.rootfrag', async () => ({
+      children: [{ type: 'Label', props: { text: '根片段 ${state.tag}' } }],
+      state: { tag: 'R' },
+      dataSources: {
+        rootData: { type: 'static', value: 'rd', autoLoad: true },
+      },
+    }));
+    const runtime = createPageRuntime(
+      minimalDsl({
+        children: { source: { type: 'service', service: 'dsl.rootfrag' } },
+      }),
+      { services },
+    );
+    registerLabel(runtime);
+
+    render(<PageRuntimeView runtime={runtime} />);
+    await flushAsync();
+
+    expect(screen.getByText('根片段 R')).toBeTruthy();
+    expect(runtime.context.data.getData('rootData')).toBe('rd');
+    await runtime.destroy();
+  });
+});
