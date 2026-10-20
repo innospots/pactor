@@ -169,6 +169,53 @@ describe('ChatPage', () => {
     expect(within(menu as HTMLElement).getByText('助理')).toBeTruthy();
   });
 
+  it('对话图标栏背景与 sidePanel 一致；sidePanel 展示时左缘补边框', () => {
+    const { container } = renderChatPage({
+      sidePanel: { type: 'Text', props: { text: '今日任务' } },
+      sidePanelOpen: false,
+    });
+    const rail = container.querySelector<HTMLElement>(
+      '[data-slot=chat-page-conv-rail]',
+    )!;
+    // 背景引用与固定块相同的 chat 皮肤令牌
+    expect(rail.getAttribute('style')).toContain(
+      '--pactor-chat-side-panel-bg',
+    );
+    // 固定块收起时不显示左边框
+    expect(rail.className).not.toContain('border-l');
+
+    const { container: open } = renderChatPage({
+      sidePanel: { type: 'Text', props: { text: '今日任务' } },
+      sidePanelOpen: true,
+    });
+    const openRail = open.querySelector<HTMLElement>(
+      '[data-slot=chat-page-conv-rail]',
+    )!;
+    // 固定块展示时左缘补边框
+    expect(openRail.className).toContain('border-l');
+    expect(openRail.className).toContain('border-border');
+
+    // 未提供 sidePanel 时即使 sidePanelOpen 为 true 也不展示左边框
+    const { container: absent } = renderChatPage({ sidePanelOpen: true });
+    expect(
+      absent.querySelector<HTMLElement>(
+        '[data-slot=chat-page-conv-rail]',
+      )!.className,
+    ).not.toContain('border-l');
+  });
+
+  it('产物栏背景与 sidePanel 一致（同一 chat 皮肤令牌）', () => {
+    const { container } = renderChatPage();
+    const pane = container.querySelector<HTMLElement>(
+      '[data-slot=chat-page-artifact]',
+    )!;
+    expect(pane.getAttribute('style')).toContain(
+      '--pactor-chat-side-panel-bg',
+    );
+    // 不再使用弱底色
+    expect(pane.className).not.toContain('bg-muted');
+  });
+
   it('hideMenu：展开菜单区整体不渲染，图标栏与对话区保留', () => {
     const { container } = renderChatPage({ hideMenu: true });
     expect(container.querySelector('[data-slot=chat-page-menu]')).toBeNull();
@@ -499,5 +546,157 @@ describe('ChatPage 右端固定块（side panel）', () => {
     });
     expect(screen.getByText('自定义主体')).not.toBeNull();
     expect(container.querySelector('[data-slot=chat-page-side-panel]')).toBeNull();
+  });
+});
+
+describe('ChatPage 提问导航', () => {
+  const question = (id: string, content: string) => ({
+    id,
+    role: 'user',
+    parts: [{ type: 'text', content }],
+  });
+
+  it('仅一条提问时不渲染', () => {
+    const { container } = renderChatPage();
+    expect(
+      container.querySelector('[data-slot=chat-page-question-nav]'),
+    ).toBeNull();
+  });
+
+  it('showQuestionNav=false 时关闭提问导航', () => {
+    const { container } = renderChatPage({
+      messages: [question('q1', '问题一'), question('q2', '问题二')],
+      showQuestionNav: false,
+    });
+    expect(
+      container.querySelector('[data-slot=chat-page-question-nav]'),
+    ).toBeNull();
+  });
+
+  it('默认 6×2 块、当前浏览 12×2，块位于浮层内；hover 向四周展开', () => {
+    const { container } = renderChatPage({
+      messages: [
+        question('q1', '第一个问题'),
+        { id: 'a1', role: 'assistant', parts: [{ type: 'text', content: '回答' }] },
+        question('q2', '这是一个超过十个字的提问内容'),
+      ],
+    });
+    const nav = container.querySelector('[data-slot=chat-page-question-nav]')!;
+    expect(nav).not.toBeNull();
+    expect(nav.getAttribute('aria-label')).toBe('提问导航');
+
+    const items = nav.querySelectorAll('[data-slot=chat-page-question-nav-item]');
+    expect(items.length).toBe(2);
+    expect(items[0].className).toContain('h-[2px]');
+    // 默认块长 6px，当前浏览（jsdom 下为末条）12px
+    expect(items[0].className).toContain('w-1.5');
+    expect(items[1].className).toContain('w-3');
+    expect(items[1].className).toContain('transition-[width,background-color]');
+
+    // 单个浮层汇总全部提问项，导航块本身也在浮层内
+    const popover = nav.querySelector(
+      '[data-slot=chat-page-question-nav-popover]',
+    )!;
+    // 浮层背景从中心向四周缩放展开
+    const popoverBg = popover.querySelector(
+      '[data-slot=chat-page-question-nav-popover-bg]',
+    )!;
+    expect(popoverBg.className).toContain('group-hover:bg-popover');
+    expect(popoverBg.className).toContain('group-hover:border-border');
+    expect(popoverBg.className).toContain('scale-90');
+    expect(popoverBg.className).toContain('group-hover:scale-100');
+    expect(popoverBg.className).toContain('opacity-0');
+    expect(popoverBg.className).toContain('group-hover:opacity-100');
+    expect(popoverBg.className).toContain(
+      'transition-[background-color,border-color,box-shadow,opacity,scale]',
+    );
+    // 默认 gap-1，hover 放大到 gap-2；x/y 内边距；收起态仅块行可交互
+    expect(popover.className).toContain('gap-1');
+    expect(popover.className).toContain('group-hover:gap-2');
+    expect(popover.className).toContain('px-4');
+    expect(popover.className).toContain('py-3');
+    expect(popover.className).toContain('pointer-events-none');
+    expect(popover.contains(items[0])).toBe(true);
+    expect(
+      nav.querySelectorAll(':scope > [data-slot=chat-page-question-nav-item]'),
+    ).toHaveLength(0);
+
+    const labels = popover.querySelectorAll(
+      '[data-slot=chat-page-question-nav-label]',
+    );
+    expect(labels.length).toBe(2);
+    expect(labels[0].textContent).toBe('第一个问题');
+    expect(labels[0].className).toContain('pointer-events-auto');
+    // 浮层文案保留 10 字截断；完整正文经 title 在 hover 时展示
+    expect(labels[1].textContent).toBe('这是一个超过十个字的...');
+    expect(labels[1].getAttribute('title')).toBe('这是一个超过十个字的提问内容');
+    expect(labels[1].getAttribute('aria-label')).toBe(
+      '跳转到提问：这是一个超过十个字的提问内容',
+    );
+    // 默认提问文字灰色；当前浏览的提问 primary 且加粗；
+    // 悬停某条时该条文字变 primary（颜色过渡）
+    const idleText = labels[0].querySelector('span')!;
+    expect(labels[0].className).toContain('group/item');
+    expect(idleText.className).toContain('text-muted-foreground');
+    expect(idleText.className).toContain('group-hover/item:text-primary');
+    expect(idleText.className).toContain(
+      'transition-[max-width,opacity,color]',
+    );
+    const labelText = labels[1].querySelector('span')!;
+    expect(labelText.className).toContain('text-primary');
+    expect(labelText.className).toContain('font-semibold');
+    expect(labelText.className).toContain('group-hover:opacity-100');
+  });
+
+  it('滚动位置对应的提问块高亮（jsdom 下视为底部，末条高亮）', () => {
+    const { container } = renderChatPage({
+      messages: [
+        question('q1', '第一个问题'),
+        question('q2', '第二个问题'),
+      ],
+    });
+    const items = container.querySelectorAll(
+      '[data-slot=chat-page-question-nav-item]',
+    );
+    expect(items.length).toBe(2);
+    expect(items[1].className).toContain('bg-primary');
+    expect(items[1].className).toContain('w-3');
+    expect(items[0].className).toContain('bg-muted-foreground/30');
+    expect(items[0].className).toContain('w-1.5');
+  });
+
+  it('最多展示 10 个块（保留最近提问）', () => {
+    const { container } = renderChatPage({
+      messages: Array.from({ length: 12 }, (_, index) =>
+        question(`q${index + 1}`, `问题${index + 1}`),
+      ),
+    });
+    const labels = container.querySelectorAll(
+      '[data-slot=chat-page-question-nav-label]',
+    );
+    expect(labels.length).toBe(10);
+    expect(labels[0].textContent).toBe('问题3');
+    expect(labels[9].textContent).toBe('问题12');
+  });
+
+  it('位于 chat-page-aside 最左侧（固定块 / 图标栏之前）并垂直居中', () => {
+    const { container } = renderChatPage({
+      messages: [question('q1', '问题一'), question('q2', '问题二')],
+      sidePanel: { type: 'Text', props: { text: '今日任务' } },
+      sidePanelOpen: true,
+    });
+    const aside = container.querySelector('[data-slot=chat-page-aside]')!;
+    const nav = container.querySelector('[data-slot=chat-page-question-nav]')!;
+    const panel = container.querySelector('[data-slot=chat-page-side-panel]')!;
+    const rail = container.querySelector('[data-slot=chat-page-conv-rail]')!;
+    expect(nav.parentElement).toBe(aside);
+    expect(aside.firstElementChild).toBe(nav);
+    expect(nav.className).toContain('self-center');
+    expect(
+      nav.compareDocumentPosition(panel) & Node.DOCUMENT_POSITION_FOLLOWING,
+    ).toBeTruthy();
+    expect(
+      nav.compareDocumentPosition(rail) & Node.DOCUMENT_POSITION_FOLLOWING,
+    ).toBeTruthy();
   });
 });

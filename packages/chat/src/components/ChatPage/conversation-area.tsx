@@ -5,15 +5,9 @@ import { Composer } from "../Composer/index.js";
 import { MessageList } from "../MessageList/index.js";
 import { Welcome } from "../Welcome/index.js";
 import type { RenderSlot } from "./hooks.js";
+import { QuestionNav } from "./question-nav.js";
+import { SIDE_PANEL_BG } from "./tokens.js";
 import type { ChatPageProps } from "./types.js";
-
-/**
- * 右端固定块背景：优先 chat 皮肤专用令牌（--pactor-chat-side-panel-bg），
- * 逐级回退到 chat 侧栏令牌 → 页面皮肤的 sidebar / muted 语义令牌，
- * 未接入 chat 皮肤时也能跟随宿主换肤。
- */
-const SIDE_PANEL_BG =
-  "var(--pactor-chat-side-panel-bg, var(--pactor-chat-sidebar-bg, var(--sidebar, var(--muted))))";
 
 export type ConversationAreaProps = Pick<
   ChatPageProps,
@@ -41,6 +35,7 @@ export type ConversationAreaProps = Pick<
   | "sidePanel"
   | "sidePanelOpen"
   | "sidePanelWidth"
+  | "showQuestionNav"
 > & {
   /** 「已生成 n 个产物」段点击：打开产物区 */
   onOpenArtifacts: () => void;
@@ -52,7 +47,8 @@ export type ConversationAreaProps = Pick<
 
 /**
  * 对话区：头部（标题 + 自定义操作）/ Welcome 空态 / MessageList /
- * Composer / composerBottom 槽；右缘为 aside 容器，内含 sidePanel 固定块
+ * Composer / composerBottom 槽；右缘为 aside 容器，最左侧为按用户提问
+ * 自动生成的提问导航（两条及以上时渲染），其后是 sidePanel 固定块
  * （受控展开 / 收起，带宽度与透明度过渡）与对话图标栏，便于整体控制。
  */
 export function ConversationArea({
@@ -80,6 +76,7 @@ export function ConversationArea({
   sidePanel,
   sidePanelOpen = false,
   sidePanelWidth = 280,
+  showQuestionNav = true,
   onOpenArtifacts,
   renderSlot,
   rail,
@@ -176,6 +173,9 @@ export function ConversationArea({
           }
           className="flex h-full shrink-0 items-stretch"
         >
+          {/* 提问导航：ChatPage 自身功能，按 messages 自动生成；位于
+              aside 最左侧（sidePanel / 图标栏之前），纵向居中 */}
+          {showQuestionNav ? <QuestionNav messages={messages} /> : null}
           {/* 右端固定块：展开时占固定宽度（ConversationRail 左侧），
               宽度 + 透明度过渡；内层保持目标宽度，避免动画期间内容重排；
               背景色经 chat 皮肤令牌关联当前页面皮肤 */}

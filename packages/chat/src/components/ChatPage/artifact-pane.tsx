@@ -1,5 +1,6 @@
 import { ArtifactPanel } from "../ArtifactPanel/index.js";
 import type { ChatPageArtifact } from "../ArtifactPanel/artifact.js";
+import { SIDE_PANEL_BG } from "./tokens.js";
 import type { ChatPageProps } from "./types.js";
 
 export type ArtifactPaneProps = Pick<
@@ -21,7 +22,7 @@ export type ArtifactPaneProps = Pick<
   onClose: () => void;
 };
 
-/** 最右产物区：ArtifactPanel 外框（左边框 + 弱底色），关闭事件回到组合层 */
+/** 最右产物区：ArtifactPanel 外框（左边框 + 与右端固定块一致的背景），关闭事件回到组合层 */
 export function ArtifactPane({
   artifact,
   artifacts,
@@ -38,7 +39,8 @@ export function ArtifactPane({
   return (
     <div
       data-slot="chat-page-artifact"
-      className="flex h-full min-w-0 flex-col border-l border-border bg-muted"
+      className="flex h-full min-w-0 flex-col border-l border-border"
+      style={{ backgroundColor: SIDE_PANEL_BG }}
     >
       <ArtifactPanel
         artifact={artifact}
