@@ -2,6 +2,7 @@ import { Button, Tooltip } from "@pactor-app/ui/components";
 
 import { cn } from "../../lib/utils.js";
 import type { RenderSlot } from "./hooks.js";
+import { SIDE_PANEL_BG } from "./tokens.js";
 import type { ConversationRailItem } from "./types.js";
 
 export interface ConversationRailProps {
@@ -21,6 +22,8 @@ export interface ConversationRailProps {
   onToggleItem: (item: ConversationRailItem) => void;
   /** 激活的 popover 项（无 content 的项不渲染弹层） */
   activePopoverItem?: ConversationRailItem;
+  /** 右端固定块（sidePanel）处于展示态：图标栏左缘补一条边框 */
+  sidePanelOpen?: boolean;
   /** DslNode 槽渲染 */
   renderSlot: RenderSlot;
 }
@@ -28,7 +31,8 @@ export interface ConversationRailProps {
 /**
  * 对话图标栏：header 下方、对话区右缘纵向排列——内置产物入口
  * （可隐藏）+ 附加项；均为空时整栏隐藏。激活的 popover 项在图标栏
- * 旁渲染悬浮弹层。
+ * 旁渲染悬浮弹层。背景与右端固定块（chat-page-side-panel）一致，
+ * sidePanel 展示时左缘补边框。
  */
 export function ConversationRail({
   artifactTitle,
@@ -39,6 +43,7 @@ export function ConversationRail({
   activeKey,
   onToggleItem,
   activePopoverItem,
+  sidePanelOpen = false,
   renderSlot,
 }: ConversationRailProps) {
   if (hideArtifactRailItem && items.length === 0) {
@@ -74,7 +79,11 @@ export function ConversationRail({
   return (
     <div
       data-slot="chat-page-conv-rail"
-      className="relative flex w-(--pactor-chat-rail-width) shrink-0 flex-col items-center gap-1 px-1 py-2"
+      className={cn(
+        "relative flex w-(--pactor-chat-rail-width) shrink-0 flex-col items-center gap-1 px-1 py-2",
+        sidePanelOpen && "border-l border-border",
+      )}
+      style={{ backgroundColor: SIDE_PANEL_BG }}
     >
       {!hideArtifactRailItem
         ? button(
