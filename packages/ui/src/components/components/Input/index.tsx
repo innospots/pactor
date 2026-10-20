@@ -27,6 +27,8 @@ export interface InputProps {
   type?: 'text' | 'password';
   placeholder?: string;
   disabled?: boolean;
+  /** 最大输入长度（原生 maxLength，达到上限后无法继续输入） */
+  maxLength?: number;
   /** 控件尺寸（默认 middle，即现行 h-9 尺寸；全局统一尺寸令牌见 control-size） */
   size?: ControlSize;
   /** hover 清除（缺省开启，传 false 关闭）：值为非空时鼠标悬停控件，右缘浮出
@@ -60,6 +62,7 @@ export function Input({
   type = 'text',
   placeholder,
   disabled,
+  maxLength,
   size = 'middle',
   allowClear,
   onChange,
@@ -102,6 +105,7 @@ export function Input({
       value={currentValue}
       placeholder={placeholder ?? t('pactor.input.placeholder')}
       disabled={disabled}
+      maxLength={maxLength}
       className={cn(
         CONTROL_SIZE_BOX[size],
         // 清除按钮悬浮覆盖在控件右缘内侧，文本预留右内边距避免被遮挡

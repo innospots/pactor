@@ -775,3 +775,27 @@ describe('Select 宽度', () => {
     );
   });
 });
+
+describe('Input maxLength', () => {
+  it('独立渲染透传原生 maxLength', () => {
+    renderDsl({
+      type: 'Input',
+      props: { maxLength: 12, placeholder: '限长输入' },
+    });
+    const input = screen.getByPlaceholderText('限长输入') as HTMLInputElement;
+    expect(input.maxLength).toBe(12);
+  });
+
+  it('Form 内透传 maxLength 并限制输入长度', async () => {
+    renderDsl({
+      type: 'Form',
+      children: [
+        { type: 'Input', props: { name: 'code', label: '编码', maxLength: 4 } },
+      ],
+    });
+    const input = screen.getByLabelText('编码') as HTMLInputElement;
+    expect(input.maxLength).toBe(4);
+    await userEvent.type(input, 'abcdef');
+    expect(input.value).toBe('abcd');
+  });
+});
