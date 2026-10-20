@@ -2435,6 +2435,9 @@
   .\[--presence-surface\:var\(--popover\)\] {
     --presence-surface: var(--popover);
   }
+  .\[--presence-surface\:var\(--sidebar\)\] {
+    --presence-surface: var(--sidebar);
+  }
   .zoom-in {
     --tw-enter-scale: 0;
   }
@@ -2451,14 +2454,17 @@
     .group-hover\:inline-flex:is(:where(.group):hover *) {
       display: inline-flex;
     }
-    .group-hover\:text-foreground:is(:where(.group):hover *) {
-      color: var(--foreground);
-    }
     .group-hover\:opacity-100:is(:where(.group):hover *) {
       opacity: 100%;
     }
     .group-hover\/menu-item\:opacity-100:is(:where(.group\/menu-item):hover *) {
       opacity: 100%;
+    }
+    .group-hover\/user-menu\:text-foreground:is(:where(.group\/user-menu):hover *) {
+      color: var(--foreground);
+    }
+    .group-hover\/user-menu\:text-sidebar-foreground:is(:where(.group\/user-menu):hover *) {
+      color: var(--sidebar-foreground);
     }
   }
   .group-focus-visible\:text-foreground:is(:where(.group):focus-visible *) {
@@ -2499,14 +2505,26 @@
   .group-data-\[collapsible\=icon\]\:w-\(--sidebar-width-icon\):is(:where(.group)[data-collapsible="icon"] *) {
     width: var(--sidebar-width-icon);
   }
+  .group-data-\[collapsible\=icon\]\:w-8:is(:where(.group)[data-collapsible="icon"] *) {
+    width: calc(var(--spacing) * 8);
+  }
   .group-data-\[collapsible\=icon\]\:w-\[calc\(var\(--sidebar-width-icon\)\+\(--spacing\(4\)\)\)\]:is(:where(.group)[data-collapsible="icon"] *) {
     width: calc(var(--sidebar-width-icon) + (calc(var(--spacing) * 4)));
   }
   .group-data-\[collapsible\=icon\]\:w-\[calc\(var\(--sidebar-width-icon\)\+\(--spacing\(4\)\)\+2px\)\]:is(:where(.group)[data-collapsible="icon"] *) {
     width: calc(var(--sidebar-width-icon) + (calc(var(--spacing) * 4)) + 2px);
   }
+  .group-data-\[collapsible\=icon\]\:justify-center:is(:where(.group)[data-collapsible="icon"] *) {
+    justify-content: center;
+  }
+  .group-data-\[collapsible\=icon\]\:gap-0\!:is(:where(.group)[data-collapsible="icon"] *) {
+    gap: 0px !important;
+  }
   .group-data-\[collapsible\=icon\]\:overflow-hidden:is(:where(.group)[data-collapsible="icon"] *) {
     overflow: hidden;
+  }
+  .group-data-\[collapsible\=icon\]\:rounded-full:is(:where(.group)[data-collapsible="icon"] *) {
+    border-radius: calc(infinity * 1px);
   }
   .group-data-\[collapsible\=icon\]\:p-0\!:is(:where(.group)[data-collapsible="icon"] *) {
     padding: 0px !important;
@@ -2611,11 +2629,14 @@
   .group-data-\[state\=idle\]\/attachment\:opacity-100:is(:where(.group\/attachment)[data-state="idle"] *) {
     opacity: 100%;
   }
-  .group-data-\[state\=open\]\:rotate-180:is(:where(.group)[data-state="open"] *) {
+  .group-data-\[state\=open\]\/user-menu\:rotate-180:is(:where(.group\/user-menu)[data-state="open"] *) {
     rotate: 180deg;
   }
-  .group-data-\[state\=open\]\:text-foreground:is(:where(.group)[data-state="open"] *) {
+  .group-data-\[state\=open\]\/user-menu\:text-foreground:is(:where(.group\/user-menu)[data-state="open"] *) {
     color: var(--foreground);
+  }
+  .group-data-\[state\=open\]\/user-menu\:text-sidebar-foreground:is(:where(.group\/user-menu)[data-state="open"] *) {
+    color: var(--sidebar-foreground);
   }
   .group-data-\[state\=processing\]\/attachment\:shimmer:is(:where(.group\/attachment)[data-state="processing"] *) {
     background: linear-gradient( 90deg, transparent 0%, var(--muted) 50%, transparent 100% );
@@ -2906,6 +2927,9 @@
     .hover\:\[--presence-surface\:var\(--muted\)\]:hover {
       --presence-surface: var(--muted);
     }
+    .hover\:\[--presence-surface\:var\(--sidebar-accent\)\]:hover {
+      --presence-surface: var(--sidebar-accent);
+    }
     .hover\:group-data-\[collapsible\=offcanvas\]\:bg-sidebar:hover:is(:where(.group)[data-collapsible="offcanvas"] *) {
       background-color: var(--sidebar);
     }
@@ -2983,6 +3007,9 @@
     @supports (color: color-mix(in lab, red, red)) {
       --tw-ring-color: color-mix(in oklab, var(--ring) 50%, transparent);
     }
+  }
+  .focus-visible\:ring-sidebar-ring:focus-visible {
+    --tw-ring-color: var(--sidebar-ring);
   }
   .focus-visible\:ring-offset-1:focus-visible {
     --tw-ring-offset-width: 1px;
@@ -3385,11 +3412,20 @@
   .data-\[state\=open\]\:bg-muted[data-state="open"] {
     background-color: var(--muted);
   }
+  .data-\[state\=open\]\:bg-sidebar-accent[data-state="open"] {
+    background-color: var(--sidebar-accent);
+  }
+  .data-\[state\=open\]\:text-sidebar-accent-foreground[data-state="open"] {
+    color: var(--sidebar-accent-foreground);
+  }
   .data-\[state\=open\]\:opacity-100[data-state="open"] {
     opacity: 100%;
   }
   .data-\[state\=open\]\:\[--presence-surface\:var\(--muted\)\][data-state="open"] {
     --presence-surface: var(--muted);
+  }
+  .data-\[state\=open\]\:\[--presence-surface\:var\(--sidebar-accent\)\][data-state="open"] {
+    --presence-surface: var(--sidebar-accent);
   }
   @media (hover: hover) {
     .data-\[state\=open\]\:hover\:bg-sidebar-accent[data-state="open"]:hover {
