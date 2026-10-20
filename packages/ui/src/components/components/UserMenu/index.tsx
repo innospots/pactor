@@ -5,7 +5,7 @@ import {
   type ThemePreference,
   type UserMenuUser,
   type UserStatus,
-} from '../../../ui/user-menu.js';
+} from '../../../ui/user-menu/index.js';
 import { Icon } from '../Icon/index.js';
 
 /** 账户菜单用户 */
@@ -41,10 +41,16 @@ export interface UserMenuProps {
   defaultTheme?: ThemePreference;
   /** 显示内联浅色 / 深色 / 跟随系统切换（缺省 true） */
   showTheme?: boolean;
-  /** 640px 以上在头像右侧展示姓名与箭头 */
+  /** 640px 以上在头像右侧展示姓名与箭头（sidebar 形态缺省开启） */
   showName?: boolean;
   /** 面板相对触发器的对齐方式（缺省 end） */
   align?: 'start' | 'center' | 'end';
+  /** 面板相对触发器的方向（缺省：sidebar 形态为 right，其余为 bottom） */
+  side?: 'top' | 'right' | 'bottom' | 'left';
+  /** 展示形态：default 为独立头像胶囊；sidebar 为侧栏账户行——
+   *  展开时整行展示头像 + 姓名 + 箭头，Sidebar 折叠为 icon 时
+   *  自动收成头像圆钮（放在 Sidebar 的 sidebarFooter 槽中使用） */
+  variant?: 'default' | 'sidebar';
   open?: boolean;
   defaultOpen?: boolean;
   onOpenChange?: (open: boolean) => void;
@@ -75,6 +81,9 @@ export interface UserMenuProps {
  * 主题与状态选择保持菜单展开并分别经 onThemeChange / onStatusChange
  * 上报；账户入口经 onSelect 传出 value；onSignOut 返回 Promise 时
  * 退出项显示进度，Promise 落定后关闭。应用主题由调用方负责。
+ *
+ * `variant="sidebar"` 用于 Sidebar 的 sidebarFooter 槽：展开时整行
+ * 展示头像 / 姓名 / 箭头，Sidebar 折叠为 icon rail 时自动收成头像圆钮。
  */
 export function UserMenu({
   user,
@@ -86,6 +95,8 @@ export function UserMenu({
   showTheme,
   showName,
   align,
+  side,
+  variant,
   open,
   defaultOpen,
   onOpenChange,
@@ -116,6 +127,8 @@ export function UserMenu({
       showTheme={showTheme}
       showName={showName}
       align={align}
+      side={side}
+      variant={variant}
       open={open}
       defaultOpen={defaultOpen}
       onOpenChange={onOpenChange}

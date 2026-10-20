@@ -7,7 +7,7 @@
 import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
 
-import { PresenceDot, UserMenu as UiUserMenu } from '../../src/ui/user-menu.js';
+import { PresenceDot, UserMenu as UiUserMenu } from '../../src/ui/user-menu/index.js';
 import { UserMenu } from '../../src/components/components/UserMenu/index.js';
 import {
   COMMON_PROPS_PROBE,
@@ -277,6 +277,60 @@ describe('UserMenu（React）', () => {
     } finally {
       window.matchMedia = base;
     }
+  });
+});
+
+describe('UserMenu（sidebar 形态）', () => {
+  it('DSL 透传 variant：整行账户行缺省展示姓名，折叠态带 icon 收拢类', () => {
+    renderDsl({
+      type: 'UserMenu',
+      props: { user: USER, variant: 'sidebar' },
+    });
+
+    const root = document.querySelector('[data-slot=user-menu]')!;
+    const trigger = screen.getByRole('button', { name: /账户菜单/ });
+
+    expect(root.getAttribute('data-variant')).toBe('sidebar');
+    expect(trigger.getAttribute('data-variant')).toBe('sidebar');
+    // 根节点占满侧栏；折叠为 icon rail 时收成头像宽度
+    expect(root.className).toContain('w-full');
+    expect(root.className).toContain('group-data-[collapsible=icon]:w-8');
+    // 触发器为 48px 账户行，折叠态固定 32px 圆钮并隐藏姓名 / 箭头
+    expect(trigger.className).toContain('h-12');
+    expect(trigger.className).toContain(
+      'group-data-[collapsible=icon]:size-8!',
+    );
+    expect(trigger.textContent).toContain('Emma Collins');
+    expect(
+      screen.getByText('Emma Collins').className,
+    ).toContain('group-data-[collapsible=icon]:hidden');
+  });
+
+  it('showName=false 时只留头像（名称与箭头不渲染）', () => {
+    renderDsl({
+      type: 'UserMenu',
+      props: { user: USER, variant: 'sidebar', showName: false },
+    });
+
+    const trigger = screen.getByRole('button', { name: /账户菜单/ });
+    expect(trigger.getAttribute('data-variant')).toBe('sidebar');
+    expect(trigger.getAttribute('data-name')).toBeNull();
+    expect(screen.queryByText('Emma Collins')).toBeNull();
+    expect(trigger.querySelector('svg')).toBeNull();
+  });
+
+  it('缺省形态不带 sidebar 收拢类，姓名仍默认隐藏', () => {
+    renderDsl({ type: 'UserMenu', props: { user: USER } });
+
+    const root = document.querySelector('[data-slot=user-menu]')!;
+    const trigger = screen.getByRole('button', { name: /账户菜单/ });
+    expect(root.getAttribute('data-variant')).toBe('default');
+    expect(trigger.getAttribute('data-variant')).toBe('default');
+    expect(root.className).not.toContain('w-full');
+    expect(trigger.className).not.toContain(
+      'group-data-[collapsible=icon]:size-8!',
+    );
+    expect(screen.queryByText('Emma Collins')).toBeNull();
   });
 });
 
