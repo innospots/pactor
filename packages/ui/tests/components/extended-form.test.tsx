@@ -83,6 +83,33 @@ describe('Textarea', () => {
     });
     expectCommonProps(container.querySelector('textarea'));
   });
+
+  it('独立渲染透传原生 maxLength', () => {
+    renderDsl({
+      type: 'Textarea',
+      props: { maxLength: 20, placeholder: '限长备注' },
+    });
+    const textarea = screen.getByPlaceholderText(
+      '限长备注',
+    ) as HTMLTextAreaElement;
+    expect(textarea.maxLength).toBe(20);
+  });
+
+  it('Form 内透传 maxLength 并限制输入长度', async () => {
+    renderDsl({
+      type: 'Form',
+      children: [
+        {
+          type: 'Textarea',
+          props: { name: 'remark', label: '备注', maxLength: 5 },
+        },
+      ],
+    });
+    const textarea = screen.getByLabelText('备注') as HTMLTextAreaElement;
+    expect(textarea.maxLength).toBe(5);
+    await userEvent.type(textarea, 'abcdefgh');
+    expect(textarea.value).toBe('abcde');
+  });
 });
 
 describe('Checkbox', () => {
