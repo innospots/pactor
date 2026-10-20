@@ -2,7 +2,7 @@
 /**
  * registerChatComponents 注册契约（spec: chat-ui-components /
  * 展示组件 DSL 注册 + chat-dsl-component / Chat 展示组件注册）：
- * 18 个 DSL 类型名注册、同名不覆盖、ui createComponentRegistry 不内置。
+ * 19 个 DSL 类型名注册、同名不覆盖、ui createComponentRegistry 不内置。
  */
 import './setup.js';
 
@@ -36,9 +36,10 @@ const CHAT_COMPONENT_TYPES = [
   'Thinking',
   'ToolCall',
   'Welcome',
+  'WorkspaceSwitcher',
 ];
 
-describe('registerChatComponents（spec: chat-ui-components / 展示组件 DSL 注册）', () => {  it('注册 18 个 chat 展示组件类型名，注册后可声明渲染 ChatPage（spec scenario: 注册并声明）', () => {
+describe('registerChatComponents（spec: chat-ui-components / 展示组件 DSL 注册）', () => {  it('注册 19 个 chat 展示组件类型名，注册后可声明渲染 ChatPage（spec scenario: 注册并声明）', () => {
     const registry = createComponentRegistry();
     registerChatComponents(registry);
     for (const type of CHAT_COMPONENT_TYPES) {

@@ -8,6 +8,7 @@ import type { RenderSlot } from "./hooks.js";
 import { QuestionNav } from "./question-nav.js";
 import { SIDE_PANEL_BG } from "./tokens.js";
 import type { ChatPageProps } from "./types.js";
+import { WorkspaceSwitcher } from "../WorkspaceSwitcher/index.js";
 
 export type ConversationAreaProps = Pick<
   ChatPageProps,
@@ -32,6 +33,10 @@ export type ConversationAreaProps = Pick<
   | "onRetryAttachment"
   | "composerFooter"
   | "composerBottom"
+  | "workspaces"
+  | "workspace"
+  | "onWorkspaceChange"
+  | "onWorkspaceCreate"
   | "sidePanel"
   | "sidePanelOpen"
   | "sidePanelWidth"
@@ -73,6 +78,10 @@ export function ConversationArea({
   onRetryAttachment,
   composerFooter,
   composerBottom,
+  workspaces,
+  workspace,
+  onWorkspaceChange,
+  onWorkspaceCreate,
   sidePanel,
   sidePanelOpen = false,
   sidePanelWidth = 280,
@@ -81,6 +90,29 @@ export function ConversationArea({
   renderSlot,
   rail,
 }: ConversationAreaProps) {
+  // 内建工作空间切换器（提供 workspaces 即渲染）；与自定义 footer 并排，
+  // 仅其一提供时原样透传，保持既有 composerFooter 布局不变
+  const workspaceSwitcher =
+    workspaces === undefined ? null : (
+      <WorkspaceSwitcher
+        options={workspaces}
+        value={workspace}
+        onChange={onWorkspaceChange}
+        onCreate={onWorkspaceCreate}
+      />
+    );
+  const footer =
+    workspaceSwitcher !== null &&
+    composerFooter !== undefined &&
+    composerFooter !== null ? (
+      <div className="flex flex-wrap items-center gap-2">
+        {workspaceSwitcher}
+        {renderSlot(composerFooter)}
+      </div>
+    ) : (
+      (workspaceSwitcher ?? composerFooter)
+    );
+
   return (
     <div
       data-slot="chat-page-conversation"
@@ -139,7 +171,7 @@ export function ConversationArea({
             contexts={contexts}
             contextItems={contextItems}
             attachments={attachments}
-            footer={composerFooter}
+            footer={footer}
             style={{
               padding: 16,
               paddingBottom: composerBottom ? 8 : 16,

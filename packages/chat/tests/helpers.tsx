@@ -22,7 +22,7 @@ export interface RenderDslResult extends RenderResult {
   context: RuntimeContext;
 }
 
-/** 创建测试注册表：ui 内置组件 + chat 展示组件（18 个 DSL 类型） */
+/** 创建测试注册表：ui 内置组件 + chat 展示组件（19 个 DSL 类型） */
 export function createComponentRegistry(): ComponentRegistry {
   const registry = createUiComponentRegistry();
   registerChatComponents(registry);

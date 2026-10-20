@@ -18,9 +18,10 @@ import { Suggestion } from './Suggestion/index.js';
 import { Thinking } from './Thinking/index.js';
 import { ToolCall } from './ToolCall/index.js';
 import { Welcome } from './Welcome/index.js';
+import { WorkspaceSwitcher } from './WorkspaceSwitcher/index.js';
 
 /**
- * Chat 展示组件族（18 个，spec: chat-ui-components）：自 @pactor-app/ui
+ * Chat 展示组件族（19 个，spec: chat-ui-components）：自 @pactor-app/ui
  * 迁入（props 契约与视觉一致），经 `@pactor-app/chat/components` 子路径
  * 导出；DSL 类型注册经 registerChatComponents（同名不覆盖，与
  * registerChatComponent 的 Chat / ChatShell 类型并存互不影响）。
@@ -95,9 +96,14 @@ export { ToolCall } from './ToolCall/index.js';
 export type { ToolCallProps, ToolCallStatus } from './ToolCall/index.js';
 export { Welcome } from './Welcome/index.js';
 export type { WelcomePromptItem, WelcomeProps } from './Welcome/index.js';
+export { WorkspaceSwitcher } from './WorkspaceSwitcher/index.js';
+export type {
+  WorkspaceOption,
+  WorkspaceSwitcherProps,
+} from './WorkspaceSwitcher/index.js';
 
 /**
- * 注册 chat 展示组件族的 18 个 DSL 类型名（与迁移前 ui
+ * 注册 chat 展示组件族的 19 个 DSL 类型名（与迁移前 ui
  * builtinComponents 的注册集合一致）；已存在同名类型时不覆盖。
  */
 export function registerChatComponents(registry: Registry<unknown>): void {
@@ -120,6 +126,7 @@ export function registerChatComponents(registry: Registry<unknown>): void {
     Thinking,
     ToolCall,
     Welcome,
+    WorkspaceSwitcher,
   } as const;
   for (const [type, component] of Object.entries(components)) {
     if (!registry.has(type)) {
