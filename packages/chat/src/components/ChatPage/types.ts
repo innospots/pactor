@@ -12,6 +12,7 @@ import type {
 import type { ConversationItemData } from "../ConversationList/index.js";
 import type { MessageListItem } from "../MessageList/index.js";
 import type { WelcomePromptItem } from "../Welcome/index.js";
+import type { WorkspaceOption } from "../WorkspaceSwitcher/index.js";
 
 /** 图标栏 / 展开菜单共用的导航项 */
 export interface ChatPageMenuItem {
@@ -175,6 +176,18 @@ export interface ChatPageProps {
   onRetryAttachment?: (id: string | number) => void;
   /** Composer footer 槽（渲染在输入框内工具栏下方，以分隔线相隔） */
   composerFooter?: DslNode | ReactNode;
+  /**
+   * 内建工作空间切换器：提供 options 即在 Composer footer 槽渲染
+   * WorkspaceSwitcher（搜索 / 列表 / 新建 / 清除）；与 composerFooter
+   * 同时提供时并排展示
+   */
+  workspaces?: WorkspaceOption[];
+  /** 当前工作空间 value（受控，'' 表示未选择） */
+  workspace?: string;
+  /** 工作空间切换事件（选择 / 清除 / 新建），传出最新 value */
+  onWorkspaceChange?: (value: string) => void;
+  /** 新建工作空间事件（弹框创建成功），传出名称，供宿主持久化 */
+  onWorkspaceCreate?: (name: string) => void;
   /** Composer 下方自定义内容槽（渲染在输入框之外正下方，如免责声明弱提示行） */
   composerBottom?: DslNode | ReactNode;
   /** 产物区标题，缺省「产物」 */

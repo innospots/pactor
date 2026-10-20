@@ -31,7 +31,8 @@ export type {
  * 行内提及（contexts：输入触发符在光标处弹菜单，选中替换为行内提及块，
  * 退格整体删除；受控 contextItems）、附件
  * 入口（onAttachFiles + 受控 attachments）与 composerFooter /
- * composerBottom 槽位）、对话图标栏（header 下方、对话区右缘纵向
+ * composerBottom 槽位；提供 workspaces 时 footer 内建工作空间切换器
+ * （选择 / 搜索 / 新建 / 清除，与 composerFooter 并排））、对话图标栏（header 下方、对话区右缘纵向
  * 图标列：内置产物入口 + conversationRailItems 附加项，点击 toggle
  * 展示附加内容——popover 悬浮弹框或 panel 右侧分栏，与产物区互斥；
  * 背景与右端固定块一致，sidePanel 展示时左缘补边框）、
@@ -113,6 +114,10 @@ export function ChatPage({
   onRetryAttachment,
   composerFooter,
   composerBottom,
+  workspaces,
+  workspace,
+  onWorkspaceChange,
+  onWorkspaceCreate,
   artifactTitle = "产物",
   artifacts = [],
   activeArtifactId,
@@ -204,6 +209,10 @@ export function ChatPage({
       onRetryAttachment={onRetryAttachment}
       composerFooter={composerFooter}
       composerBottom={composerBottom}
+      workspaces={workspaces}
+      workspace={workspace}
+      onWorkspaceChange={onWorkspaceChange}
+      onWorkspaceCreate={onWorkspaceCreate}
       sidePanel={sidePanel}
       sidePanelOpen={sidePanelOpen}
       sidePanelWidth={sidePanelWidth}
