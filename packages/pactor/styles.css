@@ -5,7 +5,7 @@
  */
 
 /* ============================================================
- * @pactor-app/ui@1.53.0（构建产物内联，源顺序：ui → blocks → chart → chat）
+ * @pactor-app/ui@1.54.0（构建产物内联，源顺序：ui → blocks → chart → chat）
  * ============================================================ */
 /*! tailwindcss v4.3.3 | MIT License | https://tailwindcss.com */
 @layer properties;
@@ -1080,7 +1080,7 @@
 }
 
 /* ============================================================
- * @pactor-app/blocks@1.53.0（构建产物内联，源顺序：ui → blocks → chart → chat）
+ * @pactor-app/blocks@1.54.0（构建产物内联，源顺序：ui → blocks → chart → chat）
  * ============================================================ */
 /*! tailwindcss v4.3.3 | MIT License | https://tailwindcss.com */
 @layer properties;
@@ -1410,7 +1410,7 @@
 }
 
 /* ============================================================
- * @pactor-app/chart@1.53.0（构建产物内联，源顺序：ui → blocks → chart → chat）
+ * @pactor-app/chart@1.54.0（构建产物内联，源顺序：ui → blocks → chart → chat）
  * ============================================================ */
 /*! tailwindcss v4.3.3 | MIT License | https://tailwindcss.com */
 @layer properties;
@@ -1554,7 +1554,7 @@
 }
 
 /* ============================================================
- * @pactor-app/chat@1.53.0（构建产物内联，源顺序：ui → blocks → chart → chat）
+ * @pactor-app/chat@1.54.0（构建产物内联，源顺序：ui → blocks → chart → chat）
  * ============================================================ */
 /*! tailwindcss v4.3.3 | MIT License | https://tailwindcss.com */
 @layer properties;
@@ -4010,6 +4010,12 @@ button.pactor-chat-trace__header:hover, .pactor-chat-trace__entry-header:hover, 
   }
 .w-\[100px\] {
     width: 100px;
+  }
+.w-\[145px\] {
+    width: 145px;
+  }
+.w-\[209px\] {
+    width: 209px;
   }
 .w-auto {
     width: auto;

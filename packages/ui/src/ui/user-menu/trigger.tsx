@@ -61,7 +61,7 @@ export function UserMenuTrigger({
       data-state={open ? 'open' : 'closed'}
       data-name={revealName || undefined}
       className={cn(
-        'group/user-menu relative shrink-0 items-center text-sm outline-none transition-colors',
+        'group/user-menu relative shrink-0 cursor-pointer items-center text-sm outline-none transition-colors',
         sidebar
           ? cn(
               // 侧边栏账户行：整行宽、与 SidebarMenuButton lg 同高（h-12），
