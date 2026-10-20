@@ -28,8 +28,9 @@ export interface UserMenuProps {
   onStatusChange?: (status: UserStatus) => void;
   /** 受控主题偏好 */
   theme?: ThemePreference;
+  /** 非受控初始主题；缺省读取 documentElement 当前 data-pactor-theme（未设置视为 system） */
   defaultTheme?: ThemePreference;
-  /** 仅上报选择；把主题应用到页面由调用方负责 */
+  /** 主题选择回调；选择同时应用到 documentElement（light / dark 写 data-pactor-theme，system 移除） */
   onThemeChange?: (theme: ThemePreference) => void;
   /** 显示内联浅色 / 深色 / 跟随系统切换（缺省 true） */
   showTheme?: boolean;

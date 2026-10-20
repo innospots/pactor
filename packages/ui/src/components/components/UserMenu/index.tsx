@@ -38,8 +38,9 @@ export interface UserMenuProps {
   defaultStatus?: UserStatus;
   /** 受控主题偏好 */
   theme?: ThemePreference;
+  /** 非受控初始主题；缺省读取 documentElement 当前 data-pactor-theme（未设置视为 system） */
   defaultTheme?: ThemePreference;
-  /** 显示内联浅色 / 深色 / 跟随系统切换（缺省 true） */
+  /** 显示内联浅色 / 深色 / 跟随系统切换（缺省 true），选择即应用到页面 */
   showTheme?: boolean;
   /** 640px 以上在头像右侧展示姓名与箭头（sidebar 形态缺省开启） */
   showName?: boolean;
@@ -56,7 +57,7 @@ export interface UserMenuProps {
   onOpenChange?: (open: boolean) => void;
   /** 账户入口点击事件，传出该项 value（缺省 label） */
   onSelect?: (value: string) => void;
-  /** 主题选择回调（仅上报，应用主题由调用方负责） */
+  /** 主题选择回调；选择同时应用到 documentElement（light / dark 写 data-pactor-theme，system 移除） */
   onThemeChange?: (theme: ThemePreference) => void;
   /** 在线状态选择回调 */
   onStatusChange?: (status: UserStatus) => void;
@@ -79,8 +80,9 @@ export interface UserMenuProps {
  * （https://uiarc.dev/components/user-menu）。
  *
  * 主题与状态选择保持菜单展开并分别经 onThemeChange / onStatusChange
- * 上报；账户入口经 onSelect 传出 value；onSignOut 返回 Promise 时
- * 退出项显示进度，Promise 落定后关闭。应用主题由调用方负责。
+ * 上报；主题选择同时写入 documentElement 的 data-pactor-theme（system
+ * 移除属性）；账户入口经 onSelect 传出 value；onSignOut 返回 Promise 时
+ * 退出项显示进度，Promise 落定后关闭。
  *
  * `variant="sidebar"` 用于 Sidebar 的 sidebarFooter 槽：展开时整行
  * 展示头像 / 姓名 / 箭头，Sidebar 折叠为 icon rail 时自动收成头像圆钮。

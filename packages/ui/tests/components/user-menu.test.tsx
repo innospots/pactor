@@ -5,7 +5,7 @@
  * 其余项关闭并归还焦点；异步退出显示进度后关闭。
  */
 import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
-import { describe, expect, it, vi } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import { PresenceDot, UserMenu as UiUserMenu } from '../../src/ui/user-menu/index.js';
 import { UserMenu } from '../../src/components/components/UserMenu/index.js';
@@ -21,6 +21,10 @@ const USER = {
   email: 'emma@example.com',
   plan: 'Pro',
 };
+
+afterEach(() => {
+  document.documentElement.removeAttribute('data-pactor-theme');
+});
 
 function openMenu() {
   const trigger = screen.getByRole('button', { name: /账户菜单/ });
@@ -101,6 +105,48 @@ describe('UserMenu（DSL）', () => {
     expect(screen.getByRole('menu')).toBeTruthy();
     expect(
       screen.getByRole('menuitemradio', { name: '深色' }).getAttribute('aria-checked'),
+    ).toBe('true');
+  });
+
+  it('主题选择应用到 documentElement：浅色/深色写属性，跟随系统移除', () => {
+    renderDsl({
+      type: 'UserMenu',
+      props: { user: USER, defaultTheme: 'system' },
+    });
+
+    openMenu();
+
+    fireEvent.click(screen.getByRole('menuitemradio', { name: '深色' }));
+    expect(
+      document.documentElement.getAttribute('data-pactor-theme'),
+    ).toBe('dark');
+
+    fireEvent.click(screen.getByRole('menuitemradio', { name: '浅色' }));
+    expect(
+      document.documentElement.getAttribute('data-pactor-theme'),
+    ).toBe('light');
+
+    fireEvent.click(screen.getByRole('menuitemradio', { name: '跟随系统' }));
+    expect(
+      document.documentElement.getAttribute('data-pactor-theme'),
+    ).toBeNull();
+  });
+
+  it('打开菜单时按页面当前主题回显，并同步外部切换', () => {
+    // 未提供 defaultTheme：挂载时读页面主题
+    document.documentElement.setAttribute('data-pactor-theme', 'dark');
+    renderDsl({ type: 'UserMenu', props: { user: USER } });
+    openMenu();
+    expect(
+      screen.getByRole('menuitemradio', { name: '深色' }).getAttribute('aria-checked'),
+    ).toBe('true');
+
+    // 菜单展开期间外部（如 Header）切换后，重新打开同步
+    fireEvent.pointerDown(document.body);
+    document.documentElement.setAttribute('data-pactor-theme', 'light');
+    openMenu();
+    expect(
+      screen.getByRole('menuitemradio', { name: '浅色' }).getAttribute('aria-checked'),
     ).toBe('true');
   });
 
