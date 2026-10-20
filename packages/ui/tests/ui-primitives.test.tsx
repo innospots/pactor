@@ -156,6 +156,22 @@ describe('/ui 原语可渲染', () => {
     expect(screen.getByText('选择')).toBeDefined();
   });
 
+  it('Select：选中值可收缩省略，长 label 不顶出右侧图标', () => {
+    render(
+      <Select>
+        <SelectTrigger>
+          <SelectValue placeholder="选择" />
+        </SelectTrigger>
+      </Select>,
+    );
+    const value = document.querySelector('[data-slot="select-value"]');
+    // 定宽触发器内：flex-1 + min-w-0 允许收缩让出箭头 / 清除按钮位置，
+    // truncate 负责长 label 省略号
+    expect(value?.className).toContain('flex-1');
+    expect(value?.className).toContain('min-w-0');
+    expect(value?.className).toContain('truncate');
+  });
+
   it('Tabs：List size=sm 标记 data-size 并压缩胶囊高度与触发器字号', () => {
     render(
       <Tabs defaultValue="a">

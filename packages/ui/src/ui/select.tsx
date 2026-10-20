@@ -19,9 +19,19 @@ function SelectGroup({
 }
 
 function SelectValue({
+  className,
   ...props
 }: SelectPrimitive.Value.Props) {
-  return <SelectPrimitive.Value data-slot="select-value" {...props} />;
+  return (
+    <SelectPrimitive.Value
+      data-slot="select-value"
+      // 选中值占满剩余宽度并可收缩：触发器定宽（Form 控件 / w-48）时，
+      // 长 label 的 min-content 不再把右侧箭头 / 清除按钮顶出边框，
+      // 文本以省略号截断
+      className={cn('min-w-0 flex-1 truncate', className)}
+      {...props}
+    />
+  );
 }
 
 function SelectTrigger({
