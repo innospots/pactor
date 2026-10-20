@@ -95,6 +95,12 @@ export type {
   ContextMenuItemData,
   ContextMenuProps,
 } from './components/ContextMenu/index.js';
+export { UserMenu } from './components/UserMenu/index.js';
+export type {
+  UserMenuItemData,
+  UserMenuProps,
+  UserMenuUserData,
+} from './components/UserMenu/index.js';
 
 // 反馈与弹层类扩展组件
 export { Dialog } from './components/Dialog/index.js';
