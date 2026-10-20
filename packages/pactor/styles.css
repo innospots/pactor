@@ -5,7 +5,7 @@
  */
 
 /* ============================================================
- * @pactor-app/ui@1.52.0（构建产物内联，源顺序：ui → blocks → chart → chat）
+ * @pactor-app/ui@1.53.0（构建产物内联，源顺序：ui → blocks → chart → chat）
  * ============================================================ */
 /*! tailwindcss v4.3.3 | MIT License | https://tailwindcss.com */
 @layer properties;
@@ -1080,7 +1080,7 @@
 }
 
 /* ============================================================
- * @pactor-app/blocks@1.52.0（构建产物内联，源顺序：ui → blocks → chart → chat）
+ * @pactor-app/blocks@1.53.0（构建产物内联，源顺序：ui → blocks → chart → chat）
  * ============================================================ */
 /*! tailwindcss v4.3.3 | MIT License | https://tailwindcss.com */
 @layer properties;
@@ -1410,7 +1410,7 @@
 }
 
 /* ============================================================
- * @pactor-app/chart@1.52.0（构建产物内联，源顺序：ui → blocks → chart → chat）
+ * @pactor-app/chart@1.53.0（构建产物内联，源顺序：ui → blocks → chart → chat）
  * ============================================================ */
 /*! tailwindcss v4.3.3 | MIT License | https://tailwindcss.com */
 @layer properties;
@@ -1554,7 +1554,7 @@
 }
 
 /* ============================================================
- * @pactor-app/chat@1.52.0（构建产物内联，源顺序：ui → blocks → chart → chat）
+ * @pactor-app/chat@1.53.0（构建产物内联，源顺序：ui → blocks → chart → chat）
  * ============================================================ */
 /*! tailwindcss v4.3.3 | MIT License | https://tailwindcss.com */
 @layer properties;
@@ -5514,6 +5514,9 @@ button.pactor-chat-trace__header:hover, .pactor-chat-trace__entry-header:hover, 
 .\[--presence-surface\:var\(--popover\)\] {
     --presence-surface: var(--popover);
   }
+.\[--presence-surface\:var\(--sidebar\)\] {
+    --presence-surface: var(--sidebar);
+  }
 .zoom-in {
     --tw-enter-scale: 0;
   }
@@ -6708,6 +6711,9 @@ button.pactor-chat-trace__header:hover, .pactor-chat-trace__entry-header:hover, 
 .mx-auto {
     margin-inline: auto;
   }
+.my-1 {
+    margin-block: var(--spacing);
+  }
 .mt-0\.5 {
     margin-top: calc(var(--spacing) * 0.5);
   }
@@ -6824,6 +6830,9 @@ button.pactor-chat-trace__header:hover, .pactor-chat-trace__entry-header:hover, 
 .max-h-\[40\%\] {
     max-height: 40%;
   }
+.max-h-\[390px\] {
+    max-height: 390px;
+  }
 .min-h-0 {
     min-height: 0px;
   }
@@ -6869,6 +6878,9 @@ button.pactor-chat-trace__header:hover, .pactor-chat-trace__entry-header:hover, 
 .w-\[250px\] {
     width: 250px;
   }
+.w-\[280px\] {
+    width: 280px;
+  }
 .w-fit {
     width: fit-content;
   }
@@ -6877,6 +6889,9 @@ button.pactor-chat-trace__header:hover, .pactor-chat-trace__entry-header:hover, 
   }
 .max-w-0 {
     max-width: 0px;
+  }
+.max-w-56 {
+    max-width: calc(var(--spacing) * 56);
   }
 .max-w-full {
     max-width: 100%;
@@ -6957,6 +6972,9 @@ button.pactor-chat-trace__header:hover, .pactor-chat-trace__entry-header:hover, 
 .justify-end {
     justify-content: flex-end;
   }
+.gap-0 {
+    gap: 0px;
+  }
 .gap-0\.5 {
     gap: calc(var(--spacing) * 0.5);
   }
@@ -7016,6 +7034,10 @@ button.pactor-chat-trace__header:hover, .pactor-chat-trace__entry-header:hover, 
 .border {
     border-style: var(--tw-border-style);
     border-width: 1px;
+  }
+.border-0 {
+    border-style: var(--tw-border-style);
+    border-width: 0px;
   }
 .border-t {
     border-top-style: var(--tw-border-style);
@@ -7369,14 +7391,17 @@ button.pactor-chat-trace__header:hover, .pactor-chat-trace__entry-header:hover, 
     .group-hover\:inline-flex:is(:where(.group):hover *) {
       display: inline-flex;
     }
-    .group-hover\:text-foreground:is(:where(.group):hover *) {
-      color: var(--foreground);
-    }
     .group-hover\:opacity-100:is(:where(.group):hover *) {
       opacity: 100%;
     }
     .group-hover\/menu-item\:opacity-100:is(:where(.group\/menu-item):hover *) {
       opacity: 100%;
+    }
+    .group-hover\/user-menu\:text-foreground:is(:where(.group\/user-menu):hover *) {
+      color: var(--foreground);
+    }
+    .group-hover\/user-menu\:text-sidebar-foreground:is(:where(.group\/user-menu):hover *) {
+      color: var(--sidebar-foreground);
     }
   }
 @media (hover: hover) {
@@ -7455,14 +7480,26 @@ button.pactor-chat-trace__header:hover, .pactor-chat-trace__entry-header:hover, 
 .group-data-\[collapsible\=icon\]\:w-\(--sidebar-width-icon\):is(:where(.group)[data-collapsible="icon"] *) {
     width: var(--sidebar-width-icon);
   }
+.group-data-\[collapsible\=icon\]\:w-8:is(:where(.group)[data-collapsible="icon"] *) {
+    width: calc(var(--spacing) * 8);
+  }
 .group-data-\[collapsible\=icon\]\:w-\[calc\(var\(--sidebar-width-icon\)\+\(--spacing\(4\)\)\)\]:is(:where(.group)[data-collapsible="icon"] *) {
     width: calc(var(--sidebar-width-icon) + (calc(var(--spacing) * 4)));
   }
 .group-data-\[collapsible\=icon\]\:w-\[calc\(var\(--sidebar-width-icon\)\+\(--spacing\(4\)\)\+2px\)\]:is(:where(.group)[data-collapsible="icon"] *) {
     width: calc(var(--sidebar-width-icon) + (calc(var(--spacing) * 4)) + 2px);
   }
+.group-data-\[collapsible\=icon\]\:justify-center:is(:where(.group)[data-collapsible="icon"] *) {
+    justify-content: center;
+  }
+.group-data-\[collapsible\=icon\]\:gap-0\!:is(:where(.group)[data-collapsible="icon"] *) {
+    gap: 0px !important;
+  }
 .group-data-\[collapsible\=icon\]\:overflow-hidden:is(:where(.group)[data-collapsible="icon"] *) {
     overflow: hidden;
+  }
+.group-data-\[collapsible\=icon\]\:rounded-full:is(:where(.group)[data-collapsible="icon"] *) {
+    border-radius: calc(infinity * 1px);
   }
 .group-data-\[collapsible\=icon\]\:p-0\!:is(:where(.group)[data-collapsible="icon"] *) {
     padding: 0px !important;
@@ -7567,11 +7604,14 @@ button.pactor-chat-trace__header:hover, .pactor-chat-trace__entry-header:hover, 
 .group-data-\[state\=idle\]\/attachment\:opacity-100:is(:where(.group\/attachment)[data-state="idle"] *) {
     opacity: 100%;
   }
-.group-data-\[state\=open\]\:rotate-180:is(:where(.group)[data-state="open"] *) {
+.group-data-\[state\=open\]\/user-menu\:rotate-180:is(:where(.group\/user-menu)[data-state="open"] *) {
     rotate: 180deg;
   }
-.group-data-\[state\=open\]\:text-foreground:is(:where(.group)[data-state="open"] *) {
+.group-data-\[state\=open\]\/user-menu\:text-foreground:is(:where(.group\/user-menu)[data-state="open"] *) {
     color: var(--foreground);
+  }
+.group-data-\[state\=open\]\/user-menu\:text-sidebar-foreground:is(:where(.group\/user-menu)[data-state="open"] *) {
+    color: var(--sidebar-foreground);
   }
 .group-data-\[state\=processing\]\/attachment\:shimmer:is(:where(.group\/attachment)[data-state="processing"] *) {
     background: linear-gradient( 90deg, transparent 0%, var(--muted) 50%, transparent 100% );
@@ -7721,23 +7761,6 @@ button.pactor-chat-trace__header:hover, .pactor-chat-trace__entry-header:hover, 
 .last\:pb-0:last-child {
     padding-bottom: 0px;
   }
-.focus-within\:border-ring:focus-within {
-    border-color: var(--ring);
-  }
-.focus-within\:ring-1:focus-within {
-    --tw-ring-shadow: var(--tw-ring-inset,) 0 0 0 calc(1px + var(--tw-ring-offset-width)) var(--tw-ring-color, currentcolor);
-    box-shadow: var(--tw-inset-shadow), var(--tw-inset-ring-shadow), var(--tw-ring-offset-shadow), var(--tw-ring-shadow), var(--tw-shadow);
-  }
-.focus-within\:ring-\[3px\]:focus-within {
-    --tw-ring-shadow: var(--tw-ring-inset,) 0 0 0 calc(3px + var(--tw-ring-offset-width)) var(--tw-ring-color, currentcolor);
-    box-shadow: var(--tw-inset-shadow), var(--tw-inset-ring-shadow), var(--tw-ring-offset-shadow), var(--tw-ring-shadow), var(--tw-shadow);
-  }
-.focus-within\:ring-ring\/50:focus-within {
-    --tw-ring-color: var(--ring);
-    @supports (color: color-mix(in lab, red, red)) {
-      --tw-ring-color: color-mix(in oklab, var(--ring) 50%, transparent);
-    }
-  }
 .empty\:before\:pointer-events-none:empty::before {
     content: var(--tw-content);
     pointer-events: none;
@@ -7777,6 +7800,30 @@ button.pactor-chat-trace__header:hover, .pactor-chat-trace__entry-header:hover, 
 .not-last\:before\:content-\[\"\"\]:not(:last-child)::before {
     --tw-content: "";
     content: var(--tw-content);
+  }
+.focus-within\:border-ring:focus-within {
+    border-color: var(--ring);
+  }
+.focus-within\:ring-1:focus-within {
+    --tw-ring-shadow: var(--tw-ring-inset,) 0 0 0 calc(1px + var(--tw-ring-offset-width)) var(--tw-ring-color, currentcolor);
+    box-shadow: var(--tw-inset-shadow), var(--tw-inset-ring-shadow), var(--tw-ring-offset-shadow), var(--tw-ring-shadow), var(--tw-shadow);
+  }
+.focus-within\:ring-\[3px\]:focus-within {
+    --tw-ring-shadow: var(--tw-ring-inset,) 0 0 0 calc(3px + var(--tw-ring-offset-width)) var(--tw-ring-color, currentcolor);
+    box-shadow: var(--tw-inset-shadow), var(--tw-inset-ring-shadow), var(--tw-ring-offset-shadow), var(--tw-ring-shadow), var(--tw-shadow);
+  }
+.focus-within\:ring-ring\/50:focus-within {
+    --tw-ring-color: var(--ring);
+    @supports (color: color-mix(in lab, red, red)) {
+      --tw-ring-color: color-mix(in oklab, var(--ring) 50%, transparent);
+    }
+  }
+.focus-within\:border-transparent:focus-within {
+    border-color: transparent;
+  }
+.focus-within\:ring-0:focus-within {
+    --tw-ring-shadow: var(--tw-ring-inset,) 0 0 0 calc(0px + var(--tw-ring-offset-width)) var(--tw-ring-color, currentcolor);
+    box-shadow: var(--tw-inset-shadow), var(--tw-inset-ring-shadow), var(--tw-ring-offset-shadow), var(--tw-ring-shadow), var(--tw-shadow);
   }
 @media (hover: hover) {
     .hover\:border-primary\/50:hover {
@@ -7904,6 +7951,9 @@ button.pactor-chat-trace__header:hover, .pactor-chat-trace__entry-header:hover, 
     }
     .hover\:\[--presence-surface\:var\(--muted\)\]:hover {
       --presence-surface: var(--muted);
+    }
+    .hover\:\[--presence-surface\:var\(--sidebar-accent\)\]:hover {
+      --presence-surface: var(--sidebar-accent);
     }
     .hover\:group-data-\[collapsible\=offcanvas\]\:bg-sidebar:hover:is(:where(.group)[data-collapsible="offcanvas"] *) {
       background-color: var(--sidebar);
@@ -8043,6 +8093,9 @@ button.pactor-chat-trace__header:hover, .pactor-chat-trace__entry-header:hover, 
       --tw-ring-color: color-mix(in oklab, var(--ring) 50%, transparent);
     }
   }
+.focus-visible\:ring-sidebar-ring:focus-visible {
+    --tw-ring-color: var(--sidebar-ring);
+  }
 .focus-visible\:ring-offset-1:focus-visible {
     --tw-ring-offset-width: 1px;
     --tw-ring-offset-shadow: var(--tw-ring-inset,) 0 0 0 var(--tw-ring-offset-width) var(--tw-ring-offset-color);
@@ -8062,9 +8115,16 @@ button.pactor-chat-trace__header:hover, .pactor-chat-trace__entry-header:hover, 
     --tw-outline-style: none;
     outline-style: none;
   }
+.focus-visible\:ring-2:focus-visible {
+    --tw-ring-shadow: var(--tw-ring-inset,) 0 0 0 calc(2px + var(--tw-ring-offset-width)) var(--tw-ring-color, currentcolor);
+    box-shadow: var(--tw-inset-shadow), var(--tw-inset-ring-shadow), var(--tw-ring-offset-shadow), var(--tw-ring-shadow), var(--tw-shadow);
+  }
 .focus-visible\:ring-\[3px\]:focus-visible {
     --tw-ring-shadow: var(--tw-ring-inset,) 0 0 0 calc(3px + var(--tw-ring-offset-width)) var(--tw-ring-color, currentcolor);
     box-shadow: var(--tw-inset-shadow), var(--tw-inset-ring-shadow), var(--tw-ring-offset-shadow), var(--tw-ring-shadow), var(--tw-shadow);
+  }
+.focus-visible\:ring-ring:focus-visible {
+    --tw-ring-color: var(--ring);
   }
 .focus-visible\:ring-ring\/50:focus-visible {
     --tw-ring-color: var(--ring);
@@ -8078,6 +8138,10 @@ button.pactor-chat-trace__header:hover, .pactor-chat-trace__entry-header:hover, 
   }
 .focus-visible\:outline-primary:focus-visible {
     outline-color: var(--primary);
+  }
+.focus-visible\:outline-none:focus-visible {
+    --tw-outline-style: none;
+    outline-style: none;
   }
 .active\:scale-95:active {
     --tw-scale-x: 95%;
@@ -8476,11 +8540,20 @@ button.pactor-chat-trace__header:hover, .pactor-chat-trace__entry-header:hover, 
 .data-\[state\=open\]\:bg-muted[data-state="open"] {
     background-color: var(--muted);
   }
+.data-\[state\=open\]\:bg-sidebar-accent[data-state="open"] {
+    background-color: var(--sidebar-accent);
+  }
+.data-\[state\=open\]\:text-sidebar-accent-foreground[data-state="open"] {
+    color: var(--sidebar-accent-foreground);
+  }
 .data-\[state\=open\]\:opacity-100[data-state="open"] {
     opacity: 100%;
   }
 .data-\[state\=open\]\:\[--presence-surface\:var\(--muted\)\][data-state="open"] {
     --presence-surface: var(--muted);
+  }
+.data-\[state\=open\]\:\[--presence-surface\:var\(--sidebar-accent\)\][data-state="open"] {
+    --presence-surface: var(--sidebar-accent);
   }
 @media (hover: hover) {
     .data-\[state\=open\]\:hover\:bg-sidebar-accent[data-state="open"]:hover {
@@ -8806,6 +8879,11 @@ button.pactor-chat-trace__header:hover, .pactor-chat-trace__entry-header:hover, 
     .md\:text-xl {
       font-size: var(--text-xl);
       line-height: var(--tw-leading, var(--text-xl--line-height));
+    }
+  }
+@media (width >= 48rem) {
+    .md\:text-\[13px\] {
+      font-size: 13px;
     }
   }
 @media (prefers-color-scheme: dark) {
