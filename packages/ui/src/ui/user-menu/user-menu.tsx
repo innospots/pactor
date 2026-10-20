@@ -21,6 +21,23 @@ function subscribeCompact(change: () => void): () => void {
 
 const subscribeNothing = () => () => {};
 
+/** 读取页面当前主题偏好：light / dark 显式标记，未标记视为跟随系统 */
+function readThemePreference(): ThemePreference {
+  if (typeof document === 'undefined') return 'system';
+  const value = document.documentElement.getAttribute('data-pactor-theme');
+  return value === 'light' || value === 'dark' ? value : 'system';
+}
+
+/** 应用主题偏好：light / dark 写 documentElement 属性，system 移除属性 */
+function applyThemePreference(theme: ThemePreference): void {
+  if (typeof document === 'undefined') return;
+  if (theme === 'system') {
+    document.documentElement.removeAttribute('data-pactor-theme');
+  } else {
+    document.documentElement.setAttribute('data-pactor-theme', theme);
+  }
+}
+
 /**
  * UserMenu 账户菜单：头像触发器 + 账号信息头 / 账户入口 / 内联主题与
  * 在线状态切换 / 退出登录。视觉与交互设计参考 Arc UI
@@ -30,6 +47,8 @@ const subscribeNothing = () => () => {};
  *   归还、方向键 / Home / End / 首字母跳转都由原语承担；
  * - 窄于 640px 时复用 Drawer（vaul）呈现底部抽屉与拖拽关闭；
  * - 主题与在线状态通过 MenuRadioGroup 保持菜单展开，其余项选择后关闭；
+ * - 主题选择会应用到 documentElement：light / dark 写 data-pactor-theme，
+ *   system 移除该属性（与 Header 的深浅色切换同款契约）；
  * - onSignOut 返回 Promise 时退出项显示进度，结束后再关闭。
  *
  * `variant="sidebar"` 适配侧栏（Sidebar / SidebarFooter）：
@@ -47,7 +66,7 @@ export function UserMenu({
   defaultStatus = 'available',
   onStatusChange,
   theme: themeProp,
-  defaultTheme = 'system',
+  defaultTheme,
   onThemeChange,
   showTheme = true,
   items = [],
@@ -80,7 +99,9 @@ export function UserMenu({
   );
   const [innerOpen, setInnerOpen] = useState(defaultOpen);
   const [innerStatus, setInnerStatus] = useState(defaultStatus);
-  const [innerTheme, setInnerTheme] = useState(defaultTheme);
+  const [innerTheme, setInnerTheme] = useState<ThemePreference>(
+    () => defaultTheme ?? readThemePreference(),
+  );
   const [signingOut, setSigningOut] = useState(false);
   const pending = useRef(false);
 
@@ -105,6 +126,13 @@ export function UserMenu({
     };
   }, [open, sheet]);
 
+  // 非受控且未显式指定 defaultTheme 时，打开菜单按页面当前主题回显，
+  // 避免 Header 等外部切换后分段控件仍停留在过期偏好
+  useEffect(() => {
+    if (!open || themeProp !== undefined || defaultTheme !== undefined) return;
+    setInnerTheme(readThemePreference());
+  }, [open, themeProp, defaultTheme]);
+
   function setTriggerRef(node: HTMLButtonElement | null): void {
     if (typeof ref === 'function') ref(node);
     else if (ref) (ref as { current: HTMLButtonElement | null }).current = node;
@@ -123,6 +151,7 @@ export function UserMenu({
 
   function changeTheme(value: ThemePreference): void {
     setInnerTheme(value);
+    applyThemePreference(value);
     onThemeChange?.(value);
   }
 
