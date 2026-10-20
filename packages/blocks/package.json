@@ -1,6 +1,6 @@
 {
   "name": "@pactor-app/blocks",
-  "version": "1.53.0",
+  "version": "1.54.0",
   "description": "Pactor blocks: composite block components built from @pactor-app/ui primitives (Login / EntityCard / CardList / RecordingPage / SiteFooter / rule & expression editors) with block component registry for the Renderer",
   "keywords": [
     "pactor",

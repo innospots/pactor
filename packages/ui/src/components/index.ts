@@ -139,6 +139,7 @@ export type {
   DatePickerProps,
   DatePickerRangeProps,
   DatePickerSingleProps,
+  DatePickerTimeFormat,
   DateRangeValue,
 } from './components/DatePicker/index.js';
 export { InputOTP } from './components/InputOTP/index.js';
