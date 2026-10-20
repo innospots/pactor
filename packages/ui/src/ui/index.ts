@@ -272,3 +272,11 @@ export { Textarea } from './textarea.js';
 export { Toggle, toggleVariants } from './toggle.js';
 export { ToggleGroup, ToggleGroupItem } from './toggle-group.js';
 export { Typography, typographyVariants } from './typography.js';
+export { PresenceDot, UserMenu, userStatuses } from './user-menu.js';
+export type {
+  ThemePreference,
+  UserMenuItem,
+  UserMenuProps,
+  UserMenuUser,
+  UserStatus,
+} from './user-menu.js';

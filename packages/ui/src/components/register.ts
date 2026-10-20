@@ -122,6 +122,7 @@ import { Tree } from './components/Tree/index.js';
 import { TreeSelect } from './components/TreeSelect/index.js';
 import { Typography } from './components/Typography/index.js';
 import { Upload } from './components/Upload/index.js';
+import { UserMenu } from './components/UserMenu/index.js';
 import { Video } from './components/Video/index.js';
 import { Watermark } from './components/Watermark/index.js';
 
@@ -186,6 +187,7 @@ export const builtinComponents = {
   NavigationMenu,
   DropdownMenu,
   ContextMenu,
+  UserMenu,
   // 反馈与弹层类扩展组件
   Dialog,
   AlertDialog,
