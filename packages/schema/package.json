@@ -1,6 +1,6 @@
 {
   "name": "@pactor-app/schema",
-  "version": "1.50.0",
+  "version": "1.54.2",
   "description": "Pactor schema: DSL version constants, JSON Schemas and Ajv-based validator",
   "keywords": [
     "pactor",

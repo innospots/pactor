@@ -60,6 +60,7 @@ const EXTENDED_TYPES = [
   'NavigationMenu',
   'DropdownMenu',
   'ContextMenu',
+  'UserMenu',
   // 第二批：反馈与弹层类
   'Dialog',
   'AlertDialog',

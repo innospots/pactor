@@ -23,6 +23,8 @@ export interface TextareaProps {
   /** 高度随内容自适应：true 无上限；{ minRows, maxRows } 限定行数区间（超上限内部滚动）；缺省 false 固定 rows 行高（可拖拽调高） */
   autoSize?: boolean | TextareaAutoSize;
   disabled?: boolean;
+  /** 最大输入长度（原生 maxLength，达到上限后无法继续输入） */
+  maxLength?: number;
   /** 控件尺寸（默认 middle；影响内边距与字号，高度仍由行数/内容决定） */
   size?: ControlSize;
   /** 输入事件，传出 string 值 */
@@ -47,6 +49,7 @@ export function Textarea({
   rows,
   autoSize,
   disabled,
+  maxLength,
   size = 'middle',
   onChange,
   className,
@@ -84,6 +87,7 @@ export function Textarea({
           rows={rows}
           autoSize={autoSize}
           disabled={disabled}
+          maxLength={maxLength}
           className={CONTROL_SIZE_AREA[size]}
           onChange={(event) => {
             form.setValue(name, event.target.value);
@@ -101,6 +105,7 @@ export function Textarea({
       rows={rows}
       autoSize={autoSize}
       disabled={disabled}
+      maxLength={maxLength}
       className={cn(CONTROL_SIZE_AREA[size], className)}
       style={style}
       onChange={(event) => onChange?.(event.target.value)}

@@ -99,6 +99,45 @@ export class DataStore {
   }
 
   /**
+   * 运行时注册数据源（如 DslSourceRef 片段载荷携带的 dataSources）：
+   * 名称冲突时告警并跳过（同一引用重复注册幂等），成功时播种空状态、
+   * 递增版本并通知订阅者。返回是否注册成功。
+   */
+  register(name: string, config: DataSourceConfig): boolean {
+    if (this.configs[name] !== undefined) {
+      console.warn(
+        `[@pactor-app/runtime] dataSource 名称冲突："${name}" 已注册，跳过重复注册`,
+      );
+      return false;
+    }
+    this.configs[name] = config;
+    this.statuses.set(name, { loading: false });
+    this.notify();
+    return true;
+  }
+
+  /** 批量运行时注册，返回实际注册成功的名称列表（冲突名跳过） */
+  registerAll(configs: Record<string, DataSourceConfig>): string[] {
+    const registered: string[] = [];
+    for (const [name, config] of Object.entries(configs)) {
+      if (this.register(name, config)) {
+        registered.push(name);
+      }
+    }
+    return registered;
+  }
+
+  /** 注销运行时注册的数据源（如片段边界卸载时回收）；未知名为 no-op */
+  unregister(name: string): void {
+    if (this.configs[name] === undefined) {
+      return;
+    }
+    delete this.configs[name];
+    this.statuses.delete(name);
+    this.notify();
+  }
+
+  /**
    * 加载指定数据源。状态流转：开始置 loading 并清空 error；
    * 成功写入 data；失败写入 error（保留旧 data）。MUST NOT 抛出。
    */
@@ -182,6 +221,10 @@ export class DataStore {
 
   private update(name: string, status: DataSourceStatus): void {
     this.statuses.set(name, status);
+    this.notify();
+  }
+
+  private notify(): void {
     this.version += 1;
     for (const listener of [...this.listeners]) {
       listener();

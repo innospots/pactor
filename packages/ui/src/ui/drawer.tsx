@@ -53,7 +53,7 @@ function DrawerContent({
   ...props
 }: React.ComponentProps<typeof DrawerPrimitive.Content> & {
   /** 透传给遮罩（modal={false} 时由遮罩 onClick 承担点击关闭） */
-  overlayProps?: React.ComponentProps<'div'>;
+  overlayProps?: React.ComponentProps<'div'> & { 'data-slot'?: string };
 }) {
   return (
     <DrawerPortal data-slot="drawer-portal">
@@ -65,7 +65,10 @@ function DrawerContent({
         data-slot="drawer-overlay"
         {...overlayProps}
         className={cn(
-          'fixed inset-0 z-50 bg-(--overlay-background)',
+          // 显式 pointer-events-auto：未打 vaul modal 补丁的消费方
+          // 仍会走 Radix 模态分支（body 被置 pointer-events:none），
+          // 遮罩若继承则点击穿透到 <html>，遮罩关闭入口失效
+          'pointer-events-auto fixed inset-0 z-50 bg-(--overlay-background)',
           overlayProps?.className,
         )}
       />

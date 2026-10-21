@@ -6,6 +6,13 @@ import { cn } from '../../../lib/utils.js';
 import { Popover, PopoverContent, PopoverTrigger } from '../../../ui/popover.js';
 import { CLEARABLE_GROUP, CLEARABLE_ICON_HIDE, ClearHoverButton } from '../../clearable.js';
 import { CONTROL_SIZE_BOX, type ControlSize } from '../../control-size.js';
+import {
+  formatTimeParts,
+  nowParts,
+  parseTime,
+  TimeColumns,
+  type TimeParts,
+} from '../../time-columns.js';
 import { useFormContext } from '../Form/context.js';
 import { FieldShell } from '../Form/form-item.js';
 import type { FieldRule } from '../Input/index.js';
@@ -33,33 +40,6 @@ export interface TimePickerProps {
   className?: string;
   /** 通用：根节点内联样式（同 className 的挂载规则） */
   style?: CSSProperties;
-}
-
-interface TimeParts {
-  hour: number;
-  minute: number;
-  second: number;
-}
-
-function pad(n: number): string {
-  return String(n).padStart(2, '0');
-}
-
-/** 时间字符串 → { hour, minute, second }（非法输入返回 undefined） */
-function parseTime(value: unknown): TimeParts | undefined {
-  if (typeof value !== 'string') return undefined;
-  const match = /^(\d{1,2}):(\d{1,2})(?::(\d{1,2}))?$/.exec(value.trim());
-  if (!match) return undefined;
-  const hour = Number(match[1]);
-  const minute = Number(match[2]);
-  const second = match[3] === undefined ? 0 : Number(match[3]);
-  if (hour > 23 || minute > 59 || second > 59) return undefined;
-  return { hour, minute, second };
-}
-
-function nowParts(): TimeParts {
-  const now = new Date();
-  return { hour: now.getHours(), minute: now.getMinutes(), second: now.getSeconds() };
 }
 
 /**
@@ -125,11 +105,6 @@ export function TimePicker({
     setOpen(next);
   };
 
-  const formatParts = (parts: TimeParts) =>
-    withSeconds
-      ? `${pad(parts.hour)}:${pad(parts.minute)}:${pad(parts.second)}`
-      : `${pad(parts.hour)}:${pad(parts.minute)}`;
-
   const commit = (next: string) => {
     if (inForm && form && name) {
       form.setValue(name, next);
@@ -138,32 +113,6 @@ export function TimePicker({
     }
     onChange?.(next);
   };
-
-  const renderColumn = (
-    slot: string,
-    max: number,
-    active: number,
-    onPick: (n: number) => void,
-  ) => (
-    <div
-      data-slot={slot}
-      className="max-h-40 w-14 overflow-y-auto rounded-md border border-border"
-    >
-      {Array.from({ length: max + 1 }, (_, n) => (
-        <button
-          key={n}
-          type="button"
-          className={cn(
-            'flex w-full cursor-pointer items-center justify-center px-2 py-1 text-sm hover:bg-accent',
-            n === active && 'bg-primary text-primary-foreground hover:bg-primary',
-          )}
-          onClick={() => onPick(n)}
-        >
-          {pad(n)}
-        </button>
-      ))}
-    </div>
-  );
 
   const control = (
     <Popover open={open} onOpenChange={openPanel}>
@@ -195,19 +144,12 @@ export function TimePicker({
       </PopoverTrigger>
       <PopoverContent className="w-auto p-3">
         <div data-slot="timepicker-panel" className="flex flex-col gap-2">
-          <div className="flex items-start gap-2">
-            {renderColumn('timepicker-hour-column', 23, pending.hour, (n) =>
-              setPending((prev) => ({ ...prev, hour: n })),
-            )}
-            {renderColumn('timepicker-minute-column', 59, pending.minute, (n) =>
-              setPending((prev) => ({ ...prev, minute: n })),
-            )}
-            {withSeconds
-              ? renderColumn('timepicker-second-column', 59, pending.second, (n) =>
-                  setPending((prev) => ({ ...prev, second: n })),
-                )
-              : null}
-          </div>
+          <TimeColumns
+            slotPrefix="timepicker"
+            value={pending}
+            onChange={setPending}
+            withSeconds={withSeconds}
+          />
           <div className="flex items-center justify-between gap-2 border-t border-border pt-2">
             <button
               type="button"
@@ -220,7 +162,7 @@ export function TimePicker({
               type="button"
               className="cursor-pointer rounded-md bg-primary px-3 py-1 text-sm text-primary-foreground hover:bg-primary/90"
               onClick={() => {
-                commit(formatParts(pending));
+                commit(formatTimeParts(pending, withSeconds));
                 setOpen(false);
               }}
             >

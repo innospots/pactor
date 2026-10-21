@@ -19,6 +19,7 @@ export type {
   ApplicationDsl,
   DataSourceConfig,
   DataSourceType,
+  DslFragmentPayload,
   DslVersion,
   FragmentDsl,
   LifecycleConfig,
@@ -27,7 +28,7 @@ export type {
   PageMeta,
   RequiresConfig,
 } from './document.js';
-export { resolveRootNodes } from './document.js';
+export { isDslFragmentPayload, resolveRootNodes } from './document.js';
 
 export { RUNTIME_SCOPES } from './scope.js';
 export type { RuntimeScope } from './scope.js';
