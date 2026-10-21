@@ -1,6 +1,6 @@
 {
   "name": "@pactor-app/expression",
-  "version": "1.54.0",
+  "version": "1.54.2",
   "description": "Pactor expression: controlled AST expression engine (no eval, no global access)",
   "keywords": [
     "pactor",
