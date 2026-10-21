@@ -1,10 +1,10 @@
 import type { DslChildren, DslChildrenItem, DslNode, PermissionDeniedStrategy } from '@pactor-app/core';
-import { isDslSourceRef } from '@pactor-app/core';
+import { isDslFragmentPayload, isDslSourceRef } from '@pactor-app/core';
 import {
   resolveTemplate,
   type ExpressionScope,
 } from '@pactor-app/expression';
-import { validateDslNode, validateDslNodes } from '@pactor-app/schema';
+import { validateDslFragmentPayload, validateDslNode, validateDslNodes } from '@pactor-app/schema';
 import {
   createElement,
   useMemo,
@@ -272,6 +272,19 @@ function validateResolvedNodes(
   content: unknown,
   label: string,
 ): DslChildrenItem[] | null {
+  // 片段载荷形态：dataSources / state 副作用已由 DslSourceBoundary 应用，
+  // 此处校验载荷结构并渲染 children 子树
+  if (isDslFragmentPayload(content)) {
+    const errors = validateDslFragmentPayload(content);
+    if (errors.length > 0) {
+      console.warn(
+        `[@pactor-app/runtime] 动态引用（${label}）返回的片段载荷未通过校验`,
+        errors,
+      );
+      return null;
+    }
+    return content.children as DslChildrenItem[];
+  }
   const errors = validateDslNodes(content);
   if (errors.length > 0) {
     console.warn(

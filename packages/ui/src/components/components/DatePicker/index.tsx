@@ -15,17 +15,28 @@ import {
 } from 'date-fns';
 import { enUS, zhCN } from 'date-fns/locale';
 import { Calendar as CalendarIcon } from 'lucide-react';
-import { useEffect, useId, useState, type CSSProperties } from 'react';
+import { useEffect, useId, useRef, useState, type CSSProperties } from 'react';
 
 import { cn } from '../../../lib/utils.js';
 import { Calendar as ShadcnCalendar } from '../../../ui/calendar.js';
 import { Popover, PopoverContent, PopoverTrigger } from '../../../ui/popover.js';
 import { CLEARABLE_GROUP, CLEARABLE_ICON_HIDE, ClearHoverButton } from '../../clearable.js';
 import { CONTROL_SIZE_BOX, type ControlSize } from '../../control-size.js';
+import {
+  defaultEndTime,
+  defaultStartTime,
+  TimeColumns,
+  timeOfDate,
+  withTime,
+  type TimeParts,
+} from '../../time-columns.js';
 import { formItemClass, useFormContext } from '../Form/context.js';
 import type { FieldRule } from '../Input/index.js';
 
-/** range 模式值（ISO yyyy-MM-dd 对） */
+/** 时间精度（showTime 时生效）：'HH:mm:ss'（缺省，含秒列）或 'HH:mm'（无秒列、值无秒） */
+export type DatePickerTimeFormat = 'HH:mm:ss' | 'HH:mm';
+
+/** range 模式值（ISO 日期对；showTime 时两端为日期时间字符串） */
 export interface DateRangeValue {
   start: string;
   end: string;
@@ -57,6 +68,10 @@ interface DatePickerCommonProps {
   disabled?: boolean;
   /** 控件尺寸（默认 middle，即现行 h-9 尺寸） */
   size?: ControlSize;
+  /** 同时选择时间：浮层内日历右侧渲染时/分（/秒）列，值带时间（缺省关闭） */
+  showTime?: boolean;
+  /** 时间精度（仅在 showTime 时生效）：'HH:mm:ss'（缺省，含秒列）或 'HH:mm'（无秒列、值无秒） */
+  timeFormat?: DatePickerTimeFormat;
   /** hover 清除（缺省开启，传 false 关闭）：有值时悬停触发器，日历图标替换为 ×，点击清空当前值 */
   allowClear?: boolean;
   /**
@@ -73,17 +88,17 @@ interface DatePickerCommonProps {
 export interface DatePickerSingleProps extends DatePickerCommonProps {
   /** 选择模式（缺省 single） */
   mode?: 'single';
-  /** 受控值（ISO 日期字符串 yyyy-MM-dd）；Form 内作为字段初始值 */
+  /** 受控值（ISO 日期字符串 yyyy-MM-dd；showTime 时为 yyyy-MM-dd HH:mm[:ss]）；Form 内作为字段初始值 */
   value?: string;
-  /** 选中日期事件，传出 ISO 日期字符串（yyyy-MM-dd），清除传 undefined */
+  /** 选中日期事件，传出 ISO 日期字符串（showTime 时带时间），清除传 undefined */
   onChange?: (value: string | undefined) => void;
 }
 
 export interface DatePickerRangeProps extends DatePickerCommonProps {
   mode: 'range';
-  /** 受控值（{ start, end } ISO 对）；Form 内作为字段初始值 */
+  /** 受控值（{ start, end } ISO 对；showTime 时两端带时间）；Form 内作为字段初始值 */
   value?: DateRangeValue;
-  /** 范围选定事件，仅两端齐备时触发，传出 { start, end } ISO 对象 */
+  /** 范围选定事件，仅两端齐备时触发，传出 { start, end } ISO 对象（showTime 时两端带时间） */
   onChange?: (value: DateRangeValue | undefined) => void;
 }
 
@@ -135,6 +150,9 @@ const IN_RANGE_CLASSES =
  * presets 快捷选择（除定位型「今天」外点击即完成选择、触发 onChange、
  * 不关浮层）；默认文案走 `pactor.datePicker.*` i18n key，日历本体按
  * useI18n().locale 映射 date-fns locale。Form 内声明 `name` 自动成为表单项。
+ * `showTime` 开启后日历右侧渲染时/分（/秒）列（复用 TimePicker 的
+ * TimeColumns，区域背景与日历一致、列高度撑满日历），值按 `timeFormat` 带时间；
+ * 点日期/时间即时提交，range 的起点/终点时间列分别位于左右日历面板右侧。
  */
 export function DatePicker(props: DatePickerProps) {
   const {
@@ -144,6 +162,8 @@ export function DatePicker(props: DatePickerProps) {
     placeholder,
     disabled,
     size = 'middle',
+    showTime,
+    timeFormat = 'HH:mm:ss',
     allowClear,
     presets,
     className,
@@ -151,6 +171,11 @@ export function DatePicker(props: DatePickerProps) {
   } = props;
   const mode = props.mode ?? 'single';
   const isRange = mode === 'range';
+  const timeEnabled = showTime === true;
+  const withSeconds = timeFormat !== 'HH:mm';
+  // 时间区宽度：时/分（/秒）列 w-14 + gap-2 + 左右 p-3（+ 1px 分隔线）。
+  // 内容高度由日历决定，列以绝对定位撑满，避免百分比高度参与行高计算。
+  const timePanelWidth = withSeconds ? 'w-[209px]' : 'w-[145px]';
   const value = props.value;
   const onChange = props.onChange as
     | ((value: string | DateRangeValue | undefined) => void)
@@ -177,9 +202,22 @@ export function DatePicker(props: DatePickerProps) {
     if (!inForm) setInnerValue(value);
   }, [inForm, value]);
 
+  // showTime 待选时间（single）：已有值取该值时刻，否则缺省 00:00:00
+  const [pendingTime, setPendingTime] = useState<TimeParts>(() => {
+    const parsed = parseDate(value);
+    return parsed ? timeOfDate(parsed) : defaultStartTime();
+  });
+
   // range 双面板：pendingStart 为未提交的开始日（设定即清空结束日显示）；
-  // 两侧各自受控月份（缺省 今天月 / 下月）
+  // 两侧各自受控月份（缺省 今天月 / 下月）。pendingStart 始终为纯日期（startOfDay），
+  // 时间单独保存，避免时间参与「第二击早于开始日」的比较。
   const [pendingStart, setPendingStart] = useState<Date | undefined>();
+  const [pendingStartTime, setPendingStartTime] = useState<TimeParts>(() =>
+    defaultStartTime(),
+  );
+  const [pendingEndTime, setPendingEndTime] = useState<TimeParts>(() =>
+    defaultEndTime(withSeconds),
+  );
   const [startMonth, setStartMonth] = useState<Date>(() =>
     startOfMonth(new Date()),
   );
@@ -211,16 +249,33 @@ export function DatePicker(props: DatePickerProps) {
     setStartMonth((prev) => (isBefore(prev, e) ? prev : subMonths(e, 1)));
   };
 
-  // 已提交值变化（用户选齐两端 / 预设 / 外部初始值）时重置 pending 与两侧月份
+  // 已提交值变化（用户选齐两端 / 预设 / 外部初始值）时重置 pending 与两侧月份。
+  // 仅区间日期部分变化时才重新定位面板：showTime 下调整时间会重新提交同一天的
+  // 区间，不应把用户翻到的月份拉回范围所在月。
+  const lastRangeDaysRef = useRef<string | undefined>(undefined);
   useEffect(() => {
     if (!isRange) return;
     const parsed = parseRange(current);
     setPendingStart(undefined);
+    setPendingStartTime(parsed ? timeOfDate(parsed.from) : defaultStartTime());
+    setPendingEndTime(parsed ? timeOfDate(parsed.to) : defaultEndTime(withSeconds));
+    const daysKey = parsed
+      ? `${format(startOfDay(parsed.from), 'yyyy-MM-dd')}|${format(startOfDay(parsed.to), 'yyyy-MM-dd')}`
+      : '';
+    if (lastRangeDaysRef.current === daysKey) return;
+    lastRangeDaysRef.current = daysKey;
     setPanelMonths(
       parsed?.from ?? new Date(),
       parsed?.to ?? addMonths(new Date(), 1),
     );
-  }, [isRange, current]);
+  }, [isRange, current, withSeconds]);
+
+  // showTime single：已提交值变化时同步待选时间（重选日期时保留时间）
+  useEffect(() => {
+    if (!timeEnabled || isRange) return;
+    const parsed = parseDate(current);
+    setPendingTime(parsed ? timeOfDate(parsed) : defaultStartTime());
+  }, [timeEnabled, isRange, current]);
 
   const commit = (next: string | DateRangeValue | undefined) => {
     if (inForm && form && name) {
@@ -231,12 +286,37 @@ export function DatePicker(props: DatePickerProps) {
     onChange?.(next);
   };
 
+  /** 日期 + 时间 → 输出字符串（showTime 时为 yyyy-MM-dd HH:mm[:ss]，否则为 yyyy-MM-dd） */
+  const formatDateTime = (date: Date, time: TimeParts) =>
+    timeEnabled
+      ? format(withTime(startOfDay(date), time), `yyyy-MM-dd ${timeFormat}`)
+      : format(date, 'yyyy-MM-dd');
+
   const commitRange = (from: Date, to: Date) => {
-    commit({ start: format(from, 'yyyy-MM-dd'), end: format(to, 'yyyy-MM-dd') });
+    commit(
+      timeEnabled
+        ? {
+            start: formatDateTime(from, pendingStartTime),
+            end: formatDateTime(to, pendingEndTime),
+          }
+        : { start: format(from, 'yyyy-MM-dd'), end: format(to, 'yyyy-MM-dd') },
+    );
+  };
+
+  /** 预设提交：range 预设为整日语义，统一使用默认起止时间（00:00:00 / 23:59:59） */
+  const commitPresetRange = (from: Date, to: Date) => {
+    commit(
+      timeEnabled
+        ? {
+            start: formatDateTime(from, defaultStartTime()),
+            end: formatDateTime(to, defaultEndTime(withSeconds)),
+          }
+        : { start: format(from, 'yyyy-MM-dd'), end: format(to, 'yyyy-MM-dd') },
+    );
   };
 
   const handleSingleSelect = (date: Date | undefined) => {
-    commit(date ? format(date, 'yyyy-MM-dd') : undefined);
+    commit(date ? formatDateTime(date, pendingTime) : undefined);
   };
 
   const parsedRange = isRange ? parseRange(current) : undefined;
@@ -307,31 +387,62 @@ export function DatePicker(props: DatePickerProps) {
         setPendingStart(today);
         setPanelMonths(today, addMonths(today, 1));
       } else {
-        commit(format(today, 'yyyy-MM-dd'));
+        commit(formatDateTime(today, pendingTime));
       }
       return;
     }
-    commitRange(from, to);
+    commitPresetRange(from, to);
   };
 
   const singleDate = isRange ? undefined : parseDate(current);
+
+  // showTime single：点时间列——已有日期立即携带新时间提交，无日期仅暂存
+  const handleSingleTimeChange = (parts: TimeParts) => {
+    setPendingTime(parts);
+    if (!timeEnabled || !singleDate) return;
+    commit(formatDateTime(singleDate, parts));
+  };
+
+  // showTime range：点时间列——待选轮次内只更新草稿；已提交区间立即重新提交该端
+  const handleRangeTimeChange = (endpoint: 'start' | 'end', parts: TimeParts) => {
+    if (!timeEnabled) return;
+    if (endpoint === 'start') {
+      setPendingStartTime(parts);
+    } else {
+      setPendingEndTime(parts);
+    }
+    if (pendingStart !== undefined || !parsedRange) return;
+    commit({
+      start: formatDateTime(
+        parsedRange.from,
+        endpoint === 'start' ? parts : timeOfDate(parsedRange.from),
+      ),
+      end: formatDateTime(
+        parsedRange.to,
+        endpoint === 'end' ? parts : timeOfDate(parsedRange.to),
+      ),
+    });
+  };
 
   // 区间选中态经 modifiers 施加（开始日/结束日端点 + 严格位于两端之间的
   // 过渡样式）；结束日清空（pending 期间）时无端点与中间样式。
   // inRange 仅在 end 严格晚于 start（按日历日）时构造：同日区间（start==end）
   // 的 { after, before } 会被 DayPicker 当作开放区间匹配几乎所有日期。
+  // 端点/区间修饰统一按日历日（startOfDay），time 仅参与值格式化
+  const rangeStartDay = rangeStart ? startOfDay(rangeStart) : undefined;
+  const rangeEndDay = rangeEnd ? startOfDay(rangeEnd) : undefined;
   const hasInnerRange =
     isRange &&
-    rangeStart !== undefined &&
-    rangeEnd !== undefined &&
-    isBefore(startOfDay(rangeStart), startOfDay(rangeEnd));
+    rangeStartDay !== undefined &&
+    rangeEndDay !== undefined &&
+    isBefore(rangeStartDay, rangeEndDay);
   // 只传 modifiers / modifiersClassNames，不传 classNames，避免整体覆盖 vendored 样式
   const rangeModifiers = isRange
     ? {
-        ...(rangeStart ? { rangeStart } : {}),
-        ...(rangeEnd ? { rangeEnd } : {}),
+        ...(rangeStartDay ? { rangeStart: rangeStartDay } : {}),
+        ...(rangeEndDay ? { rangeEnd: rangeEndDay } : {}),
         ...(hasInnerRange
-          ? { inRange: { after: rangeStart, before: rangeEnd } }
+          ? { inRange: { after: rangeStartDay, before: rangeEndDay } }
           : {}),
       }
     : undefined;
@@ -357,7 +468,7 @@ export function DatePicker(props: DatePickerProps) {
     t(isRange ? 'pactor.datePicker.placeholderRange' : 'pactor.datePicker.placeholder');
 
   const calendar = isRange ? (
-    <div className="flex">
+    <div className="flex items-stretch">
       <div
         data-slot="datepicker-start-panel"
         className="border-r border-border"
@@ -375,7 +486,29 @@ export function DatePicker(props: DatePickerProps) {
           showOutsideDays={false}
         />
       </div>
-      <div data-slot="datepicker-end-panel">
+      {timeEnabled ? (
+        <div
+          data-slot="datepicker-start-time"
+          className={cn(
+            'relative border-r border-border bg-card',
+            timePanelWidth,
+          )}
+        >
+          <div className="absolute inset-0 flex p-3">
+            <TimeColumns
+              slotPrefix="datepicker-start"
+              value={pendingStartTime}
+              onChange={(parts) => handleRangeTimeChange('start', parts)}
+              withSeconds={withSeconds}
+              fillHeight
+            />
+          </div>
+        </div>
+      ) : null}
+      <div
+        data-slot="datepicker-end-panel"
+        className={timeEnabled ? 'border-r border-border' : undefined}
+      >
         <ShadcnCalendar
           mode="single"
           month={endMonth}
@@ -387,14 +520,51 @@ export function DatePicker(props: DatePickerProps) {
           showOutsideDays={false}
         />
       </div>
+      {timeEnabled ? (
+        <div
+          data-slot="datepicker-end-time"
+          className={cn('relative bg-card', timePanelWidth)}
+        >
+          <div className="absolute inset-0 flex p-3">
+            <TimeColumns
+              slotPrefix="datepicker-end"
+              value={pendingEndTime}
+              onChange={(parts) => handleRangeTimeChange('end', parts)}
+              withSeconds={withSeconds}
+              fillHeight
+            />
+          </div>
+        </div>
+      ) : null}
     </div>
   ) : (
-    <ShadcnCalendar
-      mode="single"
-      selected={singleDate}
-      onSelect={handleSingleSelect}
-      locale={dfLocale}
-    />
+    <div className="flex items-stretch">
+      <ShadcnCalendar
+        mode="single"
+        selected={singleDate ? startOfDay(singleDate) : undefined}
+        onSelect={handleSingleSelect}
+        locale={dfLocale}
+      />
+      {timeEnabled ? (
+        <div
+          data-slot="datepicker-time"
+          className={cn(
+            'relative border-l border-border bg-card',
+            timePanelWidth,
+          )}
+        >
+          <div className="absolute inset-0 flex p-3">
+            <TimeColumns
+              slotPrefix="datepicker"
+              value={pendingTime}
+              onChange={handleSingleTimeChange}
+              withSeconds={withSeconds}
+              fillHeight
+            />
+          </div>
+        </div>
+      ) : null}
+    </div>
   );
 
   const control = (

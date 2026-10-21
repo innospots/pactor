@@ -1,6 +1,10 @@
 import Ajv, { type ErrorObject, type ValidateFunction } from 'ajv';
 
 import {
+  DSL_FRAGMENT_PAYLOAD_SCHEMA_ID,
+  dslFragmentPayloadSchema,
+} from './schemas/dsl-fragment.js';
+import {
   actionConfigSchema,
   DSL_NODE_SCHEMA_ID,
   DSL_SOURCE_REF_SCHEMA_ID,
@@ -56,6 +60,7 @@ function getAjv(): Ajv | null {
     instance.addSchema(dslSourceRefSchema);
     instance.addSchema(dslNodeSchema);
     instance.addSchema(pageDslSchema);
+    instance.addSchema(dslFragmentPayloadSchema);
     ajv = instance;
   } catch (error) {
     if (isCodeGenerationError(error)) {
@@ -171,6 +176,20 @@ export function validateDslNode(value: unknown): DslValidationError[] {
 /** 校验单个 DslSourceRef（children 数组中的引用元素） */
 export function validateDslSourceRef(value: unknown): DslValidationError[] {
   const validate = getCompiledValidator(DSL_SOURCE_REF_SCHEMA_ID);
+  if (!validate) {
+    return [];
+  }
+  const valid = validate(value) as boolean;
+  return valid ? [] : toStructuredErrors(validate.errors ?? []);
+}
+
+/**
+ * 校验 DslFragmentPayload（DslSourceRef 解析结果的片段形态），
+ * 返回结构化错误列表（空数组为通过）。
+ * 禁代码生成的运行时空数组返回（跳过校验）。
+ */
+export function validateDslFragmentPayload(value: unknown): DslValidationError[] {
+  const validate = getCompiledValidator(DSL_FRAGMENT_PAYLOAD_SCHEMA_ID);
   if (!validate) {
     return [];
   }

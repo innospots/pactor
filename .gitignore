@@ -11,3 +11,4 @@ coverage/
 .cursor
 openspec
 design
+dist-pack/

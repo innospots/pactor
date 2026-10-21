@@ -329,3 +329,103 @@ describe('autoLoad 与手动刷新', () => {
     expect(store.get('c').error?.message).toContain('unsupported');
   });
 });
+
+describe('运行时注册（register / registerAll / unregister）', () => {
+  it('register 播种空状态、通知订阅者，load 按动态配置加载', async () => {
+    const { context, store } = setup({});
+    const listener = vi.fn();
+    store.subscribe(listener);
+    const versionBefore = store.getVersion();
+
+    const ok = store.register('frag', {
+      type: 'http',
+      request: { url: '/api/frag' },
+    });
+
+    expect(ok).toBe(true);
+    expect(store.get('frag')).toEqual({ loading: false });
+    expect(store.getVersion()).toBeGreaterThan(versionBefore);
+    expect(listener).toHaveBeenCalled();
+
+    const http = context.http;
+    const spy = vi
+      .spyOn(http, 'request')
+      .mockResolvedValue({ items: [1] });
+    await store.load('frag');
+    expect(spy).toHaveBeenCalledWith(
+      expect.objectContaining({ url: '/api/frag' }),
+    );
+    expect(store.getData('frag')).toEqual({ items: [1] });
+  });
+
+  it('名称冲突：告警并跳过，保留既有配置（重复注册幂等）', async () => {
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
+    const { store } = setup({
+      existing: { type: 'static', value: 'page-level' },
+    });
+
+    const ok = store.register('existing', { type: 'static', value: 'frag' });
+
+    expect(ok).toBe(false);
+    expect(warn).toHaveBeenCalled();
+    await store.load('existing');
+    expect(store.getData('existing')).toBe('page-level');
+    warn.mockRestore();
+  });
+
+  it('registerAll 返回实际注册成功的名称，冲突名跳过', () => {
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
+    const { store } = setup({
+      clash: { type: 'static', value: 1 },
+    });
+
+    const registered = store.registerAll({
+      a: { type: 'static', value: 'a' },
+      clash: { type: 'static', value: 2 },
+      b: { type: 'static', value: 'b' },
+    });
+
+    expect(registered.sort()).toEqual(['a', 'b']);
+    expect(warn).toHaveBeenCalledTimes(1);
+    warn.mockRestore();
+  });
+
+  it('unregister 移除配置与状态，此后 load 按未知源抛错', async () => {
+    const { store } = setup({});
+    store.register('temp', { type: 'static', value: 1 });
+    await store.load('temp');
+    expect(store.getData('temp')).toBe(1);
+
+    store.unregister('temp');
+
+    expect(store.get('temp')).toEqual({ loading: false });
+    await expect(store.load('temp')).rejects.toThrow('temp');
+    // 未知名注销为 no-op
+    store.unregister('ghost');
+  });
+
+  it('缺省 reload 覆盖运行时注册的 autoLoad 源', async () => {
+    let fragLoads = 0;
+    const services = {
+      get: () => async () => ++fragLoads,
+    };
+    const { store } = setup(
+      { init: { type: 'static', value: 0, autoLoad: true } },
+      { services: services as never },
+    );
+    // init 之后的运行时注册（如片段载荷携带的 dataSources）
+    store.register('frag', {
+      type: 'service',
+      service: 'frag.svc',
+      autoLoad: true,
+    });
+    store.register('manual', { type: 'static', value: 'm' });
+
+    await store.reload();
+
+    // reload 动态读取 configs：运行时注册的 autoLoad 源一并刷新
+    expect(fragLoads).toBe(1);
+    expect(store.getData('init')).toBe(0);
+    expect(store.getData('manual')).toBeUndefined();
+  });
+});

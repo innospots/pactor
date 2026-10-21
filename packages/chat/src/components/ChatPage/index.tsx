@@ -12,6 +12,7 @@ import {
 } from "./hooks.js";
 import { IconRail } from "./icon-rail.js";
 import { MenuPane } from "./menu-pane.js";
+import { SIDE_PANEL_BG } from "./tokens.js";
 import type { ChatPageProps } from "./types.js";
 
 export type {
@@ -30,15 +31,24 @@ export type {
  * 行内提及（contexts：输入触发符在光标处弹菜单，选中替换为行内提及块，
  * 退格整体删除；受控 contextItems）、附件
  * 入口（onAttachFiles + 受控 attachments）与 composerFooter /
- * composerBottom 槽位）、对话图标栏（header 下方、对话区右缘纵向
+ * composerBottom 槽位；提供 workspaces 时 footer 内建工作空间切换器
+ * （选择 / 搜索 / 新建 / 清除，与 composerFooter 并排））、对话图标栏（header 下方、对话区右缘纵向
  * 图标列：内置产物入口 + conversationRailItems 附加项，点击 toggle
- * 展示附加内容——popover 悬浮弹框或 panel 右侧分栏，与产物区互斥）、
+ * 展示附加内容——popover 悬浮弹框或 panel 右侧分栏，与产物区互斥；
+ * 背景与右端固定块一致，sidePanel 展示时左缘补边框）、
  * 右端固定块（sidePanel 槽：与对话图标栏同处 chat-page-aside 容器，
  * 渲染在图标栏左侧，sidePanelOpen 受控显隐并带宽度 / 透明度过渡，
  * 块背景经 --pactor-chat-side-panel-bg 跟随皮肤，可放入任务列表等
- * 任意元素）、
+ * 任意元素）、提问导航（按用户提问自动生成，位于 aside 最左侧且
+ * 纵向居中；两条及以上时渲染，每条提问一个 6×2 块（当前浏览的提问
+ * 12×2），最多展示 10 个，导航块位于浮层内，hover 时浮层从中心向四周
+ * 展开（内边距 / 行距 gap-1→gap-2 / 缩放 / 背景渐显）并汇总展示全部
+ * 提问（每条截断为 10 字 + ...；hover 某条时浏览器 title 展示完整正文、
+ * 该条文字变 primary；默认灰色，当前浏览的提问 primary 加粗），当前
+ * 浏览位置的提问块加长并高亮；showQuestionNav 缺省 true，可整体关闭）、
  * 最右产物区（ArtifactPanel：内建产物预览、
- * 目录树与下载，可显隐；展示时经 Resizable 拖拽调节与对话区的宽度）。
+ * 目录树与下载，可显隐；背景与右端固定块一致，展示时经 Resizable
+ * 拖拽调节与对话区的宽度）。
  * content 槽（React 元素或 DslNode）提供时整体替换右侧主区域（含对话
  * header），由调用方自带完整主体内容；左侧图标栏与展开菜单区保留
  *（hideMenu: true 时展开菜单区整体不渲染）。
@@ -85,6 +95,7 @@ export function ChatPage({
   sidePanel,
   sidePanelOpen = false,
   sidePanelWidth,
+  showQuestionNav = true,
   messages = [],
   sending,
   composerPlaceholder,
@@ -103,6 +114,10 @@ export function ChatPage({
   onRetryAttachment,
   composerFooter,
   composerBottom,
+  workspaces,
+  workspace,
+  onWorkspaceChange,
+  onWorkspaceCreate,
   artifactTitle = "产物",
   artifacts = [],
   activeArtifactId,
@@ -166,6 +181,7 @@ export function ChatPage({
       activeKey={rail.activeKey}
       onToggleItem={rail.toggleItem}
       activePopoverItem={rail.activePopoverItem}
+      sidePanelOpen={sidePanel !== undefined && sidePanelOpen}
       renderSlot={renderSlot}
     />
   );
@@ -193,9 +209,14 @@ export function ChatPage({
       onRetryAttachment={onRetryAttachment}
       composerFooter={composerFooter}
       composerBottom={composerBottom}
+      workspaces={workspaces}
+      workspace={workspace}
+      onWorkspaceChange={onWorkspaceChange}
+      onWorkspaceCreate={onWorkspaceCreate}
       sidePanel={sidePanel}
       sidePanelOpen={sidePanelOpen}
       sidePanelWidth={sidePanelWidth}
+      showQuestionNav={showQuestionNav}
       onOpenArtifacts={() => setArtifactOpen(true)}
       renderSlot={renderSlot}
       rail={conversationRail}
@@ -273,13 +294,17 @@ export function ChatPage({
             orientation="horizontal"
             style={{ width: "100%", height: "100%" }}
           >
-            <Panel defaultSize="70%">{chatArea}</Panel>
+            {/* 不设 defaultSize：flexGrow 填满剩余宽，使同组产物栏的
+                300px 默认宽按真实容器宽换算（否则初始 flex 基准之和
+                不足容器宽，库会把 px 归一化为百分比而偏大） */}
+            <Panel>{chatArea}</Panel>
             <ResizableHandle withHandle />
-            <Panel defaultSize="30%" minSize="380px" maxSize="760px">
+            <Panel defaultSize="300px" minSize="300px" maxSize="400px">
               {rail.activePanelItem ? (
                 <div
                   data-slot="chat-page-rail-panel"
-                  className="flex h-full min-w-0 flex-col border-l border-border bg-muted"
+                  className="flex h-full min-w-0 flex-col border-l border-border"
+                  style={{ backgroundColor: SIDE_PANEL_BG }}
                 >
                   {renderSlot(rail.activePanelItem.content)}
                 </div>

@@ -1,6 +1,6 @@
 {
   "name": "@pactor-app/permission",
-  "version": "1.50.0",
+  "version": "1.54.2",
   "description": "Pactor permission: permission code store, runtime permission adapter, menu/page guards and expression function",
   "keywords": [
     "pactor",

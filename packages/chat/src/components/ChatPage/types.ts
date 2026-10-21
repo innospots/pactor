@@ -12,6 +12,7 @@ import type {
 import type { ConversationItemData } from "../ConversationList/index.js";
 import type { MessageListItem } from "../MessageList/index.js";
 import type { WelcomePromptItem } from "../Welcome/index.js";
+import type { WorkspaceOption } from "../WorkspaceSwitcher/index.js";
 
 /** 图标栏 / 展开菜单共用的导航项 */
 export interface ChatPageMenuItem {
@@ -122,11 +123,23 @@ export interface ChatPageProps {
   sidePanel?: DslNode | ReactNode;
   /**
    * 右端固定块展开态（受控）：展开 / 收起带宽度 + 透明度过渡动画；
-   * 缺省 false（收起）
+   * 缺省 false（收起）；展示时对话图标栏左缘补边框
    */
   sidePanelOpen?: boolean;
   /** 右端固定块宽度，缺省 280px（数字按 px，支持任意 CSS 宽度） */
   sidePanelWidth?: number | string;
+  /**
+   * 是否展示提问导航，缺省 true：导航由组件按 messages 中的用户提问
+   * 自动生成（无需外部传入数据），位于右端 aside 最左侧并垂直居中；
+   * 每条提问一个 6×2 块（当前浏览的提问 12×2，最多 10 个，仅一条提问
+   * 时不展示），导航块本身也在浮层内——缺省仅露出块列，hover 时浮层
+   * 从中心向四周展开（内边距 / 行距 gap-1→gap-2 / 缩放 / 背景渐显）并
+   * 汇总展示全部提问（每条截断为 10 字 + ...；hover 某条时浏览器 title
+   * 展示完整正文、该条文字变 primary；默认灰色，当前浏览的提问 primary
+   * 加粗），当前浏览位置的提问块加长并高亮（超过 10 条时窗口跟随当前
+   * 提问）
+   */
+  showQuestionNav?: boolean;
   messages?: MessageListItem[];
   /** 发送中（禁用 Composer 发送钮，由调用方完成后复位） */
   sending?: boolean;
@@ -163,6 +176,18 @@ export interface ChatPageProps {
   onRetryAttachment?: (id: string | number) => void;
   /** Composer footer 槽（渲染在输入框内工具栏下方，以分隔线相隔） */
   composerFooter?: DslNode | ReactNode;
+  /**
+   * 内建工作空间切换器：提供 options 即在 Composer footer 槽渲染
+   * WorkspaceSwitcher（搜索 / 列表 / 新建 / 清除）；与 composerFooter
+   * 同时提供时并排展示
+   */
+  workspaces?: WorkspaceOption[];
+  /** 当前工作空间 value（受控，'' 表示未选择） */
+  workspace?: string;
+  /** 工作空间切换事件（选择 / 清除 / 新建），传出最新 value */
+  onWorkspaceChange?: (value: string) => void;
+  /** 新建工作空间事件（弹框创建成功），传出名称，供宿主持久化 */
+  onWorkspaceCreate?: (name: string) => void;
   /** Composer 下方自定义内容槽（渲染在输入框之外正下方，如免责声明弱提示行） */
   composerBottom?: DslNode | ReactNode;
   /** 产物区标题，缺省「产物」 */

@@ -19,9 +19,19 @@ function SelectGroup({
 }
 
 function SelectValue({
+  className,
   ...props
 }: SelectPrimitive.Value.Props) {
-  return <SelectPrimitive.Value data-slot="select-value" {...props} />;
+  return (
+    <SelectPrimitive.Value
+      data-slot="select-value"
+      // 选中值占满剩余宽度并可收缩：触发器定宽（Form 控件 / w-48）时，
+      // 长 label 的 min-content 不再把右侧箭头 / 清除按钮顶出边框，
+      // 文本以省略号截断
+      className={cn('min-w-0 flex-1 truncate', className)}
+      {...props}
+    />
+  );
 }
 
 function SelectTrigger({
@@ -40,7 +50,9 @@ function SelectTrigger({
       data-slot="select-trigger"
       data-size={size}
       className={cn(
-        "flex w-fit cursor-pointer items-center justify-between gap-2 rounded-md border border-input bg-(--input-background) px-3 py-2 text-sm text-(--input-foreground) whitespace-nowrap shadow-xs transition-colors outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:cursor-not-allowed disabled:opacity-50 data-[size=default]:h-9 data-[size=sm]:h-8 data-[size=lg]:h-10 data-[placeholder]:text-muted-foreground [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
+        // 触发器是 <button>，UA 默认 text-align:center 会让选中值 / placeholder
+        // 居中；显式左对齐（消费方可传 text-center 经 tailwind-merge 覆盖）
+        "flex w-fit cursor-pointer items-center justify-between gap-2 rounded-md border border-input bg-(--input-background) px-3 py-2 text-left text-sm text-(--input-foreground) whitespace-nowrap shadow-xs transition-colors outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:cursor-not-allowed disabled:opacity-50 data-[size=default]:h-9 data-[size=sm]:h-8 data-[size=lg]:h-10 data-[placeholder]:text-muted-foreground [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
         className,
       )}
       {...props}

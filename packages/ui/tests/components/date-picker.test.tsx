@@ -97,6 +97,16 @@ function endpointCells(panel: Element) {
   );
 }
 
+/** showTime 时间列容器（data-slot） */
+function timeColumn(slot: string) {
+  return document.querySelector(`[data-slot=${slot}]`)!;
+}
+
+/** 点击时间列中的某项（列内为两位数字文本） */
+function clickTime(slot: string, value: string) {
+  fireEvent.click(within(timeColumn(slot) as HTMLElement).getByText(value));
+}
+
 describe('DatePicker', () => {
   it('点击触发器展开含日历的浮层；未选时显示 i18n placeholder', async () => {
     renderDsl({ type: 'DatePicker' });
@@ -633,5 +643,318 @@ describe('DatePicker', () => {
       .querySelector('[data-slot=datepicker-presets]')!
       .querySelector('button')!;
     expect(first.textContent).toBe('Today!');
+  });
+
+  describe('showTime / timeFormat', () => {
+    it('缺省关闭：浮层内无时间区与时间列', async () => {
+      renderDsl({ type: 'DatePicker' });
+
+      await openPicker();
+      expect(document.querySelector('[data-slot=datepicker-time]')).toBeNull();
+      expect(
+        document.querySelector('[data-slot=datepicker-hour-column]'),
+      ).toBeNull();
+    });
+
+    it('时间区位于日历右侧，背景与日历一致（single / range）', async () => {
+      const { unmount } = renderDsl({
+        type: 'DatePicker',
+        props: { showTime: true },
+      });
+      await openPicker();
+
+      const singleCalendar = document.querySelector('.rdp-root')!;
+      const singleTime = timeColumn('datepicker-time');
+      expect(singleCalendar.nextElementSibling).toBe(singleTime);
+      expect(singleCalendar.className).toContain('bg-card');
+      expect(singleTime.className).toContain('bg-card');
+      // 时间列高度撑满日历区域（不再使用 TimePicker 的 max-h-40）
+      const singleHourColumn = timeColumn('datepicker-hour-column');
+      expect(singleHourColumn.className).toContain('h-full');
+      expect(singleHourColumn.className).not.toContain('max-h-40');
+      unmount();
+
+      renderDsl({
+        type: 'DatePicker',
+        props: { mode: 'range', showTime: true },
+      });
+      await openPicker();
+
+      // 起点时间位于左侧日历与右侧日历之间，终点时间位于右侧日历之后
+      expect(startPanel().nextElementSibling).toBe(
+        timeColumn('datepicker-start-time'),
+      );
+      expect(timeColumn('datepicker-start-time').nextElementSibling).toBe(
+        endPanel(),
+      );
+      expect(endPanel().nextElementSibling).toBe(
+        timeColumn('datepicker-end-time'),
+      );
+      for (const slot of ['datepicker-start-time', 'datepicker-end-time']) {
+        expect(timeColumn(slot).className).toContain('bg-card');
+      }
+    });
+
+    it('single：回显日期时间值，时间列激活对应时刻', async () => {
+      const value = `${currentMonth}-20 09:30:45`;
+      renderDsl({ type: 'DatePicker', props: { showTime: true, value } });
+
+      expect(trigger().textContent).toContain(value);
+
+      await openPicker();
+      expect(document.querySelector('[data-slot=datepicker-time]')).not.toBeNull();
+      expect(
+        within(timeColumn('datepicker-hour-column') as HTMLElement).getByText('09')
+          .className,
+      ).toContain('bg-primary');
+      expect(
+        within(timeColumn('datepicker-minute-column') as HTMLElement).getByText(
+          '30',
+        ).className,
+      ).toContain('bg-primary');
+      expect(
+        within(timeColumn('datepicker-second-column') as HTMLElement).getByText(
+          '45',
+        ).className,
+      ).toContain('bg-primary');
+    });
+
+    it('single：点日期提交 00:00:00，时间列即时携带时间提交', async () => {
+      const { context } = renderDsl({
+        type: 'DatePicker',
+        props: { showTime: true },
+        events: {
+          onChange: { action: 'setState', params: { day: '${event}' } },
+        },
+      });
+
+      await openPicker();
+      clickDay('15');
+      await expectEventState(context, 'day', `${currentMonth}-15 00:00:00`);
+
+      clickTime('datepicker-hour-column', '09');
+      await expectEventState(context, 'day', `${currentMonth}-15 09:00:00`);
+
+      clickTime('datepicker-minute-column', '45');
+      await expectEventState(context, 'day', `${currentMonth}-15 09:45:00`);
+
+      clickTime('datepicker-second-column', '30');
+      await expectEventState(context, 'day', `${currentMonth}-15 09:45:30`);
+      expect(trigger().textContent).toContain(`${currentMonth}-15 09:45:30`);
+    });
+
+    it('single + timeFormat HH:mm：无秒列，值无秒', async () => {
+      const { context } = renderDsl({
+        type: 'DatePicker',
+        props: { showTime: true, timeFormat: 'HH:mm' },
+        events: {
+          onChange: { action: 'setState', params: { day: '${event}' } },
+        },
+      });
+
+      await openPicker();
+      expect(
+        document.querySelector('[data-slot=datepicker-second-column]'),
+      ).toBeNull();
+
+      clickDay('15');
+      await expectEventState(context, 'day', `${currentMonth}-15 00:00`);
+
+      clickTime('datepicker-hour-column', '13');
+      clickTime('datepicker-minute-column', '30');
+      await expectEventState(context, 'day', `${currentMonth}-15 13:30`);
+    });
+
+    it('single：先点时间再点日期，提交时携带已选时间', async () => {
+      const { context } = renderDsl({
+        type: 'DatePicker',
+        props: { showTime: true },
+        events: {
+          onChange: { action: 'setState', params: { day: '${event}' } },
+        },
+      });
+
+      await openPicker();
+      clickTime('datepicker-hour-column', '08');
+      clickTime('datepicker-minute-column', '05');
+      // 尚无日期：只暂存时间，不触发 onChange
+      expect(context.state.get('day')).toBeUndefined();
+
+      clickDay('15');
+      await expectEventState(context, 'day', `${currentMonth}-15 08:05:00`);
+    });
+
+    it('single：「今天」预设提交今天 + 待选时间', async () => {
+      const { context } = renderDsl({
+        type: 'DatePicker',
+        props: { showTime: true, presets: [{ key: 'today' }] },
+        events: {
+          onChange: { action: 'setState', params: { day: '${event}' } },
+        },
+      });
+
+      await openPicker();
+      fireEvent.click(screen.getByText('今天'));
+
+      await expectEventState(context, 'day', `${todayIso} 00:00:00`);
+    });
+
+    it('range：两次点击提交默认起止时间 00:00:00 / 23:59:59', async () => {
+      const { context } = renderDsl({
+        type: 'DatePicker',
+        props: { mode: 'range', showTime: true },
+        events: {
+          onChange: { action: 'setState', params: { period: '${event}' } },
+        },
+      });
+
+      await openPicker();
+      clickPanelDay(startPanel(), '10');
+      clickPanelDay(startPanel(), '15');
+
+      await expectEventState(context, 'period', {
+        start: `${currentMonth}-10 00:00:00`,
+        end: `${currentMonth}-15 23:59:59`,
+      });
+    });
+
+    it('range + timeFormat HH:mm：两端无秒，默认 00:00 / 23:59', async () => {
+      const { context } = renderDsl({
+        type: 'DatePicker',
+        props: { mode: 'range', showTime: true, timeFormat: 'HH:mm' },
+        events: {
+          onChange: { action: 'setState', params: { period: '${event}' } },
+        },
+      });
+
+      await openPicker();
+      expect(
+        document.querySelector('[data-slot=datepicker-start-second-column]'),
+      ).toBeNull();
+
+      clickPanelDay(startPanel(), '10');
+      clickPanelDay(startPanel(), '15');
+
+      await expectEventState(context, 'period', {
+        start: `${currentMonth}-10 00:00`,
+        end: `${currentMonth}-15 23:59`,
+      });
+    });
+
+    it('range：已提交区间调整起点/终点时间，立即重新提交且对端保持', async () => {
+      const { context } = renderDsl({
+        type: 'DatePicker',
+        props: { mode: 'range', showTime: true },
+        events: {
+          onChange: { action: 'setState', params: { period: '${event}' } },
+        },
+      });
+
+      await openPicker();
+      clickPanelDay(startPanel(), '10');
+      clickPanelDay(startPanel(), '15');
+      await expectEventState(context, 'period', {
+        start: `${currentMonth}-10 00:00:00`,
+        end: `${currentMonth}-15 23:59:59`,
+      });
+
+      clickTime('datepicker-start-hour-column', '09');
+      await expectEventState(context, 'period', {
+        start: `${currentMonth}-10 09:00:00`,
+        end: `${currentMonth}-15 23:59:59`,
+      });
+
+      clickTime('datepicker-end-minute-column', '30');
+      await expectEventState(context, 'period', {
+        start: `${currentMonth}-10 09:00:00`,
+        end: `${currentMonth}-15 23:30:59`,
+      });
+    });
+
+    it('range：新一轮选择沿用上一轮两端时间', async () => {
+      const { context } = renderDsl({
+        type: 'DatePicker',
+        props: { mode: 'range', showTime: true },
+        events: {
+          onChange: { action: 'setState', params: { period: '${event}' } },
+        },
+      });
+
+      await openPicker();
+      clickPanelDay(startPanel(), '10');
+      clickPanelDay(startPanel(), '15');
+      await expectEventState(context, 'period', {
+        start: `${currentMonth}-10 00:00:00`,
+        end: `${currentMonth}-15 23:59:59`,
+      });
+
+      clickTime('datepicker-start-hour-column', '09');
+      clickTime('datepicker-end-hour-column', '18');
+      clickTime('datepicker-end-minute-column', '30');
+      await expectEventState(context, 'period', {
+        start: `${currentMonth}-10 09:00:00`,
+        end: `${currentMonth}-15 18:30:59`,
+      });
+
+      // 新一轮首击不触发 onChange
+      clickPanelDay(startPanel(), '20');
+      expect(context.state.get('period')).toEqual({
+        start: `${currentMonth}-10 09:00:00`,
+        end: `${currentMonth}-15 18:30:59`,
+      });
+
+      clickPanelDay(startPanel(), '25');
+      await expectEventState(context, 'period', {
+        start: `${currentMonth}-20 09:00:00`,
+        end: `${currentMonth}-25 18:30:59`,
+      });
+    });
+
+    it('range：预设按整日语义使用默认起止时间', async () => {
+      const { context } = renderDsl({
+        type: 'DatePicker',
+        props: {
+          mode: 'range',
+          showTime: true,
+          presets: [{ label: '最近7天', days: 7 }],
+        },
+        events: {
+          onChange: { action: 'setState', params: { period: '${event}' } },
+        },
+      });
+
+      await openPicker();
+      fireEvent.click(screen.getByText('最近7天'));
+
+      await expectEventState(context, 'period', {
+        start: `${format(subDays(new Date(), 6), 'yyyy-MM-dd')} 00:00:00`,
+        end: `${todayIso} 23:59:59`,
+      });
+    });
+
+    it('Form 内 showTime：提交值为日期时间字符串', async () => {
+      const { context } = renderDsl({
+        type: 'Form',
+        children: [
+          {
+            type: 'DatePicker',
+            props: { name: 'day', label: '时间', showTime: true },
+          },
+          { type: 'Button', props: { text: '提交', submit: true } },
+        ],
+      });
+
+      await openPicker();
+      clickDay('15');
+      clickTime('datepicker-hour-column', '09');
+      clickTime('datepicker-minute-column', '45');
+      fireEvent.click(screen.getByRole('button', { name: '提交' }));
+
+      await vi.waitFor(() => {
+        expect(context.state.get('form')).toEqual({
+          day: `${currentMonth}-15 09:45:00`,
+        });
+      });
+    });
   });
 });

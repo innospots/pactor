@@ -130,7 +130,7 @@
 | Combobox | 扁平单选且候选超过 20 个，或 PRD 明确以关键词过滤为主要定位方式；options 为 `label / value / disabled?`。 | 层级候选；多选；自由文本；少量固定候选且没有检索任务。 | 输入关键字后候选减少，无匹配有空文案，选中后提交原始 value；不得把输入串当作未选中候选的提交值。 |
 | TreeSelect | 树形数据且父节点或叶子均可作为合法单值；需要按 label 搜索树时使用 `searchable`。 | 只能选叶子且必须保存完整路径；扁平候选。 | 展开 / 收起和选中节点行为正确，Form 值是单个节点 value；搜索命中后祖先路径可见。 |
 | Cascader | 省市区等层级数据，只有叶子是合法值，提交值需要完整路径数组。 | 需要选中间层级；扁平候选；大树必须关键词搜索。 | 只有选择叶子才完成，显示各级 label，Form 的 event 是路径 value 数组。 |
-| DatePicker | 日期或日期范围；范围使用 `mode: range`，需要快捷范围时配置 presets。 | 仅时间；用一个字段同时选择日期和时刻；用两个 single 拼范围。 | single 提交 ISO 日期字符串，range 提交 `{start,end}`；清除和预设按当前契约触发 onChange。 |
+| DatePicker | 日期或日期范围；范围使用 `mode: range`，需要快捷范围时配置 presets；需要精确到时刻时加 `showTime`（`timeFormat` 可选 `HH:mm:ss` / `HH:mm`）。 | 仅时间；用两个 single 拼范围。 | single 默认提交 ISO 日期字符串，range 提交 `{start,end}`；showTime 时提交 `yyyy-MM-dd HH:mm[:ss]`（range 两端同格式）；清除和预设按当前契约触发 onChange。 |
 | InputGroup | 一个 Input 与同一字段的前后缀 Text / Button，例如金额前缀 `¥` 或复制按钮。 | 拼接多个独立字段；替代 Flex 做页面布局；替代 Form / Field 承担值收集、标签或校验。 | 组内 Input 仍有 name / rules；前后缀与输入语义相关；focus 环和 disabled 表现覆盖整个组合而非错位。 |
 | Form | 一组字段需要统一值收集、rules 校验和提交，包括搜索、独立页、内嵌面板和抽屉。 | Form 内再嵌 Form；散放控件后用 setState 攒草稿和手写必填校验；没有提交语义的即时 ChipFilter 快筛。 | `name` 值进入 event，失败 rules 阻止请求，submit Button 写 `submit: true`，成功和失败都有可见结果。 |
 | Field | 需要统一 label / required / labelHint / description / error 与控件间距；纵向标准字段和 data-list 搜索结构按骨架使用。 | 作为普通页面分区容器；用 Text / Label 另拼一份标签；重复展示 rules 已有错误。 | 每个控件最多一个可见 label；错误位于对应字段下；error 出现时相邻字段不重叠，间距仍由 Field / Form 承担。 |
