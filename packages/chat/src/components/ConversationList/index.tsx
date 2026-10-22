@@ -1,3 +1,4 @@
+import { useI18n } from '@pactor-app/runtime';
 import { useMemo, useState, type CSSProperties } from 'react';
 
 import { cn } from '../../lib/utils.js';
@@ -36,6 +37,7 @@ export interface ConversationListProps {
  * 会话的存储与加载由调用方负责。
  */
 export function ConversationList({ items = [], activeId, searchable, onSelect, onDelete, className, style }: ConversationListProps) {
+  const { t } = useI18n();
   const [innerActive, setInnerActive] = useState<string>();
   const [keyword, setKeyword] = useState('');
   const active = activeId ?? innerActive;
@@ -67,7 +69,7 @@ export function ConversationList({ items = [], activeId, searchable, onSelect, o
           <input
             data-slot="conversation-list-search"
             value={keyword}
-            placeholder="搜索会话"
+            placeholder={t('pactor.chat.conversation.search')}
             className="h-8 w-full rounded-md border border-border bg-background pr-2 pl-7 text-sm outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
             onChange={(event) => setKeyword(event.target.value)}
           />
@@ -95,7 +97,7 @@ export function ConversationList({ items = [], activeId, searchable, onSelect, o
             <button
               type="button"
               data-slot="conversation-list-delete"
-              aria-label={`删除 ${item.title}`}
+              aria-label={t('pactor.chat.conversation.delete', { title: item.title })}
               className="shrink-0 text-muted-foreground opacity-0 group-hover:opacity-100 hover:text-destructive"
               onClick={(event) => {
                 event.stopPropagation();
@@ -108,7 +110,9 @@ export function ConversationList({ items = [], activeId, searchable, onSelect, o
         </div>
       ))}
       {filtered.length === 0 ? (
-        <div className="px-2 py-4 text-center text-sm text-muted-foreground">无匹配会话</div>
+        <div className="px-2 py-4 text-center text-sm text-muted-foreground">
+          {t('pactor.chat.conversation.empty')}
+        </div>
       ) : null}
     </div>
   );

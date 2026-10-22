@@ -2,6 +2,7 @@ import type { CSSProperties } from 'react';
 
 import {
   UserMenu as ShadcnUserMenu,
+  type LanguageOption,
   type ThemePreference,
   type UserMenuUser,
   type UserStatus,
@@ -42,6 +43,17 @@ export interface UserMenuProps {
   defaultTheme?: ThemePreference;
   /** 显示内联浅色 / 深色 / 跟随系统切换（缺省 true），选择即应用到页面 */
   showTheme?: boolean;
+  /** 受控语言偏好（BCP 47，如 zh-CN / en-US） */
+  language?: string;
+  /** 非受控初始语言；缺省读取 localStorage 的 pactor.locale，
+   *  未设置时取 languages 首项（缺省列表即 zh-CN） */
+  defaultLanguage?: string;
+  /** 显示“切换语言”子菜单（缺省 false） */
+  showLanguage?: boolean;
+  /** 可选语言列表（缺省 中文 / English）；追加 { value, label } 即可扩展语言 */
+  languages?: LanguageOption[];
+  /** 语言选择回调；非受控时选择同时写入 localStorage 的 pactor.locale */
+  onLanguageChange?: (language: string) => void;
   /** 640px 以上在头像右侧展示姓名与箭头（sidebar 形态缺省开启） */
   showName?: boolean;
   /** 面板相对触发器的对齐方式（缺省 end） */
@@ -81,8 +93,10 @@ export interface UserMenuProps {
  *
  * 主题与状态选择保持菜单展开并分别经 onThemeChange / onStatusChange
  * 上报；主题选择同时写入 documentElement 的 data-pactor-theme（system
- * 移除属性）；账户入口经 onSelect 传出 value；onSignOut 返回 Promise 时
- * 退出项显示进度，Promise 落定后关闭。
+ * 移除属性）；showLanguage 时“切换语言”项以右侧子菜单展开 languages
+ * 列表（缺省 中文 / English，可扩展）单选，选择经 onLanguageChange 上报；
+ * 账户入口经 onSelect 传出 value；
+ * onSignOut 返回 Promise 时退出项显示进度，Promise 落定后关闭。
  *
  * `variant="sidebar"` 用于 Sidebar 的 sidebarFooter 槽：展开时整行
  * 展示头像 / 姓名 / 箭头，Sidebar 折叠为 icon rail 时自动收成头像圆钮。
@@ -95,6 +109,11 @@ export function UserMenu({
   theme,
   defaultTheme,
   showTheme,
+  language,
+  defaultLanguage,
+  showLanguage,
+  languages,
+  onLanguageChange,
   showName,
   align,
   side,
@@ -127,6 +146,11 @@ export function UserMenu({
       theme={theme}
       defaultTheme={defaultTheme}
       showTheme={showTheme}
+      language={language}
+      defaultLanguage={defaultLanguage}
+      showLanguage={showLanguage}
+      languages={languages}
+      onLanguageChange={onLanguageChange}
       showName={showName}
       align={align}
       side={side}

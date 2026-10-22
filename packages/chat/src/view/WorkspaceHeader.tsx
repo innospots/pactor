@@ -1,3 +1,4 @@
+import { useI18n } from '@pactor-app/runtime';
 import { Icon } from '@pactor-app/ui/components';
 import { useEffect, useRef, useState, type ReactNode } from 'react';
 
@@ -66,6 +67,7 @@ export function WorkspaceHeader({
   onClear,
   onTitleChange,
 }: WorkspaceHeaderProps): ReactNode {
+  const { t } = useI18n();
   const hasActions = headerActions !== undefined && headerActions.length > 0;
 
   // 可编辑标题（spec: 可编辑标题）：提交成功后的本地展示覆盖；
@@ -96,7 +98,11 @@ export function WorkspaceHeader({
   };
 
   const handleExport = (): void => {
-    downloadMessagesAsMarkdown(displayTitle ?? 'chat', store.getMessages());
+    downloadMessagesAsMarkdown(displayTitle ?? 'chat', store.getMessages(), {
+      user: t('pactor.chat.export.user'),
+      assistant: t('pactor.chat.export.assistant'),
+      system: t('pactor.chat.export.system'),
+    });
     onExport?.();
   };
 
@@ -141,8 +147,8 @@ export function WorkspaceHeader({
         key="export"
         type="button"
         className="pactor-chat-icon-button"
-        title="导出 Markdown"
-        aria-label="导出 Markdown"
+        title={t('pactor.chat.header.exportMarkdown')}
+        aria-label={t('pactor.chat.header.exportMarkdown')}
         onClick={handleExport}
       >
         <Icon name="download" size={15} />
@@ -153,8 +159,12 @@ export function WorkspaceHeader({
         key="theme"
         type="button"
         className="pactor-chat-icon-button"
-        title={theme === 'dark' ? '切换为浅色' : '切换为深色'}
-        aria-label="切换明暗主题"
+        title={
+          theme === 'dark'
+            ? t('pactor.header.themeToLight')
+            : t('pactor.header.themeToDark')
+        }
+        aria-label={t('pactor.header.themeToggle')}
         onClick={handleTheme}
       >
         {theme === 'dark' ? <Icon name="sun" size={15} /> : <Icon name="moon" size={15} />}
@@ -165,8 +175,8 @@ export function WorkspaceHeader({
         key="clear"
         type="button"
         className="pactor-chat-icon-button"
-        title="清空会话"
-        aria-label="清空会话"
+        title={t('pactor.chat.header.clear')}
+        aria-label={t('pactor.chat.header.clear')}
         onClick={handleClear}
       >
         <Icon name="trash" size={15} />
@@ -180,7 +190,7 @@ export function WorkspaceHeader({
         className="pactor-chat-workspace__title-input"
         value={draft}
         autoFocus
-        aria-label="编辑标题"
+        aria-label={t('pactor.chat.header.editTitle')}
         onChange={(event) => setDraft(event.target.value)}
         onBlur={commitTitle}
         onKeyDown={(event) => {
@@ -195,7 +205,7 @@ export function WorkspaceHeader({
       <button
         type="button"
         className="pactor-chat-workspace__title pactor-chat-workspace__title--editable"
-        title="点击编辑标题"
+        title={t('pactor.chat.header.clickToEditTitle')}
         onClick={() => {
           setDraft(displayTitle ?? '');
           setEditing(true);
@@ -226,6 +236,14 @@ export function WorkspaceHeader({
               fragment={buildHeaderActionsFragment({
                 actions: headerActions,
                 theme,
+                labels: {
+                  export: t('pactor.chat.header.exportMarkdown'),
+                  theme:
+                    theme === 'dark'
+                      ? t('pactor.header.themeToLight')
+                      : t('pactor.header.themeToDark'),
+                  clear: t('pactor.chat.header.clear'),
+                },
               })}
               fallback={headerActions.map((action) => actionButtons[action])}
             />

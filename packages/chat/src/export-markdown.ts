@@ -13,10 +13,14 @@ const ROLE_LABELS: Record<ChatRole, string> = {
   system: '系统',
 };
 
+/** 导出角色标题（缺省中文，宿主可按当前语言覆盖） */
+export type ExportRoleLabels = Record<ChatRole, string>;
+
 /** 序列化消息列表为 Markdown 文本 */
 export function serializeMessages(
   title: string,
   messages: ChatMessage[],
+  roleLabels: ExportRoleLabels = ROLE_LABELS,
 ): string {
   const lines: string[] = [`# ${title}`, ''];
   for (const message of messages) {
@@ -32,7 +36,7 @@ export function serializeMessages(
     if (!content) {
       continue;
     }
-    lines.push(`## ${ROLE_LABELS[message.role]}`, '', content, '');
+    lines.push(`## ${roleLabels[message.role]}`, '', content, '');
   }
   return lines.join('\n');
 }
@@ -41,8 +45,9 @@ export function serializeMessages(
 export function downloadMessagesAsMarkdown(
   title: string,
   messages: ChatMessage[],
+  roleLabels?: ExportRoleLabels,
 ): void {
-  const markdown = serializeMessages(title, messages);
+  const markdown = serializeMessages(title, messages, roleLabels);
   const blob = new Blob([markdown], { type: 'text/markdown;charset=utf-8' });
   const url = URL.createObjectURL(blob);
   const anchor = document.createElement('a');

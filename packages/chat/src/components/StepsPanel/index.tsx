@@ -1,3 +1,4 @@
+import { useI18n } from '@pactor-app/runtime';
 import type { CSSProperties } from 'react';
 
 import { cn } from '../../lib/utils.js';
@@ -31,21 +32,26 @@ export interface StepsPanelProps {
  * 样式全走语义令牌（深浅色/换肤自适应）。
  */
 export function StepsPanel({
-  title = '执行步骤',
+  title,
   steps = [],
-  emptyText = '当前会话暂无执行步骤',
+  emptyText,
   className,
   style,
 }: StepsPanelProps) {
+  const { t } = useI18n();
+  const resolvedTitle = title ?? t('pactor.chat.steps.title');
+  const resolvedEmptyText = emptyText ?? t('pactor.chat.steps.empty');
   return (
     <div
       data-slot="steps-panel"
       className={cn('px-3.5 py-3 text-foreground', className)}
       style={style}
     >
-      <div className="mb-1 text-[13px] font-semibold">{title}</div>
+      <div className="mb-1 text-[13px] font-semibold">{resolvedTitle}</div>
       {steps.length === 0 ? (
-        <div className="py-4 text-center text-[13px] text-muted-foreground">{emptyText}</div>
+        <div className="py-4 text-center text-[13px] text-muted-foreground">
+          {resolvedEmptyText}
+        </div>
       ) : (
         <ol>
           {steps.map((step, index) => {

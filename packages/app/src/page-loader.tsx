@@ -1,5 +1,5 @@
 import type { RouteContext } from '@pactor-app/router';
-import { PageRuntimeView, type PageRuntime } from '@pactor-app/runtime';
+import { PageRuntimeView, useI18n, type PageRuntime } from '@pactor-app/runtime';
 import { useEffect, useState } from 'react';
 
 import type { PactorApplicationHandle } from './application.js';
@@ -32,6 +32,7 @@ type PageState =
  *   interaction host 内部实现）。
  */
 export function DslPageLoader({ app, pageId, route }: DslPageLoaderProps) {
+  const { t } = useI18n();
   const [state, setState] = useState<PageState>({ status: 'loading' });
   const [retryTick, setRetryTick] = useState(0);
 
@@ -80,11 +81,11 @@ export function DslPageLoader({ app, pageId, route }: DslPageLoaderProps) {
     return (
       <ResultView
         className="pactor-app-page-load-error"
-        title="页面加载失败"
+        title={t('pactor.page.loadFailed')}
         subTitle={state.error.message}
         extra={
           <PrimaryButton onClick={() => setRetryTick((n) => n + 1)}>
-            重试
+            {t('pactor.page.retry')}
           </PrimaryButton>
         }
       />

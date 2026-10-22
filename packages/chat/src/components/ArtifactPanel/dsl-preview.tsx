@@ -5,6 +5,7 @@ import {
   createRuntimeContext,
   DslRenderer,
   registerBuiltinActions,
+  useI18n,
   useRenderer,
   type RuntimeContext,
 } from '@pactor-app/runtime';
@@ -26,13 +27,16 @@ export const ARTIFACT_DENIED_TYPE = 'ChatDenied';
 
 /** 白名单外组件的受控占位（注册名 ChatDenied，见 guardArtifactDsl） */
 export function ArtifactDenied({ deniedType }: { deniedType?: string }) {
+  const { t } = useI18n();
   return (
     <div
       data-slot="artifact-denied"
       data-denied-type={deniedType}
       className="rounded-md border border-dashed border-border p-3 text-sm text-muted-foreground"
     >
-      该组件不允许在产物预览中使用{deniedType ? `：${deniedType}` : ''}
+      {deniedType
+        ? t('pactor.chat.dsl.denied', { type: deniedType })
+        : t('pactor.chat.dsl.deniedNoType')}
     </div>
   );
 }
@@ -114,7 +118,7 @@ export function useArtifactPreviewRuntime(
  * 降级为占位块，不击穿面板。
  */
 class ArtifactDslGuard extends Component<
-  { children: ReactNode },
+  { children: ReactNode; failedText: string },
   { failed: boolean }
 > {
   override state = { failed: false };
@@ -133,7 +137,7 @@ class ArtifactDslGuard extends Component<
         data-slot="artifact-denied"
         className="rounded-md border border-dashed border-border p-3 text-sm text-muted-foreground"
       >
-        DSL 产物渲染失败，已降级展示
+        {this.props.failedText}
       </div>
     ) : (
       this.props.children
@@ -157,6 +161,7 @@ export function ArtifactDslContent({
   runtime: ArtifactPreviewRuntime | undefined;
   style?: CSSProperties;
 }): ReactNode {
+  const { t } = useI18n();
   const node =
     typeof content === 'object' &&
     content !== null &&
@@ -171,14 +176,16 @@ export function ArtifactDslContent({
         className="rounded-md border border-dashed border-border p-3 text-sm text-muted-foreground"
         style={style}
       >
-        {node ? 'DSL 预览不可用（未注入 Safe Registry）' : 'DSL 产物内容无效'}
+        {node
+          ? t('pactor.chat.dsl.previewUnavailable')
+          : t('pactor.chat.dsl.invalid')}
       </div>
     );
   }
   const guarded = guardArtifactDsl(node, runtime.context.components);
   return (
     <DslRenderer context={runtime.context} engine={runtime.engine}>
-      <ArtifactDslGuard>
+      <ArtifactDslGuard failedText={t('pactor.chat.dsl.renderFailed')}>
         <ArtifactDslNode node={guarded} />
       </ArtifactDslGuard>
     </DslRenderer>

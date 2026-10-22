@@ -1,3 +1,4 @@
+import { useI18n } from '@pactor-app/runtime';
 import { Icon } from '@pactor-app/ui/components';
 import { MarkdownRenderer } from '@pactor-app/markdown';
 import { useEffect, useRef, useState, type ReactNode } from 'react';
@@ -61,10 +62,10 @@ function usePinnedCollapse(autoOpen: boolean): {
   return { open, toggle };
 }
 
-const STREAMING_STATUS_TEXT: Record<StreamingMode, string> = {
-  reasoning: '正在思考…',
-  tool: '正在调用工具…',
-  responding: '正在生成回复…',
+const STREAMING_STATUS_KEYS: Record<StreamingMode, string> = {
+  reasoning: 'pactor.chat.activity.thinking',
+  tool: 'pactor.chat.activity.tool',
+  responding: 'pactor.chat.activity.generating',
 };
 
 /** 状态头文案：流式期间按模式，结束后定格完成态 */
@@ -72,17 +73,22 @@ function statusText(
   message: ChatMessage,
   mode: StreamingMode | null,
   toolCount: number,
+  t: (key: string, params?: Record<string, unknown>) => string,
 ): string {
   if (message.status === 'pending' || message.status === 'streaming') {
-    return mode ? STREAMING_STATUS_TEXT[mode] : '正在响应…';
+    return mode
+      ? t(STREAMING_STATUS_KEYS[mode])
+      : t('pactor.chat.activity.responding');
   }
   if (message.status === 'error') {
-    return '出错了';
+    return t('pactor.chat.activity.error');
   }
   if (message.status === 'cancelled') {
-    return '已停止';
+    return t('pactor.chat.activity.stopped');
   }
-  return toolCount > 0 ? `已完成 · ${toolCount} 个工具调用` : '已完成';
+  return toolCount > 0
+    ? t('pactor.chat.activity.doneWithTools', { count: toolCount })
+    : t('pactor.chat.activity.done');
 }
 
 /** 秒级已用时长：流式期间每秒钟跳动，结束后定格（interval 清除即冻结） */
@@ -134,9 +140,9 @@ function summarizeArgs(args: unknown): string {
   }
 }
 
-function formatDetail(value: unknown): string {
+function formatDetail(value: unknown, fallback = ''): string {
   if (value === undefined) {
-    return '（无返回）';
+    return fallback;
   }
   if (typeof value === 'string') {
     return value;
@@ -150,6 +156,7 @@ function formatDetail(value: unknown): string {
 
 /** 单行可展开轨迹条目：名称 + 参数摘要 + 状态图标；展开显示参数与结果/错误 */
 function TraceRow({ entry }: { entry: ToolTraceEntry }) {
+  const { t } = useI18n();
   const [open, setOpen] = useState(false);
   const summary = summarizeArgs(entry.args);
   return (
@@ -186,8 +193,11 @@ function TraceRow({ entry }: { entry: ToolTraceEntry }) {
           )}
           <pre className="pactor-chat-trace__entry-detail">
             {entry.status === 'failed'
-              ? (entry.error ?? '执行失败')
-              : formatDetail(entry.result)}
+              ? (entry.error ?? t('pactor.chat.activity.failed'))
+              : formatDetail(
+                  entry.result,
+                  t('pactor.chat.activity.noReturn'),
+                )}
           </pre>
         </div>
       )}
@@ -207,6 +217,7 @@ function ThinkingCard({
   part: ThinkingPart;
   answerPhase: boolean;
 }) {
+  const { t } = useI18n();
   const partStreaming = part.status === 'streaming';
   const shown = useThrottledValue(part.content, 120, partStreaming);
   const { open, toggle } = usePinnedCollapse(partStreaming && !answerPhase);
@@ -232,7 +243,7 @@ function ThinkingCard({
             <Icon name="brain" size={13} />
           )}
         </span>
-        <span>思考过程</span>
+        <span>{t('pactor.chat.activity.thinkingProcess')}</span>
       </button>
       {open && (
         <div className="pactor-chat-thinking__body">
@@ -248,6 +259,7 @@ function ThinkingCard({
 }
 
 export function ActivityTrace({ message }: ActivityTraceProps) {
+  const { t } = useI18n();
   const mode = detectStreamingMode(message);
   const streaming =
     message.status === 'pending' || message.status === 'streaming';
@@ -285,7 +297,7 @@ export function ActivityTrace({ message }: ActivityTraceProps) {
           streaming ? ' pactor-chat-trace__status-text--breathing' : ''
         }`}
       >
-        {statusText(message, mode, entries.length)}
+        {statusText(message, mode, entries.length, t)}
       </span>
       <span className="pactor-chat-trace__elapsed">{elapsed}s</span>
       {collapsible && (

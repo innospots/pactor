@@ -1,3 +1,4 @@
+import { useI18n } from '@pactor-app/runtime';
 import type { CSSProperties, ReactNode } from 'react';
 
 /**
@@ -19,6 +20,7 @@ export function BootstrapSpinner({
 }: {
   style?: CSSProperties;
 }): ReactNode {
+  const { t } = useI18n();
   return (
     <div className="pactor-app-spin" style={{ ...centerStyle, ...style }}>
       <svg
@@ -26,7 +28,7 @@ export function BootstrapSpinner({
         height="32"
         viewBox="0 0 32 32"
         role="status"
-        aria-label="加载中"
+        aria-label={t('pactor.app.loading')}
       >
         <circle
           cx="16"

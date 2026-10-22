@@ -1,3 +1,4 @@
+import { useI18n } from '@pactor-app/runtime';
 import { Icon } from '@pactor-app/ui/components';
 import {
   Button,
@@ -53,11 +54,13 @@ const itemClass =
 export function WorkspaceSwitcher({
   value = '',
   options = [],
-  placeholder = '选择工作空间',
+  placeholder,
   onChange,
   onCreate,
   className,
 }: WorkspaceSwitcherProps) {
+  const { t } = useI18n();
+  const resolvedPlaceholder = placeholder ?? t('pactor.chat.workspace.select');
   const [open, setOpen] = useState(false);
   const [keyword, setKeyword] = useState('');
   // 新建的空间追加在内部（props options 为初始列表，不可变）
@@ -106,7 +109,7 @@ export function WorkspaceSwitcher({
           }
         >
           <Icon name="folder" />
-          <span className="max-w-56 truncate">{value || placeholder}</span>
+          <span className="max-w-56 truncate">{value || resolvedPlaceholder}</span>
           <Icon name="chevron-down" />
         </PopoverTrigger>
         <PopoverContent
@@ -121,7 +124,7 @@ export function WorkspaceSwitcher({
               <Icon name="search" size="sm" />
             </InputGroupAddon>
             <InputGroupInput
-              placeholder="搜索工作空间"
+              placeholder={t('pactor.chat.workspace.search')}
               className="h-8 px-2 text-[13px] md:text-[13px]"
               value={keyword}
               onChange={(event) => setKeyword(event.target.value)}
@@ -132,7 +135,7 @@ export function WorkspaceSwitcher({
           <div className="mt-1 max-h-[390px] overflow-y-auto py-0.5">
             {filtered.length === 0 ? (
               <div className="py-4 text-center text-[13px] text-muted-foreground">
-                无匹配的工作空间
+                {t('pactor.chat.workspace.empty')}
               </div>
             ) : (
               filtered.map((item) => (
@@ -164,7 +167,7 @@ export function WorkspaceSwitcher({
             }}
           >
             <Icon name="plus" />
-            <span>新建工作空间</span>
+            <span>{t('pactor.chat.workspace.create')}</span>
           </button>
 
           {/* 已选时提供「不使用工作空间」清除项 */}
@@ -175,7 +178,7 @@ export function WorkspaceSwitcher({
               onClick={() => select('')}
             >
               <Icon name="x-circle" />
-              <span>不使用工作空间</span>
+              <span>{t('pactor.chat.workspace.none')}</span>
             </button>
           ) : null}
         </PopoverContent>
@@ -184,10 +187,10 @@ export function WorkspaceSwitcher({
       <Dialog open={createOpen} onOpenChange={setCreateOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>新建工作空间</DialogTitle>
+            <DialogTitle>{t('pactor.chat.workspace.create')}</DialogTitle>
           </DialogHeader>
           <Input
-            placeholder="请输入工作空间名称"
+            placeholder={t('pactor.chat.workspace.namePlaceholder')}
             value={newName}
             autoFocus
             onChange={(event) => setNewName(event.target.value)}
@@ -199,10 +202,10 @@ export function WorkspaceSwitcher({
           />
           <DialogFooter>
             <Button variant="outline" onClick={() => setCreateOpen(false)}>
-              取消
+              {t('pactor.overlay.cancel')}
             </Button>
             <Button onClick={createWorkspace} disabled={!newName.trim()}>
-              创建
+              {t('pactor.chat.workspace.createAction')}
             </Button>
           </DialogFooter>
         </DialogContent>

@@ -3,6 +3,7 @@ import {
 } from '../components/ArtifactPanel/index.js';
 import { downloadArtifact } from '../components/ArtifactPanel/download.js';
 import type { ArtifactViewers } from '../components/ArtifactPanel/index.js';
+import { useI18n } from '@pactor-app/runtime';
 import { useEffect, useRef, useState, type ReactNode } from 'react';
 
 import type { ChatArtifact } from '../artifact.js';
@@ -96,12 +97,16 @@ export function ArtifactPanel({
   artifactViewers,
   className,
 }: ArtifactPanelProps): ReactNode {
+  const { t } = useI18n();
   // 目录列表视图状态：受控持有（ui onViewChange 回写），chrome 标题栏
   // 内部组件经 ChatPanelContext 共享
   const [view, setView] = useState<'content' | 'list'>('content');
   const activeId = activeArtifactId ?? artifact?.id;
   const hasArtifacts = artifacts !== undefined && artifacts.length > 0;
-  const headerTitle = view === 'list' ? '产物目录' : (artifact?.title ?? '产出物');
+  const headerTitle =
+    view === 'list'
+      ? t('pactor.chat.artifact.list')
+      : (artifact?.title ?? t('pactor.chat.artifact.output'));
 
   // chrome 桥接（spec: chat-on-ui-components）：chat.panelClose /
   // panelToggleList / panelDownload 内建动作 → 回调（refs 保证最新；

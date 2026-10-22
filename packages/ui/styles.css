@@ -1031,6 +1031,9 @@
   .min-w-\[8rem\] {
     min-width: 8rem;
   }
+  .min-w-\[9\.5rem\] {
+    min-width: 9.5rem;
+  }
   .flex-1 {
     flex: 1;
   }
@@ -1944,6 +1947,9 @@
   }
   .pl-6 {
     padding-left: calc(var(--spacing) * 6);
+  }
+  .pl-8 {
+    padding-left: calc(var(--spacing) * 8);
   }
   .text-center {
     text-align: center;

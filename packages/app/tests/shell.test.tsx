@@ -34,6 +34,9 @@ afterEach(async () => {
 function createStandardApp() {
   return createPactorApplication({
     appId: 'risk-admin',
+    // 显式 zh-CN：jsdom 的 navigator.language 为 en-US，内建文案断言
+    // 需固定到中文（locale 解析链见 locale-switching.test）
+    locale: 'zh-CN',
     loader: new StaticDslLoader({
       bootstrap: createBootstrap(),
       pages: standardPages,
@@ -107,7 +110,7 @@ describe('application-shell：页面加载与错误处理', () => {
     };
 
     setUrl('/broken');
-    app = createPactorApplication({ appId: 'risk-admin', loader });
+    app = createPactorApplication({ appId: 'risk-admin', locale: 'zh-CN', loader });
     await mountApp(app);
 
     await screen.findByText('页面加载失败');
@@ -133,6 +136,7 @@ describe('application-shell：页面加载与错误处理', () => {
     setUrl('/boom');
     app = createPactorApplication({
       appId: 'risk-admin',
+      locale: 'zh-CN',
       loader: new StaticDslLoader({
         bootstrap: createBootstrap({
           menus: [

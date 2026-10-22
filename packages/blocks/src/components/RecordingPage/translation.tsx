@@ -1,3 +1,4 @@
+import { useI18n } from '@pactor-app/runtime';
 import { useState } from 'react';
 
 import { Avatar } from '@pactor-app/ui/components';
@@ -28,6 +29,7 @@ export function RecordingTranslationView({
   onLanguageChange,
   onTranslationAction,
 }: RecordingTranslationViewProps) {
+  const { t } = useI18n();
   const sourceLanguages = translation.sourceLanguages ?? [];
   const targetLanguages = translation.targetLanguages ?? [];
   const dialogEnabled = sourceLanguages.length > 0 || targetLanguages.length > 0;
@@ -100,7 +102,11 @@ export function RecordingTranslationView({
               <Text text={segment.source} />
             </div>
             <div className="flex min-w-0 flex-col gap-3">
-              <Text text={translation.targetLabel ?? '译文'} strong size="small" />
+              <Text
+                text={translation.targetLabel ?? t('pactor.recording.translation.target')}
+                strong
+                size="small"
+              />
               <Text text={segment.target} />
             </div>
           </div>
@@ -122,15 +128,26 @@ export function RecordingTranslationView({
       {dialogEnabled ? (
         <RecordingLanguageDialog
           open={dialogOpen}
-          title={translation.languageDialogTitle ?? '选择翻译语言'}
-          sourceTitle={translation.sourceLanguagesTitle ?? '原文语言识别'}
-          targetTitle={translation.targetLanguagesTitle ?? '译文语言选择'}
+          title={
+            translation.languageDialogTitle ??
+            t('pactor.recording.translation.dialogTitle')
+          }
+          sourceTitle={
+            translation.sourceLanguagesTitle ??
+            t('pactor.recording.translation.sourceTitle')
+          }
+          targetTitle={
+            translation.targetLanguagesTitle ??
+            t('pactor.recording.translation.targetTitle')
+          }
           sourceLanguages={sourceLanguages}
           targetLanguages={targetLanguages}
           source={draftSource}
           target={draftTarget}
-          cancelLabel={translation.cancelLabel ?? '取消'}
-          confirmLabel={translation.confirmLabel ?? '确定'}
+          cancelLabel={translation.cancelLabel ?? t('pactor.overlay.cancel')}
+          confirmLabel={
+            translation.confirmLabel ?? t('pactor.alertDialog.confirm')
+          }
           onSelectSource={setDraftSource}
           onSelectTarget={setDraftTarget}
           onCancel={() => setDialogOpen(false)}

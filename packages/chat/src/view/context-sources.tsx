@@ -1,3 +1,4 @@
+import { useI18n } from '@pactor-app/runtime';
 import { useEffect, useState, type ReactNode } from 'react';
 
 import type { ChatContextItem, ChatContextSource } from '../model.js';
@@ -95,6 +96,7 @@ export function ContextSourceList({
   cache,
   onSelect,
 }: ContextSourceListProps): ReactNode {
+  const { t } = useI18n();
   const [resolutions, setResolutions] = useState<SourceResolution[]>([]);
 
   // 解析全部 source：静态 items 同步就绪，service 引用异步（缓存命中
@@ -161,7 +163,9 @@ export function ContextSourceList({
             </div>
           )}
           {resolution.status === 'loading' && (
-            <div className="pactor-chat-source-list__hint">加载中…</div>
+            <div className="pactor-chat-source-list__hint">
+              {t('pactor.table.loading')}
+            </div>
           )}
           {resolution.status === 'error' && (
             <div className="pactor-chat-source-list__error" role="alert">
@@ -182,7 +186,9 @@ export function ContextSourceList({
       ))}
       {totalMatched === 0 &&
         groups.every(({ resolution }) => resolution.status === 'ready') && (
-          <div className="pactor-chat-source-list__hint">无匹配项</div>
+          <div className="pactor-chat-source-list__hint">
+            {t('pactor.chat.mentions.empty')}
+          </div>
         )}
     </div>
   );

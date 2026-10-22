@@ -2,7 +2,7 @@ import { createI18nContext } from '@pactor-app/core';
 import { resolveLayout } from '@pactor-app/ui/layout';
 import { resolveRoute } from '@pactor-app/router';
 import { DynamicDslRoute, useReactRouterBridge } from '@pactor-app/router/react';
-import { I18nContextProvider } from '@pactor-app/runtime';
+import { I18nContextProvider, useI18n } from '@pactor-app/runtime';
 import {
   useEffect,
   useState,
@@ -44,6 +44,8 @@ type BootstrapState =
  * Routes path="*" → DynamicDslRoute（404/403）。
  */
 export function Application({ app }: ApplicationProps) {
+  // bootstrap 阶段尚无 Provider：useI18n 回退内置默认文案（缺省 zh-CN）
+  const { t } = useI18n();
   const [state, setState] = useState<BootstrapState>({ status: 'loading' });
   const [retryTick, setRetryTick] = useState(0);
 
@@ -80,11 +82,11 @@ export function Application({ app }: ApplicationProps) {
     return (
       <ResultView
         className="pactor-app-bootstrap-error"
-        title="应用启动失败"
+        title={t('pactor.app.startFailed')}
         subTitle={state.error.message}
         extra={
           <PrimaryButton onClick={() => setRetryTick((n) => n + 1)}>
-            重试
+            {t('pactor.page.retry')}
           </PrimaryButton>
         }
       />
@@ -246,22 +248,24 @@ function pageLoaderKey(
 
 /** 404：路径未命中任何菜单页 */
 function NotFoundPage(): ReactNode {
+  const { t } = useI18n();
   return (
     <ResultView
       className="pactor-app-not-found"
       title="404"
-      subTitle="页面不存在或尚未注册"
+      subTitle={t('pactor.app.pageNotFound')}
     />
   );
 }
 
 /** 403：命中页面但无访问权限 */
 function ForbiddenPage(): ReactNode {
+  const { t } = useI18n();
   return (
     <ResultView
       className="pactor-app-forbidden"
       title="403"
-      subTitle="没有访问该页面的权限"
+      subTitle={t('pactor.app.forbidden')}
     />
   );
 }
