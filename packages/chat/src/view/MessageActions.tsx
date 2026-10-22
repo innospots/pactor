@@ -1,4 +1,5 @@
 import { Icon } from '@pactor-app/ui/components';
+import { useI18n } from '@pactor-app/runtime';
 import { useEffect, useRef, useState } from 'react';
 
 import type {
@@ -65,6 +66,7 @@ const BUILTIN_ACTION_DEFAULTS: Record<
   BuiltinMessageAction,
   {
     label: string;
+    labelKey: string;
     icon: string;
     roles: Array<'user' | 'assistant'>;
     visibleWhen: 'completed' | 'error' | 'always';
@@ -72,24 +74,28 @@ const BUILTIN_ACTION_DEFAULTS: Record<
 > = {
   copy: {
     label: '复制',
+    labelKey: 'pactor.chat.message.copy',
     icon: 'copy',
     roles: ['assistant'],
     visibleWhen: 'completed',
   },
   regenerate: {
     label: '重新生成',
+    labelKey: 'pactor.chat.message.regenerate',
     icon: 'rotate-ccw',
     roles: ['assistant'],
     visibleWhen: 'completed',
   },
   retry: {
     label: '重试',
+    labelKey: 'pactor.chat.message.retry',
     icon: 'rotate-ccw',
     roles: ['assistant'],
     visibleWhen: 'error',
   },
   edit: {
     label: '编辑',
+    labelKey: 'pactor.chat.message.edit',
     icon: 'pencil',
     roles: ['user'],
     visibleWhen: 'completed',
@@ -118,6 +124,7 @@ const DEFAULT_ACTIONS: BuiltinMessageAction[] = [
 /** 配置项归一化：字符串项 → { id, builtin }；内建字段并入默认描述（决策 D1/D2） */
 export function resolveMessageActions(
   actions: Array<BuiltinMessageAction | ChatMessageAction> | undefined,
+  translate?: (key: string) => string,
 ): ResolvedMessageAction[] {
   return (actions ?? DEFAULT_ACTIONS).map((item) => {
     const config: ChatMessageAction =
@@ -128,7 +135,10 @@ export function resolveMessageActions(
     return {
       id: config.id,
       builtin: config.builtin,
-      label: config.label ?? defaults?.label ?? config.id,
+      label:
+        config.label ??
+        (defaults && translate ? translate(defaults.labelKey) : defaults?.label) ??
+        config.id,
       icon: config.icon ?? defaults?.icon,
       roles: config.roles ?? defaults?.roles ?? ['assistant'],
       visibleWhen: config.visibleWhen ?? defaults?.visibleWhen ?? 'completed',
@@ -176,6 +186,7 @@ export function MessageActions({
   callService,
   onMessageAction,
 }: MessageActionsProps) {
+  const { t } = useI18n();
   const [copied, setCopied] = useState(false);
 
   // chrome DSL 路径的 per-instance dispatcher（spec: chat-chrome-dsl）：
@@ -209,7 +220,7 @@ export function MessageActions({
 
   // 可见性集中求值（决策 D2）：roles 过滤角色 → visibleWhen 匹配状态 →
   // 内建附加约束（执行前提不满足不渲染，不可被配置覆盖）
-  const visibleActions = resolveMessageActions(actions).filter((action) => {
+  const visibleActions = resolveMessageActions(actions, t).filter((action) => {
     if (!action.roles.includes(message.role as 'user' | 'assistant')) {
       return false;
     }
@@ -269,7 +280,9 @@ export function MessageActions({
 
   const buttons = visibleActions.map((action) => {
     const copiedFeedback = action.builtin === 'copy' && copied;
-    const label = copiedFeedback ? '已复制' : action.label;
+    const label = copiedFeedback
+      ? t('pactor.chat.message.copied')
+      : action.label;
     const iconName = copiedFeedback ? 'check' : action.icon;
     return (
       <button
@@ -300,6 +313,7 @@ export function MessageActions({
         fragment={buildMessageActionsFragment({
           actions: visibleActions,
           copied,
+          copiedLabel: t('pactor.chat.message.copied'),
           token: message.id,
         })}
         fallback={buttons}

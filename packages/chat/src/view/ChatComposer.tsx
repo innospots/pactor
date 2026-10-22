@@ -2,6 +2,7 @@ import {
   Composer as UiComposer,
 } from '../components/Composer/index.js';
 import { type AttachmentItemData } from '../components/Attachment/index.js';
+import { useI18n } from '@pactor-app/runtime';
 import { useLayoutEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 
 import type {
@@ -130,7 +131,7 @@ export function Composer({
   onSend,
   streaming = false,
   onStop,
-  placeholder = '输入消息，Enter 发送，Shift+Enter 换行',
+  placeholder,
   disabled = false,
   attachments,
   onAttachmentsChange,
@@ -150,6 +151,9 @@ export function Composer({
   composerFooter,
   hideToolbar = false,
 }: ComposerProps) {
+  const { t } = useI18n();
+  const resolvedPlaceholder =
+    placeholder ?? t('pactor.chat.composer.placeholder');
   const [text, setText] = useState('');
   const [dragOver, setDragOver] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -360,7 +364,7 @@ export function Composer({
       )}
       <UiComposer
         value={text}
-        placeholder={placeholder}
+        placeholder={resolvedPlaceholder}
         disabled={disabled}
         streaming={streaming}
         onStop={onStop}
@@ -428,7 +432,7 @@ export function Composer({
   return (
     <ChromeSlot
       fragment={buildComposerFragment({
-        placeholder,
+        placeholder: resolvedPlaceholder,
         disabled,
         hasFooter: composerFooter !== undefined && composerFooter !== null,
         hideToolbar,

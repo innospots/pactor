@@ -1,3 +1,4 @@
+import { useI18n } from '@pactor-app/runtime';
 import { Plus, X } from 'lucide-react';
 import { useCallback, useMemo } from 'react';
 
@@ -84,26 +85,22 @@ const OPERATORS: OperatorDef[] = [
 /** 不需要值输入的操作符 */
 const NO_VALUE_OPERATORS = ['HASVAL', 'NOHASVAL', 'TRUE', 'FALSE'];
 
-/** 操作符展示文案（内置中文默认文案，缺省回退为操作符原值） */
-const OPERATOR_LABELS: Record<string, string> = {
-  EQUAL: '等于',
-  GREATER: '大于',
-  GREATER_EQUAL: '大于等于',
-  LESS: '小于',
-  LESS_EQUAL: '小于等于',
-  UNEQUAL: '不等于',
-  BETWEEN: '范围',
-  HASVAL: '有值',
-  NOHASVAL: '无值',
-  TRUE: '为真',
-  FALSE: '为假',
-  IN: '包含',
-  NOT_IN: '不包含',
+/** 操作符展示文案 key（缺省回退为操作符原值） */
+const OPERATOR_LABEL_KEYS: Record<string, string> = {
+  EQUAL: 'pactor.operator.equal',
+  GREATER: 'pactor.operator.greater',
+  GREATER_EQUAL: 'pactor.operator.greaterEqual',
+  LESS: 'pactor.operator.less',
+  LESS_EQUAL: 'pactor.operator.lessEqual',
+  UNEQUAL: 'pactor.operator.unequal',
+  BETWEEN: 'pactor.operator.between',
+  HASVAL: 'pactor.operator.hasValue',
+  NOHASVAL: 'pactor.operator.noValue',
+  TRUE: 'pactor.operator.isTrue',
+  FALSE: 'pactor.operator.isFalse',
+  IN: 'pactor.operator.contains',
+  NOT_IN: 'pactor.operator.notContains',
 };
-
-function operatorLabel(operator: string): string {
-  return OPERATOR_LABELS[operator] ?? operator;
-}
 
 /** 按字段类型获取可用操作符 */
 export function getOperatorsByFieldType(fieldType?: string): OperatorDef[] {
@@ -417,6 +414,11 @@ export function FieldCondition({
   disabled,
   size = 'middle',
 }: FieldConditionProps) {
+  const { t } = useI18n();
+  const translateOperator = (operator: string): string => {
+    const key = OPERATOR_LABEL_KEYS[operator];
+    return key ? t(key) : operator;
+  };
   const data: FieldConditionValue = useMemo(
     () =>
       value?.children?.length
@@ -469,9 +471,9 @@ export function FieldCondition({
               rawFields={fields}
               disabled={disabled}
               size={size}
-              fieldPlaceholder="选择字段"
-              operatorLabel={operatorLabel}
-              inputPlaceholder="请输入值"
+              fieldPlaceholder={t('pactor.fieldCondition.selectField')}
+              operatorLabel={translateOperator}
+              inputPlaceholder={t('pactor.fieldCondition.valuePlaceholder')}
               showDelete={group.children.length > 1}
               onChange={(patch) => updateItem(itemIndex, patch)}
               onDelete={() =>
@@ -496,7 +498,7 @@ export function FieldCondition({
           }
         >
           <Plus className="h-3.5 w-3.5" />
-          添加条件
+          {t('pactor.condition.add')}
         </Button>
       )}
     </div>
@@ -516,6 +518,7 @@ function RelationButton({
   disabled?: boolean;
   onToggle: () => void;
 }) {
+  const { t } = useI18n();
   if (!visible) return <div className="w-8 shrink-0" />;
   return (
     <button
@@ -531,7 +534,9 @@ function RelationButton({
           : 'bg-warning/10 text-warning',
       )}
     >
-      {relation === 'AND' ? '且' : '或'}
+      {relation === 'AND'
+        ? t('pactor.fieldCondition.and')
+        : t('pactor.fieldCondition.or')}
     </button>
   );
 }
@@ -565,6 +570,7 @@ function ConditionRow({
   onChange,
   onDelete,
 }: ConditionRowProps) {
+  const { t } = useI18n();
   const dataType = item.field.dataType;
   const termValue = item.term.value;
   const operators = getOperatorsByFieldType(dataType);
@@ -617,7 +623,7 @@ function ConditionRow({
           size={CONTROL_SIZE_SELECT_ATTR[size]}
           className={cn('w-28 shrink-0', CONTROL_SIZE_TRIGGER_TEXT[size])}
         >
-          <SelectValue placeholder="请选择" />
+          <SelectValue placeholder={t('pactor.select.placeholder')} />
         </SelectTrigger>
         <SelectContent>
           {operators.map((op) => (

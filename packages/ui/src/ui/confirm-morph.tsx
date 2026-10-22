@@ -1,3 +1,4 @@
+import { useI18n } from '@pactor-app/runtime';
 import { type VariantProps } from 'class-variance-authority';
 import { CheckIcon, RotateCcwIcon } from 'lucide-react';
 import * as React from 'react';
@@ -55,10 +56,10 @@ function ConfirmMorph({
   variant,
   size,
   label,
-  confirmLabel = '确认',
+  confirmLabel,
   pendingLabel,
-  successLabel = '已完成',
-  undoLabel = '撤销',
+  successLabel,
+  undoLabel,
   confirmVariant = 'destructive',
   confirmTimeout = 3000,
   resetDelay = 1500,
@@ -69,6 +70,10 @@ function ConfirmMorph({
   type = 'button',
   ...props
 }: ConfirmMorphProps) {
+  const { t } = useI18n();
+  const resolvedConfirmLabel = confirmLabel ?? t('pactor.overlay.confirm');
+  const resolvedSuccessLabel = successLabel ?? t('pactor.confirmMorph.success');
+  const resolvedUndoLabel = undoLabel ?? t('pactor.confirmMorph.undo');
   const [state, setState] = React.useState<ConfirmMorphState>('idle');
   const timerRef = React.useRef<ReturnType<typeof setTimeout> | null>(null);
   // 代际标记：忽略过期 Promise 回写（如超时回退后迟到的 resolve）
@@ -147,7 +152,7 @@ function ConfirmMorph({
 
   const segments: { key: ConfirmMorphState; content: React.ReactNode }[] = [
     { key: 'idle', content: label },
-    { key: 'confirming', content: confirmLabel },
+    { key: 'confirming', content: resolvedConfirmLabel },
     {
       key: 'pending',
       content: (
@@ -162,7 +167,7 @@ function ConfirmMorph({
       content: (
         <>
           <CheckIcon />
-          <span>{successLabel}</span>
+          <span>{resolvedSuccessLabel}</span>
         </>
       ),
     },
@@ -171,7 +176,7 @@ function ConfirmMorph({
       content: (
         <>
           <RotateCcwIcon />
-          <span>{undoLabel}</span>
+          <span>{resolvedUndoLabel}</span>
         </>
       ),
     },

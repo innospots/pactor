@@ -1,3 +1,4 @@
+import { useI18n } from '@pactor-app/runtime';
 import { useState } from 'react';
 
 import { cn } from '../../lib/utils.js';
@@ -74,7 +75,7 @@ export type {
  * 弹层）/ share.tsx（分享 Popover + 分享对话框）/ types.ts（公开类型）。
  */
 export function RecordingPage({
-  listTitle = '录音记录列表',
+  listTitle,
   selectLabel,
   selectDoneLabel,
   selectAllLabel,
@@ -96,14 +97,14 @@ export function RecordingPage({
   processingText,
   processingHint,
   onProcessingClick,
-  newRecordingLabel = '开始新录音',
+  newRecordingLabel,
   onNewRecording,
   groups = [],
   activeRecordingId,
   defaultActiveRecordingId,
   onSelectRecording,
   listWidth = 300,
-  emptyText = '暂无录音',
+  emptyText,
   title,
   meta,
   editLabel,
@@ -165,6 +166,11 @@ export function RecordingPage({
   className,
   style,
 }: RecordingPageProps) {
+  const { t } = useI18n();
+  const resolvedListTitle = listTitle ?? t('pactor.recording.listTitle');
+  const resolvedNewRecordingLabel =
+    newRecordingLabel ?? t('pactor.recording.newRecording');
+  const resolvedEmptyText = emptyText ?? t('pactor.recording.empty');
   // 受控 prop 优先，缺省内部维护（同 ChatPage artifactOpen 模式）
   const filterControlled = activeFilterKey !== undefined;
   const [innerFilter, setInnerFilter] = useState(
@@ -253,7 +259,7 @@ export function RecordingPage({
       style={style}
     >
       <RecordingList
-        listTitle={listTitle}
+        listTitle={resolvedListTitle}
         selectLabel={selectLabel}
         selectDoneLabel={selectDoneLabel}
         selectAllLabel={selectAllLabel}
@@ -279,13 +285,13 @@ export function RecordingPage({
         processingText={processingText}
         processingHint={processingHint}
         onProcessingClick={onProcessingClick}
-        newRecordingLabel={newRecordingLabel}
+        newRecordingLabel={resolvedNewRecordingLabel}
         onNewRecording={onNewRecording}
         groups={groups}
         activeRecordingId={activeRec}
         onSelectRecording={setActiveRec}
         listWidth={listWidth}
-        emptyText={emptyText}
+        emptyText={resolvedEmptyText}
       />
       <RecordingDetail
         title={title}

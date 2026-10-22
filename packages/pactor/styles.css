@@ -5,7 +5,7 @@
  */
 
 /* ============================================================
- * @pactor-app/ui@1.54.2（构建产物内联，源顺序：ui → blocks → chart → chat）
+ * @pactor-app/ui@1.54.4（构建产物内联，源顺序：ui → blocks → chart → chat）
  * ============================================================ */
 /*! tailwindcss v4.3.3 | MIT License | https://tailwindcss.com */
 @layer properties;
@@ -1080,7 +1080,7 @@
 }
 
 /* ============================================================
- * @pactor-app/blocks@1.54.2（构建产物内联，源顺序：ui → blocks → chart → chat）
+ * @pactor-app/blocks@1.54.4（构建产物内联，源顺序：ui → blocks → chart → chat）
  * ============================================================ */
 /*! tailwindcss v4.3.3 | MIT License | https://tailwindcss.com */
 @layer properties;
@@ -1410,7 +1410,7 @@
 }
 
 /* ============================================================
- * @pactor-app/chart@1.54.2（构建产物内联，源顺序：ui → blocks → chart → chat）
+ * @pactor-app/chart@1.54.4（构建产物内联，源顺序：ui → blocks → chart → chat）
  * ============================================================ */
 /*! tailwindcss v4.3.3 | MIT License | https://tailwindcss.com */
 @layer properties;
@@ -1554,7 +1554,7 @@
 }
 
 /* ============================================================
- * @pactor-app/chat@1.54.2（构建产物内联，源顺序：ui → blocks → chart → chat）
+ * @pactor-app/chat@1.54.4（构建产物内联，源顺序：ui → blocks → chart → chat）
  * ============================================================ */
 /*! tailwindcss v4.3.3 | MIT License | https://tailwindcss.com */
 @layer properties;
@@ -4110,6 +4110,9 @@ button.pactor-chat-trace__header:hover, .pactor-chat-trace__entry-header:hover, 
 .min-w-\[8rem\] {
     min-width: 8rem;
   }
+.min-w-\[9\.5rem\] {
+    min-width: 9.5rem;
+  }
 .flex-1 {
     flex: 1;
   }
@@ -5023,6 +5026,9 @@ button.pactor-chat-trace__header:hover, .pactor-chat-trace__entry-header:hover, 
   }
 .pl-6 {
     padding-left: calc(var(--spacing) * 6);
+  }
+.pl-8 {
+    padding-left: calc(var(--spacing) * 8);
   }
 .text-center {
     text-align: center;
@@ -6629,6 +6635,9 @@ button.pactor-chat-trace__header:hover, .pactor-chat-trace__entry-header:hover, 
   }
 .pointer-events-none {
     pointer-events: none;
+  }
+.collapse {
+    visibility: collapse;
   }
 .visible {
     visibility: visible;

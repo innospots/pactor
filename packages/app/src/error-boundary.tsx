@@ -1,3 +1,4 @@
+import { useI18n } from '@pactor-app/runtime';
 import { Component, type ErrorInfo, type ReactNode } from 'react';
 
 import { PrimaryButton, ResultView } from './feedback.js';
@@ -10,12 +11,17 @@ interface PageErrorBoundaryState {
   error: Error | null;
 }
 
+interface PageErrorBoundaryImplProps extends PageErrorBoundaryProps {
+  title: string;
+  retryLabel: string;
+}
+
 /**
- * PageErrorBoundary（决策 D3）：捕获页面 DSL 渲染期异常，
- * 显示受控错误页（可重试重新渲染），应用外壳不崩溃、不白屏。
+ * 错误页渲染实现（class）：错误边界必须为 class 组件，
+ * 文案经 props 注入（由函数包装层从 i18n 解析）。
  */
-export class PageErrorBoundary extends Component<
-  PageErrorBoundaryProps,
+class PageErrorBoundaryImpl extends Component<
+  PageErrorBoundaryImplProps,
   PageErrorBoundaryState
 > {
   override state: PageErrorBoundaryState = { error: null };
@@ -34,11 +40,11 @@ export class PageErrorBoundary extends Component<
       return (
         <ResultView
           className="pactor-app-page-render-error"
-          title="页面渲染异常"
+          title={this.props.title}
           subTitle={error.message}
           extra={
             <PrimaryButton onClick={() => this.setState({ error: null })}>
-              重试
+              {this.props.retryLabel}
             </PrimaryButton>
           }
         />
@@ -46,4 +52,20 @@ export class PageErrorBoundary extends Component<
     }
     return this.props.children;
   }
+}
+
+/**
+ * PageErrorBoundary（决策 D3）：捕获页面 DSL 渲染期异常，
+ * 显示受控错误页（可重试重新渲染），应用外壳不崩溃、不白屏。
+ */
+export function PageErrorBoundary({ children }: PageErrorBoundaryProps): ReactNode {
+  const { t } = useI18n();
+  return (
+    <PageErrorBoundaryImpl
+      title={t('pactor.app.renderError')}
+      retryLabel={t('pactor.page.retry')}
+    >
+      {children}
+    </PageErrorBoundaryImpl>
+  );
 }

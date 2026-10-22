@@ -1,5 +1,7 @@
 import type { CSSProperties } from 'react';
 
+import { useI18n } from '@pactor-app/runtime';
+
 import { cn } from '../../lib/utils.js';
 import { Icon } from '@pactor-app/ui/components';
 
@@ -32,6 +34,7 @@ const statusMeta: Record<AgentStatusType, { icon: string; className: string; spi
  * 与通用分类 Status 的差异：面向智能体执行过程（含耗时语义）。
  */
 export function AgentStatus({ status = 'running', text, elapsed, className, style }: AgentStatusProps) {
+  const { t } = useI18n();
   const meta = statusMeta[status];
   return (
     <div
@@ -46,7 +49,7 @@ export function AgentStatus({ status = 'running', text, elapsed, className, styl
       {text ? <span data-slot="agent-status-text">{text}</span> : null}
       {elapsed !== undefined ? (
         <span data-slot="agent-status-elapsed" className="text-xs text-muted-foreground">
-          已用时 {elapsed}s
+          {t('pactor.chat.agentStatus.elapsed', { seconds: elapsed })}
         </span>
       ) : null}
     </div>

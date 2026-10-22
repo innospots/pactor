@@ -1,3 +1,4 @@
+import { useI18n } from '@pactor-app/runtime';
 import { LogOut, SunMoon } from 'lucide-react';
 import type { ReactNode } from 'react';
 
@@ -14,8 +15,10 @@ import { themes, userStatuses } from './options.js';
 import { PresenceDot } from './presence-dot.js';
 import type { ThemePreference, UserMenuUser, UserStatus } from './types.js';
 
-function initialsOf(name: string): string {
-  return name
+// 用户资料可能异步就绪（如切换语言触发页面运行时重建的首帧），
+// name 暂缺时按空串回退，避免整页渲染崩溃
+function initialsOf(name: string | undefined | null): string {
+  return (name ?? '')
     .trim()
     .split(/\s+/)
     .slice(0, 2)
@@ -258,17 +261,19 @@ export function PreferenceRows({
   onStatusChange: (status: UserStatus) => void;
   onThemeChange: (theme: ThemePreference) => void;
 }) {
+  const { t } = useI18n();
   if (!showStatus && !showTheme) return null;
   return (
     <>
       {showStatus ? (
         <Segmented
-          label="状态"
+          label={t('pactor.userMenu.status')}
           icon={<PresenceDot status={status} />}
           value={status}
           onChange={onStatusChange}
           options={userStatuses.map((option) => ({
             ...option,
+            label: t(option.labelKey),
             icon: (
               <PresenceDot
                 status={option.value}
@@ -281,11 +286,14 @@ export function PreferenceRows({
       ) : null}
       {showTheme ? (
         <Segmented
-          label="主题"
+          label={t('pactor.userMenu.theme')}
           icon={<SunMoon size={16} strokeWidth={1.75} aria-hidden="true" />}
           value={theme}
           onChange={onThemeChange}
-          options={themes}
+          options={themes.map((option) => ({
+            ...option,
+            label: t(option.labelKey),
+          }))}
           sheet={sheet}
         />
       ) : null}
@@ -301,6 +309,7 @@ export function SignOutContent({
   signingOut: boolean;
   keys?: string[];
 }) {
+  const { t } = useI18n();
   return (
     <>
       <RowIcon>
@@ -315,7 +324,9 @@ export function SignOutContent({
           key={signingOut ? 'signing' : 'idle'}
           className="inline-block animate-in whitespace-nowrap fade-in-0 duration-150 motion-reduce:animate-none"
         >
-          {signingOut ? '正在退出' : '退出登录'}
+          {signingOut
+            ? t('pactor.userMenu.signingOut')
+            : t('pactor.userMenu.signOut')}
         </span>
       </span>
       {keys ? <Keys keys={keys} /> : null}
