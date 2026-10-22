@@ -1,6 +1,7 @@
 import type { PageDsl } from '@pactor-app/core';
 import { describe, expect, it } from 'vitest';
 
+import { ResourceError } from './errors.js';
 import {
   parseBootstrapResource,
   parseEnvelope,
@@ -80,6 +81,103 @@ describe('parseEnvelope（资源 Envelope 模型）', () => {
 
     expect(resource.schema).toEqual(pageDsl);
     expect(resource.version).toBe(1);
+  });
+
+  it('旧响应（无 representation / localization）：新字段为 undefined，行为不变', () => {
+    const resource = parseEnvelope(
+      {
+        id: 'customer-list',
+        resourceType: 'page',
+        version: 103,
+        dslVersion: '1.0',
+        schema: pageDsl,
+      },
+      { id: 'customer-list', resourceType: 'page' },
+    );
+
+    expect(resource.representation).toBeUndefined();
+    expect(resource.localization).toBeUndefined();
+  });
+
+  it('localized envelope：representation 与 localization 透传保留', () => {
+    const localization = {
+      locale: 'en-US',
+      defaultLocale: 'zh-CN',
+      source: 'url-query',
+      explicit: true,
+      release: 'rel-20261022-01',
+      bundleVersions: { common: '12', user: '7' },
+    };
+    const resource = parseEnvelope(
+      {
+        id: 'customer-list',
+        resourceType: 'page',
+        representation: 'localized',
+        version: 8,
+        dslVersion: '1.0',
+        localization,
+        schema: pageDsl,
+      },
+      { id: 'customer-list', resourceType: 'page' },
+    );
+
+    expect(resource.representation).toBe('localized');
+    expect(resource.localization).toEqual(localization);
+  });
+
+  it('source envelope：representation 为 source 时保留且不要求 localization', () => {
+    const resource = parseEnvelope(
+      {
+        id: 'customer-list',
+        resourceType: 'page',
+        representation: 'source',
+        version: 1,
+        dslVersion: '1.0',
+        schema: pageDsl,
+      },
+      { id: 'customer-list', resourceType: 'page' },
+    );
+
+    expect(resource.representation).toBe('source');
+    expect(resource.localization).toBeUndefined();
+  });
+
+  it('representation 为未知值时忽略（宽容解析）', () => {
+    const resource = parseEnvelope(
+      { representation: 'draft', schema: pageDsl },
+      { id: 'customer-list', resourceType: 'page' },
+    );
+
+    expect(resource.representation).toBeUndefined();
+  });
+
+  it('representation 为 localized 但缺少 localization.locale 时抛 ResourceError', () => {
+    expect(() =>
+      parseEnvelope(
+        {
+          representation: 'localized',
+          localization: { defaultLocale: 'zh-CN' },
+          schema: pageDsl,
+        },
+        { id: 'customer-list', resourceType: 'page' },
+      ),
+    ).toThrow(ResourceError);
+
+    expect(() =>
+      parseEnvelope(
+        { representation: 'localized', schema: pageDsl },
+        { id: 'customer-list', resourceType: 'page' },
+      ),
+    ).toThrow(ResourceError);
+  });
+
+  it('localization 非对象时忽略（宽容解析）', () => {
+    const resource = parseEnvelope(
+      { localization: 'en-US', schema: pageDsl },
+      { id: 'customer-list', resourceType: 'page' },
+    );
+
+    expect(resource.localization).toBeUndefined();
   });
 });
 
