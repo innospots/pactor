@@ -75,4 +75,5 @@ export {
 export type { PageRuntime } from './page/page-runtime.js';
 
 // 工具
-export { resolveDeep } from './utils/resolve.js';
+export { LocalizationProtocolError, resolveDeep } from './utils/resolve.js';
+export type { LocalizationMode, ResolveDeepOptions } from './utils/resolve.js';

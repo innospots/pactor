@@ -67,6 +67,13 @@ describe('createRuntimeContext', () => {
     expect(adapter.check(['a', 'b'])).toBe(true);
   });
 
+  it('localizationMode 缺省为 client，可显式指定 server', () => {
+    expect(createRuntimeContext().localizationMode).toBe('client');
+    expect(
+      createRuntimeContext({ localizationMode: 'server' }).localizationMode,
+    ).toBe('server');
+  });
+
   it('默认 HttpAdapter 基于全局 fetch', async () => {
     const fetchMock = vi.fn(
       async () =>
