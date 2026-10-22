@@ -19,6 +19,29 @@ export interface HttpDslResourceLoaderOptions {
   adapter?: HttpAdapter;
   /** 缓存实例，默认内置 MemoryResourceCache */
   cache?: MemoryResourceCache<DslResourceEnvelope<unknown>>;
+  /** 当前请求语言：请求 URL 追加 `?locale=`，缓存键扩展为 `id@version@locale` */
+  locale?: string;
+  /** 发布版本：可得时与 locale 一并纳入缓存键 */
+  release?: string;
+}
+
+/**
+ * 为 URL 追加 locale 查询参数：已有 locale 参数（含重复）统一替换为新值，不追加；
+ * 其他查询参数与 hash 保持不变。不依赖 DOM/Node 的 URLSearchParams。
+ */
+export function withLocaleParam(url: string, locale: string): string {
+  const hashIndex = url.indexOf('#');
+  const hash = hashIndex >= 0 ? url.slice(hashIndex) : '';
+  const withoutHash = hashIndex >= 0 ? url.slice(0, hashIndex) : url;
+  const queryIndex = withoutHash.indexOf('?');
+  const path = queryIndex >= 0 ? withoutHash.slice(0, queryIndex) : withoutHash;
+  const query = queryIndex >= 0 ? withoutHash.slice(queryIndex + 1) : '';
+  // 剔除全部已有 locale 参数，再以新值追加，实现「替换而非追加」
+  const kept = query
+    .split('&')
+    .filter((pair) => pair !== '' && pair.split('=')[0] !== 'locale');
+  kept.push(`locale=${encodeURIComponent(locale)}`);
+  return `${path}?${kept.join('&')}${hash}`;
 }
 
 type ResourceKind = 'page' | 'fragment';
@@ -26,7 +49,8 @@ type ResourceKind = 'page' | 'fragment';
 /**
  * 基于 HTTP 的 DSL 资源加载器：
  * - 端点 `{baseUrl}/pages/{id}` / `{baseUrl}/fragments/{id}` / `{baseUrl}/bootstrap`
- * - 内存缓存：`id@version` 键；版本表来自 bootstrap 的 pageVersions 或手动 updateVersions
+ * - 内存缓存：`id@version` 键；配置 locale 后扩展为 `id@version@locale`（release 可得时一并纳入），版本表来自 bootstrap 的 pageVersions 或手动 updateVersions
+ * - 配置 locale 后请求 URL 追加 `?locale=`（已有 locale 参数则替换，不重复追加）
  * - 无版本表时退化为 ETag 条件请求 / 普通缓存
  * - 同资源并发加载复用同一进行中 Promise（inflight 去重）
  */
@@ -34,6 +58,8 @@ export class HttpDslResourceLoader implements DslResourceLoader {
   private readonly baseUrl: string;
   private readonly adapter: HttpAdapter;
   private readonly cache: MemoryResourceCache<DslResourceEnvelope<unknown>>;
+  private readonly locale?: string;
+  private readonly release?: string;
   private versions: Record<string, number> = {};
   private readonly inflight = new Map<string, Promise<unknown>>();
 
@@ -42,6 +68,8 @@ export class HttpDslResourceLoader implements DslResourceLoader {
     this.adapter = options.adapter ?? createFetchAdapter();
     this.cache =
       options.cache ?? new MemoryResourceCache<DslResourceEnvelope<unknown>>();
+    this.locale = options.locale;
+    this.release = options.release;
   }
 
   loadPage(pageId: string): Promise<PageResource> {
@@ -53,7 +81,7 @@ export class HttpDslResourceLoader implements DslResourceLoader {
   }
 
   async loadBootstrap(): Promise<BootstrapResource> {
-    const response = await this.request(`${this.baseUrl}/bootstrap`);
+    const response = await this.request(this.urlFor(`${this.baseUrl}/bootstrap`));
     const bootstrap = parseBootstrapResource(response.data);
     // bootstrap 携带的版本表自动更新缓存版本控制
     if (bootstrap.pageVersions) {
@@ -102,12 +130,14 @@ export class HttpDslResourceLoader implements DslResourceLoader {
     id: string,
   ): Promise<T> {
     const resourceType: DslResourceEnvelope<unknown>['resourceType'] = kind;
-    const url = `${this.baseUrl}/${kind === 'page' ? 'pages' : 'fragments'}/${encodeURIComponent(id)}`;
+    const url = this.urlFor(
+      `${this.baseUrl}/${kind === 'page' ? 'pages' : 'fragments'}/${encodeURIComponent(id)}`,
+    );
     const version = this.versions[id];
 
     if (version !== undefined) {
-      // 有版本表：键为 id@version，命中直接返回，未命中普通 GET
-      const key = `${id}@${version}`;
+      // 有版本表：键为 id@version（含 locale/release 上下文），命中直接返回，未命中普通 GET
+      const key = this.cacheKey(id, version);
       const hit = this.cache.get(key);
       if (hit) {
         return hit.value as T;
@@ -137,13 +167,52 @@ export class HttpDslResourceLoader implements DslResourceLoader {
       return cached.value as T;
     }
     const resource = parseEnvelope(response.data, { id, resourceType });
-    // 以响应中的真实版本缓存；旧版本条目一并清理，避免同 id 多版本堆积
-    this.invalidate(id);
-    this.cache.set(`${id}@${resource.version}`, {
+    // 以响应中的真实版本缓存；当前上下文下的旧版本条目一并清理，避免同 id 多版本堆积
+    for (const key of this.keysOf(id)) {
+      if (this.matchesContext(key, id)) {
+        this.cache.delete(key);
+      }
+    }
+    this.cache.set(this.cacheKey(id, resource.version), {
       value: resource,
       etag: response.etag ?? resource.etag,
     });
     return resource as T;
+  }
+
+  /** 为请求 URL 追加当前 locale 上下文（未配置时原样返回） */
+  private urlFor(url: string): string {
+    return this.locale ? withLocaleParam(url, this.locale) : url;
+  }
+
+  /**
+   * 缓存键：无 locale 时保持旧键形 `id@version`；
+   * 配置 locale 后扩展为 `id@version@locale`，release 可得时再追加 `@release`。
+   */
+  private cacheKey(id: string, version: number): string {
+    return `${id}@${version}${this.contextSuffix()}`;
+  }
+
+  private contextSuffix(): string {
+    let suffix = '';
+    if (this.locale) {
+      suffix += `@${this.locale}`;
+    }
+    if (this.release) {
+      suffix += `@${this.release}`;
+    }
+    return suffix;
+  }
+
+  /** 判断缓存键是否属于当前 locale/release 上下文 */
+  private matchesContext(key: string, id: string): boolean {
+    const rest = key.slice(`${id}@`.length);
+    const suffix = this.contextSuffix();
+    if (!rest.endsWith(suffix)) {
+      return false;
+    }
+    const versionPart = rest.slice(0, rest.length - suffix.length);
+    return /^\d+$/.test(versionPart);
   }
 
   private async request(
@@ -164,9 +233,12 @@ export class HttpDslResourceLoader implements DslResourceLoader {
     return response;
   }
 
-  /** 查找该 id 的任一缓存条目（无版本表时用于 ETag / 普通缓存） */
+  /** 查找该 id 在当前 locale/release 上下文下的缓存条目（无版本表时用于 ETag / 普通缓存） */
   private findCached(id: string) {
     for (const key of this.keysOf(id)) {
+      if (!this.matchesContext(key, id)) {
+        continue;
+      }
       const entry = this.cache.get(key);
       if (entry) {
         return entry;
