@@ -1,3 +1,4 @@
+import { useI18n } from '@pactor-app/runtime';
 import { type VariantProps } from 'class-variance-authority';
 import { ArrowUpRightIcon, ChevronDownIcon } from 'lucide-react';
 import * as React from 'react';
@@ -67,10 +68,12 @@ function SplitButton({
   children,
   options,
   onSelect,
-  triggerLabel = '更多选项',
+  triggerLabel,
   type = 'button',
   ...props
 }: SplitButtonProps) {
+  const { t } = useI18n();
+  const resolvedTriggerLabel = triggerLabel ?? t('pactor.splitButton.moreOptions');
   return (
     <ButtonGroup data-slot="split-button" className={cn(className)} style={style}>
       <Button
@@ -89,7 +92,7 @@ function SplitButton({
               variant={variant}
               size={size}
               disabled={disabled}
-              aria-label={triggerLabel}
+              aria-label={resolvedTriggerLabel}
               className="px-2"
             >
               <ChevronDownIcon />

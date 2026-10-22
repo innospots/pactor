@@ -1,8 +1,9 @@
+import { useI18n } from '@pactor-app/runtime';
 import { ChevronDown } from 'lucide-react';
 import type { ComponentPropsWithRef } from 'react';
 
 import { cn } from '../../lib/utils.js';
-import { statusLabel } from './options.js';
+import { statusLabelKey } from './options.js';
 import { Face } from './parts.js';
 import type { UserStatus, UserMenuUser } from './types.js';
 
@@ -41,6 +42,7 @@ export function UserMenuTrigger({
   ref: forwardedRef,
   ...rest
 }: UserMenuTriggerProps) {
+  const { t } = useI18n();
   // 合并外部 ref（DropdownMenuTrigger render 注入）与调用方 ref
   function setRef(node: HTMLButtonElement | null): void {
     setTriggerRef(node);
@@ -87,7 +89,14 @@ export function UserMenuTrigger({
             ),
         triggerClassName,
       )}
-      aria-label={`账户菜单，${user.name}${showStatus ? `，${statusLabel(status)}` : ''}`}
+      aria-label={
+        showStatus
+          ? t('pactor.userMenu.triggerWithStatus', {
+              name: user.name,
+              status: t(statusLabelKey(status)),
+            })
+          : t('pactor.userMenu.trigger', { name: user.name })
+      }
       {...(sheet
         ? {
             'aria-haspopup': 'menu' as const,

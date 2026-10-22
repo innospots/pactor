@@ -1,3 +1,4 @@
+import { useI18n } from '@pactor-app/runtime';
 import { Plus, Trash2 } from 'lucide-react';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
@@ -135,26 +136,22 @@ const NUMERIC_OPT: ConditionOpt[] = [
 const NO_VALUE_OPT: ConditionOpt[] = ['NULL', 'HASVAL', 'NOTNULL'];
 const MULTI_VALUE_OPT: ConditionOpt[] = ['IN', 'NOT_IN'];
 
-/** 操作符展示文案（内置中文默认文案，缺省回退为操作符原值） */
-const OPERATOR_LABELS: Record<string, string> = {
-  GREATER: '大于',
-  GREATER_EQUAL: '大于等于',
-  LESS_EQUAL: '小于等于',
-  LESS: '小于',
-  EQUAL: '等于',
-  IN: '包含',
-  NOT_IN: '不包含',
-  UNEQUAL: '不等于',
-  LIKE: '类似',
-  NULL: '为空',
-  HASVAL: '有值',
-  NOTNULL: '不为空',
-  BETWEEN: '范围',
+/** 操作符展示文案 key（缺省回退为操作符原值） */
+const OPERATOR_LABEL_KEYS: Record<string, string> = {
+  GREATER: 'pactor.operator.greater',
+  GREATER_EQUAL: 'pactor.operator.greaterEqual',
+  LESS_EQUAL: 'pactor.operator.lessEqual',
+  LESS: 'pactor.operator.less',
+  EQUAL: 'pactor.operator.equal',
+  IN: 'pactor.operator.contains',
+  NOT_IN: 'pactor.operator.notContains',
+  UNEQUAL: 'pactor.operator.unequal',
+  LIKE: 'pactor.operator.like',
+  NULL: 'pactor.operator.empty',
+  HASVAL: 'pactor.operator.hasValue',
+  NOTNULL: 'pactor.operator.notEmpty',
+  BETWEEN: 'pactor.operator.between',
 };
-
-function operatorLabel(operator: string): string {
-  return OPERATOR_LABELS[operator] ?? operator;
-}
 
 let _key = 0;
 const nextKey = () => ++_key;
@@ -202,6 +199,11 @@ export interface RuleConfigProps {
 // ─── Main component ───────────────────────────────────────────────────────────
 
 export function RuleConfig({ value, onChange, disabled, size = 'middle' }: RuleConfigProps) {
+  const { t } = useI18n();
+  const operatorLabel = (op: string): string => {
+    const key = OPERATOR_LABEL_KEYS[op];
+    return key ? t(key) : op;
+  };
   const rawConditions = value?.ruleConditions;
   // 后端数据的条件没有 key（或 key 重复），统一补齐唯一 key；
   // 否则按 key 匹配更新时所有条件都会命中（undefined === undefined），
@@ -300,7 +302,9 @@ export function RuleConfig({ value, onChange, disabled, size = 'middle' }: RuleC
     return (
       <div className="space-y-2 text-sm">
         <div className="flex items-center gap-2 pb-2 border-b">
-          <span className="text-muted-foreground">权重</span>
+          <span className="text-muted-foreground">
+            {t('pactor.ruleConfig.weight')}
+          </span>
           <span className="font-medium">{initScore}</span>
         </div>
         {conditions.map((condition) => (
@@ -312,7 +316,9 @@ export function RuleConfig({ value, onChange, disabled, size = 'middle' }: RuleC
               </span>
             )}
             <span className="text-muted-foreground">
-              评分: {condition.score ?? '-'}
+              {t('pactor.ruleConfig.scoreValue', {
+                score: condition.score ?? '-',
+              })}
             </span>
           </div>
         ))}
@@ -324,7 +330,7 @@ export function RuleConfig({ value, onChange, disabled, size = 'middle' }: RuleC
     <div className="space-y-2">
       {/* Weight */}
       <div className="flex items-center gap-1 pb-2 border-b gap-2">
-        <span className="text-sm shrink-0">权重</span>
+        <span className="text-sm shrink-0">{t('pactor.ruleConfig.weight')}</span>
         <Input
           type="number"
           className={cn('w-48', CONTROL_SIZE_BOX[size])}
@@ -333,7 +339,7 @@ export function RuleConfig({ value, onChange, disabled, size = 'middle' }: RuleC
           step={1}
           value={scoreText}
           disabled={disabled}
-          placeholder="请输入权重"
+          placeholder={t('pactor.ruleConfig.weightPlaceholder')}
           onChange={(e) => handleScoreTextChange(e.target.value)}
           onBlur={handleScoreBlur}
         />
@@ -363,7 +369,7 @@ export function RuleConfig({ value, onChange, disabled, size = 'middle' }: RuleC
           onClick={handleAdd}
         >
           <Plus className="h-3.5 w-3.5" />
-          添加条件
+          {t('pactor.condition.add')}
         </Button>
       )}
     </div>
@@ -395,6 +401,11 @@ function ConditionRow({
   onScoreChange,
   onDelete,
 }: ConditionRowProps) {
+  const { t } = useI18n();
+  const operatorLabel = (op: string): string => {
+    const key = OPERATOR_LABEL_KEYS[op];
+    return key ? t(key) : op;
+  };
   const { opt, value, score } = condition;
   const missingValue = !disabled && !!issue?.missingValue;
   const missingScore = !disabled && !!issue?.missingScore;
@@ -452,7 +463,7 @@ function ConditionRow({
           CONTROL_SIZE_BOX[size],
           missingScore && 'border-destructive',
         )}
-        placeholder="评分"
+        placeholder={t('pactor.ruleConfig.score')}
         value={score ?? ''}
         disabled={disabled}
         aria-invalid={missingScore || undefined}
@@ -481,11 +492,11 @@ function ConditionRow({
       {!disabled && issue && (
         <p className="text-xs text-destructive">
           {[
-            missingValue ? '请填写取值' : null,
-            missingScore ? '请填写评分' : null,
+            missingValue ? t('pactor.ruleConfig.valueRequired') : null,
+            missingScore ? t('pactor.ruleConfig.scoreRequired') : null,
           ]
             .filter(Boolean)
-            .join('；')}
+            .join(t('pactor.ruleConfig.issueSeparator'))}
         </p>
       )}
     </div>
@@ -578,6 +589,7 @@ function TagInput({
   size: ControlSize;
   onChange: (tags: string[]) => void;
 }) {
+  const { t } = useI18n();
   const [input, setInput] = useState('');
 
   const addTag = () => {
@@ -614,7 +626,7 @@ function TagInput({
         <input
           className="flex-1 min-w-16 bg-transparent outline-none placeholder:text-muted-foreground"
           value={input}
-          placeholder="输入后按 Enter"
+          placeholder={t('pactor.ruleConfig.tagPlaceholder')}
           onChange={(e) => setInput(e.target.value)}
           onKeyDown={(e) => {
             if (e.key === 'Enter') {

@@ -1,5 +1,5 @@
 import type { DslNode } from '@pactor-app/core';
-import { useRenderer } from '@pactor-app/runtime';
+import { useI18n, useRenderer } from '@pactor-app/runtime';
 import { isValidElement, useEffect, useRef, useState, type ReactNode } from 'react';
 
 import { cn } from '../../lib/utils.js';
@@ -104,6 +104,7 @@ function TranscriptSegment({
   /** 点击改名铅笔 */
   onRename?: () => void;
 }) {
+  const { t } = useI18n();
   return (
     <div data-slot="recording-segment" className="flex flex-col gap-2">
       <div className="flex items-center justify-between">
@@ -113,7 +114,7 @@ function TranscriptSegment({
           <button
             type="button"
             data-slot="recording-speaker-edit"
-            aria-label="修改发言人"
+            aria-label={t('pactor.recording.speakerDialogTitle')}
             className="cursor-pointer text-muted-foreground"
             onClick={() => onRename?.()}
           >
@@ -121,7 +122,9 @@ function TranscriptSegment({
           </button>
         </div>
         <div className="flex items-center gap-2">
-          {segment.marked ? <Badge text="⚑ 已标记" variant="outline" /> : null}
+          {segment.marked ? (
+            <Badge text={t('pactor.recording.marked')} variant="outline" />
+          ) : null}
           <Text text={segment.time} size="small" type="secondary" />
         </div>
       </div>
@@ -195,6 +198,7 @@ export function RecordingDetail({
   onSkipBack,
   onSkipForward,
 }: RecordingDetailProps) {
+  const { t } = useI18n();
   const { renderChildren } = useRenderer();
   // 槽位渲染：React 元素直接渲染，其余按 DslNode 走 Renderer
   const renderSlot = (slot: DslNode | ReactNode): ReactNode =>
@@ -257,15 +261,25 @@ export function RecordingDetail({
                 shareLabel={shareLabel}
                 options={shareOptions}
                 selectedKeys={shareSelectedKeys}
-                popoverTitle={sharePopoverTitle ?? '选择分享内容'}
-                cancelLabel={shareCancelLabel ?? '取消'}
-                confirmLabel={shareConfirmLabel ?? '确定'}
-                dialogTitle={shareDialogTitle ?? '分享会议内容'}
+                popoverTitle={
+                  sharePopoverTitle ?? t('pactor.recording.sharePopoverTitle')
+                }
+                cancelLabel={shareCancelLabel ?? t('pactor.overlay.cancel')}
+                confirmLabel={
+                  shareConfirmLabel ?? t('pactor.alertDialog.confirm')
+                }
+                dialogTitle={
+                  shareDialogTitle ?? t('pactor.recording.shareDialogTitle')
+                }
                 link={shareLink}
-                copyLinkLabel={shareCopyLinkLabel ?? '复制链接'}
-                copiedLabel={shareCopiedLabel ?? '已复制'}
-                mailLabel={shareMailLabel ?? '邮件'}
-                systemLabel={shareSystemLabel ?? '系统分享'}
+                copyLinkLabel={
+                  shareCopyLinkLabel ?? t('pactor.recording.copyLink')
+                }
+                copiedLabel={shareCopiedLabel ?? t('pactor.recording.copied')}
+                mailLabel={shareMailLabel ?? t('pactor.recording.mail')}
+                systemLabel={
+                  shareSystemLabel ?? t('pactor.recording.systemShare')
+                }
                 onShare={onShare}
                 onSelectionCommit={(keys) => onShareSelectionCommit?.(keys)}
                 onShareConfirm={onShareConfirm}
@@ -366,13 +380,15 @@ export function RecordingDetail({
       ) : null}
       <RecordingSpeakerDialog
         open={renameIndex !== null}
-        title={speakerDialogTitle ?? '修改发言人'}
-        hint={speakerDialogHint ?? '选择参会信息、已识别人员或你曾手动创建的联系人。'}
+        title={speakerDialogTitle ?? t('pactor.recording.speakerDialogTitle')}
+        hint={speakerDialogHint ?? t('pactor.recording.speakerDialogHint')}
         speakers={speakers}
         selectedIndex={draftSpeakerIndex}
         customName={draftSpeakerName}
-        inputPlaceholder={speakerInputPlaceholder ?? '输入姓名'}
-        applyLabel={speakerApplyLabel ?? '应用姓名'}
+        inputPlaceholder={
+          speakerInputPlaceholder ?? t('pactor.recording.speakerInputPlaceholder')
+        }
+        applyLabel={speakerApplyLabel ?? t('pactor.recording.speakerApply')}
         onSelect={setDraftSpeakerIndex}
         onInputName={setDraftSpeakerName}
         onCancel={() => setRenameIndex(null)}

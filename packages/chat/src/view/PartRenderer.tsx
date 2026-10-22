@@ -1,6 +1,6 @@
 import { Icon } from '@pactor-app/ui/components';
 import { MarkdownRenderer } from '@pactor-app/markdown';
-import { DslRenderer, useRenderer } from '@pactor-app/runtime';
+import { DslRenderer, useI18n, useRenderer } from '@pactor-app/runtime';
 
 import { guardChatDsl } from '../dsl-guard.js';
 import { useSmoothStreamText } from '../hooks/use-smooth-stream-text.js';
@@ -43,9 +43,12 @@ export interface PartRendererProps {
 
 /** 白名单外组件的受控占位（注册名 ChatDenied，见 dsl-guard） */
 export function ChatDenied({ deniedType }: { deniedType?: string }) {
+  const { t } = useI18n();
   return (
     <div className="pactor-chat-denied" data-pactor-chat-denied={deniedType}>
-      该组件不允许在 Chat 中使用{deniedType ? `：${deniedType}` : ''}
+      {deniedType
+        ? t('pactor.chat.part.denied', { type: deniedType })
+        : t('pactor.chat.part.deniedNoType')}
     </div>
   );
 }
@@ -80,6 +83,7 @@ function SmoothMarkdown({ content, streaming }: { content: string; streaming: bo
 }
 
 export function PartRenderer({ part, runtime, scope, streaming = false }: PartRendererProps) {
+  const { t } = useI18n();
   switch (part.type) {
     case 'text':
       return <SmoothText content={part.content} streaming={streaming} />;
@@ -96,19 +100,14 @@ export function PartRenderer({ part, runtime, scope, streaming = false }: PartRe
     case 'dsl': {
       if (!part.schema || !runtime) {
         // dsl.start 占位阶段 / 未注入 Safe Registry 运行时
+        const statusText = part.schema
+          ? t('pactor.chat.part.renderUnavailable')
+          : t('pactor.chat.part.generating');
         return (
           <ChromeSlot
-            fragment={buildStatusFragment(
-              part.schema
-                ? 'DSL 渲染不可用（未注入 Safe Registry）'
-                : '内容生成中…',
-            )}
+            fragment={buildStatusFragment(statusText)}
             fallback={
-              <div className="pactor-chat-dsl-pending">
-                {part.schema
-                  ? 'DSL 渲染不可用（未注入 Safe Registry）'
-                  : '内容生成中…'}
-              </div>
+              <div className="pactor-chat-dsl-pending">{statusText}</div>
             }
           />
         );

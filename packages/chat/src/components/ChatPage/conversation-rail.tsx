@@ -1,3 +1,4 @@
+import { useI18n } from "@pactor-app/runtime";
 import { Button, Tooltip } from "@pactor-app/ui/components";
 
 import { cn } from "../../lib/utils.js";
@@ -46,6 +47,7 @@ export function ConversationRail({
   sidePanelOpen = false,
   renderSlot,
 }: ConversationRailProps) {
+  const { t } = useI18n();
   if (hideArtifactRailItem && items.length === 0) {
     return null;
   }
@@ -90,7 +92,9 @@ export function ConversationRail({
             {
               key: "artifact",
               icon: artifactOpen ? "panel-right-close" : "package",
-              label: artifactOpen ? "收起产物区" : artifactTitle,
+              label: artifactOpen
+                ? t("pactor.chat.artifact.collapsePanel")
+                : artifactTitle,
             },
             artifactOpen,
             onToggleArtifact,

@@ -1,3 +1,4 @@
+import { useI18n } from '@pactor-app/runtime';
 import { useEffect, useMemo, useRef, useState } from 'react';
 
 import { cn } from '../../lib/utils.js';
@@ -24,11 +25,11 @@ import { SearchableSelect } from '../internal/SearchableSelect/index.js';
 
 const TEXT = {
   /** 头部进入编辑态的按钮文案 */
-  edit: '编辑',
-  cancel: '取消',
-  confirm: '确定',
+  edit: 'pactor.expressionEditor.edit',
+  cancel: 'pactor.overlay.cancel',
+  confirm: 'pactor.alertDialog.confirm',
   /** validation 未配置 message 时的兜底提示 */
-  invalidFormat: '输入格式不正确',
+  invalidFormat: 'pactor.expressionEditor.invalidFormat',
 } as const;
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -445,6 +446,13 @@ export function ExpressionEditor({
   className,
   onValidityChange,
 }: ExpressionEditorProps) {
+  const { t } = useI18n();
+  const textLabels = {
+    edit: t(TEXT.edit),
+    cancel: t(TEXT.cancel),
+    confirm: t(TEXT.confirm),
+    invalidFormat: t(TEXT.invalidFormat),
+  };
   // label / placeholder 在 DSL 中是 I18nObject，渲染前统一按语言取值（缺省中文）
   const labelOf = (seg: { key: string; config: ExpressionMappingItem }) =>
     resolveI18nText(seg.config.label) || seg.key;
@@ -544,7 +552,7 @@ export function ExpressionEditor({
   const handleConfirm = () => {
     const nextErrors: Record<string, string> = {};
     for (const seg of fieldSegments) {
-      const message = validateMappingValue(draft[seg.key], seg.config, TEXT.invalidFormat);
+      const message = validateMappingValue(draft[seg.key], seg.config, textLabels.invalidFormat);
       if (message) nextErrors[seg.key] = message;
     }
     setDraftErrors(nextErrors);
@@ -582,7 +590,7 @@ export function ExpressionEditor({
     }));
     // 输入时即时校验（与外层表单 mode onChange 行为一致）
     if (config?.validation?.pattern) {
-      const message = validateMappingValue(next, config, TEXT.invalidFormat);
+      const message = validateMappingValue(next, config, textLabels.invalidFormat);
       setDraftErrors((prev) => {
         if (!message && !prev[key]) return prev;
         const updated = { ...prev };
@@ -615,7 +623,7 @@ export function ExpressionEditor({
               className="h-6 px-2 text-xs"
               onClick={enterEdit}
             >
-              {TEXT.edit}
+              {textLabels.edit}
             </Button>
           )}
         </div>
@@ -697,10 +705,10 @@ export function ExpressionEditor({
                 size="sm"
                 onClick={handleCancel}
               >
-                {TEXT.cancel}
+                {textLabels.cancel}
               </Button>
               <Button type="button" size="sm" onClick={handleConfirm}>
-                {TEXT.confirm}
+                {textLabels.confirm}
               </Button>
             </div>
           )}

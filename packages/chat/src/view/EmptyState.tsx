@@ -1,3 +1,5 @@
+import { useI18n } from '@pactor-app/runtime';
+
 import { Suggestion } from '../components/Suggestion/index.js';
 import { Welcome } from '../components/Welcome/index.js';
 
@@ -76,18 +78,24 @@ function EmptyStateFallback({
 }
 
 export function EmptyState({
-  greeting = DEFAULT_CHAT_GREETING,
+  greeting,
   subtitle,
   suggestions,
   onSuggestionClick,
 }: EmptyStateProps) {
+  const { t } = useI18n();
+  const resolvedGreeting = greeting ?? t('pactor.chat.welcome.greeting');
   return (
     <div className="pactor-chat-empty">
       <ChromeSlot
-        fragment={buildEmptyStateFragment({ greeting, subtitle, suggestions })}
+        fragment={buildEmptyStateFragment({
+          greeting: resolvedGreeting,
+          subtitle,
+          suggestions,
+        })}
         fallback={
           <EmptyStateFallback
-            greeting={greeting}
+            greeting={resolvedGreeting}
             subtitle={subtitle}
             suggestions={suggestions}
             onSuggestionClick={onSuggestionClick}

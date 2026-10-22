@@ -1,4 +1,5 @@
 import { Icon } from '@pactor-app/ui/components';
+import { useI18n } from '@pactor-app/runtime';
 import { useState, type ReactNode } from 'react';
 
 import type { ChatArtifact } from '../../artifact.js';
@@ -39,15 +40,19 @@ export function ChatArtifactCard({
 }: {
   artifact: ChatArtifact;
 }): ReactNode {
+  const { t } = useI18n();
   const icon = resolveArtifactIcon(artifact);
   const meta = artifactCardMeta(artifact);
+  const openLabel = t('pactor.chat.artifact.openInPanel', {
+    title: artifact.title,
+  });
   return (
     <button
       type="button"
       className={`pactor-chat-artifact-card pactor-chat-artifact-card--${icon.tone}`}
       data-artifact-kind={artifact.kind}
-      aria-label={`在面板中打开：${artifact.title}`}
-      title={`在面板中打开：${artifact.title}`}
+      aria-label={openLabel}
+      title={openLabel}
       onClick={() => invokeChatOpenArtifact(artifact)}
     >
       <span className="pactor-chat-artifact-card__icon">
@@ -89,6 +94,7 @@ export function ChatArtifactCardGroup({
 }: {
   artifacts: ChatArtifact[];
 }): ReactNode {
+  const { t } = useI18n();
   const [expanded, setExpanded] = useState(false);
   const overflow = artifacts.length > ARTIFACT_CARD_GROUP_LIMIT;
   const visible =
@@ -112,14 +118,16 @@ export function ChatArtifactCardGroup({
               name={expanded ? 'chevron-up' : 'chevron-down'}
               size={12}
             />
-            {expanded ? '收起' : '展开'}
+            {expanded
+              ? t('pactor.chat.artifact.collapse')
+              : t('pactor.chat.artifact.expand')}
           </button>
           <button
             type="button"
             className="pactor-chat-artifact-group__all"
             onClick={() => invokeChatOpenArtifactList()}
           >
-            查看所有产物({artifacts.length})
+            {t('pactor.chat.artifact.viewAll', { count: artifacts.length })}
             <Icon name="chevron-right" size={12} />
           </button>
         </div>

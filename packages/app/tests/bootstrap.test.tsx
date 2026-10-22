@@ -84,6 +84,9 @@ describe('application-bootstrap：启动编排', () => {
     setUrl('/');
     app = createPactorApplication({
       appId: 'empty-app',
+      // 显式 zh-CN：jsdom 的 navigator.language 为 en-US，内建 404 文案
+      // 断言需固定到中文
+      locale: 'zh-CN',
       loader: new StaticDslLoader({
         bootstrap: { app: { name: '空应用' } },
         pages: standardPages,

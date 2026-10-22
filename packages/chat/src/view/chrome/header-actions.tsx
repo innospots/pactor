@@ -13,14 +13,17 @@ import type { ChromeFragment } from './ChromeSlot.js';
 export function buildHeaderActionsFragment(props: {
   actions: ChatHeaderAction[];
   theme: 'light' | 'dark';
+  /** 文案覆盖（i18n）；缺省中文，保持独立片段 API 不变 */
+  labels?: Partial<Record<ChatHeaderAction, string>>;
 }): ChromeFragment {
   const meta: Record<ChatHeaderAction, { label: string; icon: string }> = {
-    export: { label: '导出 Markdown', icon: 'download' },
+    export: { label: props.labels?.export ?? '导出 Markdown', icon: 'download' },
     theme: {
-      label: props.theme === 'dark' ? '切换为浅色' : '切换为深色',
+      label:
+        props.labels?.theme ?? (props.theme === 'dark' ? '切换为浅色' : '切换为深色'),
       icon: props.theme === 'dark' ? 'sun' : 'moon',
     },
-    clear: { label: '清空会话', icon: 'trash2' },
+    clear: { label: props.labels?.clear ?? '清空会话', icon: 'trash2' },
   };
   return {
     requires: ['Flex', 'Tooltip', 'Button', 'Icon'],

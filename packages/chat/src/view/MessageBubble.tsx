@@ -1,3 +1,4 @@
+import { useI18n } from '@pactor-app/runtime';
 import { useRef, useState } from 'react';
 
 import { Bubble } from '../components/Bubble/index.js';
@@ -94,16 +95,21 @@ export interface MessageBubbleProps {
 
 /**
  * 消息时间格式化（assistant 消息底部时间戳）：
- * 当天 HH:mm；非当天 M月d日 HH:mm
+ * 当天 HH:mm；非当天 M月d日 HH:mm（非当天文案可经 formatDate 覆盖）
  */
-export function formatMessageTime(ts: number, now: number = Date.now()): string {
+export function formatMessageTime(
+  ts: number,
+  now: number = Date.now(),
+  formatDate: (date: Date, time: string) => string = (date, time) =>
+    `${date.getMonth() + 1}月${date.getDate()}日 ${time}`,
+): string {
   const date = new Date(ts);
   const hh = String(date.getHours()).padStart(2, '0');
   const mm = String(date.getMinutes()).padStart(2, '0');
   if (new Date(now).toDateString() === date.toDateString()) {
     return `${hh}:${mm}`;
   }
-  return `${date.getMonth() + 1}月${date.getDate()}日 ${hh}:${mm}`;
+  return formatDate(date, `${hh}:${mm}`);
 }
 
 /** user 消息的内联编辑框：预填原文本，确认回调新文本，取消静默关闭 */
@@ -116,6 +122,7 @@ function MessageEditForm({
   onConfirm: (text: string) => void;
   onCancel: () => void;
 }) {
+  const { t } = useI18n();
   const [text, setText] = useState(initialText);
 
   const confirm = (): void => {
@@ -130,7 +137,7 @@ function MessageEditForm({
     <div className="pactor-chat-message__edit">
       <textarea
         className="pactor-chat-message__edit-input"
-        aria-label="编辑消息"
+        aria-label={t('pactor.chat.message.editMessage')}
         rows={3}
         value={text}
         onChange={(event) => setText(event.target.value)}
@@ -147,18 +154,18 @@ function MessageEditForm({
         <button
           type="button"
           className="pactor-chat-message__edit-button pactor-chat-message__edit-button--confirm"
-          aria-label="确认发送"
+          aria-label={t('pactor.chat.message.confirmSend')}
           onClick={confirm}
         >
-          发送
+          {t('pactor.chatInput.send')}
         </button>
         <button
           type="button"
           className="pactor-chat-message__edit-button"
-          aria-label="取消"
+          aria-label={t('pactor.overlay.cancel')}
           onClick={onCancel}
         >
-          取消
+          {t('pactor.overlay.cancel')}
         </button>
       </div>
     </div>
@@ -203,6 +210,7 @@ export function MessageBubble({
   callService,
   onMessageAction,
 }: MessageBubbleProps) {
+  const { t } = useI18n();
   const [editing, setEditing] = useState(false);
   const bubbleScope: ChatScope = {
     conversation: scope?.conversation ?? {},
@@ -306,7 +314,13 @@ export function MessageBubble({
               className="pactor-chat-message__time"
               title={new Date(message.createdAt!).toLocaleString()}
             >
-              {formatMessageTime(message.createdAt!)}
+              {formatMessageTime(message.createdAt!, Date.now(), (date, time) =>
+                t('pactor.chat.message.date', {
+                  month: date.getMonth() + 1,
+                  day: date.getDate(),
+                  time,
+                }),
+              )}
             </span>
           </div>
         ) : (

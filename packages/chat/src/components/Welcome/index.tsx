@@ -1,3 +1,4 @@
+import { useI18n } from '@pactor-app/runtime';
 import type { CSSProperties } from 'react';
 
 import { cn } from '../../lib/utils.js';
@@ -38,7 +39,7 @@ export interface WelcomeProps {
  * 起始任务卡片栅格（复用 Prompt）；点击卡片经 onSelect 传出 value。
  */
 export function Welcome({
-  title = '有什么可以帮你？',
+  title,
   description,
   icon = 'chat',
   prompts = [],
@@ -48,6 +49,8 @@ export function Welcome({
   className,
   style,
 }: WelcomeProps) {
+  const { t } = useI18n();
+  const resolvedTitle = title ?? t('pactor.chat.welcome.title');
   return (
     <div
       data-slot="welcome"
@@ -61,7 +64,7 @@ export function Welcome({
       ) : null}
       <div>
         <div data-slot="welcome-title" className={cn('text-xl font-semibold', titleClassName)}>
-          {title}
+          {resolvedTitle}
         </div>
         {description ? (
           <div data-slot="welcome-description" className={cn('mt-1 text-sm text-muted-foreground', descriptionClassName)}>

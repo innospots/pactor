@@ -2,6 +2,7 @@
  * 内部组件（不导出、不注册 DSL）：可搜索下拉选择器。
  * 仅供 blocks 复合组件内嵌使用（ExpressionEditor / FieldCondition）。
  */
+import { useI18n } from '@pactor-app/runtime';
 import { Check, ChevronsUpDown, X } from 'lucide-react';
 import * as React from 'react';
 
@@ -22,14 +23,14 @@ import {
 import { ClearHoverButton } from '@pactor-app/ui/components';
 import { CONTROL_SIZE_BOX_GROW, type ControlSize } from '@pactor-app/ui/components';
 
-// ─── 文案缺省值（原 next-intl Common 命名空间文案的中文默认值） ──────────────────
+// ─── 文案缺省值（key 由 useI18n 解析，无 Provider 时为中文默认值） ──────────────
 
-const DEFAULT_PLACEHOLDER = '请选择';
-const DEFAULT_SEARCH_PLACEHOLDER = '搜索…';
+const DEFAULT_PLACEHOLDER_KEY = 'pactor.select.placeholder';
+const DEFAULT_SEARCH_PLACEHOLDER_KEY = 'pactor.searchableSelect.search';
 /** 过滤后无匹配结果时的空态文案 */
-const DEFAULT_EMPTY_TEXT = '无匹配结果';
+const DEFAULT_EMPTY_TEXT_KEY = 'pactor.command.empty';
 /** options 本身为空（无候选）时的空态文案 */
-const NO_OPTIONS_TEXT = '无选项';
+const NO_OPTIONS_TEXT_KEY = 'pactor.searchableSelect.noOptions';
 
 export interface SearchableSelectProps {
   value?: string | string[];
@@ -76,9 +77,11 @@ export function SearchableSelect({
   fullOptionText = false,
   listClassName,
 }: SearchableSelectProps) {
-  const resolvedPlaceholder = placeholder ?? DEFAULT_PLACEHOLDER;
-  const resolvedSearchPlaceholder = searchPlaceholder ?? DEFAULT_SEARCH_PLACEHOLDER;
-  const resolvedEmptyText = emptyText ?? DEFAULT_EMPTY_TEXT;
+  const { t } = useI18n();
+  const resolvedPlaceholder = placeholder ?? t(DEFAULT_PLACEHOLDER_KEY);
+  const resolvedSearchPlaceholder =
+    searchPlaceholder ?? t(DEFAULT_SEARCH_PLACEHOLDER_KEY);
+  const resolvedEmptyText = emptyText ?? t(DEFAULT_EMPTY_TEXT_KEY);
   const [open, setOpen] = React.useState(false);
   const shouldShowSearch = showSearch ?? options.length > 8;
 
@@ -196,7 +199,9 @@ export function SearchableSelect({
           {shouldShowSearch && <CommandInput placeholder={resolvedSearchPlaceholder} />}
           <CommandList className={listClassName}>
             <CommandEmpty>
-              {options.length === 0 ? NO_OPTIONS_TEXT : resolvedEmptyText}
+              {options.length === 0
+                ? t(NO_OPTIONS_TEXT_KEY)
+                : resolvedEmptyText}
             </CommandEmpty>
             <CommandGroup>
               {options.map((opt) => {

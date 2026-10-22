@@ -9,6 +9,8 @@ import {
 } from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
 
+import { useI18n } from '@pactor-app/runtime';
+
 import { cn } from '../../lib/utils.js';
 import { Icon } from '@pactor-app/ui/components';
 import type { ComposerContextItem, ComposerContextSource } from './index.js';
@@ -162,6 +164,7 @@ export const MentionInput = forwardRef<MentionInputHandle, MentionInputProps>(
     },
     ref,
   ) {
+    const { t } = useI18n();
     const fieldRef = useRef<HTMLDivElement>(null);
     const [menu, setMenu] = useState<MentionMenuState | null>(null);
     const [empty, setEmpty] = useState(true);
@@ -504,7 +507,9 @@ export const MentionInput = forwardRef<MentionInputHandle, MentionInputProps>(
             >
               <div className="px-2 py-1 text-xs text-muted-foreground">{menu.source.label}</div>
               {menuItems.length === 0 ? (
-                <div className="px-2 py-2 text-xs text-muted-foreground">无匹配项</div>
+                <div className="px-2 py-2 text-xs text-muted-foreground">
+                  {t('pactor.chat.mentions.empty')}
+                </div>
               ) : (
                 menuItems.map((item, index) => (
                   <button

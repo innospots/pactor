@@ -1,3 +1,4 @@
+import { useI18n } from '@pactor-app/runtime';
 import * as React from 'react';
 
 import { cn } from '../lib/utils.js';
@@ -42,6 +43,7 @@ function ExpandingButtonGroup({
   className,
   style,
 }: ExpandingButtonGroupProps) {
+  const { t } = useI18n();
   // 当前展开项：hover 或聚焦（focus-visible 样式由 CSS 负责，状态同等展开）
   const [expanded, setExpanded] = React.useState<string | null>(null);
   const [confirming, setConfirming] = React.useState<string | null>(null);
@@ -104,7 +106,10 @@ function ExpandingButtonGroup({
               style={{ gridTemplateColumns: isExpanded ? '1fr' : '0fr' }}
             >
               <span className="overflow-hidden">
-                {isConfirming ? (option.confirmLabel ?? '确认') : option.label}
+                {isConfirming
+                  ? (option.confirmLabel ??
+                    t('pactor.expandingButtonGroup.confirm'))
+                  : option.label}
               </span>
             </span>
           </button>
