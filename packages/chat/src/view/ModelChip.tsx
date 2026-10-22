@@ -1,4 +1,5 @@
 import { Icon } from '@pactor-app/ui/components';
+import { useI18n } from '@pactor-app/runtime';
 import { useEffect, useRef, useState, type ReactNode } from 'react';
 
 import type { ChatModelOption } from '../model.js';
@@ -27,6 +28,7 @@ export function ModelChip({
   model,
   onModelChange,
 }: ModelChipProps): ReactNode {
+  const { t } = useI18n();
   const chipRef = useRef<HTMLButtonElement>(null);
   // 弹层锚点：缺省 null 即关闭
   const [anchor, setAnchor] = useState<DOMRect | null>(null);
@@ -38,8 +40,8 @@ export function ModelChip({
         ref={chipRef}
         type="button"
         className="pactor-chat-model-chip"
-        title="选择模型"
-        aria-label="选择模型"
+        title={t('pactor.chat.composer.selectModel')}
+        aria-label={t('pactor.chat.composer.selectModel')}
         onClick={() => setAnchor(chipRef.current!.getBoundingClientRect())}
       >
         <span className="pactor-chat-model-chip__label">

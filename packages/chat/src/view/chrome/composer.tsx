@@ -1,4 +1,5 @@
 import { Icon } from '@pactor-app/ui/components';
+import { useI18n } from '@pactor-app/runtime';
 import { createContext, useContext, type ReactNode } from 'react';
 
 import type {
@@ -80,6 +81,8 @@ export function ComposerAttachments({
   onRemove: (id: string) => void;
   onClick?: (attachment: ChatAttachment) => void;
 }): ReactNode {
+  const { t } = useI18n();
+  const removeLabel = t('pactor.chat.composer.removeAttachment');
   if (attachments.length === 0) {
     return null;
   }
@@ -114,8 +117,8 @@ export function ComposerAttachments({
             <button
               type="button"
               className="pactor-chat-icon-button pactor-chat-composer__attachment-remove"
-              title="移除附件"
-              aria-label="移除附件"
+              title={removeLabel}
+              aria-label={removeLabel}
               onClick={(event) => {
                 event.stopPropagation();
                 onRemove(attachment.id);
@@ -138,9 +141,12 @@ export function ComposerContextChips({
   chips: ChatContextItem[];
   onRemove: (chip: ChatContextItem) => void;
 }): ReactNode {
+  const { t } = useI18n();
   if (chips.length === 0) {
     return null;
   }
+  const removeContextLabel = (label: string): string =>
+    t('pactor.chat.composer.removeContext', { label });
   return (
     <div className="pactor-chat-composer__contexts">
       {chips.map((chip) => (
@@ -153,8 +159,8 @@ export function ComposerContextChips({
           <button
             type="button"
             className="pactor-chat-icon-button pactor-chat-context-chip__remove"
-            title={`移除上下文 ${chip.label}`}
-            aria-label={`移除上下文 ${chip.label}`}
+            title={removeContextLabel(chip.label)}
+            aria-label={removeContextLabel(chip.label)}
             onClick={() => onRemove(chip)}
           >
             <Icon name="x" size={12} />
@@ -190,6 +196,7 @@ function ChatComposerHeader(): ReactNode {
 /** ChatInput toolbarStart 槽：chat toolbarStart 槽 + 内建 + 钮 / 附件钮 */
 function ChatComposerToolbarStart(): ReactNode {
   const bridge = useComposerBridge();
+  const { t } = useI18n();
   return (
     <>
       {bridge.toolbarStart}
@@ -197,8 +204,8 @@ function ChatComposerToolbarStart(): ReactNode {
         <button
           type="button"
           className="pactor-chat-icon-button"
-          title="更多功能"
-          aria-label="更多功能"
+          title={t('pactor.chat.composer.more')}
+          aria-label={t('pactor.chat.composer.more')}
           onClick={(event) =>
             bridge.plusClick(event.currentTarget.getBoundingClientRect())
           }
@@ -210,8 +217,8 @@ function ChatComposerToolbarStart(): ReactNode {
         <button
           type="button"
           className="pactor-chat-icon-button"
-          title="添加附件"
-          aria-label="添加附件"
+          title={t('pactor.chat.composer.addAttachment')}
+          aria-label={t('pactor.chat.composer.addAttachment')}
           onClick={bridge.openFilePicker}
         >
           <Icon name="paperclip" size={14} />
@@ -224,6 +231,7 @@ function ChatComposerToolbarStart(): ReactNode {
 /** ChatInput toolbarEnd 槽：模型 chip + chat toolbarEnd 槽 + 发送/停止状态机钮 */
 function ChatComposerToolbarEnd(): ReactNode {
   const bridge = useComposerBridge();
+  const { t } = useI18n();
   return (
     <>
       {bridge.modelChipEnabled && (
@@ -238,8 +246,16 @@ function ChatComposerToolbarEnd(): ReactNode {
       <button
         type="button"
         className={`pactor-chat-composer__button${bridge.streaming ? ' pactor-chat-composer__button--stop' : ''}`}
-        title={bridge.streaming ? '停止生成' : '发送'}
-        aria-label={bridge.streaming ? '停止生成' : '发送'}
+        title={
+          bridge.streaming
+            ? t('pactor.chatInput.stop')
+            : t('pactor.chatInput.send')
+        }
+        aria-label={
+          bridge.streaming
+            ? t('pactor.chatInput.stop')
+            : t('pactor.chatInput.send')
+        }
         disabled={
           bridge.streaming ? false : bridge.disabled || !bridge.text.trim()
         }

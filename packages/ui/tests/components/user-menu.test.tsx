@@ -24,6 +24,7 @@ const USER = {
 
 afterEach(() => {
   document.documentElement.removeAttribute('data-pactor-theme');
+  window.localStorage.removeItem('pactor.locale');
 });
 
 function openMenu() {
@@ -61,6 +62,19 @@ describe('UserMenu（DSL）', () => {
     const profile = screen.getByRole('menuitem', { name: '个人资料' });
     expect(profile.querySelector('[data-slot=icon]')).not.toBeNull();
     expect(screen.getByRole('menuitem', { name: '设置' }).textContent).toContain('⌘');
+  });
+
+  it('用户资料尚未就绪（name 缺失）时不崩溃，头像按空首字母回退', () => {
+    renderDsl({
+      type: 'UserMenu',
+      props: {
+        user: { email: 'emma@example.com' },
+        items: [{ label: '个人资料', value: 'profile', icon: 'user' }],
+      },
+    });
+
+    const trigger = screen.getByRole('button', { name: /账户菜单/ });
+    expect(trigger.textContent).not.toContain('undefined');
   });
 
   it('账户入口点击经 onSelect 传出 value，并关闭菜单', async () => {
@@ -168,6 +182,147 @@ describe('UserMenu（DSL）', () => {
     await expectEventState(context, 'status', 'busy');
     expect(screen.getByRole('menu')).toBeTruthy();
     expect(trigger.getAttribute('aria-label')).toContain('忙碌');
+  });
+
+  it('切换语言：点击触发项向右展开子菜单，选择英文经 onLanguageChange 上报且菜单保持展开', async () => {
+    const { context } = renderDsl({
+      type: 'UserMenu',
+      props: { user: USER, showLanguage: true, showTheme: false },
+      events: {
+        onLanguageChange: {
+          action: 'setState',
+          params: { language: '${event}' },
+        },
+      },
+    });
+
+    openMenu();
+    const trigger = screen.getByRole('menuitem', { name: '切换语言（当前 中文）' });
+    expect(trigger.textContent).toContain('中文');
+    expect(trigger.getAttribute('aria-expanded')).toBe('false');
+
+    // Base UI 子菜单在 mousedown 打开（openOnHover=false 时点击切换）
+    fireEvent.mouseDown(trigger);
+
+    const english = await screen.findByRole('menuitemradio', {
+      name: 'English',
+    });
+    expect(english.getAttribute('aria-checked')).toBe('false');
+
+    fireEvent.click(english);
+
+    await expectEventState(context, 'language', 'en-US');
+    expect(
+      screen
+        .getByRole('menuitemradio', { name: 'English' })
+        .getAttribute('aria-checked'),
+    ).toBe('true');
+    const updated = screen.getByRole('menuitem', { name: '切换语言（当前 English）' });
+    expect(updated.textContent).toContain('English');
+    expect(window.localStorage.getItem('pactor.locale')).toBe('en-US');
+  });
+
+  it('受控 language 以 props 回显，子菜单选择仍上报', async () => {
+    const { context } = renderDsl({
+      type: 'UserMenu',
+      props: {
+        user: USER,
+        showLanguage: true,
+        showTheme: false,
+        language: 'en-US',
+      },
+      events: {
+        onLanguageChange: {
+          action: 'setState',
+          params: { language: '${event}' },
+        },
+      },
+    });
+
+    openMenu();
+    const trigger = screen.getByRole('menuitem', { name: '切换语言（当前 English）' });
+    expect(trigger.textContent).toContain('English');
+    fireEvent.mouseDown(trigger);
+    expect(
+      (
+        await screen.findByRole('menuitemradio', { name: 'English' })
+      ).getAttribute('aria-checked'),
+    ).toBe('true');
+
+    fireEvent.click(screen.getByRole('menuitemradio', { name: '中文' }));
+    await expectEventState(context, 'language', 'zh-CN');
+    // 受控时父级未回写前保持 en-US
+    expect(
+      screen
+        .getByRole('menuitemradio', { name: 'English' })
+        .getAttribute('aria-checked'),
+    ).toBe('true');
+  });
+
+  it('languages 可扩展：自定义列表按传入项渲染并可选新增语言', async () => {
+    const { context } = renderDsl({
+      type: 'UserMenu',
+      props: {
+        user: USER,
+        showLanguage: true,
+        showTheme: false,
+        languages: [
+          { value: 'zh-CN', label: '中文' },
+          { value: 'en-US', label: 'English' },
+          { value: 'ja-JP', label: '日本語' },
+        ],
+      },
+      events: {
+        onLanguageChange: {
+          action: 'setState',
+          params: { language: '${event}' },
+        },
+      },
+    });
+
+    openMenu();
+    fireEvent.mouseDown(
+      screen.getByRole('menuitem', { name: '切换语言（当前 中文）' }),
+    );
+
+    const japanese = await screen.findByRole('menuitemradio', {
+      name: '日本語',
+    });
+    fireEvent.click(japanese);
+
+    await expectEventState(context, 'language', 'ja-JP');
+    expect(
+      screen.getByRole('menuitem', { name: '切换语言（当前 日本語）' }),
+    ).toBeTruthy();
+    expect(window.localStorage.getItem('pactor.locale')).toBe('ja-JP');
+  });
+
+  it('未设置语言时缺省选中 languages 首项', () => {
+    render(
+      <UiUserMenu
+        user={USER}
+        showTheme={false}
+        showLanguage
+        languages={[
+          { value: 'ja-JP', label: '日本語' },
+          { value: 'en-US', label: 'English' },
+        ]}
+      />,
+    );
+
+    openMenu();
+    expect(
+      screen.getByRole('menuitem', { name: '切换语言（当前 日本語）' }),
+    ).toBeTruthy();
+  });
+
+  it('showLanguage=false 时不渲染语言入口', () => {
+    renderDsl({ type: 'UserMenu', props: { user: USER, showTheme: false } });
+
+    openMenu();
+    expect(
+      screen.queryByRole('menuitem', { name: /切换语言/ }),
+    ).toBeNull();
   });
 
   it('showTheme=false 且无状态回调时不渲染切换分组', () => {
@@ -300,6 +455,57 @@ describe('UserMenu（React）', () => {
 
     rerender(<UserMenu user={USER} showName />);
     expect(screen.getByText('Emma Collins')).toBeTruthy();
+  });
+
+  it('窄屏抽屉：语言行行内展开，支持自定义语言列表并回显选择', () => {
+    const base = window.matchMedia;
+    window.matchMedia = ((query: string) => ({
+      ...base(query),
+      matches: query.includes('max-width: 639px'),
+    })) as typeof window.matchMedia;
+    try {
+      const onLanguageChange = vi.fn();
+      render(
+        <UserMenu
+          user={USER}
+          showTheme={false}
+          showLanguage
+          languages={[
+            { value: 'zh-CN', label: '中文' },
+            { value: 'en-US', label: 'English' },
+            { value: 'ja-JP', label: '日本語' },
+          ]}
+          onLanguageChange={onLanguageChange}
+        />,
+      );
+
+      openMenu();
+      const trigger = screen.getByRole('menuitem', { name: '切换语言（当前 中文）' });
+      expect(trigger.textContent).toContain('中文');
+      expect(trigger.getAttribute('aria-expanded')).toBe('false');
+
+      fireEvent.click(trigger);
+      expect(trigger.getAttribute('aria-expanded')).toBe('true');
+      expect(
+        screen.getByRole('menuitemradio', { name: '日本語' }),
+      ).toBeTruthy();
+
+      fireEvent.click(
+        screen.getByRole('menuitemradio', { name: 'English' }),
+      );
+
+      expect(onLanguageChange).toHaveBeenCalledWith('en-US');
+      expect(
+        screen
+          .getByRole('menuitemradio', { name: 'English' })
+          .getAttribute('aria-checked'),
+      ).toBe('true');
+      expect(
+        screen.getByRole('menuitem', { name: '切换语言（当前 English）' }).textContent,
+      ).toContain('English');
+    } finally {
+      window.matchMedia = base;
+    }
   });
 
   it('窄屏渲染底部抽屉：关闭时无遮罩，展开后遮罩可点击关闭', () => {

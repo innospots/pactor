@@ -9,6 +9,8 @@ import {
   type ReactNode,
 } from 'react';
 
+import { useI18n } from '@pactor-app/runtime';
+
 import { cn } from '../../lib/utils.js';
 import { ChatInput, useOptionalRenderer } from '@pactor-app/ui/components';
 import { Icon } from '@pactor-app/ui/components';
@@ -194,6 +196,7 @@ export function Composer({
   className,
   style,
 }: ComposerProps) {
+  const { t } = useI18n();
   const renderer = useOptionalRenderer();
   // 受控 / 非受控文本
   const textControlled = value !== undefined;
@@ -296,8 +299,8 @@ export function Composer({
         {plusEnabled ? (
           <button
             type="button"
-            aria-label="添加上下文"
-            title="添加上下文"
+            aria-label={t('pactor.chat.composer.addContext')}
+            title={t('pactor.chat.composer.addContext')}
             className={toolButtonClass}
             onClick={(event) => {
               if (onPlusMenu) {
@@ -315,8 +318,8 @@ export function Composer({
         {onAttachFiles ? (
           <button
             type="button"
-            aria-label="添加附件"
-            title="添加附件"
+            aria-label={t('pactor.chat.composer.addAttachment')}
+            title={t('pactor.chat.composer.addAttachment')}
             className={toolButtonClass}
             onClick={() => fileInputRef.current?.click()}
           >
@@ -329,8 +332,8 @@ export function Composer({
   const builtinToolbarEnd = modelEnabled ? (
     <button
       type="button"
-      aria-label="选择模型"
-      title="选择模型"
+      aria-label={t('pactor.chat.composer.selectModel')}
+      title={t('pactor.chat.composer.selectModel')}
       className="flex cursor-pointer items-center gap-1 rounded-md px-2 py-1 text-xs text-muted-foreground hover:bg-accent hover:text-foreground"
       onClick={() => {
         setModelOpen((prev) => !prev);

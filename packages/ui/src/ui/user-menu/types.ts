@@ -2,6 +2,16 @@ import type { CSSProperties, ReactNode, Ref } from 'react';
 
 export type UserStatus = 'available' | 'busy' | 'away';
 export type ThemePreference = 'light' | 'dark' | 'system';
+/** 语言偏好（BCP 47 标签，如 zh-CN / en-US / ja-JP） */
+export type LanguagePreference = string;
+
+/** 语言选项：语言名使用其本语言书写，不随界面语言翻译 */
+export interface LanguageOption {
+  /** BCP 47 语言标签，如 zh-CN / en-US / ja-JP */
+  value: LanguagePreference;
+  /** 该语言的本语言显示名，如 中文 / English / 日本語 */
+  label: string;
+}
 
 export interface UserMenuUser {
   name: string;
@@ -34,6 +44,18 @@ export interface UserMenuProps {
   onThemeChange?: (theme: ThemePreference) => void;
   /** 显示内联浅色 / 深色 / 跟随系统切换（缺省 true） */
   showTheme?: boolean;
+  /** 受控语言偏好 */
+  language?: LanguagePreference;
+  /** 非受控初始语言；缺省读取 localStorage 的 pactor.locale，
+   *  未设置时取 languages 首项（缺省列表即 zh-CN） */
+  defaultLanguage?: LanguagePreference;
+  /** 语言选择回调；非受控时选择同时写入 localStorage 的 pactor.locale */
+  onLanguageChange?: (language: LanguagePreference) => void;
+  /** 显示“切换语言”子菜单（缺省 false） */
+  showLanguage?: boolean;
+  /** 可选语言列表（缺省 中文 / English）；追加选项即可扩展更多语言，
+   *  value 为语言标签，label 为用该语言自身书写的显示名 */
+  languages?: LanguageOption[];
   /** 账户入口（建议 3–4 项） */
   items?: UserMenuItem[];
   /** 退出登录；返回 Promise 时菜单保持展开并显示进度，结束后关闭 */

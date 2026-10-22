@@ -1,3 +1,4 @@
+import { useI18n } from '@pactor-app/runtime';
 import { useState, type CSSProperties } from 'react';
 
 import { cn } from '../../lib/utils.js';
@@ -41,9 +42,14 @@ export function Thinking({
   className,
   style,
 }: ThinkingProps) {
+  const { t } = useI18n();
   const [innerExpanded, setInnerExpanded] = useState(defaultExpanded ?? status === 'thinking');
   const isExpanded = expanded ?? innerExpanded;
-  const resolvedTitle = title ?? (status === 'thinking' ? '思考中…' : '思考完成');
+  const resolvedTitle =
+    title ??
+    (status === 'thinking'
+      ? t('pactor.chat.thinking.thinking')
+      : t('pactor.chat.thinking.done'));
 
   const toggle = () => {
     if (expanded === undefined) {

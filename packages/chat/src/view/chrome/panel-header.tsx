@@ -1,4 +1,5 @@
 import { DropdownMenu, Icon } from '@pactor-app/ui/components';
+import { useI18n } from '@pactor-app/runtime';
 import { createContext, useContext, type ReactNode } from 'react';
 
 import type { ChatArtifact } from '../../artifact.js';
@@ -45,12 +46,13 @@ function artifactIconName(artifact: ChatArtifact | undefined): string {
  * chrome 令牌与宿主皮肤作用域，气泡配色与皮肤不一致）
  */
 export function ChatPanelCloseButton(): ReactNode {
+  const { t } = useI18n();
   return (
     <button
       type="button"
       className="pactor-chat-icon-button pactor-chat-inspector__close"
-      title="关闭面板"
-      aria-label="关闭面板"
+      title={t('pactor.chat.panel.close')}
+      aria-label={t('pactor.chat.panel.close')}
       onClick={() => invokeChatPanelClose()}
     >
       <Icon name="x" size={16} />
@@ -63,6 +65,7 @@ export function ChatPanelCloseButton(): ReactNode {
  * 视图；目录列表视图下隐藏（此时文件名处已显示"产物目录"）
  */
 export function ChatPanelListButton(): ReactNode {
+  const { t } = useI18n();
   const ctx = useContext(ChatPanelContext);
   if (ctx?.view === 'list') {
     return null;
@@ -71,8 +74,8 @@ export function ChatPanelListButton(): ReactNode {
     <button
       type="button"
       className="pactor-chat-icon-button pactor-chat-inspector__list-toggle"
-      title="产物目录"
-      aria-label="产物目录"
+      title={t('pactor.chat.artifact.list')}
+      aria-label={t('pactor.chat.artifact.list')}
       onClick={() => invokeChatPanelToggleList()}
     >
       <Icon name="arrow-left" size={16} />
@@ -82,12 +85,13 @@ export function ChatPanelListButton(): ReactNode {
 
 /** 产物下载钮内部组件：header 右端（关闭钮左侧），下载当前激活产物 */
 export function ChatPanelDownloadButton(): ReactNode {
+  const { t } = useI18n();
   return (
     <button
       type="button"
       className="pactor-chat-icon-button pactor-chat-inspector__download"
-      title="下载产物"
-      aria-label="下载产物"
+      title={t('pactor.chat.artifact.download')}
+      aria-label={t('pactor.chat.artifact.download')}
       onClick={() => invokeChatPanelDownload()}
     >
       <Icon name="download" size={16} />
@@ -102,6 +106,7 @@ export function ChatPanelDownloadButton(): ReactNode {
  * （此时产物名无处可指），选中产物即回内容视图
  */
 export function ChatPanelArtifactMenu(): ReactNode {
+  const { t } = useI18n();
   const ctx = useContext(ChatPanelContext);
   if (!ctx || ctx.artifacts.length === 0) {
     return null;
@@ -131,7 +136,9 @@ export function ChatPanelArtifactMenu(): ReactNode {
           size={13}
         />
         <span className="pactor-chat-inspector__title">
-          {inList ? '产物目录' : (active?.title ?? '产出物')}
+          {inList
+            ? t('pactor.chat.artifact.list')
+            : (active?.title ?? t('pactor.chat.artifact.output'))}
         </span>
         <Icon name="chevron-down" size={12} />
       </span>

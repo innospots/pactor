@@ -1,3 +1,4 @@
+import { useI18n } from '@pactor-app/runtime';
 import type { CSSProperties } from 'react';
 
 import { cn } from '../../lib/utils.js';
@@ -49,6 +50,7 @@ function formatSize(bytes: number): string {
  * 上传与存储由调用方负责，本组件只做呈现与事件上报。
  */
 export function Attachment({ items = [], onRemove, onRetry, onClick, className, style }: AttachmentProps) {
+  const { t } = useI18n();
   return (
     <div data-slot="attachment" className={cn('flex flex-wrap gap-2', className)} style={style}>
       {items.map((item, index) => {
@@ -80,7 +82,7 @@ export function Attachment({ items = [], onRemove, onRetry, onClick, className, 
                 <button
                   type="button"
                   data-slot="attachment-retry"
-                  aria-label={`重试 ${item.name}`}
+                  aria-label={t('pactor.chat.attachment.retry', { name: item.name })}
                   className="shrink-0 text-destructive hover:opacity-80"
                   onClick={(event) => {
                     event.stopPropagation();
@@ -94,7 +96,7 @@ export function Attachment({ items = [], onRemove, onRetry, onClick, className, 
                 <button
                   type="button"
                   data-slot="attachment-remove"
-                  aria-label={`移除 ${item.name}`}
+                  aria-label={t('pactor.chat.attachment.remove', { name: item.name })}
                   className="shrink-0 text-muted-foreground hover:text-foreground"
                   onClick={(event) => {
                     event.stopPropagation();
@@ -109,7 +111,11 @@ export function Attachment({ items = [], onRemove, onRetry, onClick, className, 
               {item.fileSize !== undefined ? (
                 <span className="text-muted-foreground">{formatSize(item.fileSize)}</span>
               ) : null}
-              {status === 'error' ? <span className="text-destructive">上传失败</span> : null}
+              {status === 'error' ? (
+                <span className="text-destructive">
+                  {t('pactor.chat.attachment.uploadFailed')}
+                </span>
+              ) : null}
             </div>
             {status === 'uploading' && item.progress !== undefined ? (
               <div data-slot="attachment-progress" className="mt-1 ml-5 h-1 overflow-hidden rounded-full bg-muted">

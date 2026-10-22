@@ -1,4 +1,5 @@
 import type { Registry } from "@pactor-app/core";
+import { useI18n } from "@pactor-app/runtime";
 import {
   useEffect,
   useRef,
@@ -266,8 +267,8 @@ export function ArtifactPanel({
   artifacts,
   activeArtifactId,
   onSelectArtifact,
-  title = "产物",
-  emptyText = "暂无产物",
+  title,
+  emptyText,
   inspector,
   header,
   view: viewProp,
@@ -283,6 +284,9 @@ export function ArtifactPanel({
   className,
   style,
 }: ArtifactPanelProps) {
+  const { t } = useI18n();
+  const resolvedTitle = title ?? t("pactor.chat.artifact.title");
+  const resolvedEmptyText = emptyText ?? t("pactor.chat.artifact.empty");
   const runtime = useArtifactPreviewRuntime(safeRegistry, user);
 
   // 产物目录列表视图：header 左端切换钮在 内容 / 列表 间切换；
@@ -353,7 +357,10 @@ export function ArtifactPanel({
     document.addEventListener("pointerup", onUp);
   };
 
-  const headerTitle = view === "list" ? "产物目录" : (artifact?.title ?? title);
+  const headerTitle =
+    view === "list"
+      ? t("pactor.chat.artifact.list")
+      : (artifact?.title ?? resolvedTitle);
 
   return (
     <aside
@@ -372,7 +379,7 @@ export function ArtifactPanel({
           data-slot="artifact-panel-resize"
           role="separator"
           aria-orientation="vertical"
-          aria-label="拖动调整面板宽度"
+          aria-label={t("pactor.chat.artifact.resize")}
           className="absolute top-0 left-0 z-10 h-full w-1 cursor-col-resize touch-none hover:bg-accent"
           onPointerDown={handleResizeStart}
         />
@@ -385,7 +392,11 @@ export function ArtifactPanel({
             <Button
               icon="list"
               variant="text"
-              tooltip={view === "list" ? "返回内容" : "产物目录"}
+              tooltip={
+                view === "list"
+                  ? t("pactor.chat.artifact.back")
+                  : t("pactor.chat.artifact.list")
+              }
               onClick={() => switchView(view === "list" ? "content" : "list")}
             />
           ) : null}
@@ -424,7 +435,7 @@ export function ArtifactPanel({
             <Button
               icon="download"
               variant="text"
-              tooltip="下载产物"
+              tooltip={t("pactor.chat.artifact.download")}
               className="px-2"
               onClick={() =>
                 onDownload
@@ -436,7 +447,7 @@ export function ArtifactPanel({
           <Button
             icon="x"
             variant="text"
-            tooltip="收起产物区"
+            tooltip={t("pactor.chat.artifact.collapsePanel")}
             className="px-2"
             onClick={() => onClose?.()}
           />
@@ -458,7 +469,7 @@ export function ArtifactPanel({
             viewers={artifactViewers}
           />
         ) : (
-          <p className="text-sm text-muted-foreground">{emptyText}</p>
+          <p className="text-sm text-muted-foreground">{resolvedEmptyText}</p>
         )}
       </div>
     </aside>

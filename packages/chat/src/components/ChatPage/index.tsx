@@ -1,3 +1,4 @@
+import { useI18n } from "@pactor-app/runtime";
 import { Panel, PanelGroup, ResizableHandle } from "@pactor-app/ui/ui";
 
 import { cn } from "../../lib/utils.js";
@@ -118,11 +119,11 @@ export function ChatPage({
   workspace,
   onWorkspaceChange,
   onWorkspaceCreate,
-  artifactTitle = "产物",
+  artifactTitle,
   artifacts = [],
   activeArtifactId,
   onSelectArtifact,
-  artifactEmptyText = "暂无产物，发送消息后生成的文件将展示在这里",
+  artifactEmptyText,
   safeRegistry,
   user,
   artifactViewers,
@@ -134,6 +135,10 @@ export function ChatPage({
   className,
   style,
 }: ChatPageProps) {
+  const { t } = useI18n();
+  const resolvedArtifactTitle = artifactTitle ?? t("pactor.chat.artifact.title");
+  const resolvedArtifactEmptyText =
+    artifactEmptyText ?? t("pactor.chat.artifact.emptyInChat");
   // 产物区开关：受控 prop 优先，缺省内部维护
   const [artifactPanelOpen, setArtifactOpen] = useControlledValue(
     artifactOpen,
@@ -173,7 +178,7 @@ export function ChatPage({
 
   const conversationRail = (
     <ConversationRail
-      artifactTitle={artifactTitle}
+      artifactTitle={resolvedArtifactTitle}
       artifactOpen={artifactPanelOpen}
       hideArtifactRailItem={hideArtifactRailItem}
       onToggleArtifact={toggleArtifact}
@@ -235,8 +240,8 @@ export function ChatPage({
       artifact={activeArtifact}
       artifacts={artifacts}
       activeArtifactId={activeArtifactId}
-      artifactTitle={artifactTitle}
-      artifactEmptyText={artifactEmptyText}
+      artifactTitle={resolvedArtifactTitle}
+      artifactEmptyText={resolvedArtifactEmptyText}
       safeRegistry={safeRegistry}
       user={user}
       artifactViewers={artifactViewers}

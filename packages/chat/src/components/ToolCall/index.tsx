@@ -1,3 +1,4 @@
+import { useI18n } from '@pactor-app/runtime';
 import { useState, type CSSProperties } from 'react';
 
 import { cn } from '../../lib/utils.js';
@@ -47,6 +48,7 @@ function renderValue(value: unknown): string {
  * 展开后参数 / 结果仅以浅色文字呈现；缺省 running 展开、done / error 折叠。
  */
 export function ToolCall({ name, params, status = 'done', result, durationMs, defaultExpanded, className, style }: ToolCallProps) {
+  const { t } = useI18n();
   const [expanded, setExpanded] = useState(defaultExpanded ?? status === 'running');
   const meta = statusIcon[status];
   const paramsText = renderValue(params);
@@ -59,7 +61,7 @@ export function ToolCall({ name, params, status = 'done', result, durationMs, de
         <Icon name="terminal" size="sm" />
       </span>
       <span data-slot="tool-call-name" className="min-w-0 truncate font-medium">
-        {name ?? '工具调用'}
+        {name ?? t('pactor.chat.toolCall.title')}
       </span>
       <span className={cn('shrink-0', meta.className, meta.spin && 'animate-spin motion-reduce:animate-none')}>
         <Icon name={meta.icon} size="sm" />
@@ -104,7 +106,9 @@ export function ToolCall({ name, params, status = 'done', result, durationMs, de
         <div data-slot="tool-call-body" className="flex flex-col gap-2 py-1 pl-6">
           {paramsText ? (
             <div>
-              <div className="text-xs font-medium text-muted-foreground">参数</div>
+              <div className="text-xs font-medium text-muted-foreground">
+                {t('pactor.chat.toolCall.args')}
+              </div>
               <pre data-slot="tool-call-params" className="mt-1 overflow-x-auto text-xs whitespace-pre-wrap text-muted-foreground">
                 {paramsText}
               </pre>
@@ -112,7 +116,9 @@ export function ToolCall({ name, params, status = 'done', result, durationMs, de
           ) : null}
           {result ? (
             <div>
-              <div className="text-xs font-medium text-muted-foreground">结果</div>
+              <div className="text-xs font-medium text-muted-foreground">
+                {t('pactor.chat.toolCall.result')}
+              </div>
               <pre data-slot="tool-call-result" className="mt-1 overflow-x-auto text-xs whitespace-pre-wrap text-muted-foreground">
                 {result}
               </pre>

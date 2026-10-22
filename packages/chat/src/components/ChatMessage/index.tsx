@@ -1,3 +1,4 @@
+import { useI18n } from '@pactor-app/runtime';
 import type { CSSProperties } from 'react';
 
 import { cn } from '../../lib/utils.js';
@@ -73,6 +74,7 @@ function PartView({
   role: 'user' | 'assistant' | 'system';
   onOpenArtifacts?: () => void;
 }) {
+  const { t } = useI18n();
   // system 消息（参考 @pactor-app/chat MessageBubble）：居中弱提示——
   // 无气泡、无底色，仅 12px 浅色文字居中
   if (role === 'system' && (part.type === 'text' || part.type === 'markdown')) {
@@ -122,7 +124,7 @@ function PartView({
     case 'artifacts': {
       const artifactsClass =
         'flex w-fit items-center gap-1.5 text-muted-foreground';
-      const label = `已生成 ${part.count} 个产物`;
+      const label = t('pactor.chat.artifact.generated', { count: part.count });
       // 提供 onOpenArtifacts 时可点击（ChatPage 接线为打开产物栏）
       return onOpenArtifacts ? (
         <button
@@ -188,9 +190,12 @@ export function ChatMessage({
   className,
   style,
 }: ChatMessageProps) {
+  const { t } = useI18n();
   const isUser = role === 'user';
   const isSystem = role === 'system';
-  const senderName = isUser ? '我' : (agent?.name ?? '助手');
+  const senderName = isUser
+    ? t('pactor.chat.message.user')
+    : (agent?.name ?? t('pactor.chat.message.assistant'));
 
   return (
     <div

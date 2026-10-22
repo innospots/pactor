@@ -1,3 +1,4 @@
+import { useI18n } from '@pactor-app/runtime';
 import { useState } from 'react';
 
 import { cn } from '../../lib/utils.js';
@@ -101,6 +102,23 @@ export function RecordingList({
   listWidth,
   emptyText,
 }: RecordingListProps) {
+  const { t } = useI18n();
+  const resolvedNewRecordingLabel =
+    newRecordingLabel === undefined
+      ? t('pactor.recording.newRecording')
+      : newRecordingLabel;
+  const selectedCountLabel =
+    selectedCountText !== undefined
+      ? selectedCountText.replace('{count}', String(selectedRecordingIds.length))
+      : t('pactor.recording.selectedCount', {
+          count: selectedRecordingIds.length,
+        });
+  const deleteConfirmMessage =
+    deleteConfirmText !== undefined
+      ? deleteConfirmText.replace('{count}', String(selectedRecordingIds.length))
+      : t('pactor.recording.deleteConfirm', {
+          count: selectedRecordingIds.length,
+        });
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
 
   const renderRecordingItem = (item: RecordingItem) => {
@@ -169,7 +187,7 @@ export function RecordingList({
         <Text text={listTitle} strong size="large" />
         {selecting ? (
           <Button
-            text={selectDoneLabel ?? '完成'}
+            text={selectDoneLabel ?? t('pactor.recording.selectDone')}
             variant="link"
             size="small"
             onClick={() => onExitSelectMode?.()}
@@ -183,16 +201,9 @@ export function RecordingList({
           data-slot="recording-page-selection-bar"
           className="flex items-center justify-between"
         >
-          <Text
-            text={(selectedCountText ?? '已选 {count} 条').replace(
-              '{count}',
-              String(selectedRecordingIds.length),
-            )}
-            size="small"
-            type="secondary"
-          />
+          <Text text={selectedCountLabel} size="small" type="secondary" />
           <Button
-            text={selectAllLabel ?? '全选'}
+            text={selectAllLabel ?? t('pactor.table.selectAll')}
             variant="link"
             size="small"
             onClick={() => onToggleSelectAll?.()}
@@ -237,9 +248,9 @@ export function RecordingList({
           <Icon name="chevron-right" size={16} className="text-muted-foreground" />
         </button>
       ) : null}
-      {!selecting && newRecordingLabel !== null && newRecordingLabel !== undefined ? (
+      {!selecting && resolvedNewRecordingLabel !== null ? (
         <Button
-          text={newRecordingLabel}
+          text={resolvedNewRecordingLabel}
           icon="mic"
           variant="primary"
           className="w-full"
@@ -265,7 +276,7 @@ export function RecordingList({
       {selecting ? (
         <>
           <Button
-            text={deleteLabel ?? '删除'}
+            text={deleteLabel ?? t('pactor.recording.delete')}
             variant="primary"
             danger
             className="w-full shrink-0"
@@ -274,21 +285,22 @@ export function RecordingList({
           <AlertDialog open={deleteConfirmOpen} onOpenChange={setDeleteConfirmOpen}>
             <AlertDialogContent data-slot="recording-delete-confirm">
               <AlertDialogHeader>
-                <AlertDialogTitle>{deleteConfirmTitle ?? '删除录音'}</AlertDialogTitle>
+                <AlertDialogTitle>
+                  {deleteConfirmTitle ?? t('pactor.recording.deleteTitle')}
+                </AlertDialogTitle>
                 <AlertDialogDescription>
-                  {(
-                    deleteConfirmText ??
-                    '确定删除选中的 {count} 条录音吗？删除后不可恢复。'
-                  ).replace('{count}', String(selectedRecordingIds.length))}
+                  {deleteConfirmMessage}
                 </AlertDialogDescription>
               </AlertDialogHeader>
               <AlertDialogFooter>
-                <AlertDialogCancel>{deleteCancelLabel ?? '取消'}</AlertDialogCancel>
+                <AlertDialogCancel>
+                  {deleteCancelLabel ?? t('pactor.overlay.cancel')}
+                </AlertDialogCancel>
                 <AlertDialogAction
                   variant="destructive"
                   onClick={() => onDeleteSelected?.()}
                 >
-                  {deleteConfirmLabel ?? '删除'}
+                  {deleteConfirmLabel ?? t('pactor.recording.delete')}
                 </AlertDialogAction>
               </AlertDialogFooter>
             </AlertDialogContent>

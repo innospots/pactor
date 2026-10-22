@@ -1,4 +1,5 @@
 import type { DslNode, Registry } from '@pactor-app/core';
+import { useI18n } from '@pactor-app/runtime';
 import { createComponentRegistry, Icon, RailTooltip } from '@pactor-app/ui/components';
 import { Fragment, useEffect, useRef, type ReactNode } from 'react';
 
@@ -179,6 +180,7 @@ export function ChatSidebarMenu({
   activeMenuKey?: string;
   onMenuSelect?: (key: string, item: ChatMenuItem) => void;
 }): ReactNode {
+  const { t } = useI18n();
   const drawer = useSidebarDrawer();
 
   // DSL 路径的选择桥接：chat.menuSelect → 同一 onMenuSelect 传播 + drawer close
@@ -204,7 +206,7 @@ export function ChatSidebarMenu({
   const fallback = (() => {
     let lastGroup: string | undefined;
     return (
-      <nav className="pactor-chat-menu" aria-label="会话导航">
+      <nav className="pactor-chat-menu" aria-label={t('pactor.chat.nav.label')}>
         {menu.map((item) => {
           const groupLabel =
             item.group !== undefined && item.group !== lastGroup
@@ -322,6 +324,7 @@ export function Chat({
   onSend,
   onMenuSelect,
 }: ChatProps): ReactNode {
+  const { t } = useI18n();
   const services = useChatServices();
 
   useEffect(() => {
@@ -336,8 +339,7 @@ export function Chat({
   if (!services) {
     return (
       <div className="pactor-chat-notice" role="note">
-        未配置聊天服务：请在 Chat 外层使用 ChatServicesProvider 注入
-        transport 等服务后重试。
+        {t('pactor.chat.serviceMissing')}
       </div>
     );
   }

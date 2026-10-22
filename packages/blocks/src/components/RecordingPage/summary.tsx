@@ -1,3 +1,5 @@
+import { useI18n } from '@pactor-app/runtime';
+
 import { cn } from '../../lib/utils.js';
 import { Button } from "@pactor-app/ui/components";
 import { Icon } from "@pactor-app/ui/components";
@@ -50,12 +52,13 @@ export function RecordingSummaryView({
   onTodoToggle,
   onSummaryAction,
 }: RecordingSummaryViewProps) {
+  const { t } = useI18n();
   return (
     <div data-slot="recording-summary" className="flex flex-col gap-6">
       {summary.mindmap ? (
         <section className="rounded-lg border border-border">
           <div className="flex items-center justify-between px-4 py-3">
-            <Text text={summary.mindmapTitle ?? "思维导图"} strong />
+            <Text text={summary.mindmapTitle ?? t('pactor.recording.summary.mindmap')} strong />
             {summary.mindmapActionLabel !== undefined ? (
               <Button
                 text={summary.mindmapActionLabel}
@@ -86,7 +89,7 @@ export function RecordingSummaryView({
       {summary.overview !== undefined ? (
         <section className="flex flex-col gap-3">
           <Text
-            text={summary.overviewTitle ?? "会议概况"}
+            text={summary.overviewTitle ?? t('pactor.recording.summary.overview')}
             strong
             size="large"
           />
@@ -97,7 +100,7 @@ export function RecordingSummaryView({
       ) : null}
       {summary.topics !== undefined && summary.topics.length > 0 ? (
         <section className="flex flex-col gap-3">
-          <Text text={summary.topicsTitle ?? "主要议题"} strong size="large" />
+          <Text text={summary.topicsTitle ?? t('pactor.recording.summary.topics')} strong size="large" />
           <div
             className="grid gap-3"
             style={{ gridTemplateColumns: "1fr 1fr" }}
@@ -117,16 +120,16 @@ export function RecordingSummaryView({
       {summary.conclusions !== undefined && summary.conclusions.length > 0 ? (
         <section className="rounded-lg border border-border p-4">
           <Text
-            text={summary.conclusionsTitle ?? "评审结论与后续安排"}
+            text={summary.conclusionsTitle ?? t('pactor.recording.summary.conclusions')}
             strong
             size="small"
           />
           <Table
             className="mt-3"
             columns={[
-              { title: "事项", dataIndex: "item" },
-              { title: "会议结论", dataIndex: "conclusion" },
-              { title: "负责人", dataIndex: "owner" },
+              { title: t('pactor.recording.summary.item'), dataIndex: "item" },
+              { title: t('pactor.recording.summary.conclusion'), dataIndex: "conclusion" },
+              { title: t('pactor.recording.summary.owner'), dataIndex: "owner" },
             ]}
             dataSource={summary.conclusions.map((row, index) => ({
               id: index,
@@ -144,7 +147,7 @@ export function RecordingSummaryView({
       {summary.materials !== undefined && summary.materials.length > 0 ? (
         <section className="flex flex-col gap-3">
           <Text
-            text={summary.materialsTitle ?? "相关材料"}
+            text={summary.materialsTitle ?? t('pactor.recording.summary.materials')}
             strong
             size="large"
           />
@@ -185,7 +188,7 @@ export function RecordingSummaryView({
       ) : null}
       {summary.todos !== undefined && summary.todos.length > 0 ? (
         <section className="flex flex-col gap-3">
-          <Text text={summary.todosTitle ?? "待办事项"} strong size="large" />
+          <Text text={summary.todosTitle ?? t('pactor.recording.summary.todos')} strong size="large" />
           <div className="flex flex-col divide-y divide-border rounded-lg border border-border">
             {summary.todos.map((todo, index) => {
               const todoId = todo.id ?? index;

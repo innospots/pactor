@@ -1,3 +1,4 @@
+import { useI18n } from '@pactor-app/runtime';
 import { useState } from 'react';
 
 import { Avatar } from '@pactor-app/ui/components';
@@ -28,6 +29,7 @@ export function RecordingInsightView({
   onPerspectiveApply,
   onInsightAction,
 }: RecordingInsightViewProps) {
+  const { t } = useI18n();
   const [dialogOpen, setDialogOpen] = useState(false);
   // 解读身份文本：受控 prop 优先，缺省内部维护
   const inputControlled = insight.perspectiveInput !== undefined;
@@ -78,13 +80,13 @@ export function RecordingInsightView({
       ) : null}
       {insight.basics !== undefined ? (
         <section className="flex flex-col gap-3">
-          <Text text={insight.basicsTitle ?? '基础信息'} strong size="large" />
+          <Text text={insight.basicsTitle ?? t('pactor.recording.insight.basics')} strong size="large" />
           <Text text={insight.basics} />
         </section>
       ) : null}
       {insight.chapters !== undefined && insight.chapters.length > 0 ? (
         <section className="flex flex-col gap-3">
-          <Text text={insight.chaptersTitle ?? '章节速览与解读'} strong size="large" />
+          <Text text={insight.chaptersTitle ?? t('pactor.recording.insight.chapters')} strong size="large" />
           {insight.chapters.map((chapter, index) => (
             <div
               key={chapter.time ?? index}
@@ -104,7 +106,7 @@ export function RecordingInsightView({
       ) : null}
       {insight.viewpoints !== undefined && insight.viewpoints.length > 0 ? (
         <section className="flex flex-col gap-3">
-          <Text text={insight.viewpointsTitle ?? '观点分析'} strong size="large" />
+          <Text text={insight.viewpointsTitle ?? t('pactor.recording.insight.viewpoints')} strong size="large" />
           {insight.viewpoints.map((viewpoint, index) => (
             <div
               key={viewpoint.speaker ?? index}
@@ -117,12 +119,12 @@ export function RecordingInsightView({
                   <Text text={viewpoint.speaker} strong size="small" />
                 </div>
                 {viewpoint.tag !== '' ? (
-                  <Text text={viewpoint.tag ?? '自动识别'} size="small" type="secondary" />
+                  <Text text={viewpoint.tag ?? t('pactor.recording.insight.autoTag')} size="small" type="secondary" />
                 ) : null}
               </div>
               <p className="text-sm">
                 {viewpoint.label !== undefined ? (
-                  <strong>{viewpoint.label}：</strong>
+                  <strong>{viewpoint.label}{t('pactor.recording.insight.labelSeparator')}</strong>
                 ) : null}
                 {viewpoint.content}
               </p>
@@ -145,12 +147,12 @@ export function RecordingInsightView({
       ) : null}
       <RecordingPerspectiveDialog
         open={dialogOpen}
-        title={insight.perspectiveDialogTitle ?? '修改解读身份'}
-        hint={insight.perspectiveDialogHint ?? '用自然语言说明你在本次会议中的身份与关注点。'}
+        title={insight.perspectiveDialogTitle ?? t('pactor.recording.insight.perspectiveTitle')}
+        hint={insight.perspectiveDialogHint ?? t('pactor.recording.insight.perspectiveHint')}
         value={draftInput}
         placeholder={insight.perspectivePlaceholder}
-        cancelLabel={insight.perspectiveCancelLabel ?? '取消'}
-        confirmLabel={insight.perspectiveConfirmLabel ?? '应用身份'}
+        cancelLabel={insight.perspectiveCancelLabel ?? t('pactor.overlay.cancel')}
+        confirmLabel={insight.perspectiveConfirmLabel ?? t('pactor.recording.insight.perspectiveApply')}
         onChange={setDraftInput}
         onCancel={() => setDialogOpen(false)}
         onConfirm={confirmDialog}

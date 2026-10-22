@@ -1,3 +1,4 @@
+import { useI18n } from "@pactor-app/runtime";
 import { useEffect, useRef, useState, type MouseEvent } from "react";
 
 import { cn } from "../../lib/utils.js";
@@ -9,7 +10,7 @@ const MAX_VISIBLE = 10;
 const MAX_LABEL_CHARS = 10;
 
 /** 提取提问正文 */
-function questionText(message: MessageListItem): string {
+function questionText(message: MessageListItem, fallback: string): string {
   const text = (message.parts ?? [])
     .map((part) =>
       part.type === "text" || part.type === "markdown" ? part.content : "",
@@ -18,7 +19,7 @@ function questionText(message: MessageListItem): string {
     .join(" ")
     .replace(/\s+/g, " ")
     .trim();
-  return text || "提问";
+  return text || fallback;
 }
 
 /** 截断到 MAX_LABEL_CHARS 个字符（超出补 ...） */
@@ -44,6 +45,7 @@ export interface QuestionNavProps {
  * aside 容器最左侧（sidePanel / 对话图标栏之前），整体垂直居中。
  */
 export function QuestionNav({ messages = [] }: QuestionNavProps) {
+  const { t } = useI18n();
   const navRef = useRef<HTMLElement>(null);
   const [activeIndex, setActiveIndex] = useState<number | null>(null);
   const questions = messages.filter((message) => message.role === "user");
@@ -123,7 +125,7 @@ export function QuestionNav({ messages = [] }: QuestionNavProps) {
     <nav
       ref={navRef}
       data-slot="chat-page-question-nav"
-      aria-label="提问导航"
+      aria-label={t("pactor.chat.question.nav")}
       className="group relative flex w-7 shrink-0 flex-col self-center"
     >
       {/* 浮层：导航块与提问文字都在其中。默认透明、仅露出块列；
@@ -139,7 +141,7 @@ export function QuestionNav({ messages = [] }: QuestionNavProps) {
           className="pointer-events-none absolute inset-0 -z-10 scale-90 rounded-lg border border-transparent bg-transparent opacity-0 shadow-none transition-[background-color,border-color,box-shadow,opacity,scale] duration-200 ease-out group-hover:scale-100 group-hover:border-border group-hover:bg-popover group-hover:opacity-100 group-hover:shadow-md group-focus-within:scale-100 group-focus-within:border-border group-focus-within:bg-popover group-focus-within:opacity-100 group-focus-within:shadow-md"
         />
         {visible.map((message, index) => {
-          const text = questionText(message);
+          const text = questionText(message, t("pactor.chat.question.label"));
           const label = truncatedLabel(text);
           const itemIndex = offset + index;
           const active = activeIndex === itemIndex;
@@ -149,7 +151,7 @@ export function QuestionNav({ messages = [] }: QuestionNavProps) {
               type="button"
               data-slot="chat-page-question-nav-label"
               title={text}
-              aria-label={`跳转到提问：${text}`}
+              aria-label={t("pactor.chat.question.jump", { question: text })}
               aria-current={active ? "true" : undefined}
               className="group/item pointer-events-auto flex cursor-pointer items-center justify-end gap-2 rounded-sm focus-visible:outline-2 focus-visible:outline-primary"
               onClick={jumpTo(itemIndex)}

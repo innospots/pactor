@@ -1,5 +1,6 @@
 import { Icon } from '@pactor-app/ui/components';
 import { Registry } from '@pactor-app/core';
+import { useI18n } from '@pactor-app/runtime';
 import { useEffect, useMemo, useRef, useState, useSyncExternalStore, type ReactNode } from 'react';
 
 import type { ChatArtifact } from '../artifact.js';
@@ -195,6 +196,7 @@ export function ChatView({
   onMessageAction,
   composerBottom,
 }: ChatViewProps) {
+  const { t } = useI18n();
   const messages = useSyncExternalStore(
     (listener) => store.subscribe(listener),
     () => store.getMessages(),
@@ -442,7 +444,7 @@ export function ChatView({
             onClick={scrollToBottom}
           >
             <Icon name="arrow-down" size={13} />
-            回到底部
+            {t('pactor.chat.view.backToBottom')}
           </button>
         )}
       </div>

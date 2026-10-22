@@ -15,9 +15,11 @@ import type { ChromeFragment } from './ChromeSlot.js';
 export function buildMessageActionsFragment(args: {
   actions: ResolvedMessageAction[];
   copied: boolean;
+  /** 已复制反馈文案（缺省中文，保持独立片段 API 不变） */
+  copiedLabel?: string;
   token: string;
 }): ChromeFragment {
-  const { actions, copied, token } = args;
+  const { actions, copied, copiedLabel = '已复制', token } = args;
   return {
     requires: ['Flex', 'Tooltip', 'Button', 'Icon'],
     node: {
@@ -25,7 +27,7 @@ export function buildMessageActionsFragment(args: {
       props: { gap: 'small' },
       children: actions.map((action) => {
         const copiedFeedback = action.builtin === 'copy' && copied;
-        const label = copiedFeedback ? '已复制' : action.label;
+        const label = copiedFeedback ? copiedLabel : action.label;
         const iconName = copiedFeedback ? 'check' : action.icon;
         return {
           type: 'Tooltip',
