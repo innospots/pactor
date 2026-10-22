@@ -18,6 +18,7 @@ import {
   CONTROL_SIZE_BOX_GROW,
   CONTROL_SIZE_SELECT_ATTR,
   CONTROL_SIZE_TRIGGER_TEXT,
+  NumberInput,
   type ControlSize,
 } from '@pactor-app/ui/components';
 
@@ -41,7 +42,7 @@ export type ConditionOpt =
 export interface Condition {
   key: number;
   opt: ConditionOpt;
-  value?: string | number | (string | number)[];
+  value?: string | number | (string | number | undefined)[];
   score?: number;
 }
 
@@ -174,6 +175,16 @@ export function normalizeBetweenValue(
   return [value, undefined];
 }
 
+/** 条件值转为 NumberInput 的数值；数组 / 空值 / 非法值返回 undefined */
+function toNumberValue(value: Condition['value']): number | undefined {
+  if (typeof value === 'number') {
+    return Number.isFinite(value) ? value : undefined;
+  }
+  if (typeof value !== 'string' || value === '') return undefined;
+  const parsed = Number(value);
+  return Number.isFinite(parsed) ? parsed : undefined;
+}
+
 /** 展示状态下条件值的可读文本：BETWEEN 用 ~ 连接，IN/NOT_IN 逗号连接 */
 function formatConditionValue(condition: Condition): string {
   const { opt, value } = condition;
@@ -223,44 +234,39 @@ export function RuleConfig({ value, onChange, disabled, size = 'middle' }: RuleC
   }, [rawConditions]);
   const initScore = value?.score ?? 1;
 
-  // 权重输入框用本地文本态：输入过程中允许清空重输（不回弹默认值），
-  // 失焦时若为空/非法再回退默认值 1 并提交
-  const [scoreText, setScoreText] = useState(String(initScore));
+  // 权重输入框用本地数值态：输入过程中允许清空重输（不回弹默认值），
+  // 失焦时若为空再回退默认值 1 并提交
+  const [score, setScore] = useState<number | undefined>(initScore);
   const lastScoreRef = useRef(value?.score);
 
   // 外部值变化（表单 reset / 回显）时同步到输入框；自身提交的受控回环跳过
   useEffect(() => {
     if (value?.score === lastScoreRef.current) return;
     lastScoreRef.current = value?.score;
-    setScoreText(value?.score == null ? '' : String(value.score));
+    setScore(value?.score);
   }, [value?.score]);
 
   const commitScore = useCallback(
-    (score: number) => {
-      lastScoreRef.current = score;
-      onChange?.({ score, ruleConditions: conditions });
+    (next: number) => {
+      lastScoreRef.current = next;
+      onChange?.({ score: next, ruleConditions: conditions });
     },
     [onChange, conditions],
   );
 
-  // 权重取值约束：1-1000 的整数
-  const normalizeScore = (n: number) =>
-    Math.min(1000, Math.max(1, Math.round(n)));
-
-  const handleScoreTextChange = (text: string) => {
-    setScoreText(text);
-    if (text === '') return; // 允许清空，失焦时再补默认值
-    const n = Number(text);
-    if (Number.isFinite(n) && n >= 1 && n <= 1000 && Number.isInteger(n)) {
-      commitScore(n);
+  const handleWeightChange = (next: number | undefined) => {
+    setScore(next);
+    // 清空时只更新本地态，失焦再回退默认值；NumberInput 已按 min/max 钳制并取整
+    if (next != null && next !== lastScoreRef.current) {
+      commitScore(next);
     }
   };
 
-  const handleScoreBlur = () => {
-    const n = scoreText.trim() === '' ? NaN : Number(scoreText);
-    const next = Number.isFinite(n) ? normalizeScore(n) : 1;
-    setScoreText(String(next));
-    if (next !== lastScoreRef.current) commitScore(next);
+  const handleWeightBlur = () => {
+    if (score == null) {
+      setScore(1);
+      commitScore(1);
+    }
   };
 
   const update = useCallback(
@@ -331,17 +337,18 @@ export function RuleConfig({ value, onChange, disabled, size = 'middle' }: RuleC
       {/* Weight */}
       <div className="flex items-center gap-1 pb-2 border-b gap-2">
         <span className="text-sm shrink-0">{t('pactor.ruleConfig.weight')}</span>
-        <Input
-          type="number"
-          className={cn('w-48', CONTROL_SIZE_BOX[size])}
+        <NumberInput
+          className="w-48"
+          size={size}
           min={1}
           max={1000}
           step={1}
-          value={scoreText}
+          precision={0}
+          value={score}
           disabled={disabled}
           placeholder={t('pactor.ruleConfig.weightPlaceholder')}
-          onChange={(e) => handleScoreTextChange(e.target.value)}
-          onBlur={handleScoreBlur}
+          onChange={handleWeightChange}
+          onBlur={handleWeightBlur}
         />
       </div>
 
@@ -456,22 +463,15 @@ function ConditionRow({
       )}
 
       {/* Score input */}
-      <Input
-        type="number"
-        className={cn(
-          'w-24 shrink-0',
-          CONTROL_SIZE_BOX[size],
-          missingScore && 'border-destructive',
-        )}
-        placeholder={t('pactor.ruleConfig.score')}
-        value={score ?? ''}
+      <NumberInput
+        className="w-24 shrink-0"
+        controlClassName={missingScore ? 'border-destructive' : undefined}
+        size={size}
+        value={score}
         disabled={disabled}
+        placeholder={t('pactor.ruleConfig.score')}
         aria-invalid={missingScore || undefined}
-        onChange={(e) =>
-          onScoreChange(
-            e.target.value === '' ? undefined : e.target.valueAsNumber,
-          )
-        }
+        onChange={onScoreChange}
       />
 
       {/* Delete button */}
@@ -523,20 +523,20 @@ function ValueInput({ opt, value, disabled, size, onChange }: ValueInputProps) {
     const [v1, v2] = normalizeBetweenValue(value);
     return (
       <div className="flex items-center gap-2">
-        <Input
-          type="number"
-          className={cn('flex-1', CONTROL_SIZE_BOX[size])}
-          value={v1 ?? ''}
+        <NumberInput
+          className="flex-1"
+          size={size}
+          value={toNumberValue(v1)}
           disabled={disabled}
-          onChange={(e) => onChange([e.target.valueAsNumber, v2 as number])}
+          onChange={(next) => onChange([next, v2])}
         />
         <span className="text-muted-foreground text-sm shrink-0">~</span>
-        <Input
-          type="number"
-          className={cn('flex-1', CONTROL_SIZE_BOX[size])}
-          value={v2 ?? ''}
+        <NumberInput
+          className="flex-1"
+          size={size}
+          value={toNumberValue(v2)}
           disabled={disabled}
-          onChange={(e) => onChange([v1 as number, e.target.valueAsNumber])}
+          onChange={(next) => onChange([v1, next])}
         />
       </div>
     );
@@ -555,12 +555,11 @@ function ValueInput({ opt, value, disabled, size, onChange }: ValueInputProps) {
 
   if (NUMERIC_OPT.includes(opt)) {
     return (
-      <Input
-        type="number"
-        className={CONTROL_SIZE_BOX[size]}
-        value={(value as number) ?? ''}
+      <NumberInput
+        size={size}
+        value={toNumberValue(value)}
         disabled={disabled}
-        onChange={(e) => onChange(e.target.valueAsNumber)}
+        onChange={onChange}
       />
     );
   }
