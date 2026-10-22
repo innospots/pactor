@@ -133,6 +133,42 @@ describe('ApiMessageProvider ETag / 304', () => {
       provider.load({ ...loadInput, locale: 'zh-CN' }),
     ).rejects.toMatchObject({ code: 'MESSAGE_PROTOCOL_ERROR' });
   });
+
+  it('相邻字段拼接歧义（appId=ab,tenantId=c vs appId=a,tenantId=bc）产生不同缓存键', async () => {
+    const inputAb = { ...loadInput, appId: 'ab', tenantId: 'c' };
+    const envelopeAb = { ...validEnvelope, appId: 'ab' };
+    let call = 0;
+    const { provider } = createProvider(async () => {
+      call += 1;
+      return call === 1 ? makeResponse(200, JSON.stringify(envelopeAb)) : makeResponse(304, '');
+    });
+    await provider.load(inputAb);
+    // 若缓存键发生拼接碰撞，此处会错误复用 ab/c 的缓存而返回 notModified；
+    // 键不同则 304 无可复用缓存 → MESSAGE_PROTOCOL_ERROR
+    await expect(
+      provider.load({ ...loadInput, appId: 'a', tenantId: 'bc' }),
+    ).rejects.toMatchObject({ code: 'MESSAGE_PROTOCOL_ERROR' });
+  });
+
+  it('namespaces 顺序不同（[common,user] vs [user,common]）命中同一缓存键', async () => {
+    let call = 0;
+    const { provider } = createProvider(async () => {
+      call += 1;
+      return call === 1
+        ? makeResponse(200, JSON.stringify(validEnvelope), {
+            'content-type': 'application/json',
+            etag: '"v12"',
+          })
+        : makeResponse(304, '');
+    });
+    await provider.load({ ...loadInput, namespaces: ['common', 'user'] });
+    const second = await provider.loadWithCacheInfo({
+      ...loadInput,
+      namespaces: ['user', 'common'],
+    });
+    expect(second.notModified).toBe(true);
+    expect(second.bundleSet).toEqual(validEnvelope);
+  });
 });
 
 describe('ApiMessageProvider 错误响应', () => {

@@ -48,9 +48,9 @@ function cacheKeyOf(input: LoadMessagesInput): string {
     input.appId,
     input.tenantId ?? '',
     input.locale,
-    [...input.namespaces].join(','),
+    [...input.namespaces].sort().join(','),
     input.release,
-  ].join('');
+  ].join('\n');
 }
 
 function buildUrl(endpoint: string, input: LoadMessagesInput): string {
