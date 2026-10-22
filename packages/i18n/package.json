@@ -1,0 +1,78 @@
+{
+  "name": "@pactor-app/i18n",
+  "version": "1.54.4",
+  "description": "Pactor i18n: request locale resolution and message bundle providers (YAML / API)",
+  "keywords": [
+    "pactor",
+    "dsl",
+    "server-driven-ui",
+    "i18n",
+    "localization",
+    "locale",
+    "messages"
+  ],
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/innospots/pactor.git",
+    "directory": "packages/i18n"
+  },
+  "homepage": "https://github.com/innospots/pactor/tree/main/packages/i18n",
+  "bugs": "https://github.com/innospots/pactor/issues",
+  "type": "module",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.js"
+      },
+      "require": {
+        "types": "./dist/index.d.cts",
+        "default": "./dist/index.cjs"
+      }
+    },
+    "./node": {
+      "import": {
+        "types": "./dist/node.d.ts",
+        "default": "./dist/node.js"
+      },
+      "require": {
+        "types": "./dist/node.d.cts",
+        "default": "./dist/node.cjs"
+      }
+    }
+  },
+  "sideEffects": false,
+  "engines": {
+    "node": ">=18"
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsup",
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit",
+    "prepublishOnly": "pnpm build"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "dependencies": {
+    "@pactor-app/core": "workspace:*"
+  },
+  "peerDependencies": {
+    "yaml": "^2.9.0"
+  },
+  "peerDependenciesMeta": {
+    "yaml": {
+      "optional": true
+    }
+  },
+  "devDependencies": {
+    "yaml": "^2.9.0"
+  }
+}
