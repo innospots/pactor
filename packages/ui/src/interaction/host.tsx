@@ -215,7 +215,12 @@ function OverlayEntryView({
             }
           />
         </DialogHeader>
-        <div data-slot="overlay-modal-body">{body}</div>
+        {/* min-w-0：作为 DialogContent（grid）子项默认 min-width:auto，
+            超长不可换行内容（如 Select 选中长文案）会把网格轨道撑宽、
+            连带弹层溢出；允许收缩后由内容自身截断。 */}
+        <div data-slot="overlay-modal-body" className="min-w-0">
+          {body}
+        </div>
         {footer}
       </DialogContent>
     </Dialog>
