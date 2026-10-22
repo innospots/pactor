@@ -430,10 +430,11 @@ function MenuEntry({
             </div>
             {/* 子菜单以非 collapsed 完整形态渲染（label/icon/badge/dot/选中态）；
                 与展开侧栏同款竖线容器：线对准浮层标题文字起点（ml-3），
-                容器 pl-1 让条目与竖线保持 4px 间距（indent=0 归零内联 padding） */}
+                容器 pl-1 让条目与竖线保持 4px 间距（indent=0 归零内联 padding）；
+                pt-0.5 让浮层标题与首个条目留 2px 间距 */}
             <div
               data-slot="menu-children"
-              className="ml-3 flex flex-col gap-0.5 border-l border-border/80 pl-1"
+              className="ml-3 flex flex-col gap-0.5 border-l border-border/80 pl-1 pt-0.5"
             >
               {item.children?.map((child) => (
                 <MenuEntry
@@ -503,10 +504,11 @@ function MenuEntry({
           // 子菜单组：左侧浅灰竖线贯通，线对准父项图标中心
           // （ml-5 = px-3 12 + sm 图标半宽 8）；容器 pl-1 让条目
           // （含 hover 底色）与竖线保持 4px 间距；子项自身 padding
-          // 归零（indent=0），hover 经 hover:pl-2 右移
+          // 归零（indent=0），hover 经 hover:pl-2 右移；
+          // pt-0.5 让父项名称与首个条目留 2px 间距
           <div
             data-slot="menu-children"
-            className="ml-5 flex flex-col gap-0.5 border-l border-border/80 pl-1"
+            className="ml-5 flex flex-col gap-0.5 border-l border-border/80 pl-1 pt-0.5"
           >
             {item.children.map((child) => (
               <MenuEntry
