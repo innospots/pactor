@@ -3,13 +3,15 @@ import type { ExpressionScope } from '@pactor-app/expression';
 
 import type { HttpAdapter, HttpRequestConfig } from '../context/adapters.js';
 import type { ServiceRegistry } from '../context/context.js';
-import { resolveDeep } from '../utils/resolve.js';
+import { resolveDeep, type LocalizationMode } from '../utils/resolve.js';
 
 export interface DslSourceResolverDeps {
   services: ServiceRegistry;
   http: HttpAdapter;
   /** 加载前取当前表达式作用域（params 求值用） */
   getScope: () => ExpressionScope;
+  /** 本地化协议模式（缺省 'client'），透传给 params / request 求值 */
+  localizationMode?: LocalizationMode;
 }
 
 /** 缓存 key：按固定字段序拼接引用原文（避免字段顺序差异导致重复请求） */
@@ -46,6 +48,7 @@ export class DslSourceResolver {
 
   private async load(ref: DslSourceRef): Promise<unknown> {
     const scope = this.deps.getScope();
+    const resolveOptions = { localizationMode: this.deps.localizationMode };
     const source = ref.source;
     if (source.type === 'service') {
       const handler = this.deps.services.get(source.service);
@@ -54,13 +57,17 @@ export class DslSourceResolver {
           `[@pactor-app/runtime] service not registered: "${source.service}"`,
         );
       }
-      const params = resolveDeep(source.params ?? {}, scope) as Record<
+      const params = resolveDeep(source.params ?? {}, scope, resolveOptions) as Record<
         string,
         unknown
       >;
       return handler(params);
     }
-    const request = resolveDeep(source.request, scope) as HttpRequestConfig;
+    const request = resolveDeep(
+      source.request,
+      scope,
+      resolveOptions,
+    ) as HttpRequestConfig;
     return this.deps.http.request(request);
   }
 }

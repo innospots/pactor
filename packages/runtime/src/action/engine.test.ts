@@ -840,3 +840,64 @@ describe('命名动作结果（ActionConfig.id → actions 作用域）', () => 
     });
   });
 });
+
+describe('本地化协议（$localizedText / $i18n）', () => {
+  it('动作 params 中的 $localizedText 经插值解析为终值字符串', async () => {
+    const { engine, context } = setup({ state: { count: 2 } });
+    const handler = vi.fn(() => ({ ok: true as const }));
+    context.actions.register('my.action', handler);
+
+    const result = await engine.execute({
+      action: 'my.action',
+      params: {
+        label: {
+          $localizedText: {
+            template: '共 {{count}} 条',
+            params: { count: '${state.count}' },
+          },
+        },
+      },
+    });
+
+    expect(result.ok).toBe(true);
+    expect(handler).toHaveBeenCalledWith(
+      expect.objectContaining({ params: { label: '共 2 条' } }),
+      expect.anything(),
+    );
+  });
+
+  it('server 模式下 params 中的 $i18n 收敛为受控失败（LocalizationProtocolError）', async () => {
+    const { engine, context } = setup({ localizationMode: 'server' });
+    const handler = vi.fn(() => ({ ok: true as const }));
+    context.actions.register('my.action', handler);
+
+    const result = await engine.execute({
+      action: 'my.action',
+      params: { label: { $i18n: { key: 'menu.home' } } },
+    });
+
+    expect(result.ok).toBe(false);
+    expect(result.error?.name).toBe('LocalizationProtocolError');
+    expect(result.error?.message).toContain('$i18n');
+    expect(handler).not.toHaveBeenCalled();
+  });
+
+  it('client 模式（默认）下 params 中的 $i18n 按普通对象递归，行为不变', async () => {
+    const { engine, context } = setup({ state: { n: 3 } });
+    const handler = vi.fn(() => ({ ok: true as const }));
+    context.actions.register('my.action', handler);
+
+    const result = await engine.execute({
+      action: 'my.action',
+      params: { label: { $i18n: { key: 'menu.home', params: { n: '${state.n}' } } } },
+    });
+
+    expect(result.ok).toBe(true);
+    expect(handler).toHaveBeenCalledWith(
+      expect.objectContaining({
+        params: { label: { $i18n: { key: 'menu.home', params: { n: 3 } } } },
+      }),
+      expect.anything(),
+    );
+  });
+});

@@ -103,6 +103,7 @@ export class ActionEngine {
         // Renderer 的 resolveProps）保持原样，由各自执行/渲染时
         // 按当时的 state 与作用域求值
         params: resolveDeep(action.params ?? {}, scope, {
+          localizationMode: this.context.localizationMode,
           isOpaque: (value) =>
             typeof value['action'] === 'string' ||
             typeof value['type'] === 'string' ||

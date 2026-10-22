@@ -4,6 +4,7 @@ import type { ExpressionScope } from '@pactor-app/expression';
 import type { ActionRegistry } from '../action/engine.js';
 import { DataStore } from '../datasource/data-store.js';
 import { DslSourceResolver } from '../datasource/dsl-source-resolver.js';
+import type { LocalizationMode } from '../utils/resolve.js';
 import {
   createDefaultPermissionAdapter,
   createDefaultRouterAdapter,
@@ -103,6 +104,12 @@ export interface RuntimeContext {
   /** i18n 上下文：提供 `t(key, params?)` 翻译函数 */
   i18n: I18nContext;
   /**
+   * 本地化协议模式（缺省 'client'）：'server' 时 props / 动作参数 /
+   * dataSource 参数解析路径中遇到作者态 `$i18n` 描述抛
+   * LocalizationProtocolError；'client' 行为与历史版本一致
+   */
+  localizationMode: LocalizationMode;
+  /**
    * 子运行时指回创建它的宿主运行时上下文（如 OverlayHost 为 page
    * 类型弹层创建的子 PageRuntime）。交互归属（overlay 在哪个宿主的
    * OverlayHost 渲染）沿此链上溯到根运行时；普通页面运行时不设置。
@@ -139,6 +146,8 @@ export interface CreateRuntimeContextOptions {
   defaultLocale?: string;
   /** 翻译消息表 */
   messages?: Record<string, string | Record<string, string>>;
+  /** 本地化协议模式（缺省 'client'）；'server' 时 `$i18n` 漏入解析路径为协议错误 */
+  localizationMode?: LocalizationMode;
 }
 
 /**
@@ -177,11 +186,13 @@ export function createRuntimeContext(
     services,
     http,
     getScope: () => buildScope(context),
+    localizationMode: options.localizationMode,
   });
   const dslSources = new DslSourceResolver({
     services,
     http,
     getScope: () => buildScope(context),
+    localizationMode: options.localizationMode,
   });
 
   context = {
@@ -208,6 +219,7 @@ export function createRuntimeContext(
       defaultLocale: options.defaultLocale,
       messages: options.messages,
     }),
+    localizationMode: options.localizationMode ?? 'client',
   };
   return context;
 }
