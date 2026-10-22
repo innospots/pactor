@@ -151,7 +151,14 @@ export function Form({
       <form
         ref={formElRef}
         data-slot="form"
-        className={cn(layout === 'inline' && 'flex flex-wrap items-center gap-3', className)}
+        // min-w-0：作为 grid / flex 子项时默认 min-width:auto，超长不可换行
+        // 内容（如 Select 选中长文案）会把表单撑出弹层等定宽容器；允许收缩后
+        // 由控件自身截断（SelectValue 已 truncate）。
+        className={cn(
+          'min-w-0',
+          layout === 'inline' && 'flex flex-wrap items-center gap-3',
+          className,
+        )}
         style={style}
         onSubmit={handleSubmit}
       >

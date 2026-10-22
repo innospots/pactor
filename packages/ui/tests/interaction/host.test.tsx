@@ -60,6 +60,11 @@ describe('Modal / Drawer 渲染（shadcn 实现）', () => {
 
     await screen.findByText('用户详情');
     expect(document.querySelector('[data-slot=overlay-modal]')).toBeTruthy();
+    // 弹层内容区允许收缩：避免超长不可换行内容撑宽 DialogContent 的
+    // grid 轨道（定宽弹层溢出）
+    expect(
+      document.querySelector('[data-slot=overlay-modal-body]')?.className,
+    ).toContain('min-w-0');
     await screen.findByText('详情内容');
     expect(document.querySelector('.ant-modal')).toBeNull();
   });
