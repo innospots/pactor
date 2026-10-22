@@ -84,7 +84,9 @@ export function registerInteractionActions(
     // overlay 配置自身（title / width / params / page.pageId 等），
     // content DslNode 子树保留原样，由渲染层以 overlay 作用域求值
     const { content, ...rest } = overlay;
-    const resolved = resolveDeep(rest, ctx.scope) as Record<string, unknown>;
+    const resolved = resolveDeep(rest, ctx.scope, {
+      localizationMode: ctx.context.localizationMode,
+    }) as Record<string, unknown>;
     const config = { ...resolved, content } as unknown as OverlayConfig;
     // 归属运行时：沿 parentRuntime 链上溯到根——多运行时共享同一
     // OverlayManager 时（布局嵌套链共用装配单例），OverlayHost 只渲染
