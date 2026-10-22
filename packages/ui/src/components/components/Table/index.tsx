@@ -10,7 +10,6 @@ import {
 } from 'react';
 
 import { cn } from '../../../lib/utils.js';
-import { Button as ShadcnButton } from '../../../ui/button.js';
 import { Checkbox as ShadcnCheckbox } from '../../../ui/checkbox.js';
 import { Spinner as ShadcnSpinner } from '../../../ui/spinner.js';
 import {
@@ -22,6 +21,7 @@ import {
   TableRow,
 } from '../../../ui/table.js';
 import { Icon } from '../Icon/index.js';
+import { Pagination } from '../Pagination/index.js';
 import {
   childrenOf,
   collectParentKeys,
@@ -176,7 +176,7 @@ function columnWidthStyle(column: TableColumn): CSSProperties | undefined {
 /**
  * Table 适配器（shadcn kit，语义对齐 antd 版）：vendored shadcn Table 原语
  * 实现 columns / dataSource / rowKey（默认 'id'）/ loading / 简化分页
- * （pageSize）/ 空态；`cell` 行模板经 renderChildren 注入
+ * （pageSize，底部渲染 Pagination 适配器）/ 空态；`cell` 行模板经 renderChildren 注入
  * `{ row, rowIndex }`（rowIndex 为当前页内序号）。
  *
  * 增强能力：
@@ -354,10 +354,6 @@ export function Table({
   const pageSize = pagination === false ? undefined : pagination?.pageSize;
   // 分页按顶层行计数 / 切片（树形子级随顶层行整体进出页）
   const total = rowsSource.length;
-  const pageCount =
-    pageSize !== undefined && pageSize > 0
-      ? Math.max(1, Math.ceil(total / pageSize))
-      : 1;
   const pagedRows =
     pageSize !== undefined && pageSize > 0
       ? sortedRows.slice((current - 1) * pageSize, current * pageSize)
@@ -697,21 +693,14 @@ export function Table({
         </TableBody>
       </ShadcnTable>
       {pageSize !== undefined && pageSize > 0 ? (
-        <div data-slot="table-pagination" className="mt-3 flex justify-end gap-1">
-          {Array.from({ length: pageCount }, (_, index) => index + 1).map(
-            (page) => (
-              <ShadcnButton
-                key={page}
-                type="button"
-                size="sm"
-                variant={page === current ? 'default' : 'outline'}
-                aria-current={page === current ? 'page' : undefined}
-                onClick={() => goToPage(page)}
-              >
-                {page}
-              </ShadcnButton>
-            ),
-          )}
+        <div data-slot="table-pagination" className="mt-3">
+          <Pagination
+            total={total}
+            pageSize={pageSize}
+            page={current}
+            align="right"
+            onChange={goToPage}
+          />
         </div>
       ) : null}
     </div>

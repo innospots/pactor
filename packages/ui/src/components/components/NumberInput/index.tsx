@@ -1,6 +1,13 @@
 import { useI18n } from '@pactor-app/runtime';
 import { ChevronDownIcon, ChevronUpIcon } from 'lucide-react';
-import { useEffect, useId, useState, type CSSProperties } from 'react';
+import {
+  useEffect,
+  useId,
+  useState,
+  type AriaAttributes,
+  type CSSProperties,
+  type FocusEventHandler,
+} from 'react';
 
 import { cn } from '../../../lib/utils.js';
 import { Input as ShadcnInput } from '../../../ui/input.js';
@@ -35,6 +42,10 @@ export interface NumberInputProps {
   allowClear?: boolean;
   /** 输入事件，传出 number；清空时传出 undefined */
   onChange?: (value: number | undefined) => void;
+  /** 失焦事件（透传原生 input blur） */
+  onBlur?: FocusEventHandler<HTMLInputElement>;
+  /** 无效状态（透传原生 aria-invalid） */
+  'aria-invalid'?: AriaAttributes['aria-invalid'];
   /** 通用：根节点 class（Form 内为 form-item 容器，独立渲染时为控件包裹节点） */
   className?: string;
   /** 控件本体（input）class（无论是否在 Form 内都挂 input 节点） */
@@ -91,6 +102,8 @@ export function NumberInput({
   size = 'middle',
   allowClear,
   onChange,
+  onBlur,
+  'aria-invalid': ariaInvalid,
   className,
   controlClassName,
   style,
@@ -183,6 +196,8 @@ export function NumberInput({
         step={step}
         placeholder={placeholder}
         disabled={disabled}
+        onBlur={onBlur}
+        aria-invalid={ariaInvalid}
         className={cn(
           CONTROL_SIZE_BOX[size],
           // × 悬浮在步进按钮左侧（right-7 宽 28px），有值时文本预留双倍右内边距避免遮挡
