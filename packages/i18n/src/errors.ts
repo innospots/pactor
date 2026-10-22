@@ -13,7 +13,18 @@ export type I18nErrorCode =
   | 'MESSAGE_BUNDLE_INVALID'
   // ApiMessageProvider
   | 'MESSAGE_PROTOCOL_ERROR'
-  | 'MESSAGE_FETCH_FAILED';
+  | 'MESSAGE_FETCH_FAILED'
+  // TranslatableFieldRegistry / DslLocalizer
+  | 'INVALID_FIELD_PATH'
+  | 'UNREGISTERED_I18N_FIELD'
+  | 'I18N_DESCRIPTOR_INVALID'
+  | 'BINDING_INVALID'
+  | 'BINDING_CONFLICT'
+  | 'UNSAFE_MESSAGE'
+  // localizeYamlResource
+  | 'PAGE_LOAD_FAILED'
+  | 'PAGE_YAML_INVALID'
+  | 'PAGE_DSL_INVALID';
 
 /** 携带可识别 code 的 i18n 错误 */
 export class I18nError extends Error {

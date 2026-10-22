@@ -32,3 +32,27 @@ export {
   validateBundleSetEnvelope,
 } from './bundle-validation.js';
 export type { EnvelopeExpectation } from './bundle-validation.js';
+
+export {
+  createDefaultTranslatableFieldRegistry,
+  getDefaultTranslatableFieldRegistry,
+  TranslatableFieldRegistry,
+} from './translatable-field-registry.js';
+
+export {
+  escapeJsonPointerSegment,
+  parseJsonPointer,
+  resolveJsonPointer,
+} from './json-pointer.js';
+export type { ResolvedJsonPointer } from './json-pointer.js';
+
+export { localizePageDsl, MISSING_TRANSLATION_TEXT } from './dsl-localizer.js';
+export type {
+  AuthorPageDsl,
+  AuthorPageI18n,
+  LanguageBundles,
+  LocalizeDiagnostic,
+  LocalizePageDslInput,
+  MissingResolution,
+  TranslationDescriptor,
+} from './dsl-localizer.js';
