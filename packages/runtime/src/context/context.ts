@@ -193,6 +193,8 @@ export function createRuntimeContext(
     http,
     getScope: () => buildScope(context),
     localizationMode: options.localizationMode,
+    // 语言上下文注入（G25）：页面运行时按语言重建，缓存键随 locale 隔离
+    locale: options.locale,
   });
 
   context = {

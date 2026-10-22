@@ -164,6 +164,27 @@ describe('fetchSitemap', () => {
     expect(vi.mocked(fetcher).mock.calls[0]![0]).toBe('https://proxy/api/sitemap');
     expect(merged.id).toBe('site');
   });
+
+  it('locale：sitemap 请求 URL 追加 ?locale=（已有 locale 参数替换不追加）', async () => {
+    const sitemap = createSitemap();
+    const fetcher = vi.fn(async () => jsonResponse(sitemap)) as unknown as typeof fetch;
+    await fetchSitemap(['/api/sitemap?x=1&locale=zh-CN', '/api/sitemap2'], {
+      fetcher,
+      locale: 'en-US',
+    });
+    expect(vi.mocked(fetcher).mock.calls.map((c) => c[0])).toEqual([
+      '/api/sitemap?x=1&locale=en-US',
+      '/api/sitemap2?locale=en-US',
+    ]);
+  });
+
+  it('locale 缺省：请求 URL 不追加 locale 参数（保持现状）', async () => {
+    const fetcher = vi.fn(async () =>
+      jsonResponse(createSitemap()),
+    ) as unknown as typeof fetch;
+    await fetchSitemap(['/api/sitemap?x=1'], { fetcher });
+    expect(vi.mocked(fetcher).mock.calls[0]![0]).toBe('/api/sitemap?x=1');
+  });
 });
 
 describe('createSitemapLoader', () => {
@@ -242,6 +263,60 @@ describe('createSitemapLoader', () => {
     const resource = await loader.loadPage('lazy');
     expect(resource.id).toBe('lazy');
     expect(resource.schema.body).toEqual(textPage('lazy', '懒加载').body);
+  });
+
+  it('locale：页面请求携带 ?locale=；两个 locale 的同一页面各自缓存、互不污染', async () => {
+    const page = {
+      id: 'lazy',
+      resourceType: 'page',
+      version: 7,
+      dslVersion: '1.0',
+      schema: textPage('lazy', '懒加载'),
+    };
+    const fetcher = vi.fn(async () => jsonResponse(page)) as unknown as typeof fetch;
+    const sitemap = createSitemap({
+      pages: [{ id: 'lazy', path: '/lazy', title: '懒页', version: 7 }],
+    });
+    const zh = createSitemapLoader(sitemap, { fetcher, locale: 'zh-CN' });
+    const en = createSitemapLoader(sitemap, { fetcher, locale: 'en-US' });
+
+    // 同一页面在两个 locale 下各自请求一次（缓存键 id@version@locale 隔离）
+    const zhFirst = await zh.loadPage('lazy');
+    const enFirst = await en.loadPage('lazy');
+    expect(zhFirst).not.toBe(enFirst);
+    expect(vi.mocked(fetcher).mock.calls.map((c) => c[0])).toEqual([
+      '/api/pages/lazy?locale=zh-CN',
+      '/api/pages/lazy?locale=en-US',
+    ]);
+
+    // 各自缓存命中：再次加载不再请求
+    expect(await zh.loadPage('lazy')).toBe(zhFirst);
+    expect(await en.loadPage('lazy')).toBe(enFirst);
+    expect(fetcher).toHaveBeenCalledTimes(2);
+  });
+
+  it('locale：端点已含 locale 参数时替换为新值（不重复追加）', async () => {
+    const fetcher = vi.fn(async () =>
+      jsonResponse({
+        id: 'lazy',
+        resourceType: 'page',
+        version: 1,
+        dslVersion: '1.0',
+        schema: textPage('lazy', '懒加载'),
+      }),
+    ) as unknown as typeof fetch;
+    const sitemap = createSitemap({
+      pages: [{ id: 'lazy', path: '/lazy', title: '懒页' }],
+    });
+    const loader = createSitemapLoader(sitemap, {
+      fetcher,
+      pageEndpoint: (id) => `/api/pages/${id}?locale=zh-CN&x=1`,
+      locale: 'en-US',
+    });
+    await loader.loadPage('lazy');
+    expect(vi.mocked(fetcher).mock.calls[0]![0]).toBe(
+      '/api/pages/lazy?x=1&locale=en-US',
+    );
   });
 });
 

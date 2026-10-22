@@ -214,6 +214,7 @@ function EmbeddedPage({
           const resolver = new DslSourceResolver({
             services: assembly.services,
             http: assembly.httpAdapter,
+            locale: options.locale,
             getScope: () => ({
               route: { params: route?.params ?? {}, query: route?.query ?? {} },
             }),
