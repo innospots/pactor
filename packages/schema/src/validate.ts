@@ -11,7 +11,20 @@ import {
   dslNodeSchema,
   dslSourceRefSchema,
 } from './schemas/dsl-node.js';
-import { PAGE_DSL_SCHEMA_ID, pageDslSchema } from './schemas/page-dsl.js';
+import {
+  I18N_VALUE_DESCRIPTOR_SCHEMA_ID,
+  i18nValueDescriptorSchema,
+  LOCALIZED_TEXT_SCHEMA_ID,
+  localizedTextSchema,
+} from './schemas/i18n.js';
+import {
+  AUTHOR_PAGE_DSL_SCHEMA_ID,
+  authorPageDslSchema,
+  LOCALIZED_PAGE_DSL_SCHEMA_ID,
+  localizedPageDslSchema,
+  PAGE_DSL_SCHEMA_ID,
+  pageDslSchema,
+} from './schemas/page-dsl.js';
 
 /** 结构化校验错误（不暴露 Ajv 原始错误对象） */
 export interface DslValidationError {
@@ -60,6 +73,10 @@ function getAjv(): Ajv | null {
     instance.addSchema(dslSourceRefSchema);
     instance.addSchema(dslNodeSchema);
     instance.addSchema(pageDslSchema);
+    instance.addSchema(authorPageDslSchema);
+    instance.addSchema(localizedPageDslSchema);
+    instance.addSchema(i18nValueDescriptorSchema);
+    instance.addSchema(localizedTextSchema);
     instance.addSchema(dslFragmentPayloadSchema);
     ajv = instance;
   } catch (error) {
@@ -140,6 +157,128 @@ export function validatePageDsl(document: unknown): DslValidationResult {
     errors: valid ? [] : toStructuredErrors(validate.errors ?? []),
     warnings: collectWarnings(document),
   };
+}
+
+/** 递归遍历未知文档；visit 返回 false 时不再深入该值 */
+function walkDocument(
+  value: unknown,
+  path: string,
+  visit: (value: unknown, path: string) => boolean,
+): void {
+  if (!visit(value, path)) {
+    return;
+  }
+  if (Array.isArray(value)) {
+    value.forEach((item, index) => walkDocument(item, `${path}/${index}`, visit));
+    return;
+  }
+  if (typeof value === 'object' && value !== null) {
+    for (const [key, child] of Object.entries(value)) {
+      walkDocument(child, `${path}/${key}`, visit);
+    }
+  }
+}
+
+/** 将子校验错误的路径拼接到父路径（子路径 '/' 表示当前值本身） */
+function atPath(path: string, errors: DslValidationError[]): DslValidationError[] {
+  return errors.map((error) => ({
+    ...error,
+    path: `${path}${error.path === '/' ? '' : error.path}`,
+  }));
+}
+
+/** 递归校验文档中出现的 $i18n 翻译描述（props 为自由对象，节点 Schema 无法到达） */
+function collectI18nDescriptorErrors(document: unknown): DslValidationError[] {
+  const validate = getCompiledValidator(I18N_VALUE_DESCRIPTOR_SCHEMA_ID);
+  if (!validate) {
+    return [];
+  }
+  const errors: DslValidationError[] = [];
+  walkDocument(document, '', (value, path) => {
+    if (
+      typeof value === 'object' &&
+      value !== null &&
+      !Array.isArray(value) &&
+      '$i18n' in value
+    ) {
+      if (!validate(value)) {
+        errors.push(...atPath(path, toStructuredErrors(validate.errors ?? [])));
+      }
+      // 描述内部（messages 等）不再深入，避免对译文内容重复报错
+      return false;
+    }
+    return true;
+  });
+  return errors;
+}
+
+/**
+ * 校验作者态 Page DSL 文档：在 Page DSL 基础上允许顶层 i18n 字段
+ * （namespaces / bindings，bindings 键须为合法 JSON Pointer），
+ * 并递归校验自由对象中出现的 $i18n 翻译描述结构（设计文档第 4.1、4.2 节）。
+ */
+export function validateAuthorPageDsl(document: unknown): DslValidationResult {
+  const validate = getCompiledValidator(AUTHOR_PAGE_DSL_SCHEMA_ID);
+  if (!validate) {
+    return { valid: true, errors: [], warnings: collectWarnings(document) };
+  }
+  const valid = validate(document) as boolean;
+  const errors = [
+    ...(valid ? [] : toStructuredErrors(validate.errors ?? [])),
+    ...collectI18nDescriptorErrors(document),
+  ];
+  return { valid: errors.length === 0, errors, warnings: collectWarnings(document) };
+}
+
+/**
+ * 递归检查下发态残留：任何 $i18n 描述均为协议错误；
+ * $localizedText 需满足结构校验（template 为字符串、params 为对象、包装无其他同级字段）
+ */
+function collectLocalizedResidualErrors(document: unknown): DslValidationError[] {
+  const validateText = getCompiledValidator(LOCALIZED_TEXT_SCHEMA_ID);
+  if (!validateText) {
+    return [];
+  }
+  const errors: DslValidationError[] = [];
+  walkDocument(document, '', (value, path) => {
+    if (typeof value !== 'object' || value === null || Array.isArray(value)) {
+      return true;
+    }
+    if ('$i18n' in value) {
+      errors.push({
+        path,
+        message: '下发态 DSL 不允许残留 $i18n 翻译描述',
+        keyword: 'prohibited',
+      });
+      return false;
+    }
+    if ('$localizedText' in value) {
+      if (!validateText(value)) {
+        errors.push(...atPath(path, toStructuredErrors(validateText.errors ?? [])));
+      }
+      return false;
+    }
+    return true;
+  });
+  return errors;
+}
+
+/**
+ * 校验下发态（已本地化）Page DSL 文档：拒绝残留的作者态 $i18n 描述与顶层
+ * i18n 字段；允许注册的文本属性中出现结构合法的 $localizedText 动态文本
+ * （设计文档第 4.3、6.2 节）。
+ */
+export function validateLocalizedPageDsl(document: unknown): DslValidationResult {
+  const validate = getCompiledValidator(LOCALIZED_PAGE_DSL_SCHEMA_ID);
+  if (!validate) {
+    return { valid: true, errors: [], warnings: collectWarnings(document) };
+  }
+  const valid = validate(document) as boolean;
+  const errors = [
+    ...(valid ? [] : toStructuredErrors(validate.errors ?? [])),
+    ...collectLocalizedResidualErrors(document),
+  ];
+  return { valid: errors.length === 0, errors, warnings: collectWarnings(document) };
 }
 
 /** 收集提示级信息（与 Schema 校验正交，不影响 valid） */
