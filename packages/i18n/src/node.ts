@@ -10,3 +10,10 @@ export type {
   MessageManifestEntry,
   YamlMessageProviderOptions,
 } from './yaml-message-provider.js';
+
+export { localizeYamlResource, parsePageYamlStrict } from './localize-yaml-resource.js';
+export type {
+  LocalizeYamlResourceInput,
+  LocalizeYamlResourceResult,
+  ParsePageYamlOptions,
+} from './localize-yaml-resource.js';

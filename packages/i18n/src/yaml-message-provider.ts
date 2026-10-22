@@ -109,8 +109,8 @@ function byteLength(text: string): number {
   return bytes;
 }
 
-/** 检测文档中显式标注的自定义标签（普通节点 tag 为 undefined） */
-function hasExplicitTag(node: unknown): boolean {
+/** 检测文档中显式标注的自定义标签（普通节点 tag 为 undefined）；供页面 YAML 严格解析复用 */
+export function hasExplicitTag(node: unknown): boolean {
   if (isPair(node)) {
     return hasExplicitTag(node.key) || hasExplicitTag(node.value);
   }

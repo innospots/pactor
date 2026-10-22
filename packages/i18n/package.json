@@ -62,7 +62,8 @@
     "access": "public"
   },
   "dependencies": {
-    "@pactor-app/core": "workspace:*"
+    "@pactor-app/core": "workspace:*",
+    "@pactor-app/schema": "workspace:*"
   },
   "peerDependencies": {
     "yaml": "^2.9.0"

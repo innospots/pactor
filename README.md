@@ -190,7 +190,7 @@ tools/        内部工具（如 theme-studio）
 | `core` | `@pactor-app/core` | DSL 协议、Registry 接口 |
 | `schema` | `@pactor-app/schema` | JSON Schema 校验 |
 | `expression` | `@pactor-app/expression` | 安全表达式引擎 |
-| `i18n` | `@pactor-app/i18n` | 语言识别与语言包 Provider（服务端） |
+| `i18n` | `@pactor-app/i18n` | 语言识别、语言包 Provider、DSL 本地化转换（服务端） |
 | `runtime` | `@pactor-app/runtime` | 页面 Runtime、React 渲染 |
 | `permission` | `@pactor-app/permission` | 权限 Store |
 | `resource` | `@pactor-app/resource` | DSL 加载与缓存 |
