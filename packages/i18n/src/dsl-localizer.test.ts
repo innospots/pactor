@@ -781,6 +781,53 @@ describe('bindings 定位与校验（设计 4.2，缺口 G03）', () => {
   });
 });
 
+describe('遍历范围之外的 $i18n 不静默透传（残留扫描）', () => {
+  const evil = { $i18n: { key: 'common.save' } };
+
+  it('$i18n 位于 state / dataSources / meta → UNREGISTERED_I18N_FIELD', () => {
+    for (const extra of [
+      { state: { label: evil } },
+      { dataSources: { ds: { type: 'static', value: { label: evil } } } },
+      { meta: { label: evil } },
+    ]) {
+      expect(() => localize(asPage({ dsl: '1.0', page: { id: 'p' }, ...extra }))).toThrowError(
+        expect.objectContaining({ code: 'UNREGISTERED_I18N_FIELD' }),
+      );
+    }
+  });
+
+  it('$i18n 位于节点未遍历字段（permission / when）→ UNREGISTERED_I18N_FIELD', () => {
+    for (const node of [
+      { type: 'Button', props: { text: 'x' }, permission: evil },
+      { type: 'Button', props: { text: 'x' }, when: { expression: evil } },
+    ]) {
+      expect(() => localize(asPage({ dsl: '1.0', page: { id: 'p' }, body: node }))).toThrowError(
+        expect.objectContaining({ code: 'UNREGISTERED_I18N_FIELD' }),
+      );
+    }
+  });
+
+  it('已合法转换的 $localizedText 输出不被误伤', () => {
+    const out = localize(
+      asPage({
+        dsl: '1.0',
+        page: { id: 'p' },
+        body: {
+          type: 'Text',
+          props: {
+            text: {
+              $i18n: { messages: { 'en-US': '{{count}} items' }, params: { count: '${state.n}' } },
+            },
+          },
+        },
+      }),
+    );
+    expect(out.body).toMatchObject({
+      props: { text: { $localizedText: { template: '{{count}} items' } } },
+    });
+  });
+});
+
 describe('诊断与输入校验', () => {
   it('onDiagnostic 可选；未提供时不影响转换', () => {
     const spy = vi.fn();

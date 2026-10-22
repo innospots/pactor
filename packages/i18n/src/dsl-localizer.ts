@@ -466,6 +466,31 @@ function dedupeLocales(locales: readonly string[]): string[] {
 }
 
 /**
+ * 输出残留扫描（兜底）：walkNode 只下钻 props/events/children/placeholder，
+ * 位于遍历范围之外（state、dataSources、meta、node.permission、node.when 等）的
+ * `$i18n` 既不可转换也不应静默透传——任何残留 `$i18n` 键抛 UNREGISTERED_I18N_FIELD。
+ * `$localizedText` 是合法下发态值，不受影响（其 params 内嵌 `$i18n` 属协议违规，同样拒绝）。
+ */
+function assertNoResidualI18n(value: unknown, display: string): void {
+  if (Array.isArray(value)) {
+    value.forEach((item, index) => assertNoResidualI18n(item, `${display}/${index}`));
+    return;
+  }
+  if (isPlainObject(value)) {
+    if ('$i18n' in value) {
+      throw new I18nError(
+        'UNREGISTERED_I18N_FIELD',
+        `$i18n 出现在不可翻译的位置（不静默透传）: ${display}`,
+        { path: display },
+      );
+    }
+    for (const [key, child] of Object.entries(value)) {
+      assertNoResidualI18n(child, `${display}/${escapeJsonPointerSegment(key)}`);
+    }
+  }
+}
+
+/**
  * 纯转换入口（设计第 6 节签名）。返回已本地化的新 Page DSL 对象，
  * 不修改输入（page / languageBundles 均不被改写）；作者态 `i18n` 字段被移除。
  */
@@ -528,6 +553,9 @@ export function localizePageDsl(input: LocalizePageDslInput): PageDsl {
       walkActions(ctx, actions, `/lifecycle/${escapeJsonPointerSegment(event)}`);
     }
   }
+
+  // 3. 残留扫描：遍历范围之外的 $i18n 不静默透传
+  assertNoResidualI18n(page, '');
 
   return page;
 }
