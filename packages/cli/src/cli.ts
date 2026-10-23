@@ -6,6 +6,7 @@ import { runBuild } from './commands/build.js';
 import { runCreate } from './commands/create.js';
 import { runInspect } from './commands/inspect.js';
 import { runLint } from './commands/lint.js';
+import { runModule } from './commands/module.js';
 import { runSchema } from './commands/schema.js';
 import { runValidate } from './commands/validate.js';
 
@@ -21,6 +22,7 @@ export const HELP_TEXT = `pactor — Pactor DSL 命令行工具
   pactor schema [-o <file>]       输出 Page DSL JSON Schema
   pactor build <src> -o <dir>     编译 DSL 为 Runtime Envelope JSON
   pactor create <name> [-t app]   从模板生成业务工程
+  pactor module <sub> [--dir .]   模块打包：init / build / validate / pack（Shell 可装配 npm 模块）
 
 退出码: 0 成功；1 校验/lint 失败；2 用法错误
 `;
@@ -60,6 +62,8 @@ export function runCli(argv: string[], io: CliIo): number {
       return runBuild(args, io);
     case 'create':
       return runCreate(args, io);
+    case 'module':
+      return runModule(args, io);
     default:
       io.err(`未知命令: ${command}`);
       io.err(HELP_TEXT);
