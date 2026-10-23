@@ -1,6 +1,6 @@
 {
   "name": "@pactor-app/chart",
-  "version": "1.54.5",
+  "version": "1.55.0",
   "description": "Pactor chart: echarts-backed DSL chart components (LineChart / BarChart / PieChart / MetricCard …) with chart component registry for the Renderer",
   "keywords": [
     "pactor",
