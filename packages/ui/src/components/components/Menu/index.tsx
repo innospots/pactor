@@ -12,13 +12,17 @@ import {
   PopoverTrigger,
 } from "../../../ui/popover.js";
 import {
+  Tooltip as ShadcnTooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "../../../ui/tooltip.js";
+import {
   renderDropdownItems,
   type DropdownMenuItemData,
 } from "../DropdownMenu/index.js";
 import { Icon } from "../Icon/index.js";
 import { RailTooltip } from "../Sidebar/rail-tooltip.js";
 import { useSidebarDrawer } from "../Sidebar/index.js";
-import { Tooltip } from "../Tooltip/index.js";
 import { triggerWrapper } from "../trigger-render.js";
 
 /** 菜单项右端操作按钮；`menu` 提供时点击展开下拉框 */
@@ -583,8 +587,14 @@ function MenuItemActionButton({
     </button>
   );
   if (!action.menu) {
+    // Tooltip 触发器经 render 合并到按钮本体（与 Button 一致）：不再插入
+    // 包装 span。包装 span 会继承行高（24px），使 20px 图标按钮在行内按
+    // 基线对齐、比行中心高 2px。
     return action.tooltip ? (
-      <Tooltip content={action.tooltip}>{button}</Tooltip>
+      <ShadcnTooltip>
+        <TooltipTrigger render={button} />
+        <TooltipContent>{action.tooltip}</TooltipContent>
+      </ShadcnTooltip>
     ) : (
       button
     );
