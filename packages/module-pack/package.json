@@ -1,0 +1,59 @@
+{
+  "name": "@pactor-app/module-pack",
+  "version": "1.54.5",
+  "description": "Pactor module pack: 把 Pactor 应用工程打包为 Shell 可装配的 npm 模块（Manifest V1）",
+  "keywords": [
+    "pactor",
+    "dsl",
+    "server-driven-ui",
+    "module",
+    "shell"
+  ],
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/innospots/pactor.git",
+    "directory": "packages/module-pack"
+  },
+  "homepage": "https://github.com/innospots/pactor/tree/main/packages/module-pack",
+  "bugs": "https://github.com/innospots/pactor/issues",
+  "type": "module",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.js"
+      },
+      "require": {
+        "types": "./dist/index.d.cts",
+        "default": "./dist/index.cjs"
+      }
+    }
+  },
+  "sideEffects": false,
+  "engines": {
+    "node": ">=18"
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsup",
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit",
+    "prepublishOnly": "pnpm build"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "dependencies": {
+    "esbuild": "^0.25.0",
+    "yaml": "^2.9.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20"
+  }
+}

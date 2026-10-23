@@ -42,6 +42,7 @@
   "dependencies": {
     "@pactor-app/core": "workspace:*",
     "@pactor-app/expression": "workspace:*",
+    "@pactor-app/module-pack": "workspace:*",
     "@pactor-app/schema": "workspace:*",
     "yaml": "^2.9.0"
   }

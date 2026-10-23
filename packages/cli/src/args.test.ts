@@ -25,6 +25,17 @@ describe('parseArgs', () => {
     expect(() => parseArgs(['-o'])).toThrow(UsageError);
   });
 
+  it('解析带值长 flag --dir / --config（空格与 = 两种形态）', () => {
+    const args = parseArgs(['build', '--dir', '/tmp/proj', '--config=custom.json']);
+    expect(args.positionals).toEqual(['build']);
+    expect(flagValue(args, 'dir')).toBe('/tmp/proj');
+    expect(flagValue(args, 'config')).toBe('custom.json');
+  });
+
+  it('--dir 缺值抛 UsageError', () => {
+    expect(() => parseArgs(['--dir'])).toThrow(UsageError);
+  });
+
   it('flagValue 对布尔 flag 返回 undefined', () => {
     const args = parseArgs(['--force']);
     expect(flagValue(args, 'force')).toBeUndefined();
