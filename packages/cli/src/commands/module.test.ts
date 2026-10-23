@@ -1,5 +1,5 @@
-import { existsSync, readFileSync } from 'node:fs';
-import { join } from 'node:path';
+import { existsSync, mkdirSync, readFileSync } from 'node:fs';
+import { dirname, join } from 'node:path';
 
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
@@ -7,9 +7,15 @@ import { parseArgs } from '../args.js';
 import { createTempDir, createTestIo, writeText } from '../test-utils.js';
 import { runModule } from './module.js';
 
+/** 写文本文件（自动创建父目录） */
+function write(file: string, content: string): void {
+  mkdirSync(dirname(file), { recursive: true });
+  writeText(file, content);
+}
+
 /** 最小可构建工程（纯 DSL：无 client entry） */
 function createModuleProject(dir: string): void {
-  writeText(
+  write(
     join(dir, 'package.json'),
     JSON.stringify({
       name: '@demo/app',
@@ -21,11 +27,11 @@ function createModuleProject(dir: string): void {
       },
     }),
   );
-  writeText(
+  write(
     join(dir, 'pactor.module.json'),
     JSON.stringify({ id: 'demo', name: 'Demo', basePath: '/demo' }),
   );
-  writeText(
+  write(
     join(dir, 'src/server/yaml/sitemap.yaml'),
     `id: site
 auth: { loginPath: /login }
@@ -34,7 +40,7 @@ pages:
 menus: []
 `,
   );
-  writeText(
+  write(
     join(dir, 'src/server/yaml/login.yaml'),
     `dsl: '1.0'\npage: { id: login, title: 登录 }\nbody:\n  type: LoginForm\n`,
   );
@@ -91,7 +97,7 @@ describe('pactor module', () => {
 
   it('build：页面 DSL 缺失退出码 1 且不留产物', () => {
     createModuleProject(temp.dir);
-    writeText(
+    write(
       join(temp.dir, 'src/server/yaml/sitemap.yaml'),
       `id: site\npages:\n  - { id: ghost, path: /ghost, title: 缺失 }\nmenus: []\n`,
     );
@@ -102,11 +108,11 @@ describe('pactor module', () => {
   });
 
   it('init：生成配置与 client 入口并注入 package.json，重复执行幂等', () => {
-    writeText(
+    write(
       join(temp.dir, 'package.json'),
       JSON.stringify({ name: '@demo/risk-app', version: '0.1.0' }, null, 2),
     );
-    writeText(
+    write(
       join(temp.dir, 'src/pactor/risk-actions.ts'),
       `export const riskActions = { 'risk.enterPage': () => {} };\n`,
     );
@@ -131,7 +137,7 @@ describe('pactor module', () => {
     expect(pkg.peerDependencies['pactor-app']).toBeDefined();
 
     // 重复执行：文件已存在则跳过，不覆盖
-    writeText(join(temp.dir, 'pactor.module.json'), `{\n  "id": "custom"\n}\n`);
+    write(join(temp.dir, 'pactor.module.json'), `{\n  "id": "custom"\n}\n`);
     const second = createTestIo();
     expect(runModule(parseArgs(['init', '--dir', temp.dir]), second.io)).toBe(0);
     expect(second.out.join('\n')).toContain('已跳过: pactor.module.json');

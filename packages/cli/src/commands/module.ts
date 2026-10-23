@@ -135,23 +135,26 @@ function runModulePack(dir: string | undefined, config: string | undefined, io: 
   }
   const projectDir = resolve(dir ?? process.cwd());
 
-  // dry-run 检查 files 列表是否覆盖 dist-module
-  let dryRun: string;
+  // dry-run 检查 files 列表是否覆盖 dist-module（--json 输出在 stdout，notice 在 stderr）
+  let packedFiles: string[];
   try {
-    dryRun = execFileSync('npm', ['pack', '--dry-run'], {
+    const dryRun = execFileSync('npm', ['pack', '--dry-run', '--json'], {
       cwd: projectDir,
       encoding: 'utf8',
     });
+    const report = JSON.parse(dryRun) as { files?: { path: string }[] }[];
+    packedFiles = (report[0]?.files ?? []).map((file) => file.path);
   } catch (error) {
     io.err(`npm pack --dry-run 失败: ${(error as Error).message}`);
     return 1;
   }
-  if (!dryRun.includes('dist-module/manifest.json')) {
+  if (!packedFiles.includes('dist-module/manifest.json')) {
     io.err('npm pack --dry-run 检查失败: 打包列表未包含 dist-module/manifest.json');
+    io.err(`实际打包文件: ${packedFiles.join(', ') || '(空)'}`);
     io.err('请确认 package.json files 含 "dist-module"（可执行 pactor module init 注入）');
     return 1;
   }
-  io.out('npm pack --dry-run 检查通过（files 覆盖 dist-module）');
+  io.out(`npm pack --dry-run 检查通过（${packedFiles.length} 个文件，覆盖 dist-module）`);
 
   try {
     const output = execFileSync('npm', ['pack'], { cwd: projectDir, encoding: 'utf8' });
