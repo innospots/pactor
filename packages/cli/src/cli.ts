@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+import { realpathSync } from 'node:fs';
 import { pathToFileURL } from 'node:url';
 
 import { UsageError, parseArgs, type CliIo } from './args.js';
@@ -6,6 +7,7 @@ import { runBuild } from './commands/build.js';
 import { runCreate } from './commands/create.js';
 import { runInspect } from './commands/inspect.js';
 import { runLint } from './commands/lint.js';
+import { runModule } from './commands/module.js';
 import { runSchema } from './commands/schema.js';
 import { runValidate } from './commands/validate.js';
 
@@ -21,6 +23,7 @@ export const HELP_TEXT = `pactor — Pactor DSL 命令行工具
   pactor schema [-o <file>]       输出 Page DSL JSON Schema
   pactor build <src> -o <dir>     编译 DSL 为 Runtime Envelope JSON
   pactor create <name> [-t app]   从模板生成业务工程
+  pactor module <sub> [--dir .]   模块打包：init / build / validate / pack / publish（Shell 可装配 npm 模块）
 
 退出码: 0 成功；1 校验/lint 失败；2 用法错误
 `;
@@ -60,6 +63,8 @@ export function runCli(argv: string[], io: CliIo): number {
       return runBuild(args, io);
     case 'create':
       return runCreate(args, io);
+    case 'module':
+      return runModule(args, io);
     default:
       io.err(`未知命令: ${command}`);
       io.err(HELP_TEXT);
@@ -67,11 +72,19 @@ export function runCli(argv: string[], io: CliIo): number {
   }
 }
 
-const isMain =
-  process.argv[1] !== undefined &&
-  import.meta.url === pathToFileURL(process.argv[1]).href;
+// 通过 npm 全局 bin / pnpm link 调用时 argv[1] 是符号链接路径，需先解析为真实路径再比较
+export function isMainEntry(importMetaUrl: string, argv1: string | undefined): boolean {
+  if (argv1 === undefined) return false;
+  let entryPath = argv1;
+  try {
+    entryPath = realpathSync(argv1);
+  } catch {
+    // argv[1] 不可解析时按原路径比较
+  }
+  return importMetaUrl === pathToFileURL(entryPath).href;
+}
 
-if (isMain) {
+if (isMainEntry(import.meta.url, process.argv[1])) {
   const io: CliIo = {
     out: (line) => process.stdout.write(`${line}\n`),
     err: (line) => process.stderr.write(`${line}\n`),

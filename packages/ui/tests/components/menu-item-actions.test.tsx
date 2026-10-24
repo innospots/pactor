@@ -225,6 +225,8 @@ describe('Menu 项级操作', () => {
     expect(leftLine.className).toContain('ml-5');
     // 条目与竖线间距 4px 由容器 pl-1 承担
     expect(leftLine.className).toContain('pl-1');
+    // 父项名称与首个条目之间 2px 间距由容器 pt-0.5 承担
+    expect(leftLine.className).toContain('pt-0.5');
     // 子项与竖线间距 4px（pl-1），hover 右移（hover:pl-2）
     const childBtn = left.container.querySelector(
       '[data-slot=menu-entry][data-key="inst-1/conv-1"] [data-slot=menu-item]',

@@ -2,6 +2,7 @@ export type {
   BootstrapResource,
   DslResourceEnvelope,
   DslResourceLoader,
+  DslResourceRepresentation,
   DslResourceType,
   FragmentResource,
   PageResource,
@@ -23,7 +24,7 @@ export type { ResourceCacheEntry } from './cache/memory-cache.js';
 export { MemoryResourceCache } from './cache/memory-cache.js';
 
 export type { HttpDslResourceLoaderOptions } from './loaders/http-loader.js';
-export { HttpDslResourceLoader } from './loaders/http-loader.js';
+export { HttpDslResourceLoader, withLocaleParam } from './loaders/http-loader.js';
 
 export type { StaticDslLoaderData } from './loaders/static-loader.js';
 export { StaticDslLoader } from './loaders/static-loader.js';

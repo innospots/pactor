@@ -103,7 +103,9 @@ export interface SitemapAppProps {
   guard?: SitemapGuard;
   /** 会话服务名（缺省 session.context） */
   sessionService?: string;
-  /** 当前语言代码（透传页面与布局运行时；缺省 'zh-CN'）。切换即重建页面 */
+  /** 当前语言代码（透传页面与布局运行时；缺省 'zh-CN'）。切换即重建页面；
+   * sitemap 与懒加载页面请求携带 `?locale=`，页面缓存按 locale 隔离
+   * （sitemap 不随切换重新拉取，属阶段 B） */
   locale?: string;
   /** 回退语言代码（缺省 'zh-CN'） */
   defaultLocale?: string;
@@ -192,6 +194,7 @@ function SitemapAppInner(props: SitemapAppProps) {
       fetcher,
       baseUrl,
       httpHooks: props.httpAdapter,
+      locale: props.locale,
     })
       .then((sitemap) => {
         if (!cancelled) {
@@ -337,6 +340,9 @@ function SitemapLayout({
     [hostNavigate],
   );
 
+  // locale 参与依赖：切换语言重建 loader——页面请求携带新 `?locale=`，
+  // 缓存键含 locale（id@version@locale）天然隔离。sitemap 本身不随 locale
+  // 重新拉取（阶段 B / G31）。
   const loader = useMemo(
     () =>
       createSitemapLoader(sitemap, {
@@ -345,6 +351,7 @@ function SitemapLayout({
         sessionService,
         baseUrl: props.baseUrl,
         httpHooks: props.httpAdapter,
+        locale: props.locale,
       }),
     [
       sitemap,
@@ -353,6 +360,7 @@ function SitemapLayout({
       props.baseUrl,
       props.httpAdapter,
       sessionService,
+      props.locale,
     ],
   );
   const services = useMemo(

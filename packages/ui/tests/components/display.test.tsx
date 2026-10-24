@@ -167,6 +167,23 @@ describe('Page / Card / Flex', () => {
     expect(flex?.className).toContain('flex-col');
     expect((flex as HTMLElement).style.gap).toBe('8px');
   });
+
+  it('Flex wrap 映射换行工具类：true / false / wrap-reverse', () => {
+    const { container, rerender } = render(<Flex wrap>内容</Flex>);
+    expect(container.firstElementChild?.className).toContain('flex-wrap');
+
+    rerender(<Flex wrap="wrap-reverse">内容</Flex>);
+    expect(container.firstElementChild?.className).toContain(
+      'flex-wrap-reverse',
+    );
+
+    rerender(<Flex wrap={false}>内容</Flex>);
+    expect(container.firstElementChild?.className).toContain('flex-nowrap');
+
+    // 未声明时不输出换行类（沿用 CSS 默认 nowrap）
+    rerender(<Flex>内容</Flex>);
+    expect(container.firstElementChild?.className).not.toContain('flex-wrap');
+  });
 });
 
 describe('Grid', () => {

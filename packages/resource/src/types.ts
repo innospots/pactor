@@ -1,4 +1,11 @@
-import type { FragmentDsl, PageDsl, RequiresConfig } from '@pactor-app/core';
+import type {
+  FragmentDsl,
+  LocalizationMeta,
+  PageDsl,
+  RequiresConfig,
+} from '@pactor-app/core';
+
+import { ResourceError } from './errors.js';
 
 /**
  * DSL 资源模型（设计文档附录 C）：Envelope 与加载器接口。
@@ -6,6 +13,12 @@ import type { FragmentDsl, PageDsl, RequiresConfig } from '@pactor-app/core';
 
 /** 资源类型；V1 内置 page / fragment / bootstrap，允许服务端扩展其他类型 */
 export type DslResourceType = 'page' | 'fragment' | 'bootstrap' | (string & {});
+
+/**
+ * 资源内容形态：`source` 为作者态原始资源，`localized` 为服务端已完成语言替换的下发态资源。
+ * 浏览器只接受 `localized` 资源（见 docs/internationalization-design.md 第 6.0/6.2 节）。
+ */
+export type DslResourceRepresentation = 'source' | 'localized';
 
 /** DSL 资源 Envelope：服务端传输 DSL 的统一包装 */
 export interface DslResourceEnvelope<T> {
@@ -15,6 +28,10 @@ export interface DslResourceEnvelope<T> {
   version: number;
   /** DSL Specification Version，如 "1.0" */
   dslVersion: string;
+  /** 资源内容形态；缺省视为旧版未标注资源 */
+  representation?: DslResourceRepresentation;
+  /** 下发态资源的本地化元信息（locale / release / bundleVersions 等） */
+  localization?: LocalizationMeta;
   etag?: string;
   requires?: RequiresConfig;
   /** DSL 本体（PageDsl / FragmentDsl） */
@@ -85,6 +102,21 @@ export function parseEnvelope<T>(
         ? schema.dsl
         : '1.0';
 
+  const representation =
+    data.representation === 'source' || data.representation === 'localized'
+      ? data.representation
+      : undefined;
+  const localization = isRecord(data.localization)
+    ? (data.localization as unknown as LocalizationMeta)
+    : undefined;
+
+  // 轻校验：服务端声明 localized 时必须给出有效 locale，避免把未完成语言选择的资源当成下发态
+  if (representation === 'localized' && typeof localization?.locale !== 'string') {
+    throw new ResourceError(
+      `localized 资源缺少 localization.locale: ${typeof data.id === 'string' ? data.id : options.id}`,
+    );
+  }
+
   return {
     id: typeof data.id === 'string' ? data.id : options.id,
     resourceType:
@@ -93,6 +125,8 @@ export function parseEnvelope<T>(
         : options.resourceType,
     version: typeof data.version === 'number' ? data.version : 1,
     dslVersion,
+    representation,
+    localization,
     etag: typeof data.etag === 'string' ? data.etag : undefined,
     requires: data.requires as RequiresConfig | undefined,
     schema,

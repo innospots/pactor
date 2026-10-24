@@ -1,25 +1,29 @@
-import { useEffect, useRef, useState, type CSSProperties } from 'react';
+import { useEffect, useRef, useState, type CSSProperties } from "react";
 
-import { cn } from '../../../lib/utils.js';
+import { cn } from "../../../lib/utils.js";
 import {
   DropdownMenu as ShadcnDropdownMenu,
   DropdownMenuContent,
   DropdownMenuTrigger,
-} from '../../../ui/dropdown-menu.js';
+} from "../../../ui/dropdown-menu.js";
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
-} from '../../../ui/popover.js';
+} from "../../../ui/popover.js";
+import {
+  Tooltip as ShadcnTooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "../../../ui/tooltip.js";
 import {
   renderDropdownItems,
   type DropdownMenuItemData,
-} from '../DropdownMenu/index.js';
-import { Icon } from '../Icon/index.js';
-import { RailTooltip } from '../Sidebar/rail-tooltip.js';
-import { useSidebarDrawer } from '../Sidebar/index.js';
-import { Tooltip } from '../Tooltip/index.js';
-import { triggerWrapper } from '../trigger-render.js';
+} from "../DropdownMenu/index.js";
+import { Icon } from "../Icon/index.js";
+import { RailTooltip } from "../Sidebar/rail-tooltip.js";
+import { useSidebarDrawer } from "../Sidebar/index.js";
+import { triggerWrapper } from "../trigger-render.js";
 
 /** 菜单项右端操作按钮；`menu` 提供时点击展开下拉框 */
 export interface MenuItemAction {
@@ -69,7 +73,7 @@ export interface MenuProps {
   /** 菜单项（可含表达式，如 `${data.menus}`） */
   items?: MenuItem[];
   /** 展示模式：inline（Sider 内纵向，缺省）| horizontal（Header 内横向） */
-  mode?: 'inline' | 'horizontal';
+  mode?: "inline" | "horizontal";
   /** 受控选中项 key（可绑 `${state.x}`） */
   selectedKey?: string;
   /**
@@ -87,7 +91,7 @@ export interface MenuProps {
   defaultExpandAll?: boolean;
   /** 目录项 chevron 展开指示的位置（仅配合 collapsible，缺省 right）：
    *  left = 图标/文字前（树形风格）；right = 行内右端 */
-  chevronPlacement?: 'left' | 'right';
+  chevronPlacement?: "left" | "right";
   /** 选中变化事件，传出选中项 key */
   onSelect?: (key: string) => void;
   /** 项操作事件（trailing 旁的操作按钮 / 下拉选择），传出 { key, action } */
@@ -134,13 +138,13 @@ function collectAncestors(
  */
 export function Menu({
   items = [],
-  mode = 'inline',
+  mode = "inline",
   selectedKey,
   collapsible = false,
   collapsed: collapsedProp,
   defaultExpandedKeys,
   defaultExpandAll = false,
-  chevronPlacement = 'right',
+  chevronPlacement = "right",
   onSelect,
   onItemAction,
   className,
@@ -148,9 +152,9 @@ export function Menu({
 }: MenuProps) {
   const drawer = useSidebarDrawer();
   const collapsed =
-    collapsedProp ?? (mode === 'inline' && drawer?.collapsed === true);
+    collapsedProp ?? (mode === "inline" && drawer?.collapsed === true);
   // icon rail 与 horizontal 不受 collapsible 影响（子菜单静态展开平铺）
-  const collapsibleOn = collapsible && mode === 'inline' && !collapsed;
+  const collapsibleOn = collapsible && mode === "inline" && !collapsed;
 
   // 非受控展开态：base 挂载时算一次（selectedKey 后续变化不重置用户手动
   // 状态）；toggled 记录用户手动翻转。基准 = defaultExpandAll ∨ base，
@@ -188,7 +192,9 @@ export function Menu({
       data-mode={mode}
       data-collapsed={collapsed || undefined}
       className={cn(
-        mode === 'horizontal' ? 'flex items-center gap-1' : 'flex flex-col gap-0.5 p-2',
+        mode === "horizontal"
+          ? "flex items-center gap-1"
+          : "flex flex-col gap-0.5 p-2",
         className,
       )}
       style={style}
@@ -198,7 +204,7 @@ export function Menu({
         let groupLabel: string | undefined;
         if (
           !collapsed &&
-          mode === 'inline' &&
+          mode === "inline" &&
           item.group !== undefined &&
           item.group !== previousGroup
         ) {
@@ -244,20 +250,20 @@ function MenuEntry({
   onItemAction,
   collapsed = false,
   collapsible = false,
-  chevronPlacement = 'right',
+  chevronPlacement = "right",
   isExpanded,
   onToggle,
   indent,
 }: {
   item: MenuItem;
-  mode: 'inline' | 'horizontal';
+  mode: "inline" | "horizontal";
   depth: number;
   selectedKey?: string;
   onSelect?: (key: string) => void;
   onItemAction?: (event: MenuItemActionEvent) => void;
   collapsed?: boolean;
   collapsible?: boolean;
-  chevronPlacement?: 'left' | 'right';
+  chevronPlacement?: "left" | "right";
   isExpanded?: (key: string) => boolean;
   onToggle?: (key: string) => void;
   /** 父级传入的左内边距（文字起点对齐）；缺省按 depth 递进（12 + depth×16） */
@@ -266,7 +272,8 @@ function MenuEntry({
   const hasChildren = (item.children?.length ?? 0) > 0;
   // inline 非折叠下带 children 字段的项即为目录（含空数组：空组同样是组）：
   // 不可选中（无选中态、不触发 onSelect）；collapsible 且有子项时才可折叠
-  const isDirectory = item.children !== undefined && mode === 'inline' && !collapsed;
+  const isDirectory =
+    item.children !== undefined && mode === "inline" && !collapsed;
   const canToggle = collapsible && isDirectory && hasChildren;
   const expanded = canToggle && isExpanded?.(item.key) === true;
   const selected = !isDirectory && item.key === selectedKey;
@@ -294,10 +301,7 @@ function MenuEntry({
   const chevron = canToggle ? (
     <span
       data-slot="menu-item-chevron"
-      className={cn(
-        'shrink-0 transition-transform',
-        expanded && 'rotate-180',
-      )}
+      className={cn("shrink-0 transition-transform", expanded && "rotate-180")}
     >
       <Icon name="chevron-down" size="sm" />
     </span>
@@ -309,39 +313,42 @@ function MenuEntry({
     <button
       type="button"
       data-slot="menu-item"
-      aria-current={selected ? 'page' : undefined}
-      aria-expanded={canToggle ? expanded : railDirectory ? flyoutOpen : undefined}
+      aria-current={selected ? "page" : undefined}
+      aria-expanded={
+        canToggle ? expanded : railDirectory ? flyoutOpen : undefined
+      }
       disabled={item.disabled}
       className={cn(
         // w-full 兜底非 flex 父容器（rail / flyout）；flex-1 min-w-0 供
         // 行容器（trailing / actions 与按钮同级）内收缩
-        'flex w-full min-w-0 flex-1 items-center gap-2 text-sm transition-colors',
-        mode === 'horizontal'
-          ? 'px-3 py-2'
+        "flex w-full min-w-0 flex-1 items-center gap-2 text-sm transition-colors",
+        mode === "horizontal"
+          ? "px-3 py-2"
           : depth > 0 && !collapsed
-            // 子菜单项（竖线容器内）：与左侧竖线间距 4px（pl-1），
-            // hover 右移 4px（pl-2，缩进反馈）；选中态保留该右移
-            ? cn(
-                'py-2 pl-1 pr-3 text-left transition-[padding-left] duration-150 hover:pl-2',
-                selected && 'pl-2',
+            ? // 子菜单项（竖线容器内）：与左侧竖线间距 4px（pl-1），
+              // hover 右移 4px（pl-2，缩进反馈）；选中态保留该右移
+              cn(
+                "py-2 pl-1 pr-3 text-left transition-[padding-left] duration-150 hover:pl-2",
+                selected && "pl-2",
               )
-            : 'px-3 py-2 text-left',
-        collapsed && 'justify-center px-0',
+            : "px-3 py-2 text-left",
+        collapsed && "justify-center px-0",
         // 行容器形态下圆角与悬浮/选中底色由 menu-item-row 承担，按钮本体透明
         hasRowExtras
           ? item.disabled
-            ? 'cursor-not-allowed'
-            : 'cursor-pointer'
+            ? "cursor-not-allowed"
+            : "cursor-pointer"
           : cn(
-              'rounded-md',
+              "rounded-md",
               selected
-                ? 'bg-(--menu-active-background) font-medium text-(--menu-active-foreground)'
-                : 'cursor-pointer text-foreground hover:bg-(--menu-hover-background)/50',
-              item.disabled && 'cursor-not-allowed opacity-50 hover:bg-transparent hover:text-muted-foreground',
+                ? "bg-(--menu-active-background) font-medium text-(--menu-active-foreground)"
+                : "cursor-pointer text-foreground hover:bg-(--menu-hover-background)/50",
+              item.disabled &&
+                "cursor-not-allowed opacity-50 hover:bg-transparent hover:text-muted-foreground",
             ),
       )}
       style={
-        mode === 'inline' && depth > 0 && !collapsed && selfPaddingLeft > 0
+        mode === "inline" && depth > 0 && !collapsed && selfPaddingLeft > 0
           ? { paddingLeft: selfPaddingLeft }
           : undefined
       }
@@ -359,30 +366,33 @@ function MenuEntry({
         onSelect?.(item.key);
       }}
     >
-      {chevronPlacement === 'left' ? chevron : null}
+      {chevronPlacement === "left" ? chevron : null}
       {item.icon ? (
         <Icon
           name={item.icon}
           size="sm"
           className={cn(
             // 图标弱化一档；选中项跟随激活前景色
-            'text-muted-foreground',
-            selected && 'text-(--menu-active-foreground)',
+            "text-muted-foreground",
+            selected && "text-(--menu-active-foreground)",
           )}
         />
       ) : null}
       {collapsed ? null : (
         <span
           className={cn(
-            'min-w-0 flex-1 truncate text-left',
-            isDirectory && 'font-semibold',
+            "min-w-0 flex-1 truncate text-left",
+            isDirectory && "font-semibold",
           )}
         >
           {item.label}
         </span>
       )}
       {item.dot && !collapsed ? (
-        <span data-slot="menu-item-dot" className="size-1.5 shrink-0 rounded-full bg-destructive" />
+        <span
+          data-slot="menu-item-dot"
+          className="size-1.5 shrink-0 rounded-full bg-destructive"
+        />
       ) : null}
       {item.badge !== undefined && !collapsed ? (
         <span
@@ -392,7 +402,7 @@ function MenuEntry({
           {item.badge}
         </span>
       ) : null}
-      {chevronPlacement === 'left' ? null : chevron}
+      {chevronPlacement === "left" ? null : chevron}
     </button>
   );
   return (
@@ -412,7 +422,9 @@ function MenuEntry({
             onMouseLeave={flyoutCloseLater}
             onClick={(event) => {
               // 浮层内点中菜单项后关闭浮层
-              if ((event.target as HTMLElement).closest('[data-slot=menu-item]')) {
+              if (
+                (event.target as HTMLElement).closest("[data-slot=menu-item]")
+              ) {
                 setFlyoutOpen(false);
               }
             }}
@@ -422,10 +434,11 @@ function MenuEntry({
             </div>
             {/* 子菜单以非 collapsed 完整形态渲染（label/icon/badge/dot/选中态）；
                 与展开侧栏同款竖线容器：线对准浮层标题文字起点（ml-3），
-                容器 pl-1 让条目与竖线保持 4px 间距（indent=0 归零内联 padding） */}
+                容器 pl-1 让条目与竖线保持 4px 间距（indent=0 归零内联 padding）；
+                pt-0.5 让浮层标题与首个条目留 2px 间距 */}
             <div
               data-slot="menu-children"
-              className="ml-3 flex flex-col gap-0.5 border-l border-border/80 pl-1"
+              className="ml-3 flex flex-col gap-0.5 border-l border-border/80 pl-1 pt-0.5"
             >
               {item.children?.map((child) => (
                 <MenuEntry
@@ -451,11 +464,11 @@ function MenuEntry({
         <div
           data-slot="menu-item-row"
           className={cn(
-            'flex w-full items-center gap-1 rounded-md pr-1.5 transition-colors',
+            "flex w-full items-center gap-1 rounded-md pr-1.5 transition-colors",
             selected
-              ? 'bg-(--menu-active-background) font-medium text-(--menu-active-foreground)'
-              : 'text-foreground hover:bg-(--menu-hover-background)/50',
-            item.disabled && 'opacity-50',
+              ? "bg-(--menu-active-background) font-medium text-(--menu-active-foreground)"
+              : "text-foreground hover:bg-(--menu-hover-background)/50",
+            item.disabled && "opacity-50",
           )}
         >
           {button}
@@ -489,39 +502,19 @@ function MenuEntry({
       )}
       {/* collapsible 目录：收起时不渲染子菜单；rail 目录走 flyout；其余静态展开。
           indent 下传本项文字起点，使子菜单文字与带左侧 chevron 的组文字对齐 */}
-      {railDirectory || (canToggle && !expanded)
-        ? null
-        : item.children?.length
-          ? mode === 'inline' && !collapsed
-            ? (
-              // 子菜单组：左侧浅灰竖线贯通，线对准父项图标中心
-              // （ml-5 = px-3 12 + sm 图标半宽 8）；容器 pl-1 让条目
-              // （含 hover 底色）与竖线保持 4px 间距；子项自身 padding
-              // 归零（indent=0），hover 经 hover:pl-2 右移
-              <div
-                data-slot="menu-children"
-                className="ml-5 flex flex-col gap-0.5 border-l border-border/80 pl-1"
-              >
-                {item.children.map((child) => (
-                  <MenuEntry
-                    key={child.key}
-                    item={child}
-                    mode={mode}
-                    depth={depth + 1}
-                    selectedKey={selectedKey}
-                    onSelect={onSelect}
-                    onItemAction={onItemAction}
-                    collapsed={collapsed}
-                    collapsible={collapsible}
-                    chevronPlacement={chevronPlacement}
-                    isExpanded={isExpanded}
-                    onToggle={onToggle}
-                    indent={0}
-                  />
-                ))}
-              </div>
-            )
-            : item.children.map((child) => (
+      {railDirectory || (canToggle && !expanded) ? null : item.children
+          ?.length ? (
+        mode === "inline" && !collapsed ? (
+          // 子菜单组：左侧浅灰竖线贯通，线对准父项图标中心
+          // （ml-5 = px-3 12 + sm 图标半宽 8）；容器 pl-1 让条目
+          // （含 hover 底色）与竖线保持 4px 间距；子项自身 padding
+          // 归零（indent=0），hover 经 hover:pl-2 右移；
+          // pt-0.5 让父项名称与首个条目留 2px 间距
+          <div
+            data-slot="menu-children"
+            className="ml-5 flex flex-col gap-0.5 border-l border-border/80 pl-1 pt-0.5"
+          >
+            {item.children.map((child) => (
               <MenuEntry
                 key={child.key}
                 item={child}
@@ -535,9 +528,29 @@ function MenuEntry({
                 chevronPlacement={chevronPlacement}
                 isExpanded={isExpanded}
                 onToggle={onToggle}
+                indent={0}
               />
-            ))
-          : null}
+            ))}
+          </div>
+        ) : (
+          item.children.map((child) => (
+            <MenuEntry
+              key={child.key}
+              item={child}
+              mode={mode}
+              depth={depth + 1}
+              selectedKey={selectedKey}
+              onSelect={onSelect}
+              onItemAction={onItemAction}
+              collapsed={collapsed}
+              collapsible={collapsible}
+              chevronPlacement={chevronPlacement}
+              isExpanded={isExpanded}
+              onToggle={onToggle}
+            />
+          ))
+        )
+      ) : null}
     </div>
   );
 }
@@ -574,8 +587,14 @@ function MenuItemActionButton({
     </button>
   );
   if (!action.menu) {
+    // Tooltip 触发器经 render 合并到按钮本体（与 Button 一致）：不再插入
+    // 包装 span。包装 span 会继承行高（24px），使 20px 图标按钮在行内按
+    // 基线对齐、比行中心高 2px。
     return action.tooltip ? (
-      <Tooltip content={action.tooltip}>{button}</Tooltip>
+      <ShadcnTooltip>
+        <TooltipTrigger render={button} />
+        <TooltipContent>{action.tooltip}</TooltipContent>
+      </ShadcnTooltip>
     ) : (
       button
     );
@@ -585,7 +604,7 @@ function MenuItemActionButton({
     <ShadcnDropdownMenu>
       <DropdownMenuTrigger
         nativeButton={false}
-        render={triggerWrapper('menu-item-action-trigger')}
+        render={triggerWrapper("menu-item-action-trigger")}
       >
         {button}
       </DropdownMenuTrigger>

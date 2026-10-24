@@ -1,4 +1,5 @@
 import type { DslResourceLoader, PageResource } from '@pactor-app/resource';
+import { withLocaleParam } from '@pactor-app/resource';
 
 import type { PactorHttpHooks } from '../assembly.js';
 
@@ -17,6 +18,11 @@ export interface SitemapLoaderOptions {
   baseUrl?: string;
   /** HTTP 钩子：与页面运行时同一套 request / response 加工 */
   httpHooks?: PactorHttpHooks;
+  /**
+   * 当前语言代码：页面请求 URL 追加 `?locale=`（已有 locale 参数替换不追加），
+   * 缓存键扩展为 `id@version@locale`；缺省不携带且维持旧键形 `id@version`
+   */
+  locale?: string;
 }
 
 const defaultPageEndpoint = (pageId: string): string => `/api/pages/${pageId}`;
@@ -24,7 +30,8 @@ const defaultPageEndpoint = (pageId: string): string => `/api/pages/${pageId}`;
 /**
  * SitemapDslLoader（design/dynamic-page.md 落地影响 #1）：
  * 内联 pageDsl 直接命中；缺省项经页面端点懒加载。
- * 缓存键 id@version——同一版本只取一次。
+ * 缓存键 id@version——同一版本只取一次；配置 locale 时扩展为
+ * id@version@locale 且页面请求追加 `?locale=`（替换语义）。
  * 每个页面注入 session dataSource（${data.session.*}），页面自行声明
  * 同名 dataSource 时以页面为准。
  */
@@ -37,12 +44,13 @@ export function createSitemapLoader(
   const fetcher = withHttpHooks(options.fetcher ?? fetch, options.httpHooks);
   const pageById = new Map(sitemap.pages.map((p) => [p.id, p]));
   const cache = new Map<string, PageResource>();
+  const locale = options.locale;
 
   return {
     async loadPage(pageId) {
       const entry = pageById.get(pageId);
       const version = entry?.version ?? 1;
-      const cacheKey = `${pageId}@${version}`;
+      const cacheKey = `${pageId}@${version}${locale ? `@${locale}` : ''}`;
       const hit = cache.get(cacheKey);
       if (hit) {
         return hit;
@@ -57,10 +65,14 @@ export function createSitemapLoader(
           schema: entry.pageDsl,
         };
       } else {
-        const res = await fetcher(resolveUrl(pageEndpoint(pageId), options.baseUrl), {
-          cache: 'no-store',
-          credentials: 'include',
-        });
+        const resolved = resolveUrl(pageEndpoint(pageId), options.baseUrl);
+        const res = await fetcher(
+          locale ? withLocaleParam(resolved, locale) : resolved,
+          {
+            cache: 'no-store',
+            credentials: 'include',
+          },
+        );
         if (!res.ok) {
           throw new Error(
             `[@pactor-app/app] 页面 ${pageId} 加载失败：HTTP ${res.status}`,

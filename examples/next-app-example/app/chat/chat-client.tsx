@@ -2,9 +2,16 @@
 
 import type { PageDsl } from "@pactor-app/core";
 import { PactorPage } from "@pactor-app/app";
-import type { StepsPanelItemData } from "@pactor-app/ui/components";
 
 import { WorkspaceSwitcher } from "./workspace-switcher";
+
+/** 执行步骤条目（对齐 @pactor-app/chat 的 StepsPanelItemData；示例未直接依赖 chat 包） */
+interface StepsPanelItemData {
+  title: string;
+  description?: string;
+  status?: "done" | "running" | "pending";
+  duration?: string;
+}
 
 /**
  * 对话页：页面结构由 DSL 描述，根组件为 @pactor-app/ui 内置的 ChatPage

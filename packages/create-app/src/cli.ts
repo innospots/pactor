@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+import { realpathSync } from 'node:fs';
 import { createInterface } from 'node:readline';
 import { pathToFileURL } from 'node:url';
 
@@ -174,11 +175,19 @@ export async function runCli(
   return 0;
 }
 
-const isMain =
-  process.argv[1] !== undefined &&
-  import.meta.url === pathToFileURL(process.argv[1]).href;
+// 通过 npm 全局 bin / pnpm link 调用时 argv[1] 是符号链接路径，需先解析为真实路径再比较
+export function isMainEntry(importMetaUrl: string, argv1: string | undefined): boolean {
+  if (argv1 === undefined) return false;
+  let entryPath = argv1;
+  try {
+    entryPath = realpathSync(argv1);
+  } catch {
+    // argv[1] 不可解析时按原路径比较
+  }
+  return importMetaUrl === pathToFileURL(entryPath).href;
+}
 
-if (isMain) {
+if (isMainEntry(import.meta.url, process.argv[1])) {
   const io: CliIo = {
     out: (line) => process.stdout.write(`${line}\n`),
     err: (line) => process.stderr.write(`${line}\n`),

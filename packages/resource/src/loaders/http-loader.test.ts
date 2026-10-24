@@ -13,7 +13,7 @@ import type {
   DslResourceLoader,
   PageResource,
 } from '../types.js';
-import { HttpDslResourceLoader } from './http-loader.js';
+import { HttpDslResourceLoader, withLocaleParam } from './http-loader.js';
 import { StaticDslLoader } from './static-loader.js';
 
 const pageDsl: PageDsl = {
@@ -280,5 +280,157 @@ describe('缓存集成', () => {
     resolveRequest({ status: 200, data: pageEnvelope() });
     const [r1, r2] = await Promise.all([p1, p2]);
     expect(r1).toBe(r2);
+  });
+});
+
+describe('withLocaleParam（URL locale 参数拼接）', () => {
+  it('无查询参数时追加 ?locale=', () => {
+    expect(withLocaleParam('/api/pages/user-list', 'en-US')).toBe(
+      '/api/pages/user-list?locale=en-US',
+    );
+  });
+
+  it('已有 locale 参数时替换而不追加', () => {
+    expect(withLocaleParam('/api/pages/user-list?locale=zh-CN', 'en-US')).toBe(
+      '/api/pages/user-list?locale=en-US',
+    );
+  });
+
+  it('重复的 locale 参数收敛为单个新值', () => {
+    const result = withLocaleParam(
+      '/api/pages/user-list?locale=zh-CN&locale=fr-FR',
+      'en-US',
+    );
+    expect(result).toBe('/api/pages/user-list?locale=en-US');
+  });
+
+  it('保留其他查询参数与 hash', () => {
+    expect(withLocaleParam('/api/pages/a?foo=1&bar=2#frag', 'en-US')).toBe(
+      '/api/pages/a?foo=1&bar=2&locale=en-US#frag',
+    );
+  });
+});
+
+describe('locale 上下文（缓存键与 URL）', () => {
+  it('配置 locale 后请求 URL 携带 ?locale=，缓存键为 id@version@locale', async () => {
+    const cache: Cache = new MemoryResourceCache();
+    const { adapter, calls } = createMockAdapter([
+      { status: 200, data: pageEnvelope(103) },
+    ]);
+    const loader = new HttpDslResourceLoader({
+      adapter,
+      cache,
+      locale: 'en-US',
+    });
+    loader.updateVersions({ 'customer-list': 103 });
+
+    await loader.loadPage('customer-list');
+
+    expect(calls[0]?.url).toBe(
+      '/api/runtime/pages/customer-list?locale=en-US',
+    );
+    expect(cache.get('customer-list@103@en-US')).toBeDefined();
+    // 旧键形不被占用
+    expect(cache.get('customer-list@103')).toBeUndefined();
+  });
+
+  it('配置 release 后缓存键为 id@version@locale@release', async () => {
+    const cache: Cache = new MemoryResourceCache();
+    const { adapter } = createMockAdapter([
+      { status: 200, data: pageEnvelope(103) },
+    ]);
+    const loader = new HttpDslResourceLoader({
+      adapter,
+      cache,
+      locale: 'en-US',
+      release: 'rel-20261022-01',
+    });
+    loader.updateVersions({ 'customer-list': 103 });
+
+    await loader.loadPage('customer-list');
+
+    expect(
+      cache.get('customer-list@103@en-US@rel-20261022-01'),
+    ).toBeDefined();
+  });
+
+  it('缓存按 locale 隔离：不同 locale 的 loader 不共享缓存条目', async () => {
+    const cache: Cache = new MemoryResourceCache();
+    const { adapter, calls } = createMockAdapter([
+      { status: 200, data: pageEnvelope(103) },
+      { status: 200, data: pageEnvelope(103) },
+    ]);
+    const zhLoader = new HttpDslResourceLoader({
+      adapter,
+      cache,
+      locale: 'zh-CN',
+    });
+    const enLoader = new HttpDslResourceLoader({
+      adapter,
+      cache,
+      locale: 'en-US',
+    });
+    zhLoader.updateVersions({ 'customer-list': 103 });
+    enLoader.updateVersions({ 'customer-list': 103 });
+
+    await zhLoader.loadPage('customer-list');
+    await enLoader.loadPage('customer-list');
+
+    expect(calls).toHaveLength(2);
+    expect(cache.get('customer-list@103@zh-CN')).toBeDefined();
+    expect(cache.get('customer-list@103@en-US')).toBeDefined();
+  });
+
+  it('无版本表时按 locale 隔离缓存：同 id 不同 locale 各自请求并缓存', async () => {
+    const cache: Cache = new MemoryResourceCache();
+    const { adapter, calls } = createMockAdapter([
+      { status: 200, data: pageEnvelope(103) },
+      { status: 200, data: pageEnvelope(103) },
+    ]);
+    const zhLoader = new HttpDslResourceLoader({
+      adapter,
+      cache,
+      locale: 'zh-CN',
+    });
+    const enLoader = new HttpDslResourceLoader({
+      adapter,
+      cache,
+      locale: 'en-US',
+    });
+
+    await zhLoader.loadPage('customer-list');
+    // 无版本表 + 无 etag：en-US 不得命中 zh-CN 的普通缓存
+    await enLoader.loadPage('customer-list');
+    // 同 locale 二次加载命中缓存
+    await zhLoader.loadPage('customer-list');
+
+    expect(calls).toHaveLength(2);
+    expect(calls[0]?.url).toContain('locale=zh-CN');
+    expect(calls[1]?.url).toContain('locale=en-US');
+  });
+
+  it('bootstrap 请求同样携带 ?locale=', async () => {
+    const { adapter, calls } = createMockAdapter([
+      { status: 200, data: { app: { id: 'crm' } } },
+    ]);
+    const loader = new HttpDslResourceLoader({ adapter, locale: 'en-US' });
+
+    await loader.loadBootstrap();
+
+    expect(calls[0]?.url).toBe('/api/runtime/bootstrap?locale=en-US');
+  });
+
+  it('未配置 locale 时 URL 与缓存键保持旧形态', async () => {
+    const cache: Cache = new MemoryResourceCache();
+    const { adapter, calls } = createMockAdapter([
+      { status: 200, data: pageEnvelope(103) },
+    ]);
+    const loader = new HttpDslResourceLoader({ adapter, cache });
+    loader.updateVersions({ 'customer-list': 103 });
+
+    await loader.loadPage('customer-list');
+
+    expect(calls[0]?.url).toBe('/api/runtime/pages/customer-list');
+    expect(cache.get('customer-list@103')).toBeDefined();
   });
 });

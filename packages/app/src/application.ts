@@ -117,7 +117,8 @@ export interface PactorApplicationOptions {
   authTokenProvider?: AuthTokenProvider;
   /** HTTP 钩子：加工页面运行时所有 HTTP 出口（request 改配置 / response 改数据） */
   httpAdapter?: PactorHttpHooks;
-  /** 当前语言代码（优先级高于持久化值、bootstrap.locale 与浏览器语言） */
+  /** 当前语言代码（优先级高于持久化值、bootstrap.locale 与浏览器语言）；
+   * 缺省 loader 的资源请求同时携带 `?locale=` 并按 locale 隔离缓存 */
   locale?: string;
   /** 回退语言代码（缺省 'zh-CN'） */
   defaultLocale?: string;
@@ -388,6 +389,8 @@ function pickLayoutConfig(
  *
  * - loader：options.loader 优先，否则按 api.baseURL（默认 '/api/runtime'）
  *   创建 HttpDslResourceLoader，authTokenProvider 注入 Authorization 头；
+ *   缺省 loader 按会话 locale 分实例——请求携带 `?locale=`，
+ *   缓存键 id@version@locale 按语言隔离；
  * - 应用级共享 registries：内置组件 + 交互动作（应用级 OverlayManager /
  *   UiBridge 单例）+ navigate 动作 + options 扩展，全部被页面运行时共享；
  * - bootstrap 在 mount 后由组合层执行（失败渲染含重试的启动错误页）；
@@ -425,12 +428,10 @@ export function createPactorApplication(
   const { overlayManager, uiBridge, interactionKit } = assembly;
 
   // ---- loader 与 adapters ----
-  const loader =
-    options.loader ??
-    new HttpDslResourceLoader({
-      baseUrl: options.api?.baseURL,
-      adapter: createResourceHttpAdapter(options.authTokenProvider),
-    });
+  // 注入的自定义 loader 原样使用（locale 传播由宿主 loader 自负）；
+  // 缺省 HttpDslResourceLoader 按下文 resolveLoader 按会话 locale 分实例。
+  const customLoader = options.loader;
+  const resourceAdapter = createResourceHttpAdapter(options.authTokenProvider);
   const permissionAdapter = createPermissionAdapter(permissionStore);
   const routerAdapter = createRouterAdapter(navigation);
 
@@ -440,6 +441,35 @@ export function createPactorApplication(
   // useSyncExternalStore 消费），bootstrap 前调用 setLocale 暂存 pending
   const sessionListeners = new Set<() => void>();
   let pendingLocale: { locale: string; messages?: I18nMessages } | null = null;
+
+  // 缺省 HTTP loader 按会话 locale 分实例（G24/G25）：请求携带
+  // `?locale=`，缓存键 id@version@locale 自然隔离——setLocale 后页面重建
+  // 不会命中旧语言缓存。会话未就绪（bootstrap 阶段）用无 locale 实例，
+  // 不追加参数（保持现状）。
+  const httpLoaders = new Map<string, HttpDslResourceLoader>();
+  function resolveLoader(): DslResourceLoader {
+    if (customLoader !== undefined) {
+      return customLoader;
+    }
+    const locale = session?.locale;
+    const key = locale ?? '';
+    let cached = httpLoaders.get(key);
+    if (cached === undefined) {
+      cached = new HttpDslResourceLoader({
+        baseUrl: options.api?.baseURL,
+        adapter: resourceAdapter,
+        locale,
+      });
+      // 版本表来自 bootstrap：后建的 locale 实例同步已知版本，
+      // 维持 id@version@locale 版本键缓存
+      const pageVersions = session?.bootstrap.pageVersions;
+      if (pageVersions !== undefined) {
+        cached.updateVersions(pageVersions);
+      }
+      httpLoaders.set(key, cached);
+    }
+    return cached;
+  }
 
   /** 替换会话并通知订阅者（仅在会话内容实际变化时调用） */
   function updateSession(next: PactorAppSession): void {
@@ -468,7 +498,7 @@ export function createPactorApplication(
     navigation,
 
     async loadSession(): Promise<PactorAppSession> {
-      const bootstrap = await loader.loadBootstrap();
+      const bootstrap = await resolveLoader().loadBootstrap();
       permissionStore.setPermissions(
         Array.isArray(bootstrap.permissions)
           ? bootstrap.permissions.filter(
@@ -572,7 +602,7 @@ export function createPactorApplication(
     },
 
     async resolvePage(pageId: string): Promise<PageDsl> {
-      const resource = await loader.loadPage(pageId);
+      const resource = await resolveLoader().loadPage(pageId);
       return resource.schema;
     },
   };

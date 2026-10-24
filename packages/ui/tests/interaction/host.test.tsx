@@ -60,6 +60,11 @@ describe('Modal / Drawer 渲染（shadcn 实现）', () => {
 
     await screen.findByText('用户详情');
     expect(document.querySelector('[data-slot=overlay-modal]')).toBeTruthy();
+    // 弹层内容区允许收缩：避免超长不可换行内容撑宽 DialogContent 的
+    // grid 轨道（定宽弹层溢出）
+    expect(
+      document.querySelector('[data-slot=overlay-modal-body]')?.className,
+    ).toContain('min-w-0');
     await screen.findByText('详情内容');
     expect(document.querySelector('.ant-modal')).toBeNull();
   });
@@ -510,4 +515,67 @@ describe('owner 归属过滤（多运行时共享 OverlayManager，如布局嵌�
       expect(document.querySelectorAll('[data-slot=overlay-modal]')).toHaveLength(count);
     });
   }
+});
+
+describe('本地化协议（overlay.open 配置）', () => {
+  it('server 模式下 overlay 配置中的 $i18n 被拒绝，弹层不打开', async () => {
+    const context = createRuntimeContext({ localizationMode: 'server' });
+    const manager = new OverlayManager();
+    registerInteractionActions(context.actions, manager, createUiBridge());
+    const engine = new ActionEngine(context);
+    render(
+      <DslRenderer context={context}>
+        <OverlayHost manager={manager} />
+      </DslRenderer>,
+    );
+
+    const result = await engine.execute({
+      action: 'overlay.open',
+      params: {
+        overlay: {
+          type: 'modal',
+          title: { $i18n: { key: 'menu.home' } },
+        },
+      },
+    });
+
+    expect(result.ok).toBe(false);
+    expect(result.error?.name).toBe('LocalizationProtocolError');
+    expect(result.error?.message).toContain('$i18n');
+    expect(document.querySelectorAll('[data-slot=overlay-modal]')).toHaveLength(0);
+  });
+
+  it('overlay 配置中的 $localizedText 经插值解析为终值标题（client 与 server 模式一致）', async () => {
+    const context = createRuntimeContext({
+      localizationMode: 'server',
+      state: { name: '世界' },
+    });
+    const manager = new OverlayManager();
+    registerInteractionActions(context.actions, manager, createUiBridge());
+    const engine = new ActionEngine(context);
+    render(
+      <DslRenderer context={context}>
+        <OverlayHost manager={manager} />
+      </DslRenderer>,
+    );
+
+    // manager.open 的 Promise 随弹层关闭才 resolve，overlay.open 动作
+    // 结果同理挂起——这里只关心打开后的渲染，不 await 执行结果
+    void engine.execute({
+      action: 'overlay.open',
+      params: {
+        overlay: {
+          type: 'modal',
+          title: {
+            $localizedText: {
+              template: '你好，{{name}}',
+              params: { name: '${state.name}' },
+            },
+          },
+        },
+      },
+    });
+
+    await screen.findByText('你好，世界');
+  });
 });
