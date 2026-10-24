@@ -94,7 +94,13 @@ export function initModule(options: InitModuleOptions = {}): InitModuleResult {
   }
 
   // 3) package.json 注入（不覆盖已有字段，冲突 warning）
-  injectPackageJson(pkg, result);
+  const hasServerEntry = existsSync(join(projectDir, 'module/server.ts'));
+  injectPackageJson(pkg, result, hasServerEntry);
+  if (hasServerEntry) {
+    result.warnings.push(
+      '检测到 module/server.ts：已注入 "./server" export；请在 pactor.module.json 中同时配置 serverEntry 与 apiPrefixes 后再构建（缺一构建会失败）',
+    );
+  }
   writeFileSync(pkgFile, `${JSON.stringify(pkg, null, 2)}\n`, 'utf8');
   result.created.push('package.json（注入 files / exports / scripts / peerDependencies）');
 
@@ -175,7 +181,11 @@ export const extensions = {
 }
 
 /** 向 package.json 注入模块打包所需字段（幂等，冲突告警不覆盖） */
-function injectPackageJson(pkg: Record<string, unknown>, result: InitModuleResult): void {
+function injectPackageJson(
+  pkg: Record<string, unknown>,
+  result: InitModuleResult,
+  hasServerEntry: boolean,
+): void {
   const outDir = CONFIG_DEFAULTS.outDir;
 
   // files
@@ -190,6 +200,7 @@ function injectPackageJson(pkg: Record<string, unknown>, result: InitModuleResul
     './manifest': `./${outDir}/manifest.json`,
     './client': `./${outDir}/client/index.js`,
     './styles.css': `./${outDir}/client/index.css`,
+    ...(hasServerEntry ? { './server': `./${outDir}/server/index.mjs` } : {}),
   };
   for (const [key, value] of Object.entries(wantedExports)) {
     if (exportsMap[key] === undefined) {

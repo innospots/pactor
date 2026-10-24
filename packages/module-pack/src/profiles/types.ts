@@ -30,4 +30,6 @@ export interface TargetProfile {
   rewriteAssetUrls: (id: string, version: string) => string;
   /** 禁止 basePath: "/"（Shell joinPublicPath 会产生 "//login" 这类坏路径） */
   forbidRootBasePath: boolean;
+  /** Shell 支持 `/api/modules/<moduleId>/*` 通用模块 API 分发 */
+  moduleServerApi: boolean;
 }

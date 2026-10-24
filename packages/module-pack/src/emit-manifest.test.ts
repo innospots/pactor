@@ -74,8 +74,40 @@ describe('emit-manifest', () => {
     expect(manifestOnDisk.version).toBe('1.2.3');
   });
 
-  it('落盘 dsl/sitemap.yaml、<pageId>.yaml 与 assets 副本', () => {
+  it('配置 server 入口时输出 serverEntry 与 apiPrefixes', () => {
     writeText(join(temp.dir, 'package.json'), JSON.stringify({ version: '0.1.0' }));
+    const result = emitModule({
+      config: makeConfig({
+        serverEntry: 'module/server.ts',
+        apiPrefixes: ['/api/risk-analysis'],
+      }),
+      projectDir: temp.dir,
+      outDir: join(temp.dir, 'out'),
+      site: { id: 'site' },
+      pages: new Map(),
+      serverEntry: 'server/index.mjs',
+      apiPrefixes: ['/api/risk-analysis'],
+      warnings: [],
+    });
+    expect(result.manifest.serverEntry).toBe('server/index.mjs');
+    expect(result.manifest.apiPrefixes).toEqual(['/api/risk-analysis']);
+  });
+
+  it('未配置 server 入口时 manifest 不含 server 字段', () => {
+    writeText(join(temp.dir, 'package.json'), JSON.stringify({ version: '0.1.0' }));
+    const result = emitModule({
+      config: makeConfig(),
+      projectDir: temp.dir,
+      outDir: join(temp.dir, 'out'),
+      site: { id: 'site' },
+      pages: new Map(),
+      warnings: [],
+    });
+    expect(result.manifest).not.toHaveProperty('serverEntry');
+    expect(result.manifest).not.toHaveProperty('apiPrefixes');
+  });
+
+  it('落盘 dsl/sitemap.yaml、<pageId>.yaml 与 assets 副本', () => {    writeText(join(temp.dir, 'package.json'), JSON.stringify({ version: '0.1.0' }));
     writeText(join(temp.dir, 'public', 'skins', 'dark.css'), 'body{}');
     const outDir = join(temp.dir, 'out');
 

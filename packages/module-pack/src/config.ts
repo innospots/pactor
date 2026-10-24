@@ -29,6 +29,13 @@ export interface ModulePackConfig {
   basePath: string;
   yamlRoot: string;
   clientEntry: string;
+  /** 服务端入口（工程相对路径，如 module/server.ts）；与 apiPrefixes 成对出现 */
+  serverEntry?: string;
+  /**
+   * 模块 API 逻辑前缀（如 /api/risk-analysis）。打包时命中这些前缀的 DSL URL
+   * 会改写为 /api/modules/<id>/...，由 Shell 的通用分发入口承接。
+   */
+  apiPrefixes?: string[];
   /** init 时自动发现的 src/pactor/*-actions.ts（仅记录，client entry 自行 import） */
   actions: string[];
   publicDir: string;
@@ -101,12 +108,20 @@ export function loadModuleConfig(projectDir: string, configPath?: string): Modul
   const tailwind = isRecord(raw.tailwind) ? raw.tailwind : {};
   const rewrite = isRecord(raw.rewrite) ? raw.rewrite : {};
 
+  const serverEntry = readString(raw, 'serverEntry', file);
+  const apiPrefixes =
+    raw.apiPrefixes === undefined
+      ? undefined
+      : readStringArray(raw.apiPrefixes, 'apiPrefixes', file);
+  validateServerConfig({ id, serverEntry, apiPrefixes, file });
+
   return {
     id,
     name,
     basePath,
     yamlRoot: readString(raw, 'yamlRoot', file) ?? CONFIG_DEFAULTS.yamlRoot,
     clientEntry: readString(raw, 'clientEntry', file) ?? CONFIG_DEFAULTS.clientEntry,
+    ...(serverEntry !== undefined ? { serverEntry, apiPrefixes } : {}),
     actions,
     publicDir: readString(raw, 'publicDir', file) ?? CONFIG_DEFAULTS.publicDir,
     target: readString(raw, 'target', file) ?? CONFIG_DEFAULTS.target,
@@ -165,4 +180,66 @@ function readStringArray(value: unknown, label: string, file: string): string[] 
     throw new ConfigError(`${file}: ${label} 必须是字符串数组`);
   }
   return value as string[];
+}
+
+/** 模块 id 需可安全放入公开 URL 路径段（仅启用 server entry 时强制） */
+const URL_SAFE_MODULE_ID_RE = /^[A-Za-z0-9._~-]+$/;
+
+/** API 前缀格式：/api/<seg>(/<seg>)*，不允许尾斜杠、query、hash、通配、参数 */
+const API_PREFIX_RE = /^\/api\/[A-Za-z0-9._~-]+(?:\/[A-Za-z0-9._~-]+)*$/;
+
+/** 保留前缀：与 Shell 自带路由冲突，或会导致二次 namespacing */
+const RESERVED_API_PREFIXES = ['/api/modules', '/api/runtime'];
+
+interface ServerConfigInput {
+  id: string;
+  serverEntry?: string;
+  apiPrefixes?: string[];
+  file: string;
+}
+
+/** 校验 serverEntry / apiPrefixes 成对性与前缀合法性（未配置时直接返回） */
+function validateServerConfig(input: ServerConfigInput): void {
+  const { id, serverEntry, apiPrefixes, file } = input;
+  if (serverEntry === undefined && apiPrefixes === undefined) return;
+  if (serverEntry === undefined || apiPrefixes === undefined) {
+    throw new ConfigError(`${file}: serverEntry 与 apiPrefixes 必须同时配置（缺一不可）`);
+  }
+  if (apiPrefixes.length === 0) {
+    throw new ConfigError(`${file}: 配置 serverEntry 时 apiPrefixes 必须是非空数组`);
+  }
+  if (!URL_SAFE_MODULE_ID_RE.test(id)) {
+    throw new ConfigError(
+      `${file}: 启用 serverEntry 时 id 只能包含字母、数字、. _ ~ -（当前: ${JSON.stringify(id)}）`,
+    );
+  }
+  for (const prefix of apiPrefixes) {
+    if (!API_PREFIX_RE.test(prefix)) {
+      throw new ConfigError(
+        `${file}: apiPrefixes 含非法前缀 ${JSON.stringify(prefix)}（要求形如 /api/risk-analysis，不能含 query / hash / 尾斜杠 / 通配 / :param）`,
+      );
+    }
+    const reserved = RESERVED_API_PREFIXES.find(
+      (item) => prefix === item || prefix.startsWith(`${item}/`),
+    );
+    if (reserved) {
+      throw new ConfigError(
+        `${file}: apiPrefixes 不能使用保留前缀 ${reserved}（Shell 自带路由）: ${prefix}`,
+      );
+    }
+  }
+  for (let i = 0; i < apiPrefixes.length; i += 1) {
+    for (let j = i + 1; j < apiPrefixes.length; j += 1) {
+      const a = apiPrefixes[i]!;
+      const b = apiPrefixes[j]!;
+      if (a === b) {
+        throw new ConfigError(`${file}: apiPrefixes 存在重复前缀: ${a}`);
+      }
+      if (a.startsWith(`${b}/`) || b.startsWith(`${a}/`)) {
+        throw new ConfigError(
+          `${file}: apiPrefixes 前缀互相包含（同一模块内无法确定归属）: ${a} / ${b}`,
+        );
+      }
+    }
+  }
 }

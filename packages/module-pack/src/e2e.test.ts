@@ -1,5 +1,6 @@
 import { existsSync, readdirSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
+import { pathToFileURL } from 'node:url';
 
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { parseDocument } from 'yaml';
@@ -136,6 +137,49 @@ function loadYaml(file: string): Record<string, unknown> {
   return parseDocument(readFileSync(file, 'utf8')).toJS() as Record<string, unknown>;
 }
 
+/** 在基础 fixture 上增加 server entry（@3 + apiPrefixes + ./server export） */
+function createServerFixtureProject(dir: string): void {
+  createFixtureProject(
+    dir,
+    `,
+  "target": "innospots-web-shell@3",
+  "serverEntry": "module/server.ts",
+  "apiPrefixes": ["/api/risk-analysis"]`,
+  );
+  const pkgFile = join(dir, 'package.json');
+  const pkg = JSON.parse(readFileSync(pkgFile, 'utf8')) as {
+    exports?: Record<string, string>;
+  };
+  pkg.exports = { ...(pkg.exports ?? {}), './server': './dist-module/server/index.mjs' };
+  writeText(pkgFile, JSON.stringify(pkg, null, 2));
+  writeText(
+    join(dir, 'module/server.ts'),
+    `export const handlers = {
+  '/api/risk-analysis/data-value': {
+    GET: () => Response.json({ code: 0, data: { ok: true }, message: 'ok' }),
+    },
+};
+`,
+  );
+  writeText(
+    join(dir, 'src/server/yaml/common/login.yaml'),
+    `dsl: '1.0'
+page: { id: login, title: 登录 }
+body:
+  type: LoginForm
+  props:
+    logo: /next.svg
+  events:
+    onSubmit:
+      - action: request
+        params:
+          url: /api/risk-analysis/data-value?x=1
+      - action: app.reload
+        params: { to: /dashboard }
+`,
+  );
+}
+
 describe('buildModule e2e（微型工程全链路）', () => {
   let temp: ReturnType<typeof createTempDir>;
   beforeEach(() => {
@@ -171,7 +215,7 @@ describe('buildModule e2e（微型工程全链路）', () => {
       styles: ['client/index.css'],
     });
 
-    // sitemap：布局字符串引用已内联、菜单去 path、@2 保留 lazy
+    // sitemap：布局字符串引用已内联、菜单去 path、@3 保留 lazy
     const site = loadYaml(join(out, 'dsl', 'sitemap.yaml'));
     const layouts = site.layouts as Record<string, unknown>;
     expect(typeof layouts.admin).toBe('object');
@@ -295,11 +339,66 @@ menus: []
     );
     const result = buildModule({ dir: temp.dir });
     expect(result.clientBundled).toBe(false);
+    expect(result.serverBundled).toBe(false);
     expect(result.warnings.some((w) => w.includes('纯 DSL 模块'))).toBe(true);
     const manifest = JSON.parse(
       readFileSync(join(result.outDir, 'manifest.json'), 'utf8'),
     ) as Record<string, unknown>;
     expect(manifest).not.toHaveProperty('clientEntry');
+    expect(manifest).not.toHaveProperty('serverEntry');
+    expect(manifest).not.toHaveProperty('apiPrefixes');
     expect(existsSync(join(result.outDir, 'dsl', 'sitemap.yaml'))).toBe(true);
+  });
+
+  it('server entry：产出 server/index.mjs、manifest 字段与 namespaced DSL URL', async () => {
+    createServerFixtureProject(temp.dir);
+    const result = buildModule({ dir: temp.dir });
+    const out = result.outDir;
+
+    expect(result.serverBundled).toBe(true);
+    expect(existsSync(join(out, 'server', 'index.mjs'))).toBe(true);
+    expect(existsSync(join(out, 'server', 'index.mjs.map'))).toBe(true);
+
+    const manifest = JSON.parse(
+      readFileSync(join(out, 'manifest.json'), 'utf8'),
+    ) as Record<string, unknown>;
+    expect(manifest.serverEntry).toBe('server/index.mjs');
+    expect(manifest.apiPrefixes).toEqual(['/api/risk-analysis']);
+
+    // DSL 中的模块 API URL 被 namespacing，query 保留
+    const login = loadYaml(join(out, 'dsl', 'login.yaml')) as {
+      body: { events: { onSubmit: { params: { url?: string; to?: string } }[] } };
+    };
+    expect(login.body.events.onSubmit[0]!.params.url).toBe(
+      '/api/modules/demo/risk-analysis/data-value?x=1',
+    );
+    expect(login.body.events.onSubmit[1]!.params.to).toBe('/demo/dashboard');
+
+    // server bundle 可直接加载并调用 handlers
+    const mod = (await import(
+      pathToFileURL(join(out, 'server', 'index.mjs')).href
+    )) as {
+      handlers: Record<string, { GET: () => Response }>;
+    };
+    const response = mod.handlers['/api/risk-analysis/data-value']!.GET();
+    expect(response.status).toBe(200);
+    await expect(response.json()).resolves.toMatchObject({ code: 0, data: { ok: true } });
+
+    // 构建期校验通过（package.json 已声明 ./server）
+    const validation = validateModule({ dir: temp.dir });
+    expect(validation.errors).toEqual([]);
+  });
+
+  it('server entry 要求 target 支持 moduleServerApi（@2 拒绝）', () => {
+    createFixtureProject(
+      temp.dir,
+      `,
+  "target": "innospots-web-shell@2",
+  "serverEntry": "module/server.ts",
+  "apiPrefixes": ["/api/risk-analysis"]`,
+    );
+    writeText(join(temp.dir, 'module/server.ts'), 'export const handlers = {};\n');
+    expect(() => buildModule({ dir: temp.dir })).toThrowError(ModuleBuildError);
+    expect(existsSync(join(temp.dir, 'dist-module'))).toBe(false);
   });
 });

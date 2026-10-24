@@ -1,6 +1,6 @@
 import { execFileSync } from 'node:child_process';
-import { existsSync } from 'node:fs';
-import { join, resolve } from 'node:path';
+import { existsSync, readFileSync } from 'node:fs';
+import { join, relative, resolve, sep } from 'node:path';
 import { isatty } from 'node:tty';
 
 import {
@@ -10,10 +10,12 @@ import {
   CONFIG_FILE,
   ConfigError,
   initModule,
+  loadModuleConfig,
   ModuleBuildError,
   ProfileError,
   validateModule,
 } from '@pactor-app/module-pack';
+import type { BuildModuleResult } from '@pactor-app/module-pack';
 
 import { flagValue, type CliIo, type ParsedArgs } from '../args.js';
 import { confirm } from '../prompt.js';
@@ -120,22 +122,27 @@ function runModuleInit(dir: string | undefined, args: ParsedArgs, io: CliIo): nu
   return 0;
 }
 
+/** 输出构建摘要（build 与 pack 共用） */
+function reportBuild(result: BuildModuleResult, io: CliIo): void {
+  for (const warning of result.warnings) {
+    io.err(`警告: ${warning}`);
+  }
+  const { stats } = result;
+  io.out(`模块构建完成: ${result.outDir}`);
+  io.out(
+    `  页面 ${stats.pages} / 菜单 ${stats.menus} / 布局 ${stats.layouts} / 资源 ${stats.assets}` +
+      ` / client ${result.clientBundled ? '已打包' : '未打包（纯 DSL 模块）'}` +
+      ` / server ${result.serverBundled ? '已打包' : '未打包（无 server 入口）'}`,
+  );
+}
+
 function runModuleBuild(
   dir: string | undefined,
   config: string | undefined,
   io: CliIo,
 ): number {
   try {
-    const result = buildModule({ dir, config });
-    for (const warning of result.warnings) {
-      io.err(`警告: ${warning}`);
-    }
-    const { stats } = result;
-    io.out(`模块构建完成: ${result.outDir}`);
-    io.out(
-      `  页面 ${stats.pages} / 菜单 ${stats.menus} / 布局 ${stats.layouts} / 资源 ${stats.assets}` +
-        ` / client ${result.clientBundled ? '已打包' : '未打包（纯 DSL 模块）'}`,
-    );
+    reportBuild(buildModule({ dir, config }), io);
     return 0;
   } catch (error) {
     return handleError(error, io);
@@ -199,8 +206,17 @@ function packModule(args: ParsedArgs, io: CliIo): { code: number; tgz?: string }
   if (buildCode !== 0) {
     return { code: buildCode };
   }
+  // 读取实际产物目录与 manifest（尊重自定义 outDir）
+  const outDirFlag = loadModuleConfig(projectDir, config).outDir;
+  const moduleDir = join(projectDir, outDirFlag);
+  const outRel = relative(projectDir, moduleDir).split(sep).join('/');
+  const manifest = readManifest(join(moduleDir, 'manifest.json'));
+  if (manifest === undefined) {
+    io.err(`无法读取产物 manifest: ${join(moduleDir, 'manifest.json')}`);
+    return { code: 1 };
+  }
 
-  // dry-run 检查 files 列表是否覆盖 dist-module（--json 输出在 stdout，notice 在 stderr）
+  // dry-run 检查 files 列表是否覆盖产物（--json 输出在 stdout，notice 在 stderr）
   let packedFiles: string[];
   try {
     const dryRun = execFileSync('npm', ['pack', '--dry-run', '--json'], {
@@ -213,13 +229,27 @@ function packModule(args: ParsedArgs, io: CliIo): { code: number; tgz?: string }
     io.err(`npm pack --dry-run 失败: ${(error as Error).message}`);
     return { code: 1 };
   }
-  if (!packedFiles.includes('dist-module/manifest.json')) {
-    io.err('npm pack --dry-run 检查失败: 打包列表未包含 dist-module/manifest.json');
+
+  const required = [`${outRel}/manifest.json`, `${outRel}/module-assets.json`];
+  if (typeof manifest.sitemap === 'string') required.push(`${outRel}/${manifest.sitemap}`);
+  if (typeof manifest.clientEntry === 'string') {
+    required.push(`${outRel}/${manifest.clientEntry}`);
+  }
+  if (typeof manifest.serverEntry === 'string') {
+    required.push(`${outRel}/${manifest.serverEntry}`);
+  }
+  const missing = required.filter((file) => !packedFiles.includes(file));
+  // assetsRoot 只检查目录存在：空目录不会被 npm pack 收录
+  if (typeof manifest.assetsRoot === 'string' && !existsSync(join(moduleDir, manifest.assetsRoot))) {
+    missing.push(`${outRel}/${manifest.assetsRoot}/（目录不存在）`);
+  }
+  if (missing.length > 0) {
+    io.err(`npm pack --dry-run 检查失败: 打包列表缺少 ${missing.join('、')}`);
     io.err(`实际打包文件: ${packedFiles.join(', ') || '(空)'}`);
     io.err('请确认 package.json files 含 "dist-module"（可执行 pactor module init 注入）');
     return { code: 1 };
   }
-  io.out(`npm pack --dry-run 检查通过（${packedFiles.length} 个文件，覆盖 dist-module）`);
+  io.out(`npm pack --dry-run 检查通过（${packedFiles.length} 个文件，覆盖 ${outRel}）`);
 
   try {
     const output = execFileSync('npm', ['pack'], { cwd: projectDir, encoding: 'utf8' });
@@ -234,6 +264,24 @@ function packModule(args: ParsedArgs, io: CliIo): { code: number; tgz?: string }
 
 function runModulePack(args: ParsedArgs, io: CliIo): number {
   return packModule(args, io).code;
+}
+
+/** pack 检查所需的 manifest 字段（其余字段不关心） */
+interface PackedManifest {
+  sitemap?: unknown;
+  clientEntry?: unknown;
+  serverEntry?: unknown;
+  assetsRoot?: unknown;
+}
+
+/** 读取产物 manifest；缺失或解析失败返回 undefined */
+function readManifest(file: string): PackedManifest | undefined {
+  if (!existsSync(file)) return undefined;
+  try {
+    return JSON.parse(readFileSync(file, 'utf8')) as PackedManifest;
+  } catch {
+    return undefined;
+  }
 }
 
 /** publish = pack 全流程 + npm publish <tgz>（--dry-run 只演练不上传） */

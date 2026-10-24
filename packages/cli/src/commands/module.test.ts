@@ -1,3 +1,4 @@
+import { execFileSync } from 'node:child_process';
 import { existsSync, mkdirSync, readFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 
@@ -45,6 +46,41 @@ menus: []
   );
 }
 
+/** 带 server entry 的最小工程 */
+function createServerModuleProject(dir: string): void {
+  createModuleProject(dir);
+  write(
+    join(dir, 'pactor.module.json'),
+    JSON.stringify({
+      id: 'demo',
+      name: 'Demo',
+      basePath: '/demo',
+      serverEntry: 'module/server.ts',
+      apiPrefixes: ['/api/demo'],
+    }),
+  );
+  write(
+    join(dir, 'package.json'),
+    JSON.stringify({
+      name: '@demo/app',
+      version: '0.1.0',
+      files: ['dist-module'],
+      exports: {
+        './manifest': './dist-module/manifest.json',
+        './client': './dist-module/client/index.js',
+        './server': './dist-module/server/index.mjs',
+      },
+    }),
+  );
+  write(
+    join(dir, 'module/server.ts'),
+    `export const handlers = {
+  '/api/demo/hello': { GET: () => Response.json({ code: 0, data: 'hi', message: 'ok' }) },
+};
+`,
+  );
+}
+
 describe('pactor module', () => {
   let temp: ReturnType<typeof createTempDir>;
   beforeEach(() => {
@@ -71,11 +107,25 @@ describe('pactor module', () => {
     expect(code).toBe(0);
     expect(out.join('\n')).toContain('模块构建完成');
     expect(out.join('\n')).toContain('页面 1');
+    expect(out.join('\n')).toContain('server 未打包');
     const manifest = JSON.parse(
       readFileSync(join(temp.dir, 'dist-module', 'manifest.json'), 'utf8'),
     ) as Record<string, unknown>;
     expect(manifest.id).toBe('demo');
     expect(manifest.version).toBe('0.1.0');
+  });
+
+  it('build：server entry 打包并在摘要中标注', () => {
+    createServerModuleProject(temp.dir);
+    const { io, out } = createTestIo();
+    expect(runModule(parseArgs(['build', '--dir', temp.dir]), io)).toBe(0);
+    expect(out.join('\n')).toContain('server 已打包');
+    expect(existsSync(join(temp.dir, 'dist-module', 'server', 'index.mjs'))).toBe(true);
+    const manifest = JSON.parse(
+      readFileSync(join(temp.dir, 'dist-module', 'manifest.json'), 'utf8'),
+    ) as Record<string, unknown>;
+    expect(manifest.serverEntry).toBe('server/index.mjs');
+    expect(manifest.apiPrefixes).toEqual(['/api/demo']);
   });
 
   it('build 后 validate 通过，退出码 0', () => {
@@ -158,6 +208,27 @@ describe('pactor module', () => {
     expect(pkg.scripts['publish:module']).toBe('pactor module publish');
   });
 
+  it('init：检测 module/server.ts 注入 ./server export 并提示补齐 serverEntry/apiPrefixes', () => {
+    write(
+      join(temp.dir, 'package.json'),
+      JSON.stringify({ name: '@demo/risk-app', version: '0.1.0' }, null, 2),
+    );
+    write(join(temp.dir, 'module/server.ts'), 'export const handlers = {};\n');
+    const { io, err } = createTestIo();
+    expect(runModule(parseArgs(['init', '--dir', temp.dir]), io)).toBe(0);
+    const pkg = JSON.parse(readFileSync(join(temp.dir, 'package.json'), 'utf8')) as {
+      exports: Record<string, string>;
+    };
+    expect(pkg.exports['./server']).toBe('./dist-module/server/index.mjs');
+    expect(err.join('\n')).toContain('serverEntry');
+    // 不写入半套 server 配置
+    const config = JSON.parse(
+      readFileSync(join(temp.dir, 'pactor.module.json'), 'utf8'),
+    ) as Record<string, unknown>;
+    expect(config).not.toHaveProperty('serverEntry');
+    expect(config).not.toHaveProperty('apiPrefixes');
+  });
+
   it('pack：默认自动递增 patch 版本号并生成对应 tgz', () => {
     createModuleProject(temp.dir);
     const { io, out } = createTestIo();
@@ -177,8 +248,18 @@ describe('pactor module', () => {
     expect(manifest.version).toBe('0.1.1');
   });
 
-  it('pack：--bump minor 按次版本递增，--no-bump 保持原版本', () => {
-    createModuleProject(temp.dir);
+  it('pack：server bundle 在打包文件列表中', () => {
+    createServerModuleProject(temp.dir);
+    const { io, out } = createTestIo();
+    expect(runModule(parseArgs(['pack', '--dir', temp.dir, '--no-bump']), io)).toBe(0);
+    expect(out.join('\n')).toContain('npm pack --dry-run 检查通过');
+    const tgz = join(temp.dir, 'demo-app-0.1.0.tgz');
+    expect(existsSync(tgz)).toBe(true);
+    const listing = execFileSync('tar', ['-tzf', tgz], { encoding: 'utf8' });
+    expect(listing).toContain('package/dist-module/server/index.mjs');
+  });
+
+  it('pack：--bump minor 按次版本递增，--no-bump 保持原版本', () => {    createModuleProject(temp.dir);
     const minor = createTestIo();
     expect(runModule(parseArgs(['pack', '--dir', temp.dir, '--bump', 'minor']), minor.io)).toBe(0);
     expect(minor.out.join('\n')).toContain('0.1.0 → 0.2.0');
