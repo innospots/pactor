@@ -1,6 +1,6 @@
 {
   "name": "@pactor-app/module-pack",
-  "version": "1.55.0",
+  "version": "1.56.0",
   "description": "Pactor module pack: 把 Pactor 应用工程打包为 Shell 可装配的 npm 模块（Manifest V1）",
   "keywords": [
     "pactor",
