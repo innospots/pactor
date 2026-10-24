@@ -34,7 +34,11 @@ export interface ModulePackConfig {
   publicDir: string;
   /** target profile id（如 innospots-web-shell@2） */
   target: string;
-  demo: { public: boolean };
+  /**
+   * 模块级访问默认值：'public' 时构建期给未声明 public/permission 的
+   * pages / menus 补 public: true（缺省填充）；默认 'authenticated' 不改动。
+   */
+  access: { default: 'public' | 'authenticated' };
   tailwind: TailwindConfig;
   rewrite: {
     /** 绝对 API 地址重写为去 origin 的相对路径（默认 true） */
@@ -84,7 +88,16 @@ export function loadModuleConfig(projectDir: string, configPath?: string): Modul
 
   const actions = raw.actions === undefined ? [] : readStringArray(raw.actions, 'actions', file);
 
-  const demo = isRecord(raw.demo) ? raw.demo : {};
+  if (raw.demo !== undefined) {
+    throw new ConfigError(
+      `${file}: demo.public 已移除，请改用 "access": { "default": "public" }（缺省填充语义，不覆盖显式 permission）`,
+    );
+  }
+  const access = isRecord(raw.access) ? raw.access : {};
+  const accessDefault = readString(access, 'default', file, 'access') ?? 'authenticated';
+  if (accessDefault !== 'public' && accessDefault !== 'authenticated') {
+    throw new ConfigError(`${file}: access.default 只支持 "public" | "authenticated"`);
+  }
   const tailwind = isRecord(raw.tailwind) ? raw.tailwind : {};
   const rewrite = isRecord(raw.rewrite) ? raw.rewrite : {};
 
@@ -97,7 +110,7 @@ export function loadModuleConfig(projectDir: string, configPath?: string): Modul
     actions,
     publicDir: readString(raw, 'publicDir', file) ?? CONFIG_DEFAULTS.publicDir,
     target: readString(raw, 'target', file) ?? CONFIG_DEFAULTS.target,
-    demo: { public: readBoolean(demo, 'public', file, 'demo') ?? false },
+    access: { default: accessDefault },
     tailwind: {
       enabled: readBoolean(tailwind, 'enabled', file, 'tailwind') ?? false,
       input: readString(tailwind, 'input', file, 'tailwind'),

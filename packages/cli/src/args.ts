@@ -26,7 +26,7 @@ export interface ParsedArgs {
 const SHORT_VALUE_FLAGS = new Set(['o', 't']);
 
 /** 带值长选项（`--dir <path>` / `--config <file>`，module 子命令使用）；其余长选项按布尔处理 */
-const LONG_VALUE_FLAGS = new Set(['dir', 'config']);
+const LONG_VALUE_FLAGS = new Set(['dir', 'config', 'bump', 'registry', 'tag', 'access', 'otp']);
 
 /** 参数用法错误：CLI 入口捕获后以退出码 2 处理 */
 export class UsageError extends Error {}

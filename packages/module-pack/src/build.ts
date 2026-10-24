@@ -112,10 +112,10 @@ export function buildModule(options: BuildModuleOptions = {}): BuildModuleResult
     throw new ModuleBuildError(`模块构建失败（${errors.length} 个错误）`, errors);
   }
 
-  // 3) sitemap 转换（布局内联 / 菜单去 path / lazy 按 profile / public 演示）
+  // 3) sitemap 转换（布局内联 / 菜单去 path / lazy 按 profile / 访问默认值填充）
   const transformed = transformSitemap(site, {
     profile,
-    demoPublic: config.demo.public,
+    accessDefault: config.access.default,
     loadLayout: (rel) => loadYamlExpanded(yamlRoot, rel),
   });
 

@@ -1,10 +1,11 @@
-import { mkdtempSync, readFileSync, readdirSync, rmSync, writeFileSync, mkdirSync, existsSync } from 'node:fs';
+import { mkdtempSync, readFileSync, readdirSync, realpathSync, rmSync, symlinkSync, writeFileSync, mkdirSync, existsSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
+import { pathToFileURL } from 'node:url';
 
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
-import { runCli } from './cli.js';
+import { isMainEntry, runCli } from './cli.js';
 import { defaultTemplatesDir, type CliIo } from './create.js';
 
 /** 内存收集输出的 io */
@@ -139,5 +140,21 @@ describe('create-pactor-app', () => {
   it('defaultTemplatesDir 能定位到包内 templates', () => {
     expect(existsSync(join(defaultTemplatesDir('spa'), 'package.json'))).toBe(true);
     expect(existsSync(join(defaultTemplatesDir('next-app'), 'package.json'))).toBe(true);
+  });
+});
+
+describe('isMainEntry', () => {
+  it('通过符号链接调用时仍识别为主入口', () => {
+    const dir = mkdtempSync(join(tmpdir(), 'create-pactor-app-'));
+    const real = join(dir, 'cli.js');
+    writeFileSync(real, '');
+    const link = join(dir, 'create-pactor-app');
+    symlinkSync(real, link);
+
+    const url = pathToFileURL(realpathSync(real)).href;
+    expect(isMainEntry(url, real)).toBe(true);
+    expect(isMainEntry(url, link)).toBe(true);
+    expect(isMainEntry(url, undefined)).toBe(false);
+    expect(isMainEntry(url, join(dir, 'other.js'))).toBe(false);
   });
 });

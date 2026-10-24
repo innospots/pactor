@@ -2,7 +2,6 @@ import { existsSync, mkdirSync, readFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
-
 import { parseArgs } from '../args.js';
 import { createTempDir, createTestIo, writeText } from '../test-utils.js';
 import { runModule } from './module.js';
@@ -144,5 +143,69 @@ describe('pactor module', () => {
     expect(readFileSync(join(temp.dir, 'pactor.module.json'), 'utf8')).toContain(
       'custom',
     );
+  });
+
+  it('init：注入 publish:module 脚本', () => {
+    write(
+      join(temp.dir, 'package.json'),
+      JSON.stringify({ name: '@demo/risk-app', version: '0.1.0' }, null, 2),
+    );
+    const { io } = createTestIo();
+    expect(runModule(parseArgs(['init', '--dir', temp.dir]), io)).toBe(0);
+    const pkg = JSON.parse(readFileSync(join(temp.dir, 'package.json'), 'utf8')) as {
+      scripts: Record<string, string>;
+    };
+    expect(pkg.scripts['publish:module']).toBe('pactor module publish');
+  });
+
+  it('pack：默认自动递增 patch 版本号并生成对应 tgz', () => {
+    createModuleProject(temp.dir);
+    const { io, out } = createTestIo();
+    const code = runModule(parseArgs(['pack', '--dir', temp.dir]), io);
+    expect(code).toBe(0);
+    const text = out.join('\n');
+    expect(text).toContain('版本号已更新: @demo/app 0.1.0 → 0.1.1');
+    expect(text).toContain('npm pack 完成: demo-app-0.1.1.tgz');
+    expect(existsSync(join(temp.dir, 'demo-app-0.1.1.tgz'))).toBe(true);
+    const pkg = JSON.parse(readFileSync(join(temp.dir, 'package.json'), 'utf8')) as {
+      version: string;
+    };
+    expect(pkg.version).toBe('0.1.1');
+    const manifest = JSON.parse(
+      readFileSync(join(temp.dir, 'dist-module', 'manifest.json'), 'utf8'),
+    ) as { version: string };
+    expect(manifest.version).toBe('0.1.1');
+  });
+
+  it('pack：--bump minor 按次版本递增，--no-bump 保持原版本', () => {
+    createModuleProject(temp.dir);
+    const minor = createTestIo();
+    expect(runModule(parseArgs(['pack', '--dir', temp.dir, '--bump', 'minor']), minor.io)).toBe(0);
+    expect(minor.out.join('\n')).toContain('0.1.0 → 0.2.0');
+
+    const keep = createTestIo();
+    expect(runModule(parseArgs(['pack', '--dir', temp.dir, '--no-bump']), keep.io)).toBe(0);
+    expect(keep.out.join('\n')).not.toContain('版本号已更新');
+    const pkg = JSON.parse(readFileSync(join(temp.dir, 'package.json'), 'utf8')) as {
+      version: string;
+    };
+    expect(pkg.version).toBe('0.2.0');
+  });
+
+  it('pack：--bump 取值非法退出码 2', () => {
+    createModuleProject(temp.dir);
+    const { io, err } = createTestIo();
+    expect(runModule(parseArgs(['pack', '--dir', temp.dir, '--bump', 'nope']), io)).toBe(2);
+    expect(err.join('\n')).toContain('--bump 取值非法');
+  });
+
+  it('publish --dry-run：递增版本、打包并演练发布（不上传）', () => {
+    createModuleProject(temp.dir);
+    const { io, out } = createTestIo();
+    const code = runModule(parseArgs(['publish', '--dir', temp.dir, '--dry-run']), io);
+    expect(code).toBe(0);
+    const text = out.join('\n');
+    expect(text).toContain('版本号已更新: @demo/app 0.1.0 → 0.1.1');
+    expect(text).toContain('npm publish --dry-run 通过（未实际上传）');
   });
 });
