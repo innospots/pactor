@@ -12,6 +12,7 @@ export {
   discoverActions,
   discoverComponents,
   initModule,
+  MODULE_ID_PREFIX,
   renderClientEntry,
 } from './init.js';
 export type { InitModuleOptions, InitModuleResult } from './init.js';

@@ -16,10 +16,17 @@ import { DEFAULT_TARGET } from './profiles/index.js';
 export interface InitModuleOptions {
   /** 目标工程根（默认 cwd） */
   dir?: string;
+  /**
+   * 覆盖已存在的初始化文件（pactor.module.json / module/client.ts）。
+   * 缺省 false 时跳过已存在文件；由 CLI 负责询问用户后传入。
+   */
+  overwrite?: boolean;
 }
 
 export interface InitModuleResult {
   created: string[];
+  /** overwrite 时重新生成（覆盖）的文件 */
+  overwritten: string[];
   skipped: string[];
   warnings: string[];
 }
@@ -31,10 +38,11 @@ interface ActionSource {
   exports: string[];
 }
 
-/** 执行初始化，返回创建 / 跳过 / 告警清单 */
+/** 执行初始化，返回创建 / 覆盖 / 跳过 / 告警清单 */
 export function initModule(options: InitModuleOptions = {}): InitModuleResult {
   const projectDir = resolve(options.dir ?? process.cwd());
-  const result: InitModuleResult = { created: [], skipped: [], warnings: [] };
+  const overwrite = options.overwrite ?? false;
+  const result: InitModuleResult = { created: [], overwritten: [], skipped: [], warnings: [] };
 
   const pkgFile = join(projectDir, 'package.json');
   if (!existsSync(pkgFile)) {
@@ -48,31 +56,41 @@ export function initModule(options: InitModuleOptions = {}): InitModuleResult {
 
   // 1) pactor.module.json
   const configFile = join(projectDir, CONFIG_FILE);
-  if (existsSync(configFile)) {
+  const renderConfig = (): Record<string, unknown> => ({
+    id,
+    name: typeof pkg.name === 'string' ? pkg.name : id,
+    basePath: `/${id}`,
+    yamlRoot: CONFIG_DEFAULTS.yamlRoot,
+    clientEntry: CONFIG_DEFAULTS.clientEntry,
+    actions: actions.map((action) => action.specifier.replace(/^\.\.\//, '')),
+    publicDir: CONFIG_DEFAULTS.publicDir,
+    target: DEFAULT_TARGET,
+  });
+  const configExisted = existsSync(configFile);
+  if (configExisted && !overwrite) {
     result.skipped.push(`${CONFIG_FILE}（已存在）`);
   } else {
-    const config = {
-      id,
-      name: typeof pkg.name === 'string' ? pkg.name : id,
-      basePath: `/${id}`,
-      yamlRoot: CONFIG_DEFAULTS.yamlRoot,
-      clientEntry: CONFIG_DEFAULTS.clientEntry,
-      actions: actions.map((action) => action.specifier.replace(/^\.\.\//, '')),
-      publicDir: CONFIG_DEFAULTS.publicDir,
-      target: DEFAULT_TARGET,
-    };
-    writeFileSync(configFile, `${JSON.stringify(config, null, 2)}\n`, 'utf8');
-    result.created.push(CONFIG_FILE);
+    writeFileSync(configFile, `${JSON.stringify(renderConfig(), null, 2)}\n`, 'utf8');
+    if (configExisted) {
+      result.overwritten.push(CONFIG_FILE);
+    } else {
+      result.created.push(CONFIG_FILE);
+    }
   }
 
   // 2) module/client.ts
   const clientFile = join(projectDir, CONFIG_DEFAULTS.clientEntry);
-  if (existsSync(clientFile)) {
+  if (existsSync(clientFile) && !overwrite) {
     result.skipped.push(`${CONFIG_DEFAULTS.clientEntry}（已存在）`);
   } else {
     mkdirSync(join(projectDir, 'module'), { recursive: true });
+    const existed = existsSync(clientFile);
     writeFileSync(clientFile, renderClientEntry(hasComponents, actions), 'utf8');
-    result.created.push(CONFIG_DEFAULTS.clientEntry);
+    if (existed) {
+      result.overwritten.push(CONFIG_DEFAULTS.clientEntry);
+    } else {
+      result.created.push(CONFIG_DEFAULTS.clientEntry);
+    }
   }
 
   // 3) package.json 注入（不覆盖已有字段，冲突 warning）
@@ -83,7 +101,10 @@ export function initModule(options: InitModuleOptions = {}): InitModuleResult {
   return result;
 }
 
-/** 从包名推导模块 id：去 scope、kebab 化 */
+/** 模块 id 统一前缀（缺省自动补齐，已有则不重复添加） */
+export const MODULE_ID_PREFIX = 'pactor-app-';
+
+/** 从包名推导模块 id：去 scope、kebab 化、补 pactor-app- 前缀 */
 export function deriveModuleId(name: unknown): string {
   const base = typeof name === 'string' && name.length > 0 ? name : 'module';
   const withoutScope = base.startsWith('@') ? base.slice(base.indexOf('/') + 1) : base;
@@ -92,7 +113,8 @@ export function deriveModuleId(name: unknown): string {
     .toLowerCase()
     .replace(/[^a-z0-9]+/g, '-')
     .replace(/^-+|-+$/g, '');
-  return kebab.length > 0 ? kebab : 'module';
+  const id = kebab.length > 0 ? kebab : 'module';
+  return id.startsWith(MODULE_ID_PREFIX) ? id : `${MODULE_ID_PREFIX}${id}`;
 }
 
 /** 扫描 src/pactor/*-actions.ts 的具名导出（export const xxx） */
