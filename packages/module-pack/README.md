@@ -2,8 +2,8 @@
 
 把 Pactor 应用工程打包为 Shell（如 innospots-web-shell）可装配的 npm 模块（Manifest V1）。
 
-- 可编程 API：`buildModule` / `validateModule` / `initModule`；
-- CLI 薄封装：`pactor module init|build|validate|pack`（见 `@pactor-app/cli`）。
+- 可编程 API：`buildModule` / `validateModule` / `initModule` / `bumpPackageVersion`；
+- CLI 薄封装：`pactor module init|build|validate|pack|publish`（见 `@pactor-app/cli`）。
 
 ## 用法
 
@@ -11,7 +11,8 @@
 pactor module init      # 一次性：生成 pactor.module.json、module/client.ts，注入 package.json
 pactor module build     # 每次发布：构建 dist-module/（Manifest V1 + DSL + client + assets）
 pactor module validate  # 校验产物契约
-pactor module pack      # build + npm pack 生成 tgz
+pactor module pack      # 递增版本号（默认 patch，--bump/--no-bump 控制）+ build + npm pack 生成 tgz
+pactor module publish   # pack 全流程 + npm publish 发布（--registry/--tag/--access/--otp/--dry-run）
 ```
 
 ```ts
@@ -51,7 +52,7 @@ alias 自动取 tsconfig paths）→ 可选 Tailwind 预编译 → Manifest V1 +
   "actions": [],                      // init 自动发现 src/pactor/*-actions.ts
   "publicDir": "public",              // 默认值
   "target": "innospots-web-shell@2",  // 默认值
-  "demo": { "public": false },        // 演示模式：pages/menus 标 public
+  "access": { "default": "public" },  // 访问默认值：public 时给未声明 public/permission 的页面/菜单补 public
   "tailwind": { "enabled": false },   // 可选 Tailwind 预编译
   "rewrite": { "absoluteApiToRelative": true }  // 绝对 API 地址降为相对路径
 }

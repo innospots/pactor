@@ -60,7 +60,6 @@ export function initModule(options: InitModuleOptions = {}): InitModuleResult {
       actions: actions.map((action) => action.specifier.replace(/^\.\.\//, '')),
       publicDir: CONFIG_DEFAULTS.publicDir,
       target: DEFAULT_TARGET,
-      demo: { public: false },
     };
     writeFileSync(configFile, `${JSON.stringify(config, null, 2)}\n`, 'utf8');
     result.created.push(CONFIG_FILE);
@@ -184,6 +183,7 @@ function injectPackageJson(pkg: Record<string, unknown>, result: InitModuleResul
   const wantedScripts: Record<string, string> = {
     'build:module': 'pactor module build',
     'pack:module': 'pactor module pack',
+    'publish:module': 'pactor module publish',
   };
   for (const [key, value] of Object.entries(wantedScripts)) {
     if (scripts[key] === undefined) {

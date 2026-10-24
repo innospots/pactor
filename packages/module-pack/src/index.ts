@@ -65,3 +65,9 @@ export {
   writeManifest,
 } from './emit-manifest.js';
 export type { ModuleManifest } from './emit-manifest.js';
+export { bumpPackageVersion, bumpVersion } from './version.js';
+export type {
+  BumpPackageVersionOptions,
+  BumpPackageVersionResult,
+  VersionRelease,
+} from './version.js';

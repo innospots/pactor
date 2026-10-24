@@ -26,10 +26,9 @@ const site = {
 
 const adminLayout = { type: 'AdminLayout' };
 
-function makeOptions(profile: typeof innospotsWebShellV1, demoPublic = false) {
+function makeOptions(profile: typeof innospotsWebShellV1) {
   return {
     profile,
-    demoPublic,
     loadLayout: (rel: string): unknown => {
       if (rel === 'admin.layout.yaml') return adminLayout;
       throw new Error(`未知布局: ${rel}`);
@@ -65,10 +64,11 @@ describe('transformSitemap', () => {
     expect(v2Pages[1]!.lazy).toBe(true);
   });
 
-  it('demo.public：pages 与 menus（含 children）标记 public: true', () => {
-    const { site: next } = transformSitemap(site, makeOptions(innospotsWebShellV2, true));
-    const pages = next.pages as Record<string, unknown>[];
-    expect(pages.every((page) => page.public === true)).toBe(true);
+  it('accessDefault=public：menus children 递归填充', () => {
+    const { site: next } = transformSitemap(site, {
+      ...makeOptions(innospotsWebShellV2),
+      accessDefault: 'public' as const,
+    });
     const menus = next.menus as Record<string, unknown>[];
     expect(menus[0]!.public).toBe(true);
     expect((menus[1]!.children as Record<string, unknown>[])[0]!.public).toBe(true);
@@ -85,5 +85,44 @@ describe('transformSitemap', () => {
     expect(result.pageCount).toBe(2);
     expect(result.menuCount).toBe(2);
     expect(result.layoutCount).toBe(2);
+  });
+
+  it('accessDefault=public：只填充未声明访问属性的条目', () => {
+    const mixed = {
+      id: 'site',
+      layouts: {},
+      pages: [
+        { id: 'login', path: '/login', public: true },
+        { id: 'dashboard', path: '/dashboard' },
+        { id: 'admin', path: '/admin', permission: 'admin:view' },
+      ],
+      menus: [
+        { id: 'dash', title: '工作台', pageId: 'dashboard' },
+        { id: 'admin', title: '管理', pageId: 'admin', permission: 'admin:view' },
+      ],
+    };
+    const { site: next } = transformSitemap(mixed, {
+      ...makeOptions(innospotsWebShellV2),
+      accessDefault: 'public' as const,
+    });
+    const pages = next.pages as Record<string, unknown>[];
+    expect(pages[0]!.public).toBe(true);
+    expect(pages[1]!.public).toBe(true);
+    // 显式声明 permission 的条目不被覆盖
+    expect(pages[2]).not.toHaveProperty('public');
+    expect(pages[2]!.permission).toBe('admin:view');
+    const menus = next.menus as Record<string, unknown>[];
+    expect(menus[0]!.public).toBe(true);
+    expect(menus[1]).not.toHaveProperty('public');
+    expect(menus[1]!.permission).toBe('admin:view');
+  });
+
+  it('accessDefault=authenticated（缺省）：不改动访问属性', () => {
+    const { site: next } = transformSitemap(site, {
+      ...makeOptions(innospotsWebShellV2),
+      accessDefault: 'authenticated' as const,
+    });
+    const pages = next.pages as Record<string, unknown>[];
+    expect(pages[1]).not.toHaveProperty('public');
   });
 });

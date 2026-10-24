@@ -17,7 +17,7 @@ function makeConfig(overrides: Partial<ModulePackConfig> = {}): ModulePackConfig
     actions: [],
     publicDir: 'public',
     target: 'innospots-web-shell@2',
-    demo: { public: false },
+    access: { default: 'authenticated' },
     tailwind: { enabled: false },
     rewrite: { absoluteApiToRelative: true },
     outDir: 'dist-module',
