@@ -8,12 +8,17 @@ export type { BuildModuleOptions, BuildModuleResult } from './build.js';
 export { validateModule } from './validate.js';
 export type { ValidateModuleOptions, ValidateModuleResult } from './validate.js';
 export {
+  CLIENT_STYLES_ENTRY,
+  deriveApiPrefix,
   deriveModuleId,
   discoverActions,
   discoverComponents,
   initModule,
   MODULE_ID_PREFIX,
   renderClientEntry,
+  renderModuleStyles,
+  renderServerEntry,
+  SERVER_ENTRY,
 } from './init.js';
 export type { InitModuleOptions, InitModuleResult } from './init.js';
 
