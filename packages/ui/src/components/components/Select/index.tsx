@@ -123,12 +123,21 @@ export function Select({
   };
 
   const inFormRoot = inForm === true;
+  // 选中值对应的完整 label：触发器内文案会被省略号截断，title 提供
+  // 原生 hover 提示；未选中时不给 title，避免空提示
+  const selectedLabel =
+    selectedValue === null
+      ? undefined
+      : (options.find((option) => option.value === selectedValue)?.label ??
+        String(selectedValue));
   const select = (
     <span
       className={cn(
-        // Form / Field（Form 上下文）内控件占满整行宽度；独立渲染保持内容自然宽度
+        // Form / Field（Form 上下文）内控件占满整行宽度；独立渲染保持内容自然宽度。
+        // min-w-0：水平布局下作为 form-item 的 flex 子项可收缩（超长选中值
+        // 由 SelectValue 截断），否则 min-width:auto 会把表单项撑宽。
         inFormRoot
-          ? 'flex w-full items-center gap-1'
+          ? 'flex w-full min-w-0 items-center gap-1'
           : 'inline-flex items-center gap-1',
         !inFormRoot && className,
         controlClassName,
@@ -152,6 +161,7 @@ export function Select({
       >
         <SelectTrigger
           id={controlId}
+          title={selectedLabel}
           size={CONTROL_SIZE_SELECT_ATTR[size]}
           iconClassName={showClear ? CLEARABLE_ICON_HIDE : undefined}
           className={cn(

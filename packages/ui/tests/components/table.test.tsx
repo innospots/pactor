@@ -161,7 +161,7 @@ describe('分页与加载态', () => {
       },
     );
 
-    fireEvent.click(screen.getByRole('button', { name: '2' }));
+    fireEvent.click(screen.getByRole('link', { name: '2' }));
     await vi.waitFor(() => {
       expect(context.state.get('page')).toBe(2);
     });

@@ -701,6 +701,43 @@ describe('Select 选项', () => {
     expect(document.querySelector('[data-slot=select-content]')).toBeNull();
   });
 
+  it('选中值后触发器 title 为完整 label，未选中时无 title', async () => {
+    const user = userEvent.setup();
+    const { container } = renderDsl({
+      type: 'Form',
+      children: [
+        {
+          type: 'Select',
+          props: {
+            name: 'city',
+            label: '城市',
+            options: [
+              { label: '杭州', value: 'hz' },
+              { label: '一条很长的城市名称用于验证 title 提示文案', value: 'long' },
+            ],
+          },
+        },
+      ],
+    });
+
+    const trigger = container.querySelector('[data-slot=select-trigger]')!;
+    // 未选中：不给 title，避免悬停出现空提示
+    expect(trigger.hasAttribute('title')).toBe(false);
+
+    await user.click(trigger);
+    await user.click(
+      await screen.findByRole('option', {
+        name: '一条很长的城市名称用于验证 title 提示文案',
+      }),
+    );
+    // 选中后 title 展示完整 label（触发器内文案可能被省略号截断）
+    await vi.waitFor(() => {
+      expect(trigger.getAttribute('title')).toBe(
+        '一条很长的城市名称用于验证 title 提示文案',
+      );
+    });
+  });
+
   it('表单项 label 经 htmlFor 与触发器 id 关联', () => {
     const { container } = renderDsl({
       type: 'Form',
@@ -758,6 +795,12 @@ describe('Select 宽度', () => {
     const trigger = container.querySelector('[data-slot=select-trigger]');
     expect(trigger?.className).toContain('w-full');
     expect(trigger?.closest('span')?.className).toContain('w-full');
+    // 表单根与控件包裹节点都允许收缩：避免超长选中值作为 grid / flex 子项
+    // 的 min-content 把定宽容器（如弹层）撑开
+    expect(container.querySelector('[data-slot=form]')?.className).toContain(
+      'min-w-0',
+    );
+    expect(trigger?.closest('span')?.className).toContain('min-w-0');
 
     const standalone = renderDsl({
       type: 'Select',
@@ -772,6 +815,9 @@ describe('Select 宽度', () => {
     expect(standaloneTrigger?.className).not.toContain('w-fit');
     expect(standaloneTrigger?.closest('span')?.className).toContain(
       'inline-flex',
+    );
+    expect(standaloneTrigger?.closest('span')?.className).not.toContain(
+      'min-w-0',
     );
   });
 });

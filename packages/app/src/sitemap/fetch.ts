@@ -1,3 +1,5 @@
+import { withLocaleParam } from '@pactor-app/resource';
+
 import type { PactorHttpHooks } from '../assembly.js';
 
 import { withHttpHooks } from './http.js';
@@ -11,6 +13,8 @@ export interface FetchSitemapOptions {
   baseUrl?: string;
   /** HTTP 钩子：与页面运行时同一套 request / response 加工 */
   httpHooks?: PactorHttpHooks;
+  /** 当前语言代码：请求 URL 追加 `?locale=`（已有 locale 参数替换不追加）；缺省不携带 */
+  locale?: string;
 }
 
 /**
@@ -23,9 +27,13 @@ export async function fetchSitemap(
   options: FetchSitemapOptions = {},
 ): Promise<SitemapResource> {
   const fetcher = withHttpHooks(options.fetcher ?? fetch, options.httpHooks);
+  const sourceUrl = (url: string): string => {
+    const resolved = resolveUrl(url, options.baseUrl);
+    return options.locale ? withLocaleParam(resolved, options.locale) : resolved;
+  };
   const responses = await Promise.all(
     sources.map(async (url) => {
-      const res = await fetcher(resolveUrl(url, options.baseUrl), {
+      const res = await fetcher(sourceUrl(url), {
         cache: 'no-store',
         // 跨源 cookie 会话（服务端开通 CORS + Allow-Credentials 时生效；
         // 同源行为不变）

@@ -4,6 +4,7 @@
  * 支持形态：
  * - 位置参数：`pactor validate a.page.yaml b.page.yaml`
  * - 长 flag：`--flag`（布尔）或 `--flag=value`
+ * - 带值长 flag：`--dir <path>` / `--config <file>`（见 {@link LONG_VALUE_FLAGS}）
  * - 短 flag：`-o value`（带值短选项，见 {@link SHORT_VALUE_FLAGS}）
  */
 
@@ -24,6 +25,9 @@ export interface ParsedArgs {
 /** 带值短选项（`-o <file>` / `-t <template>`）；其余短选项按布尔处理 */
 const SHORT_VALUE_FLAGS = new Set(['o', 't']);
 
+/** 带值长选项（`--dir <path>` / `--config <file>`，module 子命令使用）；其余长选项按布尔处理 */
+const LONG_VALUE_FLAGS = new Set(['dir', 'config', 'bump', 'registry', 'tag', 'access', 'otp']);
+
 /** 参数用法错误：CLI 入口捕获后以退出码 2 处理 */
 export class UsageError extends Error {}
 
@@ -43,6 +47,13 @@ export function parseArgs(argv: string[]): ParsedArgs {
       const eq = body.indexOf('=');
       if (eq >= 0) {
         flags[body.slice(0, eq)] = body.slice(eq + 1);
+      } else if (LONG_VALUE_FLAGS.has(body)) {
+        const value = argv[i + 1];
+        if (value === undefined) {
+          throw new UsageError(`选项 --${body} 缺少值`);
+        }
+        flags[body] = value;
+        i += 1;
       } else {
         flags[body] = true;
       }

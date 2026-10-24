@@ -6,7 +6,7 @@ import type {
   HttpRequestConfig,
 } from '../context/adapters.js';
 import type { ServiceRegistry } from '../context/context.js';
-import { resolveDeep, toError } from '../utils/resolve.js';
+import { resolveDeep, toError, type LocalizationMode } from '../utils/resolve.js';
 
 /** 单个数据源的运行时状态 */
 export interface DataSourceStatus {
@@ -21,6 +21,8 @@ export interface DataStoreDeps {
   http: HttpAdapter;
   /** 加载前取当前表达式作用域（params / request 求值用） */
   getScope: () => ExpressionScope;
+  /** 本地化协议模式（缺省 'client'），透传给 params / request 求值 */
+  localizationMode?: LocalizationMode;
 }
 
 /**
@@ -35,6 +37,7 @@ export class DataStore {
   private readonly services: ServiceRegistry;
   private readonly http: HttpAdapter;
   private readonly getScope: () => ExpressionScope;
+  private readonly localizationMode?: LocalizationMode;
   private readonly statuses = new Map<string, DataSourceStatus>();
   private readonly listeners = new Set<() => void>();
   private version = 0;
@@ -44,6 +47,7 @@ export class DataStore {
     this.services = deps.services;
     this.http = deps.http;
     this.getScope = deps.getScope;
+    this.localizationMode = deps.localizationMode;
     for (const name of Object.keys(deps.dataSources)) {
       this.statuses.set(name, { loading: false });
     }
@@ -195,7 +199,9 @@ export class DataStore {
             `[@pactor-app/runtime] service not registered: "${serviceName}"`,
           );
         }
-        const params = resolveDeep(config.params ?? {}, this.getScope()) as Record<
+        const params = resolveDeep(config.params ?? {}, this.getScope(), {
+          localizationMode: this.localizationMode,
+        }) as Record<
           string,
           unknown
         >;
@@ -208,6 +214,7 @@ export class DataStore {
         const request = resolveDeep(
           config.request,
           this.getScope(),
+          { localizationMode: this.localizationMode },
         ) as HttpRequestConfig;
         return this.http.request(request);
       }

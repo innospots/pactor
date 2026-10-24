@@ -4,6 +4,7 @@ import {
   DSL_SOURCE_REF_SCHEMA_ID,
   dslChildrenSchema,
 } from './dsl-node.js';
+import { pageI18nSchema } from './i18n.js';
 
 /**
  * Page DSL 根结构 JSON Schema（设计文档第 10、37 节）。
@@ -152,4 +153,27 @@ export const pageDslSchema = {
     children: dslChildrenSchema,
   },
   additionalProperties: false,
+} as const;
+
+export const AUTHOR_PAGE_DSL_SCHEMA_ID = 'pactor:author-page-dsl';
+
+/** 作者态页面 Schema：在 Page DSL 基础上允许顶层 i18n 字段（设计文档第 4.2 节） */
+export const authorPageDslSchema = {
+  ...pageDslSchema,
+  $id: AUTHOR_PAGE_DSL_SCHEMA_ID,
+  properties: {
+    ...pageDslSchema.properties,
+    i18n: pageI18nSchema,
+  },
+} as const;
+
+export const LOCALIZED_PAGE_DSL_SCHEMA_ID = 'pactor:localized-page-dsl';
+
+/**
+ * 下发态页面 Schema：结构与 Page DSL 一致；作者态 i18n 字段编译后移除，
+ * 由 additionalProperties: false 拒绝；残留 $i18n 由 validateLocalizedPageDsl 遍历检查
+ */
+export const localizedPageDslSchema = {
+  ...pageDslSchema,
+  $id: LOCALIZED_PAGE_DSL_SCHEMA_ID,
 } as const;

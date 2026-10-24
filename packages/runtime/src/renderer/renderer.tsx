@@ -17,7 +17,7 @@ import {
 import { ActionEngine } from '../action/engine.js';
 import type { RuntimeContext } from '../context/context.js';
 import { buildScope } from '../context/scope.js';
-import { resolveDeep } from '../utils/resolve.js';
+import { resolveDeep, type LocalizationMode } from '../utils/resolve.js';
 import { DslSourceBoundary } from './dsl-source-boundary.js';
 import {
   RendererContextProvider,
@@ -200,7 +200,7 @@ function renderNode(
     return <UnsupportedComponent key={key} type={node.type} />;
   }
 
-  const props = resolveProps(node.props, scope);
+  const props = resolveProps(node.props, scope, value.context.localizationMode);
 
   // events 绑定：事件对象放入 event 局部作用域，动作数组串行执行
   if (node.events) {
@@ -417,6 +417,7 @@ function normalizeEntry(
 function resolveProps(
   props: Record<string, unknown> | undefined,
   scope: ExpressionScope,
+  localizationMode?: LocalizationMode,
 ): Record<string, unknown> {
   if (!props) {
     return {};
@@ -426,7 +427,10 @@ function resolveProps(
     out[key] =
       typeof value === 'string' && key.startsWith('on')
         ? value
-        : resolveDeep(value, scope, { isOpaque: isEmbeddedDslNode });
+        : resolveDeep(value, scope, {
+            isOpaque: isEmbeddedDslNode,
+            localizationMode,
+          });
   }
   return out;
 }

@@ -11,11 +11,11 @@
     "build:test": "node scripts/build.mjs test"
   },
   "dependencies": {
-    "@pactor-app/core": "^1.23.0",
-    "@pactor-app/runtime": "^1.23.0",
-    "@pactor-app/ui": "^1.23.0",
+    "@pactor-app/core": "latest",
+    "@pactor-app/runtime": "latest",
+    "@pactor-app/ui": "latest",
     "next": "16.3.5",
-    "pactor-app": "^1.23.0",
+    "pactor-app": "latest",
     "react": "19.2.8",
     "react-dom": "19.2.8",
     "yaml": "^2.9.1"
