@@ -6,6 +6,7 @@ import { isatty } from 'node:tty';
 import {
   buildModule,
   bumpPackageVersion,
+  CLIENT_STYLES_ENTRY,
   CONFIG_DEFAULTS,
   CONFIG_FILE,
   ConfigError,
@@ -13,6 +14,7 @@ import {
   loadModuleConfig,
   ModuleBuildError,
   ProfileError,
+  SERVER_ENTRY,
   validateModule,
 } from '@pactor-app/module-pack';
 import type { BuildModuleResult } from '@pactor-app/module-pack';
@@ -30,7 +32,7 @@ import { confirm } from '../prompt.js';
 const MODULE_USAGE = `用法: pactor module <subcommand> [options]
 
 子命令:
-  pactor module init [--dir <工程根>] [--force]      初始化模块接入面（已存在文件询问是否重新生成，--force 直接覆盖）
+  pactor module init [--dir <工程根>] [--force] [--server]  初始化模块接入面（已存在文件询问是否重新生成，--force 直接覆盖）
   pactor module build [--dir <工程根>] [--config <配置文件>]  构建 dist-module/ 产物
   pactor module validate [--dir <工程根>]           校验 dist-module/ 产物
   pactor module pack [--dir <工程根>]               自动递增版本号 + build + npm pack 生成 tgz
@@ -89,7 +91,9 @@ function runModuleInit(dir: string | undefined, args: ParsedArgs, io: CliIo): nu
   const green = (text: string): string =>
     process.stdout.isTTY ? `\x1b[32m${text}\x1b[39m` : text;
   const projectDir = resolve(dir ?? process.cwd());
-  const initFiles = [CONFIG_FILE, CONFIG_DEFAULTS.clientEntry];
+  const server = args.flags['server'] === true;
+  const initFiles = [CONFIG_FILE, CONFIG_DEFAULTS.clientEntry, CLIENT_STYLES_ENTRY];
+  if (server) initFiles.push(SERVER_ENTRY);
   const existing = initFiles.filter((file) => existsSync(join(projectDir, file)));
 
   let overwrite = args.flags['force'] === true;
@@ -105,7 +109,7 @@ function runModuleInit(dir: string | undefined, args: ParsedArgs, io: CliIo): nu
     }
   }
 
-  const result = initModule({ dir, overwrite });
+  const result = initModule({ dir, overwrite, server });
   for (const file of result.created) {
     io.out(`已生成: ${file}`);
   }

@@ -8,7 +8,8 @@
 ## 用法
 
 ```bash
-pactor module init      # 一次性：生成 pactor.module.json、module/client.ts，注入 package.json
+pactor module init      # 一次性：生成 pactor.module.json、module/client.ts、module/module.css，注入 package.json
+pactor module init --server  # 同上，并额外生成 module/server.ts、写入 serverEntry / apiPrefixes
 pactor module build     # 每次发布：构建 dist-module/（Manifest V1 + DSL + client + server + assets）
 pactor module validate  # 校验产物契约
 pactor module pack      # 递增版本号（默认 patch，--bump/--no-bump 控制）+ build + npm pack 生成 tgz
@@ -48,6 +49,10 @@ alias 自动取 tsconfig paths）→ 可选 Tailwind 预编译 → 可选 server
 ## 模块服务端 API（server entry）
 
 模块可把自己的业务 API 一起打进 tgz，由 Shell 统一承接，无需在宿主工程复制路由。
+
+`pactor module init --server` 会生成 `module/server.ts` 模板，并在新建的
+`pactor.module.json` 中写入 `serverEntry` 与默认 `apiPrefixes`（`/api/<模块 slug>`）；
+已有配置不会被改写，需手动补齐这两项。
 
 ```jsonc
 {

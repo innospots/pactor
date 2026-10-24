@@ -63,9 +63,9 @@ const httpHooks = createHttpHooks();
 />
 ```
 
-> 依赖说明：`SitemapApp` 于 `@pactor-app/app` v1.19.0 引入。本模板开发期间
-> pactor 依赖经 `link:../../packages/*` 指向本仓；`v1.19.0` 发布到 npm 后
-> 改回 `^1.19.0` 版本号即可独立使用。
+> 依赖说明：`SitemapApp` 于 `@pactor-app/app` v1.19.0 引入。模板中 pactor 依赖
+> 统一使用 `latest` dist-tag，`pnpm install` 会解析 npm 上最新发布版；模板不随附
+> 锁文件，保证新工程始终安装最新版本。
 
 ## 接入真实后端
 

@@ -172,6 +172,9 @@ describe('pactor module', () => {
     const client = readFileSync(join(temp.dir, 'module/client.ts'), 'utf8');
     expect(client).toContain('riskActions');
     expect(client).toContain('export const extensions');
+    expect(client).toContain("import './module.css'");
+    expect(existsSync(join(temp.dir, 'module/module.css'))).toBe(true);
+    expect(existsSync(join(temp.dir, 'module/server.ts'))).toBe(false);
     const pkg = JSON.parse(readFileSync(join(temp.dir, 'package.json'), 'utf8')) as {
       files: string[];
       exports: Record<string, string>;
@@ -206,6 +209,31 @@ describe('pactor module', () => {
       scripts: Record<string, string>;
     };
     expect(pkg.scripts['publish:module']).toBe('pactor module publish');
+  });
+
+  it('init --server：生成 server.ts 并写入 serverEntry/apiPrefixes', () => {
+    write(
+      join(temp.dir, 'package.json'),
+      JSON.stringify({ name: '@demo/risk-app', version: '0.1.0' }, null, 2),
+    );
+    const { io, err } = createTestIo();
+    expect(runModule(parseArgs(['init', '--dir', temp.dir, '--server']), io)).toBe(0);
+
+    expect(existsSync(join(temp.dir, 'module/server.ts'))).toBe(true);
+    expect(readFileSync(join(temp.dir, 'module/server.ts'), 'utf8')).toContain(
+      'export const handlers',
+    );
+    const config = JSON.parse(
+      readFileSync(join(temp.dir, 'pactor.module.json'), 'utf8'),
+    ) as { serverEntry?: string; apiPrefixes?: string[] };
+    expect(config.serverEntry).toBe('module/server.ts');
+    expect(config.apiPrefixes).toEqual(['/api/risk-app']);
+    const pkg = JSON.parse(readFileSync(join(temp.dir, 'package.json'), 'utf8')) as {
+      exports: Record<string, string>;
+    };
+    expect(pkg.exports['./server']).toBe('./dist-module/server/index.mjs');
+    // 配置由 init 写全，不应再提示手动补齐
+    expect(err.join('\n')).not.toContain('serverEntry');
   });
 
   it('init：检测 module/server.ts 注入 ./server export 并提示补齐 serverEntry/apiPrefixes', () => {
