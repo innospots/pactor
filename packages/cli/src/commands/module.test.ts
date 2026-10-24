@@ -208,4 +208,30 @@ describe('pactor module', () => {
     expect(text).toContain('版本号已更新: @demo/app 0.1.0 → 0.1.1');
     expect(text).toContain('npm publish --dry-run 通过（未实际上传）');
   });
+
+  it('init：文件已存在时非 TTY 默认保留并提示 --force，--force 直接覆盖', () => {
+    write(
+      join(temp.dir, 'package.json'),
+      JSON.stringify({ name: 'risk-app', version: '0.1.0' }, null, 2),
+    );
+    const first = createTestIo();
+    expect(runModule(parseArgs(['init', '--dir', temp.dir]), first.io)).toBe(0);
+    write(join(temp.dir, 'pactor.module.json'), `{\n  "id": "custom"\n}\n`);
+
+    // 非 TTY（vitest 环境）：默认保留，输出提示
+    const second = createTestIo();
+    expect(runModule(parseArgs(['init', '--dir', temp.dir]), second.io)).toBe(0);
+    expect(second.err.join('\n')).toContain('--force');
+    expect(second.out.join('\n')).toContain('已跳过: pactor.module.json');
+    expect(readFileSync(join(temp.dir, 'pactor.module.json'), 'utf8')).toContain('custom');
+
+    // --force：覆盖并提示
+    const forced = createTestIo();
+    expect(runModule(parseArgs(['init', '--dir', temp.dir, '--force']), forced.io)).toBe(0);
+    expect(forced.out.join('\n')).toContain('已重新生成: pactor.module.json');
+    const config = JSON.parse(readFileSync(join(temp.dir, 'pactor.module.json'), 'utf8')) as {
+      id: string;
+    };
+    expect(config.id).toBe('pactor-app-risk-app');
+  });
 });

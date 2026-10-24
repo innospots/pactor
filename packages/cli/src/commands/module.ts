@@ -1,9 +1,13 @@
 import { execFileSync } from 'node:child_process';
-import { resolve } from 'node:path';
+import { existsSync } from 'node:fs';
+import { join, resolve } from 'node:path';
+import { isatty } from 'node:tty';
 
 import {
   buildModule,
   bumpPackageVersion,
+  CONFIG_DEFAULTS,
+  CONFIG_FILE,
   ConfigError,
   initModule,
   ModuleBuildError,
@@ -12,6 +16,7 @@ import {
 } from '@pactor-app/module-pack';
 
 import { flagValue, type CliIo, type ParsedArgs } from '../args.js';
+import { confirm } from '../prompt.js';
 
 /**
  * `pactor module <init|build|validate|pack|publish>`：模块打包命令族，
@@ -23,7 +28,7 @@ import { flagValue, type CliIo, type ParsedArgs } from '../args.js';
 const MODULE_USAGE = `用法: pactor module <subcommand> [options]
 
 子命令:
-  pactor module init [--dir <工程根>]               初始化模块接入面（幂等，只新增不破坏）
+  pactor module init [--dir <工程根>] [--force]      初始化模块接入面（已存在文件询问是否重新生成，--force 直接覆盖）
   pactor module build [--dir <工程根>] [--config <配置文件>]  构建 dist-module/ 产物
   pactor module validate [--dir <工程根>]           校验 dist-module/ 产物
   pactor module pack [--dir <工程根>]               自动递增版本号 + build + npm pack 生成 tgz
@@ -42,7 +47,7 @@ export function runModule(args: ParsedArgs, io: CliIo): number {
 
   switch (sub) {
     case 'init':
-      return runModuleInit(dir, io);
+      return runModuleInit(dir, args, io);
     case 'build':
       return runModuleBuild(dir, config, io);
     case 'validate':
@@ -77,10 +82,33 @@ function handleError(error: unknown, io: CliIo): number {
   throw error;
 }
 
-function runModuleInit(dir: string | undefined, io: CliIo): number {
-  const result = initModule({ dir });
+function runModuleInit(dir: string | undefined, args: ParsedArgs, io: CliIo): number {
+  // TTY 下绿色输出；非 TTY（管道/CI/测试注入 io）输出纯文本
+  const green = (text: string): string =>
+    process.stdout.isTTY ? `\x1b[32m${text}\x1b[39m` : text;
+  const projectDir = resolve(dir ?? process.cwd());
+  const initFiles = [CONFIG_FILE, CONFIG_DEFAULTS.clientEntry];
+  const existing = initFiles.filter((file) => existsSync(join(projectDir, file)));
+
+  let overwrite = args.flags['force'] === true;
+  if (existing.length > 0 && !overwrite) {
+    if (isatty(0)) {
+      io.err(`初始化文件已存在: ${existing.join('、')}`);
+      overwrite = confirm('是否重新生成（覆盖）这些初始化文件？');
+      if (!overwrite) {
+        io.out('已取消，保留现有文件');
+      }
+    } else {
+      io.err(`初始化文件已存在，默认保留（重新生成请用 --force）: ${existing.join('、')}`);
+    }
+  }
+
+  const result = initModule({ dir, overwrite });
   for (const file of result.created) {
     io.out(`已生成: ${file}`);
+  }
+  for (const file of result.overwritten) {
+    io.out(`已重新生成: ${file}`);
   }
   for (const file of result.skipped) {
     io.out(`已跳过: ${file}`);
@@ -88,7 +116,7 @@ function runModuleInit(dir: string | undefined, io: CliIo): number {
   for (const warning of result.warnings) {
     io.err(`警告: ${warning}`);
   }
-  io.out('模块初始化完成（未修改 app/ 与 src/ 现有文件）');
+  io.out(green('✓ Pactor App 模块初始化完成'));
   return 0;
 }
 
