@@ -30,6 +30,7 @@ export {
   getProfile,
   innospotsWebShellV1,
   innospotsWebShellV2,
+  innospotsWebShellV3,
   listProfiles,
   ProfileError,
 } from './profiles/index.js';
@@ -53,6 +54,13 @@ export { matchPathPattern, rewriteDslUrls, rewriteNavigationTo } from './rewrite
 export type { RewriteContext, RewriteResult } from './rewrite-urls.js';
 export { bundleClient, CLIENT_EXTERNALS, parseJsonc, tsconfigAliases } from './bundle-client.js';
 export type { BundleClientOptions, BundleClientResult } from './bundle-client.js';
+export {
+  bundleServer,
+  SERVER_BUNDLE_FILE,
+  SERVER_EXTERNALS,
+  ServerBundleError,
+} from './bundle-server.js';
+export type { BundleServerOptions, BundleServerResult } from './bundle-server.js';
 export { compileTailwind } from './compile-styles.js';
 export type {
   CompileTailwindOptions,

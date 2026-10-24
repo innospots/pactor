@@ -141,4 +141,85 @@ describe('rewrite-urls', () => {
     expect(matchPathPattern('/a/b', '/a/b')).toBe(true);
     expect(matchPathPattern('/a/b', '/a/c')).toBe(false);
   });
+
+  describe('模块 API namespacing', () => {
+    // 必须在 beforeEach 之后取 ctx，否则拿不到初始化后的上下文
+    const moduleCtx = (): RewriteContext => ({
+      ...ctx,
+      moduleId: 'pactor-app-risk-analysis',
+      apiPrefixes: ['/api/risk-analysis'],
+    });
+
+    it('命中前缀时改写为 /api/modules/<moduleId>/<path>，保留 query', () => {
+      const { value } = rewriteDslUrls(
+        {
+          action: 'request',
+          params: { url: '/api/risk-analysis/data-value?start=2026-08-12&end=2026-08-13' },
+        },
+        moduleCtx(),
+      );
+      expect((value as { params: { url: string } }).params.url).toBe(
+        '/api/modules/pactor-app-risk-analysis/risk-analysis/data-value?start=2026-08-12&end=2026-08-13',
+      );
+    });
+
+    it('精确命中前缀本身也会改写', () => {
+      const { value } = rewriteDslUrls({ url: '/api/risk-analysis' }, moduleCtx());
+      expect((value as { url: string }).url).toBe(
+        '/api/modules/pactor-app-risk-analysis/risk-analysis',
+      );
+    });
+
+    it('段边界不命中：/api/risk-analysis-extra 与 /api/risk-analysis2 不变', () => {
+      const { value } = rewriteDslUrls(
+        ['/api/risk-analysis-extra', '/api/risk-analysis2'],
+        moduleCtx(),
+      );
+      expect(value).toEqual(['/api/risk-analysis-extra', '/api/risk-analysis2']);
+    });
+
+    it('未声明前缀的 /api/*（如 /api/runtime）保持不动', () => {
+      const { value } = rewriteDslUrls({ url: '/api/runtime/bootstrap' }, moduleCtx());
+      expect((value as { url: string }).url).toBe('/api/runtime/bootstrap');
+    });
+
+    it('rewriteAssets=false 时 API namespacing 仍然生效', () => {
+      const { value } = rewriteDslUrls(
+        { url: '/api/risk-analysis/data-value' },
+        { ...moduleCtx(), rewriteAssets: false },
+      );
+      expect((value as { url: string }).url).toBe(
+        '/api/modules/pactor-app-risk-analysis/risk-analysis/data-value',
+      );
+    });
+
+    it('绝对 API 地址先去 origin 再 namespacing，并提示走模块 API', () => {
+      const { value, warnings } = rewriteDslUrls(
+        { action: 'request', params: { url: 'http://localhost:8011/api/risk-analysis/data-value' } },
+        moduleCtx(),
+      );
+      expect((value as { params: { url: string } }).params.url).toBe(
+        '/api/modules/pactor-app-risk-analysis/risk-analysis/data-value',
+      );
+      expect(warnings).toHaveLength(1);
+      expect(warnings[0]).toContain('模块 API');
+    });
+
+    it('absoluteApiToRelative=false 时保持绝对地址并提示不会走模块 API 路由', () => {
+      const { value, warnings } = rewriteDslUrls(
+        { action: 'request', params: { url: 'http://localhost:8011/api/risk-analysis/data-value' } },
+        { ...moduleCtx(), absoluteApiToRelative: false },
+      );
+      expect((value as { params: { url: string } }).params.url).toBe(
+        'http://localhost:8011/api/risk-analysis/data-value',
+      );
+      expect(warnings).toHaveLength(1);
+      expect(warnings[0]).toContain('不会走模块 API 路由');
+    });
+
+    it('未配置 moduleId/apiPrefixes 时行为不变', () => {
+      const { value } = rewriteDslUrls({ url: '/api/risk-analysis/data-value' }, ctx);
+      expect((value as { url: string }).url).toBe('/api/risk-analysis/data-value');
+    });
+  });
 });

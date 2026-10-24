@@ -1,5 +1,5 @@
 import { existsSync, readdirSync, readFileSync, statSync } from 'node:fs';
-import { join, relative, resolve } from 'node:path';
+import { join, relative, resolve, sep } from 'node:path';
 
 import { parseDocument } from 'yaml';
 
@@ -152,6 +152,34 @@ export function validateModule(options: ValidateModuleOptions = {}): ValidateMod
     }
   }
 
+  // ── server bundle ─────────────────────────────────────────────────────
+  const hasServerEntry = typeof manifest.serverEntry === 'string';
+  const hasApiPrefixes = Array.isArray(manifest.apiPrefixes);
+  if (hasServerEntry !== hasApiPrefixes) {
+    errors.push('manifest.serverEntry 与 apiPrefixes 必须成对出现');
+  }
+  if (hasServerEntry) {
+    const serverRel = manifest.serverEntry as string;
+    const serverFile = resolve(moduleDir, serverRel);
+    if (!isInsideDir(moduleDir, serverFile)) {
+      errors.push(`server bundle 路径越界: ${serverRel}`);
+    } else if (!existsSync(serverFile)) {
+      errors.push(`server bundle 不存在: ${serverRel}`);
+    } else {
+      const text = readFileSync(serverFile, 'utf8');
+      if (/node_modules\/(?:next|react|react-dom|@pactor-app|pactor-app)\//.test(text)) {
+        warnings.push(
+          'server bundle 疑似内嵌 next / react / pactor（应保持 external，由宿主提供）',
+        );
+      }
+    }
+    if (!Array.isArray(manifest.apiPrefixes) || manifest.apiPrefixes.length === 0) {
+      errors.push('manifest.apiPrefixes 必须是非空数组');
+    } else if (manifest.apiPrefixes.some((prefix) => typeof prefix !== 'string')) {
+      errors.push('manifest.apiPrefixes 必须是字符串数组');
+    }
+  }
+
   // ── package.json exports / 版本同步 ───────────────────────────────────
   const pkgFile = join(projectDir, 'package.json');
   if (existsSync(pkgFile)) {
@@ -166,6 +194,9 @@ export function validateModule(options: ValidateModuleOptions = {}): ValidateMod
       }
       if (typeof manifest.clientEntry === 'string' && exportsMap['./client'] === undefined) {
         errors.push('package.json exports 缺少 "./client"（client-registry 静态 import "<pkg>/client"）');
+      }
+      if (typeof manifest.serverEntry === 'string' && exportsMap['./server'] === undefined) {
+        errors.push('package.json exports 缺少 "./server"（Shell 装配器经 require.resolve("<pkg>/server") 定位）');
       }
       if (
         typeof pkg.version === 'string' &&
@@ -186,8 +217,13 @@ export function validateModule(options: ValidateModuleOptions = {}): ValidateMod
   return { ok: errors.length === 0, errors, warnings };
 }
 
-/** 与 Shell 装配器 findPageDslFile 同语义：dslRoot 下递归查找 <pageId>.yaml */
-function findPageDslFile(dslRootDir: string, pageId: string): string | null {
+/** 判断文件路径是否严格位于目录内（防止 manifest 路径逃逸） */
+function isInsideDir(dir: string, file: string): boolean {
+  const root = resolve(dir);
+  return file.startsWith(`${root}${sep}`);
+}
+
+/** 与 Shell 装配器 findPageDslFile 同语义：dslRoot 下递归查找 <pageId>.yaml */function findPageDslFile(dslRootDir: string, pageId: string): string | null {
   if (!existsSync(dslRootDir)) return null;
   const queue = [dslRootDir];
   while (queue.length > 0) {

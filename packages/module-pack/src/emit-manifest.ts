@@ -39,6 +39,10 @@ export interface ModuleManifest {
   /** 纯 DSL 模块无 client bundle 时缺省 */
   clientEntry?: 'client/index.js';
   styles?: ['client/index.css'];
+  /** 服务端入口（存在 server bundle 时输出） */
+  serverEntry?: 'server/index.mjs';
+  /** 模块 API 逻辑前缀（与 serverEntry 成对输出） */
+  apiPrefixes?: string[];
 }
 
 export interface EmitDslInput {
@@ -62,6 +66,8 @@ export interface WriteManifestInput {
   outDir: string;
   clientEntry?: 'client/index.js';
   styles?: ['client/index.css'];
+  serverEntry?: 'server/index.mjs';
+  apiPrefixes?: string[];
   /** 追加版本推导相关的告警 */
   warnings: string[];
 }
@@ -119,6 +125,10 @@ export function writeManifest(input: WriteManifestInput): ModuleManifest {
     assetsRoot: 'assets',
     ...(input.clientEntry ? { clientEntry: input.clientEntry } : {}),
     ...(input.styles ? { styles: input.styles } : {}),
+    ...(input.serverEntry ? { serverEntry: input.serverEntry } : {}),
+    ...(input.apiPrefixes && input.apiPrefixes.length > 0
+      ? { apiPrefixes: input.apiPrefixes }
+      : {}),
   };
   writeFileSync(
     join(outDir, 'manifest.json'),

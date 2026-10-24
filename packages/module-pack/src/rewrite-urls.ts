@@ -30,6 +30,10 @@ export interface RewriteContext {
   assetPrefix: string;
   /** 绝对 API 地址重写为相对路径（false 时仅告警不改写） */
   absoluteApiToRelative: boolean;
+  /** 模块 id（与 apiPrefixes 同时存在时，命中前缀的 API URL 改写为模块挂载路径） */
+  moduleId?: string;
+  /** 模块声明的逻辑 API 前缀（如 `/api/risk-analysis`） */
+  apiPrefixes?: string[];
 }
 
 export interface RewriteResult {
@@ -109,15 +113,26 @@ export function matchPathPattern(pattern: string, value: string): boolean {
   return patternSegs.every((seg, index) => seg.startsWith(':') || seg === valueSegs[index]);
 }
 
-/** 字符串值重写：绝对 API 告警/降相对、资源 URL 重写为模块 assets 路径 */
+/** 字符串值重写：绝对 API 告警/降相对、模块 API namespacing、资源 URL 重写 */
 function rewriteString(value: string, ctx: RewriteContext, warnings: string[]): string {
   const absoluteApi = ABSOLUTE_API_RE.exec(value);
   if (absoluteApi) {
-    warnings.push(
-      `绝对 API 地址: ${value}${ctx.absoluteApiToRelative ? '（已重写为相对路径，需底座 BFF/代理承接）' : ''}`,
-    );
-    return ctx.absoluteApiToRelative ? absoluteApi[1]! : value;
+    // 绝对地址先去掉 origin，再按模块 API 前缀 namespacing（若命中）。
+    const relative = absoluteApi[1]!;
+    const namespaced = ctx.absoluteApiToRelative
+      ? namespaceModuleApi(relative, ctx)
+      : undefined;
+    const action = ctx.absoluteApiToRelative
+      ? namespaced !== undefined
+        ? '（已重写为模块 API 相对路径）'
+        : '（已重写为相对路径，需底座 BFF/代理承接）'
+      : '（absoluteApiToRelative=false，保持绝对地址，不会走模块 API 路由）';
+    warnings.push(`绝对 API 地址: ${value}${action}`);
+    return ctx.absoluteApiToRelative ? (namespaced ?? relative) : value;
   }
+  // 模块 API namespacing 不受 rewriteAssets 影响（即使关闭资源重写也必须改写）
+  const namespaced = namespaceModuleApi(value, ctx);
+  if (namespaced !== undefined) return namespaced;
   if (!ctx.rewriteAssets) return value;
   if (!value.startsWith('/') || value.startsWith('//')) return value;
   if (value.startsWith('/api/')) return value;
@@ -129,6 +144,25 @@ function rewriteString(value: string, ctx: RewriteContext, warnings: string[]): 
   if (isPagePath) return value;
   if (!isPublicFile(ctx.publicDir, value)) return value;
   return `${ctx.assetPrefix}${value}`;
+}
+
+/**
+ * 命中模块声明的 API 前缀时，把 `/api/<path>` 改写为
+ * `/api/modules/<moduleId>/<path>`（query / hash 原样保留）。
+ * 未配置 moduleId/apiPrefixes 或未命中时返回 undefined。
+ *
+ * 前缀按长度降序匹配并做段边界判断，避免 `/api/risk-analysis-extra`
+ * 被 `/api/risk-analysis` 误命中。
+ */
+function namespaceModuleApi(value: string, ctx: RewriteContext): string | undefined {
+  const { moduleId, apiPrefixes } = ctx;
+  if (!moduleId || !apiPrefixes || apiPrefixes.length === 0) return undefined;
+  const pathOnly = value.split(/[?#]/, 1)[0]!;
+  const hit = [...apiPrefixes]
+    .sort((a, b) => b.length - a.length)
+    .some((prefix) => pathOnly === prefix || pathOnly.startsWith(`${prefix}/`));
+  if (!hit) return undefined;
+  return `/api/modules/${encodeURIComponent(moduleId)}${value.slice('/api'.length)}`;
 }
 
 /** 判断 URL 路径是否对应 publicDir 下的真实文件 */

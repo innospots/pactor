@@ -2,6 +2,7 @@ import { existsSync, mkdirSync, mkdtempSync, renameSync, rmSync } from 'node:fs'
 import { dirname, join, resolve } from 'node:path';
 
 import { bundleClient } from './bundle-client.js';
+import { bundleServer } from './bundle-server.js';
 import { collectModuleSource } from './collect.js';
 import { compileTailwind } from './compile-styles.js';
 import { loadModuleConfig } from './config.js';
@@ -49,6 +50,7 @@ export interface BuildModuleResult {
     assets: number;
   };
   clientBundled: boolean;
+  serverBundled: boolean;
   warnings: string[];
 }
 
@@ -62,6 +64,17 @@ export function buildModule(options: BuildModuleOptions = {}): BuildModuleResult
     throw new ModuleBuildError(
       `target ${config.target} 禁止 basePath: "/"（Shell joinPublicPath 会产生 "//login" 这类坏路径）`,
       [`basePath: "/" 与 profile ${config.target} 的 forbidRootBasePath 冲突，请改用如 /${config.id} 的前缀`],
+    );
+  }
+
+  // server entry 依赖 Shell 的 /api/modules/* 通用分发入口
+  if (config.serverEntry !== undefined && !profile.moduleServerApi) {
+    throw new ModuleBuildError(
+      `target ${config.target} 不支持模块 server entry（需要 innospots-web-shell@3）`,
+      [
+        `配置了 serverEntry / apiPrefixes，但 profile ${config.target} 的 moduleServerApi=false`,
+        '请把 pactor.module.json 的 target 升到 "innospots-web-shell@3" 后重新构建',
+      ],
     );
   }
 
@@ -136,6 +149,8 @@ export function buildModule(options: BuildModuleOptions = {}): BuildModuleResult
     rewriteAssets: true,
     assetPrefix: profile.rewriteAssetUrls(config.id, version).replace(/\/+$/, ''),
     absoluteApiToRelative: config.rewrite.absoluteApiToRelative,
+    moduleId: config.id,
+    apiPrefixes: config.apiPrefixes,
   };
   const sitemapRewrite = rewriteDslUrls(transformed.site, rewriteCtx);
   warnings.push(...sitemapRewrite.warnings);
@@ -159,6 +174,15 @@ export function buildModule(options: BuildModuleOptions = {}): BuildModuleResult
     if (bundle.message !== undefined) {
       warnings.push(bundle.message);
     }
+
+    // server bundle（未配置 serverEntry 的模块跳过）
+    const server = config.serverEntry
+      ? bundleServer({
+          projectDir,
+          serverEntry: config.serverEntry,
+          outDir: join(temp, 'server'),
+        })
+      : undefined;
 
     // dsl + assets + module-assets.json（Tailwind 需扫描 dist dsl，先落盘）
     const emitted = emitDsl({
@@ -187,6 +211,8 @@ export function buildModule(options: BuildModuleOptions = {}): BuildModuleResult
       outDir: temp,
       clientEntry: bundle.bundled ? 'client/index.js' : undefined,
       styles: bundle.bundled && hasCss ? ['client/index.css'] : undefined,
+      serverEntry: server ? 'server/index.mjs' : undefined,
+      apiPrefixes: server ? config.apiPrefixes : undefined,
       warnings,
     });
 
@@ -213,6 +239,7 @@ export function buildModule(options: BuildModuleOptions = {}): BuildModuleResult
         assets: emitted.assetCount,
       },
       clientBundled: bundle.bundled,
+      serverBundled: server !== undefined,
       warnings,
     };
   } catch (error) {
