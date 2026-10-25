@@ -23,6 +23,74 @@ pnpm dev   # http://localhost:9011
 匿名访问任意非 public 路径会重定向到 `/login`；登录 / 登出后整页重载，
 sitemap 端点按新会话重新裁剪内容。
 
+## 页面访问校验（grantGroup）
+
+页面切换 / 首次打开之前，客户端先请求同源 `POST /api/page-access/verify`，
+由 Next 服务端解析当前页面的页面 DSL：
+
+- `pageKey` ← `page.name`（缺省回退页面 `id`）
+- `grantGroup` ← `page.grantGroup`
+
+然后转发平台接口（请求 / 响应与平台保持一致）：
+
+```bash
+curl {API_BASE}/api/public/page-access/verify \
+  --request POST \
+  --header 'Content-Type: application/json' \
+  --data '{
+  "domainKey": "platform",
+  "moduleKey": "organization",
+  "pageKey": "pluginList",
+  "grantGroup": "viewGroup"
+}'
+```
+
+```json
+{
+  "success": true,
+  "code": "OK",
+  "message": "OK",
+  "data": { "allowed": true, "reason": "OK" },
+  "display": {}
+}
+```
+
+`data.allowed === false` 时拦截：已登录用户展示 403 视图（含 `reason`），
+匿名访问非 public 页由服务端返回 `redirectTo` 跳登录页。校验通过前内容区
+停留在上一个已放行页面（URL 已随宿主路由变化，但页面不闪切），布局 state
+不丢；平台不可用 / 响应异常按拒绝处理（fail-closed）。
+
+页面 DSL 的 `page` 元数据（`grantGroup` 为 Page DSL 字段，见 `src/server/yaml/pages/*.page.yaml`）：
+
+```yaml
+page:
+  id: users
+  title: 用户列表
+  name: users           # 平台 pageKey（缺省回退 id）
+  grantGroup: userGroup # 页面权限分组
+```
+
+`grantGroup` 随 Page DSL 下发 Runtime（已纳入 Page DSL Schema），同时由
+`src/server/page-access.ts` 在服务端读取用于访问校验与权限分组展示。
+
+应用私有的页面数据放 `page.meta`（自由键值，Runtime 不消费）；`page` 顶层为
+框架字段并保持封闭，未知字段会导致整页校验失败。
+
+模板自带平台 mock（`app/api/public/page-access/verify/route.ts`），按
+`grantGroup → 权限码` 演示：`userGroup → user:view`、
+`reportGroup → report:view`，public 页匿名放行——admin 全部放行，
+guest 仅首页放行。
+
+配置（仅服务端读取，见 `src/server/page-access.ts`）：
+
+| 环境变量 | 缺省值 | 说明 |
+| --- | --- | --- |
+| `PACTOR_DOMAIN_KEY` | `platform` | 平台域标识（`domainKey`） |
+| `PACTOR_MODULE_KEY` | `organization` | 平台模块标识（`moduleKey`） |
+| `PACTOR_PAGE_ACCESS_API_BASE_URL` | `NEXT_PUBLIC_API_BASE_URL` | 平台接口基准地址 |
+
+接入真实平台时把以上变量指向实际环境即可，浏览器不接触平台地址与标识。
+
 ## 结构
 
 ```
@@ -33,33 +101,36 @@ app/
   api/
     sitemap/route.ts       # sitemap 端点（会话感知：匿名 / 角色裁剪）
     pages/[id]/route.ts    # 懒加载页面端点（PageResource envelope，接口侧鉴权）
+    page-access/verify/route.ts         # 页面访问校验（服务端转发平台接口）
+    public/page-access/verify/route.ts  # 平台页面访问接口 mock（同契约）
     auth/login/route.ts    # 演示登录（写会话 cookie）
     auth/logout/route.ts   # 演示登出（清 cookie）
 src/
   pactor/
-    config.ts              # ★ 入口配置：sitemapSources 接口 URL 列表
-    App.tsx                # 薄壳：框架 SitemapApp + 宿主路由（pathname / navigate）
+    config.ts              # ★ 入口配置：sitemapSources / pageAccessEndpoint
+    App.tsx                # 薄壳：页面访问门禁 + 框架 SitemapApp + 宿主路由
+    page-access.tsx        # 页面访问门禁（切换前校验 / 403 视图）
   server/
     accounts.ts            # 演示账号与会话 cookie
     cors.ts                # CORS 头（演示放开跨源，含预检响应）
     sitemap.ts             # mock sitemap 数据源（layouts / pages / menus 按角色裁剪；
                            # 登录 / 登出在 DSL 中用内置 request 动作表达）
+    page-access.ts         # 页面访问校验代理（path → pageKey / grantGroup → 平台接口）
     yaml/                  # DSL 文件：sitemap.yaml（入口元数据 + 布局 + 页面/菜单全量声明）
       pages/               # 页面 DSL（每页一个 *.page.yaml，按 id 约定加载）
 ```
 
-`App.tsx` 全部内容即：
+`App.tsx` 的核心接线（页面访问门禁 + 框架 SitemapApp）：
 
 ```tsx
-const httpHooks = createHttpHooks();
+const { committed, status, retry } = usePageAccessGate(pathname, search, replace);
 
 <SitemapApp
   sources={sitemapSources}
   baseUrl={apiBaseUrl}
-  pathname={pathname}
-  query={query}
-  navigate={(to) => router.push(to)}
-  httpAdapter={httpHooks}
+  pathname={committed.pathname}
+  query={committedQuery}
+  navigate={navigate}
 />
 ```
 
@@ -95,7 +166,7 @@ mock API 已在路由层放开跨源（`src/server/cors.ts`：Allow-Origin 回�
 请求源 + Allow-Credentials，POST 预检经 `OPTIONS` 响应；cookie 会话
 跨源可达，框架 fetch 均带 `credentials: 'include'`）。
 
-**HTTP 钩子**（框架默认实现 `createHttpHooks`，`src/pactor/App.tsx`）：
+**HTTP 钩子**（框架默认实现 `createHttpHooks`，`SitemapApp` 内置，本模板未覆盖）：
 接入框架的全部 HTTP 出口（sitemap 源、页面懒加载端点、DSL `request`
 动作、http 类型 dataSource、动态 DSL 引用）——
 - `request`：缺省不改写地址（CORS 直连）；服务端不开 CORS 时传

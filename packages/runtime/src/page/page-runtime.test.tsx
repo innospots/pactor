@@ -7,9 +7,11 @@ import type { ActionHandler, ServiceHandler } from '../index.js';
 import {
   createPageRuntime,
   PageRuntimeError,
+  PageRuntimeVersionError,
   PageRuntimeView,
 } from './page-runtime.js';
 import { useRenderer } from '../renderer/renderer-context.js';
+import { RUNTIME_VERSION } from '../version.js';
 
 afterEach(cleanup);
 
@@ -45,6 +47,63 @@ describe('PageDsl 加载校验', () => {
     expect(runtime.context.page).toEqual({ id: 'p1', title: '测试页' });
     expect(runtime.context.state).toBeDefined();
     expect(runtime.context.data).toBeDefined();
+  });
+
+  it('page.meta（页面级扩展元数据）保留在 RuntimeContext.page', () => {
+    const runtime = createPageRuntime(
+      minimalDsl({
+        page: { id: 'p1', title: '测试页', meta: { host: { badge: 2 } } },
+      }),
+    );
+
+    expect(runtime.context.page.meta).toEqual({ host: { badge: 2 } });
+  });
+});
+
+describe('requires.runtime 版本门禁', () => {
+  it('满足声明范围时正常创建', () => {
+    const runtime = createPageRuntime(
+      minimalDsl({ requires: { runtime: '>=1.0.0' } }),
+    );
+
+    expect(runtime.context.page.id).toBe('p1');
+  });
+
+  it('不满足时抛 PageRuntimeVersionError，信息含要求与当前版本', () => {
+    let caught: unknown;
+    try {
+      createPageRuntime(minimalDsl({ requires: { runtime: '>=99.0.0' } }));
+    } catch (error) {
+      caught = error;
+    }
+
+    expect(caught).toBeInstanceOf(PageRuntimeVersionError);
+    expect(caught).toBeInstanceOf(PageRuntimeError);
+    const error = caught as PageRuntimeVersionError;
+    expect(error.requirement).toBe('>=99.0.0');
+    expect(error.runtimeVersion).toBe(RUNTIME_VERSION);
+    expect(error.message).toContain('>=99.0.0');
+    expect(error.message).toContain(RUNTIME_VERSION);
+    expect(error.errors).toEqual([
+      expect.objectContaining({
+        path: '/requires/runtime',
+        keyword: 'version',
+      }),
+    ]);
+  });
+
+  it('非法版本范围按不兼容处理', () => {
+    let caught: unknown;
+    try {
+      createPageRuntime(minimalDsl({ requires: { runtime: 'not-a-range' } }));
+    } catch (error) {
+      caught = error;
+    }
+
+    expect(caught).toBeInstanceOf(PageRuntimeVersionError);
+    expect((caught as PageRuntimeVersionError).message).toContain(
+      '不是合法的版本范围',
+    );
   });
 });
 

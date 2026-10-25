@@ -4,6 +4,8 @@ dsl: "1.0"
 page:
   id: monthly-detail
   title: 月报详情
+  name: monthlyDetail
+  grantGroup: reportGroup
 
 body:
   type: Page

@@ -5,6 +5,8 @@ dsl: "1.0"
 page:
   id: login
   title: 登录
+  name: login
+  grantGroup: publicGroup
 
 state:
   submitting: false

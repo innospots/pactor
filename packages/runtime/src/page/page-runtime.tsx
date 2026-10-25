@@ -7,6 +7,7 @@ import {
   type DslValidationError,
 } from '@pactor-app/schema';
 import type { ReactNode } from 'react';
+import { satisfies, validRange } from 'semver';
 
 import { registerBuiltinActions } from '../action/builtins.js';
 import { ActionEngine } from '../action/engine.js';
@@ -18,6 +19,7 @@ import {
 import { DslSourceBoundary } from '../renderer/dsl-source-boundary.js';
 import { dslSourceKey } from '../datasource/dsl-source-resolver.js';
 import { DslRenderer } from '../renderer/renderer.js';
+import { RUNTIME_VERSION } from '../version.js';
 
 /** Page DSL 校验失败错误：内含结构化错误列表 */
 export class PageRuntimeError extends Error {
@@ -31,6 +33,54 @@ export class PageRuntimeError extends Error {
     );
     this.name = 'PageRuntimeError';
     this.errors = errors;
+  }
+}
+
+/**
+ * Runtime 版本不满足 Page DSL `requires.runtime` 声明的错误。
+ * 继承 `PageRuntimeError`，宿主现有的「DSL 校验失败」处理可直接复用。
+ */
+export class PageRuntimeVersionError extends PageRuntimeError {
+  /** 页面声明的版本范围（requires.runtime） */
+  readonly requirement: string;
+  /** 当前 Runtime 版本 */
+  readonly runtimeVersion: string;
+
+  constructor(requirement: string, runtimeVersion: string, message: string) {
+    super([{ path: '/requires/runtime', keyword: 'version', message }]);
+    this.name = 'PageRuntimeVersionError';
+    this.requirement = requirement;
+    this.runtimeVersion = runtimeVersion;
+  }
+}
+
+/**
+ * `requires.runtime` 版本门禁：在 Schema 校验之前执行，让「页面使用了当前
+ * Runtime 不支持的能力」得到可读错误，而不是底层的 unknown-property 报错。
+ * 未声明该字段时跳过；类型错误交由 `validatePageDsl` 报告；
+ * 版本范围非法或当前版本不满足范围时按不兼容处理（fail-closed）。
+ */
+function assertRuntimeVersion(pageDsl: PageDsl): void {
+  const requirement = pageDsl?.requires?.runtime;
+  if (typeof requirement !== 'string') {
+    return;
+  }
+  const pageId = pageDsl?.page?.id;
+  const label = pageId === undefined ? '页面' : `页面（${pageId}）`;
+
+  if (validRange(requirement) === null) {
+    throw new PageRuntimeVersionError(
+      requirement,
+      RUNTIME_VERSION,
+      `${label}的 requires.runtime 不是合法的版本范围："${requirement}"`,
+    );
+  }
+  if (!satisfies(RUNTIME_VERSION, requirement)) {
+    throw new PageRuntimeVersionError(
+      requirement,
+      RUNTIME_VERSION,
+      `${label}要求 Runtime ${requirement}，当前 Runtime 版本为 ${RUNTIME_VERSION}`,
+    );
   }
 }
 
@@ -74,6 +124,7 @@ export function createPageRuntime(
   pageDsl: PageDsl,
   options: CreateRuntimeContextOptions = {},
 ): PageRuntime {
+  assertRuntimeVersion(pageDsl);
   const validation = validatePageDsl(pageDsl);
   if (!validation.valid) {
     throw new PageRuntimeError(validation.errors);

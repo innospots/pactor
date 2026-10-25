@@ -4,6 +4,8 @@ dsl: "1.0"
 page:
   id: register
   title: 注册
+  name: register
+  grantGroup: publicGroup
 
 body:
   type: Page

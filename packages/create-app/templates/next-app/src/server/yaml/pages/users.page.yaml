@@ -4,6 +4,8 @@ dsl: "1.0"
 page:
   id: users
   title: 用户列表
+  name: users
+  grantGroup: userGroup
   permission: user:view
 
 state:

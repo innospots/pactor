@@ -4,6 +4,8 @@ dsl: "1.0"
 page:
   id: home
   title: 首页
+  name: home
+  grantGroup: homeGroup
 
 body:
   type: Page

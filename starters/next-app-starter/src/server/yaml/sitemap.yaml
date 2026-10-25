@@ -6,6 +6,11 @@
 # 页面 DSL 按 id 约定从 pages/<id>.page.yaml 加载；lazy: true 不随 sitemap
 # 内联下发，客户端经 /api/pages/{id} 懒加载。updatedAt / user / permissions
 # 为会话动态字段，由服务端在响应时注入。
+#
+# 页面访问校验：页面 DSL 的 page 元数据可声明 name（平台 pageKey，缺省回退
+# 页面 id）与 grantGroup（页面权限分组）。打开页面前宿主经
+# /api/page-access/verify → 平台 /api/public/page-access/verify 校验，
+# 详见 src/server/page-access.ts。
 
 id: site
 resourceType: sitemap
