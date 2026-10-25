@@ -11,11 +11,14 @@
     "build:test": "node scripts/build.mjs test"
   },
   "dependencies": {
-    "@pactor-app/core": "latest",
-    "@pactor-app/runtime": "latest",
-    "@pactor-app/ui": "latest",
+    "@pactor-app/blocks": "^1.56.0",
+    "@pactor-app/chat": "^1.56.0",
+    "@pactor-app/core": "^1.56.0",
+    "@pactor-app/runtime": "^1.56.0",
+    "@pactor-app/ui": "^1.56.0",
+    "lucide-react": "1.45.0",
     "next": "16.3.5",
-    "pactor-app": "latest",
+    "pactor-app": "^1.56.0",
     "react": "19.2.8",
     "react-dom": "19.2.8",
     "yaml": "^2.9.1"

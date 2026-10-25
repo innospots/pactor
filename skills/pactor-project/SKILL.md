@@ -97,7 +97,7 @@ cd ../my-app && pnpm install && pnpm dev
 
 1. **不要**对非空目录强行 `scaffold`；应新建子目录或让用户清空/换路径。
 2. **不要**在 spa 单独开发时忘记后端：默认 `apiBaseUrl` 指向 `http://localhost:9011`。
-3. **不要**把 PRD 整站生成与脚手架混用；PRD 流程从 `pactor-prd/template/` 复制。
+3. **不要**把 PRD 整站生成与普通空壳脚手架混用；PRD 流程（pactor-prd）同样经 create-pactor-app next-app 模板创建，但必须带 `--values` 渲染占位符并走该 skill 的页面生成与验收流程。
 4. 使用内置 UI 时，入口必须 `import '@pactor-app/ui/styles.css'`（模板已包含；手动接入时勿漏）。
 5. 生成后加页：官方 next-app 默认 **`src/server/yaml/pages/*.page.yaml`**（平铺）；模块多或页面 >5 时迁到 **`yaml/<模块>/<id>.yaml`**，规则见 `pactor-dsl/references/page-catalog-and-layout.md`。spa 由远端 sitemap 声明 pageId，yaml 通常在 API 侧。
 

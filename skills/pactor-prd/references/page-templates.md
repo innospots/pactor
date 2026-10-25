@@ -6,7 +6,7 @@
 
 ## 数据列表标准模型（搜索 Form + 表格 + 抽屉新建/编辑）
 
-从成熟实现提取的完整闭环：搜索过滤、新建/编辑共用抽屉表单（分区 + 条件显隐 + 预填）、操作列 link 按钮。**完整可拷贝的骨架文件：`template/src/server/yaml/models/data-list.yaml`**（已注册进模板 sitemap 的可运行示例，菜单「页面骨架 / 数据列表」直接预览；复制后替换页面信息、字段、接口名与文案即可）。结构照抄，字段按线框图替换：
+从成熟实现提取的完整闭环：搜索过滤、新建/编辑共用抽屉表单（分区 + 条件显隐 + 预填）、操作列 link 按钮。**完整可拷贝的骨架文件：生成工程内 `src/server/yaml/models/data-list.yaml`**（已注册进生成工程 sitemap 的可运行示例，菜单「页面骨架 / 数据列表」直接预览；复制后替换页面信息、字段、接口名与文案即可）。结构照抄，字段按线框图替换：
 
 ```yaml
 dsl: "1.0"
@@ -354,7 +354,7 @@ body:
 
 ## 登录页（Login 业务组件，`@pactor-app/blocks`）
 
-登录页一律用 DSL `type: Login` 业务组件，禁止手写 Card+Form+自定义 CSS。**样板即模板工程的 `template/src/server/yaml/common/login.yaml`**（可直接运行预览），核心结构：
+登录页一律用 DSL `type: Login` 业务组件，禁止手写 Card+Form+自定义 CSS。**样板即生成工程内的 `src/server/yaml/common/login.yaml`**（可直接运行预览），核心结构：
 
 ```yaml
 body:

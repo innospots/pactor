@@ -20,6 +20,20 @@ export interface CliIo {
 /** 模板占位符（全局替换； replacer 用函数形式防应用名含 `$` 特殊序列） */
 const APP_NAME_PLACEHOLDER = /__APP_NAME__/g;
 
+/** 模板根占位符清单文件名（脚手架元数据，不复制进生成工程） */
+export const PLACEHOLDER_MANIFEST = 'placeholders.json';
+
+/** 占位符清单：键 → 描述与默认示例值 */
+export type PlaceholderManifest = Record<string, { description?: string; example: string }>;
+
+/** 读取模板根的占位符默认值（placeholders.json 的 example）；无清单时返回空表 */
+export function loadPlaceholderDefaults(templatesDir: string): Record<string, string> {
+  const manifestPath = join(templatesDir, PLACEHOLDER_MANIFEST);
+  if (!existsSync(manifestPath)) return {};
+  const manifest = JSON.parse(readFileSync(manifestPath, 'utf8')) as PlaceholderManifest;
+  return Object.fromEntries(Object.entries(manifest).map(([key, v]) => [key, v.example]));
+}
+
 /** 可选模板清单（编号即交互选择的默认顺序） */
 export const TEMPLATES = [
   { id: 'next-app', label: 'Next.js 全栈（含 mock API，dev 端口 9011）' },
@@ -47,25 +61,38 @@ export function defaultTemplatesDir(template: string): string {
 
 /**
  * 递归复制模板目录。
- * 含 `__APP_NAME__` 的文件按 utf8 文本替换占位；其余（含二进制如 favicon）
+ * 含 `__APP_NAME__` 或 `{{KEY}}` 的文件按 utf8 文本替换占位；其余（含二进制如 favicon）
  * 按字节原样复制，避免 utf8 往返损坏。
+ * 模板根的 placeholders.json 是脚手架元数据，跳过不复制。
  */
-function copyTemplate(src: string, dest: string, appName: string): void {
+function copyTemplate(
+  src: string,
+  dest: string,
+  appName: string,
+  placeholders: Record<string, string>,
+  isRoot = true,
+): void {
   mkdirSync(dest, { recursive: true });
   for (const entry of readdirSync(src)) {
+    if (isRoot && entry === PLACEHOLDER_MANIFEST) continue;
     const from = join(src, entry);
     const to = join(dest, entry);
     if (statSync(from).isDirectory()) {
-      copyTemplate(from, to, appName);
+      copyTemplate(from, to, appName, placeholders, false);
       continue;
     }
     const content = readFileSync(from);
-    if (content.includes('__APP_NAME__')) {
-      writeFileSync(
-        to,
-        content.toString('utf8').replace(APP_NAME_PLACEHOLDER, () => appName),
-        'utf8',
-      );
+    if (content.includes('__APP_NAME__') || content.includes('{{')) {
+      let text = content
+        .toString('utf8')
+        .replace(APP_NAME_PLACEHOLDER, () => appName);
+      for (const [key, value] of Object.entries(placeholders)) {
+        // 与 prd-template.mjs 一致的转义语义：带引号字面量 "{{KEY}}" 按 JSON 字符串
+        // 值替换（值含引号/换行时仍合法）；裸 {{KEY}} 兜底原样替换。
+        text = text.split(`"{{${key}}}"`).join(JSON.stringify(value));
+        text = text.split(`{{${key}}}`).join(value);
+      }
+      writeFileSync(to, text, 'utf8');
     } else {
       writeFileSync(to, content);
     }
@@ -74,15 +101,18 @@ function copyTemplate(src: string, dest: string, appName: string): void {
 
 /**
  * 生成工程：target 已存在且非空时由调用方拦截，这里只做复制。
+ * `{{KEY}}` 占位符取 options.values 覆盖值，缺省回退模板 placeholders.json 的示例值。
  * 返回应用名（取目标目录名，name 可为相对/绝对路径）。
  */
 export function scaffold(
   target: string,
   template: TemplateId,
   templatesDir: string = defaultTemplatesDir(template),
+  options: { values?: Record<string, string> } = {},
 ): string {
   const appName = basename(target);
-  copyTemplate(templatesDir, target, appName);
+  const placeholders = { ...loadPlaceholderDefaults(templatesDir), ...options.values };
+  copyTemplate(templatesDir, target, appName, placeholders);
   return appName;
 }
 

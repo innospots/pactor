@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-import { realpathSync } from 'node:fs';
+import { readFileSync, realpathSync } from 'node:fs';
 import { createInterface } from 'node:readline';
 import { pathToFileURL } from 'node:url';
 
@@ -18,11 +18,12 @@ import {
 /** 命令清单与用法（--help 输出） */
 export const HELP_TEXT = `create-pactor-app — 从模板创建 Pactor 应用
 
-用法: create-pactor-app <name> [-t next-app|spa]
+用法: create-pactor-app <name> [-t next-app|spa] [--values <file>]
 
 参数:
   <name>                目标目录（可为相对/绝对路径，应用名取目录名）
   -t, --template <id>   模板：next-app（Next.js 全栈）/ spa（Vite 纯前端）
+  --values <file>       模板 {{KEY}} 占位符值（flat JSON 字符串对象，覆盖模板默认值）
   -h, --help            显示帮助
 
 未指定 -t 时：交互终端编号选择（默认 next-app），非 TTY 直接用 next-app。
@@ -36,6 +37,7 @@ export class UsageError extends Error {}
 export interface ParsedArgs {
   name?: string;
   template?: string;
+  values?: string;
   help: boolean;
 }
 
@@ -64,6 +66,17 @@ export function parseArgs(argv: string[]): ParsedArgs {
       result.template = token.slice('--template='.length);
       continue;
     }
+    if (token === '--values') {
+      const value = argv[i + 1];
+      if (value === undefined) throw new UsageError(`选项 ${token} 缺少值`);
+      result.values = value;
+      i += 1;
+      continue;
+    }
+    if (token.startsWith('--values=')) {
+      result.values = token.slice('--values='.length);
+      continue;
+    }
     if (token.startsWith('-')) {
       throw new UsageError(`未知选项: ${token}`);
     }
@@ -82,6 +95,27 @@ export function parseTemplateId(value: string): TemplateId {
   throw new UsageError(
     `未知模板: ${value}（可选: ${TEMPLATES.map((t) => t.id).join(' | ')}）`,
   );
+}
+
+/** 读取 --values 文件：必须是 flat JSON 字符串对象，否则 UsageError */
+export function loadValuesFile(path: string): Record<string, string> {
+  let parsed: unknown;
+  try {
+    parsed = JSON.parse(readFileSync(path, 'utf8'));
+  } catch (error) {
+    throw new UsageError(
+      `--values 文件不可读或不是合法 JSON: ${path}（${(error as Error).message}）`,
+    );
+  }
+  if (typeof parsed !== 'object' || parsed === null || Array.isArray(parsed)) {
+    throw new UsageError(`--values 必须是 flat JSON 对象: ${path}`);
+  }
+  for (const [key, value] of Object.entries(parsed)) {
+    if (typeof value !== 'string') {
+      throw new UsageError(`--values 的 ${key} 必须是字符串`);
+    }
+  }
+  return parsed as Record<string, string>;
 }
 
 /** 交互式模板选择（stdin/stdout 均为 TTY 时由 runCli 调用）：编号选择，回车取默认 */
@@ -167,8 +201,21 @@ export async function runCli(
   const target = resolveTarget(args.name);
   if (!checkTarget(target, io)) return 2;
 
+  let values: Record<string, string> | undefined;
+  if (args.values !== undefined) {
+    try {
+      values = loadValuesFile(args.values);
+    } catch (error) {
+      if (error instanceof UsageError) {
+        io.err(error.message);
+        return 2;
+      }
+      throw error;
+    }
+  }
+
   const templatesDir = options.templatesDir ?? defaultTemplatesDir;
-  scaffold(target, template, templatesDir(template));
+  scaffold(target, template, templatesDir(template), { values });
 
   io.out(`已创建工程: ${target}`);
   printNextSteps(io, args.name, template);

@@ -1,6 +1,6 @@
 # 已有工程：线框图增量（新增 / 调整）
 
-当目标已是 Pactor 工程（由 `pactor-prd/template`、或已对齐 PRD 约定的 next-app 扩展仓）时，**不要**再复制 `template/`。根据 **新增或变更** 的线框图 markdown（及 README 增量）更新 DSL 与配套文件。
+当目标已是 Pactor 工程（由 pactor-prd 脚手架 `pnpm dlx create-pactor-app@latest <project> -t next-app --values <values.json>` 创建、或已对齐 PRD 约定的工程）时，**不要**再重新运行脚手架覆盖。根据 **新增或变更** 的线框图 markdown（及 README 增量）更新 DSL 与配套文件。
 
 ## 适用条件
 
@@ -48,13 +48,13 @@
 | **样式** | 仅当线框图要求新页面级样式时改 `globals.css` / 皮肤；见 `theme-and-style.md` |
 | **deprecate** | 删 yaml；从 `pages`/`menus` 移除；全局搜 `pageId` / 路径引用 |
 
-**禁止**：为增量在仓库根再复制一份 `template/` 覆盖工程。
+**禁止**：为增量在仓库根重新运行脚手架覆盖工程。
 
 ## 3. 与全量流程的差异
 
 | 阶段 | 新建工程 | 增量（已有工程） |
 | --- | --- | --- |
-| 脚手架 | 复制 `template/` | **跳过**；仅摸底 |
+| 脚手架 | create-pactor-app 脚手架（next-app 模板） | **跳过**；仅摸底 |
 | 页面 | 全量清单 N 文件 | 仅 **delta** 行对应文件 |
 | 样式 | 全站移植 | 仅受影响页面/令牌 |
 | 验收 | 全站清单 | **变更页全量验** + **抽 1～2 条旧页回归**（见 acceptance-checklist） |

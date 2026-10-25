@@ -11,9 +11,12 @@
     "build:test": "node scripts/build.mjs test"
   },
   "dependencies": {
+    "@pactor-app/blocks": "link:../../packages/blocks",
+    "@pactor-app/chat": "link:../../packages/chat",
     "@pactor-app/core": "link:../../packages/core",
     "@pactor-app/runtime": "link:../../packages/runtime",
     "@pactor-app/ui": "link:../../packages/ui",
+    "lucide-react": "1.45.0",
     "next": "16.3.5",
     "pactor-app": "link:../../packages/pactor",
     "react": "19.2.8",

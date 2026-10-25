@@ -13,15 +13,59 @@ pnpm install
 pnpm dev   # http://localhost:9011
 ```
 
-演示账号（登录页可见）：
+演示账号（登录页可见；具体用户名 / 密码在 `pnpm create pactor-app` 生成工程时
+按模板 `placeholders.json` 的示例值或 `--values` 覆盖值渲染）：
 
-| 账号 | 密码 | 角色差异 |
-| --- | --- | --- |
-| `admin` | `pactor123` | 可见「报表」菜单（`report:view`），月报页懒加载 |
-| `guest` | `guest123` | 仅可见首页 |
+| 账号 | 角色差异 |
+| --- | --- |
+| 管理员 | 可见「报表」菜单（`report:view`），月报页懒加载 |
+| 访客 | 仅可见首页等无权限标记的页面 |
 
 匿名访问任意非 public 路径会重定向到 `/login`；登录 / 登出后整页重载，
 sitemap 端点按新会话重新裁剪内容。
+
+## 数据转发层（/api/d）
+
+页面 DSL 的 http 数据源可以写同源相对路径 `/api/d/<parts>`（如
+`yaml/common/dashboard.yaml`、`yaml/provider/`、`yaml/route/` 中的页面）：
+`app/api/d/[...parts]/route.ts` 按相同路径、方法、查询与请求体原样转发到
+`serverBaseUrl`（`src/pactor/config.ts`，缺省 `http://localhost:9011/backend`，
+仅服务端读取），并携带会话 cookie；匿名一律 401。
+
+没有服务层接口时返回空数据（不 5xx）：上游不可达、接口 404 或返回非 JSON
+时 GET 返回 `{}`、POST 返回 `{ ok: true }`，页面按空态渲染。接真实后端只需
+把 `next.config.js` 的 `API_BASE_URLS` 换成真实地址，页面 yaml 与转发层零改动。
+自转发保护：`serverBaseUrl` 与本应用同源时（如本地开发缺省指向自身），
+转发层直接回退空数据，避免无限循环。
+
+> 与 `apiBaseUrl` 的分工：`apiBaseUrl` 是客户端 http 数据源的基准地址
+>（CORS 直连外部接口，如 `yaml/pages/users.page.yaml`）；`serverBaseUrl`
+> 是服务端转发层的目标地址（浏览器不接触）。两套写法可共存，按页面需要选择。
+
+## 页面骨架与参考模块
+
+`src/server/yaml/` 除 `pages/`（每页一个 `*.page.yaml` 平铺约定）外，
+还内置按模块分目录的参考页面（`<模块>/<id>.yaml` 约定，两种命名可混用，
+由 `src/server/sitemap.ts` 递归收集，id 冲突报错）：
+
+- `common/`：login（`type: Login` 业务组件登录页）、dashboard（仪表盘演示，
+  日期范围随工程生成时的演示日期值渲染）
+- `provider/`、`route/`：卡片式列表 + 详情 + 新增/编辑的参考模块
+- `models/data-list.yaml`：数据列表标准骨架（搜索 + 表格 + 抽屉新建/编辑），
+  可复制生成业务列表页
+
+以上均为演示 / 骨架内容，不需要时可整目录删除（同步移除 sitemap.yaml 中的
+pages / menus 注册即可）。
+
+## 皮肤与品牌素材
+
+- 默认皮肤 `public/skins/neutral.css`（Theme Studio 生成，含完整亮色 / 暗色
+  语义令牌）由 `app/layout.tsx` 的首屏内联脚本注入（避免闪烁），运行时换肤
+  见 `src/pactor/skin.ts` 与外壳 Header 的 ThemeSwitcher（明暗偏好持久化在
+  localStorage `mc-skin` / `mc-mode`）。追加皮肤：放入 `public/skins/<key>.css`，
+  在 `src/pactor/skin.ts` 的 `SKINS` 注册，并同步 layout 首屏脚本的皮肤允许值。
+- 品牌素材：`public/logo.svg`（外壳 Sidebar 品牌区引用）、`app/icon.svg`
+  （浏览器 icon，Next.js 文件约定），直接替换文件即可。
 
 ## 页面访问校验（grantGroup）
 
@@ -96,31 +140,46 @@ guest 仅首页放行。
 ```
 app/
   layout.tsx               # PactorApp 挂载点（Next layout 跨导航常驻：
-                           # 切换导航只刷新内容区，sitemap 不重复拉取）
+                           # 切换导航只刷新内容区，sitemap 不重复拉取）；
+                           # 首屏皮肤 / 明暗注入内联脚本
+  icon.svg                 # 浏览器 icon（Next.js 文件约定）
   [[...slug]]/page.tsx     # 可选 catch-all：匹配全部站内路径，渲染为空
   api/
     sitemap/route.ts       # sitemap 端点（会话感知：匿名 / 角色裁剪）
     pages/[id]/route.ts    # 懒加载页面端点（PageResource envelope，接口侧鉴权）
+    d/[...parts]/route.ts  # 数据转发层（原样转发 serverBaseUrl，无后端回退空数据）
     page-access/verify/route.ts         # 页面访问校验（服务端转发平台接口）
     public/page-access/verify/route.ts  # 平台页面访问接口 mock（同契约）
     auth/login/route.ts    # 演示登录（写会话 cookie）
     auth/logout/route.ts   # 演示登出（清 cookie）
+public/
+  logo.svg                 # 品牌 logo（外壳 Sidebar 引用）
+  skins/neutral.css        # 默认皮肤（Theme Studio 生成，亮 / 暗语义令牌）
 src/
   pactor/
-    config.ts              # ★ 入口配置：sitemapSources / pageAccessEndpoint
+    config.ts              # ★ 入口配置：sitemapSources / pageAccessEndpoint /
+                           # apiBaseUrl / serverBaseUrl
     App.tsx                # 薄壳：页面访问门禁 + 框架 SitemapApp + 宿主路由
+                           #（注册自定义组件 / 动作与 blocks 的 Login）
     page-access.tsx        # 页面访问门禁（切换前校验 / 403 视图）
+    skin.ts                # 皮肤清单与运行时换肤（link[data-pactor-skin] swap）
+    actions.ts             # 页面级自定义动作注册表（默认为空）
+    components/            # 页面级自定义组件注册表（chat 展示组件 / ThemeSwitcher 等）
   server/
-    accounts.ts            # 演示账号与会话 cookie
+    accounts.ts            # 演示账号（模板为占位符，生成时渲染）与会话 cookie
     cors.ts                # CORS 头（演示放开跨源，含预检响应）
     sitemap.ts             # mock sitemap 数据源（layouts / pages / menus 按角色裁剪；
                            # 登录 / 登出在 DSL 中用内置 request 动作表达）
     page-access.ts         # 页面访问校验代理（path → pageKey / grantGroup → 平台接口）
     yaml/                  # DSL 文件：sitemap.yaml（入口元数据 + 布局 + 页面/菜单全量声明）
-      pages/               # 页面 DSL（每页一个 *.page.yaml，按 id 约定加载）
+      pages/               # 页面 DSL（每页一个 *.page.yaml，平铺约定）
+      common/              # login / dashboard（模块目录约定：<模块>/<id>.yaml）
+      provider/            # 参考模块：供应商（列表 + 详情 + 新增/编辑）
+      route/               # 参考模块：路由（列表 + 详情 + 新增/编辑）
+      models/              # 页面骨架：data-list 数据列表标准模型
 ```
 
-`App.tsx` 的核心接线（页面访问门禁 + 框架 SitemapApp）：
+`App.tsx` 的核心接线（页面访问门禁 + 框架 SitemapApp + 自定义组件 / 动作）：
 
 ```tsx
 const { committed, status, retry } = usePageAccessGate(pathname, search, replace);
@@ -131,6 +190,8 @@ const { committed, status, retry } = usePageAccessGate(pathname, search, replace
   pathname={committed.pathname}
   query={committedQuery}
   navigate={navigate}
+  components={appComponents} // src/pactor/components/ + blocks 的 Login
+  actions={pactorActions}    // src/pactor/actions.ts（默认为空）
 />
 ```
 
