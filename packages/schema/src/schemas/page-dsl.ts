@@ -110,11 +110,15 @@ export const pageDslSchema = {
         /** 页面描述 */
         description: { type: 'string' },
         type: { type: 'string' },
+        /** 页面权限分组（宿主按分组做页面访问校验与权限查看） */
+        grantGroup: { type: 'string' },
+        /** 页面级扩展元数据（自由键值，Runtime 不消费） */
+        meta: { type: 'object' },
         permission: permissionSchema,
       },
       additionalProperties: false,
     },
-    /** 页面扩展元数据（自由键值，如 version / author），Runtime 不消费 */
+    /** 文档级扩展元数据（自由键值，如 version / author），Runtime 不消费 */
     meta: { type: 'object' },
     state: { type: 'object' },
     dataSources: {

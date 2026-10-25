@@ -25,6 +25,14 @@ export interface PageMeta {
   description?: string;
   /** 页面类型 / Page Pattern，如 "list"、"detail"、"form" */
   type?: string;
+  /** 页面权限分组：宿主按分组做页面访问校验与权限查看 */
+  grantGroup?: string;
+  /**
+   * 页面级扩展元数据（自由键值，如宿主业务标记 / 埋点信息）。
+   * Runtime 不消费，仅供宿主与工具链读取；框架能力请使用正式字段，
+   * 不要把应用私有键直接加到 `page` 顶层（Schema 对其保持封闭）
+   */
+  meta?: Record<string, unknown>;
   permission?: PermissionConfig;
 }
 
@@ -85,7 +93,7 @@ export interface PageDsl {
   dsl: DslVersion;
   requires?: RequiresConfig;
   page: PageMeta;
-  /** 页面扩展元数据（自由键值，如 version / author / 业务自定义标记），Runtime 不消费，仅供宿主与工具链读取 */
+  /** 文档级扩展元数据（自由键值，如 version / author / 业务自定义标记），Runtime 不消费，仅供宿主与工具链读取 */
   meta?: Record<string, unknown>;
   /** 页面初始状态 */
   state?: Record<string, unknown>;

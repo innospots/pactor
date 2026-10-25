@@ -95,6 +95,45 @@ describe('validatePageDsl', () => {
     );
   });
 
+  it('accepts page.grantGroup（页面权限分组），拒绝非字符串', () => {
+    const ok = validatePageDsl({
+      ...validPage,
+      page: { ...validPage.page, grantGroup: 'viewGroup' },
+    });
+    expect(ok.valid).toBe(true);
+    expect(ok.errors).toEqual([]);
+
+    const bad = validatePageDsl({
+      ...validPage,
+      page: { ...validPage.page, grantGroup: 123 },
+    });
+    expect(bad.valid).toBe(false);
+    expect(bad.errors).toContainEqual(
+      expect.objectContaining({ path: '/page/grantGroup', keyword: 'type' }),
+    );
+  });
+
+  it('accepts page.meta（页面级扩展元数据），拒绝非对象', () => {
+    const ok = validatePageDsl({
+      ...validPage,
+      page: {
+        ...validPage.page,
+        meta: { analytics: { event: 'customer_view' }, badge: 3 },
+      },
+    });
+    expect(ok.valid).toBe(true);
+    expect(ok.errors).toEqual([]);
+
+    const bad = validatePageDsl({
+      ...validPage,
+      page: { ...validPage.page, meta: 'v1' },
+    });
+    expect(bad.valid).toBe(false);
+    expect(bad.errors).toContainEqual(
+      expect.objectContaining({ path: '/page/meta', keyword: 'type' }),
+    );
+  });
+
   it('rejects a non-object meta', () => {
     const result = validatePageDsl({ ...validPage, meta: 'v1' });
 

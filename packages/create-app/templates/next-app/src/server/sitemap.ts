@@ -35,7 +35,7 @@ function loadYaml<T>(file: string): T {
 }
 
 /** sitemap.yaml 中的页面声明：可见性标记（public / permission）+ DSL 加载方式（lazy） */
-interface PageEntry {
+export interface PageEntry {
   id: string;
   path: string;
   title: string;
@@ -151,4 +151,102 @@ export function getLazyPage(
     return null;
   }
   return { version: entry.version, pageDsl };
+}
+
+/* ---------------- 页面访问校验辅助（src/server/page-access.ts 消费） ---------------- */
+
+/** 全部页面声明（会话无关超集；访问校验按全量页面解析，不受菜单裁剪影响） */
+export function listPageEntries(): PageEntry[] {
+  return site.pages;
+}
+
+/** 按 id 取页面 DSL（内联或懒加载文件）；未声明返回 undefined */
+export function findPageDsl(pageId: string): PageDsl | undefined {
+  return pageDsls.get(pageId) ?? lazyPageDsls.get(pageId);
+}
+
+/** 未登录访问受保护页面的重定向目标（sitemap.yaml 的 auth.loginPath） */
+export function getLoginPath(): string {
+  return site.auth.loginPath ?? "/login";
+}
+
+/** 路由候选：菜单可显式覆写页面 path（如一级菜单落到静态地址），优先于页面声明 */
+interface RouteRef {
+  pattern: string;
+  pageId: string;
+}
+
+/**
+ * 按路径查找页面声明（页面访问校验用）：
+ * 菜单声明的 path 优先（与 SitemapApp 路由解析一致），页面声明兜底；
+ * 静态段更多的模式优先，保证 /reports/monthly 先于 /reports/:id。
+ */
+export function findPageEntryByPath(pathname: string): PageEntry | null {
+  const refs: RouteRef[] = [];
+  const walk = (items: SitemapResource["menus"]): void => {
+    for (const item of items) {
+      if (item.pageId !== undefined && item.path !== undefined) {
+        refs.push({ pattern: item.path, pageId: item.pageId });
+      }
+      if (item.children !== undefined) {
+        walk(item.children);
+      }
+    }
+  };
+  walk(site.menus);
+  for (const page of site.pages) {
+    refs.push({ pattern: page.path, pageId: page.id });
+  }
+
+  const path = normalizePath(pathname);
+  const matched = refs
+    .map((ref, index) => ({ ref, index }))
+    .filter(({ ref }) => matchRoutePath(ref.pattern, path))
+    .sort(
+      (a, b) =>
+        staticSegmentCount(b.ref.pattern) - staticSegmentCount(a.ref.pattern) ||
+        a.index - b.index,
+    )[0];
+  if (matched === undefined) {
+    return null;
+  }
+  return site.pages.find((page) => page.id === matched.ref.pageId) ?? null;
+}
+
+/** 路径段拆分（忽略首尾 / 重复斜杠，逐段解码失败时保留原文） */
+function splitPath(value: string): string[] {
+  return normalizePath(value)
+    .split("/")
+    .filter(Boolean)
+    .map((segment) => {
+      try {
+        return decodeURIComponent(segment);
+      } catch {
+        return segment;
+      }
+    });
+}
+
+/** 模式匹配：:param 段匹配任意非空段，其余段精确相等 */
+function matchRoutePath(pattern: string, pathname: string): boolean {
+  const patternSegments = splitPath(pattern);
+  const pathSegments = splitPath(pathname);
+  return (
+    patternSegments.length === pathSegments.length &&
+    patternSegments.every(
+      (segment, index) =>
+        segment.startsWith(":") || segment === pathSegments[index],
+    )
+  );
+}
+
+/** 静态段数量（模式优先级：静态段多者更具体） */
+function staticSegmentCount(pattern: string): number {
+  return splitPath(pattern).filter((segment) => !segment.startsWith(":")).length;
+}
+
+/** 去掉末尾斜杠（根路径保留） */
+function normalizePath(pathname: string): string {
+  const path = pathname.split("?")[0] ?? pathname;
+  return path === "/" ? "/" : path.replace(/\/+$/, "");
 }
