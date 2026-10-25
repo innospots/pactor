@@ -23,7 +23,7 @@
   → 服务端接口                        真实后端（与 DSL 同路径契约）
 ```
 
-完整实现见模板工程 `app/api/d/[...parts]/route.ts`。
+完整实现见脚手架生成工程 `app/api/d/[...parts]/route.ts`。
 
 ## 对页面 yaml 的要求
 

@@ -26,3 +26,12 @@ export const pageAccessEndpoint = "/api/page-access/verify";
  */
 export const apiBaseUrl =
   process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:9011";
+
+/**
+ * 服务端接口基准地址（/api/d 转发层的目标地址，仅服务端路由使用）。
+ * 同样由 next.config.js 的 API_BASE_URLS 按构建环境解析并内联；
+ * 缺省回退本地开发占位（不存在 → 转发层回退空数据，页面按空态渲染）。
+ * 所有需要服务端接口地址的位置统一从这里导入。
+ */
+export const serverBaseUrl =
+  process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:9011/backend";

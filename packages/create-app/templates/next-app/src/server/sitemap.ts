@@ -1,5 +1,5 @@
-import { readFileSync } from "node:fs";
-import { join } from "node:path";
+import { readFileSync, readdirSync, watch } from "node:fs";
+import { join, relative } from "node:path";
 
 import type { PageDsl, PermissionConfig } from "@pactor-app/core";
 import { parseDocument } from "yaml";
@@ -14,12 +14,14 @@ import type { DemoUser } from "./accounts";
  * 匿名 → public 页（登录/注册）；登录后 → 该角色可见的 menus / pages / permissions。
  *
  * 入口数据（元数据 / layouts / pages / menus 全量）在 yaml/sitemap.yaml，
- * 页面 DSL 在 yaml/pages/<id>.page.yaml；本文件只负责：加载 YAML、
+ * 页面 DSL 支持两种命名约定（可混用，按 id 建索引）：
+ * pages/<id>.page.yaml（平铺）与 yaml/<模块>/<id>.yaml（按 PRD 模块树
+ * 分目录，如 provider / route / models 骨架）；本文件只负责：加载 YAML、
  * 按会话裁剪可见性（public / permission / 需登录）、注入会话动态字段
  * （updatedAt / user / permissions）。
  */
 
-/* ---------------- YAML DSL 文件加载（src/server/yaml/，启动时读入内存） ---------------- */
+/* ---------------- YAML DSL 文件加载（src/server/yaml/，缓存 + dev 下 fs.watch 失效重读） ---------------- */
 
 const YAML_DIR = join(process.cwd(), "src/server/yaml");
 
@@ -59,15 +61,93 @@ interface SitemapFile {
   menus: SitemapResource["menus"];
 }
 
-const site = loadYaml<SitemapFile>("sitemap.yaml");
+/**
+ * 递归收集 yaml 下所有页面 DSL（含 pages/ 平铺目录与 provider / route /
+ * models 等模块子目录；跳过 sitemap.yaml），按 id → 相对路径建索引。
+ * 兼容两种命名：<id>.page.yaml 与 <id>.yaml；同一 id 出现两次即报错
+ * （静默覆盖会让线上页面来源不可追溯）。
+ */
+function collectPageFiles(dir: string): Map<string, string> {
+  const out = new Map<string, string>();
+  const walk = (current: string): void => {
+    for (const entry of readdirSync(current, { withFileTypes: true })) {
+      const path = join(current, entry.name);
+      if (entry.isDirectory()) {
+        walk(path);
+        continue;
+      }
+      if (entry.name === "sitemap.yaml") continue;
+      const id = entry.name.endsWith(".page.yaml")
+        ? entry.name.slice(0, -".page.yaml".length)
+        : entry.name.endsWith(".yaml")
+          ? entry.name.slice(0, -".yaml".length)
+          : null;
+      if (id === null) continue;
+      const rel = relative(YAML_DIR, path);
+      const existing = out.get(id);
+      if (existing !== undefined) {
+        throw new Error(`页面 id 冲突：${existing} 与 ${rel} 同为 ${id}`);
+      }
+      out.set(id, rel);
+    }
+  };
+  walk(dir);
+  return out;
+}
 
-/** 页面 DSL：按 id 约定从 pages/<id>.page.yaml 加载；lazy 页不在此内联 */
-const pageDsls = new Map(
-  site.pages.filter((p) => !p.lazy).map((p) => [p.id, loadYaml<PageDsl>(`pages/${p.id}.page.yaml`)]),
-);
-const lazyPageDsls = new Map(
-  site.pages.filter((p) => p.lazy).map((p) => [p.id, loadYaml<PageDsl>(`pages/${p.id}.page.yaml`)]),
-);
+interface YamlState {
+  site: SitemapFile;
+  pageDsls: Map<string, PageDsl>;
+  lazyPageDsls: Map<string, PageDsl>;
+}
+
+function loadState(): YamlState {
+  const site = loadYaml<SitemapFile>("sitemap.yaml");
+  const pageFiles = collectPageFiles(YAML_DIR);
+
+  /** 页面 DSL：按 id 从收集索引加载；lazy 页不在此内联 */
+  function loadPageDsl(id: string): PageDsl {
+    const file = pageFiles.get(id);
+    if (!file) throw new Error(`页面 DSL 缺失：${id}.yaml`);
+    return loadYaml<PageDsl>(file);
+  }
+
+  return {
+    site,
+    pageDsls: new Map(
+      site.pages.filter((p) => !p.lazy).map((p) => [p.id, loadPageDsl(p.id)]),
+    ),
+    lazyPageDsls: new Map(
+      site.pages.filter((p) => p.lazy).map((p) => [p.id, loadPageDsl(p.id)]),
+    ),
+  };
+}
+
+let stateCache: YamlState | null = null;
+
+/** YAML 状态：首次请求时读入缓存；dev 下 yaml 目录任一文件变更由 fs.watch 失效缓存，下次请求重读，无需重启 */
+function state(): YamlState {
+  if (!stateCache) stateCache = loadState();
+  return stateCache;
+}
+
+// watcher 挂 globalThis：Next dev 重编译会重新执行本模块，只更新失效回调、不重复建 watcher
+const globalForYamlWatch = globalThis as unknown as {
+  __pactorYamlInvalidate?: () => void;
+  __pactorYamlWatcher?: ReturnType<typeof watch>;
+};
+globalForYamlWatch.__pactorYamlInvalidate = () => {
+  stateCache = null;
+};
+if (process.env.NODE_ENV !== "production" && !globalForYamlWatch.__pactorYamlWatcher) {
+  globalForYamlWatch.__pactorYamlWatcher = watch(
+    YAML_DIR,
+    { recursive: true },
+    () => {
+      globalForYamlWatch.__pactorYamlInvalidate?.();
+    },
+  );
+}
 
 /* ---------------- 会话裁剪 ---------------- */
 
@@ -118,6 +198,7 @@ function filterMenus(
  * 匿名 → 仅 public 页；guest → + 首页；admin → + 用户列表 / 报表组。
  */
 export function buildSitemap(user: DemoUser | null): SitemapResource {
+  const { site, pageDsls } = state();
   const pages: SitemapResource["pages"] = site.pages
     .filter((p) => canSee(p, user))
     .map((p) => ({
@@ -145,6 +226,7 @@ export function getLazyPage(
   pageId: string,
   user: DemoUser | null,
 ): { version: number; pageDsl: PageDsl } | null {
+  const { site, lazyPageDsls } = state();
   const entry = site.pages.find((p) => p.id === pageId);
   const pageDsl = lazyPageDsls.get(pageId);
   if (!entry?.lazy || !pageDsl || !canSee(entry, user)) {
@@ -157,17 +239,18 @@ export function getLazyPage(
 
 /** 全部页面声明（会话无关超集；访问校验按全量页面解析，不受菜单裁剪影响） */
 export function listPageEntries(): PageEntry[] {
-  return site.pages;
+  return state().site.pages;
 }
 
 /** 按 id 取页面 DSL（内联或懒加载文件）；未声明返回 undefined */
 export function findPageDsl(pageId: string): PageDsl | undefined {
+  const { pageDsls, lazyPageDsls } = state();
   return pageDsls.get(pageId) ?? lazyPageDsls.get(pageId);
 }
 
 /** 未登录访问受保护页面的重定向目标（sitemap.yaml 的 auth.loginPath） */
 export function getLoginPath(): string {
-  return site.auth.loginPath ?? "/login";
+  return state().site.auth.loginPath ?? "/login";
 }
 
 /** 路由候选：菜单可显式覆写页面 path（如一级菜单落到静态地址），优先于页面声明 */
@@ -182,6 +265,7 @@ interface RouteRef {
  * 静态段更多的模式优先，保证 /reports/monthly 先于 /reports/:id。
  */
 export function findPageEntryByPath(pathname: string): PageEntry | null {
+  const { site } = state();
   const refs: RouteRef[] = [];
   const walk = (items: SitemapResource["menus"]): void => {
     for (const item of items) {
