@@ -24,6 +24,34 @@ pnpm dev   # http://localhost:9011
 匿名访问任意非 public 路径会重定向到 `/login`；登录 / 登出后整页重载，
 sitemap 端点按新会话重新裁剪内容。
 
+## 语言切换（i18n）
+
+外壳 Header 内置语言下拉（中文 / English），切换即生效、无整页刷新，
+偏好持久化在 localStorage `pactor.locale`，刷新后恢复。接线位置：
+
+- `src/pactor/i18n/messages.ts`：业务语言包（按语言分组的词条表）。
+  页面 / 布局 DSL 经 `${t('key')}` 消费，参数插值用 `{{name}}` 占位符
+  （如 `${t('home.welcome', { name: data.session.user.name })}`）。
+  业务 key 用自有命名空间（`shell.*` / `home.*` / `dashboard.*`），
+  不要占用框架保留的 `pactor.*` 前缀（内置组件默认文案）。
+- `src/pactor/i18n/locale.ts`：宿主 locale 状态（持久化 + 订阅）与
+  `translateHost`（SitemapApp 之外的宿主视图文案，如页面访问门禁）。
+- `src/pactor/actions.ts`：自定义动作 `app.setLocale`——布局 DSL 的
+  `onLocaleChange` 经它写偏好并通知宿主；任意页面 DSL 也可调用。
+- `src/pactor/App.tsx`：向 `SitemapApp` 传 `locale` / `defaultLocale` /
+  `messages`，并以 `key={locale}` 重挂载——框架暂不随 locale 重取
+  sitemap（阶段 B），换 key 让 sitemap 携带新 `?locale=` 重拉，
+  菜单 / 布局 / 页面整体切换（代价：侧栏折叠态等布局临时状态重置；
+  框架支持 sitemap 随 locale 重取后应移除此 key）。
+- `src/server/sitemap.ts` + `src/server/yaml/sitemap.yaml`：菜单 / 页面
+  `title` 支持字符串或按语言映射 `{ zh-CN: ..., en-US: ... }`，
+  `/api/sitemap` 按 `?locale=` 直出对应语言（缺省 zh-CN）。
+
+增删语言：在 `messages.ts` 的 `SUPPORTED_LOCALES` / `MESSAGES` 加一组词条，
+并在 sitemap.yaml 布局 Header 的 `locales` 列表加一项即可。演示页面中
+provider / route / models 骨架保留中文原文，按上述范式（`t()` key +
+词条表）自行扩展。
+
 ## 数据转发层（/api/d）
 
 页面 DSL 的 http 数据源可以写同源相对路径 `/api/d/<parts>`（如
@@ -160,16 +188,18 @@ src/
     config.ts              # ★ 入口配置：sitemapSources / pageAccessEndpoint /
                            # apiBaseUrl / serverBaseUrl
     App.tsx                # 薄壳：页面访问门禁 + 框架 SitemapApp + 宿主路由
-                           #（注册自定义组件 / 动作与 blocks 的 Login）
+                           #（注册自定义组件 / 动作与 blocks 的 Login；
+                           # 持有 locale 状态并向 SitemapApp 传 i18n props）
     page-access.tsx        # 页面访问门禁（切换前校验 / 403 视图）
     skin.ts                # 皮肤清单与运行时换肤（link[data-pactor-skin] swap）
-    actions.ts             # 页面级自定义动作注册表（默认为空）
+    i18n/                  # 语言包（messages.ts）与宿主 locale 状态（locale.ts）
+    actions.ts             # 页面级自定义动作注册表（app.setLocale 语言切换）
     components/            # 页面级自定义组件注册表（chat 展示组件 / ThemeSwitcher 等）
   server/
     accounts.ts            # 演示账号（模板为占位符，生成时渲染）与会话 cookie
     cors.ts                # CORS 头（演示放开跨源，含预检响应）
-    sitemap.ts             # mock sitemap 数据源（layouts / pages / menus 按角色裁剪；
-                           # 登录 / 登出在 DSL 中用内置 request 动作表达）
+    sitemap.ts             # mock sitemap 数据源（layouts / pages / menus 按角色裁剪，
+                           # 标题按 ?locale= 直出；登录 / 登出在 DSL 中用内置 request 动作表达）
     page-access.ts         # 页面访问校验代理（path → pageKey / grantGroup → 平台接口）
     yaml/                  # DSL 文件：sitemap.yaml（入口元数据 + 布局 + 页面/菜单全量声明）
       pages/               # 页面 DSL（每页一个 *.page.yaml，平铺约定）
@@ -191,7 +221,10 @@ const { committed, status, retry } = usePageAccessGate(pathname, search, replace
   query={committedQuery}
   navigate={navigate}
   components={appComponents} // src/pactor/components/ + blocks 的 Login
-  actions={pactorActions}    // src/pactor/actions.ts（默认为空）
+  actions={pactorActions}    // src/pactor/actions.ts（app.setLocale 语言切换）
+  locale={locale}            // src/pactor/i18n/（localStorage pactor.locale 持久化）
+  defaultLocale="zh-CN"
+  messages={MESSAGES[locale]}
 />
 ```
 

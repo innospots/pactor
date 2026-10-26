@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import { pageAccessEndpoint } from "./config";
+import { translateHost } from "./i18n/locale";
 
 /**
  * 页面访问校验（前端侧）：页面切换 / 首次打开之前，先请求项目内
@@ -56,7 +57,7 @@ export async function verifyPageAccess(
     if (!response.ok) {
       return {
         allowed: false,
-        reason: `页面权限校验失败：HTTP ${response.status}`,
+        reason: translateHost("gate.error.http", { status: response.status }),
       };
     }
     const result = (await response.json()) as Partial<PageAccessResult>;
@@ -68,9 +69,9 @@ export async function verifyPageAccess(
   } catch (error) {
     return {
       allowed: false,
-      reason: `页面权限校验服务不可用：${
-        error instanceof Error ? error.message : String(error)
-      }`,
+      reason: translateHost("gate.error.unavailable", {
+        message: error instanceof Error ? error.message : String(error),
+      }),
     };
   }
 }
@@ -118,7 +119,7 @@ export function usePageAccessGate(
       }
       setDenial({
         pathname: targetPathname,
-        reason: result.reason ?? "无页面访问权限",
+        reason: result.reason ?? translateHost("gate.denied.noAccess"),
         redirectTo: result.redirectTo,
       });
       if (
@@ -234,7 +235,7 @@ export function PageAccessPending() {
         fontSize: 12,
       }}
     >
-      正在校验页面访问权限…
+      {translateHost("gate.checking")}
     </div>
   );
 }
@@ -281,19 +282,21 @@ export function PageAccessDenied({
         textAlign: "center",
       }}
     >
-      <div style={{ fontSize: 20, fontWeight: 600 }}>无访问权限</div>
+      <div style={{ fontSize: 20, fontWeight: 600 }}>
+        {translateHost("gate.denied.title")}
+      </div>
       <div style={{ color: "var(--muted-foreground, #6b7280)" }}>{reason}</div>
       <div style={{ display: "flex", gap: 8, marginTop: 4 }}>
         <button type="button" style={primaryButtonStyle} onClick={onRetry}>
-          重新校验
+          {translateHost("gate.denied.retry")}
         </button>
         {onBack !== undefined ? (
           <button type="button" style={buttonStyle} onClick={onBack}>
-            返回上一页
+            {translateHost("gate.denied.back")}
           </button>
         ) : null}
         <button type="button" style={buttonStyle} onClick={onHome}>
-          回到首页
+          {translateHost("gate.denied.home")}
         </button>
       </div>
     </div>

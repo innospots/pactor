@@ -23,63 +23,63 @@ layout: admin
 auth: { loginPath: /login }
 
 pages:
-  - { id: login, path: /login, title: 登录, version: 1, public: true }
-  - { id: register, path: /register, title: 注册, version: 1, public: true }
-  - { id: home, path: /, title: 首页, version: 3 }
-  - { id: users, path: /users, title: 用户列表, version: 1, permission: user:view, lazy: true }
-  - { id: monthly, path: /reports/monthly, title: 月报, version: 7, permission: report:view, lazy: true }
-  - { id: monthly-detail, path: /reports/monthly/:id, title: 月报详情, version: 2, permission: report:view }
+  - { id: login, path: /login, title: { zh-CN: 登录, en-US: Sign in }, version: 1, public: true }
+  - { id: register, path: /register, title: { zh-CN: 注册, en-US: Sign up }, version: 1, public: true }
+  - { id: home, path: /, title: { zh-CN: 首页, en-US: Home }, version: 3 }
+  - { id: users, path: /users, title: { zh-CN: 用户列表, en-US: Users }, version: 1, permission: user:view, lazy: true }
+  - { id: monthly, path: /reports/monthly, title: { zh-CN: 月报, en-US: Monthly Report }, version: 7, permission: report:view, lazy: true }
+  - { id: monthly-detail, path: /reports/monthly/:id, title: { zh-CN: 月报详情, en-US: Report Detail }, version: 2, permission: report:view }
   # 仪表盘（common/；与首页同为演示入口，独立路径避免与 home 的 / 冲突）
-  - { id: dashboard, path: /dashboard, title: 仪表盘, version: 1, lazy: true }
+  - { id: dashboard, path: /dashboard, title: { zh-CN: 仪表盘, en-US: Dashboard }, version: 1, lazy: true }
   # 模块一：模型资产 / 供应商（卡片式列表 + 详情 + 新增/编辑）
-  - { id: provider-list, path: /providers, title: 供应商, version: 1, lazy: true }
-  - { id: provider-create, path: /providers/new, title: 新增 Provider, version: 1, lazy: true }
-  - { id: provider-detail, path: /providers/:code, title: Provider 详情, version: 1, lazy: true }
-  - { id: provider-edit, path: /providers/:code/edit, title: 编辑 Provider, version: 1, lazy: true }
+  - { id: provider-list, path: /providers, title: { zh-CN: 供应商, en-US: Providers }, version: 1, lazy: true }
+  - { id: provider-create, path: /providers/new, title: { zh-CN: 新增 Provider, en-US: Add Provider }, version: 1, lazy: true }
+  - { id: provider-detail, path: /providers/:code, title: { zh-CN: Provider 详情, en-US: Provider Detail }, version: 1, lazy: true }
+  - { id: provider-edit, path: /providers/:code/edit, title: { zh-CN: 编辑 Provider, en-US: Edit Provider }, version: 1, lazy: true }
   # 模块二：模型路由 / 路由（卡片式列表 + 单页纵向详情 + 单页表单）
-  - { id: route-list, path: /routes, title: 路由, version: 1, lazy: true }
-  - { id: route-create, path: /routes/new, title: 新增路由, version: 1, lazy: true }
-  - { id: route-detail, path: /routes/:code, title: 路由详情, version: 1, lazy: true }
-  - { id: route-edit, path: /routes/:code/edit, title: 编辑路由, version: 1, lazy: true }
+  - { id: route-list, path: /routes, title: { zh-CN: 路由, en-US: Routes }, version: 1, lazy: true }
+  - { id: route-create, path: /routes/new, title: { zh-CN: 新增路由, en-US: Add Route }, version: 1, lazy: true }
+  - { id: route-detail, path: /routes/:code, title: { zh-CN: 路由详情, en-US: Route Detail }, version: 1, lazy: true }
+  - { id: route-edit, path: /routes/:code/edit, title: { zh-CN: 编辑路由, en-US: Edit Route }, version: 1, lazy: true }
   # 页面骨架：数据列表标准模型（搜索 + 表格 + 抽屉新建/编辑），可复制生成业务列表页
-  - { id: data-list, path: /models/data-list, title: 数据列表, version: 1, lazy: true }
+  - { id: data-list, path: /models/data-list, title: { zh-CN: 数据列表, en-US: Data List }, version: 1, lazy: true }
 
 menus:
-  - { id: login, type: page, pageId: login, title: 登录, layout: login, public: true, hidden: true }
-  - { id: register, type: page, pageId: register, title: 注册, layout: auth, public: true, hidden: true }
-  - { id: home, type: page, pageId: home, title: 首页, icon: home, layout: admin, order: 1 }
-  - { id: dashboard, type: page, pageId: dashboard, title: 仪表盘, icon: chart, layout: admin, order: 2 }
-  - { id: users, type: page, pageId: users, title: 用户列表, icon: users, layout: admin, permission: user:view, order: 3 }
+  - { id: login, type: page, pageId: login, title: { zh-CN: 登录, en-US: Sign in }, layout: login, public: true, hidden: true }
+  - { id: register, type: page, pageId: register, title: { zh-CN: 注册, en-US: Sign up }, layout: auth, public: true, hidden: true }
+  - { id: home, type: page, pageId: home, title: { zh-CN: 首页, en-US: Home }, icon: home, layout: admin, order: 1 }
+  - { id: dashboard, type: page, pageId: dashboard, title: { zh-CN: 仪表盘, en-US: Dashboard }, icon: chart, layout: admin, order: 2 }
+  - { id: users, type: page, pageId: users, title: { zh-CN: 用户列表, en-US: Users }, icon: users, layout: admin, permission: user:view, order: 3 }
   - id: assets
     type: group
-    title: 模型资产
+    title: { zh-CN: 模型资产, en-US: Model Assets }
     icon: package
     order: 4
     children:
-      - { id: providers, type: page, pageId: provider-list, title: 供应商, layout: admin }
+      - { id: providers, type: page, pageId: provider-list, title: { zh-CN: 供应商, en-US: Providers }, layout: admin }
   - id: routing
     type: group
-    title: 模型路由
+    title: { zh-CN: 模型路由, en-US: Model Routing }
     icon: share
     order: 5
     children:
-      - { id: routes, type: page, pageId: route-list, title: 路由, layout: admin }
+      - { id: routes, type: page, pageId: route-list, title: { zh-CN: 路由, en-US: Routes }, layout: admin }
   - id: skeletons
     type: group
-    title: 页面骨架
+    title: { zh-CN: 页面骨架, en-US: Page Skeletons }
     icon: folder
     order: 6
     children:
-      - { id: data-list, type: page, pageId: data-list, title: 数据列表, layout: admin }
+      - { id: data-list, type: page, pageId: data-list, title: { zh-CN: 数据列表, en-US: Data List }, layout: admin }
   - id: reports
     type: group
-    title: 报表
+    title: { zh-CN: 报表, en-US: Reports }
     icon: chart
     order: 7
     children:
-      - { id: monthly, type: page, pageId: monthly, title: 报表中心, icon: chart, layout: admin, permission: report:view }
-      - { id: monthly-detail, type: page, pageId: monthly-detail, title: 月报详情, layout: admin, hidden: true, activeMenu: monthly, permission: report:view }
-  - { id: help, type: link, title: 帮助, path: https://github.com/, external: true, permission: report:view, order: 8 }
+      - { id: monthly, type: page, pageId: monthly, title: { zh-CN: 报表中心, en-US: Report Center }, icon: chart, layout: admin, permission: report:view }
+      - { id: monthly-detail, type: page, pageId: monthly-detail, title: { zh-CN: 月报详情, en-US: Report Detail }, layout: admin, hidden: true, activeMenu: monthly, permission: report:view }
+  - { id: help, type: link, title: { zh-CN: 帮助, en-US: Help }, path: https://github.com/, external: true, permission: report:view, order: 8 }
   # 隐藏页（不出现在菜单，经列表页跳转进入；activeMenu 保持所属菜单高亮）
   - { id: provider-create, type: page, pageId: provider-create, layout: admin, hidden: true, activeMenu: providers }
   - { id: provider-detail, type: page, pageId: provider-detail, layout: admin, hidden: true, activeMenu: providers }
@@ -124,10 +124,10 @@ layouts:
                   - { label: 中文, value: zh-CN }
                   - { label: English, value: en-US }
                 user:
-                  name: "${data.session.user.name || '用户'}"
+                  name: "${data.session.user.name || t('shell.userMenu.defaultName')}"
                   items:
-                    - { label: 个人中心, value: profile, icon: user }
-                    - { label: 退出登录, value: logout, icon: log-out }
+                    - { label: "${t('shell.userMenu.profile')}", value: profile, icon: user }
+                    - { label: "${t('shell.userMenu.logout')}", value: logout, icon: log-out }
               events:
                 onUserSelect:
                   - action: if
@@ -144,12 +144,12 @@ layouts:
                         - action: message
                           params:
                             messageType: info
-                            text: 打开个人中心
+                            text: "${t('shell.userMenu.profileToast')}"
+                # 语言切换：自定义动作（src/pactor/actions.ts）持久化偏好并
+                # 通知宿主更新 SitemapApp 的 locale prop（含 sitemap 按语言重取）
                 onLocaleChange:
-                  - action: message
-                    params:
-                      messageType: info
-                      text: 语言切换为 ${event}
+                  - action: app.setLocale
+                    params: { locale: "${event}" }
               children:
                 - type: ThemeSwitcher
             - type: Content
