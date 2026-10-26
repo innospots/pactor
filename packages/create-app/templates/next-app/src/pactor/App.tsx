@@ -1,13 +1,27 @@
 "use client";
 
 import { usePathname, useRouter } from "next/navigation";
-import { Suspense, useCallback, useMemo, useSyncExternalStore } from "react";
+import {
+  Suspense,
+  useCallback,
+  useEffect,
+  useMemo,
+  useState,
+  useSyncExternalStore,
+} from "react";
 import { createHttpHooks, SitemapApp } from "pactor-app";
 import { Login } from "@pactor-app/blocks";
 
 import { apiBaseUrl, sitemapSources } from "./config";
 import { pactorActions } from "./actions";
 import { pactorComponents } from "./components";
+import { DEFAULT_LOCALE, MESSAGES } from "./i18n/messages";
+import {
+  getLocaleSnapshot,
+  getServerLocaleSnapshot,
+  subscribeLocale,
+  translateHost,
+} from "./i18n/locale";
 import {
   PageAccessDenied,
   PageAccessGateLoading,
@@ -88,6 +102,23 @@ function PactorAppInner() {
   // navigate 随之稳定，布局跨导航常驻。
   const navigate = useCallback((to: string) => router.push(to), [router]);
 
+  // 当前语言（localStorage(pactor.locale) 持久化，app.setLocale 动作写入）。
+  // key={locale} 重挂载 SitemapApp：框架暂不随 locale 重取 sitemap（阶段 B），
+  // 而菜单标题由服务端按语言直出——换 key 让 sitemap 携带新 ?locale= 重拉，
+  // 菜单 / 布局 / 页面整体切到新语言。代价：布局临时状态（侧栏折叠、页签）
+  // 重置；框架支持 sitemap 随 locale 重取后应移除此 key。
+  const locale = useSyncExternalStore(
+    subscribeLocale,
+    getLocaleSnapshot,
+    getServerLocaleSnapshot,
+  );
+
+  // 持久化语言（如 en-US）与服务端快照（zh-CN）不同：SSR HTML 与客户端
+  // 首帧文案必然不一致。水合完成前不渲染内容（SSR 与客户端首帧同为 null），
+  // 规避 hydration mismatch；应用本就需异步拉取 sitemap，首屏无感知损失。
+  const [hydrated, setHydrated] = useState(false);
+  useEffect(() => setHydrated(true), []);
+
   const { committed, status, retry } = usePageAccessGate(
     pathname,
     search,
@@ -103,6 +134,10 @@ function PactorAppInner() {
   const denied = status.status === "denied";
   const redirecting = denied && status.redirectTo !== undefined;
 
+  if (!hydrated) {
+    return null;
+  }
+
   // 首次打开：校验通过前不挂载 SitemapApp（避免未授权页面被解析 / 请求 DSL）
   if (committed === null) {
     if (denied && !redirecting) {
@@ -116,7 +151,9 @@ function PactorAppInner() {
     }
     return (
       <PageAccessGateLoading
-        text={redirecting ? "正在跳转登录页…" : "正在校验页面访问权限…"}
+        text={translateHost(
+          redirecting ? "gate.redirecting" : "gate.checking",
+        )}
       />
     );
   }
@@ -135,6 +172,7 @@ function PactorAppInner() {
        */}
       <div style={{ display: denied ? "none" : "contents" }}>
         <SitemapApp
+          key={locale}
           sources={sitemapSources}
           baseUrl={apiBaseUrl}
           pathname={committed.pathname}
@@ -143,10 +181,15 @@ function PactorAppInner() {
           components={appComponents}
           actions={pactorActions}
           httpAdapter={httpAdapter}
+          locale={locale}
+          defaultLocale={DEFAULT_LOCALE}
+          messages={MESSAGES[locale]}
         />
       </div>
       {status.status === "checking" ? <PageAccessPending /> : null}
-      {redirecting ? <PageAccessGateLoading text="正在跳转登录页…" /> : null}
+      {redirecting ? (
+        <PageAccessGateLoading text={translateHost("gate.redirecting")} />
+      ) : null}
       {denied && !redirecting ? (
         <PageAccessDenied
           reason={status.reason}

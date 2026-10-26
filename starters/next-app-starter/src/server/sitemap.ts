@@ -36,16 +36,44 @@ function loadYaml<T>(file: string): T {
   return doc.toJS() as T;
 }
 
+/** 标题文案：字符串（语言无关）或按语言映射（{ zh-CN, en-US }，下发前按 locale 解析） */
+export type LocalizedTitle = string | Record<string, string>;
+
+/** 按语言解析标题；无标题（隐藏页菜单项）回退空串，当前语言缺失回退 zh-CN 再回退任一可用值 */
+function resolveTitle(title: LocalizedTitle | undefined, locale: string): string {
+  if (title === undefined) return "";
+  if (typeof title === "string") return title;
+  return title[locale] ?? title["zh-CN"] ?? Object.values(title)[0] ?? "";
+}
+
 /** sitemap.yaml 中的页面声明：可见性标记（public / permission）+ DSL 加载方式（lazy） */
 export interface PageEntry {
   id: string;
   path: string;
-  title: string;
+  title: LocalizedTitle;
   version: number;
   public?: boolean;
   permission?: string;
   /** 不随 sitemap 内联 pageDsl，客户端经 /api/pages/{id} 懒加载 */
   lazy?: boolean;
+}
+
+/** sitemap.yaml 的菜单条目（title 允许按语言映射，buildSitemap 按 locale 解析为字符串后下发） */
+interface RawMenuItem {
+  id?: string;
+  type?: string;
+  pageId?: string;
+  path?: string;
+  /** 隐藏页菜单项可省略标题 */
+  title?: LocalizedTitle;
+  public?: boolean;
+  permission?: PermissionConfig;
+  hidden?: boolean;
+  activeMenu?: string;
+  icon?: string;
+  order?: number;
+  external?: boolean;
+  children?: RawMenuItem[];
 }
 
 interface SitemapFile {
@@ -58,7 +86,7 @@ interface SitemapFile {
   auth: { loginPath: string };
   layouts: Record<string, LayoutDsl>;
   pages: PageEntry[];
-  menus: SitemapResource["menus"];
+  menus: RawMenuItem[];
 }
 
 /**
@@ -176,10 +204,10 @@ function canSee(entry: Visibility, user: DemoUser | null): boolean {
 
 /** 菜单按会话过滤；group 无可见子项时整组隐藏 */
 function filterMenus(
-  menus: SitemapResource["menus"],
+  menus: RawMenuItem[],
   user: DemoUser | null,
-): SitemapResource["menus"] {
-  const out: SitemapResource["menus"] = [];
+): RawMenuItem[] {
+  const out: RawMenuItem[] = [];
   for (const item of menus) {
     if (!canSee(item, user)) continue;
     if (item.type === "group") {
@@ -193,31 +221,55 @@ function filterMenus(
   return out;
 }
 
+/** 菜单标题按 locale 解析为字符串（菜单标题不做表达式求值，由服务端按语言直出） */
+function resolveMenuTitles(
+  menus: RawMenuItem[],
+  locale: string,
+): SitemapResource["menus"] {
+  return menus.map((item) => {
+    const { children, ...rest } = item;
+    return {
+      ...rest,
+      // 隐藏页菜单项可无标题，不下发空串
+      ...(item.title !== undefined
+        ? { title: resolveTitle(item.title, locale) }
+        : {}),
+      ...(children !== undefined
+        ? { children: resolveMenuTitles(children, locale) }
+        : {}),
+    };
+  }) as SitemapResource["menus"];
+}
+
 /**
  * 按会话构建 sitemap：同一 URL，不同用户拿到不同内容。
  * 匿名 → 仅 public 页；guest → + 首页；admin → + 用户列表 / 报表组。
+ * locale 决定 menus / pages 标题语言（缺省 zh-CN）。
  */
-export function buildSitemap(user: DemoUser | null): SitemapResource {
+export function buildSitemap(
+  user: DemoUser | null,
+  locale = "zh-CN",
+): SitemapResource {
   const { site, pageDsls } = state();
   const pages: SitemapResource["pages"] = site.pages
     .filter((p) => canSee(p, user))
     .map((p) => ({
       id: p.id,
       path: p.path,
-      title: p.title,
+      title: resolveTitle(p.title, locale),
       version: p.version,
       // 懒加载页不下发 pageDsl，仅 id / path / version，经 /api/pages/{id} 按需获取
       ...(p.lazy ? {} : { pageDsl: pageDsls.get(p.id) }),
     }));
 
-  // sitemap.yaml 原样透传，仅覆盖会话相关部分：pages / menus 按可见性过滤，
-  // updatedAt / user / permissions 按会话注入
+  // sitemap.yaml 原样透传，仅覆盖会话相关部分：pages / menus 按可见性过滤
+  // 并按 locale 解析标题，updatedAt / user / permissions 按会话注入
   return {
     ...site,
     updatedAt: new Date().toISOString(),
     ...(user ? { user: { ...user }, permissions: user.permissions } : {}),
     pages,
-    menus: filterMenus(site.menus, user),
+    menus: resolveMenuTitles(filterMenus(site.menus, user), locale),
   };
 }
 
@@ -267,7 +319,7 @@ interface RouteRef {
 export function findPageEntryByPath(pathname: string): PageEntry | null {
   const { site } = state();
   const refs: RouteRef[] = [];
-  const walk = (items: SitemapResource["menus"]): void => {
+  const walk = (items: RawMenuItem[]): void => {
     for (const item of items) {
       if (item.pageId !== undefined && item.path !== undefined) {
         refs.push({ pattern: item.path, pageId: item.pageId });

@@ -9,16 +9,16 @@ page:
 
 body:
   type: Page
-  props: { title: 首页 }
+  props: { title: "${t('home.title')}" }
   children:
     - type: Alert
       props:
         variant: info
-        message: 欢迎回来，${data.session.user.name}！
-        description: 本页与外壳布局均由 sitemap 对象下发（design/dynamic-page.md）；菜单随角色裁剪。
+        message: "${t('home.welcome', { name: data.session.user.name })}"
+        description: "${t('home.description')}"
         style: { marginBottom: 16 }
     - type: Button
-      props: { text: 查看月报（需 report:view） }
+      props: { text: "${t('home.viewMonthly')}" }
       events:
         onClick:
           - action: navigate
