@@ -1,0 +1,245 @@
+# 完整仪表盘页：时间范围、刷新、指标带、趋势图、分类对比、
+# loading / error / empty 三态。图表需要注册 @pactor-app/chart。
+dsl: '1.0'
+page:
+  id: dashboard
+  title: 运营分析看板
+  type: dashboard
+  permission: analytics:view
+
+state:
+  range:
+    start: '2026-10-01'
+    end: '2026-10-27'
+
+dataSources:
+  overview:
+    type: http
+    autoLoad: true
+    request:
+      method: GET
+      url: /api/dashboard/overview
+      params:
+        start: ${state.range.start}
+        end: ${state.range.end}
+
+body:
+  type: Page
+  children:
+    - type: Flex
+      props:
+        justify: space-between
+        align: center
+        wrap: true
+        gap: 12
+      children:
+        - type: Flex
+          props: { direction: vertical, gap: 4 }
+          children:
+            - type: Typography
+              props: { text: 运营分析, variant: h3 }
+            - type: Typography
+              props:
+                text: 更新时间：${data.overview.updatedAt || '—'}
+                variant: muted
+        - type: Flex
+          props: { align: center, gap: 8, wrap: true }
+          children:
+            - type: DatePicker
+              props:
+                mode: range
+                value: ${state.range}
+                allowClear: false
+                style: { width: 260 }
+              events:
+                onChange:
+                  - action: setState
+                    params:
+                      range: ${event}
+                  - action: reload
+                    params: { dataSource: overview }
+            - type: Button
+              props:
+                text: 刷新
+                icon: refresh
+                loading: ${dataStatus.overview.loading}
+              events:
+                onClick:
+                  - action: reload
+                    params: { dataSource: overview }
+
+    - type: Alert
+      when: ${dataStatus.overview.error != null}
+      props:
+        variant: error
+        showIcon: true
+        message: 看板数据加载失败
+        description: ${dataStatus.overview.error.message}
+
+    - type: Flex
+      when: ${dataStatus.overview.error != null}
+      props: { gap: 8 }
+      children:
+        - type: Button
+          props:
+            text: 重新加载
+            variant: primary
+            loading: ${dataStatus.overview.loading}
+          events:
+            onClick:
+              - action: reload
+                params: { dataSource: overview }
+
+    - type: Row
+      when: ${dataStatus.overview.loading}
+      props: { gutter: [16, 16] }
+      children:
+        - type: Col
+          props: { xs: 24, sm: 12, xl: 6 }
+          children:
+            - type: Card
+              props: { loading: true }
+              children: []
+        - type: Col
+          props: { xs: 24, sm: 12, xl: 6 }
+          children:
+            - type: Card
+              props: { loading: true }
+              children: []
+        - type: Col
+          props: { xs: 24, sm: 12, xl: 6 }
+          children:
+            - type: Card
+              props: { loading: true }
+              children: []
+        - type: Col
+          props: { xs: 24, sm: 12, xl: 6 }
+          children:
+            - type: Card
+              props: { loading: true }
+              children: []
+
+    - type: Empty
+      when: ${dataStatus.overview.loading == false && dataStatus.overview.error == null && data.overview.metrics == null}
+      props:
+        title: 当前时间范围暂无数据
+        description: 调整时间范围或确认数据同步任务是否完成。
+
+    - type: Flex
+      when: ${dataStatus.overview.loading == false && dataStatus.overview.error == null && data.overview.metrics != null}
+      props: { direction: vertical, gap: 16 }
+      children:
+        - type: Row
+          props: { gutter: [16, 16] }
+          children:
+            - type: Col
+              props: { xs: 24, sm: 12, xl: 6 }
+              children:
+                - type: MetricCard
+                  props:
+                    title: 总营收
+                    prefix: ¥
+                    value: ${data.overview.metrics.revenue}
+                    trend: ${data.overview.metrics.revenueTrend}
+                    trendLabel: 较上期
+            - type: Col
+              props: { xs: 24, sm: 12, xl: 6 }
+              children:
+                - type: MetricCard
+                  props:
+                    title: 新增客户
+                    value: ${data.overview.metrics.newCustomers}
+                    trend: ${data.overview.metrics.newCustomersTrend}
+                    trendLabel: 较上期
+            - type: Col
+              props: { xs: 24, sm: 12, xl: 6 }
+              children:
+                - type: MetricCard
+                  props:
+                    title: 转化率
+                    value: ${data.overview.metrics.conversionRate}
+                    suffix: '%'
+                    trend: ${data.overview.metrics.conversionTrend}
+                    trendLabel: 较上期
+            - type: Col
+              props: { xs: 24, sm: 12, xl: 6 }
+              children:
+                - type: MetricCard
+                  props:
+                    title: 客单价
+                    prefix: ¥
+                    value: ${data.overview.metrics.averageOrderValue}
+                    trend: ${data.overview.metrics.averageOrderTrend}
+                    trendLabel: 较上期
+
+        - type: Card
+          props:
+            title: 营收与订单趋势
+            extra:
+              - type: Tag
+                props: { text: 按日, color: info }
+          children:
+            - type: Empty
+              when: ${data.overview.trend == null || data.overview.trend.length === 0}
+              props:
+                title: 暂无趋势数据
+            - type: LineChart
+              when: ${data.overview.trend != null && data.overview.trend.length > 0}
+              props:
+                data: ${data.overview.trend}
+                xKey: date
+                yKeys: [revenue, orders]
+                smooth: true
+                showArea: true
+                height: 340
+              events:
+                onSelect:
+                  - action: message
+                    params:
+                      messageType: info
+                      text: 已选择 ${event.name} / ${event.seriesName}
+
+        - type: Row
+          props: { gutter: [16, 16] }
+          children:
+            - type: Col
+              props: { xs: 24, lg: 16 }
+              children:
+                - type: Card
+                  props: { title: 渠道转化对比 }
+                  children:
+                    - type: Empty
+                      when: ${data.overview.channels == null || data.overview.channels.length === 0}
+                      props:
+                        title: 暂无渠道数据
+                    - type: ColumnChart
+                      when: ${data.overview.channels != null && data.overview.channels.length > 0}
+                      props:
+                        data: ${data.overview.channels}
+                        xKey: channel
+                        yKeys: [visitors, conversions]
+                        stacked: false
+                        height: 320
+            - type: Col
+              props: { xs: 24, lg: 8 }
+              children:
+                - type: Card
+                  props: { title: 运营提醒 }
+                  children:
+                    - type: Alert
+                      when: ${data.overview.metrics.conversionTrend < 0}
+                      props:
+                        variant: warning
+                        showIcon: true
+                        message: 转化率低于上期
+                        description: 建议检查主要渠道投放与落地页转化路径。
+                    - type: Alert
+                      when: ${data.overview.metrics.conversionTrend >= 0}
+                      props:
+                        variant: success
+                        showIcon: true
+                        message: 核心指标运行正常
+                        description: 当前转化率不低于上一统计周期。
+                    - type: Timeline
+                      props:
+                        items: ${data.overview.events}
