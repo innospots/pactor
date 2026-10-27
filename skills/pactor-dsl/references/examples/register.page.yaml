@@ -1,0 +1,116 @@
+# 完整注册页。Pactor 没有独立 Register 类型：
+# 使用 Login 业务区块 + children 自定义 Form，保留登录页品牌与认证布局。
+dsl: '1.0'
+page:
+  id: register
+  title: 注册账号
+  type: login
+
+state:
+  submitting: false
+  agreed: false
+
+body:
+  type: Login
+  props:
+    layout: brand-card
+    brandSide: left
+    decor: true
+    brand:
+      logo: /logo.svg
+      name: Pactor
+      title: 创建你的工作空间
+      description: 注册后即可创建应用、配置菜单并发布 DSL 页面。
+    title: 创建账号
+    subtitle: 填写下列信息完成注册。
+    registerLink:
+      text: 已有账号？返回登录
+      href: /login
+    footer: 注册即表示你同意服务条款和隐私政策
+  children:
+    - type: Form
+      props: { name: register, layout: vertical }
+      events:
+        onSubmit:
+          - action: setState
+            params: { submitting: true }
+          - id: registerResult
+            action: service.call
+            params:
+              service: auth.register
+              params:
+                username: ${event.username}
+                email: ${event.email}
+                password: ${event.password}
+          - action: setState
+            params: { submitting: false }
+          - action: if
+            params:
+              condition: ${actions.registerResult.ok != false}
+              then:
+                - action: message
+                  params:
+                    messageType: success
+                    text: 注册成功，请登录
+                - action: navigate
+                  params: { to: /login }
+              else:
+                - action: message
+                  params:
+                    messageType: error
+                    text: 注册失败，请检查信息后重试
+      children:
+        - type: Input
+          props:
+            name: username
+            label: 账号
+            placeholder: 4–32 位字母、数字或下划线
+            rules:
+              - { required: true, message: 请输入账号 }
+        - type: Input
+          props:
+            name: email
+            label: 邮箱
+            placeholder: name@example.com
+            rules:
+              - { required: true, message: 请输入邮箱 }
+        - type: Input
+          props:
+            name: password
+            label: 密码
+            type: password
+            placeholder: 至少 8 位字符
+            rules:
+              - { required: true, message: 请输入密码 }
+        - type: Input
+          props:
+            name: confirmPassword
+            label: 确认密码
+            type: password
+            placeholder: 再次输入密码
+            rules:
+              - { required: true, message: 请再次输入密码 }
+        - type: Field
+          props:
+            label: 服务条款
+            required: true
+            description: 布尔 false 不会被 required 判为空，因此用状态显式控制提交入口。
+          children:
+            - type: Checkbox
+              props:
+                name: agreement
+                label: 我已阅读并同意服务条款
+                value: false
+              events:
+                onChange:
+                  - action: setState
+                    params: { agreed: "${event}" }
+        - type: Button
+          props:
+            text: 注册
+            variant: primary
+            size: large
+            submit: true
+            loading: ${state.submitting}
+            disabled: ${state.submitting || !state.agreed}
+            className: w-full

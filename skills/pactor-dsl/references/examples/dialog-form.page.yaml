@@ -1,0 +1,231 @@
+# 完整 Dialog 表单页：列表上下文保持不变，新建/编辑共用受控 Dialog，
+# 打开前写入 draft state，由 Form initialValues 回填；提交成功后关闭并刷新列表。
+dsl: '1.0'
+page:
+  id: dialog-form
+  title: 项目列表
+  type: overlay
+  permission: project:view
+
+state:
+  dialogOpen: false
+  dialogMode: create
+  editingId: ''
+  submitting: false
+  dialogValues:
+    name: ''
+    owner: ''
+    status: planning
+    description: ''
+
+dataSources:
+  records:
+    type: service
+    service: project.list
+    autoLoad: true
+
+body:
+  type: Page
+  children:
+    - type: Breadcrumb
+      props:
+        items:
+          - { label: 首页, href: / }
+          - { label: 项目列表 }
+
+    - type: Flex
+      props:
+        justify: space-between
+        align: center
+        wrap: true
+        gap: 12
+      children:
+        - type: Flex
+          props: { direction: vertical, gap: 4 }
+          children:
+            - type: Typography
+              props: { text: 项目列表, variant: h3 }
+            - type: Typography
+              props:
+                text: 在当前列表上下文中通过 Dialog 完成新建和编辑。
+                variant: muted
+        - type: Button
+          props: { text: 新建项目, icon: plus, variant: primary }
+          permission: project:create
+          events:
+            onClick:
+              - action: setState
+                params:
+                  dialogOpen: true
+                  dialogMode: create
+                  editingId: ''
+                  dialogValues:
+                    name: ''
+                    owner: ''
+                    status: planning
+                    description: ''
+
+    - type: Alert
+      when: ${dataStatus.records.error != null}
+      props:
+        variant: error
+        showIcon: true
+        message: 项目列表加载失败
+        description: ${dataStatus.records.error.message}
+
+    - type: Card
+      when: ${dataStatus.records.error == null}
+      props: { title: 项目数据 }
+      children:
+        - type: Flex
+          props: { justify: end, gap: 8 }
+          children:
+            - type: Button
+              props:
+                text: 刷新
+                icon: refresh
+                variant: text
+                loading: ${dataStatus.records.loading}
+              events:
+                onClick:
+                  - action: reload
+                    params: { dataSource: records }
+        - type: Table
+          props:
+            dataSource: ${data.records}
+            rowKey: id
+            loading: ${dataStatus.records.loading}
+            pagination: { pageSize: 10 }
+            emptyText: 暂无项目
+            columns:
+              - { title: 项目名称, dataIndex: name }
+              - { title: 负责人, dataIndex: owner }
+              - title: 状态
+                dataIndex: status
+                cell:
+                  type: Status
+                  props:
+                    status: "${row.status === 'active' ? 'success' : row.status === 'paused' ? 'warning' : 'default'}"
+                    text: "${row.statusLabel || row.status}"
+              - { title: 更新时间, dataIndex: updatedAt }
+              - title: 操作
+                width: 120
+                fixed: right
+                cell:
+                  type: Button
+                  props: { text: 编辑, variant: link, size: small }
+                  permission: project:edit
+                  events:
+                    onClick:
+                      - action: setState
+                        params:
+                          dialogOpen: true
+                          dialogMode: edit
+                          editingId: ${row.id}
+                          dialogValues:
+                            name: ${row.name}
+                            owner: ${row.owner}
+                            status: ${row.status}
+                            description: ${row.description}
+
+    - type: Dialog
+      props:
+        title: "${state.dialogMode === 'create' ? '新建项目' : '编辑项目'}"
+        description: 保存后列表会自动刷新。
+        open: ${state.dialogOpen}
+        style: { width: 620, maxWidth: '92vw' }
+      events:
+        onClose:
+          - action: setState
+            params: { dialogOpen: false }
+      children:
+        - type: Form
+          props:
+            name: projectDialog
+            layout: vertical
+            initialValues: ${state.dialogValues}
+          events:
+            onSubmit:
+              - action: setState
+                params: { submitting: true }
+              - id: saveResult
+                action: service.call
+                params:
+                  service: project.save
+                  params:
+                    id: ${state.editingId}
+                    name: ${event.name}
+                    owner: ${event.owner}
+                    status: ${event.status}
+                    description: ${event.description}
+              - action: setState
+                params: { submitting: false }
+              - action: if
+                params:
+                  condition: ${actions.saveResult.ok != false}
+                  then:
+                    - action: message
+                      params: { messageType: success, text: 项目已保存 }
+                    - action: setState
+                      params: { dialogOpen: false }
+                    - action: reload
+                      params: { dataSource: records }
+                  else:
+                    - action: message
+                      params: { messageType: error, text: 保存失败，请重试 }
+          children:
+            - type: Input
+              props:
+                name: name
+                label: 项目名称
+                placeholder: 请输入项目名称
+                rules:
+                  - { required: true, message: 请输入项目名称 }
+            - type: Select
+              props:
+                name: owner
+                label: 负责人
+                placeholder: 请选择负责人
+                showSearch: true
+                options:
+                  - { label: 张明, value: zhang-ming }
+                  - { label: 李华, value: li-hua }
+                  - { label: 王芳, value: wang-fang }
+                rules:
+                  - { required: true, message: 请选择负责人 }
+            - type: Select
+              props:
+                name: status
+                label: 状态
+                options:
+                  - { label: 规划中, value: planning }
+                  - { label: 进行中, value: active }
+                  - { label: 已暂停, value: paused }
+                  - { label: 已完成, value: completed }
+                rules:
+                  - { required: true, message: 请选择状态 }
+            - type: Textarea
+              props:
+                name: description
+                label: 项目说明
+                rows: 4
+                maxLength: 1000
+                placeholder: 请输入项目说明
+            - type: Flex
+              props: { justify: end, gap: 8 }
+              children:
+                - type: Button
+                  props:
+                    text: 取消
+                    disabled: ${state.submitting}
+                  events:
+                    onClick:
+                      - action: setState
+                        params: { dialogOpen: false }
+                - type: Button
+                  props:
+                    text: 保存
+                    variant: primary
+                    submit: true
+                    loading: ${state.submitting}
+                    disabled: ${state.submitting}
