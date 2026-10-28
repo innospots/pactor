@@ -3,38 +3,42 @@
 dsl: "1.0"
 page:
   id: monthly
-  title: 月报
+  title: $i18n{page.monthly.text1:月报}
+
+i18n:
+  namespaces: [ app ]
 
 body:
   type: Page
-  props: { title: 本月经营月报 }
+  props: { title: "$i18n{page.monthly.text2:本月经营月报}" }
   children:
     - type: Flex
       props: { gap: 16, style: { marginBottom: 16 } }
       children:
         - type: Card
-          props: { title: 营收 }
+          props: { title: "$i18n{page.monthly.text3:营收}" }
           children:
             - type: Statistic
-              props: { title: 本月（万元）, value: 128.6 }
+              props: { title: "$i18n{page.monthly.text4:本月（万元）}", value: 128.6 }
         - type: Card
-          props: { title: 新增客户 }
+          props: { title: "$i18n{page.monthly.text5:新增客户}" }
           children:
             - type: Statistic
-              props: { title: 本月（家）, value: 342 }
+              props: { title: "$i18n{page.monthly.text6:本月（家）}", value: 342 }
         - type: Card
-          props: { title: 转化率 }
+          props: { title: "$i18n{page.monthly.text7:转化率}" }
           children:
             - type: Statistic
-              props: { title: 本月（%）, value: 23.8 }
+              props: { title: "$i18n{page.monthly.text8:本月（%）}", value: 23.8 }
     - type: Alert
       props:
         variant: success
-        message: 本页 DSL 由 /api/pages/monthly 懒加载下发
-        description: sitemap 中该页仅声明 id / path / version（monthly@7），点击进入时才请求页面 DSL。
+        message: $i18n{page.monthly.text9:本页 DSL 由 /api/pages/monthly 懒加载下发}
+        description: $i18n{page.monthly.text10:sitemap 中该页仅声明 id / path /
+          version（monthly@7），点击进入时才请求页面 DSL。}
         style: { marginBottom: 16 }
     - type: Button
-      props: { text: 查看详情（隐藏页 + 路径参数） }
+      props: { text: "$i18n{page.monthly.text11:查看详情（隐藏页 + 路径参数）}" }
       events:
         onClick:
           - action: navigate

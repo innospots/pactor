@@ -1,0 +1,75 @@
+layout.logout: Sign out
+layout.settings: Settings
+layout.settingsNotice: Settings are not available in this demo
+menu.help: Help
+menu.home: Home
+menu.login: Sign in
+menu.monthly: Reports
+menu.monthly-detail: Monthly report details
+menu.register: Register
+menu.reports: Reports
+menu.users: Users
+page.home.text1: Home
+page.home.text2: Home
+page.home.text3: Welcome back, {{name}}!
+page.home.text4: This page and layout are supplied by the sitemap; menus are filtered by role.
+page.home.text5: View monthly report (report:view required)
+page.home.title: Home
+page.login.text1: Sign in
+page.login.text10: Enter your password
+page.login.text11: Sign in
+page.login.text2: 'Sign in failed: invalid username or password'
+page.login.text3: 'Demo accounts: admin / pactor123, guest / guest123'
+page.login.text4: Admins can access reports; guests can access the home page. Menus are filtered after sign-in.
+page.login.text5: Username
+page.login.text6: Enter your username
+page.login.text7: Enter your username
+page.login.text8: Password
+page.login.text9: Enter your password
+page.login.title: Sign in
+page.monthly-detail.text1: Monthly report details
+page.monthly-detail.text2: Monthly report details
+page.monthly-detail.text3: 'Route parameter: id = {{id}}'
+page.monthly-detail.text4: A hidden page reached from the report list.
+page.monthly-detail.text5: Back to reports
+page.monthly-detail.title: Monthly report details
+page.monthly.text1: Monthly report
+page.monthly.text10: The sitemap declares the page ID, path and version; the DSL is fetched when opened.
+page.monthly.text11: View details (hidden route with a parameter)
+page.monthly.text2: Monthly business report
+page.monthly.text3: Revenue
+page.monthly.text4: This month (10k CNY)
+page.monthly.text5: New customers
+page.monthly.text6: This month (customers)
+page.monthly.text7: Conversion rate
+page.monthly.text8: This month (%)
+page.monthly.text9: This page is loaded on demand from /api/pages/monthly
+page.monthly.title: Monthly report
+page.register.text1: Register
+page.register.text2: Register
+page.register.text3: Registration is disabled in this demo
+page.register.text4: Use a demo account on the login page to explore role-based menus.
+page.register.text5: Back to login
+page.register.title: Register
+page.users.text1: Users
+page.users.text10: Guest
+page.users.text11: Search
+page.users.text12: Users
+page.users.text13: Name
+page.users.text14: Username
+page.users.text15: Role
+page.users.text16: Email
+page.users.text17: Created at
+page.users.text18: Actions
+page.users.text19: View
+page.users.text2: Users
+page.users.text20: User {{name}} ({{username}})
+page.users.text3: Filters
+page.users.text4: Keyword
+page.users.text5: Name / username
+page.users.text6: Role
+page.users.text7: Select a role
+page.users.text8: Administrator
+page.users.text9: Member
+page.users.title: Users
+site.app.name: Pactor Starter

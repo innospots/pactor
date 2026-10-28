@@ -3,7 +3,7 @@
 dsl: "1.0"
 page:
   id: users
-  title: 用户列表
+  title: $i18n{page.users.text1:用户列表}
   permission: user:view
 
 state:
@@ -21,12 +21,15 @@ dataSources:
         keyword: ${state.keyword}
         role: ${state.role}
 
+i18n:
+  namespaces: [ app ]
+
 body:
   type: Page
-  props: { title: 用户列表 }
+  props: { title: "$i18n{page.users.text2:用户列表}" }
   children:
     - type: Card
-      props: { title: 筛选 }
+      props: { title: "$i18n{page.users.text3:筛选}" }
       children:
         - type: Form
           props: { layout: inline }
@@ -40,20 +43,25 @@ body:
                 params: { dataSource: users }
           children:
             - type: Input
-              props: { name: keyword, label: 关键词, placeholder: 姓名 / 用户名 }
+              props:
+                {
+                  name: keyword,
+                  label: "$i18n{page.users.text4:关键词}",
+                  placeholder: "$i18n{page.users.text5:姓名 / 用户名}"
+                }
             - type: Select
               props:
                 name: role
-                label: 角色
-                placeholder: 请选择角色
+                label: $i18n{page.users.text6:角色}
+                placeholder: $i18n{page.users.text7:请选择角色}
                 options:
-                  - { label: 管理员, value: admin }
-                  - { label: 成员, value: member }
-                  - { label: 访客, value: guest }
+                  - { label: "$i18n{page.users.text8:管理员}", value: admin }
+                  - { label: "$i18n{page.users.text9:成员}", value: member }
+                  - { label: "$i18n{page.users.text10:访客}", value: guest }
             - type: Button
-              props: { text: 查询, variant: primary, submit: true }
+              props: { text: "$i18n{page.users.text11:查询}", variant: primary, submit: true }
     - type: Card
-      props: { title: 用户数据 }
+      props: { title: "$i18n{page.users.text12:用户数据}" }
       children:
         - type: Table
           props:
@@ -62,24 +70,30 @@ body:
             rowKey: id
             pagination: { pageSize: 5 }
             columns:
-              - { title: 姓名, dataIndex: name }
-              - { title: 用户名, dataIndex: username }
-              - title: 角色
+              - { title: "$i18n{page.users.text13:姓名}", dataIndex: name }
+              - { title: "$i18n{page.users.text14:用户名}", dataIndex: username }
+              - title: $i18n{page.users.text15:角色}
                 dataIndex: role
                 cell:
                   type: Badge
                   props:
                     text: ${row.role}
                     variant: secondary
-              - { title: 邮箱, dataIndex: email }
-              - { title: 创建时间, dataIndex: createdAt }
-              - title: 操作
+              - { title: "$i18n{page.users.text16:邮箱}", dataIndex: email }
+              - { title: "$i18n{page.users.text17:创建时间}", dataIndex: createdAt }
+              - title: $i18n{page.users.text18:操作}
                 cell:
                   type: Button
-                  props: { text: 查看, variant: primary, size: small }
+                  props: { text: "$i18n{page.users.text19:查看}", variant: primary, size: small }
                   events:
                     onClick:
                       - action: message
                         params:
                           messageType: info
-                          text: 用户 ${row.name}（${row.username}）
+                          text:
+                            $i18n:
+                              key: page.users.text20
+                              params:
+                                name: ${row.name}
+                                username: ${row.username}
+                              fallback: 用户 ${row.name}（${row.username}）

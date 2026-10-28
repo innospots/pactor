@@ -1,7 +1,7 @@
 dsl: "1.0"
 page:
   id: dashboard
-  title: 仪表盘
+  title: $i18n{page.dashboard.text1:仪表盘}
   name: dashboard
   description: 运营概览：核心指标、趋势分析、用量构成
 state:
@@ -19,6 +19,9 @@ dataSources:
       params:
         start: ${state.range.start}
         end: ${state.range.end}
+i18n:
+  namespaces: [ app ]
+
 body:
   type: Page
   children:
@@ -35,11 +38,11 @@ body:
             - type: Typography
               props:
                 variant: h3
-                text: 仪表盘
+                text: $i18n{page.dashboard.text2:仪表盘}
             - type: Typography
               props:
                 variant: muted
-                text: 运营概览
+                text: $i18n{page.dashboard.text3:运营概览}
         - type: Flex
           props:
             align: center
@@ -110,7 +113,7 @@ body:
         text: 核心概览 · ${state.range.start} — ${state.range.end}
     - type: Row
       props:
-        gutter: [16, 16]
+        gutter: [ 16, 16 ]
         align: stretch
       children:
         - type: Col
@@ -277,7 +280,7 @@ body:
               height: 320
     - type: Row
       props:
-        gutter: [16, 16]
+        gutter: [ 16, 16 ]
         align: stretch
       children:
         - type: Col

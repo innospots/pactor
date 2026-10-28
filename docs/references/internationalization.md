@@ -17,7 +17,7 @@
 
 ## 2. 三种多语言声明方式
 
-同一页面可混用三种方式；**同一字段只能选一种**（属性 `$i18n` 与 `i18n.bindings` 指向同一路径会报 `BINDING_CONFLICT`）。
+同一页面可混用三种方式；**同一字段只能选一种**。方式三为字段内简写；旧路径 bindings 已移除。
 
 ### 2.1 方式一：属性内联多语言（`$i18n.messages`）
 
@@ -75,41 +75,26 @@ body:
 - 服务端通过 `MessageProvider.load` 按 `namespaces` 批量加载后查找词条。
 - 若页面**未**声明 `namespaces` 且仅使用方式一内联 `messages`，**不会**调用 Provider（内联仍可转换）。
 
-### 2.3 方式三：页面级 bindings 路径绑定
-
-适用：保留字段原字符串（如 `text: 保存`），在页面级声明替换关系；渐进改造元信息字段（如 `page.title`）。
+### 2.3 方式三：字段内简写
 
 ```yaml
 dsl: "1.0"
 page:
   id: editor
-  title: 编辑器
+  title: "$i18n{editor.title:编辑器}"
 i18n:
-  namespaces: [common]
-  bindings:
-    /page/title:
-      key: editor.title
-    /body/props/text:
-      key: common.save
-      # 未写 fallback 时，目标字段原字符串 "保存" 作为隐式 fallback
+  namespaces: [editor, common]
 body:
   type: Button
   props:
-    text: 保存
+    text: "$i18n{common.save:保存}"
 ```
 
-规则：
+`$i18n{key:default}` 表示引用完整 key，并以 default 作为回退。它是整字段的静态文本简写：第一个冒号分隔 key 和 default，default 可为空且可含其他冒号；`\}` 和 `\\` 分别表示 default 中的右花括号和反斜杠，建议 YAML 使用单引号。动态参数用方式二 `params`，语言包不执行 `${...}`。
 
-- `bindings` 的键为 **JSON Pointer**（RFC 6901）：以 `/` 开头或空串；数组使用**真实下标**（如 `/children/0/props/text`）。
-- 值为翻译描述对象，形态与 `$i18n` **内层**相同（直接写 `key` / `messages`，**不再**包一层 `$i18n`）。
-- 目标节点必须是 **字符串**；目标不存在、路径重复、或目标已是 `$i18n` 对象 → 校验失败。
-- 编译后 **移除** 整个顶层 `i18n` 字段，不下发。
+只在明确允许翻译的静态元信息和注册的组件展示字段识别；不得替换状态、业务数据、URL、路由、标识、权限或请求参数。解析 YAML 后规范化，非法、未闭合或不允许字段中的显式简写应报错。
 
-**禁止绑定的路径**（`BINDING_INVALID`）：
-
-- 顶层：`state`、`dataSources`、`requires`、`meta`、`i18n`
-- `/page/id`
-- 任意以 `permission` 结尾的段（如 `.../permission`）
+**迁移**：旧 `i18n.bindings` 已移除；将 key 与显式 fallback 移至目标字段，缺省 fallback 时使用原字段文案，动态参数改用对象式 `$i18n.params`。迁移后验证两种语言输出。
 
 ---
 
@@ -280,7 +265,7 @@ interface ResolvedRequestLocale {
 
 ## 5. 数据结构
 
-### 5.1 作者态翻译描述（`$i18n` 内层 / `bindings` 值）
+### 5.1 作者态翻译描述（`$i18n` 内层）
 
 ```ts
 // 二选一
@@ -346,6 +331,10 @@ interface LocalizedText {
 ```
 
 Runtime（`resolveDeep`）对 `params` 递归求值后，用 `{{name}}` 插值 `template`。静态文案直接下发 **字符串**。
+
+动态参数并非所有字段都可用：组件 props、动作参数等经过 Runtime `resolveDeep` 的路径可以求值；`page.title` 等由宿主作为静态元信息读取的字段未必经过该路径。把动态参数放进静态字段可能导致对象被当作字符串消费，或不发生更新。需要动态页面标题时，优先使用页面内支持表达式的文本组件，或由宿主单独实现动态元信息。
+
+语言包只写 `欢迎，{{name}}`，表达式只由 DSL 作者在 `params.name: "${state.name}"` 提供。译文及插值结果不会再次求值，避免翻译内容注入表达式；当前服务端也会拒绝词条中的字面量 `${`。这是执行边界，不是对动态数据的禁止。当前 Schema 尚未按所有字段的消费方式强制检查动态参数，使用前仍需核对该字段是否经过 Runtime 求值。
 
 下发态 **禁止** 残留 `$i18n`；`$localizedText` 结构由 `validateLocalizedPageDsl` 校验。
 
@@ -418,16 +407,16 @@ interface DslResourceEnvelope<T> {
 
 ## 6. 过滤、裁剪与校验流水线
 
-推荐顺序（与 `localizeYamlResource` 一致）：
+当前 `localizeYamlResource` 的处理顺序：
 
 ```text
 加载 YAML 文本
   → 严格解析（parsePageYamlStrict：禁自定义标签、重复 key 等）
   → validateAuthorPageDsl（允许顶层 i18n + 递归校验 $i18n）
-  → prune(page) 可选：权限 / 租户 / 菜单可见性裁剪（须在提取 namespaces 前，且勿破坏 bindings 路径）
+  → prune(page) 可选：权限 / 租户 / 菜单可见性裁剪（须在提取 namespaces 前）
   → 提取 i18n.namespaces
   → Provider 按 locale 链批量 load（current + fallbackLocales + defaultLocale，去重保序）
-  → localizePageDsl（bindings → 遍历 UI → 残留扫描）
+  → localizePageDsl（转换元信息和已注册字段 → 残留扫描）
   → validateLocalizedPageDsl（无 $i18n，$localizedText 合法）
   → 组装 envelope + localization
 ```
@@ -440,8 +429,7 @@ interface DslResourceEnvelope<T> {
 2. `languageBundles.fallbacks` 与 `fallbackLocales` 构成的显式语言级回退
 3. `defaultLocale`
 4. 描述上的 `fallback` 字符串
-5. bindings **隐式 fallback**（目标字段原字符串）
-6. 方式二：回退为 **key 字符串**；方式一无 key：`'[missing translation]'`
+5. 方式二：回退为 **key 字符串**；方式一无 key：`'[missing translation]'`
 
 空字符串译文视为**有效命中**。未命中当前 locale 但命中回退链时，可通过 `onDiagnostic` 收到 `missing-translation`。
 
@@ -483,7 +471,6 @@ createPactorApplication({
 | Code | 常见原因 |
 | --- | --- |
 | `UNREGISTERED_I18N_FIELD` | 未注册字段上的 `$i18n` 或遍历范围外残留 |
-| `BINDING_INVALID` / `BINDING_CONFLICT` | bindings 路径非法或与 `$i18n` 重复 |
 | `I18N_DESCRIPTOR_INVALID` | key/messages 互斥违反等 |
 | `NAMESPACE_NOT_FOUND` | Provider 缺少请求的 namespace |
 | `MESSAGE_PROTOCOL_ERROR` | API 响应非合法 JSON envelope |
@@ -498,7 +485,7 @@ createPactorApplication({
 
 | 主题 | 路径 |
 | --- | --- |
-| 三种声明转换 | `packages/i18n/src/dsl-localizer.ts` |
+| 对象声明与字段内简写转换 | `packages/i18n/src/dsl-localizer.ts` |
 | 注册表 | `packages/i18n/src/translatable-field-registry.ts` |
 | Schema | `packages/schema/src/schemas/i18n.ts` |
 | Provider | `packages/i18n/src/yaml-message-provider.ts`、`api-message-provider.ts` |

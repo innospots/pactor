@@ -49,3 +49,14 @@ node skills/scripts/prd-template.mjs check skills/pactor-prd/template --source
 ## 演示账号
 
 render 后的账号与登录提示见 `src/server/accounts.ts` 和登录页；它们由 values JSON 中对应的演示账号键生成，仅用于本地模板冒烟。
+
+## 国际化
+
+模板使用服务端语言包，支持 `zh-CN` 与 `en-US`。右下角选择器写入 `locale` Cookie 与 URL 参数，并按语言重挂载 `SitemapApp`，确保菜单、布局、内联页和懒加载页来自同一语言。页面内容依然由浏览器运行时渲染。
+
+- `src/server/i18n/locales/<locale>/app.yaml` 是随模板复制的服务端语言包；`src/server/i18n/index.ts` 声明 `YamlMessageProvider`、版本和请求语言规则。
+- `/api/sitemap` 和 `/api/public/pages/{id}` 先执行会话与权限裁剪，再本地化资源；懒加载页面返回 `representation: localized`、`localization` 和 `Content-Language`。
+- `yaml/common/login.yaml` 与 `dashboard.yaml` 包含国际化声明示例；登录页、部分仪表盘文字、菜单和外壳有对应英文。参考业务模块默认中文，生成项目时应按实际 PRD 将页面可翻译字段及业务数据的译文补齐。
+- 新增语言时同时修改语言解析配置、Provider 清单、两个语言包及 `src/pactor/locale.tsx` 的选项。新增页面时添加 `i18n.namespaces`、字段内简写或 `$i18n` 对象与对应词条；更改外壳需注册可翻译字段。业务接口响应的内容由后端负责本地化。
+
+语言包版本用于发布标识；正式应用应管理版本发布和语言切换失败后的回滚策略。

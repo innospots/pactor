@@ -6,13 +6,10 @@ import type {
   PageDsl,
 } from '@pactor-app/core';
 import { isDslSourceRef } from '@pactor-app/core';
+import { isValidMessageKey } from './bundle-validation.js';
 
 import { I18nError } from './errors.js';
-import {
-  escapeJsonPointerSegment,
-  parseJsonPointer,
-  resolveJsonPointer,
-} from './json-pointer.js';
+import { escapeJsonPointerSegment } from './json-pointer.js';
 import {
   getDefaultTranslatableFieldRegistry,
   type TranslatableFieldRegistry,
@@ -22,17 +19,16 @@ import {
  * DslLocalizer（设计第 4、6、7、8 节，缺口 G03/G04/G17）。
  *
  * 纯转换入口：语言包作为参数显式传入，不在遍历组件时自行请求。
- * 统一处理三种声明方式（`$i18n.messages`、`$i18n.key`、页面 `i18n.bindings`），
+ * 统一处理三种声明方式（`$i18n.messages`、`$i18n.key`、字段内简写），
  * 返回已本地化的新对象（不修改输入）；编译后移除作者态 `i18n` 字段。
  */
 
-/** 翻译描述（bindings 值与 `$i18n` 内层共用形态） */
+/** 翻译描述（`$i18n` 内层形态） */
 export type TranslationDescriptor = I18nKeyRef | I18nInlineMessages;
 
 /** 页面作者态 i18n 字段（设计 4.2） */
 export interface AuthorPageI18n {
   namespaces?: string[];
-  bindings?: Record<string, TranslationDescriptor>;
 }
 
 /** 作者态 Page DSL（PageDsl + 顶层 i18n 字段） */
@@ -76,7 +72,6 @@ export interface LocalizePageDslInput {
 export const MISSING_TRANSLATION_TEXT = '[missing translation]';
 
 /** bindings 禁止定位的顶层字段（设计 4.2：禁止绑定状态、请求参数、权限、标识与路由） */
-const FORBIDDEN_BINDING_ROOTS = new Set(['state', 'dataSources', 'requires', 'meta', 'i18n']);
 
 function isPlainObject(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null && !Array.isArray(value);
@@ -214,7 +209,7 @@ function interpolateTemplate(
 /**
  * 转换单个翻译描述：
  * 查找顺序（设计第 8 节）= 当前 locale → 显式语言级回退 → defaultLocale →
- * 描述 fallback（bindings 未显式配置时为目标字段原始字符串）→ key / 统一缺失文案。
+ * 描述 fallback→ key / 统一缺失文案。
  * 静态结果直接输出字符串；含 `${...}` 运行时参数时编译为 `$localizedText`。
  */
 function convertDescriptor(
@@ -303,6 +298,29 @@ type TranslatableMatcher = (canonicalPath: string) => boolean;
  * 递归遍历自由对象（props / action params）。canonical 路径数组段写作 `[*]`
  * （与注册表模式一致）；display 路径为 JSON Pointer 形态、数组为真实下标。
  */
+/** Parse a whole-field translation reference after YAML decoding. */
+function parseShorthand(value: string, path: string): TranslationDescriptor {
+  const invalid = () => new I18nError('I18N_DESCRIPTOR_INVALID', `无效的国际化简写: ${path}`, { path });
+  const colon = value.indexOf(':', 6);
+  if (!value.startsWith('$i18n{') || colon < 7) throw invalid();
+  const key = value.slice(6, colon);
+  if (!isValidMessageKey(key) || /[{}\\]/.test(key)) throw invalid();
+  let fallback = '';
+  for (let i = colon + 1; i < value.length; i++) {
+    const char = value[i]!;
+    if (char === '}') {
+      if (i !== value.length - 1 || fallback.includes('${')) throw invalid();
+      return { key, fallback };
+    }
+    if (char === '\\') {
+      const next = value[++i];
+      if (next !== '}' && next !== '\\') throw invalid();
+      fallback += next;
+    } else fallback += char;
+  }
+  throw invalid();
+}
+
 function walkValue(
   ctx: LocalizeContext,
   value: unknown,
@@ -310,6 +328,10 @@ function walkValue(
   display: string,
   isTranslatable: TranslatableMatcher,
 ): unknown {
+  if (typeof value === 'string' && value.startsWith('$i18n{')) {
+    if (!isTranslatable(canonical)) throw new I18nError('UNREGISTERED_I18N_FIELD', `未注册的可翻译字段: ${display}`, { path: display });
+    return convertDescriptor(ctx, parseShorthand(value, display), undefined, display);
+  }
   if (Array.isArray(value)) {
     for (let i = 0; i < value.length; i += 1) {
       value[i] = walkValue(ctx, value[i], `${canonical}[*]`, `${display}/${i}`, isTranslatable);
@@ -317,6 +339,14 @@ function walkValue(
     return value;
   }
   if (isPlainObject(value)) {
+    if (typeof value['type'] === 'string' && isPlainObject(value['props'])) {
+      walkNode(ctx, value, display);
+      return value;
+    }
+    if (typeof value['action'] === 'string') {
+      walkAction(ctx, value, display);
+      return value;
+    }
     if ('$i18n' in value) {
       if (!isTranslatable(canonical)) {
         throw new I18nError(
@@ -403,64 +433,6 @@ function walkNode(ctx: LocalizeContext, node: unknown, display: string): void {
   }
 }
 
-/** bindings 目标白名单边界（设计 4.2：禁止绑定状态/请求参数/权限/标识/路由） */
-function assertBindingAllowed(segments: readonly string[], pointer: string): void {
-  const root = segments[0];
-  if (root !== undefined && FORBIDDEN_BINDING_ROOTS.has(root)) {
-    throw new I18nError('BINDING_INVALID', `bindings 禁止绑定该字段: ${pointer}`, { pointer });
-  }
-  if (root === 'page' && segments[1] === 'id') {
-    throw new I18nError('BINDING_INVALID', `bindings 禁止绑定页面标识: ${pointer}`, { pointer });
-  }
-  if (segments[segments.length - 1] === 'permission') {
-    throw new I18nError('BINDING_INVALID', `bindings 禁止绑定权限字段: ${pointer}`, { pointer });
-  }
-}
-
-/**
- * 应用页面 `i18n.bindings`（设计 4.0/4.2，缺口 G03）。
- * 目标必须为字符串；目标不存在 / 路径重复 / 目标已是 `$i18n` 对象（重复声明）
- * 均校验失败；目标原字符串作为隐式 fallback（仅在词条回退失败后使用）。
- * 必须先于组件树遍历执行，保证重复声明能被检测而不是被覆盖。
- */
-function applyBindings(
-  ctx: LocalizeContext,
-  root: AuthorPageDsl,
-  bindings: Record<string, unknown>,
-): void {
-  const seen = new Map<string, string>();
-  for (const [pointer, rawDesc] of Object.entries(bindings)) {
-    const segments = parseJsonPointer(pointer);
-    const canonical = segments.map(escapeJsonPointerSegment).join('/');
-    const previous = seen.get(canonical);
-    if (previous !== undefined) {
-      throw new I18nError('BINDING_INVALID', `bindings 路径重复: ${previous} 与 ${pointer}`, {
-        pointer,
-        previous,
-      });
-    }
-    seen.set(canonical, pointer);
-    assertBindingAllowed(segments, pointer);
-    const desc = assertDescriptor(rawDesc, pointer);
-    const resolved = resolveJsonPointer(root, segments, pointer);
-    if (isPlainObject(resolved.value) && '$i18n' in resolved.value) {
-      throw new I18nError(
-        'BINDING_CONFLICT',
-        `同一字段被 $i18n 与 bindings 重复声明: ${pointer}`,
-        { pointer },
-      );
-    }
-    if (typeof resolved.value !== 'string') {
-      throw new I18nError('BINDING_INVALID', `bindings 目标必须是字符串: ${pointer}`, {
-        pointer,
-        valueType: Array.isArray(resolved.value) ? 'array' : typeof resolved.value,
-      });
-    }
-    const converted = convertDescriptor(ctx, desc, resolved.value, pointer);
-    (resolved.parent as Record<string | number, unknown>)[resolved.key] = converted;
-  }
-}
-
 function dedupeLocales(locales: readonly string[]): string[] {
   return [...new Set(locales)];
 }
@@ -472,6 +444,9 @@ function dedupeLocales(locales: readonly string[]): string[] {
  * `$localizedText` 是合法下发态值，不受影响（其 params 内嵌 `$i18n` 属协议违规，同样拒绝）。
  */
 function assertNoResidualI18n(value: unknown, display: string): void {
+  if (typeof value === 'string' && value.startsWith('$i18n{')) {
+    throw new I18nError('UNREGISTERED_I18N_FIELD', `国际化简写出现在不可翻译的位置: ${display}`, { path: display });
+  }
   if (Array.isArray(value)) {
     value.forEach((item, index) => assertNoResidualI18n(item, `${display}/${index}`));
     return;
@@ -518,13 +493,17 @@ export function localizePageDsl(input: LocalizePageDslInput): PageDsl {
     onDiagnostic: input.onDiagnostic,
   };
 
-  // 1. bindings（先于组件树遍历，保证 $i18n 重复声明被检测而非覆盖）
-  const authorI18n = page.i18n;
-  if (authorI18n !== undefined) {
-    if (isPlainObject(authorI18n.bindings)) {
-      applyBindings(ctx, page, authorI18n.bindings);
+  if (isPlainObject(page.i18n) && 'bindings' in page.i18n) {
+    throw new I18nError('I18N_DESCRIPTOR_INVALID', 'i18n.bindings 已移除，请使用字段内简写');
+  }
+  delete page.i18n;
+  if (isPlainObject(page.page)) {
+    for (const field of ['title', 'description']) {
+      const value = page.page[field];
+      if (typeof value === 'string' && value.startsWith('$i18n{')) {
+        page.page[field] = convertDescriptor(ctx, parseShorthand(value, `/page/${field}`), undefined, `/page/${field}`);
+      }
     }
-    delete page.i18n;
   }
 
   // 2. 遍历 UI 树 / 命名组件 / 页面级动作与生命周期

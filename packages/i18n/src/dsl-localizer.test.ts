@@ -74,8 +74,7 @@ describe('三种声明方式产出相同字段值（验收标准）', () => {
   const binding = asPage({
     dsl: '1.0',
     page: { id: 'p' },
-    i18n: { bindings: { '/body/props/text': { key: 'common.save', fallback: '保存' } } },
-    body: { type: 'Button', props: { text: '保存' } },
+    body: { type: 'Button', props: { text: '$i18n{common.save:保存}' } },
   });
 
   it('en-US 下三种方式均为 Save', () => {
@@ -101,68 +100,6 @@ describe('三种声明方式产出相同字段值（验收标准）', () => {
       const out = localize(page, { languageBundles: bundles });
       expect(validateLocalizedPageDsl(out).valid).toBe(true);
     }
-  });
-});
-
-describe('bindings 隐式 fallback（设计 4.0/8）', () => {
-  it('所有语言词条均缺失时保留目标字段原始文案', () => {
-    const diagnostics: LocalizeDiagnostic[] = [];
-    const out = localize(
-      asPage({
-        dsl: '1.0',
-        page: { id: 'p' },
-        i18n: { bindings: { '/body/props/text': { key: 'common.save' } } },
-        body: { type: 'Button', props: { text: '保存' } },
-      }),
-      { onDiagnostic: (d) => diagnostics.push(d) },
-    );
-    expect(out.body).toMatchObject({ props: { text: '保存' } });
-    expect(diagnostics).toContainEqual(
-      expect.objectContaining({ type: 'missing-translation', resolution: 'implicit-fallback' }),
-    );
-  });
-
-  it('隐式 fallback 不压过 defaultLocale 词条', () => {
-    const out = localize(
-      asPage({
-        dsl: '1.0',
-        page: { id: 'p' },
-        i18n: { bindings: { '/body/props/text': { key: 'common.save' } } },
-        body: { type: 'Button', props: { text: '原始文案' } },
-      }),
-      {
-        languageBundles: {
-          current: EMPTY_EN,
-          fallbacks: [bundleSet('zh-CN', { common: { 'common.save': '默认语言词条' } })],
-        },
-      },
-    );
-    expect(out.body).toMatchObject({ props: { text: '默认语言词条' } });
-  });
-
-  it('显式 fallback 优先于目标原始字符串', () => {
-    const out = localize(
-      asPage({
-        dsl: '1.0',
-        page: { id: 'p' },
-        i18n: { bindings: { '/body/props/text': { key: 'common.save', fallback: '显式兜底' } } },
-        body: { type: 'Button', props: { text: '原始文案' } },
-      }),
-    );
-    expect(out.body).toMatchObject({ props: { text: '显式兜底' } });
-  });
-
-  it('bindings 可覆盖 page.title', () => {
-    const out = localize(
-      asPage({
-        dsl: '1.0',
-        page: { id: 'p', title: '编辑页面' },
-        i18n: { bindings: { '/page/title': { key: 'editor.title' } } },
-        body: { type: 'Button', props: { text: 'x' } },
-      }),
-      { languageBundles: { current: bundleSet('en-US', { common: { 'editor.title': 'Edit page' } }) } },
-    );
-    expect(out.page.title).toBe('Edit page');
   });
 });
 
@@ -426,18 +363,7 @@ describe('${ 注入拒绝（设计第 7 节）', () => {
     ).toThrowError(expect.objectContaining({ code: 'UNSAFE_MESSAGE' }));
   });
 
-  it('bindings 隐式 fallback（目标原始字符串）含 ${ 且词条缺失 → UNSAFE_MESSAGE', () => {
-    expect(() =>
-      localize(
-        asPage({
-          dsl: '1.0',
-          page: { id: 'p' },
-          i18n: { bindings: { '/body/props/text': { key: 'common.missing' } } },
-          body: { type: 'Button', props: { text: '原文 ${state.x}' } },
-        }),
-      ),
-    ).toThrowError(expect.objectContaining({ code: 'UNSAFE_MESSAGE' }));
-  });
+
 });
 
 describe('不可变性', () => {
@@ -445,8 +371,8 @@ describe('不可变性', () => {
     const page = deepFreeze(
       asPage({
         dsl: '1.0',
-        page: { id: 'p', title: '标题' },
-        i18n: { namespaces: ['common'], bindings: { '/page/title': { key: 'common.title' } } },
+        page: { id: 'p', title: '$i18n{common.title:标题}' },
+        i18n: { namespaces: ['common'] },
         body: {
           type: 'Button',
           props: {
@@ -487,19 +413,6 @@ describe('不可变性', () => {
 });
 
 describe('重复声明与未注册字段', () => {
-  it('同一字段被 $i18n 与 bindings 重复声明 → BINDING_CONFLICT', () => {
-    expect(() =>
-      localize(
-        asPage({
-          dsl: '1.0',
-          page: { id: 'p' },
-          i18n: { bindings: { '/body/props/text': { key: 'common.save' } } },
-          body: { type: 'Button', props: { text: { $i18n: { key: 'common.save' } } } },
-        }),
-      ),
-    ).toThrowError(expect.objectContaining({ code: 'BINDING_CONFLICT' }));
-  });
-
   it('未注册字段出现 $i18n → UNREGISTERED_I18N_FIELD（不静默忽略）', () => {
     expect(() =>
       localize(
@@ -687,97 +600,6 @@ describe('注册字段转换：数组通配与动作参数（设计 4.4）', () 
     expect(out.lifecycle).toMatchObject({ onInit: { params: { title: 'Confirm' } } });
     expect(out.components).toMatchObject({ SaveButton: { props: { text: 'Save' } } });
     expect(out.body).toMatchObject({ props: { text: 'Save!' } });
-  });
-});
-
-describe('bindings 定位与校验（设计 4.2，缺口 G03）', () => {
-  const bundles = {
-    current: bundleSet('en-US', { common: { 'common.save': 'Save' } }),
-  };
-  const bindPage = (bindings: Record<string, unknown>, body?: unknown) =>
-    asPage({
-      dsl: '1.0',
-      page: { id: 'p' },
-      i18n: { bindings },
-      body: body ?? { type: 'Button', props: { text: '保存' } },
-    });
-
-  it('目标不存在 → BINDING_INVALID', () => {
-    expect(() => localize(bindPage({ '/body/props/missing': { key: 'common.save' } }))).toThrowError(
-      expect.objectContaining({ code: 'BINDING_INVALID' }),
-    );
-    expect(() => localize(bindPage({ '/body/props/deep/x': { key: 'common.save' } }))).toThrowError(
-      expect.objectContaining({ code: 'BINDING_INVALID' }),
-    );
-  });
-
-  it('目标非字符串 → BINDING_INVALID', () => {
-    expect(() => localize(bindPage({ '/body/props': { key: 'common.save' } }))).toThrowError(
-      expect.objectContaining({ code: 'BINDING_INVALID' }),
-    );
-    expect(() => localize(bindPage({ '': { key: 'common.save' } }))).toThrowError(
-      expect.objectContaining({ code: 'BINDING_INVALID' }),
-    );
-  });
-
-  it('非法指针（非 / 开头、非法转义）→ BINDING_INVALID', () => {
-    expect(() => localize(bindPage({ 'body/props/text': { key: 'common.save' } }))).toThrowError(
-      expect.objectContaining({ code: 'BINDING_INVALID' }),
-    );
-    expect(() => localize(bindPage({ '/body/props/te~2xt': { key: 'common.save' } }))).toThrowError(
-      expect.objectContaining({ code: 'BINDING_INVALID' }),
-    );
-  });
-
-  it('~0 / ~1 转义定位属性名含 ~ 与 / 的字段', () => {
-    const out = localize(
-      bindPage(
-        {
-          '/body/props/a~1b': { key: 'common.save' },
-          '/body/props/a~0b': { key: 'common.save' },
-        },
-        { type: 'Button', props: { 'a/b': '斜杠', 'a~b': '波浪' } },
-      ),
-      { languageBundles: bundles },
-    );
-    expect(out.body).toMatchObject({ props: { 'a/b': 'Save', 'a~b': 'Save' } });
-  });
-
-  it('数组具体下标定位；越界与通配符报错', () => {
-    const body = {
-      type: 'Page',
-      children: [
-        { type: 'Button', props: { text: '第一个' } },
-        { type: 'Button', props: { text: '第二个' } },
-      ],
-    };
-    const out = localize(
-      bindPage({ '/body/children/1/props/text': { key: 'common.save' } }, body),
-      { languageBundles: bundles },
-    );
-    expect(out.body).toMatchObject({
-      children: [{ props: { text: '第一个' } }, { props: { text: 'Save' } }],
-    });
-    expect(() =>
-      localize(bindPage({ '/body/children/5/props/text': { key: 'common.save' } }, body)),
-    ).toThrowError(expect.objectContaining({ code: 'BINDING_INVALID' }));
-    expect(() =>
-      localize(bindPage({ '/body/children/*/props/text': { key: 'common.save' } }, body)),
-    ).toThrowError(expect.objectContaining({ code: 'BINDING_INVALID' }));
-  });
-
-  it('禁止绑定 state / page.id / permission（设计 4.2）', () => {
-    for (const pointer of ['/state/x', '/page/id', '/body/permission']) {
-      expect(() => localize(bindPage({ [pointer]: { key: 'common.save' } }))).toThrowError(
-        expect.objectContaining({ code: 'BINDING_INVALID' }),
-      );
-    }
-  });
-
-  it('bindings 描述结构非法 → I18N_DESCRIPTOR_INVALID', () => {
-    expect(() =>
-      localize(bindPage({ '/body/props/text': { key: 'a', messages: { 'en-US': 'b' } } })),
-    ).toThrowError(expect.objectContaining({ code: 'I18N_DESCRIPTOR_INVALID' }));
   });
 });
 

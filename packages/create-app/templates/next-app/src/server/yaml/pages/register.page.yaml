@@ -3,20 +3,23 @@
 dsl: "1.0"
 page:
   id: register
-  title: 注册
+  title: $i18n{page.register.text1:注册}
+
+i18n:
+  namespaces: [ app ]
 
 body:
   type: Page
-  props: { title: 注册 }
+  props: { title: "$i18n{page.register.text2:注册}" }
   children:
     - type: Alert
       props:
         variant: warning
-        message: 演示环境不开放注册
-        description: 请使用登录页的演示账号体验不同角色的菜单差异。
+        message: $i18n{page.register.text3:演示环境不开放注册}
+        description: $i18n{page.register.text4:请使用登录页的演示账号体验不同角色的菜单差异。}
         style: { marginBottom: 16 }
     - type: Button
-      props: { text: 返回登录, variant: primary }
+      props: { text: "$i18n{page.register.text5:返回登录}", variant: primary }
       events:
         onClick:
           - action: navigate

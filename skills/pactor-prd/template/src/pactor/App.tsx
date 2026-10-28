@@ -5,6 +5,8 @@ import { Suspense, useCallback, useSyncExternalStore } from "react";
 import { createHttpHooks, SitemapApp } from "pactor-app";
 import { Login } from "@pactor-app/blocks";
 
+import { LocaleSelector, useLocale } from "./locale";
+
 import { apiBaseUrl, pageEndpoint, sitemapSources } from "./config";
 import { pactorActions } from "./actions";
 import { pactorComponents } from "./components";
@@ -72,13 +74,20 @@ function PactorAppInner() {
   const pathname = usePathname();
   const search = useLocationSearch();
   const router = useRouter();
+  const { locale, changeLocale } = useLocale();
   const query = Object.fromEntries(new URLSearchParams(search).entries());
   // navigate 参与 SitemapApp 内部工厂 memo：内联箭头每次渲染都是新身份
   // → 布局/页面工厂重建 → 布局随导航整体重挂载。useRouter 返回稳定引用，
   // navigate 随之稳定，布局跨导航常驻。
   const navigate = useCallback((to: string) => router.push(to), [router]);
+  if (!locale) return null;
   return (
+    <>
+    <LocaleSelector locale={locale} onChange={changeLocale} />
     <SitemapApp
+      key={locale}
+      locale={locale}
+      defaultLocale="zh-CN"
       sources={sitemapSources}
       baseUrl={apiBaseUrl}
       pathname={pathname}
@@ -89,5 +98,6 @@ function PactorAppInner() {
       pageEndpoint={pageEndpoint}
       httpAdapter={httpAdapter}
     />
+    </>
   );
 }

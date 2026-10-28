@@ -1,0 +1,75 @@
+layout.logout: 退出登录
+layout.settings: 个人设置
+layout.settingsNotice: 演示环境未实现个人设置
+menu.help: 帮助
+menu.home: 首页
+menu.login: 登录
+menu.monthly: 报表中心
+menu.monthly-detail: 月报详情
+menu.register: 注册
+menu.reports: 报表
+menu.users: 用户列表
+page.home.text1: 首页
+page.home.text2: 首页
+page.home.text3: 欢迎回来，{{name}}！
+page.home.text4: 本页与外壳布局均由 sitemap 对象下发（design/dynamic-page.md）；菜单随角色裁剪。
+page.home.text5: 查看月报（需 report:view）
+page.home.title: 首页
+page.login.text1: 登录
+page.login.text10: 请输入密码
+page.login.text11: 登 录
+page.login.text2: 登录失败：用户名或密码错误
+page.login.text3: 演示账号 admin / pactor123，guest / guest123
+page.login.text4: admin 可见「报表」菜单（report:view）；guest 仅可见首页。登录后 sitemap 按角色重新下发。
+page.login.text5: 用户名
+page.login.text6: 请输入用户名
+page.login.text7: 请输入用户名
+page.login.text8: 密码
+page.login.text9: 请输入密码
+page.login.title: 登录
+page.monthly-detail.text1: 月报详情
+page.monthly-detail.text2: 月报详情
+page.monthly-detail.text3: 路径参数演示：id = {{id}}
+page.monthly-detail.text4: 隐藏页（不出现在菜单），经列表页跳转进入。
+page.monthly-detail.text5: 返回月报
+page.monthly-detail.title: 月报详情
+page.monthly.text1: 月报
+page.monthly.text10: sitemap 中该页仅声明 id / path / version（monthly@7），点击进入时才请求页面 DSL。
+page.monthly.text11: 查看详情（隐藏页 + 路径参数）
+page.monthly.text2: 本月经营月报
+page.monthly.text3: 营收
+page.monthly.text4: 本月（万元）
+page.monthly.text5: 新增客户
+page.monthly.text6: 本月（家）
+page.monthly.text7: 转化率
+page.monthly.text8: 本月（%）
+page.monthly.text9: 本页 DSL 由 /api/pages/monthly 懒加载下发
+page.monthly.title: 月报
+page.register.text1: 注册
+page.register.text2: 注册
+page.register.text3: 演示环境不开放注册
+page.register.text4: 请使用登录页的演示账号体验不同角色的菜单差异。
+page.register.text5: 返回登录
+page.register.title: 注册
+page.users.text1: 用户列表
+page.users.text10: 访客
+page.users.text11: 查询
+page.users.text12: 用户数据
+page.users.text13: 姓名
+page.users.text14: 用户名
+page.users.text15: 角色
+page.users.text16: 邮箱
+page.users.text17: 创建时间
+page.users.text18: 操作
+page.users.text19: 查看
+page.users.text2: 用户列表
+page.users.text20: 用户 {{name}}（{{username}}）
+page.users.text3: 筛选
+page.users.text4: 关键词
+page.users.text5: 姓名 / 用户名
+page.users.text6: 角色
+page.users.text7: 请选择角色
+page.users.text8: 管理员
+page.users.text9: 成员
+page.users.title: 用户列表
+site.app.name: 动态页面 Starter
