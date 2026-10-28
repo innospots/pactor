@@ -37,6 +37,10 @@ Activate when the user works with **Pactor DSL or runtime APIs** in a project th
 - Assemble AI chat workspaces with the `Chat` DSL component
 - Provide exact commands and example project pointers
 
+## Internationalization
+
+When adding multilingual YAML or a language selector, read [references/internationalization.md](references/internationalization.md). Prefer the field shorthand `'$i18n{key:default}'`; establish the locale bundles, server localization and switching flow described there. Verify the target host supports author-time localization.
+
 ## Framework in one sentence
 
 **Pactor — Dynamic Application Runtime**: an enterprise-oriented **Server-Driven UI + AI-Native frontend runtime** where pages are YAML/JSON DSL rendered by a shared browser Runtime. Business projects install the framework via npm; ordinary pages do not need to be rebuilt or rebundled.

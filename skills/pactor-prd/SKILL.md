@@ -36,6 +36,10 @@ version: 1.7.0
 8. **登录页用 `Login` 业务组件**：PRD 含登录页时，以生成工程内 `src/server/yaml/common/login.yaml`（`type: Login`）为样板生成，禁止手写 Card+Form+自定义 CSS；**原型未明确布局方式时必须向用户提问**选择 `layout`（`split` 左右分栏 / `centered` 居中 / `brand-card` 品牌卡片 / `overlap` 卡片叠加 / `backdrop` 整页渐变背景，附效果简述，必要时含 `brandSide`/`brandRatio`/`authVariant` 修饰项），原型可判定布局则直接用、不提问；用户不答默认 `split` + `authVariant: card`；品牌区文案/logo/插画取自 PRD，提交闭环沿用 `onSubmit` → `request` + `message` + `app.reload` 模式
 9. DSL 语法细节（组件 props、表达式、动作）以 `pactor-dsl` skill 与 packages 当前导出（ui 内置注册表 / `@pactor-app/blocks` / `@pactor-app/chart`）为准，本 skill 只约定流程与产出物
 
+## 国际化
+
+PRD 要求多语言时，先读 [国际化参考](references/internationalization.md)，确定支持语言、默认语言和切换入口；页面、菜单和布局的可翻译文案优先使用字段简写 `'$i18n{key:默认文案}'`，同步建立各语言词条并接通服务端本地化和切换。沿用目标工程或脚手架现有接线，按参考文档验证切换、回退及懒加载页面。PRD 指定原文作为简写默认文案；单语言项目不强制增加国际化。
+
 ## 流程总览
 
 ```text
@@ -119,6 +123,7 @@ version: 1.7.0
 | --- | --- |
 | `create-pactor-app` 脚手架 | 阶段 2 **仅新建工程**：`pnpm dlx create-pactor-app@latest <project> -t next-app --values <values.json>` 创建工程（模板含 PRD 起点内容）；增量勿用 |
 | `template-placeholders.json` | 阶段 2 **仅新建工程**：脚手架前据其准备 `--values` JSON；位于 `skills/pactor-prd/template-placeholders.json`，是 flat values 的唯一键清单与示例来源；脚手架后用 `skills/scripts/prd-template.mjs check <project> --rendered` 检查（必要时用同脚本 `render` 补渲染） |
+| `references/internationalization.md` | PRD 要求多语言时：三种 YAML 声明、词条、服务端接入、语言切换与验收；优先字段简写 |
 | `references/incremental-wireframe-delta.md` | **已有工程**：线框图 add/update/deprecate、改 sitemap/数据接口/样式 |
 | `references/project-structure.md` | 阶段 2：目录结构约定与 sitemap.yaml 骨架 |
 | `references/ui-quality.md` | 阶段 1 页面清单 / delta 后、阶段 3 前：编写目标项目 `docs/prd/ui-plan.md`；阶段 3：核对计划与变体理由；阶段 5：执行 S1–S8、截图矩阵、V1–V9 及失败后的修复重验 |
