@@ -4,30 +4,23 @@ import { usePathname, useRouter } from "next/navigation";
 import {
   Suspense,
   useCallback,
-  useEffect,
   useMemo,
-  useState,
   useSyncExternalStore,
 } from "react";
 import { createHttpHooks, SitemapApp } from "pactor-app";
 import { Login } from "@pactor-app/blocks";
 
+import { LocaleSelector, useLocale } from "./locale";
+
 import { apiBaseUrl, sitemapSources } from "./config";
-import { pactorActions } from "./actions";
 import { pactorComponents } from "./components";
-import { DEFAULT_LOCALE, MESSAGES } from "./i18n/messages";
-import {
-  getLocaleSnapshot,
-  getServerLocaleSnapshot,
-  subscribeLocale,
-  translateHost,
-} from "./i18n/locale";
 import {
   PageAccessDenied,
   PageAccessGateLoading,
   PageAccessPending,
   usePageAccessGate,
 } from "./page-access";
+import { translate } from "./i18n/messages";
 
 /**
  * 动态页面应用（design/dynamic-page.md）：框架 SitemapApp + 宿主接线。
@@ -35,7 +28,7 @@ import {
  * session.context 桥 / 缺省动作（app.reload / service.call）全部由
  * @pactor-app/app 内置；此处只提供：sitemap 源、宿主路由
  * （pathname / navigate）、HTTP 钩子，以及页面 DSL 依赖的运行时支撑层——
- * 自定义组件（components/）与自定义动作（actions.ts）。
+ * 自定义组件（components/）。
  *
  * 页面访问校验（grantGroup）：页面切换 / 首次打开前先经
  * POST /api/page-access/verify 校验（Next 服务端转发平台
@@ -51,6 +44,14 @@ import {
  * 登录 / 登出是普通 HTTP 调用，由 DSL 中的内置 request 动作直接表达
  * （见 src/server/sitemap.ts 下发的登录页 / 布局 DSL），无需客户端注册服务。
  *
+ * 国际化：页面 / 布局文案由服务端按 `locale` 本地化后下发（`$i18n` 与
+ * `src/server/i18n/locales/<locale>/app.yaml`），客户端不再传业务词条表；
+ * `useLocale` 统一 Cookie / URL / 浏览器语言解析，右下角 `LocaleSelector`
+ * 写入 `locale` Cookie。切换语言时以 `key={locale}` 重挂载 SitemapApp：
+ * 框架暂不随 locale 重取 sitemap（阶段 B），换 key 让 sitemap、布局与页面
+ * 携带新 `?locale=` 整体重拉（代价：侧栏折叠态等布局临时状态重置）。
+ * 宿主自身视图（页面访问门禁）的文案走 src/pactor/i18n/messages.ts。
+ *
  * 挂载在 app/layout.tsx（Next layout 跨导航常驻，切换导航只刷新内容区）。
  *
  * HTTP 钩子用框架默认实现 createHttpHooks：{ code, data, message } 拆包；
@@ -60,7 +61,7 @@ import {
 
 const httpAdapter = createHttpHooks();
 
-// 稳定引用（模块级）：SitemapApp 的 components / actions 参与工厂 memo，
+// 稳定引用（模块级）：SitemapApp 的 components 参与工厂 memo，
 // 内联对象会在每次渲染生成新身份 → 布局与页面运行时随导航整体重挂载
 // （丢失布局常驻语义、侧栏折叠态重置，且首帧 session 未就绪时 Header
 // 用户区更易撞上空数据）。提为常量后仅路由页面随导航重建。
@@ -102,27 +103,15 @@ function PactorAppInner() {
   // navigate 随之稳定，布局跨导航常驻。
   const navigate = useCallback((to: string) => router.push(to), [router]);
 
-  // 当前语言（localStorage(pactor.locale) 持久化，app.setLocale 动作写入）。
-  // key={locale} 重挂载 SitemapApp：框架暂不随 locale 重取 sitemap（阶段 B），
-  // 而菜单标题由服务端按语言直出——换 key 让 sitemap 携带新 ?locale= 重拉，
-  // 菜单 / 布局 / 页面整体切到新语言。代价：布局临时状态（侧栏折叠、页签）
-  // 重置；框架支持 sitemap 随 locale 重取后应移除此 key。
-  const locale = useSyncExternalStore(
-    subscribeLocale,
-    getLocaleSnapshot,
-    getServerLocaleSnapshot,
-  );
-
-  // 持久化语言（如 en-US）与服务端快照（zh-CN）不同：SSR HTML 与客户端
-  // 首帧文案必然不一致。水合完成前不渲染内容（SSR 与客户端首帧同为 null），
-  // 规避 hydration mismatch；应用本就需异步拉取 sitemap，首屏无感知损失。
-  const [hydrated, setHydrated] = useState(false);
-  useEffect(() => setHydrated(true), []);
+  // 当前语言（Cookie `locale` / URL `?locale=` / 浏览器语言；首帧 null →
+  // SSR 与客户端首帧同为 null，水合完成后才渲染，规避 hydration mismatch）。
+  const { locale, changeLocale } = useLocale();
 
   const { committed, status, retry } = usePageAccessGate(
     pathname,
     search,
     replace,
+    locale,
   );
 
   // SitemapApp 只消费已放行页面的 query；切换期间保持旧页面参数
@@ -131,18 +120,19 @@ function PactorAppInner() {
     [committed?.search],
   );
 
-  const denied = status.status === "denied";
-  const redirecting = denied && status.redirectTo !== undefined;
-
-  if (!hydrated) {
+  if (!locale) {
     return null;
   }
+
+  const denied = status.status === "denied";
+  const redirecting = denied && status.redirectTo !== undefined;
 
   // 首次打开：校验通过前不挂载 SitemapApp（避免未授权页面被解析 / 请求 DSL）
   if (committed === null) {
     if (denied && !redirecting) {
       return (
         <PageAccessDenied
+          locale={locale}
           reason={status.reason}
           onRetry={retry}
           onHome={() => router.replace("/")}
@@ -151,9 +141,7 @@ function PactorAppInner() {
     }
     return (
       <PageAccessGateLoading
-        text={translateHost(
-          redirecting ? "gate.redirecting" : "gate.checking",
-        )}
+        text={translate(locale, redirecting ? "gate.redirecting" : "gate.checking")}
       />
     );
   }
@@ -166,6 +154,7 @@ function PactorAppInner() {
 
   return (
     <>
+      <LocaleSelector locale={locale} onChange={changeLocale} />
       {/*
        * 校验 / 拦截期间保持 SitemapApp 挂载（仅隐藏）：布局 state 与
        * 已加载页面不因一次页面切换丢失。
@@ -179,19 +168,18 @@ function PactorAppInner() {
           query={committedQuery}
           navigate={navigate}
           components={appComponents}
-          actions={pactorActions}
           httpAdapter={httpAdapter}
           locale={locale}
-          defaultLocale={DEFAULT_LOCALE}
-          messages={MESSAGES[locale]}
+          defaultLocale="zh-CN"
         />
       </div>
-      {status.status === "checking" ? <PageAccessPending /> : null}
+      {status.status === "checking" ? <PageAccessPending locale={locale} /> : null}
       {redirecting ? (
-        <PageAccessGateLoading text={translateHost("gate.redirecting")} />
+        <PageAccessGateLoading text={translate(locale, "gate.redirecting")} />
       ) : null}
       {denied && !redirecting ? (
         <PageAccessDenied
+          locale={locale}
           reason={status.reason}
           onRetry={retry}
           onBack={backToCommitted}

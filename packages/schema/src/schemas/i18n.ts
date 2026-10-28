@@ -8,11 +8,9 @@
 export const I18N_VALUE_DESCRIPTOR_SCHEMA_ID = 'pactor:i18n-value-descriptor';
 export const LOCALIZED_TEXT_SCHEMA_ID = 'pactor:localized-text';
 
-/** JSON Pointer 键（RFC 6901）：`/` 开头或空串；`~` 后仅允许 0/1 转义，数组用具体下标 */
-const JSON_POINTER_PATTERN = '^$|^\\/(?:[^~]|~[01])*$';
 
 /**
- * 翻译描述（bindings 值与 `$i18n` 内层共用）：key 与 messages 必须且只能
+ * 翻译描述（`$i18n` 内层）：key 与 messages 必须且只能
  * 出现一个；messages 为 locale → string 扁平映射；params 为对象；
  * fallback 为可选字符串。
  */
@@ -54,12 +52,6 @@ export const pageI18nSchema = {
     namespaces: {
       type: 'array',
       items: { type: 'string', minLength: 1 },
-    },
-    /** 路径绑定替换：JSON Pointer → 翻译描述（直接写 key/messages，不再包 $i18n） */
-    bindings: {
-      type: 'object',
-      propertyNames: { pattern: JSON_POINTER_PATTERN },
-      additionalProperties: i18nTranslationDescriptorSchema,
     },
   },
   additionalProperties: false,

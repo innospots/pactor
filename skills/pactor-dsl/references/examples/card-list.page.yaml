@@ -1,0 +1,184 @@
+# 完整卡片列表页：筛选、错误重试、CardList 新建占位、整卡进入详情、
+# 卡内操作确认和归档请求。CardList 需要注册 @pactor-app/blocks。
+dsl: '1.0'
+page:
+  id: card-list
+  title: 项目广场
+  type: card-list
+  permission: project:view
+
+state:
+  keyword: ''
+  owner: ''
+
+dataSources:
+  projects:
+    type: http
+    autoLoad: true
+    request:
+      method: GET
+      url: /api/projects
+      params:
+        keyword: ${state.keyword}
+        owner: ${state.owner}
+
+body:
+  type: Page
+  children:
+    - type: Breadcrumb
+      props:
+        items:
+          - { label: 首页, href: / }
+          - { label: 项目广场 }
+
+    - type: Flex
+      props:
+        justify: space-between
+        align: center
+        wrap: true
+        gap: 12
+      children:
+        - type: Flex
+          props: { direction: vertical, gap: 4 }
+          children:
+            - type: Typography
+              props: { text: 项目广场, variant: h3 }
+            - type: Typography
+              props:
+                text: 以卡片摘要浏览项目，支持筛选、打开详情和归档。
+                variant: muted
+        - type: Button
+          props: { text: 新建项目, icon: plus, variant: primary }
+          permission: project:create
+          events:
+            onClick:
+              - action: navigate
+                params: { to: /projects/new }
+
+    - type: Alert
+      when: ${dataStatus.projects.error != null}
+      props:
+        variant: error
+        showIcon: true
+        message: 项目数据加载失败
+        description: ${dataStatus.projects.error.message}
+
+    - type: Flex
+      when: ${dataStatus.projects.error != null}
+      props: { gap: 8 }
+      children:
+        - type: Button
+          props:
+            text: 重新加载
+            variant: primary
+            loading: ${dataStatus.projects.loading}
+          events:
+            onClick:
+              - action: reload
+                params: { dataSource: projects }
+
+    - type: Card
+      props: { title: 筛选条件 }
+      children:
+        - type: Form
+          props: { name: projectFilters, layout: inline }
+          events:
+            onSubmit:
+              - action: setState
+                params:
+                  keyword: ${event.keyword}
+                  owner: ${event.owner}
+              - action: reload
+                params: { dataSource: projects }
+          children:
+            - type: Input
+              props:
+                name: keyword
+                label: 关键词
+                placeholder: 项目名称或编号
+                allowClear: true
+            - type: Select
+              props:
+                name: owner
+                label: 负责人
+                allowClear: true
+                controlClassName: w-40
+                options:
+                  - { label: 张明, value: zhang-ming }
+                  - { label: 李华, value: li-hua }
+                  - { label: 王芳, value: wang-fang }
+            - type: Button
+              props: { text: 查询, variant: primary, submit: true }
+            - type: Button
+              props: { text: 重置 }
+              events:
+                onClick:
+                  - action: form.setValues
+                    params:
+                      form: projectFilters
+                      values: { keyword: '', owner: '' }
+                  - action: resetState
+                  - action: reload
+                    params: { dataSource: projects }
+
+    - type: Card
+      when: ${dataStatus.projects.error == null}
+      props:
+        title: 项目
+        loading: ${dataStatus.projects.loading}
+      children:
+        - type: CardList
+          props:
+            items: ${data.projects}
+            columns: 3
+            gap: 16
+            createText: 新建项目
+            createIcon: plus
+            hoverable: true
+            showCount: true
+            emptyText: 没有符合当前条件的项目
+          events:
+            onCreateClick:
+              - action: navigate
+                params: { to: /projects/new }
+            onItemClick:
+              - action: navigate
+                params:
+                  to: /projects/${event.item.id}
+            onItemAction:
+              - action: if
+                params:
+                  condition: ${event.key === 'open'}
+                  then:
+                    - action: navigate
+                      params:
+                        to: /projects/${event.item.id}
+              - action: if
+                params:
+                  condition: ${event.key === 'archive'}
+                  then:
+                    - id: archiveConfirm
+                      action: confirm
+                      params:
+                        title: 归档项目
+                        content: 确认归档「${event.item.title}」？
+                    - action: if
+                      params:
+                        condition: ${actions.archiveConfirm}
+                        then:
+                          - id: archiveResult
+                            action: request
+                            params:
+                              method: POST
+                              url: /api/projects/${event.item.id}/archive
+                          - action: if
+                            params:
+                              condition: ${actions.archiveResult.ok != false}
+                            then:
+                              - action: message
+                                params: { messageType: success, text: 项目已归档 }
+                              - action: reload
+                                params: { dataSource: projects }
+                            else:
+                              - action: message
+                                params: { messageType: error, text: 归档失败，请重试 }

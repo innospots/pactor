@@ -1,0 +1,60 @@
+# 完整登录页：Login 业务区块默认账号密码表单、登录服务调用、
+# 成功跳转和失败反馈。页面应注册到 login 全局布局。
+dsl: '1.0'
+page:
+  id: login
+  title: 登录
+  type: login
+
+body:
+  type: Login
+  props:
+    layout: split
+    brandSide: left
+    brandRatio: 0.5
+    authVariant: card
+    brand:
+      logo: /logo.svg
+      name: Pactor
+      title: 动态应用运行时
+      description: 用 YAML 描述页面，由统一运行时渲染企业级应用。
+    title: 欢迎回来
+    subtitle: 使用账号和密码登录控制台。
+    usernameLabel: 账号
+    usernamePlaceholder: 请输入账号
+    passwordLabel: 密码
+    passwordPlaceholder: 请输入密码
+    submitText: 登录
+    forgotLink:
+      text: 忘记密码？
+      href: /forgot-password
+    registerLink:
+      text: 注册账号
+      href: /register
+    footer: © 2026 Pactor
+  events:
+    onSubmit:
+      # service.call 成功时 actions.loginResult 为服务返回值；
+      # 失败时为 { ok: false, error }。
+      - id: loginResult
+        action: service.call
+        params:
+          service: auth.login
+          params:
+            username: ${event.username}
+            password: ${event.password}
+      - action: if
+        params:
+          condition: ${actions.loginResult.ok != false}
+          then:
+            - action: message
+              params:
+                messageType: success
+                text: 登录成功
+            - action: navigate
+              params: { to: /dashboard }
+          else:
+            - action: message
+              params:
+                messageType: error
+                text: 登录失败，请检查账号和密码

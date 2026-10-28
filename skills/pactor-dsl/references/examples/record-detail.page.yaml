@@ -1,0 +1,196 @@
+# 完整详情页：路由参数加载、页头操作、加载/错误态、只读属性、
+# 同层页签、活动时间线与删除确认。数据源返回单个项目对象。
+dsl: '1.0'
+page:
+  id: record-detail
+  title: 项目详情
+  type: detail
+  permission: project:view
+
+state:
+  activeTab: overview
+  deleteSubmitting: false
+
+dataSources:
+  record:
+    type: http
+    autoLoad: true
+    request:
+      method: GET
+      url: /api/projects/${params.id}
+
+body:
+  type: Page
+  children:
+    - type: Breadcrumb
+      props:
+        items:
+          - { label: 首页, href: / }
+          - { label: 项目管理, href: /projects }
+          - { label: 项目详情 }
+
+    - type: Alert
+      when: ${dataStatus.record.error != null}
+      props:
+        variant: error
+        showIcon: true
+        message: 项目详情加载失败
+        description: ${dataStatus.record.error.message}
+
+    - type: Flex
+      props:
+        justify: space-between
+        align: center
+        wrap: true
+        gap: 12
+      children:
+        - type: Flex
+          props:
+            direction: vertical
+            gap: 6
+          children:
+            - type: Flex
+              props: { align: center, gap: 8, wrap: true }
+              children:
+                - type: Typography
+                  props:
+                    text: ${data.record.name || '项目详情'}
+                    variant: h3
+                - type: Tag
+                  props:
+                    text: ${data.record.statusLabel || '加载中'}
+                    color: info
+            - type: Typography
+              props:
+                text: 最后更新：${data.record.updatedAt || '—'}
+                variant: muted
+        - type: Flex
+          props: { gap: 8, wrap: true }
+          children:
+            - type: Button
+              props: { text: 返回列表, icon: arrow-left }
+              events:
+                onClick:
+                  - action: navigate
+                    params: { to: /projects }
+            - type: Button
+              props: { text: 编辑, icon: edit, variant: primary }
+              permission: project:edit
+              events:
+                onClick:
+                  - action: navigate
+                    params:
+                      to: /projects/${params.id}/edit
+            - type: Button
+              props:
+                text: 删除
+                danger: true
+                loading: ${state.deleteSubmitting}
+                disabled: ${state.deleteSubmitting || dataStatus.record.loading}
+              permission:
+                code: project:delete
+                denied: disabled
+              events:
+                onClick:
+                  - action: setState
+                    params: { deleteSubmitting: true }
+                  - id: deleteConfirm
+                    action: confirm
+                    params:
+                      title: 删除项目
+                      content: 删除后不可恢复，是否继续？
+                  - action: if
+                    params:
+                      condition: ${actions.deleteConfirm}
+                      then:
+                        - id: deleteResult
+                          action: request
+                          params:
+                            method: DELETE
+                            url: /api/projects/${params.id}
+                        - action: if
+                          params:
+                            condition: ${actions.deleteResult.ok != false}
+                          then:
+                            - action: message
+                              params: { messageType: success, text: 项目已删除 }
+                            - action: navigate
+                              params: { to: /projects }
+                          else:
+                            - action: message
+                              params: { messageType: error, text: 删除失败，请重试 }
+                      else:
+                        - action: message
+                          params: { messageType: info, text: 已取消删除 }
+                  - action: setState
+                    params: { deleteSubmitting: false }
+
+    - type: Card
+      when: ${dataStatus.record.error == null}
+      props:
+        loading: ${dataStatus.record.loading}
+      children:
+        - type: Tabs
+          props:
+            activeKey: ${state.activeTab}
+            variant: line
+            items:
+              - key: overview
+                label: 基本信息
+                children:
+                  - type: Descriptions
+                    props:
+                      bordered: true
+                      column: 2
+                      items:
+                        - { label: 项目名称, value: "${data.record.name || '—'}" }
+                        - { label: 项目编号, value: "${data.record.code || '—'}" }
+                        - { label: 负责人, value: "${data.record.owner || '—'}" }
+                        - { label: 所属团队, value: "${data.record.team || '—'}" }
+                        - { label: 开始日期, value: "${data.record.startDate || '—'}" }
+                        - { label: 截止日期, value: "${data.record.dueDate || '—'}" }
+                        - { label: 创建时间, value: "${data.record.createdAt || '—'}" }
+                        - { label: 更新时间, value: "${data.record.updatedAt || '—'}" }
+                  - type: Card
+                    props: { title: 项目说明, bordered: false }
+                    children:
+                      - type: Typography
+                        props:
+                          text: ${data.record.description || '暂无项目说明'}
+              - key: activity
+                label: 动态记录
+                children:
+                  - type: Empty
+                    when: ${data.record.timeline == null || data.record.timeline.length === 0}
+                    props:
+                      title: 暂无动态
+                      description: 项目发生变更后会在这里留下记录。
+                  - type: Timeline
+                    when: ${data.record.timeline != null && data.record.timeline.length > 0}
+                    props:
+                      items: ${data.record.timeline}
+          events:
+            onChange:
+              - action: setState
+                params:
+                  activeTab: ${event}
+
+    - type: Flex
+      when: ${dataStatus.record.error != null}
+      props: { gap: 8 }
+      children:
+        - type: Button
+          props:
+            text: 重新加载
+            variant: primary
+            loading: ${dataStatus.record.loading}
+          events:
+            onClick:
+              - action: reload
+                params: { dataSource: record }
+        - type: Button
+          props: { text: 返回列表 }
+          events:
+            onClick:
+              - action: navigate
+                params: { to: /projects }

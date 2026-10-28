@@ -27,10 +27,10 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
             // 由 Theme Studio 生成；运行时换肤见 src/pactor/skin.ts）并应用明暗
             //（data-pactor-theme），避免闪烁。皮肤与明暗偏好持久化在
             // localStorage（mc-skin / mc-mode），由 Header 的 ThemeSwitcher 写入；
-            // mc-mode 缺省时跟随系统并监听变化。语言偏好（pactor.locale，
-            // src/pactor/i18n/locale.ts）同样在此预置 <html lang>。
+            // mc-mode 缺省时跟随系统并监听变化。语言偏好（Cookie `locale`，
+            // 见 src/pactor/locale.tsx；URL ?locale= 优先）同样在此预置 <html lang>。
             // suppressHydrationWarning 容忍 data-pactor-theme 造成的 hydration 差异。
-            __html: `(function(){var root=document.documentElement;var loc=localStorage.getItem("pactor.locale");root.lang=loc==="en-US"?"en-US":"zh-CN";var skin=localStorage.getItem("mc-skin");if(skin!=="neutral"){skin="neutral"}var link=document.createElement("link");link.rel="stylesheet";link.href="/skins/"+skin+".css";link.setAttribute("data-pactor-skin",skin);document.head.appendChild(link);var m=window.matchMedia("(prefers-color-scheme: dark)");function apply(){var mode=localStorage.getItem("mc-mode");var dark=mode?mode==="dark":m.matches;if(dark){root.setAttribute("data-pactor-theme","dark")}else{root.removeAttribute("data-pactor-theme")}}apply();m.addEventListener("change",apply)})()`,
+            __html: `(function(){var root=document.documentElement;var q=new URLSearchParams(location.search).get("locale");var c=document.cookie.split("; ").filter(function(p){return p.slice(0,7)==="locale="})[0];var saved=c?decodeURIComponent(c.slice(7)):"";var loc=q||saved;root.lang=loc==="en-US"?"en-US":loc==="zh-CN"?"zh-CN":navigator.language.toLowerCase().indexOf("en")===0?"en-US":"zh-CN";var skin=localStorage.getItem("mc-skin");if(skin!=="neutral"){skin="neutral"}var link=document.createElement("link");link.rel="stylesheet";link.href="/skins/"+skin+".css";link.setAttribute("data-pactor-skin",skin);document.head.appendChild(link);var m=window.matchMedia("(prefers-color-scheme: dark)");function apply(){var mode=localStorage.getItem("mc-mode");var dark=mode?mode==="dark":m.matches;if(dark){root.setAttribute("data-pactor-theme","dark")}else{root.removeAttribute("data-pactor-theme")}}apply();m.addEventListener("change",apply)})()`,
           }}
         />
       </head>

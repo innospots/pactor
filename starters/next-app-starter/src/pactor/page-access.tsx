@@ -3,7 +3,8 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import { pageAccessEndpoint } from "./config";
-import { translateHost } from "./i18n/locale";
+import { translate } from "./i18n/messages";
+import type { Locale } from "./locale";
 
 /**
  * 页面访问校验（前端侧）：页面切换 / 首次打开之前，先请求项目内
@@ -45,6 +46,7 @@ interface Denial {
 /** 调用服务端校验路径访问权限；网络 / 解析失败按拒绝处理（fail-closed） */
 export async function verifyPageAccess(
   pathname: string,
+  locale?: Locale | null,
 ): Promise<PageAccessResult> {
   try {
     const response = await fetch(pageAccessEndpoint, {
@@ -57,7 +59,7 @@ export async function verifyPageAccess(
     if (!response.ok) {
       return {
         allowed: false,
-        reason: translateHost("gate.error.http", { status: response.status }),
+        reason: translate(locale, "gate.error.http", { status: response.status }),
       };
     }
     const result = (await response.json()) as Partial<PageAccessResult>;
@@ -69,7 +71,7 @@ export async function verifyPageAccess(
   } catch (error) {
     return {
       allowed: false,
-      reason: translateHost("gate.error.unavailable", {
+      reason: translate(locale, "gate.error.unavailable", {
         message: error instanceof Error ? error.message : String(error),
       }),
     };
@@ -88,6 +90,7 @@ export function usePageAccessGate(
   pathname: string,
   search: string,
   replace: (to: string) => void,
+  locale?: Locale | null,
 ): {
   committed: CommittedPage | null;
   status: GateStatus;
@@ -119,7 +122,7 @@ export function usePageAccessGate(
       }
       setDenial({
         pathname: targetPathname,
-        reason: result.reason ?? translateHost("gate.denied.noAccess"),
+        reason: result.reason ?? translate(locale, "gate.denied.noAccess"),
         redirectTo: result.redirectTo,
       });
       if (
@@ -129,14 +132,14 @@ export function usePageAccessGate(
         replace(result.redirectTo);
       }
     },
-    [replace],
+    [replace, locale],
   );
 
   /** 发起一次校验（路径切换 / 重试共用）；过期响应直接丢弃 */
   const runCheck = useCallback(
     (targetPathname: string, targetSearch: string) => {
       const requestId = ++sequence.current;
-      void verifyPageAccess(targetPathname).then((result) => {
+      void verifyPageAccess(targetPathname, locale).then((result) => {
         if (requestId === sequence.current) {
           applyResult(targetPathname, targetSearch, result);
         }
@@ -216,7 +219,7 @@ export function PageAccessGateLoading({ text }: { text: string }) {
 }
 
 /** 页面切换校验中的轻提示（内容区保持上一个已放行页面） */
-export function PageAccessPending() {
+export function PageAccessPending({ locale }: { locale?: Locale | null }) {
   return (
     <div
       role="status"
@@ -235,7 +238,7 @@ export function PageAccessPending() {
         fontSize: 12,
       }}
     >
-      {translateHost("gate.checking")}
+      {translate(locale, "gate.checking")}
     </div>
   );
 }
@@ -263,11 +266,13 @@ export function PageAccessDenied({
   onRetry,
   onBack,
   onHome,
+  locale,
 }: {
   reason: string;
   onRetry: () => void;
   onBack?: () => void;
   onHome: () => void;
+  locale?: Locale | null;
 }) {
   return (
     <div
@@ -283,20 +288,20 @@ export function PageAccessDenied({
       }}
     >
       <div style={{ fontSize: 20, fontWeight: 600 }}>
-        {translateHost("gate.denied.title")}
+        {translate(locale, "gate.denied.title")}
       </div>
       <div style={{ color: "var(--muted-foreground, #6b7280)" }}>{reason}</div>
       <div style={{ display: "flex", gap: 8, marginTop: 4 }}>
         <button type="button" style={primaryButtonStyle} onClick={onRetry}>
-          {translateHost("gate.denied.retry")}
+          {translate(locale, "gate.denied.retry")}
         </button>
         {onBack !== undefined ? (
           <button type="button" style={buttonStyle} onClick={onBack}>
-            {translateHost("gate.denied.back")}
+            {translate(locale, "gate.denied.back")}
           </button>
         ) : null}
         <button type="button" style={buttonStyle} onClick={onHome}>
-          {translateHost("gate.denied.home")}
+          {translate(locale, "gate.denied.home")}
         </button>
       </div>
     </div>
