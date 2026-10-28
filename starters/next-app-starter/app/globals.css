@@ -1,12 +1,167 @@
 @import "tailwindcss";
 
+:root {
+  --background: #ffffff;
+  --foreground: #171717;
+}
+
 @theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 }
 
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: #0a0a0a;
+    --foreground: #ededed;
+  }
+}
+
 body {
   margin: 0;
-  background: var(--background, #ffffff);
-  color: var(--foreground, #171717);
+  background: var(--background);
+  color: var(--foreground);
+}
+
+/* ── 外壳布局：Header 与左侧栏固定，仅中间内容区滚动 ──────────────
+   外层 Layout 锁定视口高度并裁切溢出；Sidebar（.shell-main）占满剩余
+   高度并允许收缩（需压过其自带 min-h-svh，提升选择器优先级），侧栏
+   菜单由 SidebarContent 自带 overflow-auto 滚动，Content 自身滚动。 */
+.shell-root {
+  height: 100dvh;
+  overflow: hidden;
+}
+
+.shell-root .shell-main {
+  flex: 1;
+  min-height: 0;
+}
+
+.shell-content {
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+/* ── 核心概览指标牌：Grid 项默认拉伸，卡片撑满网格 → 同高自适应 ── */
+.stat-card {
+  height: 100%;
+}
+
+.stat-card [data-slot="card-content"] {
+  display: flex;
+  height: 100%;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* ── Provider 数据卡：hover 手型 + 阴影过渡；点击主体进详情（ProviderCardLink）── */
+.provider-card {
+  cursor: pointer;
+  transition:
+    box-shadow 0.2s ease,
+    border-color 0.2s ease;
+}
+
+.provider-card:hover {
+  border-color: color-mix(in srgb, var(--foreground) 20%, transparent);
+  box-shadow: 0 8px 24px color-mix(in srgb, var(--foreground) 12%, transparent);
+}
+
+/* 操作按钮组（右上角）：仅 hover 卡片时显示 */
+.provider-card-actions {
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s ease;
+}
+
+.provider-card:hover .provider-card-actions {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+/* ── Provider 数据卡：内容区撑满卡片高度，能力标签行（末位区块）钉在底部 ── */
+.provider-card [data-slot="card-content"] {
+  display: flex;
+  height: 100%;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.provider-card [data-slot="card-content"] > :last-child {
+  margin-top: auto;
+}
+
+/* ── Model 数据卡：hover 手型 + 阴影过渡；点击主体进详情（ModelCardLink）── */
+.model-card {
+  cursor: pointer;
+  transition:
+    box-shadow 0.2s ease,
+    border-color 0.2s ease;
+}
+
+.model-card:hover {
+  border-color: color-mix(in srgb, var(--foreground) 20%, transparent);
+  box-shadow: 0 8px 24px color-mix(in srgb, var(--foreground) 12%, transparent);
+}
+
+/* 操作按钮组（右上角）：仅 hover 卡片时显示 */
+.model-card-actions {
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s ease;
+}
+
+.model-card:hover .model-card-actions {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+/* ── Model 数据卡：内容区撑满卡片高度，路由摘要行（末位区块）钉在底部 ── */
+.model-card [data-slot="card-content"] {
+  display: flex;
+  height: 100%;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.model-card [data-slot="card-content"] > :last-child {
+  margin-top: auto;
+}
+
+/* ── 启用状态徽标：绿色底纹（Badge 的 className 叠加，暗色主题提亮文字）── */
+.badge-enabled {
+  background-color: color-mix(in srgb, #22c55e 15%, transparent);
+  border-color: color-mix(in srgb, #22c55e 45%, transparent);
+  color: #16a34a;
+}
+
+[data-pactor-theme="dark"] .badge-enabled {
+  color: #4ade80;
+}
+
+/* Statistic：标题与数值之间统一 6px 节奏 */
+[data-slot="statistic"] {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+/* 指标牌右上角图标：弱化处理，避免与主数字争夺视觉层级 */
+.stat-card-icon {
+  color: var(--muted-foreground);
+  opacity: 0.65;
+}
+
+/* 聚合样式中后续裸 .hidden 会覆盖响应式 display；提高 Sidebar/Login 既有选择器优先级。 */
+@media (min-width: 48rem) {
+  [data-slot="sidebar"].md\:block {
+    display: block;
+  }
+
+  [data-slot="sidebar"] > .md\:flex,
+  [data-slot="login"] > .md\:flex {
+    display: flex;
+  }
 }

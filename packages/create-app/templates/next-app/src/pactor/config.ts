@@ -11,6 +11,14 @@
 export const sitemapSources: string[] = ["/api/sitemap"];
 
 /**
+ * 页面访问校验端点（同源 Next 服务端路由）。
+ * 服务端解析页面 DSL 的 pageKey / grantGroup 后转发平台
+ * POST /api/public/page-access/verify（域 / 模块标识见 src/server/page-access.ts），
+ * 浏览器不直接接触平台地址。
+ */
+export const pageAccessEndpoint = "/api/page-access/verify";
+
+/**
  * 外部接口基准地址（SitemapApp baseUrl）。
  * 由 next.config.js 的 API_BASE_URLS 按构建环境（APP_ENV：
  * build / build:dev / build:test → production / development / test）
@@ -18,3 +26,12 @@ export const sitemapSources: string[] = ["/api/sitemap"];
  */
 export const apiBaseUrl =
   process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:9011";
+
+/**
+ * 服务端接口基准地址（/api/d 转发层的目标地址，仅服务端路由使用）。
+ * 同样由 next.config.js 的 API_BASE_URLS 按构建环境解析并内联；
+ * 缺省回退本地开发占位（不存在 → 转发层回退空数据，页面按空态渲染）。
+ * 所有需要服务端接口地址的位置统一从这里导入。
+ */
+export const serverBaseUrl =
+  process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:9011/backend";

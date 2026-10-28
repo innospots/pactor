@@ -13,17 +13,17 @@ export interface DemoUser {
 export const DEMO_ACCOUNTS: (DemoUser & { password: string })[] = [
   {
     id: "u-1",
-    username: "admin",
-    password: "pactor123",
-    name: "演示管理员",
+    username: "{{DEMO_ADMIN_USERNAME}}",
+    password: "{{DEMO_ADMIN_PASSWORD}}",
+    name: "{{DEMO_ADMIN_NAME}}",
     roles: ["admin"],
     permissions: ["report:view", "user:view"],
   },
   {
     id: "u-2",
-    username: "guest",
-    password: "guest123",
-    name: "访客",
+    username: "{{DEMO_GUEST_USERNAME}}",
+    password: "{{DEMO_GUEST_PASSWORD}}",
+    name: "{{DEMO_GUEST_NAME}}",
     roles: ["guest"],
     permissions: [],
   },

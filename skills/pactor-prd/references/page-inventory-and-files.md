@@ -51,13 +51,13 @@ src/server/yaml/
 - **P**：P0 必须生成；P2 只登记不建文件（在 SKILL 阶段 1 已约定）。
 - **类型**：决定用 page-templates 哪一节；同一业务域列表+编辑共用表单规范（见 SKILL 红线）。
 
-## 参考模块（模板内）
+## 参考模块（生成工程内）
 
-复制 `pactor-prd/template/` 后，保留 `yaml/provider/`、`yaml/route/` 作写法样本；新模块 **照同样目录深度** 新增；全站生成完成后删除参考模块。
+脚手架生成工程后，保留 `yaml/provider/`、`yaml/route/` 作写法样本；新模块 **照同样目录深度** 新增；全站生成完成后删除参考模块。
 
 ## 已有工程（增量）
 
-线框图只增改部分页面时：**不要**复制 `template/`。走 **`incremental-wireframe-delta.md`**（delta 表、只改涉及文件、验收变更页 + 回归）。
+线框图只增改部分页面时：**不要**重新运行脚手架。走 **`incremental-wireframe-delta.md`**（delta 表、只改涉及文件、验收变更页 + 回归）。
 
 ## 与 `pactor-dsl` 的衔接
 

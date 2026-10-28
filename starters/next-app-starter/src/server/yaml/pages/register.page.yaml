@@ -4,6 +4,8 @@ dsl: "1.0"
 page:
   id: register
   title: $i18n{page.register.text1:注册}
+  name: register
+  grantGroup: publicGroup
 
 i18n:
   namespaces: [ app ]

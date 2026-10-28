@@ -4,6 +4,8 @@ dsl: "1.0"
 page:
   id: users
   title: $i18n{page.users.text1:用户列表}
+  name: users
+  grantGroup: userGroup
   permission: user:view
 
 state:
@@ -96,4 +98,4 @@ body:
                               params:
                                 name: ${row.name}
                                 username: ${row.username}
-                              fallback: 用户 ${row.name}（${row.username}）
+                              fallback: 用户 {{name}}（{{username}}）

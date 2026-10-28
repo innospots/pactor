@@ -3,15 +3,22 @@
 #   public: true   → 匿名可见（登录/注册页）
 #   permission: x  → 需登录且具备对应权限
 #   无标记         → 需登录
-# 页面 DSL 按 id 约定从 pages/<id>.page.yaml 加载；lazy: true 不随 sitemap
-# 内联下发，客户端经 /api/pages/{id} 懒加载。updatedAt / user / permissions
-# 为会话动态字段，由服务端在响应时注入。
+# 页面 DSL 支持两种命名约定（可混用，由 sitemap.ts 递归收集按 id 建索引，
+# id 冲突报错）：pages/<id>.page.yaml（平铺）与 yaml/<模块>/<id>.yaml
+#（common / provider / route / models，按 PRD 模块树划分）；lazy: true
+# 不随 sitemap 内联下发，客户端经 /api/pages/{id} 懒加载。
+# updatedAt / user / permissions 为会话动态字段，由服务端在响应时注入。
+#
+# 页面访问校验：页面 DSL 的 page 元数据可声明 name（平台 pageKey，缺省回退
+# 页面 id）与 grantGroup（页面权限分组）。打开页面前宿主经
+# /api/page-access/verify → 平台 /api/public/page-access/verify 校验，
+# 详见 src/server/page-access.ts。
 
 id: site
 resourceType: sitemap
 version: 13
 dslVersion: "1.0"
-app: { name: 动态页面 Starter }
+app: { name: "{{APP_TITLE}}" }
 layout: admin
 auth: { loginPath: /login }
 
@@ -19,187 +26,136 @@ pages:
   - { id: login, path: /login, title: 登录, version: 1, public: true }
   - { id: register, path: /register, title: 注册, version: 1, public: true }
   - { id: home, path: /, title: 首页, version: 3 }
-  - {
-      id: users,
-      path: /users,
-      title: 用户列表,
-      version: 1,
-      permission: user:view,
-      lazy: true
-    }
-  - {
-      id: monthly,
-      path: /reports/monthly,
-      title: 月报,
-      version: 7,
-      permission: report:view,
-      lazy: true
-    }
-  - {
-      id: monthly-detail,
-      path: /reports/monthly/:id,
-      title: 月报详情,
-      version: 2,
-      permission: report:view
-    }
+  - { id: users, path: /users, title: 用户列表, version: 1, permission: user:view, lazy: true }
+  - { id: monthly, path: /reports/monthly, title: 月报, version: 7, permission: report:view, lazy: true }
+  - { id: monthly-detail, path: /reports/monthly/:id, title: 月报详情, version: 2, permission: report:view }
+  # 仪表盘（common/；与首页同为演示入口，独立路径避免与 home 的 / 冲突）
+  - { id: dashboard, path: /dashboard, title: 仪表盘, version: 1, lazy: true }
+  # 模块一：模型资产 / 供应商（卡片式列表 + 详情 + 新增/编辑）
+  - { id: provider-list, path: /providers, title: 供应商, version: 1, lazy: true }
+  - { id: provider-create, path: /providers/new, title: 新增 Provider, version: 1, lazy: true }
+  - { id: provider-detail, path: /providers/:code, title: Provider 详情, version: 1, lazy: true }
+  - { id: provider-edit, path: /providers/:code/edit, title: 编辑 Provider, version: 1, lazy: true }
+  # 模块二：模型路由 / 路由（卡片式列表 + 单页纵向详情 + 单页表单）
+  - { id: route-list, path: /routes, title: 路由, version: 1, lazy: true }
+  - { id: route-create, path: /routes/new, title: 新增路由, version: 1, lazy: true }
+  - { id: route-detail, path: /routes/:code, title: 路由详情, version: 1, lazy: true }
+  - { id: route-edit, path: /routes/:code/edit, title: 编辑路由, version: 1, lazy: true }
+  # 页面骨架：数据列表标准模型（搜索 + 表格 + 抽屉新建/编辑），可复制生成业务列表页
+  - { id: data-list, path: /models/data-list, title: 数据列表, version: 1, lazy: true }
 
 menus:
-  - {
-      id: login,
-      type: page,
-      pageId: login,
-      title: 登录,
-      layout: login,
-      public: true,
-      hidden: true
-    }
-  - {
-      id: register,
-      type: page,
-      pageId: register,
-      title: 注册,
-      layout: login,
-      public: true,
-      hidden: true
-    }
-  - {
-      id: home,
-      type: page,
-      pageId: home,
-      title: 首页,
-      icon: home,
-      layout: admin,
-      order: 1
-    }
-  - {
-      id: users,
-      type: page,
-      pageId: users,
-      title: 用户列表,
-      icon: users,
-      layout: admin,
-      permission: user:view,
-      order: 2
-    }
+  - { id: login, type: page, pageId: login, title: 登录, layout: login, public: true, hidden: true }
+  - { id: register, type: page, pageId: register, title: 注册, layout: auth, public: true, hidden: true }
+  - { id: home, type: page, pageId: home, title: 首页, icon: home, layout: admin, order: 1 }
+  - { id: dashboard, type: page, pageId: dashboard, title: 仪表盘, icon: chart, layout: admin, order: 2 }
+  - { id: users, type: page, pageId: users, title: 用户列表, icon: users, layout: admin, permission: user:view, order: 3 }
+  - id: assets
+    type: group
+    title: 模型资产
+    icon: package
+    order: 4
+    children:
+      - { id: providers, type: page, pageId: provider-list, title: 供应商, layout: admin }
+  - id: routing
+    type: group
+    title: 模型路由
+    icon: share
+    order: 5
+    children:
+      - { id: routes, type: page, pageId: route-list, title: 路由, layout: admin }
+  - id: skeletons
+    type: group
+    title: 页面骨架
+    icon: folder
+    order: 6
+    children:
+      - { id: data-list, type: page, pageId: data-list, title: 数据列表, layout: admin }
   - id: reports
     type: group
     title: 报表
     icon: chart
-    order: 3
+    order: 7
     children:
-      - {
-          id: monthly,
-          type: page,
-          pageId: monthly,
-          title: 报表中心,
-          icon: chart,
-          layout: admin,
-          permission: report:view
-        }
-      - {
-          id: monthly-detail,
-          type: page,
-          pageId: monthly-detail,
-          title: 月报详情,
-          layout: admin,
-          hidden: true,
-          activeMenu: monthly,
-          permission: report:view
-        }
-  - {
-      id: help,
-      type: link,
-      title: 帮助,
-      path: https://github.com/,
-      external: true,
-      permission: report:view,
-      order: 4
-    }
+      - { id: monthly, type: page, pageId: monthly, title: 报表中心, icon: chart, layout: admin, permission: report:view }
+      - { id: monthly-detail, type: page, pageId: monthly-detail, title: 月报详情, layout: admin, hidden: true, activeMenu: monthly, permission: report:view }
+  - { id: help, type: link, title: 帮助, path: https://github.com/, external: true, permission: report:view, order: 8 }
+  # 隐藏页（不出现在菜单，经列表页跳转进入；activeMenu 保持所属菜单高亮）
+  - { id: provider-create, type: page, pageId: provider-create, layout: admin, hidden: true, activeMenu: providers }
+  - { id: provider-detail, type: page, pageId: provider-detail, layout: admin, hidden: true, activeMenu: providers }
+  - { id: provider-edit, type: page, pageId: provider-edit, layout: admin, hidden: true, activeMenu: providers }
+  - { id: route-create, type: page, pageId: route-create, layout: admin, hidden: true, activeMenu: routes }
+  - { id: route-detail, type: page, pageId: route-detail, layout: admin, hidden: true, activeMenu: routes }
+  - { id: route-edit, type: page, pageId: route-edit, layout: admin, hidden: true, activeMenu: routes }
 
 # 布局 DSL（PageOutlet 为页面内容出口）。
 # 布局 body 内 ${data.session.*} 由客户端注入的 session dataSource 提供
-#（user / app / menus）；${route.params.pathname} 为当前路径（客户端注入）。
-# 登录 / 登出是普通 HTTP 调用，DSL 用内置 request 动作表达（跨域绝对地址，
-# 客户端 httpHooks 自动改写进项目内代理前缀），无需客户端注册服务。
+#（user / app / menus）。登录 / 登出是普通 HTTP 调用，DSL 用内置 request
+# 动作表达（同源相对地址，由当前 Next 应用的认证路由处理）。
 layouts:
-  # 管理端外壳：左侧 SitemapMenu 导航 + 顶栏用户菜单 + PageOutlet
+  # 管理端外壳：Sidebar（品牌 + SitemapMenu 导航）> Header（ThemeSwitcher
+  # 换肤 + 用户菜单）+ Content（PageOutlet 页面出口）；文案经 $i18n 由服务端
+  # 按请求语言下发（语言切换由宿主 LocaleSelector 负责，不在布局内）
   admin:
     dsl: "1.0"
     body:
-      type: Flex
-      props: { gap: 0, direction: horizontal, style: { height: 100vh } }
+      type: Layout
+      props: { className: shell-root }
       children:
-        - type: Flex
+        - type: Sidebar
           props:
-            direction: vertical
-            style:
-              width: 224
-              flexShrink: 0
-              borderRight: 1px solid var(--border)
-          children:
-            - type: Flex
-              props:
-                style:
-                  padding: 16px 16px
-                  fontWeight: 600
-                  borderBottom: 1px solid var(--border)
-              children:
-                - type: Text
-                  props: { text: "${data.session.app.name}" }
-            - type: SitemapMenu
+            className: shell-main
+            brand: { title: "{{APP_TITLE}}", logo: /logo.svg }
+            collapsible: true
+            content:
+              type: SitemapMenu
               props:
                 items: ${data.session.menus}
                 collapsible: true
+                className: shell-menu
               events:
                 onSelect:
                   - action: navigate
                     params: { to: "${event}" }
-        - type: Flex
-          props:
-            direction: vertical
-            style: { flex: 1, minWidth: 0 }
           children:
-            - type: Flex
+            - type: Header
               props:
-                justify: end
-                align: center
-                style:
-                  padding: 10px 20px
-                  borderBottom: 1px solid var(--border)
+                className: shell-header
+                user:
+                  name: "${data.session.user.name}"
+                  items:
+                    - { label: "$i18n{layout.profile:个人中心}", value: profile, icon: user }
+                    - { label: "$i18n{layout.logout:退出登录}", value: logout, icon: log-out }
+              events:
+                onUserSelect:
+                  - action: if
+                    params:
+                      condition: ${event == 'logout'}
+                      then:
+                        - action: request
+                          params:
+                            method: POST
+                            url: /api/auth/logout
+                        - action: app.reload
+                          params: { to: /login }
+                      else:
+                        - action: message
+                          params:
+                            messageType: info
+                            text: "$i18n{layout.profileToast:打开个人中心}"
               children:
-                - type: DropdownMenu
-                  props:
-                    items:
-                      - { label: "$i18n{layout.settings:个人设置}", value: settings, icon: settings }
-                      - { label: "$i18n{layout.logout:退出登录}", value: logout, icon: log-out }
-                  events:
-                    onSelect:
-                      - action: if
-                        params:
-                          condition: ${event == 'logout'}
-                          then:
-                            - action: request
-                              params:
-                                method: POST
-                                url: http://localhost:9011/api/auth/logout
-                            - action: app.reload
-                              params: { to: /login }
-                          else:
-                            - action: message
-                              params: { text: "$i18n{layout.settingsNotice:演示环境未实现个人设置}" }
-                  children:
-                    - type: Button
-                      props:
-                        text: ${data.session.user.name}
-                        variant: text
-            - type: Flex
-              props:
-                direction: vertical
-                style: { flex: 1, minHeight: 0, overflow: auto }
+                - type: ThemeSwitcher
+            - type: Content
+              props: { className: shell-content }
               children:
                 - type: PageOutlet
-  # 登录 / 注册页外壳：居中卡片
+  # 登录页外壳：纯页面出口（登录页由 Login 业务组件自带整页品牌视觉与背景装饰）
   login:
+    dsl: "1.0"
+    body:
+      type: PageOutlet
+  # 注册等辅助 public 页外壳：居中卡片
+  auth:
     dsl: "1.0"
     body:
       type: Flex

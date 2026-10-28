@@ -1,6 +1,6 @@
 {
   "name": "@pactor-app/runtime",
-  "version": "1.56.0",
+  "version": "1.58.0",
   "description": "Pactor runtime: RuntimeContext, StateStore, DataSource runtime, action engine, React renderer and page runtime",
   "keywords": [
     "pactor",
@@ -53,7 +53,8 @@
   "dependencies": {
     "@pactor-app/core": "workspace:*",
     "@pactor-app/expression": "workspace:*",
-    "@pactor-app/schema": "workspace:*"
+    "@pactor-app/schema": "workspace:*",
+    "semver": "^7.8.5"
   },
   "peerDependencies": {
     "react": ">=18"
@@ -63,6 +64,7 @@
     "@testing-library/react": "^16.3.2",
     "@types/react": "^19.2.18",
     "@types/react-dom": "^19.2.4",
+    "@types/semver": "^7.8.0",
     "jsdom": "^30.0.1",
     "react": "^19.2.8",
     "react-dom": "^19.2.8"

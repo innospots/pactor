@@ -1,0 +1,50 @@
+{
+  "APP_NAME": {
+    "description": "应用标识，用于 package.json 和运行时配置。",
+    "example": "example-admin"
+  },
+  "APP_TITLE": {
+    "description": "显示在浏览器和页面品牌区的应用标题。",
+    "example": "Example Admin"
+  },
+  "APP_DESCRIPTION": {
+    "description": "应用 metadata 与品牌区使用的中性描述。",
+    "example": "A neutral admin application for demonstrations."
+  },
+  "DEMO_ACCOUNT_HINT": {
+    "description": "登录页展示的演示账号提示，与下列示例账号一致。",
+    "example": "Demo accounts: demo-admin / demo-admin-pass; demo-guest / demo-guest-pass"
+  },
+  "DEMO_ADMIN_USERNAME": {
+    "description": "演示管理员登录名。",
+    "example": "demo-admin"
+  },
+  "DEMO_ADMIN_PASSWORD": {
+    "description": "演示管理员密码，仅用于本地模板冒烟。",
+    "example": "demo-admin-pass"
+  },
+  "DEMO_ADMIN_NAME": {
+    "description": "演示管理员的显示名称。",
+    "example": "Demo Admin"
+  },
+  "DEMO_GUEST_USERNAME": {
+    "description": "演示访客登录名。",
+    "example": "demo-guest"
+  },
+  "DEMO_GUEST_PASSWORD": {
+    "description": "演示访客密码，仅用于本地模板冒烟。",
+    "example": "demo-guest-pass"
+  },
+  "DEMO_GUEST_NAME": {
+    "description": "演示访客的显示名称。",
+    "example": "Demo Guest"
+  },
+  "DEMO_DATE_START": {
+    "description": "演示数据日期范围的 ISO 开始日期。",
+    "example": "2025-01-01"
+  },
+  "DEMO_DATE_END": {
+    "description": "演示数据日期范围的 ISO 结束日期。",
+    "example": "2025-01-31"
+  }
+}

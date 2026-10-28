@@ -136,7 +136,11 @@ export function checkSource(directory) {
   }
 
   for (const key of placeholderKeys) {
-    if (!seen.has(key)) issues.push(`missing required placeholder "{{${key}}}"`);
+    // APP_NAME 例外：模板用 __APP_NAME__ 由 create-app 脚手架按目录名替换，
+    // 不要求出现 {{APP_NAME}}；其余键必须在源模板中以带引号字面量落点存在。
+    if (key !== 'APP_NAME' && !seen.has(key)) {
+      issues.push(`missing required placeholder "{{${key}}}"`);
+    }
   }
   return issues;
 }

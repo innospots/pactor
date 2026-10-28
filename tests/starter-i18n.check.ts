@@ -7,15 +7,11 @@ import { evaluateExpression } from '@pactor-app/expression';
 import { validateAuthorPageDsl, validateLocalizedPageDsl } from '@pactor-app/schema';
 
 import * as next from '../starters/next-app-starter/src/server/i18n';
-import * as prd from '../skills/pactor-prd/template/src/server/i18n';
 import { withClientDemo } from '../starters/spa-starter/src/i18n/demo';
 import { messages } from '../starters/spa-starter/src/i18n/messages';
 
 const root = process.cwd();
-const examples = [
-  { name: 'Next starter', dir: 'starters/next-app-starter', api: next },
-  { name: 'PRD template', dir: 'skills/pactor-prd/template', api: prd },
-];
+const examples = [{ name: 'Next starter', dir: 'starters/next-app-starter', api: next }];
 
 afterAll(() => process.chdir(root));
 
@@ -43,7 +39,7 @@ for (const example of examples) {
     it('localizes sitemap, layout and inline pages without mutating the source', async () => {
       process.chdir(resolve(root, example.dir));
       const site = yaml(example.dir, 'sitemap.yaml');
-      const login = yaml(example.dir, example.dir.startsWith('starters') ? 'pages/login.page.yaml' : 'common/login.yaml');
+      const login = yaml(example.dir, 'common/login.yaml');
       site.pages.find((page: { id: string }) => page.id === 'login').pageDsl = login;
       const original = structuredClone(site);
       const en = await example.api.localizeSitemap(site, 'en-US');

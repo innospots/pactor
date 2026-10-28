@@ -4,6 +4,8 @@ dsl: "1.0"
 page:
   id: home
   title: $i18n{page.home.text1:首页}
+  name: home
+  grantGroup: homeGroup
 
 i18n:
   namespaces: [ app ]
@@ -20,7 +22,7 @@ body:
             key: page.home.text3
             params:
               name: ${data.session.user.name}
-            fallback: 欢迎回来，${data.session.user.name}！
+            fallback: 欢迎回来，{{name}}！
         description: $i18n{page.home.text4:本页与外壳布局均由 sitemap
           对象下发（design/dynamic-page.md）；菜单随角色裁剪。}
         style: { marginBottom: 16 }

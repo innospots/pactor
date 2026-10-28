@@ -4,6 +4,8 @@ dsl: "1.0"
 page:
   id: monthly-detail
   title: $i18n{page.monthly-detail.text1:月报详情}
+  name: monthlyDetail
+  grantGroup: reportGroup
 
 i18n:
   namespaces: [ app ]
@@ -20,7 +22,7 @@ body:
             key: page.monthly-detail.text3
             params:
               id: ${route.params.id}
-            fallback: 路径参数演示：id = ${route.params.id}
+            fallback: 路径参数演示：id = {{id}}
         description: $i18n{page.monthly-detail.text4:隐藏页（不出现在菜单），经列表页跳转进入。}
         style: { marginBottom: 16 }
     - type: Button
