@@ -11,18 +11,18 @@
     "build:test": "node scripts/build.mjs test"
   },
   "dependencies": {
-    "@pactor-app/blocks": "^1.57.0",
-    "@pactor-app/chat": "^1.57.0",
-    "@pactor-app/core": "^1.57.0",
-    "@pactor-app/runtime": "^1.57.0",
-    "@pactor-app/ui": "^1.57.0",
+    "@pactor-app/blocks": "^1.58.0",
+    "@pactor-app/chat": "^1.58.0",
+    "@pactor-app/core": "^1.58.0",
+    "@pactor-app/runtime": "^1.58.0",
+    "@pactor-app/ui": "^1.58.0",
     "lucide-react": "1.45.0",
     "next": "16.3.5",
-    "pactor-app": "^1.57.0",
+    "pactor-app": "^1.58.0",
     "react": "19.2.8",
     "react-dom": "19.2.8",
     "yaml": "^2.9.1",
-    "@pactor-app/i18n": "^1.57.0"
+    "@pactor-app/i18n": "^1.58.0"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
