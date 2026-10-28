@@ -1,0 +1,269 @@
+# 完整搜索列表页：页头、查询、重置、服务端分页、多选、行操作、
+# 删除确认、加载/空/错误/权限状态和成功/失败反馈。
+dsl: '1.0'
+page:
+  id: search-list
+  title: 客户列表
+  type: list
+  permission: customer:view
+
+state:
+  keyword: ''
+  status: ''
+  page: 1
+  pageSize: 10
+  selectedKeys: []
+
+dataSources:
+  customers:
+    type: http
+    autoLoad: true
+    request:
+      method: GET
+      url: /api/customers
+      params:
+        keyword: ${state.keyword}
+        status: ${state.status}
+        page: ${state.page}
+        pageSize: ${state.pageSize}
+
+body:
+  type: Page
+  children:
+    - type: Breadcrumb
+      props:
+        items:
+          - { label: 首页, href: / }
+          - { label: 客户管理 }
+
+    - type: Flex
+      props:
+        justify: space-between
+        align: center
+        wrap: true
+        gap: 12
+      children:
+        - type: Flex
+          props: { direction: vertical, gap: 4 }
+          children:
+            - type: Typography
+              props: { text: 客户列表, variant: h3 }
+            - type: Typography
+              props:
+                text: 查询、查看和维护客户资料。
+                variant: muted
+        - type: Button
+          props: { text: 新建客户, variant: primary, icon: plus }
+          permission: customer:create
+          events:
+            onClick:
+              - action: navigate
+                params: { to: /customers/new }
+
+    - type: Flex
+      when: ${dataStatus.customers.error != null}
+      props: { align: center, gap: 12, wrap: true }
+      children:
+        - type: Alert
+          props:
+            variant: error
+            showIcon: true
+            message: 客户数据加载失败
+            description: ${dataStatus.customers.error.message}
+            style: { flex: 1 }
+        - type: Button
+          props:
+            text: 重新加载
+            loading: ${dataStatus.customers.loading}
+          events:
+            onClick:
+              - action: reload
+                params: { dataSource: customers }
+
+    - type: Card
+      props: { title: 查询条件 }
+      children:
+        - type: Form
+          props: { name: filters, layout: inline }
+          events:
+            onSubmit:
+              - action: setState
+                params:
+                  keyword: ${event.keyword}
+                  status: ${event.status}
+                  page: 1
+              - action: reload
+                params: { dataSource: customers }
+          children:
+            - type: Input
+              props:
+                name: keyword
+                label: 关键词
+                placeholder: 名称、电话或负责人
+                allowClear: true
+            - type: Select
+              props:
+                name: status
+                label: 状态
+                allowClear: true
+                controlClassName: w-36
+                options:
+                  - { label: 全部, value: '' }
+                  - { label: 启用, value: active }
+                  - { label: 停用, value: disabled }
+            - type: Button
+              props: { text: 查询, variant: primary, submit: true }
+            - type: Button
+              props: { text: 重置 }
+              events:
+                onClick:
+                  - action: form.setValues
+                    params:
+                      form: filters
+                      values: { keyword: '', status: '' }
+                  - action: resetState
+                  - action: reload
+                    params: { dataSource: customers }
+
+    - type: Card
+      when: ${dataStatus.customers.error == null}
+      props: { title: 客户数据 }
+      children:
+        - type: Flex
+          props:
+            justify: space-between
+            align: center
+            wrap: true
+            gap: 8
+          children:
+            - type: Text
+              props:
+                text: 已选 ${state.selectedKeys.length} 项
+                type: secondary
+                size: small
+            - type: Flex
+              props: { gap: 8 }
+              children:
+                - type: Button
+                  props:
+                    text: 批量停用
+                    disabled: ${state.selectedKeys.length === 0}
+                  permission: customer:edit
+                - type: Button
+                  props:
+                    text: 刷新
+                    icon: refresh
+                    variant: text
+                    loading: ${dataStatus.customers.loading}
+                  events:
+                    onClick:
+                      - action: reload
+                        params: { dataSource: customers }
+
+        - type: Table
+          props:
+            dataSource: ${data.customers.list}
+            rowKey: id
+            loading: ${dataStatus.customers.loading}
+            pagination: false
+            emptyText: 没有符合当前条件的客户
+            rowSelection: true
+            selectedRowKeys: ${state.selectedKeys}
+            columns:
+              - { title: 客户名称, dataIndex: name, sorter: true }
+              - { title: 联系电话, dataIndex: phone }
+              - title: 状态
+                dataIndex: status
+                cell:
+                  type: Status
+                  props:
+                    status: "${row.status === 'active' ? 'success' : 'default'}"
+                    text: "${row.status === 'active' ? '启用' : '停用'}"
+              - { title: 负责人, dataIndex: owner }
+              - { title: 更新时间, dataIndex: updatedAt }
+              - title: 操作
+                fixed: right
+                width: 180
+                cell:
+                  type: Flex
+                  props: { gap: 4, wrap: true }
+                  children:
+                    - type: Button
+                      props: { text: 查看, variant: link, size: small }
+                      events:
+                        onClick:
+                          - action: navigate
+                            params: { to: "/customers/${row.id}" }
+                    - type: Button
+                      props: { text: 编辑, variant: link, size: small }
+                      permission: customer:edit
+                      events:
+                        onClick:
+                          - action: navigate
+                            params: { to: "/customers/${row.id}/edit" }
+                    - type: Button
+                      props:
+                        text: 删除
+                        variant: text
+                        danger: true
+                        size: small
+                      permission:
+                        code: customer:delete
+                        denied: disabled
+                      events:
+                        onClick:
+                          - id: deleteConfirm
+                            action: confirm
+                            params:
+                              title: 删除客户
+                              content: 删除后不可恢复，是否继续？
+                          - action: if
+                            params:
+                              condition: ${actions.deleteConfirm}
+                              then:
+                                - id: deleteResult
+                                  action: request
+                                  params:
+                                    method: DELETE
+                                    url: /api/customers/${row.id}
+                                - action: if
+                                  params:
+                                    condition: ${actions.deleteResult.ok != false}
+                                  then:
+                                    - action: message
+                                      params:
+                                        messageType: success
+                                        text: 客户已删除
+                                    - action: reload
+                                      params: { dataSource: customers }
+                                  else:
+                                    - action: message
+                                      params:
+                                        messageType: error
+                                        text: 删除失败，请重试
+          events:
+            onSelectChange:
+              - action: setState
+                params:
+                  selectedKeys: ${event}
+
+        - type: Pagination
+          props:
+            total: ${data.customers.total}
+            page: ${state.page}
+            pageSize: ${state.pageSize}
+            pageSizeOptions: [10, 20, 50]
+            showTotal: true
+            align: right
+          events:
+            onChange:
+              - action: setState
+                params:
+                  page: ${event}
+              - action: reload
+                params: { dataSource: customers }
+            onPageSizeChange:
+              - action: setState
+                params:
+                  page: 1
+                  pageSize: ${event}

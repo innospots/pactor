@@ -1,0 +1,269 @@
+# 完整树形主从页：左侧树筛选与选择，右侧数据就绪后挂载表单；
+# Tree / Form 均通过受控状态闭环，保存后刷新树与当前节点。
+dsl: '1.0'
+page:
+  id: tree-master-detail
+  title: 导航配置
+  type: tree-master-detail
+  permission: navigation:view
+
+state:
+  keyword: ''
+  selectedKeys: [home]
+  expandedKeys: [system]
+  submitting: false
+
+dataSources:
+  tree:
+    type: http
+    autoLoad: true
+    request:
+      method: GET
+      url: /api/navigation/tree
+      params:
+        keyword: ${state.keyword}
+  node:
+    type: http
+    autoLoad: true
+    request:
+      method: GET
+      url: /api/navigation/${state.selectedKeys[0]}
+
+body:
+  type: Page
+  children:
+    - type: Breadcrumb
+      props:
+        items:
+          - { label: 首页, href: / }
+          - { label: 系统管理, href: /system }
+          - { label: 导航配置 }
+
+    - type: Flex
+      props:
+        justify: space-between
+        align: center
+        wrap: true
+        gap: 12
+      children:
+        - type: Flex
+          props: { direction: vertical, gap: 4 }
+          children:
+            - type: Typography
+              props: { text: 导航配置, variant: h3 }
+            - type: Typography
+              props:
+                text: 左侧选择节点，右侧维护节点属性与页面入口。
+                variant: muted
+        - type: Flex
+          props: { gap: 8 }
+          children:
+            - type: Button
+              props: { text: 刷新, icon: refresh, variant: text }
+              events:
+                onClick:
+                  - action: reload
+                    params: { dataSource: tree }
+                  - action: reload
+                    params: { dataSource: node }
+            - type: Button
+              props: { text: 新建节点, icon: plus, variant: primary }
+              permission: navigation:create
+              events:
+                onClick:
+                  - action: message
+                    params: { messageType: info, text: 打开新建节点表单或弹层 }
+
+    - type: Row
+      props: { gutter: 16, align: top }
+      children:
+        - type: Col
+          props: { xs: 24, lg: 8 }
+          children:
+            - type: Card
+              props:
+                title: 导航结构
+                loading: ${dataStatus.tree.loading}
+              children:
+                - type: Alert
+                  when: ${dataStatus.tree.error != null}
+                  props:
+                    variant: error
+                    showIcon: true
+                    message: 导航树加载失败
+                    description: ${dataStatus.tree.error.message}
+                - type: Form
+                  when: ${dataStatus.tree.error == null}
+                  props: { name: treeSearch, layout: inline }
+                  events:
+                    onSubmit:
+                      - action: setState
+                        params:
+                          keyword: ${event.keyword}
+                      - action: reload
+                        params: { dataSource: tree }
+                  children:
+                    - type: Input
+                      props:
+                        name: keyword
+                        placeholder: 搜索节点
+                        allowClear: true
+                        controlClassName: flex-1
+                    - type: Button
+                      props: { text: 搜索, variant: primary, submit: true }
+                - type: Tree
+                  when: ${dataStatus.tree.error == null}
+                  props:
+                    treeData: ${data.tree}
+                    expandedKeys: ${state.expandedKeys}
+                    selectedKeys: ${state.selectedKeys}
+                  events:
+                    onExpand:
+                      - action: setState
+                        params:
+                          expandedKeys: ${event}
+                    onSelect:
+                      - action: setState
+                        params:
+                          selectedKeys: ${event}
+                      - action: reload
+                        params: { dataSource: node }
+
+        - type: Col
+          props: { xs: 24, lg: 16 }
+          children:
+            - type: Card
+              props:
+                title: 节点属性
+                loading: ${dataStatus.node.loading}
+              children:
+                - type: Alert
+                  when: ${dataStatus.node.error != null}
+                  props:
+                    variant: error
+                    showIcon: true
+                    message: 节点详情加载失败
+                    description: ${dataStatus.node.error.message}
+                - type: Flex
+                  when: ${dataStatus.node.error != null}
+                  props: { gap: 8 }
+                  children:
+                    - type: Button
+                      props: { text: 重新加载, variant: primary }
+                      events:
+                        onClick:
+                          - action: reload
+                            params: { dataSource: node }
+                - type: Form
+                  when: ${dataStatus.node.loading == false && dataStatus.node.error == null && data.node != null}
+                  props:
+                    name: nodeEdit
+                    layout: vertical
+                    initialValues: ${data.node}
+                  events:
+                    onSubmit:
+                      - action: setState
+                        params: { submitting: true }
+                      - id: saveResult
+                        action: service.call
+                        params:
+                          service: navigation.save
+                          params:
+                            key: ${state.selectedKeys[0]}
+                            name: ${event.name}
+                            type: ${event.type}
+                            path: ${event.path}
+                            sort: ${event.sort}
+                            visible: ${event.visible}
+                      - action: setState
+                        params: { submitting: false }
+                      - action: if
+                        params:
+                          condition: ${actions.saveResult.ok != false}
+                          then:
+                            - action: message
+                              params: { messageType: success, text: 节点已保存 }
+                            - action: reload
+                              params: { dataSource: tree }
+                            - action: reload
+                              params: { dataSource: node }
+                          else:
+                            - action: message
+                              params: { messageType: error, text: 保存失败，请重试 }
+                  children:
+                    - type: Row
+                      props: { gutter: 16 }
+                      children:
+                        - type: Col
+                          props: { xs: 24, md: 12 }
+                          children:
+                            - type: Input
+                              props:
+                                name: name
+                                label: 节点名称
+                                rules:
+                                  - { required: true, message: 请输入节点名称 }
+                        - type: Col
+                          props: { xs: 24, md: 12 }
+                          children:
+                            - type: RadioGroup
+                              props:
+                                name: type
+                                label: 节点类型
+                                direction: horizontal
+                                options:
+                                  - { label: 目录, value: group }
+                                  - { label: 页面, value: page }
+                                  - { label: 外链, value: link }
+                                rules:
+                                  - { required: true, message: 请选择节点类型 }
+                        - type: Col
+                          props: { xs: 24, md: 16 }
+                          children:
+                            - type: Input
+                              props:
+                                name: path
+                                label: 路径或 URL
+                                placeholder: /system/menu 或 https://example.com
+                                rules:
+                                  - { required: true, message: 请输入路径或 URL }
+                        - type: Col
+                          props: { xs: 24, md: 8 }
+                          children:
+                            - type: NumberInput
+                              props:
+                                name: sort
+                                label: 排序
+                                min: 0
+                                step: 1
+                        - type: Col
+                          props: { span: 24 }
+                          children:
+                            - type: Field
+                              props:
+                                label: 是否显示
+                                description: 隐藏节点仍可被直接访问或作为 activeMenu 目标。
+                              children:
+                                - type: Switch
+                                  props:
+                                    name: visible
+                    - type: Flex
+                      props: { justify: end, gap: 8 }
+                      children:
+                        - type: Button
+                          props:
+                            text: 撤销修改
+                            disabled: ${state.submitting}
+                          events:
+                            onClick:
+                              - action: form.setValues
+                                params:
+                                  form: nodeEdit
+                                  values: ${data.node}
+                        - type: Button
+                          props:
+                            text: 保存
+                            variant: primary
+                            submit: true
+                            loading: ${state.submitting}
+                            disabled: ${state.submitting}

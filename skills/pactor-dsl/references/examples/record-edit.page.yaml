@@ -1,0 +1,248 @@
+# 完整独立编辑页：路由参数加载详情、数据就绪后挂载 Form、
+# 响应式字段栅格、提交中状态、成功返回与失败保留输入。
+dsl: '1.0'
+page:
+  id: record-edit
+  title: 编辑项目
+  type: form
+  permission: project:edit
+
+state:
+  submitting: false
+  saveError: ''
+
+dataSources:
+  record:
+    type: http
+    autoLoad: true
+    request:
+      method: GET
+      url: /api/projects/${params.id}
+
+body:
+  type: Page
+  children:
+    - type: Breadcrumb
+      props:
+        items:
+          - { label: 首页, href: / }
+          - { label: 项目管理, href: /projects }
+          - { label: 编辑项目 }
+
+    - type: Flex
+      props:
+        justify: space-between
+        align: center
+        wrap: true
+        gap: 12
+      children:
+        - type: Flex
+          props: { direction: vertical, gap: 4 }
+          children:
+            - type: Typography
+              props: { text: 编辑项目, variant: h3 }
+            - type: Typography
+              props:
+                text: 修改项目基础信息、负责人和计划时间。
+                variant: muted
+        - type: Button
+          props: { text: 返回详情, icon: arrow-left }
+          events:
+            onClick:
+              - action: navigate
+                params:
+                  to: /projects/${params.id}
+
+    - type: Alert
+      when: ${dataStatus.record.error != null}
+      props:
+        variant: error
+        showIcon: true
+        message: 项目数据加载失败
+        description: ${dataStatus.record.error.message}
+
+    - type: Flex
+      when: ${dataStatus.record.error != null}
+      props: { gap: 8 }
+      children:
+        - type: Button
+          props:
+            text: 重试
+            variant: primary
+            loading: ${dataStatus.record.loading}
+          events:
+            onClick:
+              - action: reload
+                params: { dataSource: record }
+        - type: Button
+          props: { text: 返回列表 }
+          events:
+            onClick:
+              - action: navigate
+                params: { to: /projects }
+
+    - type: Card
+      when: ${dataStatus.record.error == null}
+      props:
+        title: 项目信息
+        loading: ${dataStatus.record.loading}
+      children:
+        - type: Alert
+          when: ${state.saveError != ''}
+          props:
+            variant: error
+            showIcon: true
+            message: 保存失败
+            description: ${state.saveError}
+        - type: Form
+          when: ${dataStatus.record.loading == false && data.record != null}
+          props:
+            name: recordEdit
+            layout: vertical
+            initialValues: ${data.record}
+          events:
+            onSubmit:
+              - action: setState
+                params: { submitting: true, saveError: '' }
+              - id: saveResult
+                action: service.call
+                params:
+                  service: project.update
+                  params:
+                    id: ${params.id}
+                    name: ${event.name}
+                    code: ${event.code}
+                    owner: ${event.owner}
+                    status: ${event.status}
+                    startDate: ${event.startDate}
+                    dueDate: ${event.dueDate}
+                    enabled: ${event.enabled}
+                    description: ${event.description}
+              - action: setState
+                params: { submitting: false }
+              - action: if
+                params:
+                  condition: ${actions.saveResult.ok != false}
+                  then:
+                    - action: message
+                      params: { messageType: success, text: 项目已保存 }
+                    - action: navigate
+                      params:
+                        to: /projects/${params.id}
+                  else:
+                    - action: setState
+                      params:
+                        saveError: ${actions.saveResult.error.message || '请检查网络后重试'}
+          children:
+            - type: Row
+              props: { gutter: 16 }
+              children:
+                - type: Col
+                  props: { xs: 24, md: 12 }
+                  children:
+                    - type: Input
+                      props:
+                        name: name
+                        label: 项目名称
+                        placeholder: 请输入项目名称
+                        rules:
+                          - { required: true, message: 请输入项目名称 }
+                - type: Col
+                  props: { xs: 24, md: 12 }
+                  children:
+                    - type: Input
+                      props:
+                        name: code
+                        label: 项目编号
+                        placeholder: 例如 PRJ-2026-001
+                        rules:
+                          - { required: true, message: 请输入项目编号 }
+                - type: Col
+                  props: { xs: 24, md: 12 }
+                  children:
+                    - type: Select
+                      props:
+                        name: owner
+                        label: 负责人
+                        showSearch: true
+                        placeholder: 选择负责人
+                        rules:
+                          - { required: true, message: 请选择负责人 }
+                        options:
+                          - { label: 张明, value: zhang-ming }
+                          - { label: 李华, value: li-hua }
+                          - { label: 王芳, value: wang-fang }
+                - type: Col
+                  props: { xs: 24, md: 12 }
+                  children:
+                    - type: Select
+                      props:
+                        name: status
+                        label: 项目状态
+                        options:
+                          - { label: 规划中, value: planning }
+                          - { label: 进行中, value: active }
+                          - { label: 已暂停, value: paused }
+                          - { label: 已完成, value: completed }
+                        rules:
+                          - { required: true, message: 请选择项目状态 }
+                - type: Col
+                  props: { xs: 24, md: 12 }
+                  children:
+                    - type: DatePicker
+                      props:
+                        name: startDate
+                        label: 开始日期
+                        placeholder: 选择开始日期
+                - type: Col
+                  props: { xs: 24, md: 12 }
+                  children:
+                    - type: DatePicker
+                      props:
+                        name: dueDate
+                        label: 截止日期
+                        placeholder: 选择截止日期
+                - type: Col
+                  props: { span: 24 }
+                  children:
+                    - type: Field
+                      props:
+                        label: 项目说明
+                        description: 用于详情页展示，建议说明目标、范围和交付物。
+                      children:
+                        - type: Textarea
+                          props:
+                            name: description
+                            rows: 5
+                            maxLength: 2000
+                            placeholder: 请输入项目说明
+                - type: Col
+                  props: { span: 24 }
+                  children:
+                    - type: Field
+                      props:
+                        label: 启用状态
+                        description: 停用后项目仍保留数据，但不再进入活跃列表。
+                      children:
+                        - type: Switch
+                          props:
+                            name: enabled
+            - type: Flex
+              props: { justify: end, gap: 8 }
+              children:
+                - type: Button
+                  props:
+                    text: 取消
+                    disabled: ${state.submitting}
+                  events:
+                    onClick:
+                      - action: navigate
+                        params:
+                          to: /projects/${params.id}
+                - type: Button
+                  props:
+                    text: 保存
+                    variant: primary
+                    submit: true
+                    loading: ${state.submitting}
+                    disabled: ${state.submitting}
