@@ -21,7 +21,8 @@
     "pactor-app": "link:../../packages/pactor",
     "react": "19.2.8",
     "react-dom": "19.2.8",
-    "yaml": "^2.9.1"
+    "yaml": "^2.9.1",
+    "@pactor-app/i18n": "link:../../packages/i18n"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",

@@ -98,7 +98,7 @@ const schema = localizePageDsl({
 });
 ```
 
-统一处理 `$i18n.messages`、`$i18n.key` 与页面 `i18n.bindings` 三种声明；查找顺序为 当前 locale → 显式语言级回退（fallbacks 有序）→ defaultLocale → 描述 fallback（bindings 未显式配置时用目标字段原始字符串）→ key；空字符串视为有效翻译。返回新对象，不修改输入；静态结果输出字符串；含 `${...}` 运行时参数时编译为 `{ $localizedText: { template, params } }`；词条/fallback 含字面量 `${` 抛 `UNSAFE_MESSAGE`。
+统一处理 `$i18n.messages`、`$i18n.key` 与字段内 `$i18n{key:default}` 三种声明；查找顺序为 当前 locale → 显式语言级回退（fallbacks 有序）→ defaultLocale → 描述 fallback（简写中的 default）→ key；空字符串视为有效翻译。返回新对象，不修改输入；静态结果输出字符串；含 `${...}` 运行时参数时编译为 `{ $localizedText: { template, params } }`；词条/fallback 含字面量 `${` 抛 `UNSAFE_MESSAGE`。
 
 ## localizeYamlResource（Node 入口，YAML 资源编排）
 

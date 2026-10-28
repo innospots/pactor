@@ -214,7 +214,7 @@ function collectI18nDescriptorErrors(document: unknown): DslValidationError[] {
 
 /**
  * 校验作者态 Page DSL 文档：在 Page DSL 基础上允许顶层 i18n 字段
- * （namespaces / bindings，bindings 键须为合法 JSON Pointer），
+ * （namespaces；不再接受 bindings），
  * 并递归校验自由对象中出现的 $i18n 翻译描述结构（设计文档第 4.1、4.2 节）。
  */
 export function validateAuthorPageDsl(document: unknown): DslValidationResult {

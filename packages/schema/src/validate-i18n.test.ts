@@ -21,20 +21,9 @@ const withText = (text: unknown) => ({
 });
 
 describe('validateAuthorPageDsl（作者态）', () => {
-  it('accepts 页面级 i18n 字段（namespaces + bindings）', () => {
-    const result = validateAuthorPageDsl({
-      ...clone(basePage),
-      i18n: {
-        namespaces: ['common', 'editor'],
-        bindings: {
-          '/page/title': { key: 'editor.page.title', fallback: '编辑页面' },
-          '/body/props/text': { key: 'common.save', fallback: '保存' },
-        },
-      },
-    });
-
-    expect(result.valid).toBe(true);
-    expect(result.errors).toEqual([]);
+  it('accepts namespaces and rejects removed bindings', () => {
+    expect(validateAuthorPageDsl({ ...clone(basePage), i18n: { namespaces: ['common'] } }).valid).toBe(true);
+    expect(validateAuthorPageDsl({ ...clone(basePage), i18n: { bindings: {} } }).valid).toBe(false);
   });
 
   it('accepts 属性内联多语言与引用语言包两种 $i18n 写法', () => {
@@ -145,23 +134,6 @@ describe('validateAuthorPageDsl（作者态）', () => {
     });
 
     expect(result.valid).toBe(false);
-  });
-
-  it('accepts 合法 JSON Pointer 作为 bindings 键（含空串与 ~0/~1 转义）', () => {
-    const result = validateAuthorPageDsl({
-      ...clone(basePage),
-      i18n: {
-        bindings: {
-          '': { key: 'a.root' },
-          '/page/title': { key: 'a.b' },
-          '/body/children/0/props/text': { messages: { 'zh-CN': '保存' } },
-          '/a~0b~1c': { key: 'a.c' },
-        },
-      },
-    });
-
-    expect(result.valid).toBe(true);
-    expect(result.errors).toEqual([]);
   });
 
   it('rejects 非法 JSON Pointer 形式的 bindings 键', () => {

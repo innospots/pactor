@@ -4,6 +4,15 @@ Read this before writing or editing any Pactor DSL file (`*.page.yaml`). It defi
 
 A DSL file is data, never code: no functions, no arbitrary JavaScript — only declared state, data sources, component trees, events, and actions.
 
+Pair this reference with:
+
+- `references/page-blueprints.md` for complete page structures and the R1–R13 delivery checklist.
+- `references/component-contracts.md` for exact high-frequency props, events, slots, form behavior, overlays, blocks, charts, and chat.
+- `references/component-catalog.md` for every registered DSL type, package registration, purpose, and online documentation link.
+- `references/page-catalog-and-layout.md` when adding routes, menus, or global layouts.
+- `references/examples/index.md` for complete page baselines, data contracts, host registration, and route/layout mapping.
+- `references/examples/search-list.page.yaml` for the production search/list baseline covering filters, server pagination, table cells, async states, permissions, retry, confirm, and feedback.
+
 ## 1. Page skeleton (PageDsl)
 
 Every page file has this top-level shape. Only `dsl`, `page`, and a UI root (`body` or root-level `children`) matter for simple pages; everything else is optional.
@@ -69,7 +78,7 @@ Rules:
   when: ${state.mode != 'readonly'} # conditional render; false → node and subtree skipped
 ```
 
-Component types come from the registry (built-in list in SKILL.md "UI at a glance"). Never invent type names; unknown types render an "Unsupported" placeholder.
+Component types come from the registry. Check `references/component-catalog.md` before using a type; never infer a component name from a design document. Unknown types render an "Unsupported" placeholder. In particular, `Chart` is not a type (use `LineChart` / `PieChart` / …), and the docs label `Splitter` maps to DSL type `Resizable`.
 
 ## 3. state
 
@@ -219,6 +228,8 @@ Applies at page / menu / component / action levels. In expressions: `${!permissi
 
 ## 8. Recipes (copy-paste starting points)
 
+A production-complete page is more than a component tree. Before copying a recipe, read `references/page-blueprints.md` and preserve the applicable page header, breadcrumb, permission, loading, empty, error, disabled, and responsive regions. Use [`examples/search-list.page.yaml`](examples/search-list.page.yaml) for the production list baseline, or the closest page type in [`examples/index.md`](examples/index.md).
+
 ### 8.1 Query form + data table (the most common page)
 
 ```yaml
@@ -252,24 +263,20 @@ body:
               - action: reload
                 params: { dataSource: customers }
           children:
-            - type: Field                      # Form 内控件必须放 Field 内（label 归 Field）
-              props: { label: Keyword }
-              children:
-                - type: Input
-                  props: { name: keyword, placeholder: Name / owner }
-            - type: Field
-              props: { label: Status }
-              children:
-                - type: Select
-                  props:
-                    name: status
-                    options:
-                      - { label: Enabled, value: active }
-                      - { label: Disabled, value: inactive }
-            - type: Field                      # 查询按钮也放 Field 内，与输入框对齐
-              children:
-                - type: Button
-                  props: { text: Search, variant: primary, submit: true }   # submit: true, NOT htmlType
+            - type: Input                    # name 让控件自动成为 Form 字段
+              props:
+                name: keyword
+                label: Keyword
+                placeholder: Name / owner
+            - type: Select
+              props:
+                name: status
+                label: Status
+                options:
+                  - { label: Enabled, value: active }
+                  - { label: Disabled, value: inactive }
+            - type: Button                   # inline Form 中与字段自动同基线
+              props: { text: Search, variant: primary, submit: true }   # submit: true, NOT htmlType
     - type: Card
       props: { title: Customer Data }
       children:
@@ -290,6 +297,21 @@ body:
                       - action: navigate
                         params:
                           to: /customers/${row.id}/edit   # param name is `to`
+```
+
+Use an explicit `Field` only for extra structure, for example:
+
+```yaml
+- type: Field
+  props:
+    label: Owner
+    description: The owner receives review notifications.
+  children:
+    - type: Select
+      props:
+        name: owner
+        rules: [{ required: true, message: Select an owner }]
+        options: ${data.owners}
 ```
 
 ### 8.2 Drawer edit (overlay.open named action + close payload)
@@ -486,7 +508,7 @@ events:
 state:
   cityMap: { Zhejiang: [{ label: Hangzhou, value: Hangzhou }], Jiangsu: [{ label: Nanjing, value: Nanjing }] }
   cityOptions: []
-# fields (each control wrapped in Field, as required inside Form):
+# explicit Fields used to group controls that share a description:
 - type: Field
   props: { label: Province }
   children:
@@ -557,7 +579,7 @@ body:
 | Column template key `render` | `cell` |
 | `pagination: true` | `pagination: { pageSize: 10 }` |
 | `htmlType: submit` | `submit: true` |
-| Bare `Input`/`Select`/`Button` directly under `Form` | Wrap every form control (incl. search-bar buttons) in `Field`; label / required / description / error belong to `Field` |
+| Duplicate label on explicit `Field` and inner `Input` | The control owns `name` / `rules`; put `label` on either the control (automatic field shell) or the explicit `Field`, never both |
 | Relying on `Field required: true` for validation | It is a visual `*` marker only — declare `rules: [{ required: true, message: ... }]` on the CONTROL (`Input`/`Select`/…); Form validates control rules on submit |
 | `style` / `className` as node-level keys (sibling of `props:`) | They are component props — always nest them inside `props: { className: ..., style: ... }`; node-level keys are silently ignored |
 | `children` nested inside `props:` | `children` is a NODE-level key (sibling of `props:`); nested under `props:` it is silently dropped |
@@ -566,21 +588,34 @@ body:
 | Reading full form values in `onValuesChange` | It only carries the changed field; use `onSubmit` or `${form.x}` |
 | Expecting actions to re-render UI | Only the state/data changes they produce do |
 | Inventing component `type` names or props | Use registry names (SKILL.md list) and documented props |
+| `type: Chart` | Use a concrete registered chart, e.g. `LineChart`, `ColumnChart`, `PieChart` |
+| `type: Splitter` | Use `Resizable`; `Splitter` is only the documentation label |
 
 ## 10. Validate before delivering
 
 ```bash
-npx pactor validate path/to.page.yaml        # consumer projects (@pactor-app/cli installed)
-node packages/cli/dist/cli.js validate <file> # inside the pactor monorepo
+# 单文件
+npx pactor validate src/server/yaml/pages/home.page.yaml
+
+# 递归校验 DSL 目录（包含表达式静态检查）
+npx pactor lint src/server/yaml
 ```
 
-The validator checks schema shape (top-level keys, node structure, action configs). It does NOT validate component props — correctness of props comes from this reference and the component docs.
+The command must run in the consumer project with `@pactor-app/cli` installed. It checks schema shape (top-level keys, node structure, action configs) but does NOT validate component props. Correctness of props comes from the bundled component catalog/contracts and the online docs.
 
-## 11. Deeper references (monorepo)
+## 11. Version-drift lookup
 
-- Exhaustive DSL reference: `docs/src/content/docs/reference/dsl.md` (named actions/components, dynamic source refs, lifecycle details)
-- Per-component props + minimal YAML per component: `docs/src/content/docs/components/` (index.md lists all 71)
-- Events & form linkage deep-dive: `docs/src/content/docs/guides/events.md`
-- Data flow deep-dive: `docs/src/content/docs/guides/data-flow.md`
-- Runnable example pages: `examples/admin/src/pages/*.page.yaml`
-- Authoritative schemas: `packages/schema/src/schemas/page-dsl.ts`, `packages/schema/src/schemas/dsl-node.ts`
+- Exhaustive DSL reference: <https://pactor.innospots.com/docs/reference/dsl/> (named actions/components, dynamic source refs, lifecycle details)
+- Online component catalog: <https://pactor.innospots.com/components/overview/> (141 documentation entries; complete type mapping in `references/component-catalog.md`)
+- Online page templates: <https://pactor.innospots.com/templates/overview/>
+- Source repository: <https://github.com/innospots/pactor>
+- Page DSL schema source: <https://github.com/innospots/pactor/blob/main/packages/schema/src/schemas/page-dsl.ts>
+- DSL node and action schema source: <https://github.com/innospots/pactor/blob/main/packages/schema/src/schemas/dsl-node.ts>
+- UI component adapters: <https://github.com/innospots/pactor/tree/main/packages/ui/src/components/components>
+- Chart adapters: <https://github.com/innospots/pactor/tree/main/packages/chart/src/components>
+- Blocks: <https://github.com/innospots/pactor/tree/main/packages/blocks/src/components>
+- Chat DSL component: <https://github.com/innospots/pactor/blob/main/packages/chat/src/view/Chat.tsx>
+- Events & form linkage deep-dive: <https://pactor.innospots.com/docs/guides/events/>
+- Data flow deep-dive: <https://pactor.innospots.com/docs/guides/data-flow/>
+
+Use these links only when the installed package version appears newer than the bundled references. The bundled files remain the primary offline source for page authoring.

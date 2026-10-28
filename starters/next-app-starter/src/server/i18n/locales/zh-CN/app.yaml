@@ -1,0 +1,118 @@
+dashboard.coreOverview: 核心概览 · {{start}} — {{end}}
+dashboard.link.allClients: 查看全部 → 客户端用量
+dashboard.link.allModels: 查看全部 → 模型用量
+dashboard.link.reliability: 查看可靠性分析 →
+dashboard.metric.cost: 费用
+dashboard.metric.latency: 延迟
+dashboard.metric.requests: 请求
+dashboard.preset.lastDays: 近{{days}}天
+dashboard.preset.today: 今天
+dashboard.rangeLabel: 分析时间范围
+dashboard.rangePlaceholder: 选择时间范围
+dashboard.realtime: 实时 {{rpm}} RPM · {{tpm}} TPM
+dashboard.refresh: ↻ 刷新
+dashboard.refreshed: 看板数据已刷新
+dashboard.stats.activeClients: "{{clients}} 位活跃客户端 · {{tokens}} Token"
+dashboard.stats.avgCost: 平均每次 {{cost}}
+dashboard.stats.avgLatency: 平均响应时间
+dashboard.stats.cost: 计费金额
+dashboard.stats.failures: "{{failures}} 个失败 · 错误率 {{errorRate}}%"
+dashboard.stats.requests: 请求量
+dashboard.stats.successRate: 成功率
+dashboard.subtitle: 运营概览
+dashboard.title: 仪表盘
+dashboard.toast.callLog: 跳转调用日志（失败筛选）
+dashboard.toast.clients: 跳转客户端用量
+dashboard.toast.models: 跳转模型用量
+dashboard.toast.providerAvailability: 跳转供应商可用性
+dashboard.trend.subtitle: 观察流量变化与异常峰值
+dashboard.trend.title: 趋势分析
+dashboard.usage.clients: 用量构成 · 客户端
+dashboard.usage.clientsSubtitle: 按请求量分布，识别主要客户端流量来源
+dashboard.usage.models: 用量构成 · 模型
+dashboard.usage.modelsSubtitle: 按请求量分布，识别主要模型流量来源
+layout.logout: 退出登录
+layout.profile: 个人中心
+layout.profileToast: 打开个人中心
+menu.assets: 模型资产
+menu.dashboard: 仪表盘
+menu.data-list: 数据列表
+menu.help: 帮助
+menu.home: 首页
+menu.login: 登录
+menu.monthly: 报表中心
+menu.monthly-detail: 月报详情
+menu.providers: 供应商
+menu.register: 注册
+menu.reports: 报表
+menu.routes: 路由
+menu.routing: 模型路由
+menu.skeletons: 页面骨架
+menu.users: 用户列表
+page.dashboard.description: 运营概览：核心指标、趋势分析、用量构成
+page.dashboard.title: 仪表盘
+page.data-list.title: 数据列表
+page.home.text1: 首页
+page.home.text2: 首页
+page.home.text3: 欢迎回来，{{name}}！
+page.home.text4: 本页与外壳布局均由 sitemap 对象下发（design/dynamic-page.md）；菜单随角色裁剪。
+page.home.text5: 查看月报（需 report:view）
+page.home.title: 首页
+page.login.brandTitle: 管理后台登录
+page.login.error: 用户名或密码错误
+page.login.submit: 登 录
+page.login.success: 登录成功，正在跳转…
+page.login.title: 登录
+page.monthly-detail.text1: 月报详情
+page.monthly-detail.text2: 月报详情
+page.monthly-detail.text3: 路径参数演示：id = {{id}}
+page.monthly-detail.text4: 隐藏页（不出现在菜单），经列表页跳转进入。
+page.monthly-detail.text5: 返回月报
+page.monthly-detail.title: 月报详情
+page.monthly.text1: 月报
+page.monthly.text10: sitemap 中该页仅声明 id / path / version（monthly@7），点击进入时才请求页面 DSL。
+page.monthly.text11: 查看详情（隐藏页 + 路径参数）
+page.monthly.text2: 本月经营月报
+page.monthly.text3: 营收
+page.monthly.text4: 本月（万元）
+page.monthly.text5: 新增客户
+page.monthly.text6: 本月（家）
+page.monthly.text7: 转化率
+page.monthly.text8: 本月（%）
+page.monthly.text9: 本页 DSL 由 /api/pages/monthly 懒加载下发
+page.monthly.title: 月报
+page.provider-create.title: 新增 Provider
+page.provider-detail.title: Provider 详情
+page.provider-edit.title: 编辑 Provider
+page.provider-list.title: 供应商
+page.register.text1: 注册
+page.register.text2: 注册
+page.register.text3: 演示环境不开放注册
+page.register.text4: 请使用登录页的演示账号体验不同角色的菜单差异。
+page.register.text5: 返回登录
+page.register.title: 注册
+page.route-create.title: 新增路由
+page.route-detail.title: 路由详情
+page.route-edit.title: 编辑路由
+page.route-list.title: 路由
+page.users.text1: 用户列表
+page.users.text10: 访客
+page.users.text11: 查询
+page.users.text12: 用户数据
+page.users.text13: 姓名
+page.users.text14: 用户名
+page.users.text15: 角色
+page.users.text16: 邮箱
+page.users.text17: 创建时间
+page.users.text18: 操作
+page.users.text19: 查看
+page.users.text2: 用户列表
+page.users.text20: 用户 {{name}}（{{username}}）
+page.users.text3: 筛选
+page.users.text4: 关键词
+page.users.text5: 姓名 / 用户名
+page.users.text6: 角色
+page.users.text7: 请选择角色
+page.users.text8: 管理员
+page.users.text9: 成员
+page.users.title: 用户列表

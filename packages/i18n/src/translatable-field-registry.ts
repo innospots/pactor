@@ -105,6 +105,14 @@ export class TranslatableFieldRegistry {
  */
 export function createDefaultTranslatableFieldRegistry(): TranslatableFieldRegistry {
   return new TranslatableFieldRegistry()
+    .register('Page', 'props.title')
+    .register('Card', 'props.title')
+    .register('Statistic', 'props.title')
+    .register('Alert', ['props.message', 'props.description'])
+    .register('Typography', 'props.text')
+    .register('Login', ['props.brand.title', 'props.title', 'props.submitText'])
+    .register('Header', ['props.user.items[*].label'])
+    .register('DropdownMenu', ['props.items[*].label'])
     .register('Button', ['props.text', 'props.label', 'props.description', 'props.ariaLabel'])
     .register('Text', ['props.text', 'props.description', 'props.ariaLabel'])
     .register('Input', [
@@ -113,6 +121,7 @@ export function createDefaultTranslatableFieldRegistry(): TranslatableFieldRegis
       'props.placeholder',
       'props.description',
       'props.ariaLabel',
+      'props.rules[*].message',
     ])
     .register('Table', [
       'props.label',
@@ -127,6 +136,8 @@ export function createDefaultTranslatableFieldRegistry(): TranslatableFieldRegis
       'props.ariaLabel',
       'props.options[*].label',
     ])
+    .register('DatePicker', ['props.placeholder', 'props.presets[*].label'])
+    .register('ToggleGroup', ['props.options[*].label'])
     .registerAction('message', ['params.text'])
     .registerAction('confirm', ['params.title', 'params.content']);
 }

@@ -1,0 +1,215 @@
+# 完整站点导航页：适用于 blank / landing 全局布局。
+# 顶部 NavigationMenu 负责跨路由导航，侧边 Menu 负责当前分区的章节导航，
+# 内容区与 SiteFooter 构成完整页面；PageOutlet 只存在于全局布局中。
+dsl: '1.0'
+page:
+  id: navigation
+  title: Pactor 文档门户
+  type: info
+
+state:
+  activeSection: /guides/start
+
+body:
+  type: Layout
+  props:
+    direction: vertical
+    className: min-h-screen bg-background
+  children:
+    - type: Header
+      props:
+        logo: /logo.svg
+        title: Pactor
+        className: sticky top-0 z-20
+      children:
+        - type: Flex
+          props:
+            justify: space-between
+            align: center
+            wrap: true
+            gap: 12
+            className: w-full
+          children:
+            - type: NavigationMenu
+              props:
+                items:
+                  - label: 产品
+                    children:
+                      - { label: 运行时, description: 页面 DSL 与应用运行时, href: /runtime, icon: boxes }
+                      - { label: 组件, description: 可组合的 UI 契约, href: /components/overview, icon: layout-grid }
+                  - label: 模板
+                    href: /templates/overview
+                  - label: 指南
+                    children:
+                      - { label: 快速开始, description: 创建第一个页面, href: /guides/start, icon: rocket }
+                      - { label: 数据流, description: 数据源、状态与动作, href: /guides/data-flow, icon: database }
+                  - label: GitHub
+                    href: https://github.com/innospots/pactor
+                    icon: github
+            - type: Flex
+              props: { align: center, gap: 8 }
+              children:
+                - type: Button
+                  props: { text: 登录, variant: text }
+                  events:
+                    onClick:
+                      - action: navigate
+                        params: { to: /login }
+                - type: Button
+                  props: { text: 开始使用, variant: primary, icon: arrow-right }
+                  events:
+                    onClick:
+                      - action: navigate
+                        params: { to: /guides/start }
+
+    - type: Content
+      children:
+        - type: Container
+          props:
+            size: xl
+            centered: true
+            className: py-8
+          children:
+            - type: Page
+              children:
+                - type: Breadcrumb
+                  props:
+                    items:
+                      - { label: 首页, href: / }
+                      - { label: 文档 }
+
+                - type: Flex
+                  props:
+                    direction: vertical
+                    gap: 4
+                  children:
+                    - type: Typography
+                      props: { text: 构建你的第一个 Pactor 页面, variant: h2 }
+                    - type: Typography
+                      props:
+                        text: 从页面结构、数据源和动作链路开始，组合出可维护的业务界面。
+                        variant: muted
+
+                - type: Row
+                  props: { gutter: 24, align: top }
+                  children:
+                    - type: Col
+                      props: { xs: 24, lg: 7 }
+                      children:
+                        - type: Card
+                          props: { title: 文档目录 }
+                          children:
+                            - type: Menu
+                              props:
+                                mode: inline
+                                collapsible: true
+                                selectedKey: ${state.activeSection}
+                                items:
+                                  - { key: /guides/start, label: 快速开始, icon: rocket, group: 指南 }
+                                  - { key: /guides/data-flow, label: 数据流, icon: database, group: 指南 }
+                                  - { key: /guides/layouts, label: 布局, icon: layout, group: 指南 }
+                                  - { key: /components/overview, label: 组件总览, icon: boxes, group: 参考 }
+                                  - { key: /templates/overview, label: 页面模板, icon: copy, group: 参考 }
+                              events:
+                                onSelect:
+                                  - action: setState
+                                    params:
+                                      activeSection: ${event}
+                                  - action: navigate
+                                    params:
+                                      to: ${event}
+
+                    - type: Col
+                      props: { xs: 24, lg: 17 }
+                      children:
+                        - type: Flex
+                          props: { direction: vertical, gap: 16 }
+                          children:
+                            - type: Card
+                              props:
+                                title: 推荐路径
+                                extra:
+                                  - type: Tag
+                                    props: { text: 约 10 分钟, color: info }
+                              children:
+                                - type: Steps
+                                  props:
+                                    current: 1
+                                    items:
+                                      - { title: 定义页面, description: 声明 page、state 和 body }
+                                      - { title: 接数据, description: 配置 dataSources 与加载状态 }
+                                      - { title: 串动作, description: 用 events 和 actions 闭环交互 }
+                                      - { title: 做验收, description: 检查路由、权限和响应式 }
+                            - type: Grid
+                              props: { columns: 2, gap: 16 }
+                              children:
+                                - type: Card
+                                  props: { title: 组件文档, hoverable: true }
+                                  children:
+                                    - type: Typography
+                                      props:
+                                        text: 查看 175 个运行时 DSL 类型、在线示例与组件契约。
+                                        variant: muted
+                                    - type: Button
+                                      props: { text: 浏览组件, variant: link, icon: arrow-right }
+                                      events:
+                                        onClick:
+                                          - action: navigate
+                                            params: { to: /components/overview }
+                                - type: Card
+                                  props: { title: 页面模板, hoverable: true }
+                                  children:
+                                    - type: Typography
+                                      props:
+                                        text: 从搜索列表、详情、表单、看板和聊天页起步。
+                                        variant: muted
+                                    - type: Button
+                                      props: { text: 浏览模板, variant: link, icon: arrow-right }
+                                      events:
+                                        onClick:
+                                          - action: navigate
+                                            params: { to: /templates/overview }
+                            - type: Card
+                              props: { title: 下一步 }
+                              children:
+                                - type: Alert
+                                  props:
+                                    variant: info
+                                    showIcon: true
+                                    message: 页面必须挂到真实路由
+                                    description: 本示例使用 blank / landing 布局；不要再在普通页面中放置 PageOutlet。
+                                - type: Flex
+                                  props: { justify: end, gap: 8 }
+                                  children:
+                                    - type: Button
+                                      props: { text: 上一节 }
+                                    - type: Button
+                                      props: { text: 开始创建, variant: primary, icon: arrow-right }
+                                      events:
+                                        onClick:
+                                          - action: navigate
+                                            params: { to: /guides/start }
+
+    - type: SiteFooter
+      props:
+        brand:
+          logo: /logo.svg
+          name: Pactor
+          description: 动态应用运行时与企业级 Server-Driven UI。
+        groups:
+          - title: 产品
+            links:
+              - { text: 组件总览, href: /components/overview }
+              - { text: 页面模板, href: /templates/overview }
+          - title: 资源
+            links:
+              - { text: 快速开始, href: /guides/start }
+              - { text: GitHub, href: https://github.com/innospots/pactor }
+          - title: 支持
+            links:
+              - { text: 文档, href: /docs }
+              - { text: 联系我们, href: /contact }
+        copyright: © 2026 Pactor
+        bottomLinks:
+          - { text: 隐私政策, href: /privacy }
+          - { text: 服务条款, href: /terms }

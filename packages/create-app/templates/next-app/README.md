@@ -26,31 +26,12 @@ sitemap 端点按新会话重新裁剪内容。
 
 ## 语言切换（i18n）
 
-外壳 Header 内置语言下拉（中文 / English），切换即生效、无整页刷新，
-偏好持久化在 localStorage `pactor.locale`，刷新后恢复。接线位置：
-
-- `src/pactor/i18n/messages.ts`：业务语言包（按语言分组的词条表）。
-  页面 / 布局 DSL 经 `${t('key')}` 消费，参数插值用 `{{name}}` 占位符
-  （如 `${t('home.welcome', { name: data.session.user.name })}`）。
-  业务 key 用自有命名空间（`shell.*` / `home.*` / `dashboard.*`），
-  不要占用框架保留的 `pactor.*` 前缀（内置组件默认文案）。
-- `src/pactor/i18n/locale.ts`：宿主 locale 状态（持久化 + 订阅）与
-  `translateHost`（SitemapApp 之外的宿主视图文案，如页面访问门禁）。
-- `src/pactor/actions.ts`：自定义动作 `app.setLocale`——布局 DSL 的
-  `onLocaleChange` 经它写偏好并通知宿主；任意页面 DSL 也可调用。
-- `src/pactor/App.tsx`：向 `SitemapApp` 传 `locale` / `defaultLocale` /
-  `messages`，并以 `key={locale}` 重挂载——框架暂不随 locale 重取
-  sitemap（阶段 B），换 key 让 sitemap 携带新 `?locale=` 重拉，
-  菜单 / 布局 / 页面整体切换（代价：侧栏折叠态等布局临时状态重置；
-  框架支持 sitemap 随 locale 重取后应移除此 key）。
-- `src/server/sitemap.ts` + `src/server/yaml/sitemap.yaml`：菜单 / 页面
-  `title` 支持字符串或按语言映射 `{ zh-CN: ..., en-US: ... }`，
-  `/api/sitemap` 按 `?locale=` 直出对应语言（缺省 zh-CN）。
-
-增删语言：在 `messages.ts` 的 `SUPPORTED_LOCALES` / `MESSAGES` 加一组词条，
-并在 sitemap.yaml 布局 Header 的 `locales` 列表加一项即可。演示页面中
-provider / route / models 骨架保留中文原文，按上述范式（`t()` key +
-词条表）自行扩展。
+页面 / 布局文案由服务端按请求语言本地化后下发（词条在
+`src/server/i18n/locales/<locale>/app.yaml`，DSL 用 `$i18n` 引用），
+宿主 `src/pactor/locale.tsx` 统一解析 URL `?locale=` / Cookie /
+`Accept-Language`，右下角语言选择器写入 `locale` Cookie；切换时宿主以
+`key={locale}` 重挂载 `SitemapApp`，sitemap、布局和页面携带新 `?locale=`
+整体重拉。详见文末「国际化」。
 
 ## 数据转发层（/api/d）
 
@@ -188,12 +169,13 @@ src/
     config.ts              # ★ 入口配置：sitemapSources / pageAccessEndpoint /
                            # apiBaseUrl / serverBaseUrl
     App.tsx                # 薄壳：页面访问门禁 + 框架 SitemapApp + 宿主路由
-                           #（注册自定义组件 / 动作与 blocks 的 Login；
-                           # 持有 locale 状态并向 SitemapApp 传 i18n props）
+                           #（注册自定义组件与 blocks 的 Login，向 SitemapApp
+                           # 传 locale / defaultLocale）
+    locale.tsx             # 宿主 locale 解析（URL / Cookie / 浏览器语言）、
+                           # LocaleSelector 与 Cookie 持久化
     page-access.tsx        # 页面访问门禁（切换前校验 / 403 视图）
     skin.ts                # 皮肤清单与运行时换肤（link[data-pactor-skin] swap）
-    i18n/                  # 语言包（messages.ts）与宿主 locale 状态（locale.ts）
-    actions.ts             # 页面级自定义动作注册表（app.setLocale 语言切换）
+    i18n/                  # 宿主自身视图词条（messages.ts，页面访问门禁文案）
     components/            # 页面级自定义组件注册表（chat 展示组件 / ThemeSwitcher 等）
   server/
     accounts.ts            # 演示账号（模板为占位符，生成时渲染）与会话 cookie
@@ -209,22 +191,26 @@ src/
       models/              # 页面骨架：data-list 数据列表标准模型
 ```
 
-`App.tsx` 的核心接线（页面访问门禁 + 框架 SitemapApp + 自定义组件 / 动作）：
+`App.tsx` 的核心接线（页面访问门禁 + 框架 SitemapApp + 自定义组件）：
 
 ```tsx
-const { committed, status, retry } = usePageAccessGate(pathname, search, replace);
+const { committed, status, retry } = usePageAccessGate(
+  pathname,
+  search,
+  replace,
+  locale,
+);
 
 <SitemapApp
+  key={locale}               // 切换语言时整体重取 sitemap / 布局 / 页面
   sources={sitemapSources}
   baseUrl={apiBaseUrl}
   pathname={committed.pathname}
   query={committedQuery}
   navigate={navigate}
   components={appComponents} // src/pactor/components/ + blocks 的 Login
-  actions={pactorActions}    // src/pactor/actions.ts（app.setLocale 语言切换）
-  locale={locale}            // src/pactor/i18n/（localStorage pactor.locale 持久化）
+  locale={locale}            // src/pactor/locale.tsx（URL / Cookie / 浏览器语言）
   defaultLocale="zh-CN"
-  messages={MESSAGES[locale]}
 />
 ```
 
@@ -276,3 +262,19 @@ mock API 已在路由层放开跨源（`src/server/cors.ts`：Allow-Origin 回�
 `${app}` / `${menus}` 作用域（框架尚未原生开放）。当前由 `SitemapApp` 内置的
 `session.context` 服务桥接，DSL 中写作 `${data.session.user.name}`、
 `${data.session.menus}`；框架支持原生作用域后可平滑迁回。
+
+## 国际化
+
+示例支持 `zh-CN` 和 `en-US`。右下角语言选择器保存 `locale` Cookie、同步 URL 的 `locale` 参数与文档 `lang`，切换时重新加载 sitemap、布局和页面。`SitemapApp` 当前不会自动按语言重取 sitemap，因此宿主按语言重挂载它；路由、查询参数与登录会话保留。
+
+- `src/server/i18n/locales/<locale>/app.yaml`：服务端词条；`src/server/i18n/index.ts` 配置版本清单与 `YamlMessageProvider`。
+- 页面 YAML 使用 `$i18n{key:default}` 引用词条；带动态参数时使用对象式 `$i18n.params`，支持运行时参数，服务端下发 `$localizedText`，浏览器只插值，不查找业务语言包。
+- `/api/sitemap` 和 `/api/pages/{id}` 依次按 URL `locale`、Cookie、`Accept-Language` 选择语言；页面接口下发 `representation: localized` 和版本信息，响应不缓存。权限裁剪发生在本地化之前。
+- 本 starter 的登录、注册、首页、仪表盘、用户与月报示例、菜单和外壳演示两种语言。业务数据接口返回的内容由数据服务负责翻译。
+- 扩展页面时为字段增加绑定并在两个语言包中补充对应 key；扩展布局时在已注册的可翻译字段内添加简写。引用独立词条或内联 `$i18n` 时，还需要按 `@pactor-app/i18n` 的可翻译字段注册表注册相应组件字段。
+- provider / route / data-list 参考模块保留中文原文，接入业务时按上述范式补 `$i18n` 与词条。
+- 新增语言：在 `src/server/i18n/index.ts` 的 `localeConfig.supportedLocales` 与 `manifest.locales` 中登记，新增 `locales/<locale>/app.yaml`，并在 `src/pactor/locale.tsx` 的 `supported` / `LocaleSelector` 中加入该语言。
+
+`src/pactor/i18n/messages.ts` 只保留宿主自身视图（页面访问门禁）的词条，不参与服务端本地化；页面 / 布局文案一律走 `$i18n` 与服务端词条，两种机制不要混用。
+
+语言包目录属于应用源码；正式部署时应随服务端产物发布，修改语言包后更新清单版本。切换语言时服务端错误会显示为资源加载失败；生产环境可进一步接入版本化发布与失败回滚。

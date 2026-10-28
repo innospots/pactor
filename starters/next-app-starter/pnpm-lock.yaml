@@ -17,6 +17,9 @@ importers:
       '@pactor-app/core':
         specifier: link:../../packages/core
         version: link:../../packages/core
+      '@pactor-app/i18n':
+        specifier: link:../../packages/i18n
+        version: link:../../packages/i18n
       '@pactor-app/runtime':
         specifier: link:../../packages/runtime
         version: link:../../packages/runtime

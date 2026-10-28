@@ -94,3 +94,9 @@ vite.config.ts           # react 插件（无代理：接口服务端已开通 C
 > pactor 依赖经 `link:../../packages/*` 指向本仓；`v1.19.0` 发布到 npm 后
 > 改回 `^1.19.0` 版本号即可独立使用。`react-router-dom` 是
 > `@pactor-app/app` 的 peer 依赖（整应用模式需要），纯前端模式不会用到。
+
+## 前端国际化
+
+右下角选择器将语言保存在浏览器的 `localStorage`，并同步 URL `locale` 与文档 `lang`。`src/i18n/messages.ts` 是前端词条，`SitemapApp` 接收 `locale`、`defaultLocale` 和 `messages`；`src/i18n/demo.ts` 注册的 `/client-i18n` 页使用 `${t('demo.title')}` 与动态参数插值，可直接切换中英文。
+
+本示例仍连接 next-app-starter 的后端：远端菜单和页面由该服务按请求 `locale` 本地化，`/client-i18n` 展示浏览器自主翻译的模式。语言变化会重挂载 `SitemapApp`，重取同一语言的远端 sitemap；如果业务接口返回的数据也需要翻译，应由对应服务或前端产品代码自行处理。扩展前端词条时同时维护两种语言；缺失 key 按默认语言回退。
