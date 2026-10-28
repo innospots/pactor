@@ -1,0 +1,245 @@
+# 完整 Drawer 表单页：列表上打开右侧滑层，默认 footer 的“保存”通过
+# form.submit 触发表单校验，提交成功后关闭并刷新列表。
+dsl: '1.0'
+page:
+  id: drawer-form
+  title: 任务列表
+  type: drawer-form
+  permission: task:view
+
+state:
+  drawerOpen: false
+  editingId: ''
+  submitting: false
+  saveError: ''
+  drawerValues:
+    title: ''
+    priority: medium
+    assignee: ''
+    enabled: true
+    note: ''
+
+dataSources:
+  tasks:
+    type: service
+    service: task.list
+    autoLoad: true
+
+body:
+  type: Page
+  children:
+    - type: Breadcrumb
+      props:
+        items:
+          - { label: 首页, href: / }
+          - { label: 任务管理 }
+
+    - type: Flex
+      props:
+        justify: space-between
+        align: center
+        wrap: true
+        gap: 12
+      children:
+        - type: Flex
+          props: { direction: vertical, gap: 4 }
+          children:
+            - type: Typography
+              props: { text: 任务管理, variant: h3 }
+            - type: Typography
+              props:
+                text: 在保留列表上下文的前提下完成任务编辑。
+                variant: muted
+        - type: Button
+          props: { text: 新建任务, icon: plus, variant: primary }
+          permission: task:create
+          events:
+            onClick:
+              - action: setState
+                params:
+                  drawerOpen: true
+                  editingId: ''
+                  saveError: ''
+                  drawerValues:
+                    title: ''
+                    priority: medium
+                    assignee: ''
+                    enabled: true
+                    note: ''
+
+    - type: Alert
+      when: ${dataStatus.tasks.error != null}
+      props:
+        variant: error
+        showIcon: true
+        message: 任务列表加载失败
+        description: ${dataStatus.tasks.error.message}
+
+    - type: Card
+      when: ${dataStatus.tasks.error == null}
+      props: { title: 任务列表 }
+      children:
+        - type: Flex
+          props: { justify: end, gap: 8 }
+          children:
+            - type: Button
+              props:
+                text: 刷新
+                icon: refresh
+                variant: text
+                loading: ${dataStatus.tasks.loading}
+              events:
+                onClick:
+                  - action: reload
+                    params: { dataSource: tasks }
+        - type: Table
+          props:
+            dataSource: ${data.tasks}
+            rowKey: id
+            loading: ${dataStatus.tasks.loading}
+            pagination: { pageSize: 10 }
+            emptyText: 暂无任务
+            columns:
+              - { title: 任务标题, dataIndex: title }
+              - { title: 负责人, dataIndex: assignee }
+              - title: 优先级
+                dataIndex: priority
+                cell:
+                  type: Tag
+                  props:
+                    text: "${row.priorityLabel || row.priority}"
+                    color: "${row.priority === 'high' ? 'error' : row.priority === 'low' ? 'default' : 'warning'}"
+              - title: 状态
+                dataIndex: enabled
+                cell:
+                  type: Status
+                  props:
+                    status: "${row.enabled ? 'success' : 'default'}"
+                    text: "${row.enabled ? '启用' : '停用'}"
+              - title: 操作
+                width: 120
+                fixed: right
+                cell:
+                  type: Button
+                  props: { text: 编辑, variant: link, size: small }
+                  permission: task:edit
+                  events:
+                    onClick:
+                      - action: setState
+                        params:
+                          drawerOpen: true
+                          editingId: ${row.id}
+                          saveError: ''
+                          drawerValues:
+                            title: ${row.title}
+                            priority: ${row.priority}
+                            assignee: ${row.assignee}
+                            enabled: ${row.enabled}
+                            note: ${row.note}
+
+    - type: Drawer
+      props:
+        title: 编辑任务
+        open: ${state.drawerOpen}
+        placement: right
+        draggable: false
+        closable: true
+        cancelText: 取消
+        okText: 保存
+        style: { width: 480, maxWidth: '100vw' }
+      events:
+        onClose:
+          - action: setState
+            params: { drawerOpen: false, saveError: '' }
+        onOk:
+          - action: form.submit
+            params: { form: taskDrawer }
+      children:
+        - type: Alert
+          when: ${state.saveError != ''}
+          props:
+            variant: error
+            showIcon: true
+            message: 保存失败
+            description: ${state.saveError}
+        - type: Form
+          props:
+            name: taskDrawer
+            layout: vertical
+            initialValues: ${state.drawerValues}
+          events:
+            onSubmit:
+              - action: setState
+                params: { submitting: true, saveError: '' }
+              - id: saveResult
+                action: service.call
+                params:
+                  service: task.save
+                  params:
+                    id: ${state.editingId}
+                    title: ${event.title}
+                    priority: ${event.priority}
+                    assignee: ${event.assignee}
+                    enabled: ${event.enabled}
+                    note: ${event.note}
+              - action: setState
+                params: { submitting: false }
+              - action: if
+                params:
+                  condition: ${actions.saveResult.ok != false}
+                  then:
+                    - action: message
+                      params: { messageType: success, text: 任务已保存 }
+                    - action: setState
+                      params: { drawerOpen: false }
+                    - action: reload
+                      params: { dataSource: tasks }
+                  else:
+                    - action: setState
+                      params:
+                        saveError: ${actions.saveResult.error.message || '请检查网络后重试'}
+          children:
+            - type: Input
+              props:
+                name: title
+                label: 任务标题
+                placeholder: 请输入任务标题
+                rules:
+                  - { required: true, message: 请输入任务标题 }
+            - type: Select
+              props:
+                name: priority
+                label: 优先级
+                options:
+                  - { label: 高, value: high }
+                  - { label: 中, value: medium }
+                  - { label: 低, value: low }
+                rules:
+                  - { required: true, message: 请选择优先级 }
+            - type: Select
+              props:
+                name: assignee
+                label: 负责人
+                showSearch: true
+                placeholder: 请选择负责人
+                options:
+                  - { label: 张明, value: zhang-ming }
+                  - { label: 李华, value: li-hua }
+                  - { label: 王芳, value: wang-fang }
+                rules:
+                  - { required: true, message: 请选择负责人 }
+            - type: Field
+              props:
+                label: 启用状态
+                description: 停用后任务不会进入待办列表。
+              children:
+                - type: Switch
+                  props:
+                    name: enabled
+            - type: Textarea
+              props:
+                name: note
+                label: 备注
+                rows: 5
+                maxLength: 1000
+                placeholder: 补充执行说明或验收标准

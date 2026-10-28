@@ -1,0 +1,213 @@
+# Complete list-page reference: page shell, filters, async states, permissions,
+# table actions, destructive confirmation, retry, and navigation closure.
+dsl: '1.0'
+page:
+  id: customer-list
+  title: Customer List
+  type: list
+  permission: customer:view
+
+state:
+  keyword: ''
+  status: ''
+
+dataSources:
+  customers:
+    type: http
+    autoLoad: true
+    request:
+      method: GET
+      url: /api/customers
+      params:
+        keyword: ${state.keyword}
+        status: ${state.status}
+
+body:
+  type: Page
+  children:
+    - type: Breadcrumb
+      props:
+        items:
+          - { label: Home, href: / }
+          - { label: Customer Management }
+
+    - type: Flex
+      props:
+        justify: space-between
+        align: center
+        wrap: true
+        gap: 12
+      children:
+        - type: Flex
+          props:
+            direction: vertical
+            gap: 4
+          children:
+            - type: Typography
+              props: { text: Customer List, variant: h3 }
+            - type: Typography
+              props:
+                text: Search, inspect, and maintain customer records.
+                variant: muted
+        - type: Button
+          props:
+            text: New Customer
+            variant: primary
+            icon: plus
+          permission: customer:create
+          events:
+            onClick:
+              - action: navigate
+                params: { to: /customers/new }
+
+    - type: Flex
+      when: ${dataStatus.customers.error != null}
+      props:
+        align: center
+        gap: 12
+        wrap: true
+      children:
+        - type: Alert
+          props:
+            variant: error
+            showIcon: true
+            message: Customer data failed to load
+            description: ${dataStatus.customers.error.message}
+            style: { flex: 1 }
+        - type: Button
+          props:
+            text: Retry
+            loading: ${dataStatus.customers.loading}
+          events:
+            onClick:
+              - action: reload
+                params: { dataSource: customers }
+
+    - type: Card
+      props: { title: Filters }
+      children:
+        - type: Form
+          props: { name: filters, layout: inline }
+          events:
+            onSubmit:
+              - action: setState
+                params:
+                  keyword: ${event.keyword}
+                  status: ${event.status}
+              - action: reload
+                params: { dataSource: customers }
+          children:
+            - type: Input
+              props:
+                name: keyword
+                label: Keyword
+                placeholder: Name, phone, or owner
+            - type: Select
+              props:
+                name: status
+                label: Status
+                allowClear: true
+                options:
+                  - { label: All, value: '' }
+                  - { label: Active, value: active }
+                  - { label: Disabled, value: disabled }
+            - type: Button
+              props: { text: Search, variant: primary, submit: true }
+            - type: Button
+              props: { text: Reset }
+              events:
+                onClick:
+                  - action: form.setValues
+                    params:
+                      form: filters
+                      values: { keyword: '', status: '' }
+                  - action: resetState
+                  - action: reload
+                    params: { dataSource: customers }
+
+    - type: Card
+      props: { title: Customers }
+      when: ${dataStatus.customers.error == null}
+      children:
+        - type: Table
+          props:
+            dataSource: ${data.customers}
+            rowKey: id
+            loading: ${dataStatus.customers.loading}
+            pagination: { pageSize: 10 }
+            emptyText: No customers match the current filters.
+            columns:
+              - { title: Name, dataIndex: name, sorter: true }
+              - { title: Phone, dataIndex: phone }
+              - title: Status
+                dataIndex: status
+                cell:
+                  type: Status
+                  props:
+                    status: "${row.status === 'active' ? 'success' : 'default'}"
+                    text: "${row.status === 'active' ? 'Active' : 'Disabled'}"
+              - { title: Owner, dataIndex: owner }
+              - title: Actions
+                cell:
+                  type: Flex
+                  props: { gap: 4, wrap: true }
+                  children:
+                    - type: Button
+                      props:
+                        text: View
+                        variant: link
+                        size: small
+                      events:
+                        onClick:
+                          - action: navigate
+                            params: { to: "/customers/${row.id}" }
+                    - type: Button
+                      props:
+                        text: Edit
+                        variant: link
+                        size: small
+                      permission: customer:edit
+                      events:
+                        onClick:
+                          - action: navigate
+                            params: { to: "/customers/${row.id}/edit" }
+                    - type: Button
+                      props:
+                        text: Delete
+                        variant: text
+                        danger: true
+                        size: small
+                      permission:
+                        code: customer:delete
+                        denied: disabled
+                      events:
+                        onClick:
+                          - id: deleteConfirm
+                            action: confirm
+                            params:
+                              title: Delete customer
+                              content: This action cannot be undone.
+                          - action: if
+                            params:
+                              condition: ${actions.deleteConfirm}
+                              then:
+                                - id: deleteResult
+                                  action: request
+                                  params:
+                                    method: DELETE
+                                    url: /api/customers/${row.id}
+                                - action: if
+                                  params:
+                                    condition: ${actions.deleteResult.ok != false}
+                                  then:
+                                    - action: message
+                                      params:
+                                        messageType: success
+                                        text: Customer deleted
+                                    - action: reload
+                                      params: { dataSource: customers }
+                                  else:
+                                    - action: message
+                                      params:
+                                        messageType: error
+                                        text: Delete failed, please retry

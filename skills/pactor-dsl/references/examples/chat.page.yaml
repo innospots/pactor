@@ -1,0 +1,114 @@
+# 完整 AI 对话页：Chat 一等 DSL 组件、模型选择、上下文源、
+# 工作空间 footer、消息动作、产物面板和主题/清空通知。
+# 宿主必须在外层注入 ChatServicesProvider，至少提供 transport。
+dsl: '1.0'
+page:
+  id: chat
+  title: AI 助手
+  type: chat
+
+state:
+  model: demo-pro
+  workspace: ''
+  artifact: null
+  panelOpen: false
+
+body:
+  type: Chat
+  props:
+    title: AI 助手
+    greeting: 你好，我可以帮你分析数据、编写页面或整理文档
+    subtitle: 选择一个建议开始，或直接输入你的问题。
+    conversationId: ${route.query.id || 'chat-main'}
+    params:
+      agentId: ${route.query.id || ''}
+    modelPlacement: composer
+    models:
+      - { value: demo-fast, label: demo-fast }
+      - { value: demo-pro, label: demo-pro }
+      - { value: demo-max, label: demo-max }
+    model: ${state.model}
+    contexts:
+      - { trigger: '@', label: 智能体, service: agents }
+      - { trigger: '+', label: 上下文, service: contexts }
+    suggestions:
+      - { label: 生成本月经营摘要, prompt: 帮我生成本月经营摘要 }
+      - { label: 分析客户流失原因, prompt: 分析最近三个月的客户流失原因 }
+      - { label: 创建一个项目详情页, prompt: 用 Pactor DSL 创建一个项目详情页 }
+    messageActions:
+      - copy
+      - retry
+      - regenerate
+      - { id: edit, builtin: edit, label: 修改并重发 }
+    artifact: ${state.artifact}
+    panelOpen: ${state.panelOpen}
+    composerFooter:
+      type: DropdownMenu
+      props:
+        items:
+          - { label: 默认工作空间, value: default, icon: folder }
+          - { label: 数据团队, value: data-team, icon: users }
+          - { label: 设计团队, value: design-team, icon: pen-tool }
+      events:
+        onSelect:
+          - action: setState
+            params:
+              workspace: ${event}
+      children:
+        - type: Button
+          props: { variant: text, size: small }
+          children:
+            - type: Icon
+              props: { name: folder }
+            - type: Text
+              props:
+                text: ${state.workspace || '选择工作空间'}
+            - type: Icon
+              props: { name: chevron-down }
+    composerBottom:
+      type: Text
+      props:
+        text: 内容由 AI 生成，请核对关键事实和数字。
+        type: secondary
+        size: small
+    headerActions: [export, theme, clear]
+  events:
+    onModelChange:
+      - action: setState
+        params:
+          model: ${event.model}
+    onArtifact:
+      - action: setState
+        params:
+          artifact: ${event.artifact}
+          panelOpen: true
+    onOpenArtifact:
+      - action: setState
+        params:
+          artifact: ${event.artifact}
+          panelOpen: true
+    onOpenArtifactList:
+      - action: setState
+        params: { panelOpen: true }
+    onPanelClose:
+      - action: setState
+        params: { panelOpen: false }
+    onSelectArtifact:
+      - action: setState
+        params:
+          artifact: ${event.artifact}
+    onMessageAction:
+      - action: message
+        params:
+          messageType: info
+          text: 已触发消息操作：${event.action}
+    onClear:
+      - action: message
+        params:
+          messageType: success
+          text: 当前会话已清空
+    onThemeChange:
+      - action: message
+        params:
+          messageType: info
+          text: 已切换为 ${event.theme} 主题
