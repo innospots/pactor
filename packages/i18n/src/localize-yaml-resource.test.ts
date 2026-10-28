@@ -37,12 +37,9 @@ const PAGE_YAML = `
 dsl: "1.0"
 page:
   id: editor
-  title: 编辑页面
+  title: "$i18n{editor.page.title:编辑页面}"
 i18n:
   namespaces: [editor, common]
-  bindings:
-    /page/title:
-      key: editor.page.title
 body:
   type: Button
   props:
@@ -152,7 +149,7 @@ body:
   it('裁剪钩子在作者态校验后执行，结果参与转换', async () => {
     const prune = vi.fn((page: AuthorPageDsl): AuthorPageDsl => {
       const clone = JSON.parse(JSON.stringify(page)) as AuthorPageDsl;
-      // 裁剪掉 Button 的 text（模拟无权限），bindings 只保留 page.title
+      // 裁剪掉 Button 的 text（模拟无权限），page.title 保留翻译简写
       (clone.body as { props: Record<string, unknown> }).props = {};
       return clone;
     });

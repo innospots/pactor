@@ -16,7 +16,7 @@
 4. 渲染服务通过统一 Provider 同时支持读取 Next.js 本地语言包、调用后端语言包 API，以及通过 Next.js 语言包接口读取数据。浏览器正常展示链路不承担语言包加载或 key 查找。
 5. 语言选择、词条版本和缓存上下文贯穿整个资源加载链，避免切换语言后出现旧文案。
 
-声明方式明确分为：**属性内联多语言、属性引用语言包、bindings 路径绑定替换**。前两种直接修改属性的值，第三种保留原字段的默认文案，在页面级单独声明替换关系。语言包位于 Next.js 本地还是后端 API，是独立的来源配置，不增加新的声明方式。
+声明方式明确分为：**属性内联多语言、属性引用语言包、字段内简写 `$i18n{key:default}`**。三种方式均在目标字段直接声明，不再新增页面级路径绑定。语言包位于 Next.js 本地还是后端 API，是独立的来源配置，不增加新的声明方式。
 
 “服务端完成国际化”在这里指 DSL 文案转换，不等同于页面已经生成 HTML。当前 Next.js 示例通过接口向浏览器提供 DSL，仍由 Pactor Runtime 渲染。
 
@@ -54,15 +54,15 @@
 
 ### 4.0 三种多语言声明方式总览
 
-`bindings` 是第三种声明替换关系的方式：**保留字段原有默认文案，通过路径找到该字段，再使用当前请求语言的译文覆盖它。** 它不负责设置或切换 `defaultLocale`，也不是额外的翻译来源。
+第三种方式在字段中直接写 `$i18n{key:default}`；`default` 是缺失词条时的兜底文本，不是 `defaultLocale`。这是对语言包引用的简写，不引入新的语言包来源。
 
-| 方式 | 文案或替换关系在哪里定义 | 原属性的写法 | 是否需要独立语言包 | 适用场景 |
-| --- | --- | --- | --- | --- |
-| 一：属性内联多语言 | 属性的 `$i18n.messages` 中列出各语言文案 | 原字符串改为翻译对象 | 不需要 | 少量、局部且不复用的组件文案 |
-| 二：属性引用语言包 | 属性的 `$i18n.key` 引用独立词条 | 原字符串改为翻译对象 | 需要 | 新建业务组件，推荐作为主要写法 |
-| 三：bindings 路径绑定替换 | 页面 `i18n.bindings` 指定目标路径和翻译描述 | 保留原字符串，如 `text: 保存` | 使用 key 时需要；使用 messages 时不需要 | 现有 YAML 渐进改造、必须保持字符串的元信息字段 |
+| 方式 | 作者态写法 | 语言包 | 适用场景 |
+| --- | --- | --- | --- |
+| 一：属性内联多语言 | `$i18n.messages` | 不需要 | 局部文案 |
+| 二：属性引用语言包 | `$i18n.key`、`fallback`、可选 `params` | 需要 | 需要动态参数或完整描述的文案 |
+| 三：字段内简写 | `"$i18n{common.save:保存}"` | 需要 | 静态文本及元信息的简洁声明 |
 
-三种方式的服务端处理结果相同：当前请求为 `en-US` 时，最终组件属性都是 `text: "Save"`。`bindings` 可以覆盖 `page.title`，也可以覆盖注册过的组件展示字段，例如 `/body/props/text`；不限制为页面标题。
+同一页面可混用三种方式，同一字段只能使用一种。服务端按相同 locale 和回退规则处理，最终均下发本地化文本。
 
 #### 方式一：属性内联多语言
 
@@ -96,62 +96,28 @@ body:
 
 语言包分别定义 `common.save: 保存` 和 `common.save: Save`。服务端可以从 Next.js 本地 YAML 或后端返回的 JSON 获取这些词条，组件写法不变。
 
-#### 方式三：bindings 保留默认文案并按路径替换
+#### 方式三：字段内简写
 
 ```yaml
+dsl: "1.0"
 page:
   id: editor
-  title: 编辑页面
+  title: "$i18n{editor.page.title:编辑页面}"
 i18n:
-  namespaces: [common, editor]
-  bindings:
-    /page/title:
-      key: editor.page.title
-      fallback: 编辑页面
-    /body/props/text:
-      key: common.save
-      fallback: 保存
+  namespaces: [editor, common]
 body:
   type: Button
   props:
-    text: 保存
+    text: "$i18n{common.save:保存}"
 ```
 
-这里的 `/body/props/text` 是 JSON Pointer，表示找到 `body.props.text`。假设英文包中 `common.save` 为 `Save`、`editor.page.title` 为 `Edit page`，服务端返回的 DSL 内容为：
+`$i18n{key:default}` 等价于引用 `key` 且以 `default` 为 `fallback` 的翻译描述；简写仅匹配完整字段值，不进行混合文本或多段拼接。`key` 必须非空且为完整稳定键名；第一个 `:` 分隔 key 和默认文案，后续 `:` 属于默认文案。`default` 必须存在，可以为空；要在默认文案中表示 `}` 或反斜杠，分别写 `\}` 或 `\\`，YAML 中建议使用单引号。非法或未闭合的显式简写必须报错，不能静默按普通文本处理。
 
-```json
-{
-  "page": {"id": "editor", "title": "Edit page"},
-  "body": {"type": "Button", "props": {"text": "Save"}}
-}
-```
+仅对明确允许翻译的文本字段识别：页面 `title` 等已声明的静态元信息，以及注册的组件展示字段；不得扫描或改写 `state`、数据、URL、路由、标识、权限、枚举和请求参数。先解析 YAML，再针对许可字段规范化；禁止对 YAML 原文全局替换。含动态参数的文本继续使用方式二的 `params`，不得在简写的 key 或默认文案中写 `${...}`。
 
-以上为展示声明差异的片段，实际资源仍需要完整的 `dsl` 及 envelope 字段。下发时已经移除 `i18n.bindings`，前端无需处理路径替换。
+例如英文包含 `editor.page.title: Edit page`、`common.save: Save` 时，下发的 `page.title` 与 `body.props.text` 分别为 `Edit page`、`Save`。查找顺序为当前语言、配置的回退语言、默认语言、简写中的 `default`；空字符串译文视为有效命中。
 
-`bindings` 的值也允许使用内联消息，不一定引用语言包：
-
-```yaml
-i18n:
-  bindings:
-    /body/props/text:
-      messages:
-        zh-CN: 保存
-        en-US: Save
-      fallback: 保存
-```
-
-这表示“路径绑定 + 内联消息”。路径决定替换哪个字段，`key` 或 `messages` 决定译文来源，两者是不同维度。
-
-#### 默认文案、默认语言与回退的区别
-
-- `text: 保存`：原字段默认文案，是作者态内容，不决定当前语言。
-- `defaultLocale: zh-CN`：应用的默认及回退语言，由请求解析与词条回退规则使用；`bindings` 不修改它。
-- `fallback: 保存`：当前语言和回退语言均无可用译文时的兜底文案。
-- `bindings`：定位目标字段并应用翻译的声明；即使本次请求恰好是默认语言，也按相同词条查找规则处理。
-
-对 `bindings`，显式提供 fallback 时采用该值；未提供时，把目标字段原始字符串作为该描述的隐式 fallback。该隐式值只在词条回退失败后使用，不压过 defaultLocale 词条。两种属性内声明方式则没有可保留的原字符串，按各自 fallback 处理。
-
-同一页面可以在不同字段混用三种方式；同一字段只能选择一种，禁止属性 `$i18n` 与 bindings 重复声明。新组件优先选择方式二，旧字段逐步改造或元信息字段选择方式三，少量一次性文案选择方式一。
+**实现状态**：`localizePageDsl` 已支持字段内简写；旧 `i18n.bindings` 已从作者态 Schema 和转换器中移除。旧页面需要将每个路径对应的 key 和 fallback 移到目标字段，带动态参数的文案改为对象式 `$i18n.params`。
 
 ### 4.1 统一的可翻译属性值
 
@@ -184,7 +150,7 @@ props:
       fallback: 请输入用户名
 ```
 
-新组件优先把国际化信息放在具体属性值上；需要保留原属性字符串时，使用第 4.0 节明确支持的页面级 bindings。另不引入节点级 `i18n: {text: ...}` 平行映射，避免出现第四套声明规则。
+新组件优先把国际化信息放在具体属性值上；需要在字段中直接保留默认文案时，使用第 4.0 节的简写。另不引入节点级 `i18n: {text: ...}` 平行映射，避免出现第四套声明规则。
 
 语法约束：
 
@@ -194,7 +160,7 @@ props:
 - `messages` 是 locale 到字符串的映射，禁止对象嵌套。
 - `params` 为参数对象；第一阶段只允许标量或受控表达式，不允许函数、任意代码或嵌套翻译描述。
 - `fallback` 为可选字符串，与词条使用相同的参数格式；对关键操作文案建议必填。
-- 不支持 `${...}` 的字段不能通过 `$i18n` 获得表达式执行能力。
+- 字段是否支持运行时表达式由该字段的消费者决定；`$i18n` 只负责翻译，不能保证一个原本只读取静态字符串的字段获得运行时求值能力。动态参数应放在可经过 Runtime 表达式解析的文本字段中；静态字段只能使用字面量参数。原因和示例见第 7 节。
 - `$i18n` 为 DSL 作者协议保留标识；业务数据及普通对象中的同名字段不触发解析。
 
 ### 4.2 页面声明与语言包
@@ -203,13 +169,9 @@ props:
 dsl: "1.0"
 page:
   id: user-list
-  title: 用户管理
+  title: "$i18n{user.page.title:用户管理}"
 i18n:
   namespaces: [common, user]
-  bindings:
-    /page/title:
-      key: user.page.title
-      fallback: 用户管理
 body:
   type: Button
   props:
@@ -219,11 +181,9 @@ body:
         fallback: 保存
 ```
 
-`i18n` 是拟新增的页面作者态字段，当前 Schema 不接受该字段。`namespaces` 是语言包分组，不是自动拼接 key 的前缀；`common.save` 始终是完整键名。
+`i18n.namespaces` 是语言包分组，不是自动拼接 key 的前缀；`common.save` 始终是完整键名。实现先解析和校验作者态、按权限裁剪并提取 namespace，再由转换器识别字段内简写；静态元信息的简写应被转换为字符串。旧 `i18n.bindings` 不再被接受。
 
-方式三使用 `i18n.bindings`，键为 JSON Pointer，值为上述翻译描述（直接写 `key` 或 `messages`，不再包 `$i18n`）。第一阶段只允许注册过的展示字段路径，且目标必须为字符串；禁止绑定 `/state`、请求参数、权限、标识和路由。目标不存在、路径重复、目标非字符串或已经是 `$i18n` 对象时，发布校验失败。编译器先定位字段并保存其原文作为可选的隐式 fallback，再按统一规则翻译；编译后移除作者态 `i18n` 字段。
-
-JSON Pointer 中数组元素使用具体下标，如 `/body/children/0/props/text`，首期不支持通配符；属性名中的 `~` 和 `/` 分别按 `~0`、`~1` 转义。组件重排可能改变数组路径，发布时必须验证绑定位置；对频繁调整的组件树优先使用属性内声明。
+`page.title` 的作者态 Schema 接受包含简写的字符串；转换器加载语言包后将其替换为最终字符串，保持元信息字段的类型。
 
 独立语言包示例：
 
@@ -427,7 +387,7 @@ type ResolvedRequestLocale = {
 2. 服务端调用页面加载器，从本地文件或后端接口取得原始页面 YAML 文本。
 3. 服务端解析 YAML 并校验作者态结构，按权限裁剪，提取该页需要的 namespace。
 4. 调用已配置的语言包 Provider，取得当前语言和必要回退语言的 JSON 对象：本地 YAML 由 Next.js 解析，后端语言包 API 则直接返回 JSON。
-5. 将解析后的页面、`locale`、`defaultLocale` 和语言包对象显式传入转换函数。转换函数统一处理内联 messages、key 引用和 bindings，替换字段值并移除作者态声明。
+5. 将解析后的页面、`locale`、`defaultLocale` 和语言包对象显式传入转换函数。转换函数统一处理内联 messages、key 引用和字段内简写，替换字段值并移除作者态声明。
 6. 校验转换结果为下发态 Page DSL；组装第 6.2 节页面资源 envelope，通过 `Response.json` 返回。
 7. 前端从响应的 `schema` 取得已经国际化的 Page DSL，交给组件 Runtime 展示。
 
@@ -492,12 +452,9 @@ return Response.json(toPageResource(pageDsl, localization));
 dsl: "1.0"
 page:
   id: editor
-  title: 编辑页面
+  title: "$i18n{editor.page.title:编辑页面}"
 i18n:
   namespaces: [editor, common]
-  bindings:
-    /page/title:
-      key: editor.page.title
 body:
   type: Button
   props:
@@ -729,6 +686,23 @@ bootstrap 适配层将 `localization.locale/defaultLocale` 映射到会话。框
 
 ## 7. 动态参数和表达式边界
 
+这里的限制针对**字段的消费路径**，不是说国际化文案不能使用动态数据。组件 props 和动作参数若经 Runtime 的 `resolveDeep` 处理，`$i18n.params` 可以引用 `${state.name}` 等表达式；服务端生成 `$localizedText`，客户端求值参数后插入已选择语言的模板。若字段只被路由、菜单或宿主当作静态字符串读取（例如 `page.title` 元信息），该消费者不会执行这个步骤，收到动态描述后可能无法展示或类型不匹配。不能仅因为声明了 `$i18n` 就假定所有消费者会求值。
+
+```yaml
+# 组件文本：支持运行时参数（需声明 i18n.namespaces: [common]）
+type: Text
+props:
+  text:
+    $i18n:
+      key: common.welcome
+      params:
+        name: "${state.name}"
+```
+
+语言包中的 `common.welcome` 可写 `欢迎，{{name}}` / `Welcome, {{name}}`。不要把 `${state.name}` 写进语言包：译文可能由其他人员或系统维护，若作为表达式再次执行，就可能读取当前作用域中的数据或改变页面行为。`$localizedText` 只求值 DSL 作者明确提供的参数，不会二次执行模板或插值结果。
+
+`page.title` 等静态元信息应使用静态翻译；需要动态标题时，在页面内容中使用支持表达式的 `Text` 或 `Typography`，或由宿主明确实现并验证相应动态元数据机制。当前框架会转换动态参数，但尚未对所有字段建立“能否求值”的统一校验；作者和接入方需核对消费路径，不能把这条设计约束误认为已被所有 Schema 强制执行。
+
 - 服务端只展开字面量参数。首期不在服务端执行任意 `${...}`，包括看似可用的用户或路由表达式。
 - 翻译文本中的 `{{name}}` 由翻译器插值；DSL 中的 `${state.name}` 由表达式引擎求值，两者不得混为一种模板语法。
 - 翻译结果作为最终文本值，**不得再次送入表达式引擎**。词条内容不得执行 `${...}`。
@@ -748,7 +722,7 @@ bootstrap 适配层将 `localization.locale/defaultLocale` 映射到会话。框
 1. 当前有效 locale 的内联消息或语言包词条。
 2. 显式配置的语言级回退，例如 `fr-CA → fr`；只访问已配置的语言。
 3. 应用 defaultLocale 对应词条。
-4. 描述的 fallback；bindings 未显式配置时使用绑定目标的原始字符串。
+4. 描述的 fallback；简写中的 default 等价于显式 fallback。
 5. key；内联描述没有 key 时展示统一的缺失文案，并记录资源路径。
 
 空字符串视为有效翻译，不触发回退。建议新增返回 `{found, value, resolvedLocale}` 的内部 lookup，不能只用 `translated === key` 判断命中，因为合法译文可能恰好等于 key。现有 `useI18n` 的判断需在兼容迁移中替换。
@@ -813,7 +787,7 @@ Next.js 支持在服务端按语言加载字典；本方案把这一思路应用
 
 ### 第一阶段：建立协议与服务端链路
 
-支持 `$i18n.messages`、`$i18n.key`、简单 params/fallback、页面 bindings；实现作者态校验、字段注册、YamlMessageProvider、ApiMessageProvider、统一 YAML 转换入口和目标语言模板编译。打通本地/API 两类页面来源、两类语言包来源，以及 sitemap、懒加载页和动态片段。
+支持 `$i18n.messages`、`$i18n.key`、简单 params/fallback、字段内 `$i18n{key:default}` 简写；实现作者态校验、字段注册、YamlMessageProvider、ApiMessageProvider、统一 YAML 转换入口和目标语言模板编译。打通本地/API 两类页面来源、两类语言包来源，以及 sitemap、懒加载页和动态片段。
 
 交付双语言示例、Next.js 语言包接口、服务端返回已转换 JSON、动态参数响应交互、缺失诊断及语言维度缓存。静态属性为字符串，动态属性为已选语言的安全模板，不能残留 `$i18n` 或 t 调用；复杂复数格式不进入本阶段。
 
@@ -830,9 +804,9 @@ Next.js 支持在服务端按语言加载字典；本方案把这一思路应用
 | 场景 | 预期结果 |
 | --- | --- |
 | 同一按钮分别使用内联描述和语言包 key | `zh-CN` / `en-US` 下均显示正确文案 |
-| 同一文本分别使用属性内联、属性引用及 bindings | 三种声明生成相同的本地化字段值，不改变请求 locale/defaultLocale |
-| bindings 未配置 fallback，且所有语言词条均缺失 | 保留目标字段原始文案；显式 fallback 存在时采用显式值 |
-| bindings 与属性内 `$i18n` 指向同一字段，或目标路径失效 | 发布检查报错，不以处理顺序决定覆盖结果 |
+| 同一文本分别使用属性内联、属性引用及简写 | 三种声明生成相同的本地化字段值，不改变请求 locale/defaultLocale |
+| 简写的词条在所有回退语言中均缺失 | 使用简写中的 default；空 default 为有效兜底 |
+| 简写语法非法、字段不允许翻译或旧 bindings 仍被使用 | 发布检查报错，不以处理顺序决定覆盖结果 |
 | 同一页面分别使用 Next.js YAML 和后端 API 语言包 | 对等语言包生成相同 DSL JSON，转换器不因来源分叉 |
 | 后端使用 YAML 定义语言包并通过 API 提供 | API 返回规范 JSON 和 `application/json`，消费方只解析 JSON，不接收 YAML 原文或 YAML 字符串 |
 | 后端 API 返回原始 YAML，Next.js 获取后转换 | 浏览器只收到已本地化 JSON，无 YAML 原文或未解析翻译声明 |
@@ -865,6 +839,6 @@ Next.js 支持在服务端按语言加载字典；本方案把这一思路应用
 
 ## 13. 评审建议
 
-建议批准方案 C，明确属性引用语言包为主、组件内联为辅，bindings 用于保留默认文案的字段和渐进改造；三种声明统一转换，两种语言包来源通过统一 Provider 接入。无论原始 YAML 和语言包来自后端 API 还是 Next.js 本地文件，前端都消费已完成语言选择与词条替换的 DSL JSON；动态文案仅填充已选模板的参数。旧版客户端 t 仅作为独立兼容模式保留。
+建议批准方案 C，明确属性引用语言包为主、组件内联为辅，字段内简写用于直接声明 key 和默认文案，旧 bindings 需要迁移；三种声明统一转换，两种语言包来源通过统一 Provider 接入。无论原始 YAML 和语言包来自后端 API 还是 Next.js 本地文件，前端都消费已完成语言选择与词条替换的 DSL JSON；动态文案仅填充已选模板的参数。旧版客户端 t 仅作为独立兼容模式保留。
 
-本文件仅为设计交付，尚未执行运行时代码变更或依赖安装。
+字段内简写已实现；旧路径 bindings 已移除。

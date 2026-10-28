@@ -10,9 +10,12 @@
 dsl: "1.0"
 page:
   id: login
-  title: 登录
+  title: $i18n{page.login.text1:登录}
   name: login
-  description: 登录页
+  description: $i18n{page.login.text2:登录页}
+
+i18n:
+  namespaces: [ app ]
 
 body:
   type: Login
@@ -21,11 +24,11 @@ body:
     authVariant: card
     brand:
       name: "{{APP_TITLE}}"
-      title: 管理后台登录
+      title: $i18n{page.login.text3:管理后台登录}
       description: "{{APP_DESCRIPTION}}"
-    title: 登录
+    title: $i18n{page.login.text4:登录}
     subtitle: "{{DEMO_ACCOUNT_HINT}}"
-    submitText: 登 录
+    submitText: $i18n{page.login.text5:登 录}
   events:
     onSubmit:
       - id: loginResult
@@ -43,7 +46,7 @@ body:
             - action: message
               params:
                 messageType: error
-                text: 用户名或密码错误
+                text: $i18n{page.login.text6:用户名或密码错误}
       - action: if
         params:
           condition: ${actions.loginResult != null && actions.loginResult.token != null}
@@ -51,6 +54,6 @@ body:
             - action: message
               params:
                 messageType: success
-                text: 登录成功，正在跳转…
+                text: $i18n{page.login.text7:登录成功，正在跳转…}
             - action: app.reload
               params: { to: / }

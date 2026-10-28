@@ -21,7 +21,8 @@
     "pactor-app": "latest",
     "react": "19.2.8",
     "react-dom": "19.2.8",
-    "yaml": "^2.9.1"
+    "yaml": "^2.9.1",
+    "@pactor-app/i18n": "latest"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",

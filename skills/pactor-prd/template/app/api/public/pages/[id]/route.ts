@@ -3,6 +3,7 @@ import { cookies } from "next/headers";
 import { findUserBySession, SESSION_COOKIE } from "@/server/accounts";
 import { corsHeaders, corsPreflight } from "@/server/cors";
 import { getLazyPage } from "@/server/sitemap";
+import { localeError, localizePage, localization, requestLocale } from "@/server/i18n";
 
 /**
  * 懒加载页面端点：sitemap 中未内联 pageDsl 的页面按需获取。
@@ -23,17 +24,25 @@ export async function GET(
       { status: 404, headers: corsHeaders(request) },
     );
   }
-  return Response.json(
-    {
-      id,
-      resourceType: "page",
-      version: entry.version,
-      dslVersion: "1.0",
-      schema: entry.pageDsl,
-      updatedAt: new Date().toISOString(),
-    },
-    { headers: { "cache-control": "no-store", ...corsHeaders(request) } },
-  );
+  const headers = { "cache-control": "no-store", ...corsHeaders(request) };
+  try {
+    const { locale } = requestLocale(request, store.get("locale")?.value);
+    return Response.json(
+      {
+        id,
+        resourceType: "page",
+        version: entry.version,
+        dslVersion: "1.0",
+        representation: "localized",
+        localization: localization(locale),
+        schema: await localizePage(entry.pageDsl, locale),
+        updatedAt: new Date().toISOString(),
+      },
+      { headers: { ...headers, "content-language": locale } },
+    );
+  } catch (error) {
+    return localeError(error, headers);
+  }
 }
 
 /** 预检（跨源带凭据 / 自定义头时） */

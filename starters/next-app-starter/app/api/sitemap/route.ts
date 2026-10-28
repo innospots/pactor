@@ -3,6 +3,7 @@ import { cookies } from "next/headers";
 import { findUserBySession, SESSION_COOKIE } from "@/server/accounts";
 import { corsPreflight, corsHeaders } from "@/server/cors";
 import { buildSitemap } from "@/server/sitemap";
+import { localeError, localizeSitemap, requestLocale } from "@/server/i18n";
 
 /**
  * Sitemap 端点（design/dynamic-page.md）：
@@ -12,9 +13,15 @@ import { buildSitemap } from "@/server/sitemap";
 export async function GET(request: Request) {
   const store = await cookies();
   const user = findUserBySession(store.get(SESSION_COOKIE)?.value);
-  return Response.json(buildSitemap(user), {
-    headers: { "cache-control": "no-store", ...corsHeaders(request) },
-  });
+  const headers = { "cache-control": "no-store", ...corsHeaders(request) };
+  try {
+    const { locale } = requestLocale(request, store.get("locale")?.value);
+    return Response.json(await localizeSitemap(buildSitemap(user), locale), {
+      headers: { ...headers, "content-language": locale },
+    });
+  } catch (error) {
+    return localeError(error, headers);
+  }
 }
 
 /** 预检（跨源带凭据 / 自定义头时） */

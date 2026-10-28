@@ -4,6 +4,8 @@ import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { Suspense } from "react";
 import { SitemapApp } from "pactor-app";
 
+import { LocaleSelector, useLocale } from "./locale";
+
 import { apiBaseUrl, sitemapSources } from "./config";
 
 /**
@@ -35,13 +37,21 @@ function PactorAppInner() {
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const router = useRouter();
+  const { locale, changeLocale } = useLocale();
+  if (!locale) return null;
   return (
+    <>
+    <LocaleSelector locale={locale} onChange={changeLocale} />
     <SitemapApp
+      key={locale}
+      locale={locale}
+      defaultLocale="zh-CN"
       sources={sitemapSources}
       baseUrl={apiBaseUrl}
       pathname={pathname}
       query={Object.fromEntries(searchParams.entries())}
       navigate={(to) => router.push(to)}
     />
+    </>
   );
 }

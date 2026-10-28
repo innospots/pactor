@@ -111,3 +111,15 @@ mock API 已在路由层放开跨源（`src/server/cors.ts`：Allow-Origin 回�
 `${app}` / `${menus}` 作用域（框架尚未原生开放）。当前由 `SitemapApp` 内置的
 `session.context` 服务桥接，DSL 中写作 `${data.session.user.name}`、
 `${data.session.menus}`；框架支持原生作用域后可平滑迁回。
+
+## 国际化
+
+示例支持 `zh-CN` 和 `en-US`。右下角语言选择器保存 `locale` Cookie、同步 URL 的 `locale` 参数与文档 `lang`，切换时重新加载 sitemap、布局和页面。`SitemapApp` 当前不会自动按语言重取 sitemap，因此宿主按语言重挂载它；路由、查询参数与登录会话保留。
+
+- `src/server/i18n/locales/<locale>/app.yaml`：服务端词条；`src/server/i18n/index.ts` 配置版本清单与 `YamlMessageProvider`。
+- 页面 YAML 使用 `$i18n{key:default}` 引用词条；带动态参数时使用对象式 `$i18n.params`，支持运行时参数，服务端下发 `$localizedText`，浏览器只插值，不查找业务语言包。
+- `/api/sitemap` 和 `/api/pages/{id}` 依次按 URL `locale`、Cookie、`Accept-Language` 选择语言；页面接口下发 `representation: localized` 和版本信息，响应不缓存。权限裁剪发生在本地化之前。
+- 本 starter 的登录、注册、首页、用户与月报示例、菜单和外壳演示两种语言。业务数据接口返回的内容由数据服务负责翻译。
+- 扩展页面时为字段增加绑定并在两个语言包中补充对应 key；扩展布局时在已注册的可翻译字段内添加简写。引用独立词条或内联 `$i18n` 时，还需要按 `@pactor-app/i18n` 的可翻译字段注册表注册相应组件字段。
+
+语言包目录属于应用源码；正式部署时应随服务端产物发布，修改语言包后更新清单版本。切换语言时服务端错误会显示为资源加载失败；生产环境可进一步接入版本化发布与失败回滚。
