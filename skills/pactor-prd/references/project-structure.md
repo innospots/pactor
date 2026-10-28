@@ -1,6 +1,6 @@
 # 目标项目目录结构约定
 
-以 `skills/pactor-prd/template/` 的实际文件为准。下面列出关键接线；构建配置、锁文件和 workspace 文件随模板完整保留。
+以脚手架（`create-pactor-app` next-app 模板）生成工程的实际文件为准。下面列出关键接线；构建配置、锁文件和 workspace 文件随模板完整保留。
 
 ```
 <project>/
@@ -29,20 +29,20 @@
 │           ├── sitemap.yaml         布局 DSL：app / auth / layouts / pages / menus
 │           └── <模块>/              页面按 PRD 模块分目录存放（如 user/ order/ project/）
 │               └── <id>.yaml        每页一个文件，页面 id = 文件名（不含 .yaml）
-└── package.json                     工程名等占位由 render 写入
+└── package.json                     工程名等占位由脚手架创建时写入
 ```
 
 ## 占位清单与安全替换
 
 - 清单位于 **`skills/pactor-prd/template-placeholders.json`**，记录全部可用键、含义和冒烟示例值。values JSON 必须是 flat object，键恰好等于清单登记的全部键，且每个值都是字符串。
-- 复制模板后，在包含 `skills/` 的仓库根目录执行：
+- 用 `create-pactor-app` 脚手架（next-app 模板）创建工程，values 随创建一次性写入；随后在包含 `skills/` 的仓库根目录执行 rendered check：
 
   ```bash
-  node skills/scripts/prd-template.mjs render <project> --values <values.json>
+  pnpm dlx create-pactor-app@latest <project> -t next-app --values <values.json>
   node skills/scripts/prd-template.mjs check <project> --rendered
   ```
 
-- `render` 是唯一安全替换入口：它先校验源模板和 values，再以 JSON 编码替换完整字符串字面量。不要手工逐文件替换或只修改 `package.json`。
+- 脚手架创建是唯一安全替换入口：values 在生成时一次写入，之后不要再对工程做占位替换。不要手工逐文件替换或只修改 `package.json`。
 - rendered check 通过后才执行 install/dev 冒烟；冒烟通过后再生成页面。**任何占位未替换时禁止进入页面生成。**
 
 ## sitemap.yaml 骨架
@@ -55,7 +55,7 @@ id: site
 resourceType: sitemap
 version: 1
 dslVersion: "1.0"
-app: { name: <render 写入的产品名> }
+app: { name: <脚手架创建时写入的产品名> }
 auth: { loginPath: /login }
 
 pages:

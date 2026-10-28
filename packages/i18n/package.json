@@ -1,6 +1,6 @@
 {
   "name": "@pactor-app/i18n",
-  "version": "1.56.0",
+  "version": "1.58.0",
   "description": "Pactor i18n: request locale resolution and message bundle providers (YAML / API)",
   "keywords": [
     "pactor",

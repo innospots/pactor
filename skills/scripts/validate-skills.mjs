@@ -1,13 +1,17 @@
 #!/usr/bin/env node
 /**
- * Validates @pactor-app/skills layout and the pactor-prd source-template contract.
+ * Validates @pactor-app/skills layout and the pactor-prd placeholder-manifest contract.
+ *
+ * pactor-prd 不再自带 template/ 工程副本（新建工程经 create-pactor-app 脚手架，
+ * 模板事实来源为 starters/next-app-starter）；技能侧只保留 template-placeholders.json
+ * 占位符清单，其键集合必须与 starter 的 placeholders.json 一致。
  */
-import { existsSync, readFileSync, readdirSync, statSync } from 'node:fs';
+import { existsSync, readFileSync, readdirSync } from 'node:fs';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { checkSource } from './prd-template.mjs';
 
 const skillsRoot = join(dirname(fileURLToPath(import.meta.url)), '..');
+const repoRoot = join(skillsRoot, '..');
 const SKILL_DIRS = ['pactor-dsl', 'pactor-project', 'pactor-prd'];
 
 function readSkillName(skillDir) {
@@ -29,58 +33,6 @@ function listMdReferences(skillDir) {
   return readdirSync(refDir).filter((f) => f.endsWith('.md'));
 }
 
-const FORBIDDEN_TEMPLATE_PATHS = [
-  'public/file.svg',
-  'public/globe.svg',
-  'public/vercel.svg',
-  'public/window.svg',
-  'public/next.svg',
-  'app/favicon.ico',
-  'public/skins/chenwunaifu.css',
-  'public/skins/taijingshenlin.css',
-  'public/skins/xuanzhimoyun.css',
-];
-
-function isFile(path) {
-  try {
-    return statSync(path).isFile();
-  } catch {
-    return false;
-  }
-}
-
-function findForbiddenGeneratedPaths(templateDir) {
-  const found = [];
-
-  function visit(directory, prefix = '') {
-    for (const entry of readdirSync(directory, { withFileTypes: true })) {
-      const relativePath = prefix ? `${prefix}/${entry.name}` : entry.name;
-      if (entry.name === 'node_modules' || entry.name === '.next') {
-        found.push(relativePath);
-        continue;
-      }
-      if (entry.name === '.git' && entry.isDirectory()) continue;
-      if (entry.name === '.DS_Store' || entry.name.endsWith('.tsbuildinfo')) {
-        found.push(relativePath);
-      }
-      if (entry.isDirectory()) visit(join(directory, entry.name), relativePath);
-    }
-  }
-
-  visit(templateDir);
-  return found;
-}
-
-function hasNeutralDefaultSkin(text) {
-  const hasRegistration =
-    /\bvalue\s*:\s*['"]neutral['"]/.test(text) || /\bneutral\b['"]?\s*:/.test(text);
-  const hasExplicitDefault = /\bDEFAULT_SKIN\b[^\n=]*=\s*['"]neutral['"]/.test(text);
-  const defaultsToFirst =
-    /\bDEFAULT_SKIN\b[^\n=]*=\s*SKINS\[0\]\.value/.test(text) &&
-    text.match(/\bvalue\s*:\s*['"]([^'"]+)['"]/)?.[1] === 'neutral';
-  return hasRegistration && (hasExplicitDefault || defaultsToFirst);
-}
-
 let failed = false;
 
 function fail(message) {
@@ -88,45 +40,33 @@ function fail(message) {
   failed = true;
 }
 
-function validatePrdTemplate(skillDir) {
-  const templateDir = join(skillDir, 'template');
-
-  try {
-    for (const diagnostic of checkSource(templateDir)) {
-      fail(`pactor-prd template: ${diagnostic}`);
-    }
-  } catch (error) {
-    fail(`pactor-prd template: source check error: ${error.message}`);
+function validatePrdPlaceholders(skillDir) {
+  if (existsSync(join(skillDir, 'template'))) {
+    fail('pactor-prd: template/ 已移除，新建工程必须经 create-pactor-app 脚手架');
   }
 
-  try {
-    for (const path of findForbiddenGeneratedPaths(templateDir)) {
-      fail(`pactor-prd: forbidden template path ${path}`);
-    }
-  } catch (error) {
-    fail(`pactor-prd template: path check error: ${error.message}`);
+  const manifestPath = join(skillDir, 'template-placeholders.json');
+  if (!existsSync(manifestPath)) {
+    fail('pactor-prd: missing template-placeholders.json');
+    return;
   }
-
-  for (const path of FORBIDDEN_TEMPLATE_PATHS) {
-    if (existsSync(join(templateDir, path))) {
-      fail(`pactor-prd: forbidden template path ${path}`);
+  const manifest = JSON.parse(readFileSync(manifestPath, 'utf8'));
+  for (const [key, entry] of Object.entries(manifest)) {
+    if (typeof entry?.example !== 'string') {
+      fail(`pactor-prd: template-placeholders.json 的 ${key} 缺少字符串 example`);
     }
   }
 
-  if (!isFile(join(templateDir, 'public/skins/neutral.css'))) {
-    fail('pactor-prd: missing template/public/skins/neutral.css');
-  }
-
-  const skinPath = join(templateDir, 'src/pactor/skin.ts');
-  if (!isFile(skinPath)) {
-    fail('pactor-prd: missing template/src/pactor/skin.ts');
-  } else {
-    try {
-      if (!hasNeutralDefaultSkin(readFileSync(skinPath, 'utf8'))) {
-        fail('pactor-prd: template/src/pactor/skin.ts missing neutral registration/default');
-      }
-    } catch (error) {
-      fail(`pactor-prd template: skin check error: ${error.message}`);
+  // 与 starter 占位符清单键集合一致性（仓库上下文；发布包内无 starters 时跳过）
+  const starterManifestPath = join(repoRoot, 'starters/next-app-starter/placeholders.json');
+  if (existsSync(starterManifestPath)) {
+    const starterKeys = Object.keys(JSON.parse(readFileSync(starterManifestPath, 'utf8'))).sort();
+    const skillKeys = Object.keys(manifest).sort();
+    if (JSON.stringify(starterKeys) !== JSON.stringify(skillKeys)) {
+      fail(
+        `pactor-prd: 占位符键集合与 starters/next-app-starter/placeholders.json 不一致\n` +
+          `  skill: ${skillKeys.join(', ')}\n  starter: ${starterKeys.join(', ')}`,
+      );
     }
   }
 }
@@ -151,12 +91,7 @@ for (const id of SKILL_DIRS) {
     }
   }
   if (id === 'pactor-prd') {
-    const tpl = join(dir, 'template', 'package.json');
-    if (!existsSync(tpl)) {
-      console.error('pactor-prd: missing template/package.json');
-      failed = true;
-    }
-    validatePrdTemplate(dir);
+    validatePrdPlaceholders(dir);
   }
 }
 

@@ -4,6 +4,8 @@ dsl: "1.0"
 page:
   id: monthly
   title: $i18n{page.monthly.text1:月报}
+  name: monthly
+  grantGroup: reportGroup
 
 i18n:
   namespaces: [ app ]

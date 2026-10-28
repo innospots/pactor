@@ -70,9 +70,13 @@ export type { DslSourceBoundaryProps } from './renderer/dsl-source-boundary.js';
 export {
   createPageRuntime,
   PageRuntimeError,
+  PageRuntimeVersionError,
   PageRuntimeView,
 } from './page/page-runtime.js';
 export type { PageRuntime } from './page/page-runtime.js';
+
+// 版本
+export { RUNTIME_VERSION } from './version.js';
 
 // 工具
 export { LocalizationProtocolError, resolveDeep } from './utils/resolve.js';

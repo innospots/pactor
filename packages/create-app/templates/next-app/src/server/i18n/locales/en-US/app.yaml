@@ -1,35 +1,71 @@
+dashboard.coreOverview: Overview · {{start}} — {{end}}
+dashboard.link.allClients: View all → Client usage
+dashboard.link.allModels: View all → Model usage
+dashboard.link.reliability: View reliability analysis →
+dashboard.metric.cost: Cost
+dashboard.metric.latency: Latency
+dashboard.metric.requests: Requests
+dashboard.preset.lastDays: Last {{days}} days
+dashboard.preset.today: Today
+dashboard.rangeLabel: Analysis range
+dashboard.rangePlaceholder: Select range
+dashboard.realtime: Live {{rpm}} RPM · {{tpm}} TPM
+dashboard.refresh: ↻ Refresh
+dashboard.refreshed: Dashboard refreshed
+dashboard.stats.activeClients: "{{clients}} active clients · {{tokens}} tokens"
+dashboard.stats.avgCost: Avg. {{cost}} per request
+dashboard.stats.avgLatency: Avg. response time
+dashboard.stats.cost: Billing amount
+dashboard.stats.failures: "{{failures}} failed · error rate {{errorRate}}%"
+dashboard.stats.requests: Requests
+dashboard.stats.successRate: Success rate
+dashboard.subtitle: Operations overview
+dashboard.title: Dashboard
+dashboard.toast.callLog: Jump to call log (failures)
+dashboard.toast.clients: Jump to client usage
+dashboard.toast.models: Jump to model usage
+dashboard.toast.providerAvailability: Jump to provider availability
+dashboard.trend.subtitle: Watch traffic trends and spikes
+dashboard.trend.title: Trend analysis
+dashboard.usage.clients: Usage · Clients
+dashboard.usage.clientsSubtitle: Distribution by requests — spot the dominant client traffic
+dashboard.usage.models: Usage · Models
+dashboard.usage.modelsSubtitle: Distribution by requests — spot the dominant model traffic
 layout.logout: Sign out
-layout.settings: Settings
-layout.settingsNotice: Settings are not available in this demo
+layout.profile: Profile
+layout.profileToast: Open profile
+menu.assets: Model Assets
+menu.dashboard: Dashboard
+menu.data-list: Data List
 menu.help: Help
 menu.home: Home
 menu.login: Sign in
 menu.monthly: Reports
 menu.monthly-detail: Monthly report details
+menu.providers: Providers
 menu.register: Register
 menu.reports: Reports
+menu.routes: Routes
+menu.routing: Model Routing
+menu.skeletons: Page Skeletons
 menu.users: Users
+page.dashboard.description: "Operations overview: core metrics, trend analysis and usage breakdown"
+page.dashboard.title: Dashboard
+page.data-list.title: Data List
 page.home.text1: Home
 page.home.text2: Home
 page.home.text3: Welcome back, {{name}}!
 page.home.text4: This page and layout are supplied by the sitemap; menus are filtered by role.
 page.home.text5: View monthly report (report:view required)
 page.home.title: Home
-page.login.text1: Sign in
-page.login.text10: Enter your password
-page.login.text11: Sign in
-page.login.text2: 'Sign in failed: invalid username or password'
-page.login.text3: 'Demo accounts: admin / pactor123, guest / guest123'
-page.login.text4: Admins can access reports; guests can access the home page. Menus are filtered after sign-in.
-page.login.text5: Username
-page.login.text6: Enter your username
-page.login.text7: Enter your username
-page.login.text8: Password
-page.login.text9: Enter your password
+page.login.brandTitle: Sign in to the admin console
+page.login.error: Invalid username or password
+page.login.submit: Sign in
+page.login.success: Signed in — redirecting…
 page.login.title: Sign in
 page.monthly-detail.text1: Monthly report details
 page.monthly-detail.text2: Monthly report details
-page.monthly-detail.text3: 'Route parameter: id = {{id}}'
+page.monthly-detail.text3: "Route parameter: id = {{id}}"
 page.monthly-detail.text4: A hidden page reached from the report list.
 page.monthly-detail.text5: Back to reports
 page.monthly-detail.title: Monthly report details
@@ -45,12 +81,20 @@ page.monthly.text7: Conversion rate
 page.monthly.text8: This month (%)
 page.monthly.text9: This page is loaded on demand from /api/pages/monthly
 page.monthly.title: Monthly report
+page.provider-create.title: Add Provider
+page.provider-detail.title: Provider Detail
+page.provider-edit.title: Edit Provider
+page.provider-list.title: Providers
 page.register.text1: Register
 page.register.text2: Register
 page.register.text3: Registration is disabled in this demo
 page.register.text4: Use a demo account on the login page to explore role-based menus.
 page.register.text5: Back to login
 page.register.title: Register
+page.route-create.title: Add Route
+page.route-detail.title: Route Detail
+page.route-edit.title: Edit Route
+page.route-list.title: Routes
 page.users.text1: Users
 page.users.text10: Guest
 page.users.text11: Search
@@ -72,4 +116,3 @@ page.users.text7: Select a role
 page.users.text8: Administrator
 page.users.text9: Member
 page.users.title: Users
-site.app.name: Pactor Starter
