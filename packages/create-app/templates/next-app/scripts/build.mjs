@@ -1,15 +1,17 @@
 #!/usr/bin/env node
 /**
  * 按目标环境打包：
- *   node scripts/build.mjs <development|test|production>
- * 对应 package.json 的 build / build:dev / build:test 命令。
+ *   node scripts/build.mjs <prototype|development|test|production>
+ * 对应 package.json 的 build:prototype / build:dev / build:test / build 命令。
  * 环境经 APP_ENV 注入（构建期由 next.config.js 读取并解析
- * API_BASE_URLS，结果内联进客户端包，见 src/pactor/config.ts）。
+ * API_BASE_URLS，结果内联进客户端包，见 src/frontend/config.ts）。
+ * 生产构建使用 Webpack：Turbopack 的 CSS 子进程在部分受限环境无法绑定端口。
  * 跨平台：Windows 下经 shell 解析 next.cmd。
  */
 import { spawn } from 'node:child_process';
+import { createRequire } from 'node:module';
 
-const ENVS = ['development', 'test', 'production'];
+const ENVS = ['prototype', 'development', 'test', 'production'];
 const env = process.argv[2];
 
 if (!ENVS.includes(env)) {
@@ -20,9 +22,10 @@ if (!ENVS.includes(env)) {
 process.env.APP_ENV = env;
 console.log(`\n构建目标环境: ${env}（APP_ENV=${env}）\n`);
 
-const child = spawn('next', ['build'], {
+const require = createRequire(import.meta.url);
+const nextBin = require.resolve('next/dist/bin/next');
+const child = spawn(process.execPath, [nextBin, 'build', '--webpack'], {
   stdio: 'inherit',
-  shell: process.platform === 'win32',
 });
 
 child.on('error', (error) => {

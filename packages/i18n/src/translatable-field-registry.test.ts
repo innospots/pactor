@@ -86,6 +86,14 @@ describe('内置注册表（设计 4.4 常用展示字段）', () => {
     expect(registry.isTranslatable('Input', 'props.description')).toBe(true);
   });
 
+  it('Login 品牌区、标题与账号提示', () => {
+    expect(registry.isTranslatable('Login', 'props.brand.title')).toBe(true);
+    expect(registry.isTranslatable('Login', 'props.brand.description')).toBe(true);
+    expect(registry.isTranslatable('Login', 'props.title')).toBe(true);
+    expect(registry.isTranslatable('Login', 'props.subtitle')).toBe(true);
+    expect(registry.isTranslatable('Login', 'props.submitText')).toBe(true);
+  });
+
   it('Table 列与 Select 选项', () => {
     expect(registry.isTranslatable('Table', 'props.columns[*].title')).toBe(true);
     expect(registry.isTranslatable('Table', 'props.columns[*].dataIndex')).toBe(false);

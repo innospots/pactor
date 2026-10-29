@@ -38,7 +38,7 @@ const SOURCES = [
 /** 目录级排除（任意深度，按名称匹配） */
 const EXCLUDED_DIRS = new Set(['node_modules', '.next', 'dist']);
 /** 文件级排除（lockfile / 构建缓存 / next 自动生成）。
- * pnpm-workspace.yaml 同步保留：其中 onlyBuiltDependencies 是独立安装时
+ * pnpm-workspace.yaml 同步保留：其中 allowBuilds 是独立安装时
  * 批准原生依赖构建脚本的关键配置（避免 ERR_PNPM_IGNORED_BUILDS） */
 const EXCLUDED_FILES = new Set([
   'pnpm-lock.yaml',

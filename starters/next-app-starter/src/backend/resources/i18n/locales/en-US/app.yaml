@@ -1,0 +1,266 @@
+site.app.name: "{{APP_TITLE}}"
+
+menu.analytics: Analytics
+menu.system: System
+menu.workspace: Workspace
+menu.dashboard: Overview
+menu.monthly: Reports
+menu.monthly-detail: Monthly report
+menu.data-list: Data list
+menu.system-settings: Settings
+menu.dictionaries: Dictionaries
+menu.audit-logs: Audit logs
+menu.roles: Roles
+menu.role-detail: Role details
+menu.users: Users
+menu.themes: Themes
+menu.profile: Profile
+menu.login: Sign in
+menu.register: Register
+
+page.login.title: Sign in
+page.login.description: Sign-in page
+page.login.brandTitle: Sign in to the admin console
+page.login.brandDescription: A neutral admin application for demonstrations.
+page.login.submit: Sign in
+page.login.accountHint: "Demo accounts: {{DEMO_ADMIN_USERNAME}} / {{DEMO_ADMIN_PASSWORD}}; {{DEMO_GUEST_USERNAME}} / {{DEMO_GUEST_PASSWORD}}"
+page.login.error: Invalid username or password
+page.login.success: Signed in — redirecting…
+page.register.title: Register
+page.register.text1: Register
+page.register.text2: Register
+page.register.text3: Registration is disabled in this demo
+page.register.text4: Use a demo account on the sign-in page to explore role-based menus.
+page.register.text5: Back to sign in
+page.workspace.title: Workspace
+page.dashboard.title: Overview
+page.dashboard.description: "Operations overview: core metrics, trends and usage breakdown"
+page.monthly.title: Reports
+page.monthly-detail.title: Monthly report
+page.data-list.title: Data list
+page.system-settings.title: Settings
+page.dictionaries.title: Dictionaries
+page.audit-logs.title: Audit logs
+page.roles.title: Roles
+page.role-detail.title: Role details
+page.users.title: Users
+page.themes.title: Themes
+page.profile.title: Profile
+
+page.monthly.text1: Reports
+page.monthly.text2: Monthly business report
+page.monthly.text3: Revenue
+page.monthly.text4: This month (10k CNY)
+page.monthly.text5: New customers
+page.monthly.text6: This month (customers)
+page.monthly.text7: Conversion rate
+page.monthly.text8: This month (%)
+page.monthly.text9: This page DSL is loaded on demand by the page endpoint
+page.monthly.text10: The page DSL is fetched when the report center is opened; the menu stays lightweight.
+page.monthly.text11: View monthly report details
+page.monthly-detail.text1: Monthly report
+page.monthly-detail.text2: Monthly report
+page.monthly-detail.text3: "Path parameter demo: id = {{id}}"
+page.monthly-detail.text4: This detail page is reached through a hidden route with a path parameter.
+page.monthly-detail.text5: Back to reports
+
+page.users.text1: Users
+page.users.text2: Users
+page.users.text12: User data
+page.users.text13: Name
+page.users.text14: Username
+page.users.text15: Role
+page.users.text16: Email
+page.users.text17: Created at
+page.users.create: "+ Add user"
+page.users.createTitle: Add user
+page.users.searchPlaceholder: Name / username
+page.users.rolePlaceholder: Select a role
+page.users.roleAll: All roles
+page.users.roleAdmin: Administrator
+page.users.roleMember: Member
+page.users.roleGuest: Guest
+page.users.query: Search
+page.users.status: Status
+page.users.actions: Actions
+page.users.confirmStatusTitle: Change status
+page.users.confirmStatusContent: Change the status of this user?
+page.users.edit: Edit
+page.users.editTitle: Edit user
+page.users.name: Name
+page.users.namePlaceholder: Enter a name
+page.users.nameRequired: Enter a name
+page.users.username: Username
+page.users.usernamePlaceholder: Enter a username
+page.users.usernameRequired: Enter a username
+page.users.email: Email
+page.users.emailPlaceholder: Enter an email address
+page.users.emailRequired: Enter an email address
+page.users.role: Role
+page.users.roleRequired: Select a role
+page.users.save: Save
+page.users.resetPassword: Reset password
+page.users.resetUnavailable: Demo users are not connected to sign-in accounts, so password reset is unavailable.
+page.users.delete: Delete
+page.users.deleteTitle: Delete user
+page.users.deleteContent: Delete this demo user?
+page.users.added: User added
+page.users.addError: Could not add the user. Check the form and try again.
+page.users.cancel: Cancel
+page.users.add: Add
+
+page.data-list.subtitle: "Standard list example: search, table and drawer-based create/edit. Copy this page to build a business list."
+page.data-list.create: "+ New record"
+page.data-list.saved: Saved
+page.data-list.saveError: Could not save. Check the endpoint and try again.
+page.data-list.basicInfo: General
+page.data-list.name: Name
+page.data-list.namePlaceholder: Enter a name
+page.data-list.nameRequired: Enter a name
+page.data-list.code: Code
+page.data-list.codePlaceholder: "Uppercase letters and underscores, e.g. DEMO_ITEM"
+page.data-list.codeRequired: Enter a code
+page.data-list.kind: Type
+page.data-list.kindPlaceholder: Select a type
+page.data-list.kindRequired: Select a type
+page.data-list.status: Status
+page.data-list.statusPlaceholder: Select a status
+page.data-list.sort: Sort order
+page.data-list.extra: Additional notes
+page.data-list.extraPlaceholder: Configuration notes for the advanced type
+page.data-list.cancel: Cancel
+page.data-list.save: Save
+page.data-list.searchLabel: Code / name
+page.data-list.searchPlaceholder: Search by keyword
+page.data-list.query: Search
+page.data-list.reset: Reset
+page.data-list.column.name: Name
+page.data-list.column.code: Code
+page.data-list.column.kind: Type
+page.data-list.column.status: Status
+page.data-list.column.actions: Actions
+page.data-list.edit: Edit
+page.data-list.total: "{{total}} total"
+
+page.roles.subtitle: Create roles, configure resource permissions and bind users or organization units.
+page.roles.create: "+ New role"
+page.roles.createTitle: New role
+page.roles.created: Role created
+page.roles.roleName: Role name
+page.roles.roleNamePlaceholder: Enter a role name
+page.roles.roleNameRequired: Enter a role name
+page.roles.roleCode: Role code
+page.roles.roleCodePlaceholder: "Uppercase letters and underscores, e.g. OPERATOR"
+page.roles.roleCodeRequired: Enter a role code
+page.roles.description: Description
+page.roles.descriptionPlaceholder: Describe how this role is used
+page.roles.cancel: Cancel
+page.roles.save: Save
+page.roles.searchLabel: Name / code
+page.roles.searchPlaceholder: Search by keyword
+page.roles.statusLabel: Status
+page.roles.all: All
+page.roles.enabled: Enabled
+page.roles.disabled: Disabled
+page.roles.query: Search
+page.roles.reset: Reset
+page.roles.column.name: Role name
+page.roles.column.code: Code
+page.roles.column.scope: Scope
+page.roles.column.members: Members
+page.roles.column.status: Status
+page.roles.column.actions: Actions
+page.roles.detail: Details
+page.roles.confirmStatusTitle: Change status
+page.roles.confirmStatusContent: Change the enabled status of this role?
+page.roles.statusUpdated: Status updated
+page.roles.delete: Delete
+page.roles.deleteTitle: Delete role
+page.roles.deleteContent: This removes the role's permissions and member bindings. Delete it?
+page.roles.deleted: Deleted
+
+page.role-detail.back: Back to roles
+page.role-detail.tab.basic: General
+page.role-detail.tab.permissions: Permissions
+page.role-detail.tab.members: Members
+page.role-detail.confirmStatusTitle: Change status
+page.role-detail.confirmStatusContent: Change the enabled status of this role?
+page.role-detail.statusUpdated: Status updated
+page.role-detail.edit: Edit
+page.role-detail.editTitle: Edit role
+page.role-detail.saved: Changes saved
+page.role-detail.roleName: Role name
+page.role-detail.roleNamePlaceholder: Enter a role name
+page.role-detail.roleNameRequired: Enter a role name
+page.role-detail.description: Description
+page.role-detail.descriptionPlaceholder: Describe how this role is used
+page.role-detail.cancel: Cancel
+page.role-detail.save: Save
+page.role-detail.field.roleName: Role name
+page.role-detail.field.roleCode: Role code
+page.role-detail.field.ownerType: Scope
+page.role-detail.field.status: Status
+page.role-detail.field.memberCount: Members
+page.role-detail.field.description: Description
+page.role-detail.permissions.note: Permission selections remain a draft until saved; saving replaces all permissions for this role.
+page.role-detail.permissions.searchPlaceholder: Search resource name / key
+page.role-detail.permissions.catalog: Backend resources
+page.role-detail.permissions.sync: Sync catalog
+page.role-detail.permissions.synced: Catalog synced
+page.role-detail.permissions.loadingCatalog: Loading catalog…
+page.role-detail.permissions.grants: Current permissions
+page.role-detail.permissions.loadingGrants: Loading permissions…
+page.role-detail.permissions.cancel: Cancel
+page.role-detail.permissions.save: Save all permissions
+page.role-detail.permissions.saveConfirmTitle: Save all permissions
+page.role-detail.permissions.saveConfirmContent: This replaces all current permissions for this role. Continue?
+page.role-detail.permissions.saved: Permissions saved
+page.role-detail.members.add: "+ Add member"
+page.role-detail.members.addTitle: Add member
+page.role-detail.members.empty: No members are available to add.
+page.role-detail.members.search: Search
+page.role-detail.members.searchPlaceholder: Name / account / organization unit
+page.role-detail.members.query: Search
+page.role-detail.members.subjectType: Subject type
+page.role-detail.members.subjectName: Subject name
+page.role-detail.members.subjectKey: Subject key
+page.role-detail.members.actions: Actions
+page.role-detail.members.remove: Remove
+page.role-detail.members.removeTitle: Remove member
+page.role-detail.members.removeConfirm: This only removes the role binding; the user or organization unit is not deleted. Remove it?
+page.role-detail.members.removed: Member removed
+
+
+dashboard.title: Overview
+dashboard.subtitle: Operations overview
+dashboard.refresh: ↻ Refresh
+dashboard.refreshed: Dashboard refreshed
+dashboard.realtime: Live {{rpm}} RPM · {{tpm}} TPM
+dashboard.rangeLabel: Analysis range
+dashboard.rangePlaceholder: Select range
+dashboard.preset.today: Today
+dashboard.preset.lastDays: Last {{days}} days
+dashboard.coreOverview: Core overview · {{start}} — {{end}}
+dashboard.metric.requests: Requests
+dashboard.metric.cost: Cost
+dashboard.metric.latency: Latency
+dashboard.stats.requests: Requests
+dashboard.stats.successRate: Success rate
+dashboard.stats.avgLatency: Avg. response time
+dashboard.stats.cost: Billing amount
+dashboard.stats.activeClients: Active clients {{clients}}
+dashboard.stats.failures: Failed requests {{failures}}
+dashboard.stats.avgCost: Average cost {{cost}}
+dashboard.trend.title: Trend analysis
+dashboard.trend.subtitle: Watch traffic trends and spikes
+dashboard.usage.models: Usage · Models
+dashboard.usage.modelsSubtitle: Distribution by requests — identify dominant model traffic
+dashboard.usage.clients: Usage · Clients
+dashboard.usage.clientsSubtitle: Distribution by requests — identify dominant client traffic
+dashboard.link.allModels: View all → Model usage
+dashboard.link.allClients: View all → Client usage
+dashboard.link.reliability: View reliability analysis →
+dashboard.toast.models: Go to model usage
+dashboard.toast.clients: Go to client usage
+dashboard.toast.callLog: Go to call log (failures)
+dashboard.toast.providerAvailability: Go to provider availability

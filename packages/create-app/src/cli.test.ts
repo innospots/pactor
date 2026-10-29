@@ -69,7 +69,7 @@ describe('create-pactor-app', () => {
     const code = await runCli([target, '-t', 'next-app'], io);
 
     expect(code).toBe(0);
-    for (const file of ['package.json', 'README.md', 'app/layout.tsx', 'tsconfig.json']) {
+    for (const file of ['package.json', 'README.md', 'src/app/layout.tsx', 'tsconfig.json']) {
       expect(existsSync(join(target, file)), file).toBe(true);
     }
     const pkg = readPkg(target);
@@ -91,7 +91,7 @@ describe('create-pactor-app', () => {
       selectTemplate: () => Promise.resolve('next-app'),
     });
     expect(code).toBe(0);
-    expect(existsSync(join(target, 'app/layout.tsx'))).toBe(true);
+    expect(existsSync(join(target, 'src/app/layout.tsx'))).toBe(true);
   });
 
   it('name 为路径时应用名取 basename', async () => {
@@ -227,7 +227,7 @@ describe('create-pactor-app', () => {
     }
 
     // 模板含 {{APP_TITLE}} 落点时 values 必须生效（同步后的模板才有，未同步时跳过该断言）
-    const layout = readFileSync(join(target, 'app/layout.tsx'), 'utf8');
+    const layout = readFileSync(join(target, 'src/app/layout.tsx'), 'utf8');
     if (!layout.includes('Pactor 动态页面 Starter')) {
       expect(layout).toContain('Model Console 验收');
     }

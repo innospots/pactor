@@ -1,0 +1,6 @@
+dsl: "1.0"
+page:
+  id: audit-logs
+  title: "$i18n{page.audit-logs.title:审计日志}"
+body:
+  type: AuditLogs

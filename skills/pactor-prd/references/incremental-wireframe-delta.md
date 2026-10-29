@@ -6,16 +6,16 @@
 
 工程至少具备：
 
-- `src/server/yaml/sitemap.yaml`（或等价 sitemap 源）
-- 页面 yaml 目录（**模式 B** `yaml/<模块>/<id>.yaml` 或 **模式 A** `yaml/pages/*.page.yaml` — 见 `pactor-dsl/references/page-catalog-and-layout.md`）
-- 数据接口层：`app/api/d/[...parts]/route.ts` 纯转发（路径即契约、无服务层接口时返回空数据，见 `data-api.md`）；**无 mock 层**（若工程仍用 `type: service`，增量页 **仍须 http**，并迁移或仅对新页遵守红线）
+- `src/backend/resources/yaml/sitemap.yaml`（或等价 sitemap 源）
+- 页面 yaml 目录（**模式 B** `yaml/<模块>/<id>.page.yaml` 或 **模式 A** `yaml/pages/*.page.yaml` — 见 `pactor-dsl/references/page-catalog-and-layout.md`）
+- 数据接口层：`src/app/api/d/[...parts]/route.ts`（prototype 使用 mock，其他环境原样转发；见 `data-api.md`）。若工程仍用 `type: service`，增量页 **仍须 http**，并迁移或仅对新页遵守红线
 
 不满足时：先 **`pactor-project`** 或 **新建工程 `pactor-prd` 模式** 搭壳，再回来做增量。
 
 ## 0. 摸底（只读）
 
-1. 扫描 `src/server/yaml/**`（排除 `sitemap.yaml`），建立 **现状清单**：`page id`、文件路径、`sitemap.pages` 的 path、`menus` 引用。
-2. 确认 `pageEndpoint` / 懒加载 API 路径（`src/pactor/config.ts`）与 `app/api/public/pages/[id]` 存在。
+1. 扫描 `src/backend/resources/yaml/**`（排除 `sitemap.yaml`），建立 **现状清单**：`page id`、文件路径、`sitemap.pages` 的 path、`menus` 引用。
+2. 确认懒加载 API `src/app/api/pages/[id]` 存在，并与框架缺省请求 `/api/pages/{id}` 对齐。
 3. 读工程内 **同类页** 一份（同模块列表页或表单页）作为排版样板（增量时红线「以模板为准」= **以本工程同类页为准**）。
 
 ## 1. 解析线框图增量

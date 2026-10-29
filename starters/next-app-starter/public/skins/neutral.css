@@ -1,6 +1,6 @@
 /**
  * 模板默认皮肤：冷灰底色、低饱和蓝灰主色与克制的表面层次。
- * 在 app/layout.tsx 导入的 pactor-app/styles.css 聚合样式之后加载本文件（后加载者胜出）。
+ * 在 src/app/layout.tsx 导入的 pactor-app/styles.css 聚合样式之后加载本文件（后加载者胜出）。
  */
 :root:not([data-pactor-theme='dark']) {
   color-scheme: light;

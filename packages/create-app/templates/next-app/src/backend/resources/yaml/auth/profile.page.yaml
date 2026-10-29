@@ -1,0 +1,8 @@
+dsl: "1.0"
+page:
+  id: profile
+  title: "$i18n{page.profile.title:个人中心}"
+body:
+  type: ProfilePage
+  props:
+    user: ${data.session.user}

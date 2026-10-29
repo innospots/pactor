@@ -2,33 +2,49 @@
 
 以脚手架（`create-pactor-app` next-app 模板）生成工程的实际文件为准。下面列出关键接线；构建配置、锁文件和 workspace 文件随模板完整保留。
 
-```
+```text
 <project>/
-├── app/
-│   ├── [[...slug]]/                 pactor 动态路由承载页（不改）
-│   ├── api/
-│   │   ├── sitemap/route.ts         返回 sitemap 入口数据（由 src/server/sitemap.ts 组装）
-│   │   ├── public/pages/[id]/route.ts  懒加载页面端点，返回单页 envelope
-│   │   ├── auth/ · users/           登录、登出与用户接口（演示账号由 values 提供）
-│   │   └── d/[...parts]/route.ts    数据统一入口（纯转发；无后端返回空数据，见 data-api.md）
-│   ├── globals.css                  全局样式与模板通用 CSS
-│   ├── icon.svg                     Next.js 文件约定的浏览器 icon
-│   └── layout.tsx                   根布局；导入 pactor-app/styles.css，注入首屏皮肤与明暗脚本
 ├── public/
 │   ├── logo.svg                     品牌 logo（sitemap 品牌区引用）
-│   └── skins/
-│       └── neutral.css              neutral 默认皮肤的亮色、暗色语义令牌
+│   ├── themes/                      12 套主题 CSS
+│   └── skins/neutral.css            基础语义令牌
+├── scripts/
+│   └── build.mjs                    按 APP_ENV 构建
 ├── src/
-│   ├── pactor/
-│   │   ├── config.ts                pactor 运行时配置（sitemapSources / baseUrl / pageEndpoint）
-│   │   ├── skin.ts                  已注册皮肤、默认皮肤与运行时换肤
-│   │   └── App.tsx                  客户端入口（SitemapApp 接线、自定义组件/动作注册）
-│   └── server/
-│       ├── sitemap.ts               递归收集 yaml/ 模块子目录建 id→路径索引、按会话裁剪
-│       └── yaml/
-│           ├── sitemap.yaml         布局 DSL：app / auth / layouts / pages / menus
-│           └── <模块>/              页面按 PRD 模块分目录存放（如 user/ order/ project/）
-│               └── <id>.yaml        每页一个文件，页面 id = 文件名（不含 .yaml）
+│   ├── app/
+│   │   ├── [[...slug]]/             Pactor 动态路由承载页
+│   │   ├── api/
+│   │   │   ├── sitemap/route.ts     返回按会话裁剪、按 locale 本地化的 sitemap
+│   │   │   ├── pages/[id]/route.ts  懒加载页面端点（PageResource envelope）
+│   │   │   ├── auth/                登录、登出与演示会话
+│   │   │   ├── page-access/         页面访问校验转发
+│   │   │   ├── public/page-access/  原型页面访问校验实现
+│   │   │   └── d/[...parts]/        prototype mock；其他环境原样转发
+│   │   ├── globals.css              全局样式与通用后台 CSS
+│   │   ├── icon.svg                 Next.js 浏览器 icon
+│   │   └── layout.tsx               根布局、主题首屏注入、PactorApp 挂载
+│   ├── backend/
+│   │   ├── auth/                    演示账号与会话
+│   │   ├── fixtures/                用户、角色、设置示例数据
+│   │   ├── mock/                    prototype 数据接口
+│   │   ├── config.ts                serverBaseUrl / prototype 判断
+│   │   └── resources/
+│   │       ├── i18n/                语言包与服务端本地化
+│   │       ├── page-access.ts       pageKey / grantGroup 映射
+│   │       ├── sitemap.ts           YAML 收集、权限裁剪与 lazy 页面索引
+│   │       └── yaml/
+│   │           ├── sitemap.yaml     布局 DSL：app / auth / layouts / pages / menus
+│   │           └── <模块>/          页面按 PRD 模块分目录存放
+│   │               └── <id>.page.yaml
+│   └── frontend/
+│       ├── App.tsx                  SitemapApp、页面门禁与自定义组件注册
+│       ├── components/              自定义组件
+│       ├── i18n/messages.ts         宿主 React 视图词条
+│       ├── themes/                  主题注册表
+│       ├── config.ts                sitemap / pageAccess / apiBaseUrl 配置
+│       ├── locale.tsx               URL / Cookie / 浏览器语言
+│       ├── page-access.tsx          页面访问门禁 UI
+│       └── skin.ts                  换肤与偏好持久化
 └── package.json                     工程名等占位由脚手架创建时写入
 ```
 
@@ -48,9 +64,9 @@
 ## sitemap.yaml 骨架
 
 ```yaml
-# 页面 DSL 按模块分目录存放：yaml/<模块>/<id>.yaml，页面 id = 文件名；
-# src/server/sitemap.ts 递归收集各模块目录建 id→路径索引；
-# lazy: true 不随 sitemap 内联下发，客户端经 /api/public/pages/{id} 懒加载
+# 页面 DSL 按模块分目录存放：yaml/<模块>/<id>.page.yaml；
+# 页面 id = 文件名去掉 .page；src/backend/resources/sitemap.ts 递归收集并建 id→路径索引；
+# lazy: true 不随 sitemap 内联下发，客户端经 /api/pages/{id} 懒加载
 id: site
 resourceType: sitemap
 version: 1
@@ -87,19 +103,11 @@ layouts:
 
 ## 约定
 
-- 页面按 PRD 模块树分目录：`src/server/yaml/<模块>/<id>.yaml`（如 `src/server/yaml/user/user-list.yaml`）；模块目录名用 kebab-case 英文域，按 PRD 模块树划分（如 user / order / report）。批量建文件与清单对齐见 **`page-inventory-and-files.md`**。
-- 页面 id kebab-case，= 文件名（不含 `.yaml`）；`pages:` 注册、`menus:` 引用、文件名三者一致。
+- 页面按 PRD 模块树分目录：`src/backend/resources/yaml/<模块>/<id>.page.yaml`（如 `src/backend/resources/yaml/project/project-list.page.yaml`）；模块目录名用 kebab-case 英文域。批量建文件与清单对齐见 **`page-inventory-and-files.md`**。
+- 页面 id kebab-case，= 文件名去掉 `.page.yaml`；`pages:` 注册、`menus:` 引用、文件名三者一致。
 - 列表/详情/编辑成组路径：`/projects`、`/projects/:code`、`/projects/:code/edit`、`/projects/new`。
 - 详情/编辑页不进菜单（`hidden: true`），用 `activeMenu` 保持列表菜单高亮。
 - 菜单图标仅一级菜单配置（目录 group 与「首页」这类独立页面项都要配），用 pactor Icon 白名单 kebab-case 名；二级及以下菜单项一律不配图标。
 - 登录/注册页 `public: true` + `layout: login`；其余默认需登录。
-- `src/server/sitemap.ts` 只按会话过滤（public/permission），不要在代码里拼接业务字段——数据归 YAML。
-- 懒加载页面端点放 `app/api/public/pages/[id]/route.ts`；框架缺省请求 `/api/pages/{id}`，因此**必须**在 `src/pactor/config.ts` 显式配置并传给 SitemapApp，否则客户端请求错路径：
-
-```ts
-// src/pactor/config.ts
-export const pageEndpoint = (pageId: string) => `/api/public/pages/${pageId}`;
-
-// src/pactor/App.tsx
-<SitemapApp ... pageEndpoint={pageEndpoint} />
-```
+- `src/backend/resources/sitemap.ts` 只按会话过滤（public/permission），不要在代码里拼接业务字段——数据归 YAML。
+- 懒加载页面端点固定为 `src/app/api/pages/[id]/route.ts`，与框架缺省请求 `/api/pages/{id}` 对齐；无需额外配置 `pageEndpoint`。

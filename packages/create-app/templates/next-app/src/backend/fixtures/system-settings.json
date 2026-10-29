@@ -1,0 +1,8 @@
+{
+  "siteName": "{{APP_TITLE}}",
+  "description": "企业运营管理平台",
+  "timezone": "Asia/Shanghai",
+  "language": "zh-CN",
+  "pageSize": "20",
+  "sessionTimeout": "30"
+}
