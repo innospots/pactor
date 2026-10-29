@@ -37,8 +37,13 @@ const TEXT_EXTENSIONS = new Set([
   '.svg',
   '.html',
 ]);
-const REFERENCE_DIRECTORIES = ['provider', 'route', 'models'];
-const REFERENCE_PATH_RESIDUALS = ['yaml/provider', 'yaml/route', 'yaml/models'];
+const LEGACY_PATH_RESIDUALS = [
+  'src/server/',
+  'src/pactor/',
+  'yaml/provider/',
+  'yaml/route/',
+  'yaml/models/',
+];
 const LEGACY_ACCOUNT_PATTERN = /\busername\s*:\s*(?:["'](?:admin|guest)["']|(?:admin|guest)(?=\s*(?:$|[,}\];])))/gim;
 
 function isLockFile(file) {
@@ -181,16 +186,9 @@ function run(projectDirectory, expectedPath) {
     }
   }
 
-  const yamlRoot = join(projectRoot, 'src/server/yaml');
+  const yamlRoot = join(projectRoot, 'src/backend/resources/yaml');
   const sitemapPath = join(yamlRoot, 'sitemap.yaml');
-  if (!existsSync(sitemapPath)) issues.push('src/server/yaml/sitemap.yaml: file is missing');
-  for (const directory of REFERENCE_DIRECTORIES) {
-    const path = join(yamlRoot, directory);
-    if (existsSync(path)) {
-      issues.push(`${displayPath(projectRoot, path)}: reference YAML directory/file must be removed`);
-    }
-  }
-
+  if (!existsSync(sitemapPath)) issues.push('src/backend/resources/yaml/sitemap.yaml: file is missing');
   const pageFiles = allFiles.filter(
     (file) =>
       isInside(yamlRoot, file) &&
@@ -247,13 +245,13 @@ function run(projectDirectory, expectedPath) {
   }
   const sitemapPages = Array.isArray(sitemap?.pages) ? sitemap.pages : [];
   if (sitemap && !Array.isArray(sitemap.pages)) {
-    issues.push('src/server/yaml/sitemap.yaml: pages must be an array');
+    issues.push('src/backend/resources/yaml/sitemap.yaml: pages must be an array');
   }
   const sitemapIds = new Set();
   const sitemapPaths = new Set();
   const sitemapById = new Map();
   for (const [index, page] of sitemapPages.entries()) {
-    const label = `src/server/yaml/sitemap.yaml: pages[${index}]`;
+    const label = `src/backend/resources/yaml/sitemap.yaml: pages[${index}]`;
     if (!page || typeof page !== 'object' || Array.isArray(page)) {
       issues.push(`${label} must be an object`);
       continue;
@@ -277,24 +275,24 @@ function run(projectDirectory, expectedPath) {
     const actual = sitemapById.get(page.id);
     if (actual && actual.path !== page.path) {
       issues.push(
-        `src/server/yaml/sitemap.yaml: ${page.id} path must be ${page.path}, got ${actual.path}`,
+        `src/backend/resources/yaml/sitemap.yaml: ${page.id} path must be ${page.path}, got ${actual.path}`,
       );
     }
   }
 
-  const menus = sitemap ? flattenMenus(sitemap.menus, issues, 'src/server/yaml/sitemap.yaml') : [];
+  const menus = sitemap ? flattenMenus(sitemap.menus, issues, 'src/backend/resources/yaml/sitemap.yaml') : [];
   const menuById = new Map();
   for (const menu of menus) {
     if (typeof menu.id === 'string' && menu.id !== '') {
-      if (menuById.has(menu.id)) issues.push(`src/server/yaml/sitemap.yaml: duplicate menu id ${menu.id}`);
+      if (menuById.has(menu.id)) issues.push(`src/backend/resources/yaml/sitemap.yaml: duplicate menu id ${menu.id}`);
       menuById.set(menu.id, menu);
     }
     if (menu.type === 'page' && (typeof menu.pageId !== 'string' || menu.pageId === '')) {
-      issues.push(`src/server/yaml/sitemap.yaml: menu ${menu.id ?? '(unknown)'} needs pageId`);
+      issues.push(`src/backend/resources/yaml/sitemap.yaml: menu ${menu.id ?? '(unknown)'} needs pageId`);
     }
     if (menu.pageId !== undefined && !sitemapIds.has(menu.pageId)) {
       issues.push(
-        `src/server/yaml/sitemap.yaml: menu ${menu.id ?? '(unknown)'} has invalid pageId ${menu.pageId}`,
+        `src/backend/resources/yaml/sitemap.yaml: menu ${menu.id ?? '(unknown)'} has invalid pageId ${menu.pageId}`,
       );
     }
   }
@@ -303,11 +301,11 @@ function run(projectDirectory, expectedPath) {
     const target = menuById.get(menu.activeMenu);
     if (!target) {
       issues.push(
-        `src/server/yaml/sitemap.yaml: menu ${menu.id ?? '(unknown)'} activeMenu ${menu.activeMenu} does not exist`,
+        `src/backend/resources/yaml/sitemap.yaml: menu ${menu.id ?? '(unknown)'} activeMenu ${menu.activeMenu} does not exist`,
       );
     } else if (target.type !== 'page' || target.hidden === true) {
       issues.push(
-        `src/server/yaml/sitemap.yaml: activeMenu ${menu.activeMenu} must reference a visible page menu`,
+        `src/backend/resources/yaml/sitemap.yaml: activeMenu ${menu.activeMenu} must reference a visible page menu`,
       );
     }
   }
@@ -315,29 +313,29 @@ function run(projectDirectory, expectedPath) {
     const matchingPageMenus = menus.filter((menu) => menu.pageId === page.id);
     if (matchingPageMenus.length !== 1) {
       issues.push(
-        `src/server/yaml/sitemap.yaml: expected exactly one menu for ${page.id}, got ${matchingPageMenus.length}`,
+        `src/backend/resources/yaml/sitemap.yaml: expected exactly one menu for ${page.id}, got ${matchingPageMenus.length}`,
       );
     }
     const menu = menuById.get(page.menu);
     if (!menu) {
-      issues.push(`src/server/yaml/sitemap.yaml: missing expected menu ${page.menu}`);
+      issues.push(`src/backend/resources/yaml/sitemap.yaml: missing expected menu ${page.menu}`);
       continue;
     }
     if (menu.pageId !== page.id) {
       issues.push(
-        `src/server/yaml/sitemap.yaml: menu ${page.menu} pageId must be ${page.id}, got ${menu.pageId}`,
+        `src/backend/resources/yaml/sitemap.yaml: menu ${page.menu} pageId must be ${page.id}, got ${menu.pageId}`,
       );
     }
     const hidden = menu.hidden === true;
     if (hidden !== page.hidden) {
       issues.push(
-        `src/server/yaml/sitemap.yaml: menu ${page.menu} hidden must be ${page.hidden}, got ${hidden}`,
+        `src/backend/resources/yaml/sitemap.yaml: menu ${page.menu} hidden must be ${page.hidden}, got ${hidden}`,
       );
     }
     const activeMenu = menu.activeMenu ?? null;
     if (activeMenu !== page.activeMenu) {
       issues.push(
-        `src/server/yaml/sitemap.yaml: menu ${page.menu} activeMenu must be ${page.activeMenu}, got ${activeMenu}`,
+        `src/backend/resources/yaml/sitemap.yaml: menu ${page.menu} activeMenu must be ${page.activeMenu}, got ${activeMenu}`,
       );
     }
   }
@@ -354,16 +352,16 @@ function run(projectDirectory, expectedPath) {
   }
   if (sitemap && sitemap.app?.name !== expected.brand.appTitle) {
     issues.push(
-      `src/server/yaml/sitemap.yaml: app.name must be ${expected.brand.appTitle}, got ${sitemap.app?.name}`,
+      `src/backend/resources/yaml/sitemap.yaml: app.name must be ${expected.brand.appTitle}, got ${sitemap.app?.name}`,
     );
   }
-  const layoutPath = join(projectRoot, 'app/layout.tsx');
+  const layoutPath = join(projectRoot, 'src/app/layout.tsx');
   if (!existsSync(layoutPath)) {
-    issues.push('app/layout.tsx: file is missing for brand metadata check');
+    issues.push('src/app/layout.tsx: file is missing for brand metadata check');
   } else {
     const layout = readFileSync(layoutPath, 'utf8');
     for (const value of [expected.brand.appTitle, expected.brand.appDescription]) {
-      if (!layout.includes(value)) issues.push(`app/layout.tsx: missing brand text ${value}`);
+      if (!layout.includes(value)) issues.push(`src/app/layout.tsx: missing brand text ${value}`);
     }
   }
 
@@ -377,7 +375,7 @@ function run(projectDirectory, expectedPath) {
     const path = join(projectRoot, file);
     if (existsSync(path)) scanFiles.add(path);
   }
-  const residuals = [...expected.forbiddenResiduals, ...REFERENCE_PATH_RESIDUALS];
+  const residuals = [...expected.forbiddenResiduals, ...LEGACY_PATH_RESIDUALS];
   for (const file of [...scanFiles].sort()) {
     const label = displayPath(projectRoot, file);
     const text = readFileSync(file, 'utf8');

@@ -1,0 +1,59 @@
+# 登录页 DSL：type: Login 业务组件（@pactor-app/blocks，经 App.tsx 的
+# components prop 注册；样式由 src/app/layout.tsx 的 pactor-app/styles.css 聚合入口加载），
+# 布局（layout: split / centered / brand-card / overlap / backdrop）与修饰
+# （brandSide / brandRatio / authVariant / brandPanelBackground / decor）正交组合，
+# 品牌区/文案/辅助入口/页脚全部 props 化，样式走语义令牌（深浅色/换肤自适应），
+# 可配置项权威定义见 openspec/specs/ui-login-component 与组件源码。
+# 提交闭环由 DSL 编排：内置 request（POST /api/auth/login 写会话 cookie）
+# + 结果判空 + 失败/成功 message + app.reload 整页重载，sitemap 端点按已登录
+# 会话重新下发。页面使用 sitemap.yaml 的 login 布局（纯 PageOutlet）。
+dsl: "1.0"
+page:
+  id: login
+  title: $i18n{page.login.title:登录}
+  name: login
+  description: "$i18n{page.login.description:登录页}"
+
+i18n:
+  namespaces: [ app ]
+
+body:
+  type: Login
+  props:
+    layout: split
+    authVariant: card
+    brand:
+      name: "{{APP_TITLE}}"
+      title: $i18n{page.login.brandTitle:管理后台登录}
+      description: $i18n{page.login.brandDescription:A neutral admin application for demonstrations.}
+    title: $i18n{page.login.title:登录}
+    subtitle: $i18n{page.login.accountHint:演示账号}
+    submitText: $i18n{page.login.submit:登 录}
+  events:
+    onSubmit:
+      - id: loginResult
+        action: request
+        params:
+          method: POST
+          url: /api/auth/login
+          body:
+            username: ${event.username}
+            password: ${event.password}
+      - action: if
+        params:
+          condition: ${actions.loginResult == null || actions.loginResult.token == null}
+          then:
+            - action: message
+              params:
+                messageType: error
+                text: $i18n{page.login.error:用户名或密码错误}
+      - action: if
+        params:
+          condition: ${actions.loginResult != null && actions.loginResult.token != null}
+          then:
+            - action: message
+              params:
+                messageType: success
+                text: $i18n{page.login.success:登录成功，正在跳转…}
+            - action: app.reload
+              params: { to: /workspace }

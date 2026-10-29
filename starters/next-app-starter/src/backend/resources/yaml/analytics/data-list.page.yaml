@@ -1,0 +1,373 @@
+# 数据列表标准骨架 —— 「搜索 + 表格 + 抽屉新建/编辑」数据列表页的复制起点。
+# 本页已注册进 sitemap.yaml（菜单「页面骨架 / 数据列表」，路径 /models/data-list），
+# 在模板工程中可直接运行预览；生成业务列表页时复制本文件到 yaml/<模块>/ 下，
+# 替换页面信息、字段、接口名（data-list → 业务资源名）与文案。
+# 结构与交互约定见 skills/pactor-prd/references/page-templates.md「数据列表标准模型」。
+dsl: "1.0"
+page:
+  id: data-list
+  title: "$i18n{page.data-list.title:数据列表}"
+  name: dataList
+state:
+  # 搜索条件镜像：Form submit 后写入，驱动列表请求参数
+  keyword: ""
+  status: all
+  editingId: ""
+  # 表单条件显隐镜像（onValuesChange 写入；按页面需要增减，可多个）
+  fKind: ""
+dataSources:
+  list:
+    type: http
+    autoLoad: true
+    request:
+      method: GET
+      url: /api/d/data-list
+      params:
+        keyword: ${state.keyword}
+        status: ${state.status}
+  editing: # 编辑预填；autoLoad: false，打开抽屉前手动 reload
+    type: http
+    autoLoad: false
+    request:
+      method: GET
+      url: /api/d/data-list/${state.editingId}
+body:
+  type: Page
+  children:
+    # 标题行：左标题 + 副标题，右新建按钮
+    - type: Flex
+      props:
+        justify: space-between
+        align: center
+      children:
+        - type: Flex
+          props:
+            direction: vertical
+            gap: 2
+          children:
+            - type: Typography
+              props:
+                variant: h3
+                text: "$i18n{page.data-list.title:数据列表}"
+            - type: Typography
+              props:
+                variant: muted
+                text: "$i18n{page.data-list.subtitle:标准列表示例：搜索 + 表格 + 抽屉新建/编辑，复制本页生成业务列表。}"
+        - type: Button
+          props:
+            text: "$i18n{page.data-list.create:+ 新建记录}"
+            variant: primary
+          events:
+            onClick:
+              - action: setState # 清空编辑态与显隐镜像
+                params:
+                  editingId: ""
+                  fKind: ""
+              - action: reload # 清空 editing 数据（editingId 为空 → 空对象）
+                params:
+                  dataSource: editing
+              - action: overlay.open # 锚点 &entityDrawer 在此定义，表格行内用 *entityDrawer 引用
+                params:
+                  overlay: &entityDrawer
+                    type: drawer
+                    title: "${state.editingId == '' ? t('dataList.createTitle') : t('dataList.editTitle')}"
+                    width: 720
+                    content:
+                      type: Form
+                      props:
+                        name: entityForm
+                        layout: vertical
+                        initialValues: ${data.editing}
+                      events:
+                        # 条件显隐字段镜像到 state（其他字段变化时保持原值）
+                        onValuesChange:
+                          - action: setState
+                            params:
+                              fKind: "${event.kind != null ? event.kind : state.fKind}"
+                        onSubmit:
+                          - id: saveResult
+                            action: request
+                            params:
+                              method: POST
+                              url: /api/d/ops/data-list-save
+                              body:
+                                id: ${state.editingId}
+                                name: ${event.name}
+                                code: ${event.code}
+                                kind: ${event.kind}
+                                extra: ${event.extra}
+                                sort: ${event.sort}
+                                status: ${event.status}
+                          - action: if
+                            params:
+                              condition: ${actions.saveResult != null && actions.saveResult.ok == true}
+                              then:
+                                - action: message
+                                  params:
+                                    messageType: success
+                                    text: "$i18n{page.data-list.saved:已保存}"
+                                - action: overlay.close
+                              else:
+                                - action: message
+                                  params:
+                                    messageType: error
+                                    text: "$i18n{page.data-list.saveError:保存失败，请检查接口后重试}"
+                      children:
+                        # 分区与底部按钮共用纵向 Flex/gap，不用临时 margin 修间距
+                        - type: Flex
+                          props:
+                            direction: vertical
+                            gap: middle
+                          children:
+                            # 分区结构：标题 → 分割线 → 字段组（不用 Card）；多个分区重复此结构
+                            - type: Flex
+                              props:
+                                direction: vertical
+                                gap: middle
+                              children:
+                                - type: Text
+                                  props:
+                                    text: "$i18n{page.data-list.basicInfo:基本信息}"
+                                    strong: true
+                                - type: Separator
+                                - type: Flex
+                                  props:
+                                    direction: vertical
+                                    gap: small
+                                  children:
+                                    - type: Field
+                                      props:
+                                        label: "$i18n{page.data-list.name:名称}"
+                                        required: true
+                                      children:
+                                        - type: Input
+                                          props:
+                                            name: name
+                                            placeholder: "$i18n{page.data-list.namePlaceholder:请输入名称}"
+                                            rules:
+                                              - required: true
+                                                message: "$i18n{page.data-list.nameRequired:请输入名称}"
+                                    # 编辑时禁用关键字段
+                                    - type: Field
+                                      props:
+                                        label: "$i18n{page.data-list.code:编码}"
+                                        required: true
+                                      children:
+                                        - type: Input
+                                          props:
+                                            name: code
+                                            placeholder: "$i18n{page.data-list.codePlaceholder:大写字母 + 下划线，如 DEMO_ITEM}"
+                                            disabled: ${state.editingId != ''}
+                                            rules:
+                                              - required: true
+                                                message: "$i18n{page.data-list.codeRequired:请输入编码}"
+                                    # 成对字段用 Row / Col：窄屏单列，md 起两列
+                                    - type: Row
+                                      props:
+                                        gutter: [16, 16]
+                                      children:
+                                        - type: Col
+                                          props: { span: 24, md: 12 }
+                                          children:
+                                            - type: Field
+                                              props:
+                                                label: "$i18n{page.data-list.kind:类型}"
+                                                required: true
+                                              children:
+                                                - type: Select
+                                                  props:
+                                                    name: kind
+                                                    controlClassName: w-full
+                                                    placeholder: "$i18n{page.data-list.kindPlaceholder:请选择类型}"
+                                                    options: ${data.list.filters.kind}
+                                                    rules:
+                                                      - required: true
+                                                        message: "$i18n{page.data-list.kindRequired:请选择类型}"
+                                        - type: Col
+                                          props: { span: 24, md: 12 }
+                                          children:
+                                            - type: Field
+                                              props:
+                                                label: "$i18n{page.data-list.status:状态}"
+                                              children:
+                                                - type: Select
+                                                  props:
+                                                    name: status
+                                                    controlClassName: w-full
+                                                    value: 启用
+                                                    options: ${data.list.filters.status}
+                                    # 单字段保留桌面半宽，窄屏单列
+                                    - type: Row
+                                      props:
+                                        gutter: [16, 16]
+                                      children:
+                                        - type: Col
+                                          props: { span: 24, md: 12 }
+                                          children:
+                                            - type: Field
+                                              props:
+                                                label: "$i18n{page.data-list.sort:排序}"
+                                              children:
+                                                - type: NumberInput
+                                                  props:
+                                                    name: sort
+                                                    className: w-full
+                                                    min: 0
+                                                    precision: 0
+                                    # 条件显隐字段：依赖镜像 state
+                                    - when: ${state.fKind == '高级'}
+                                      type: Field
+                                      props:
+                                        label: "$i18n{page.data-list.extra:扩展说明}"
+                                      children:
+                                        - type: Input
+                                          props:
+                                            name: extra
+                                            placeholder: "$i18n{page.data-list.extraPlaceholder:高级类型的扩展配置说明}"
+                            # 底部按钮：取消关抽屉，保存触发 Form onSubmit
+                            - type: Flex
+                              props:
+                                justify: end
+                                gap: small
+                              children:
+                                - type: Button
+                                  props:
+                                    text: "$i18n{page.data-list.cancel:取消}"
+                                  events:
+                                    onClick:
+                                      - action: overlay.close
+                                - type: Button
+                                  props:
+                                    text: "$i18n{page.data-list.save:保存}"
+                                    variant: primary
+                                    submit: true
+              - action: reload # overlay.open 阻塞到关闭，关闭后刷新列表
+                params:
+                  dataSource: list
+    # 搜索栏：Form(layout: inline) + Field 包裹控件
+    - type: Card
+      children:
+        - type: Flex
+          props:
+            direction: vertical
+            gap: middle
+          children:
+            - type: Form
+              props:
+                name: search
+                layout: inline
+                className: data-list-search-right
+              events:
+                onSubmit:
+                  - action: setState
+                    params:
+                      keyword: ${event.keyword}
+                      status: ${event.status}
+                  - action: reload
+                    params:
+                      dataSource: list
+              children:
+                - type: Field
+                  props:
+                    label: "$i18n{page.data-list.searchLabel:编码/名称}"
+                  children:
+                    - type: Input
+                      props:
+                        name: keyword
+                        placeholder: "$i18n{page.data-list.searchPlaceholder:支持模糊查询}"
+                - type: Field
+                  props:
+                    label: "$i18n{page.data-list.status:状态}"
+                  children:
+                    - type: Select
+                      props:
+                        name: status
+                        controlClassName: w-40
+                        placeholder: "$i18n{page.data-list.statusPlaceholder:请选择状态}"
+                        options: ${data.list.filters.status} # 选项由接口下发
+                # 按钮组也放进 Field；inline 布局由 Form/Field 对齐，无需空格伪 label
+                - type: Field
+                  children:
+                    - type: Flex
+                      props:
+                        gap: small
+                        align: center
+                      children:
+                        - type: Button
+                          props:
+                            text: "$i18n{page.data-list.query:查询}"
+                            submit: true
+                        - type: Button
+                          props:
+                            text: "$i18n{page.data-list.reset:重置}"
+                          events:
+                            onClick:
+                              - action: form.setValues
+                                params:
+                                  form: search
+                                  values:
+                                    keyword: ""
+                                    status: all
+                              - action: setState
+                                params:
+                                  keyword: ""
+                                  status: all
+                              - action: reload
+                                params:
+                                  dataSource: list
+            # 表格：名称列/操作列按钮统一 variant: link size: small
+            - type: Table
+              props:
+                dataSource: ${data.list.items}
+                rowKey: id
+                pagination: false
+                columns:
+                  - title: "$i18n{page.data-list.column.name:名称}"
+                    cell:
+                      type: Button
+                      props:
+                        text: ${row.name}
+                        variant: link
+                        size: small
+                      events:
+                        onClick: &editRow # 行点击 = 编辑，锚点在此定义
+                          - action: setState # 写入编辑 id + 显隐镜像（取自行数据，不等 editing 接口）
+                            params:
+                              editingId: ${row.id}
+                              fKind: ${row.kind}
+                          - action: reload
+                            params:
+                              dataSource: editing
+                          - action: overlay.open
+                            params:
+                              overlay: *entityDrawer
+                          - action: reload
+                            params:
+                              dataSource: list
+                  - title: "$i18n{page.data-list.column.code:编码}"
+                    dataIndex: code
+                  - title: "$i18n{page.data-list.column.kind:类型}"
+                    dataIndex: kind
+                  - title: "$i18n{page.data-list.column.status:状态}"
+                    dataIndex: status
+                  - title: "$i18n{page.data-list.column.actions:操作}"
+                    align: center
+                    fixed: right
+                    width: 120
+                    cell:
+                      type: Button
+                      props:
+                        text: "$i18n{page.data-list.edit:编辑}"
+                        variant: link
+                        size: small
+                      events:
+                        onClick: *editRow # 与名称列同一动作
+            - type: Text
+              props:
+                text:
+                  $i18n:
+                    key: page.data-list.total
+                    fallback: 共 {{total}} 条
+                    params:
+                      total: ${data.list.total}
+                type: secondary

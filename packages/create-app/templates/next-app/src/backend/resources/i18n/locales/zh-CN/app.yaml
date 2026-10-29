@@ -1,0 +1,266 @@
+site.app.name: "{{APP_TITLE}}"
+
+menu.analytics: 数据经营
+menu.system: 系统管理
+menu.workspace: 工作台
+menu.dashboard: 数据概览
+menu.monthly: 报表中心
+menu.monthly-detail: 月报详情
+menu.data-list: 数据列表
+menu.system-settings: 系统设置
+menu.dictionaries: 字典管理
+menu.audit-logs: 审计日志
+menu.roles: 角色管理
+menu.role-detail: 角色详情
+menu.users: 用户管理
+menu.themes: 主题设置
+menu.profile: 个人中心
+menu.login: 登录
+menu.register: 注册
+
+page.login.title: 登录
+page.login.description: 登录页
+page.login.brandTitle: 管理后台登录
+page.login.brandDescription: 用于演示的中性管理后台。
+page.login.submit: 登 录
+page.login.accountHint: "演示账号：{{DEMO_ADMIN_USERNAME}} / {{DEMO_ADMIN_PASSWORD}}；{{DEMO_GUEST_USERNAME}} / {{DEMO_GUEST_PASSWORD}}"
+page.login.error: 用户名或密码错误
+page.login.success: 登录成功，正在跳转…
+page.register.title: 注册
+page.register.text1: 注册
+page.register.text2: 注册
+page.register.text3: 演示环境不开放注册
+page.register.text4: 请使用登录页的演示账号体验不同角色的菜单差异。
+page.register.text5: 返回登录
+page.workspace.title: 工作台
+page.dashboard.title: 数据概览
+page.dashboard.description: 运营概览：核心指标、趋势分析、用量构成
+page.monthly.title: 报表中心
+page.monthly-detail.title: 月报详情
+page.data-list.title: 数据列表
+page.system-settings.title: 系统设置
+page.dictionaries.title: 字典管理
+page.audit-logs.title: 审计日志
+page.roles.title: 角色管理
+page.role-detail.title: 角色详情
+page.users.title: 用户管理
+page.themes.title: 主题设置
+page.profile.title: 个人中心
+
+page.monthly.text1: 报表中心
+page.monthly.text2: 本月经营月报
+page.monthly.text3: 营收
+page.monthly.text4: 本月（万元）
+page.monthly.text5: 新增客户
+page.monthly.text6: 本月（家）
+page.monthly.text7: 转化率
+page.monthly.text8: 本月（%）
+page.monthly.text9: 本页 DSL 由页面接口按需下发
+page.monthly.text10: 点击进入报表中心时才请求页面 DSL，菜单本身保持轻量。
+page.monthly.text11: 查看月报详情
+page.monthly-detail.text1: 月报详情
+page.monthly-detail.text2: 月报详情
+page.monthly-detail.text3: "路径参数演示：id = {{id}}"
+page.monthly-detail.text4: 通过隐藏路由与路径参数进入详情页。
+page.monthly-detail.text5: 返回报表中心
+
+page.users.text1: 用户管理
+page.users.text2: 用户管理
+page.users.text12: 用户数据
+page.users.text13: 姓名
+page.users.text14: 用户名
+page.users.text15: 角色
+page.users.text16: 邮箱
+page.users.text17: 创建时间
+page.users.create: "+ 添加用户"
+page.users.createTitle: 添加用户
+page.users.searchPlaceholder: 姓名 / 用户名
+page.users.rolePlaceholder: 选择角色
+page.users.roleAll: 全部角色
+page.users.roleAdmin: 管理员
+page.users.roleMember: 成员
+page.users.roleGuest: 访客
+page.users.query: 查询
+page.users.status: 状态
+page.users.actions: 操作
+page.users.confirmStatusTitle: 变更状态
+page.users.confirmStatusContent: 确定变更该用户的状态吗？
+page.users.edit: 修改
+page.users.editTitle: 修改用户
+page.users.name: 姓名
+page.users.namePlaceholder: 请输入姓名
+page.users.nameRequired: 请输入姓名
+page.users.username: 用户名
+page.users.usernamePlaceholder: 请输入用户名
+page.users.usernameRequired: 请输入用户名
+page.users.email: 邮箱
+page.users.emailPlaceholder: 请输入邮箱
+page.users.emailRequired: 请输入邮箱
+page.users.role: 角色
+page.users.roleRequired: 请选择角色
+page.users.save: 保存
+page.users.resetPassword: 密码重置
+page.users.resetUnavailable: 示例用户未接入登录账号，暂不支持密码重置
+page.users.delete: 删除
+page.users.deleteTitle: 删除用户
+page.users.deleteContent: 确定删除该示例用户吗？
+page.users.added: 用户已添加
+page.users.addError: 添加失败，请检查输入或稍后重试
+page.users.cancel: 取消
+page.users.add: 添加
+
+page.data-list.subtitle: "标准列表示例：搜索 + 表格 + 抽屉新建/编辑，复制本页生成业务列表。"
+page.data-list.create: "+ 新建记录"
+page.data-list.saved: 已保存
+page.data-list.saveError: 保存失败，请检查接口后重试
+page.data-list.basicInfo: 基本信息
+page.data-list.name: 名称
+page.data-list.namePlaceholder: 请输入名称
+page.data-list.nameRequired: 请输入名称
+page.data-list.code: 编码
+page.data-list.codePlaceholder: "大写字母 + 下划线，如 DEMO_ITEM"
+page.data-list.codeRequired: 请输入编码
+page.data-list.kind: 类型
+page.data-list.kindPlaceholder: 请选择类型
+page.data-list.kindRequired: 请选择类型
+page.data-list.status: 状态
+page.data-list.statusPlaceholder: 请选择状态
+page.data-list.sort: 排序
+page.data-list.extra: 扩展说明
+page.data-list.extraPlaceholder: 高级类型的扩展配置说明
+page.data-list.cancel: 取消
+page.data-list.save: 保存
+page.data-list.searchLabel: 编码/名称
+page.data-list.searchPlaceholder: 支持模糊查询
+page.data-list.query: 查询
+page.data-list.reset: 重置
+page.data-list.column.name: 名称
+page.data-list.column.code: 编码
+page.data-list.column.kind: 类型
+page.data-list.column.status: 状态
+page.data-list.column.actions: 操作
+page.data-list.edit: 编辑
+page.data-list.total: "共 {{total}} 条"
+
+page.roles.subtitle: 创建角色、配置其资源权限，并绑定用户或组织单元。
+page.roles.create: "+ 新建角色"
+page.roles.createTitle: 新建角色
+page.roles.created: 角色已创建
+page.roles.roleName: 角色名称
+page.roles.roleNamePlaceholder: 请输入角色名称
+page.roles.roleNameRequired: 请输入角色名称
+page.roles.roleCode: 角色编码
+page.roles.roleCodePlaceholder: "大写字母与下划线，如 OPERATOR"
+page.roles.roleCodeRequired: 请输入角色编码
+page.roles.description: 描述
+page.roles.descriptionPlaceholder: 角色用途说明
+page.roles.cancel: 取消
+page.roles.save: 保存
+page.roles.searchLabel: 名称/编码
+page.roles.searchPlaceholder: 模糊搜索
+page.roles.statusLabel: 状态
+page.roles.all: 全部
+page.roles.enabled: 启用
+page.roles.disabled: 禁用
+page.roles.query: 查询
+page.roles.reset: 重置
+page.roles.column.name: 角色名称
+page.roles.column.code: 编码
+page.roles.column.scope: 归属范围
+page.roles.column.members: 成员数
+page.roles.column.status: 状态
+page.roles.column.actions: 操作
+page.roles.detail: 详情
+page.roles.confirmStatusTitle: 确认变更状态
+page.roles.confirmStatusContent: 确定要变更该角色的启用状态吗？
+page.roles.statusUpdated: 状态已更新
+page.roles.delete: 删除
+page.roles.deleteTitle: 删除角色
+page.roles.deleteContent: 将解除该角色的授权与成员绑定，确定删除吗？
+page.roles.deleted: 已删除
+
+page.role-detail.back: 返回角色列表
+page.role-detail.tab.basic: 基本信息
+page.role-detail.tab.permissions: 权限设置
+page.role-detail.tab.members: 成员列表
+page.role-detail.confirmStatusTitle: 确认变更状态
+page.role-detail.confirmStatusContent: 确定要变更该角色的启用状态吗？
+page.role-detail.statusUpdated: 状态已更新
+page.role-detail.edit: 修改
+page.role-detail.editTitle: 修改角色
+page.role-detail.saved: 已保存修改
+page.role-detail.roleName: 角色名称
+page.role-detail.roleNamePlaceholder: 请输入角色名称
+page.role-detail.roleNameRequired: 请输入角色名称
+page.role-detail.description: 描述
+page.role-detail.descriptionPlaceholder: 角色用途说明
+page.role-detail.cancel: 取消
+page.role-detail.save: 保存
+page.role-detail.field.roleName: 角色名称
+page.role-detail.field.roleCode: 角色编码
+page.role-detail.field.ownerType: 归属层级
+page.role-detail.field.status: 状态
+page.role-detail.field.memberCount: 成员数量
+page.role-detail.field.description: 描述
+page.role-detail.permissions.note: 当前角色已选授权项以保存前草稿为准；保存将全量替换该角色现有授权。
+page.role-detail.permissions.searchPlaceholder: 搜索资源名称 / Key
+page.role-detail.permissions.catalog: 后台资源目录
+page.role-detail.permissions.sync: 同步目录
+page.role-detail.permissions.synced: 目录已同步
+page.role-detail.permissions.loadingCatalog: 加载目录中…
+page.role-detail.permissions.grants: 当前资源授权
+page.role-detail.permissions.loadingGrants: 加载授权中…
+page.role-detail.permissions.cancel: 取消
+page.role-detail.permissions.save: 保存完整授权
+page.role-detail.permissions.saveConfirmTitle: 保存完整授权
+page.role-detail.permissions.saveConfirmContent: 本次提交会替换该角色现有的全部授权，确定继续吗？
+page.role-detail.permissions.saved: 授权已保存
+page.role-detail.members.add: "+ 添加成员"
+page.role-detail.members.addTitle: 添加成员
+page.role-detail.members.empty: 暂无可添加的成员。
+page.role-detail.members.search: 搜索
+page.role-detail.members.searchPlaceholder: 名称 / 账号 / 组织单元
+page.role-detail.members.query: 查询
+page.role-detail.members.subjectType: 主体类型
+page.role-detail.members.subjectName: 主体名称
+page.role-detail.members.subjectKey: 主体标识
+page.role-detail.members.actions: 操作
+page.role-detail.members.remove: 移除
+page.role-detail.members.removeTitle: 移除成员
+page.role-detail.members.removeConfirm: 仅解除该角色绑定，不删除用户或组织单元。确定移除吗？
+page.role-detail.members.removed: 已移除
+
+
+dashboard.title: 数据概览
+dashboard.subtitle: 运营概览
+dashboard.refresh: ↻ 刷新
+dashboard.refreshed: 看板数据已刷新
+dashboard.realtime: 实时 {{rpm}} RPM · {{tpm}} TPM
+dashboard.rangeLabel: 分析时间范围
+dashboard.rangePlaceholder: 选择时间范围
+dashboard.preset.today: 今天
+dashboard.preset.lastDays: 近{{days}}天
+dashboard.coreOverview: 核心概览 · {{start}} — {{end}}
+dashboard.metric.requests: 请求
+dashboard.metric.cost: 费用
+dashboard.metric.latency: 延迟
+dashboard.stats.requests: 请求量
+dashboard.stats.successRate: 成功率
+dashboard.stats.avgLatency: 平均响应时间
+dashboard.stats.cost: 计费金额
+dashboard.stats.activeClients: 活跃客户端 {{clients}}
+dashboard.stats.failures: 失败请求 {{failures}}
+dashboard.stats.avgCost: 平均成本 {{cost}}
+dashboard.trend.title: 趋势分析
+dashboard.trend.subtitle: 观察流量变化与异常峰值
+dashboard.usage.models: 用量构成 · 模型
+dashboard.usage.modelsSubtitle: 按请求量分布，识别主要模型流量来源
+dashboard.usage.clients: 用量构成 · 客户端
+dashboard.usage.clientsSubtitle: 按请求量分布，识别主要客户端流量来源
+dashboard.link.allModels: 查看全部 → 模型用量
+dashboard.link.allClients: 查看全部 → 客户端用量
+dashboard.link.reliability: 查看可靠性分析 →
+dashboard.toast.models: 跳转模型用量
+dashboard.toast.clients: 跳转客户端用量
+dashboard.toast.callLog: 跳转调用日志（失败筛选）
+dashboard.toast.providerAvailability: 跳转供应商可用性

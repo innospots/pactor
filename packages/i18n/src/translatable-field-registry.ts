@@ -110,7 +110,13 @@ export function createDefaultTranslatableFieldRegistry(): TranslatableFieldRegis
     .register('Statistic', 'props.title')
     .register('Alert', ['props.message', 'props.description'])
     .register('Typography', 'props.text')
-    .register('Login', ['props.brand.title', 'props.title', 'props.submitText'])
+    .register('Login', [
+      'props.brand.title',
+      'props.brand.description',
+      'props.title',
+      'props.subtitle',
+      'props.submitText',
+    ])
     .register('Header', ['props.user.items[*].label'])
     .register('DropdownMenu', ['props.items[*].label'])
     .register('Button', ['props.text', 'props.label', 'props.description', 'props.ariaLabel'])

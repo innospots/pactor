@@ -12,3 +12,4 @@ coverage/
 openspec
 design
 dist-pack/
+/.pnpm-store/
