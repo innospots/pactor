@@ -1,8 +1,0 @@
-dsl: "1.0"
-page:
-  id: workspace
-  title: "$i18n{page.workspace.title:工作台}"
-body:
-  type: WorkbenchHome
-  props:
-    user: ${data.session.user}

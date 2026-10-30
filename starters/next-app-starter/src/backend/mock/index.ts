@@ -3,12 +3,14 @@ import * as auditLogs from "./audit-logs";
 import * as dashboard from "./dashboard";
 import * as dataList from "./data-list";
 import * as dictionaries from "./dictionaries";
+import * as monitoring from "./monitoring";
 import * as roles from "./roles";
 import * as systemSettings from "./system-settings";
 import * as users from "./users";
 
 const handlers: Record<string, Record<string, unknown>> = {
   dashboard,
+  monitoring,
   "data-list": dataList,
   users,
   dictionaries,

@@ -1,6 +1,0 @@
-dsl: "1.0"
-page:
-  id: dictionaries
-  title: "$i18n{page.dictionaries.title:字典管理}"
-body:
-  type: DictionaryManagement

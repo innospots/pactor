@@ -1,6 +1,6 @@
 import { cookies } from "next/headers";
 
-import { findUserBySession, SESSION_COOKIE } from "@/backend/auth/accounts";
+import { findUserBySession, SESSION_COOKIE } from "@/backend/mock/accounts";
 import { isPrototype, serverBaseUrl } from "@/backend/config";
 import { corsHeaders, corsPreflight } from "@/backend/cors";
 import { mockBusinessData } from "@/backend/mock";

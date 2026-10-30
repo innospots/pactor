@@ -1,8 +1,8 @@
 import { cookies } from "next/headers";
 
-import { findUserBySession, SESSION_COOKIE } from "@/backend/auth/accounts";
+import { findUserBySession, SESSION_COOKIE } from "@/backend/mock/accounts";
 import { corsHeaders, corsPreflight } from "@/backend/cors";
-import { verifyPageAccess } from "@/backend/resources/page-access";
+import { verifyPageAccess } from "@/backend/pages/page-access";
 
 /**
  * 页面访问校验端点（客户端在页面切换 / 首次打开前调用）：
@@ -10,7 +10,7 @@ import { verifyPageAccess } from "@/backend/resources/page-access";
  * pageKey / grantGroup，转发平台 POST /api/public/page-access/verify，
  * 只按 data.allowed 返回放行 / 拒绝。
  *
- * 平台的域 / 模块标识与接口地址均在服务端配置（见 src/backend/resources/page-access.ts），
+ * 平台的域 / 模块标识与接口地址均在服务端配置（见 src/backend/pages/page-access.ts），
  * 浏览器不接触平台地址，也不持有域 / 模块密钥。
  */
 interface VerifyBody {

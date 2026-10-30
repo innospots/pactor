@@ -42,10 +42,10 @@ import { messages as clientMessages, translate } from "./i18n/messages";
  * pactor-app/styles.css 聚合入口统一加载）。
  *
  * 登录 / 登出是普通 HTTP 调用，由 DSL 中的内置 request 动作直接表达
- * （见 src/backend/resources/sitemap.ts 下发的登录页 / 布局 DSL），无需客户端注册服务。
+ * （见 src/backend/pages/sitemap.ts 下发的登录页 / 布局 DSL），无需客户端注册服务。
  *
  * 国际化：页面 / 布局文案由服务端按 `locale` 本地化后下发（`$i18n` 与
- * `src/backend/resources/i18n/locales/<locale>/app.yaml`），客户端不再传业务词条表；
+ * `src/backend/pages/i18n/locales/<locale>/app.yaml`），客户端不再传业务词条表；
  * `useLocale` 统一 Cookie / URL / 浏览器语言解析，右下角 `LocaleSelector`
  * 写入 `locale` Cookie。切换语言时以 `key={locale}` 重挂载 SitemapApp：
  * 框架暂不随 locale 重取 sitemap（阶段 B），换 key 让 sitemap、布局与页面

@@ -32,17 +32,15 @@ pnpm dev
 
 打开 <http://localhost:9011>。默认 `APP_ENV=prototype`，无需真实后端。
 
-模板源码中的账号使用占位符，生成新工程时由
-`packages/create-app` 按 `placeholders.json` 渲染；未渲染时也可以用占位符字符串
-登录本地原型：
+本地原型可使用以下演示账号登录：
 
 | 角色 | 用户名 | 密码 | 权限 |
 | --- | --- | --- | --- |
-| 管理员 | `{{DEMO_ADMIN_USERNAME}}` | `{{DEMO_ADMIN_PASSWORD}}` | `report:view`、`user:view` |
-| 访客 | `{{DEMO_GUEST_USERNAME}}` | `{{DEMO_GUEST_PASSWORD}}` | 仅访问无权限标记的页面 |
+| 管理员 | `admin` | `admin123` | `report:view`、`user:view` |
+| 访客 | `guest` | `guest123` | 仅访问无权限标记的页面 |
 
 演示会话只用于本地原型。接入生产环境时应替换
-`src/backend/auth/accounts.ts` 和登录接口，改用真实用户体系与会话。
+`src/backend/mock/accounts.ts`、`src/backend/fixtures/accounts.json` 和登录接口，改用真实用户体系与会话。
 
 ## 配置说明
 
@@ -54,9 +52,9 @@ pnpm dev
 | 应用环境与接口地址 | `next.config.js`、`scripts/build.mjs` |
 | 服务端环境判断 | `src/backend/config.ts` |
 | 浏览器端接口入口 | `src/frontend/config.ts` |
-| 菜单、路由与布局 | `src/backend/resources/yaml/sitemap.yaml` |
-| 页面访问权限 | `src/backend/resources/page-access.ts` |
-| 中英文语言包 | `src/backend/resources/i18n/locales/*/app.yaml` |
+| 菜单、路由与布局 | `src/backend/pages/yaml/sitemap.yaml` |
+| 页面访问权限 | `src/backend/pages/page-access.ts` |
+| 中英文语言包 | `src/backend/pages/i18n/locales/*/app.yaml` |
 | 主题与明暗模式 | `public/themes/*.css`、`src/frontend/skin.ts` |
 
 ### 环境与命令
@@ -105,11 +103,10 @@ next-app-starter/
 │   │   ├── layout.tsx          HTML 壳、主题首屏注入、PactorApp 挂载
 │   │   └── globals.css         后台布局与系统管理页面样式
 │   ├── backend/
-│   │   ├── auth/               演示账号、会话 cookie
-│   │   ├── fixtures/           用户、角色、系统设置示例数据
-│   │   ├── mock/               原型模式业务接口
+│   │   ├── fixtures/           演示账号、用户、角色等示例数据
+│   │   ├── mock/               原型模式认证与业务接口
 │   │   ├── config.ts           服务端地址与 prototype 判断
-│   │   └── resources/
+│   │   └── pages/
 │   │       ├── i18n/           YAML 语言包与服务端本地化
 │   │       ├── page-access.ts  pageKey / grantGroup 校验
 │   │       ├── sitemap.ts      sitemap 构建、权限裁剪、语言解析
@@ -135,7 +132,7 @@ next-app-starter/
 
 ## 页面与导航
 
-导航和路由以 `src/backend/resources/yaml/sitemap.yaml` 为唯一入口：
+导航和路由以 `src/backend/pages/yaml/sitemap.yaml` 为唯一入口：
 
 ```yaml
 menus:
@@ -160,24 +157,35 @@ menus:
 - 隐藏详情页通过 `hidden: true` 不进入菜单，通过 `activeMenu` 保持父菜单高亮。
 - 菜单标题在服务端按 `locale` 解析后下发。
 
-页面 DSL 位于 `src/backend/resources/yaml/<module>/<id>.page.yaml`。
+左侧一级导航默认保持收起，仅显示图标。需要鼠标悬停或键盘聚焦时展开文字，
+可在 `src/frontend/config.ts` 中修改：
+
+```ts
+export const navigationConfig = { expandRailOnHover: true };
+```
+
+设为 `false` 可关闭伸缩；修改后开发环境会自动更新，生产环境需要重新构建。
+
+页面 DSL 位于 `src/backend/pages/yaml/<module>/<id>.page.yaml`。
 `lazy: true` 的页面不内联到 sitemap，由
 `GET /api/pages/{id}` 按需加载。
 
 ## 新增一个页面
 
-1. 在 `src/backend/resources/yaml/<module>/` 新建 `<id>.page.yaml`。
+1. 在 `src/backend/pages/yaml/<module>/` 新建 `<id>.page.yaml`。
 2. 在 `sitemap.yaml` 的 `pages` 中声明 `id`、`path`、`title`、`version`；
    大页面建议设置 `lazy: true`。
 3. 在对应 group 的 `children` 中增加菜单项，填写 `pageId`、`path`、`title`、
    `layout`。详情页增加 `hidden: true` 和 `activeMenu`。
 4. 如需权限控制，在页面和菜单上配置 `permission`，并在
-   `src/backend/resources/page-access.ts` 补齐 `grantGroup` 到权限码的映射。
-5. 在 `src/backend/resources/i18n/locales/zh-CN/app.yaml` 和
+   `src/backend/pages/page-access.ts` 补齐 `grantGroup` 到权限码的映射。
+5. 在 `src/backend/pages/i18n/locales/zh-CN/app.yaml` 和
    `en-US/app.yaml` 中增加 `menu.<id>`、`page.<id>.title` 及页面文案词条。
 6. 自定义组件放在 `src/frontend/components/`，并在
    `src/frontend/components/index.ts` 注册。
 7. 修改 lazy 页面后递增 sitemap 中的 `version`，避免浏览器使用旧缓存。
+
+系统设置、字典列表、审计日志、角色和用户等页面优先在 YAML 中组合标准表格、表单、弹窗和布局组件。`src/frontend/components/settings/` 只保留需要专门交互的部分：字典项动态编辑、资源目录转换与搜索、分层权限授权和主题预览选择。工作台的布局和入口清单同样由 YAML 管理，智能助手会话等有状态交互由组件实现。新增页面时应先检查 Pactor 标准组件，只有现有能力无法满足时才注册自定义组件。
 
 页面 DSL 可用作者态 Schema 校验：
 
@@ -187,7 +195,7 @@ import { readFileSync, globSync } from 'node:fs';
 import YAML from 'yaml';
 import { validateAuthorPageDsl } from '@pactor-app/schema';
 
-for (const file of globSync('src/backend/resources/yaml/**/*.page.yaml')) {
+for (const file of globSync('src/backend/pages/yaml/**/*.page.yaml')) {
   const result = validateAuthorPageDsl(YAML.parse(readFileSync(file, 'utf8')));
   if (!result.valid) {
     console.error(file, result.errors);
@@ -203,7 +211,7 @@ NODE
 
 1. `src/frontend/locale.tsx` 从 URL `locale`、Cookie 和浏览器语言解析语言。
 2. 页面 YAML 使用 `$i18n{key:默认值}` 或对象式 `$i18n`。
-3. `src/backend/resources/i18n/index.ts` 使用 `YamlMessageProvider`
+3. `src/backend/pages/i18n/index.ts` 使用 `YamlMessageProvider`
    加载 `zh-CN` / `en-US` 语言包。
 4. 页面 DSL 下发前完成本地化，浏览器不加载业务语言包。
 
@@ -211,8 +219,8 @@ NODE
 
 - `src/frontend/locale.tsx` 的 `Locale` 与 `supported()`。
 - `src/frontend/components/layout/account-menu.tsx` 的语言选项。
-- `src/backend/resources/i18n/index.ts` 的支持语言和词条清单。
-- 新增 `src/backend/resources/i18n/locales/<locale>/app.yaml`。
+- `src/backend/pages/i18n/index.ts` 的支持语言和词条清单。
+- 新增 `src/backend/pages/i18n/locales/<locale>/app.yaml`。
 
 ## 主题
 
@@ -240,7 +248,7 @@ page:
   grantGroup: userGroup
 ```
 
-原型映射位于 `src/backend/resources/page-access.ts`：
+原型映射位于 `src/backend/pages/page-access.ts`：
 
 - `userGroup` → `user:view`
 - `reportGroup` → `report:view`

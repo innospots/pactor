@@ -1,63 +1,114 @@
 "use client";
 
-import {
-  ArrowRight,
-  BarChart3,
-  BookOpen,
-  Bot,
-  FileText,
-  History,
-  Languages,
-  Layers,
-  Palette,
-  Plus,
-  ScrollText,
-  Send,
-  Settings,
-  Shield,
-  Sparkles,
-  Table2,
-  Trash2,
-  Users,
-  Wrench,
-  type LucideIcon,
-} from "lucide-react";
+import { ArrowRight, Bot, History, Languages, Layers, Palette, Plus, Send, Sparkles, Trash2, Wrench, BarChart3, BookOpen, FileText, ScrollText, Settings, Shield, Table2, Users, type LucideIcon } from "lucide-react";
 import Link from "next/link";
 import { type FormEvent, useEffect, useRef, useState } from "react";
-
-import type { SessionUser } from "../auth/profile-page";
+import type { SessionUser } from "../../types/session";
 import { useHostI18n } from "../../i18n/messages";
 
 type Message = { id: string; role: "user" | "assistant"; text: string };
 type Conversation = { id: string; title: string; messages: Message[] };
 type ErrorState = "read" | "save" | null;
-type Entry = {
-  href: string;
-  icon: LucideIcon;
-  title: string;
-  description: string;
-  tone: "blue" | "green" | "amber" | "rose" | "slate" | "violet";
-};
-
 const STORAGE_KEY = "pactor-workbench-conversations-v1";
 
-function WorkbenchEntry({ entry }: { entry: Entry }) {
-  const Icon = entry.icon;
-  return (
-    <Link className="workbench-entry" href={entry.href}>
-      <span className={`workbench-entry-icon tone-${entry.tone}`}>
-        <Icon size={20} strokeWidth={1.8} />
-      </span>
-      <span className="workbench-entry-copy">
-        <strong>{entry.title}</strong>
-        <small>{entry.description}</small>
-      </span>
-      <ArrowRight className="workbench-entry-arrow" size={17} />
-    </Link>
-  );
+// Compatibility for clients still holding the previous inline workspace DSL.
+export function WorkbenchHome({ user }: { user?: SessionUser }) {
+  return <div className="workbench-page"><div className="workbench-frame"><WorkbenchHero user={user} /><WorkbenchAssistant user={user} /></div></div>;
 }
 
-export function WorkbenchHome({ user }: { user?: SessionUser }) {
+const entryIcons: Record<string, LucideIcon> = { overview: BarChart3, reports: FileText, records: Table2, settings: Settings, dictionaries: BookOpen, audit: ScrollText, roles: Shield, users: Users, themes: Palette };
+export function WorkbenchEntry({ href, icon, title, description, tone }: { href: string; icon: string; title: string; description: string; tone: string }) {
+  const Icon = entryIcons[icon] ?? BarChart3;
+  return <Link className="workbench-entry" href={href}><span className={`workbench-entry-icon tone-${tone}`}><Icon size={20} strokeWidth={1.8} /></span><span className="workbench-entry-copy"><strong>{title}</strong><small>{description}</small></span><ArrowRight className="workbench-entry-arrow" size={17} /></Link>;
+}
+
+export function WorkbenchHero({ user }: { user?: SessionUser }) {
+  const { t } = useHostI18n();
+  const canViewReports = user?.permissions?.includes("report:view") ?? false;
+  const canViewUsers = user?.permissions?.includes("user:view") ?? false;
+  const userName = [user?.name, user?.username].find((value) => value && !/^\{\{[^{}]+\}\}$/.test(value));
+  return <>
+        <header className="workbench-header">
+          <div>
+            <h1>
+              {userName
+                ? t("workbench.welcome", { name: userName })
+                : t("workbench.welcomeFallback")}
+            </h1>
+            <p>{t("workbench.subtitle")}</p>
+          </div>
+        </header>
+
+        <section className="workbench-hero">
+          <div className="workbench-hero-copy">
+            <span className="workbench-hero-kicker">
+              <Sparkles size={14} />
+              {t("workbench.hero.badge")}
+            </span>
+            <h2>{t("workbench.hero.title")}</h2>
+            <p>{t("workbench.hero.description")}</p>
+            <div className="workbench-hero-actions">
+              <Link className="workbench-action-primary" href="/dashboard">
+                {t("workbench.hero.primary")}
+                <ArrowRight size={17} />
+              </Link>
+              <a className="workbench-action-secondary" href="#workbench-assistant">
+                <Bot size={17} />
+                {t("workbench.hero.secondary")}
+              </a>
+            </div>
+          </div>
+
+          <div className="workbench-hero-visual" aria-hidden="true">
+            <span className="workbench-orbit orbit-one" />
+            <span className="workbench-orbit orbit-two" />
+            <span className="workbench-hero-core">P</span>
+            <span className="workbench-floating-note note-one">
+              <Layers size={15} />
+              03
+            </span>
+            <span className="workbench-floating-note note-two">
+              <Languages size={15} />
+              02
+            </span>
+          </div>
+
+          <div className="workbench-hero-stats">
+            <div>
+              <span className="workbench-stat-icon">
+                <Layers size={17} />
+              </span>
+              <strong>{(canViewReports ? "03" : "02")}</strong>
+              <small>{t("workbench.stats.views")}</small>
+            </div>
+            <div>
+              <span className="workbench-stat-icon">
+                <Wrench size={17} />
+              </span>
+              <strong>{(canViewUsers ? "06" : "05")}</strong>
+              <small>{t("workbench.stats.tools")}</small>
+            </div>
+            <div>
+              <span className="workbench-stat-icon">
+                <Palette size={17} />
+              </span>
+              <strong>12</strong>
+              <small>{t("workbench.stats.themes")}</small>
+            </div>
+            <div>
+              <span className="workbench-stat-icon">
+                <Languages size={17} />
+              </span>
+              <strong>02</strong>
+              <small>{t("workbench.stats.languages")}</small>
+            </div>
+          </div>
+        </section>
+
+  </>;
+}
+
+export function WorkbenchAssistant({ user }: { user?: SessionUser }) {
   const { t } = useHostI18n();
   const [conversations, setConversations] = useState<Conversation[]>([]);
   const [selected, setSelected] = useState("");
@@ -170,86 +221,6 @@ export function WorkbenchHome({ user }: { user?: SessionUser }) {
   const canViewReports = user?.permissions?.includes("report:view") ?? false;
   const canViewUsers = user?.permissions?.includes("user:view") ?? false;
 
-  const dataEntries: Entry[] = [
-    {
-      href: "/dashboard",
-      icon: BarChart3,
-      title: t("workbench.data.overview"),
-      description: t("workbench.data.overviewDescription"),
-      tone: "blue",
-    },
-    ...(canViewReports
-      ? [
-          {
-            href: "/reports/monthly",
-            icon: FileText,
-            title: t("workbench.data.reports"),
-            description: t("workbench.data.reportsDescription"),
-            tone: "green" as const,
-          },
-        ]
-      : []),
-    {
-      href: "/models/data-list",
-      icon: Table2,
-      title: t("workbench.data.records"),
-      description: t("workbench.data.recordsDescription"),
-      tone: "amber",
-    },
-  ];
-
-  const systemEntries: Entry[] = [
-    {
-      href: "/settings/general",
-      icon: Settings,
-      title: t("workbench.system.settings"),
-      description: t("workbench.system.settingsDescription"),
-      tone: "blue",
-    },
-    {
-      href: "/settings/dictionaries",
-      icon: BookOpen,
-      title: t("workbench.system.dictionaries"),
-      description: t("workbench.system.dictionariesDescription"),
-      tone: "green",
-    },
-    {
-      href: "/settings/audit-logs",
-      icon: ScrollText,
-      title: t("workbench.system.audit"),
-      description: t("workbench.system.auditDescription"),
-      tone: "slate",
-    },
-    {
-      href: "/settings/roles",
-      icon: Shield,
-      title: t("workbench.system.roles"),
-      description: t("workbench.system.rolesDescription"),
-      tone: "violet",
-    },
-    ...(canViewUsers
-      ? [
-          {
-            href: "/settings/users",
-            icon: Users,
-            title: t("workbench.system.users"),
-            description: t("workbench.system.usersDescription"),
-            tone: "rose" as const,
-          },
-        ]
-      : []),
-    {
-      href: "/settings/themes",
-      icon: Palette,
-      title: t("workbench.system.themes"),
-      description: t("workbench.system.themesDescription"),
-      tone: "amber",
-    },
-  ];
-
-  const userName = [user?.name, user?.username].find(
-    (value) => value && !/^\{\{[^{}]+\}\}$/.test(value),
-  );
   const errorText =
     error === "read"
       ? t("workbench.assistant.readError")
@@ -258,129 +229,6 @@ export function WorkbenchHome({ user }: { user?: SessionUser }) {
         : "";
 
   return (
-    <div className="workbench-page">
-      <div className="workbench-frame">
-        <header className="workbench-header">
-          <div>
-            <p className="workbench-eyebrow">{t("workbench.eyebrow")}</p>
-            <h1>
-              {userName
-                ? t("workbench.welcome", { name: userName })
-                : t("workbench.welcomeFallback")}
-            </h1>
-            <p>{t("workbench.subtitle")}</p>
-          </div>
-          <div className="workbench-header-badge">
-            <Sparkles size={15} />
-            <span>{t("workbench.ready")}</span>
-          </div>
-        </header>
-
-        <section className="workbench-hero">
-          <div className="workbench-hero-copy">
-            <span className="workbench-hero-kicker">
-              <Sparkles size={14} />
-              {t("workbench.hero.badge")}
-            </span>
-            <h2>{t("workbench.hero.title")}</h2>
-            <p>{t("workbench.hero.description")}</p>
-            <div className="workbench-hero-actions">
-              <Link className="workbench-action-primary" href="/dashboard">
-                {t("workbench.hero.primary")}
-                <ArrowRight size={17} />
-              </Link>
-              <a className="workbench-action-secondary" href="#workbench-assistant">
-                <Bot size={17} />
-                {t("workbench.hero.secondary")}
-              </a>
-            </div>
-          </div>
-
-          <div className="workbench-hero-visual" aria-hidden="true">
-            <span className="workbench-orbit orbit-one" />
-            <span className="workbench-orbit orbit-two" />
-            <span className="workbench-hero-core">P</span>
-            <span className="workbench-floating-note note-one">
-              <Layers size={15} />
-              03
-            </span>
-            <span className="workbench-floating-note note-two">
-              <Languages size={15} />
-              02
-            </span>
-          </div>
-
-          <div className="workbench-hero-stats">
-            <div>
-              <span className="workbench-stat-icon">
-                <Layers size={17} />
-              </span>
-              <strong>{dataEntries.length.toString().padStart(2, "0")}</strong>
-              <small>{t("workbench.stats.views")}</small>
-            </div>
-            <div>
-              <span className="workbench-stat-icon">
-                <Wrench size={17} />
-              </span>
-              <strong>{systemEntries.length.toString().padStart(2, "0")}</strong>
-              <small>{t("workbench.stats.tools")}</small>
-            </div>
-            <div>
-              <span className="workbench-stat-icon">
-                <Palette size={17} />
-              </span>
-              <strong>12</strong>
-              <small>{t("workbench.stats.themes")}</small>
-            </div>
-            <div>
-              <span className="workbench-stat-icon">
-                <Languages size={17} />
-              </span>
-              <strong>02</strong>
-              <small>{t("workbench.stats.languages")}</small>
-            </div>
-          </div>
-        </section>
-
-        <div className="workbench-content-grid">
-          <div className="workbench-main-column">
-            <section className="workbench-panel">
-              <div className="workbench-section-head">
-                <div>
-                  <span className="workbench-section-index">01</span>
-                  <div>
-                    <h2>{t("workbench.data.title")}</h2>
-                    <p>{t("workbench.data.description")}</p>
-                  </div>
-                </div>
-                <BarChart3 size={20} />
-              </div>
-              <div className="workbench-entry-grid">
-                {dataEntries.map((entry) => (
-                  <WorkbenchEntry entry={entry} key={entry.href} />
-                ))}
-              </div>
-            </section>
-
-            <section className="workbench-panel">
-              <div className="workbench-section-head">
-                <div>
-                  <span className="workbench-section-index">02</span>
-                  <div>
-                    <h2>{t("workbench.system.title")}</h2>
-                    <p>{t("workbench.system.description")}</p>
-                  </div>
-                </div>
-                <Wrench size={20} />
-              </div>
-              <div className="workbench-entry-grid workbench-entry-grid-compact">
-                {systemEntries.map((entry) => (
-                  <WorkbenchEntry entry={entry} key={entry.href} />
-                ))}
-              </div>
-            </section>
-          </div>
-
           <aside className="assistant-card" id="workbench-assistant">
             <header className="assistant-head">
               <div className="assistant-title">
@@ -527,8 +375,5 @@ export function WorkbenchHome({ user }: { user?: SessionUser }) {
               </div>
             </form>
           </aside>
-        </div>
-      </div>
-    </div>
   );
 }

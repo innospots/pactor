@@ -8,13 +8,15 @@ import {
   type LucideIcon,
 } from "lucide-react";
 import Link from "next/link";
+import { MenuRegistry, type MenuItem } from "@pactor-app/router";
 import { usePathname, useRouter } from "next/navigation";
 import type { ReactNode } from "react";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef } from "react";
 
 import { AccountMenu } from "./account-menu";
-import type { SessionUser } from "../auth/profile-page";
+import type { SessionUser } from "../../types/session";
 import { useHostI18n } from "../../i18n/messages";
+import { navigationConfig } from "../../config";
 
 export interface NavMenu {
   id?: string;
@@ -51,27 +53,6 @@ function iconFor(name: string | undefined): LucideIcon {
   return ICONS[(name ?? "").toLowerCase()] ?? MessageSquare;
 }
 
-function normalizePath(path: string): string {
-  return path.length > 1 ? path.replace(/\/+$/, "") : path;
-}
-
-function matchesPattern(pattern: string, path: string): boolean {
-  const expected = normalizePath(pattern).split("/").filter(Boolean);
-  const actual = normalizePath(path).split("/").filter(Boolean);
-  return (
-    expected.length === actual.length &&
-    expected.every(
-      (segment, index) => segment.startsWith(":") || segment === actual[index],
-    )
-  );
-}
-
-function matchesPrefix(pattern: string, path: string): boolean {
-  const expected = normalizePath(pattern);
-  const actual = normalizePath(path);
-  return actual === expected || actual.startsWith(`${expected}/`);
-}
-
 function isGroup(item: NavMenu): boolean {
   return item.type === "group" || (item.children !== undefined && item.children.length > 0);
 }
@@ -92,38 +73,32 @@ function menuTitle(item: NavMenu): string {
   return item.title ?? item.label ?? "";
 }
 
-function activeMenuId(path: string, menus: NavMenu[]): string | undefined {
-  const candidates: { id?: string; path: string; staticCount: number }[] = [];
-  const collect = (items: NavMenu[]): void => {
-    for (const item of items) {
-      const path = navPath(item);
-      if (path) {
-        candidates.push({
-          id: navId(item),
-          path,
-          staticCount: path.split("/").filter((part) => part && !part.startsWith(":")).length,
-        });
-      }
-      if (item.children) collect(item.children);
-    }
-  };
-  collect(menus);
-  return candidates
-    .filter((item) => matchesPattern(item.path, path) || matchesPrefix(item.path, path))
-    .sort((a, b) => b.staticCount - a.staticCount)[0]?.id;
+/** Adapt the server's sitemap menu to Pactor's route registry. */
+export function createNavigationRegistry(menus: NavMenu[]): MenuRegistry {
+  function convert(items: NavMenu[]): MenuItem[] {
+    return items.flatMap((item) => {
+      const id = navId(item);
+      if (!id) return [];
+      const type = isGroup(item) ? "group" : item.type === "link" ? "link" : "page";
+      return [{
+        id, type, title: menuTitle(item), path: navPath(item), pageId: item.pageId,
+        hidden: item.hidden, activeMenu: item.activeMenu,
+        ...(item.children ? { children: convert(item.children) } : {}),
+      }];
+    });
+  }
+  return new MenuRegistry(convert(menus));
 }
 
-function targetedMenuId(currentId: string | undefined, menus: NavMenu[]): string | undefined {
-  if (!currentId) return undefined;
-  const collect = (items: NavMenu[]): NavMenu | undefined => {
-    for (const item of items) {
-      if (navId(item) === currentId || item.pageId === currentId) return item;
-      const nested = collect(item.children ?? []);
-      if (nested) return nested;
-    }
-    return undefined;
-  };
-  return collect(menus)?.activeMenu ?? currentId;
+/** Session navigation excludes hidden pages; find their nearest visible parent route. */
+export function findNavigationMenu(registry: MenuRegistry, pathname: string): MenuItem | undefined {
+  const segments = pathname.split("/").filter(Boolean);
+  while (segments.length > 0) {
+    const hit = registry.findByPath(`/${segments.join("/")}`)?.menu;
+    if (hit) return hit;
+    segments.pop();
+  }
+  return registry.findByPath("/")?.menu;
 }
 
 function groupContains(group: NavMenu, currentId: string | undefined): boolean {
@@ -133,23 +108,6 @@ function groupContains(group: NavMenu, currentId: string | undefined): boolean {
       navId(item) === currentId ||
       item.pageId === currentId ||
       item.activeMenu === currentId,
-  );
-}
-
-function routeMatches(item: NavMenu, pathname: string): boolean {
-  if (isGroup(item)) {
-    return visibleChildren(item).some((child) => {
-      const path = navPath(child);
-      return (
-        path !== undefined &&
-        (matchesPattern(path, pathname) || matchesPrefix(path, pathname))
-      );
-    });
-  }
-  const path = navPath(item);
-  return (
-    path !== undefined &&
-    (matchesPattern(path, pathname) || matchesPrefix(path, pathname))
   );
 }
 
@@ -167,24 +125,17 @@ export function NavigationShell({ menus = [], user, children }: NavigationShellP
       ),
     [menus],
   );
-  const currentMenuId = useMemo(
-    () => targetedMenuId(activeMenuId(pathname, menus), menus),
-    [menus, pathname],
-  );
+  const registry = useMemo(() => createNavigationRegistry(menus), [menus]);
+  const matchedMenu = findNavigationMenu(registry, pathname);
+  const currentMenuId = matchedMenu?.activeMenu ?? matchedMenu?.id;
   const routedTopLevel = useMemo(
     () =>
       topLevelMenus.find(
-        (item) => routeMatches(item, pathname) || groupContains(item, currentMenuId),
+        (item) => navId(item) === currentMenuId || groupContains(item, currentMenuId),
       ),
-    [currentMenuId, pathname, topLevelMenus],
+    [currentMenuId, topLevelMenus],
   );
-  const [selection, setSelection] = useState<{ pathname: string; itemId?: string } | null>(
-    null,
-  );
-  const selectedTopLevel =
-    selection?.pathname === pathname
-      ? topLevelMenus.find((item) => navId(item) === selection.itemId) ?? routedTopLevel
-      : routedTopLevel;
+  const selectedTopLevel = routedTopLevel;
   const activeGroup =
     selectedTopLevel && isGroup(selectedTopLevel) ? selectedTopLevel : undefined;
 
@@ -194,9 +145,6 @@ export function NavigationShell({ menus = [], user, children }: NavigationShellP
   }, [pathname]);
 
   function selectGroup(group: NavMenu) {
-    const itemId = navId(group);
-    if (!itemId) return;
-    setSelection({ pathname, itemId });
     if (!groupContains(group, currentMenuId)) {
       const first = visibleChildren(group)[0];
       const firstPath = first ? navPath(first) : undefined;
@@ -206,7 +154,7 @@ export function NavigationShell({ menus = [], user, children }: NavigationShellP
 
   return (
     <div className="kn-shell">
-      <nav className="kn-rail" aria-label={t("nav.main")}>
+      <nav className={navigationConfig.expandRailOnHover ? "kn-rail kn-rail-expandable" : "kn-rail"} aria-label={t("nav.main")}>
         <div className="kn-mark" aria-hidden="true">
           P
         </div>
@@ -259,10 +207,7 @@ export function NavigationShell({ menus = [], user, children }: NavigationShellP
           <nav className="kn-menu">
             {visibleChildren(activeGroup).map((item) => {
               const path = navPath(item)!;
-              const active =
-                navId(item) === currentMenuId ||
-                matchesPattern(path, pathname) ||
-                matchesPrefix(path, pathname);
+              const active = navId(item) === currentMenuId || item.pageId === currentMenuId;
               return (
                 <Link
                   key={navId(item)}

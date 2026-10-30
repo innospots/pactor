@@ -10,8 +10,8 @@ import { withClientDemo } from '../starters/spa-starter/src/i18n/demo';
 import { messages } from '../starters/spa-starter/src/i18n/messages';
 
 const root = process.cwd();
-let next: typeof import('../starters/next-app-starter/src/backend/resources/i18n');
-let buildSitemap: typeof import('../starters/next-app-starter/src/backend/resources/sitemap').buildSitemap;
+let next: typeof import('../starters/next-app-starter/src/backend/pages/i18n');
+let buildSitemap: typeof import('../starters/next-app-starter/src/backend/pages/sitemap').buildSitemap;
 const examples = [
   {
     name: 'Next starter',
@@ -30,8 +30,8 @@ const { parse } = requireFromStarter('yaml') as {
 
 beforeAll(async () => {
   process.chdir(resolve(root, 'starters/next-app-starter'));
-  next = await import('../starters/next-app-starter/src/backend/resources/i18n');
-  ({ buildSitemap } = await import('../starters/next-app-starter/src/backend/resources/sitemap'));
+  next = await import('../starters/next-app-starter/src/backend/pages/i18n');
+  ({ buildSitemap } = await import('../starters/next-app-starter/src/backend/pages/sitemap'));
 });
 
 afterAll(() => process.chdir(root));
@@ -91,7 +91,7 @@ for (const example of examples) {
 
     it('converts every page to valid localized DSL in both languages', async () => {
       process.chdir(resolve(root, example.dir));
-      const dir = resolve(root, example.dir, 'src/backend/resources/yaml');
+      const dir = resolve(root, example.dir, 'src/backend/pages/yaml');
       for (const file of pageFiles(dir)) {
         const page = parse(readFileSync(file, 'utf8'));
         expect(validateAuthorPageDsl(page), file).toMatchObject({ valid: true });
@@ -105,7 +105,7 @@ for (const example of examples) {
 
     it('defines every referenced page translation key in both language packs', () => {
       process.chdir(resolve(root, example.dir));
-      const yamlDir = resolve(root, example.dir, 'src/backend/resources/yaml');
+      const yamlDir = resolve(root, example.dir, 'src/backend/pages/yaml');
       const keys = new Set<string>();
       for (const file of pageFiles(yamlDir)) {
         collectI18nKeys(parse(readFileSync(file, 'utf8')), keys);
@@ -114,7 +114,7 @@ for (const example of examples) {
         const packFile = resolve(
           root,
           example.dir,
-          `src/backend/resources/i18n/locales/${locale}/app.yaml`,
+          `src/backend/pages/i18n/locales/${locale}/app.yaml`,
         );
         const pack = parse(readFileSync(packFile, 'utf8')) as Record<string, unknown>;
         const missing = [...keys].filter((key) => !(key in pack)).sort();

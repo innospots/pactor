@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 import { applySkinStylesheet, DEFAULT_SKIN, PREFERENCES_CHANGE_EVENT, resolveSkin, selectSkin, SKINS, SKIN_STORAGE_KEY, type SkinValue } from "../../skin";
 import { themeText } from "../../themes";
 import { useHostI18n } from "../../i18n/messages";
-import type { SessionUser } from "../auth/profile-page";
+import type { SessionUser } from "../../types/session";
 
 type Mode = "light" | "dark" | "system";
 const MODE_KEY = "mc-mode";

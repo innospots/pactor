@@ -11,7 +11,7 @@ type Binding = {
 
 const state = globalThis as typeof globalThis & {
   starterRoles?: Role[];
-  starterRoleGrants?: Record<string, { resourceKey: string; displayName: string }[]>;
+  starterRoleGrants?: Record<string, { resourceKey: string; displayName: string; constraintDefinition?: string | null }[]>;
   starterRoleBindings?: Record<string, Binding[]>;
 };
 
@@ -210,13 +210,14 @@ export async function PUT(request: Request, parts: string[]) {
   }
   if (parts[3] === "permissions") {
     const input = (await request.json().catch(() => ({}))) as {
-      grants?: { resourceKey: string; displayName?: string }[];
+      grants?: { resourceKey: string; displayName?: string; constraintDefinition?: string | null }[];
     };
     state.starterRoleGrants![role.roleId] = (input.grants ?? [])
       .filter((item) => typeof item.resourceKey === "string")
       .map((item) => ({
         resourceKey: item.resourceKey,
         displayName: item.displayName ?? item.resourceKey,
+        ...(item.constraintDefinition !== undefined ? { constraintDefinition: item.constraintDefinition } : {}),
       }));
     return json({ ok: true, grants: state.starterRoleGrants![role.roleId] });
   }
