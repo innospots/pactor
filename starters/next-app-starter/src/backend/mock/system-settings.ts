@@ -1,5 +1,5 @@
 import { requestCookies } from "../auth/cookies";
-import { findUserBySession, SESSION_COOKIE } from "../auth/accounts";
+import { findUserBySession, SESSION_COOKIE } from "../mock/accounts";
 import { corsHeaders } from "../cors";
 import defaults from "../fixtures/system-settings.json";
 

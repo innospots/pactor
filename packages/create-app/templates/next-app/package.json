@@ -17,6 +17,7 @@
     "@pactor-app/chat": "^1.58.0",
     "@pactor-app/core": "^1.58.0",
     "@pactor-app/i18n": "^1.58.0",
+    "@pactor-app/router": "^1.58.0",
     "@pactor-app/runtime": "^1.58.0",
     "@pactor-app/ui": "^1.58.0",
     "lucide-react": "1.64.0",

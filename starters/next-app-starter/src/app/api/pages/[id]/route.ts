@@ -1,9 +1,9 @@
 import { cookies } from "next/headers";
 
-import { findUserBySession, SESSION_COOKIE } from "@/backend/auth/accounts";
+import { findUserBySession, SESSION_COOKIE } from "@/backend/mock/accounts";
 import { corsHeaders, corsPreflight } from "@/backend/cors";
-import { getLazyPage } from "@/backend/resources/sitemap";
-import { localeError, localizePage, localization, requestLocale } from "@/backend/resources/i18n";
+import { getLazyPage } from "@/backend/pages/sitemap";
+import { localeError, localizePage, localization, requestLocale } from "@/backend/pages/i18n";
 
 /**
  * 懒加载页面端点：sitemap 中未内联 pageDsl 的页面按需获取。

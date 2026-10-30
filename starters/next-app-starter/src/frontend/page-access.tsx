@@ -9,7 +9,7 @@ import type { Locale } from "./locale";
 /**
  * 页面访问校验（前端侧）：页面切换 / 首次打开之前，先请求项目内
  * POST /api/page-access/verify，由 Next 服务端解析当前页面 DSL 的
- * pageKey / grantGroup 并转发平台接口（见 src/backend/resources/page-access.ts）。
+ * pageKey / grantGroup 并转发平台接口（见 src/backend/pages/page-access.ts）。
  *
  * 校验通过前不把新路径交给 SitemapApp：URL 已随宿主路由变化，但内容区
  * 仍停留在上一个已放行页面（布局 state 不丢）；被拒时展示 403 视图，

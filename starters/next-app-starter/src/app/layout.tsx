@@ -6,7 +6,7 @@ import "./globals.css";
 import "pactor-app/styles.css";
 
 export const metadata: Metadata = {
-  title: "{{APP_TITLE}}",
+  title: "Example Admin",
   description: "{{APP_DESCRIPTION}}",
 };
 

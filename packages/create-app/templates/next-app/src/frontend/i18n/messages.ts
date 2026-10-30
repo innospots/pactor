@@ -2,7 +2,7 @@
  * 宿主侧文案（页面 DSL 之外的自定义 React 组件）。
  *
  * 页面 / 布局 DSL 的文案不在这里：走服务端本地化（`$i18n{key:默认值}` +
- * `src/backend/resources/i18n/locales/<locale>/app.yaml`），客户端只消费已选语言的
+ * `src/backend/pages/i18n/locales/<locale>/app.yaml`），客户端只消费已选语言的
  * 字符串或 `$localizedText`。本表只服务宿主自己的 React 视图，语言来自
  * `src/frontend/locale.tsx` 的 `useLocale`（Cookie + URL，与服务端同一来源）。
  */

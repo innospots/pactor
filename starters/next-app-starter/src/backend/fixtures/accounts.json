@@ -1,0 +1,4 @@
+[
+  { "id": "u-1", "username": "admin", "password": "admin123", "name": "Demo Admin", "roles": ["admin"], "permissions": ["report:view", "user:view"] },
+  { "id": "u-2", "username": "guest", "password": "guest123", "name": "Demo Guest", "roles": ["guest"], "permissions": [] }
+]

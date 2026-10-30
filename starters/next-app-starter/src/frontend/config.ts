@@ -10,10 +10,13 @@
  */
 export const sitemapSources: string[] = ["/api/sitemap"];
 
+/** Expand the primary navigation on hover or keyboard focus. */
+export const navigationConfig = { expandRailOnHover: false };
+
 /**
  * 页面访问校验端点（同源 Next 服务端路由）。
  * 服务端解析页面 DSL 的 pageKey / grantGroup 后转发平台
- * POST /api/public/page-access/verify（域 / 模块标识见 src/backend/resources/page-access.ts），
+ * POST /api/public/page-access/verify（域 / 模块标识见 src/backend/pages/page-access.ts），
  * 浏览器不直接接触平台地址。
  */
 export const pageAccessEndpoint = "/api/page-access/verify";

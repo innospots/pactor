@@ -1,5 +1,5 @@
 {
-  "siteName": "{{APP_TITLE}}",
+  "siteName": "Example Admin",
   "description": "企业运营管理平台",
   "timezone": "Asia/Shanghai",
   "language": "zh-CN",

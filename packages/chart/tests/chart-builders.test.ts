@@ -160,6 +160,10 @@ describe('buildScatterOption / buildBubbleOption', () => {
 });
 
 describe('buildRadarOption', () => {
+  it('does not create radar data points before indicators load', () => {
+    const option = buildRadarOption({ data: [], yKeys: ['value', 'target'] }, theme);
+    expect((option.series as Array<{ data: unknown[] }>)[0].data).toEqual([]);
+  });
   it('indicatorKey 每行一个轴，yKeys 每列一个系列', () => {
     const option = buildRadarOption(
       {

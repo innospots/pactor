@@ -1,0 +1,361 @@
+{
+  "series": [
+    {
+      "period": "1",
+      "requests": 390,
+      "errors": 12
+    },
+    {
+      "period": "2",
+      "requests": 480,
+      "errors": 14
+    },
+    {
+      "period": "3",
+      "requests": 570,
+      "errors": 16
+    },
+    {
+      "period": "4",
+      "requests": 660,
+      "errors": 18
+    },
+    {
+      "period": "5",
+      "requests": 750,
+      "errors": 20
+    },
+    {
+      "period": "6",
+      "requests": 840,
+      "errors": 22
+    },
+    {
+      "period": "7",
+      "requests": 930,
+      "errors": 24
+    },
+    {
+      "period": "8",
+      "requests": 1020,
+      "errors": 26
+    }
+  ],
+  "categories": [
+    {
+      "name": "在线",
+      "value": 40
+    },
+    {
+      "name": "合作",
+      "value": 30
+    },
+    {
+      "name": "直销",
+      "value": 20
+    },
+    {
+      "name": "其他",
+      "value": 10
+    }
+  ],
+  "points": [
+    {
+      "x": 10,
+      "y": 21,
+      "size": 5
+    },
+    {
+      "x": 20,
+      "y": 24,
+      "size": 10
+    },
+    {
+      "x": 30,
+      "y": 29,
+      "size": 15
+    },
+    {
+      "x": 40,
+      "y": 36,
+      "size": 20
+    },
+    {
+      "x": 50,
+      "y": 45,
+      "size": 25
+    },
+    {
+      "x": 60,
+      "y": 56,
+      "size": 30
+    },
+    {
+      "x": 70,
+      "y": 69,
+      "size": 35
+    }
+  ],
+  "radar": [
+    {
+      "indicator": "稳定",
+      "value": 90,
+      "target": 80
+    },
+    {
+      "indicator": "效率",
+      "value": 75,
+      "target": 80
+    },
+    {
+      "indicator": "体验",
+      "value": 85,
+      "target": 80
+    },
+    {
+      "indicator": "安全",
+      "value": 95,
+      "target": 80
+    }
+  ],
+  "heat": [
+    {
+      "x": "1",
+      "y": "1",
+      "value": 3
+    },
+    {
+      "x": "1",
+      "y": "2",
+      "value": 6
+    },
+    {
+      "x": "1",
+      "y": "3",
+      "value": 9
+    },
+    {
+      "x": "1",
+      "y": "4",
+      "value": 12
+    },
+    {
+      "x": "2",
+      "y": "1",
+      "value": 6
+    },
+    {
+      "x": "2",
+      "y": "2",
+      "value": 12
+    },
+    {
+      "x": "2",
+      "y": "3",
+      "value": 18
+    },
+    {
+      "x": "2",
+      "y": "4",
+      "value": 24
+    },
+    {
+      "x": "3",
+      "y": "1",
+      "value": 9
+    },
+    {
+      "x": "3",
+      "y": "2",
+      "value": 18
+    },
+    {
+      "x": "3",
+      "y": "3",
+      "value": 27
+    },
+    {
+      "x": "3",
+      "y": "4",
+      "value": 36
+    },
+    {
+      "x": "4",
+      "y": "1",
+      "value": 12
+    },
+    {
+      "x": "4",
+      "y": "2",
+      "value": 24
+    },
+    {
+      "x": "4",
+      "y": "3",
+      "value": 36
+    },
+    {
+      "x": "4",
+      "y": "4",
+      "value": 48
+    },
+    {
+      "x": "5",
+      "y": "1",
+      "value": 15
+    },
+    {
+      "x": "5",
+      "y": "2",
+      "value": 30
+    },
+    {
+      "x": "5",
+      "y": "3",
+      "value": 45
+    },
+    {
+      "x": "5",
+      "y": "4",
+      "value": 60
+    },
+    {
+      "x": "6",
+      "y": "1",
+      "value": 18
+    },
+    {
+      "x": "6",
+      "y": "2",
+      "value": 36
+    },
+    {
+      "x": "6",
+      "y": "3",
+      "value": 54
+    },
+    {
+      "x": "6",
+      "y": "4",
+      "value": 72
+    }
+  ],
+  "tree": [
+    {
+      "name": "平台",
+      "children": [
+        {
+          "name": "数据"
+        },
+        {
+          "name": "运营"
+        }
+      ]
+    }
+  ],
+  "nodes": [
+    {
+      "name": "访问"
+    },
+    {
+      "name": "注册"
+    },
+    {
+      "name": "转化"
+    }
+  ],
+  "links": [
+    {
+      "source": "访问",
+      "target": "注册",
+      "value": 70
+    },
+    {
+      "source": "注册",
+      "target": "转化",
+      "value": 45
+    }
+  ],
+  "gauge": 86,
+  "regions": [
+    {
+      "name": "北区",
+      "value": 78
+    },
+    {
+      "name": "南区",
+      "value": 56
+    }
+  ],
+  "geo": {
+    "type": "FeatureCollection",
+    "features": [
+      {
+        "type": "Feature",
+        "properties": {
+          "name": "北区"
+        },
+        "geometry": {
+          "type": "Polygon",
+          "coordinates": [
+            [
+              [
+                0,
+                10
+              ],
+              [
+                10,
+                10
+              ],
+              [
+                10,
+                18
+              ],
+              [
+                0,
+                18
+              ],
+              [
+                0,
+                10
+              ]
+            ]
+          ]
+        }
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "name": "南区"
+        },
+        "geometry": {
+          "type": "Polygon",
+          "coordinates": [
+            [
+              [
+                0,
+                0
+              ],
+              [
+                10,
+                0
+              ],
+              [
+                10,
+                8
+              ],
+              [
+                0,
+                8
+              ],
+              [
+                0,
+                0
+              ]
+            ]
+          ]
+        }
+      }
+    ]
+  }
+}

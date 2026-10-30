@@ -98,8 +98,8 @@ body .shell-root {
   transition: width 200ms ease, flex-basis 200ms ease;
 }
 
-.kn-rail:hover,
-.kn-rail:has(.kn-rail-button:focus-visible) {
+.kn-rail-expandable:hover,
+.kn-rail-expandable:has(.kn-rail-button:focus-visible) {
   width: 150px;
   flex-basis: 150px;
 }
@@ -144,8 +144,8 @@ body .shell-root {
   color: var(--rail-foreground, #fff);
 }
 
-.kn-rail:hover .kn-rail-button,
-.kn-rail:has(.kn-rail-button:focus-visible) .kn-rail-button {
+.kn-rail-expandable:hover .kn-rail-button,
+.kn-rail-expandable:has(.kn-rail-button:focus-visible) .kn-rail-button {
   width: 100%;
   justify-content: flex-start;
   gap: 10px;
@@ -166,8 +166,8 @@ body .shell-root {
   transition: max-width 200ms ease, opacity 150ms ease;
 }
 
-.kn-rail:hover .kn-rail-label,
-.kn-rail:has(.kn-rail-button:focus-visible) .kn-rail-label {
+.kn-rail-expandable:hover .kn-rail-label,
+.kn-rail-expandable:has(.kn-rail-button:focus-visible) .kn-rail-label {
   max-width: 110px;
   opacity: 1;
 }
@@ -241,8 +241,8 @@ body .shell-root {
     padding-inline: 5px;
   }
 
-  .kn-rail:hover,
-  .kn-rail:has(.kn-rail-button:focus-visible) {
+  .kn-rail-expandable:hover,
+  .kn-rail-expandable:has(.kn-rail-button:focus-visible) {
     width: 150px;
     flex-basis: 150px;
   }
@@ -308,14 +308,14 @@ body .shell-root {
   transition: max-width 200ms ease, opacity 150ms ease;
 }
 
-.kn-rail:hover .account-trigger,
-.kn-rail:has(:focus-visible) .account-trigger {
+.kn-rail-expandable:hover .account-trigger,
+.kn-rail-expandable:has(:focus-visible) .account-trigger {
   width: 100%;
   gap: 10px;
 }
 
-.kn-rail:hover .account-trigger-label,
-.kn-rail:has(:focus-visible) .account-trigger-label {
+.kn-rail-expandable:hover .account-trigger-label,
+.kn-rail-expandable:has(:focus-visible) .account-trigger-label {
   max-width: 100px;
   opacity: 1;
 }
@@ -325,8 +325,9 @@ body .shell-root {
   z-index: 100;
   bottom: 0;
   left: calc(100% + 12px);
-  width: min(320px, calc(100vw - 75px));
-  overflow: hidden;
+  width: min(280px, calc(100vw - 75px));
+  max-height: calc(100dvh - 24px);
+  overflow-y: auto;
   border: 1px solid var(--border);
   border-radius: 14px;
   background: var(--popover);
@@ -389,23 +390,50 @@ body .shell-root {
 }
 
 .account-preferences {
-  padding: 4px 0;
+  display: grid;
+  gap: 4px;
+  padding: 8px 14px;
   border-block: 1px solid var(--border);
 }
 
 .account-preferences .account-row {
-  padding-block: 10px;
+  display: grid;
+  grid-template-columns: 18px minmax(0, 1fr) minmax(0, 122px);
+  align-items: center;
+  gap: 9px;
+  min-height: 38px;
+  padding: 0;
+  font-size: 13px;
 }
 
 .account-row select {
-  max-width: 105px;
-  color: var(--muted-foreground);
-  background: transparent;
+  grid-column: 3;
+  width: 100%;
+  min-width: 0;
+  height: 34px;
+  padding: 0 28px 0 10px;
+  appearance: none;
+  border: 1px solid transparent;
+  border-radius: 7px;
+  color: var(--foreground);
+  background-color: var(--muted);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23748291' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 8px center;
+  font: inherit;
+  font-size: 13px;
+  line-height: normal;
+  text-overflow: ellipsis;
   cursor: pointer;
+}
+
+.account-row select:hover {
+  border-color: var(--border);
 }
 
 .account-mode {
   display: flex;
+  grid-column: 3;
   gap: 2px;
   padding: 3px;
   border-radius: 8px;
@@ -414,7 +442,8 @@ body .shell-root {
 
 .account-mode button {
   display: grid;
-  width: 30px;
+  flex: 1;
+  min-width: 0;
   height: 28px;
   place-items: center;
   border: 0;
@@ -518,7 +547,8 @@ body .shell-root {
   margin: 32px 0 20px;
 }
 
-.theme-section-heading h2 {
+.theme-section-heading h2,
+.theme-section-heading h4 {
   margin: 0;
   font-size: 18px;
   font-weight: 650;
@@ -1021,24 +1051,29 @@ body .shell-root {
   box-shadow: -8px 0 30px #0002;
 }
 
-.dictionary-drawer form {
+.dictionary-drawer form,
+.dictionary-editor {
   display: grid;
   gap: 16px;
 }
 
-.dictionary-drawer h3 {
+.dictionary-drawer h3,
+.dictionary-editor h3 {
   margin: 20px 0 0;
   font-size: 15px;
 }
 
-.dictionary-drawer label {
+.dictionary-drawer label,
+.dictionary-editor label {
   display: grid;
   gap: 7px;
   font-size: 13px;
 }
 
 .dictionary-drawer input,
-.dictionary-drawer select {
+.dictionary-drawer select,
+.dictionary-editor input,
+.dictionary-editor select {
   min-height: 38px;
   padding: 8px 10px;
   border: 1px solid var(--border);
@@ -1164,6 +1199,17 @@ body .shell-root {
   font: inherit;
 }
 
+/* Native selects in custom settings forms need their own inset arrow. */
+.system-setting-dialog select,
+.dictionary-drawer select,
+.dictionary-editor select {
+  appearance: none;
+  padding-right: 36px;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23748291' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+}
+
 .workbench-page {
   min-height: 100%;
   padding: clamp(28px, 3.4vw, 52px) clamp(20px, 4vw, 64px) 56px;
@@ -1183,6 +1229,7 @@ body .shell-root {
 .workbench-frame {
   width: min(1440px, 100%);
   margin: 0 auto;
+  gap: 0;
 }
 
 .workbench-header {
@@ -1544,6 +1591,7 @@ body .shell-root {
 }
 
 .workbench-panel {
+  gap: 0;
   padding: 24px;
   border: 1px solid var(--border);
   border-radius: 20px;
@@ -1585,12 +1633,17 @@ body .shell-root {
   font-weight: 700;
 }
 
-.workbench-section-head h2 {
+.workbench-section-head h2,
+.workbench-section-head h4 {
   margin: 0;
   color: var(--foreground);
   font-size: 17px;
   font-weight: 680;
   letter-spacing: -0.01em;
+}
+
+.workbench-section-head > div > div {
+  gap: 0;
 }
 
 .workbench-section-head p {

@@ -1,0 +1,109 @@
+dsl: "1.0"
+page:
+  id: audit-logs
+  title: "$i18n{page.audit-logs.title:审计日志}"
+i18n: { namespaces: [app] }
+state: { keyword: "", result: "", page: 1, selected: null }
+dataSources:
+  logs:
+    type: http
+    autoLoad: true
+    request:
+      method: GET
+      url: /api/d/audit-logs
+      params: { keyword: "${state.keyword}", result: "${state.result}", page: "${state.page}" }
+body:
+  type: Page
+  props: { className: system-page }
+  children:
+    - type: Typography
+      props: { variant: h3, text: "$i18n{page.audit-logs.title:审计日志}" }
+    - type: Typography
+      props: { variant: muted, text: "$i18n{auditPage.subtitle:查看系统操作记录与执行结果}" }
+    - type: Alert
+      when: ${dataStatus.logs.error != null}
+      props: { variant: error, message: "$i18n{auditPage.error:加载审计日志失败，请重试。}" }
+    - type: Card
+      children:
+        - type: Form
+          props: { name: auditFilters, layout: inline, className: audit-search }
+          events:
+            onSubmit:
+              - action: setState
+                params: { keyword: "${event.keyword || ''}", result: "${event.result == '__ALL__' ? '' : event.result}", page: 1 }
+              - action: reload
+                params: { dataSource: logs }
+          children:
+            - type: Input
+              props: { name: keyword, placeholder: "$i18n{auditPage.search:搜索操作人、操作或 IP}" }
+            - type: FilterSelect
+              props:
+                name: result
+                placeholder: "$i18n{auditPage.all:全部结果}"
+                options:
+                  - { label: "$i18n{auditPage.all:全部结果}", value: "" }
+                  - { label: "$i18n{auditPage.success:成功}", value: 成功 }
+                  - { label: "$i18n{auditPage.failure:失败}", value: 失败 }
+            - type: Button
+              props: { text: "$i18n{auditPage.query:查询}", variant: primary, submit: true }
+            - type: Button
+              props: { text: "$i18n{auditPage.reset:重置}" }
+              events:
+                onClick:
+                  - action: form.setValues
+                    params: { form: auditFilters, values: { keyword: "", result: __ALL__ } }
+                  - action: setState
+                    params: { keyword: "", result: "", page: 1 }
+                  - action: reload
+                    params: { dataSource: logs }
+        - type: Table
+          props:
+            rowKey: id
+            dataSource: ${data.logs.records}
+            loading: ${dataStatus.logs.loading}
+            pagination: false
+            columns:
+              - { title: "$i18n{auditPage.time:操作时间}", dataIndex: time }
+              - { title: "$i18n{auditPage.user:操作人}", dataIndex: user }
+              - title: "$i18n{auditPage.action:操作}"
+                cell:
+                  type: Text
+                  props: { text: "${row.action == '登录系统' ? t('audit.action.login') : row.action == '更新角色' ? t('audit.action.updateRole') : row.action == '创建用户' ? t('audit.action.createUser') : row.action == '修改系统设置' ? t('audit.action.updateSettings') : row.action == '查看报表' ? t('audit.action.viewReport') : row.action == '导出数据' ? t('audit.action.exportData') : row.action}" }
+              - title: "$i18n{auditPage.result:执行结果}"
+                cell:
+                  type: Text
+                  props: { text: "${row.result == '成功' ? t('audit.success') : row.result == '失败' ? t('audit.failure') : row.result}" }
+              - { title: "$i18n{auditPage.ip:来源 IP}", dataIndex: ip }
+              - title: "$i18n{auditPage.actions:操作}"
+                cell:
+                  type: Button
+                  props: { text: "$i18n{auditPage.view:查看}", variant: link, size: small }
+                  events:
+                    onClick:
+                      - action: setState
+                        params: { selected: "${row}" }
+                      - action: overlay.open
+                        params:
+                          overlay:
+                            type: drawer
+                            title: "$i18n{auditPage.detail:日志详情}"
+                            width: 600
+                            content:
+                              type: Descriptions
+                              props:
+                                column: 1
+                                items:
+                                  - { label: "$i18n{auditPage.id:日志编号}", value: "${state.selected.id}" }
+                                  - { label: "$i18n{auditPage.time:操作时间}", value: "${state.selected.time}" }
+                                  - { label: "$i18n{auditPage.user:操作人}", value: "${state.selected.user}" }
+                                  - { label: "$i18n{auditPage.action:操作}", value: "${state.selected.action == '登录系统' ? t('audit.action.login') : state.selected.action == '更新角色' ? t('audit.action.updateRole') : state.selected.action == '创建用户' ? t('audit.action.createUser') : state.selected.action == '修改系统设置' ? t('audit.action.updateSettings') : state.selected.action == '查看报表' ? t('audit.action.viewReport') : state.selected.action == '导出数据' ? t('audit.action.exportData') : state.selected.action}" }
+                                  - { label: "$i18n{auditPage.result:执行结果}", value: "${state.selected.result == '成功' ? t('audit.success') : state.selected.result == '失败' ? t('audit.failure') : state.selected.result}" }
+                                  - { label: "$i18n{auditPage.ip:来源 IP}", value: "${state.selected.ip}" }
+        - type: Pagination
+          props: { total: "${data.logs.total}", page: "${state.page}", pageSize: 10, showTotal: true, align: right }
+          events:
+            onChange:
+              - action: setState
+                params: { page: "${event}" }
+              - action: reload
+                params: { dataSource: logs }

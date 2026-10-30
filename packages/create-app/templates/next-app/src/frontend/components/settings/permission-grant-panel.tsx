@@ -74,6 +74,11 @@ function grantKey(item: CatalogGrantItem | PermissionGrant | CatalogGrantGroup |
   return item?.resourceKey?.trim() ?? "";
 }
 
+export function updateGrantSelection(grants: PermissionGrant[], key: string, checked: boolean): PermissionGrant[] {
+  if (!checked) return grants.filter((item) => grantKey(item) !== key);
+  return grants.some((item) => grantKey(item) === key) ? grants : [...grants, { resourceKey: key }];
+}
+
 function findCatalogPath(
   nodes: CatalogNode[],
   selectedKey: string,
@@ -121,27 +126,6 @@ function viewGroupSelectableKeys(group: CatalogGrantGroup): string[] {
   }
   const key = grantKey(group);
   return key.length > 0 ? [key] : [];
-}
-
-function collectCatalogGrantKeys(nodes: CatalogNode[], keys: string[] = []): string[] {
-  for (const node of nodes) {
-    const grants = node?.grants;
-    if (grants != null) {
-      for (const group of grants.viewGroups ?? []) {
-        keys.push(...viewGroupSelectableKeys(group));
-      }
-      for (const group of grants.operationGroups ?? []) {
-        for (const item of group.items ?? []) {
-          const key = grantKey(item);
-          if (key.length > 0) {
-            keys.push(key);
-          }
-        }
-      }
-    }
-    collectCatalogGrantKeys(Array.isArray(node?.children) ? node.children : [], keys);
-  }
-  return keys;
 }
 
 type TranslateText = ReturnType<typeof useI18n>;
@@ -277,19 +261,10 @@ export function PermissionGrantPanel({
   const moduleNode = useMemo(() => resolveGrantModule(selectedPath), [selectedPath]);
   const selectedNode = selectedPath?.[selectedPath.length - 1] ?? null;
 
-  const orderedGrantKeys = useMemo(
-    () => Array.from(new Set(collectCatalogGrantKeys(catalogNodes))),
-    [catalogNodes],
-  );
-  const knownGrantKeys = useMemo(() => new Set(orderedGrantKeys), [orderedGrantKeys]);
-  const savedGrants = useMemo(
-    () => normalizeGrants(grants).filter((item) => knownGrantKeys.has(grantKey(item))),
-    [grants, knownGrantKeys],
-  );
+  const savedGrants = useMemo(() => normalizeGrants(grants), [grants]);
   const effectiveGrants = useMemo(() => {
-    const source = Array.isArray(draftGrants) ? normalizeGrants(draftGrants) : savedGrants;
-    return source.filter((item) => knownGrantKeys.has(grantKey(item)));
-  }, [draftGrants, savedGrants, knownGrantKeys]);
+    return Array.isArray(draftGrants) ? normalizeGrants(draftGrants) : savedGrants;
+  }, [draftGrants, savedGrants]);
   const selectedKeys = useMemo(
     () => new Set(effectiveGrants.map((item) => grantKey(item)).filter((key) => key.length > 0)),
     [effectiveGrants],
@@ -318,15 +293,7 @@ export function PermissionGrantPanel({
   const selectedCount = moduleItemKeys.filter((key) => selectedKeys.has(key)).length;
 
   const toggleGrant = (key: string, checked: boolean) => {
-    const nextKeys = new Set(selectedKeys);
-    if (checked) {
-      nextKeys.add(key);
-    } else {
-      nextKeys.delete(key);
-    }
-    const nextGrants = orderedGrantKeys
-      .filter((candidate) => nextKeys.has(candidate))
-      .map((candidate) => ({ resourceKey: candidate }));
+    const nextGrants = updateGrantSelection(effectiveGrants, key, checked);
     onChange?.({ grants: nextGrants, dirty: true });
   };
 

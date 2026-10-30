@@ -1,6 +1,0 @@
-dsl: "1.0"
-page:
-  id: themes
-  title: "$i18n{page.themes.title:主题设置}"
-body:
-  type: ThemeSettings

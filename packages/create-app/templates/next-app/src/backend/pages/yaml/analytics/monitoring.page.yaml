@@ -1,0 +1,153 @@
+dsl: "1.0"
+page:
+  id: monitoring
+  title: "$i18n{page.monitoring.title:数据监控}"
+i18n: { namespaces: [app] }
+dataSources:
+  monitoring:
+    type: http
+    autoLoad: true
+    request: { method: GET, url: /api/d/monitoring }
+body:
+  type: Page
+  children:
+    - type: Typography
+      props: { variant: h3, text: "$i18n{page.monitoring.title:数据监控}" }
+    - type: Alert
+      props: { variant: info, message: "$i18n{monitoring.sample:图表组件示例}", description: "$i18n{monitoring.description:数据来自本地示例接口。}", style: { marginBottom: 20 } }
+    - type: Row
+      props: { gutter: [16, 16] }
+      children:
+        - type: Col
+          props: { span: 24, md: 12 }
+          children:
+            - type: Card
+              props: { title: LineChart }
+              children:
+                - type: LineChart
+                  props: { data: "${data.monitoring.series}", xKey: period, yKeys: [requests], height: 260 }
+        - type: Col
+          props: { span: 24, md: 12 }
+          children:
+            - type: Card
+              props: { title: ColumnChart }
+              children:
+                - type: ColumnChart
+                  props: { data: "${data.monitoring.series}", xKey: period, yKeys: [requests], height: 260 }
+        - type: Col
+          props: { span: 24, md: 12 }
+          children:
+            - type: Card
+              props: { title: BarChart }
+              children:
+                - type: BarChart
+                  props: { data: "${data.monitoring.categories}", yKey: name, xKeys: [value], height: 260 }
+        - type: Col
+          props: { span: 24, md: 12 }
+          children:
+            - type: Card
+              props: { title: AreaChart }
+              children:
+                - type: AreaChart
+                  props: { data: "${data.monitoring.series}", xKey: period, yKeys: [requests], height: 260 }
+        - type: Col
+          props: { span: 24, md: 12 }
+          children:
+            - type: Card
+              props: { title: PieChart }
+              children:
+                - type: PieChart
+                  props: { data: "${data.monitoring.categories}", height: 260 }
+        - type: Col
+          props: { span: 24, md: 12 }
+          children:
+            - type: Card
+              props: { title: DonutChart }
+              children:
+                - type: DonutChart
+                  props: { data: "${data.monitoring.categories}", height: 260 }
+        - type: Col
+          props: { span: 24, md: 12 }
+          children:
+            - type: Card
+              props: { title: ScatterChart }
+              children:
+                - type: ScatterChart
+                  props: { data: "${data.monitoring.points}", height: 260 }
+        - type: Col
+          props: { span: 24, md: 12 }
+          children:
+            - type: Card
+              props: { title: BubbleChart }
+              children:
+                - type: BubbleChart
+                  props: { data: "${data.monitoring.points}", height: 260 }
+        - type: Col
+          props: { span: 24, md: 12 }
+          children:
+            - type: Card
+              props: { title: RadarChart }
+              children:
+                - type: RadarChart
+                  props: { data: "${data.monitoring.radar}", yKeys: [value, target], height: 260 }
+        - type: Col
+          props: { span: 24, md: 12 }
+          children:
+            - type: Card
+              props: { title: FunnelChart }
+              children:
+                - type: FunnelChart
+                  props: { data: "${data.monitoring.categories}", height: 260 }
+        - type: Col
+          props: { span: 24, md: 12 }
+          children:
+            - type: Card
+              props: { title: GaugeChart }
+              children:
+                - type: GaugeChart
+                  props: { value: "${data.monitoring.gauge}", unit: "%", height: 260 }
+        - type: Col
+          props: { span: 24, md: 12 }
+          children:
+            - type: Card
+              props: { title: Heatmap }
+              children:
+                - type: Heatmap
+                  props: { data: "${data.monitoring.heat}", height: 260 }
+        - type: Col
+          props: { span: 24, md: 12 }
+          children:
+            - type: Card
+              props: { title: TreeChart }
+              children:
+                - type: TreeChart
+                  props: { data: "${data.monitoring.tree}", height: 260 }
+        - type: Col
+          props: { span: 24, md: 12 }
+          children:
+            - type: Card
+              props: { title: SankeyChart }
+              children:
+                - type: SankeyChart
+                  props: { nodes: "${data.monitoring.nodes}", links: "${data.monitoring.links}", height: 260 }
+        - type: Col
+          props: { span: 24, md: 12 }
+          children:
+            - type: Card
+              props: { title: MapChart }
+              children:
+                - type: MapChart
+                  props: { mapName: starter-regions, data: "${data.monitoring.regions}", geoJson: "${data.monitoring.geo}", height: 260 }
+        - type: Col
+          props: { span: 24, md: 12 }
+          children:
+            - type: Card
+              props: { title: ComposedChart }
+              children:
+                - type: ComposedChart
+                  props: { data: "${data.monitoring.series}", xKey: period, series: [{ type: bar, dataKey: requests }, { type: line, dataKey: errors, yAxisIndex: 1 }], height: 260 }
+        - type: Col
+          props: { span: 24, md: 12 }
+          children:
+            - type: MetricCard
+              props: { title: "$i18n{monitoring.metric:服务健康度}", value: "${data.monitoring.gauge}", suffix: "%", trend: 3.2 }

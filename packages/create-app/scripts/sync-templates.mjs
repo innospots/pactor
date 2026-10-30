@@ -92,6 +92,15 @@ function syncDir(src, dest) {
       writeFileSync(to, transformPackageJson(readFileSync(from, 'utf8')), 'utf8');
     } else if (entry === 'README.md') {
       writeFileSync(to, transformReadme(readFileSync(from, 'utf8')), 'utf8');
+    } else if (src.startsWith(join(repoRoot, 'starters/next-app-starter')) && [
+      'src/backend/fixtures/system-settings.json',
+      'src/backend/pages/i18n/locales/en-US/app.yaml',
+      'src/backend/pages/i18n/locales/zh-CN/app.yaml',
+      'src/app/layout.tsx',
+      'src/backend/pages/yaml/sitemap.yaml',
+      'src/backend/pages/yaml/auth/login.page.yaml',
+    ].includes(from.slice(join(repoRoot, 'starters/next-app-starter').length + 1))) {
+      writeFileSync(to, readFileSync(from, 'utf8').replaceAll('Example Admin', '{{APP_TITLE}}'), 'utf8');
     } else {
       cpSync(from, to);
     }

@@ -5,10 +5,11 @@ import { useMemo } from "react";
 import { Tree, type TreeNodeData } from "@pactor-app/ui/components";
 
 import { useI18n } from "@pactor-app/runtime";
+import { resolveI18nText } from "../shared/i18n-text";
 
 type CatalogNode = {
   resourceKey?: string | null;
-  displayName?: string | null;
+  displayName?: string | Record<string, string> | null;
   children?: CatalogNode[] | null;
 };
 
@@ -28,7 +29,7 @@ function normalizeCatalogTreeSource(raw: unknown): CatalogNode[] {
   return [];
 }
 
-function mapCatalogNodes(nodes: CatalogNode[] | null | undefined): TreeNodeData[] {
+export function mapCatalogNodes(nodes: CatalogNode[] | null | undefined, locale: string, defaultLocale: string): TreeNodeData[] {
   if (!Array.isArray(nodes)) {
     return [];
   }
@@ -41,8 +42,8 @@ function mapCatalogNodes(nodes: CatalogNode[] | null | undefined): TreeNodeData[
     if (key.length === 0) {
       continue;
     }
-    const title = raw.displayName?.trim() || key;
-    const children = mapCatalogNodes(raw.children);
+    const title = resolveI18nText(raw.displayName, locale, defaultLocale).trim() || key;
+    const children = mapCatalogNodes(raw.children, locale, defaultLocale);
     mapped.push({
       key,
       title,
@@ -63,7 +64,7 @@ function collectExpandableKeys(nodes: TreeNodeData[]): string[] {
   return keys;
 }
 
-function filterTree(nodes: TreeNodeData[], search: string): TreeNodeData[] {
+export function filterTree(nodes: TreeNodeData[], search: string): TreeNodeData[] {
   const query = search.trim().toLowerCase();
   if (query.length === 0) {
     return nodes;
@@ -77,7 +78,7 @@ function filterTree(nodes: TreeNodeData[], search: string): TreeNodeData[] {
     if (selfMatch || children.length > 0) {
       filtered.push({
         ...node,
-        ...(children.length > 0 ? { children } : {}),
+        children: children.length > 0 ? children : undefined,
       });
     }
   }
@@ -95,11 +96,11 @@ export interface CatalogTreeProps {
  * 将 Console catalog/tree API 节点（resourceKey、displayName）映射为 Tree 所需的 key、title。
  */
 export function CatalogTree({ treeData, search, className, onSelect }: CatalogTreeProps) {
-  const { t } = useI18n();
+  const { t, locale, defaultLocale } = useI18n();
   const nodes = useMemo(() => {
-    const mapped = mapCatalogNodes(normalizeCatalogTreeSource(treeData));
+    const mapped = mapCatalogNodes(normalizeCatalogTreeSource(treeData), locale, defaultLocale);
     return filterTree(mapped, search ?? "");
-  }, [treeData, search]);
+  }, [treeData, search, locale, defaultLocale]);
 
   const defaultExpandedKeys = useMemo(() => collectExpandableKeys(nodes), [nodes]);
 
@@ -117,6 +118,7 @@ export function CatalogTree({ treeData, search, className, onSelect }: CatalogTr
       style={{ minHeight: 280 }}
       treeData={nodes}
       defaultExpandedKeys={defaultExpandedKeys}
+      expandedKeys={search?.trim() ? defaultExpandedKeys : undefined}
       onSelect={onSelect}
     />
   );

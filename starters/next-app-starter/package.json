@@ -17,6 +17,7 @@
     "@pactor-app/chat": "link:../../packages/chat",
     "@pactor-app/core": "link:../../packages/core",
     "@pactor-app/i18n": "link:../../packages/i18n",
+    "@pactor-app/router": "link:../../packages/router",
     "@pactor-app/runtime": "link:../../packages/runtime",
     "@pactor-app/ui": "link:../../packages/ui",
     "lucide-react": "1.64.0",

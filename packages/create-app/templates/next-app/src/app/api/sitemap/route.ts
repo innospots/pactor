@@ -1,9 +1,9 @@
 import { cookies } from "next/headers";
 
-import { findUserBySession, SESSION_COOKIE } from "@/backend/auth/accounts";
+import { findUserBySession, SESSION_COOKIE } from "@/backend/mock/accounts";
 import { corsPreflight, corsHeaders } from "@/backend/cors";
-import { buildSitemap } from "@/backend/resources/sitemap";
-import { localeError, localizeSitemap, requestLocale } from "@/backend/resources/i18n";
+import { buildSitemap } from "@/backend/pages/sitemap";
+import { localeError, localizeSitemap, requestLocale } from "@/backend/pages/i18n";
 
 /**
  * Sitemap 端点（design/dynamic-page.md）：

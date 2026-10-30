@@ -1,0 +1,227 @@
+# 用户列表页 DSL：由 /api/pages/users 懒加载下发（见 src/backend/pages/sitemap.ts）。
+# 数据来自 /api/d/users（接口侧鉴权，需登录且具备 user:view 权限）。
+dsl: "1.0"
+page:
+  id: users
+  title: $i18n{page.users.text1:用户列表}
+  name: users
+  grantGroup: userGroup
+  permission: user:view
+
+state:
+  keyword: ""
+  role: ""
+  dialogOpen: false
+
+dataSources:
+  users:
+    type: http
+    autoLoad: true
+    request:
+      method: GET
+      url: /api/d/users
+      params:
+        keyword: ${state.keyword}
+        role: ${state.role}
+
+i18n:
+  namespaces: [ app ]
+
+body:
+  type: Page
+  props: { className: system-page }
+  # 标题与系统管理其他页面保持一致
+  children:
+    - type: Flex
+      props: { justify: space-between, align: center, wrap: true, gap: 12 }
+      children:
+        - type: Typography
+          props: { variant: h3, className: system-page-title, text: "$i18n{page.users.text2:用户列表}" }
+        - type: Button
+          props: { text: "$i18n{page.users.create:+ 添加用户}", icon: plus, variant: primary }
+          events:
+            onClick:
+              - action: setState
+                params: { dialogOpen: true }
+    - type: Form
+      props: { layout: inline, className: user-search }
+      events:
+        onSubmit:
+          - action: setState
+            params: { keyword: "${event.keyword}", role: "${event.role}" }
+          - action: reload
+            params: { dataSource: users }
+      children:
+        - type: Input
+          props: { name: keyword, placeholder: "$i18n{page.users.searchPlaceholder:姓名 / 用户名}" }
+        - type: Select
+          props:
+            name: role
+            placeholder: "$i18n{page.users.rolePlaceholder:选择角色}"
+            options:
+              - { label: "$i18n{page.users.roleAll:全部角色}", value: "" }
+              - { label: "$i18n{page.users.roleAdmin:管理员}", value: admin }
+              - { label: "$i18n{page.users.roleMember:成员}", value: member }
+              - { label: "$i18n{page.users.roleGuest:访客}", value: guest }
+        - type: Button
+          props: { text: "$i18n{page.users.query:查询}", variant: primary, submit: true }
+    - type: Card
+      props: { title: "$i18n{page.users.text12:用户数据}" }
+      children:
+        - type: Table
+          props:
+            dataSource: ${data.users}
+            loading: ${dataStatus.users.loading}
+            rowKey: id
+            pagination: { pageSize: 5 }
+            columns:
+              - { title: "$i18n{page.users.text13:姓名}", dataIndex: name }
+              - { title: "$i18n{page.users.text14:用户名}", dataIndex: username }
+              - title: $i18n{page.users.text15:角色}
+                dataIndex: role
+                cell:
+                  type: Text
+                  props:
+                    text: "${row.role == 'admin' ? t('users.role.admin') : row.role == 'member' ? t('users.role.member') : row.role == 'guest' ? t('users.role.guest') : row.role}"
+              - { title: "$i18n{page.users.text16:邮箱}", dataIndex: email }
+              - { title: "$i18n{page.users.text17:创建时间}", dataIndex: createdAt }
+              - title: "$i18n{page.users.status:状态}"
+                cell:
+                  type: Text
+                  props: { text: "${row.status == 'DISABLED' ? t('common.inactive') : t('common.enabled')}" }
+              - title: "$i18n{page.users.actions:操作}"
+                align: center
+                fixed: right
+                width: 250
+                cell:
+                  type: Flex
+                  props: { justify: center, gap: small }
+                  children:
+                    - type: Button
+                      props: { text: "${row.status == 'DISABLED' ? t('common.enable') : t('common.inactive')}", variant: link, size: small }
+                      events:
+                        onClick:
+                          - action: confirm
+                            params:
+                              title: "$i18n{page.users.confirmStatusTitle:变更状态}"
+                              content: "$i18n{page.users.confirmStatusContent:确定变更该用户的状态吗？}"
+                          - action: request
+                            params: { method: PATCH, url: /api/d/users, body: { id: "${row.id}", action: status, status: "${row.status == 'DISABLED' ? 'ENABLED' : 'DISABLED'}" } }
+                          - action: reload
+                            params: { dataSource: users }
+                    - type: Button
+                      props: { text: "$i18n{page.users.edit:修改}", variant: link, size: small }
+                      events:
+                        onClick:
+                          - action: overlay.open
+                            params:
+                              overlay:
+                                type: modal
+                                title: "$i18n{page.users.editTitle:修改用户}"
+                                width: 520
+                                content:
+                                  type: Form
+                                  props: { layout: vertical, initialValues: "${row}" }
+                                  events:
+                                    onSubmit:
+                                      - action: request
+                                        params: { method: PATCH, url: /api/d/users, body: { id: "${row.id}", action: edit, name: "${event.name}", email: "${event.email}", role: "${event.role}" } }
+                                      - action: overlay.close
+                                      - action: reload
+                                        params: { dataSource: users }
+                                  children:
+                                    - type: Input
+                                      props: { name: name, label: "$i18n{page.users.name:姓名}", rules: [{ required: true, message: "$i18n{page.users.nameRequired:请输入姓名}" }] }
+                                    - type: Input
+                                      props: { name: email, label: "$i18n{page.users.email:邮箱}", rules: [{ required: true, message: "$i18n{page.users.emailRequired:请输入邮箱}" }] }
+                                    - type: Select
+                                      props:
+                                        name: role
+                                        label: "$i18n{page.users.role:角色}"
+                                        options:
+                                          - { label: "$i18n{page.users.roleAdmin:管理员}", value: admin }
+                                          - { label: "$i18n{page.users.roleMember:成员}", value: member }
+                                          - { label: "$i18n{page.users.roleGuest:访客}", value: guest }
+                                    - type: Button
+                                      props: { text: "$i18n{page.users.save:保存}", variant: primary, submit: true }
+                    - type: Button
+                      props: { text: "$i18n{page.users.resetPassword:密码重置}", variant: link, size: small }
+                      events:
+                        onClick:
+                          - action: message
+                            params:
+                              messageType: info
+                              text: "$i18n{page.users.resetUnavailable:示例用户未接入登录账号，暂不支持密码重置}"
+                    - type: Button
+                      props: { text: "$i18n{page.users.delete:删除}", variant: link, size: small, danger: true }
+                      events:
+                        onClick:
+                          - action: confirm
+                            params:
+                              title: "$i18n{page.users.deleteTitle:删除用户}"
+                              content: "$i18n{page.users.deleteContent:确定删除该示例用户吗？}"
+                          - action: request
+                            params: { method: DELETE, url: "/api/d/users?id=${row.id}" }
+                          - action: reload
+                            params: { dataSource: users }
+
+    - type: Dialog
+      props:
+        title: "$i18n{page.users.createTitle:添加用户}"
+        open: ${state.dialogOpen}
+        style: { width: 520, maxWidth: 92vw }
+      events:
+        onClose:
+          - action: setState
+            params: { dialogOpen: false }
+      children:
+        - type: Form
+          props: { name: createUser, layout: vertical, initialValues: { role: member } }
+          events:
+            onSubmit:
+              - id: createUserResult
+                action: request
+                params:
+                  method: POST
+                  url: /api/d/users
+                  body: { name: "${event.name}", username: "${event.username}", email: "${event.email}", role: "${event.role}" }
+              - action: if
+                params:
+                  condition: ${actions.createUserResult.ok != false}
+                  then:
+                    - action: setState
+                      params: { dialogOpen: false }
+                    - action: reload
+                      params: { dataSource: users }
+                    - action: message
+                      params: { messageType: success, text: "$i18n{page.users.added:用户已添加}" }
+                  else:
+                    - action: message
+                      params: { messageType: error, text: "$i18n{page.users.addError:添加失败，请检查输入或稍后重试}" }
+          children:
+            - type: Input
+              props: { name: name, label: "$i18n{page.users.name:姓名}", placeholder: "$i18n{page.users.namePlaceholder:请输入姓名}", rules: [{ required: true, message: "$i18n{page.users.nameRequired:请输入姓名}" }] }
+            - type: Input
+              props: { name: username, label: "$i18n{page.users.username:用户名}", placeholder: "$i18n{page.users.usernamePlaceholder:请输入用户名}", rules: [{ required: true, message: "$i18n{page.users.usernameRequired:请输入用户名}" }] }
+            - type: Input
+              props: { name: email, label: "$i18n{page.users.email:邮箱}", placeholder: "$i18n{page.users.emailPlaceholder:请输入邮箱}", rules: [{ required: true, message: "$i18n{page.users.emailRequired:请输入邮箱}" }] }
+            - type: Select
+              props:
+                name: role
+                label: "$i18n{page.users.role:角色}"
+                rules: [{ required: true, message: "$i18n{page.users.roleRequired:请选择角色}" }]
+                options:
+                  - { label: "$i18n{page.users.roleAdmin:管理员}", value: admin }
+                  - { label: "$i18n{page.users.roleMember:成员}", value: member }
+                  - { label: "$i18n{page.users.roleGuest:访客}", value: guest }
+            - type: Flex
+              props: { justify: end, gap: 8 }
+              children:
+                - type: Button
+                  props: { text: "$i18n{page.users.cancel:取消}" }
+                  events:
+                    onClick:
+                      - action: setState
+                        params: { dialogOpen: false }
+                - type: Button
+                  props: { text: "$i18n{page.users.add:添加}", variant: primary, submit: true }

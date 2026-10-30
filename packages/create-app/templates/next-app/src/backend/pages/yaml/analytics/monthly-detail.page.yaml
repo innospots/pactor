@@ -1,0 +1,128 @@
+dsl: "1.0"
+page:
+  id: monthly-detail
+  title: "$i18n{page.monthly-detail.title:月报详情}"
+  name: monthlyDetail
+  grantGroup: reportGroup
+i18n:
+  namespaces: [app]
+body:
+  type: Page
+  children:
+    - type: Flex
+      props: { justify: space-between, align: center, wrap: true, gap: 12, style: { marginBottom: 20 } }
+      children:
+        - type: Flex
+          props: { direction: vertical, gap: 4 }
+          children:
+            - type: Typography
+              props: { variant: h3, text: "$i18n{page.monthly-detail.title:月报详情}" }
+            - type: Text
+              props:
+                text:
+                  $i18n:
+                    key: monthly.detail.period
+                    params: { id: "${route.params.id}" }
+                    fallback: "报告周期：{{id}}"
+        - type: Button
+          props: { text: "$i18n{page.monthly-detail.text5:返回报表中心}" }
+          events:
+            onClick:
+              - action: navigate
+                params: { to: /reports/monthly }
+    - type: Alert
+      props: { variant: info, message: "$i18n{monthly.demo:示例数据}", description: "$i18n{monthly.detail.demo:以下为固定示例数据，不随报告周期变化。}", style: { marginBottom: 20 } }
+    - type: Row
+      props: { gutter: [16, 16], align: stretch, style: { marginBottom: 20 } }
+      children:
+        - type: Col
+          props: { span: 24, md: 8 }
+          children:
+            - type: Card
+              props: { className: stat-card }
+              children:
+                - type: Statistic
+                  props: { title: "$i18n{monthly.revenue:营收（万元）}", value: 128.6 }
+                - type: Text
+                  props: { text: "$i18n{monthly.detail.revenueChange:较上月增长 7.2%}" }
+        - type: Col
+          props: { span: 24, md: 8 }
+          children:
+            - type: Card
+              props: { className: stat-card }
+              children:
+                - type: Statistic
+                  props: { title: "$i18n{monthly.customers:新增客户}", value: 342 }
+                - type: Text
+                  props: { text: "$i18n{monthly.detail.customerChange:较上月增长 8.6%}" }
+        - type: Col
+          props: { span: 24, md: 8 }
+          children:
+            - type: Card
+              props: { className: stat-card }
+              children:
+                - type: Statistic
+                  props: { title: "$i18n{monthly.conversion:转化率}", value: 23.8, suffix: "%" }
+                - type: Text
+                  props: { text: "$i18n{monthly.detail.conversionChange:较上月提升 1.2 个百分点}" }
+    - type: Row
+      props: { gutter: [16, 16], align: stretch, style: { marginBottom: 20 } }
+      children:
+        - type: Col
+          props: { span: 24, lg: 16 }
+          children:
+            - type: Card
+              props: { title: "$i18n{monthly.detail.weekly:周度营收趋势（万元）}" }
+              children:
+                - type: AreaChart
+                  props:
+                    xKey: week
+                    yKeys: [revenue]
+                    style: { height: 260 }
+                    data:
+                      - { week: W1, revenue: 26.4 }
+                      - { week: W2, revenue: 30.8 }
+                      - { week: W3, revenue: 33.2 }
+                      - { week: W4, revenue: 38.2 }
+        - type: Col
+          props: { span: 24, lg: 8 }
+          children:
+            - type: Card
+              props: { title: "$i18n{monthly.targets:目标完成情况}" }
+              children:
+                - type: Flex
+                  props: { direction: vertical, gap: 12 }
+                  children:
+                    - type: Text
+                      props: { text: "$i18n{monthly.revenueTarget:营收目标 · 86%}" }
+                    - type: Progress
+                      props: { value: 86 }
+                    - type: Text
+                      props: { text: "$i18n{monthly.customerTarget:客户增长目标 · 76%}" }
+                    - type: Progress
+                      props: { value: 76 }
+                    - type: Text
+                      props: { text: "$i18n{monthly.conversionTarget:转化目标 · 95%}" }
+                    - type: Progress
+                      props: { value: 95 }
+    - type: Card
+      props: { title: "$i18n{monthly.breakdown:业务渠道明细}", style: { marginBottom: 20 } }
+      children:
+        - type: Table
+          props:
+            rowKey: channel
+            pagination: false
+            dataSource:
+              - { channel: 在线渠道, customers: 146, revenue: 52.8, conversion: "25.4%" }
+              - { channel: 合作伙伴, customers: 112, revenue: 43.2, conversion: "24.1%" }
+              - { channel: 直接销售, customers: 84, revenue: 32.6, conversion: "20.8%" }
+            columns:
+              - { title: "$i18n{monthly.channel:渠道}", dataIndex: channel }
+              - { title: "$i18n{monthly.customers:新增客户}", dataIndex: customers }
+              - { title: "$i18n{monthly.revenue:营收（万元）}", dataIndex: revenue }
+              - { title: "$i18n{monthly.conversion:转化率}", dataIndex: conversion }
+    - type: Card
+      props: { title: "$i18n{monthly.detail.summary:经营总结}" }
+      children:
+        - type: Typography
+          props: { text: "$i18n{monthly.detail.summaryText:本月营收与客户增长保持上升，在线渠道贡献最高。建议关注直接销售渠道的转化效率，并持续跟踪目标完成情况。}" }

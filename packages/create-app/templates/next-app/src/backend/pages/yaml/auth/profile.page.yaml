@@ -1,0 +1,24 @@
+dsl: "1.0"
+page:
+  id: profile
+  title: "$i18n{page.profile.title:个人中心}"
+i18n:
+  namespaces: [app]
+body:
+  type: Page
+  props: { className: profile-page }
+  children:
+    - type: Typography
+      props: { variant: h3, text: "$i18n{page.profile.title:个人中心}" }
+    - type: Typography
+      props: { variant: muted, className: profile-subtitle, text: "$i18n{page.profile.subtitle:查看当前登录账户的信息。}" }
+    - type: Card
+      props: { title: "$i18n{page.profile.section:个人信息}" }
+      children:
+        - type: Descriptions
+          props:
+            column: 1
+            items:
+              - { label: "$i18n{page.profile.name:姓名}", value: "${data.session.user.name}" }
+              - { label: "$i18n{page.profile.username:账号}", value: "${data.session.user.username}" }
+              - { label: "$i18n{page.profile.roles:角色}", value: "${data.session.user.roles}" }

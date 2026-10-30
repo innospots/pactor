@@ -1,0 +1,113 @@
+# 月报页 DSL：懒加载页——sitemap 中仅声明 id / path / version（monthly@7），
+# 本文件由 /api/pages/monthly 按需下发（见 src/backend/pages/sitemap.ts 的 lazyPages）。
+dsl: "1.0"
+page:
+  id: monthly
+  title: $i18n{page.monthly.text1:月报}
+  name: monthly
+  grantGroup: reportGroup
+
+i18n:
+  namespaces: [ app ]
+
+body:
+  type: Page
+  props: { title: "$i18n{page.monthly.text2:本月经营月报}" }
+  children:
+    - type: Row
+      props: { gutter: [16, 16], align: stretch, style: { marginBottom: 16 } }
+      children:
+        - type: Col
+          props: { span: 24, md: 8 }
+          children:
+            - type: Card
+              props: { title: "$i18n{page.monthly.text3:营收}", className: stat-card }
+              children:
+                - type: Statistic
+                  props: { title: "$i18n{page.monthly.text4:本月（万元）}", value: 128.6 }
+        - type: Col
+          props: { span: 24, md: 8 }
+          children:
+            - type: Card
+              props: { title: "$i18n{page.monthly.text5:新增客户}", className: stat-card }
+              children:
+                - type: Statistic
+                  props: { title: "$i18n{page.monthly.text6:本月（家）}", value: 342 }
+        - type: Col
+          props: { span: 24, md: 8 }
+          children:
+            - type: Card
+              props: { title: "$i18n{page.monthly.text7:转化率}", className: stat-card }
+              children:
+                - type: Statistic
+                  props: { title: "$i18n{page.monthly.text8:本月（%）}", value: 23.8 }
+    - type: Row
+      props: { gutter: [16, 16], style: { marginBottom: 16 } }
+      children:
+        - type: Col
+          props: { span: 24, lg: 16 }
+          children:
+            - type: Card
+              props: { title: "$i18n{monthly.trend:经营趋势}" }
+              children:
+                - type: AreaChart
+                  props:
+                    xKey: month
+                    yKeys: [revenue]
+                    style: { height: 280 }
+                    data:
+                      - { month: 05, revenue: 92 }
+                      - { month: 06, revenue: 105 }
+                      - { month: 07, revenue: 101 }
+                      - { month: 08, revenue: 114 }
+                      - { month: 09, revenue: 120 }
+                      - { month: 10, revenue: 128.6 }
+        - type: Col
+          props: { span: 24, lg: 8 }
+          children:
+            - type: Card
+              props: { title: "$i18n{monthly.targets:目标完成情况}" }
+              children:
+                - type: Flex
+                  props: { direction: vertical, gap: 16 }
+                  children:
+                    - type: Text
+                      props: { text: "$i18n{monthly.revenueTarget:营收目标 · 86%}" }
+                    - type: Progress
+                      props: { value: 86 }
+                    - type: Text
+                      props: { text: "$i18n{monthly.customerTarget:客户增长目标 · 76%}" }
+                    - type: Progress
+                      props: { value: 76 }
+                    - type: Text
+                      props: { text: "$i18n{monthly.conversionTarget:转化目标 · 95%}" }
+                    - type: Progress
+                      props: { value: 95 }
+    - type: Card
+      props: { title: "$i18n{monthly.breakdown:业务渠道明细}", style: { marginBottom: 16 } }
+      children:
+        - type: Table
+          props:
+            rowKey: channel
+            pagination: false
+            dataSource:
+              - { channel: 在线渠道, customers: 146, revenue: 52.8, conversion: "25.4%" }
+              - { channel: 合作伙伴, customers: 112, revenue: 43.2, conversion: "24.1%" }
+              - { channel: 直接销售, customers: 84, revenue: 32.6, conversion: "20.8%" }
+            columns:
+              - { title: "$i18n{monthly.channel:渠道}", dataIndex: channel }
+              - { title: "$i18n{monthly.customers:新增客户}", dataIndex: customers }
+              - { title: "$i18n{monthly.revenue:营收（万元）}", dataIndex: revenue }
+              - { title: "$i18n{monthly.conversion:转化率}", dataIndex: conversion }
+    - type: Alert
+      props:
+        variant: info
+        message: "$i18n{monthly.demo:示例数据}" 
+        description: "$i18n{monthly.demoDescription:本页展示模拟月报数据，接入业务接口后可替换。}"
+        style: { marginBottom: 16 }
+    - type: Button
+      props: { text: "$i18n{page.monthly.text11:查看月报详情}", variant: primary }
+      events:
+        onClick:
+          - action: navigate
+            params: { to: /reports/monthly/2026-10 }

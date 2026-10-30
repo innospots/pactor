@@ -412,7 +412,7 @@ export function buildRadarOption(input: RadarChartInput, theme: ChartTheme): ECh
     series: [
       {
         type: 'radar',
-        data: keys.map((key) => ({
+        data: input.data.length === 0 ? [] : keys.map((key) => ({
           name: key,
           value: input.data.map((row) => toNumber(row[key])),
         })),
@@ -533,7 +533,7 @@ export function buildTreeOption(input: TreeChartInput, theme: ChartTheme): EChar
   return {
     title: titleOption(input.title),
     tooltip: itemTooltip(theme),
-    series: [
+    series: input.data.length === 0 ? [] : [
       {
         type: 'tree',
         data: input.data,
@@ -566,7 +566,7 @@ export function buildSankeyOption(input: SankeyChartInput, theme: ChartTheme): E
     color: theme.palette,
     title: titleOption(input.title),
     tooltip: itemTooltip(theme),
-    series: [
+    series: input.nodes.length === 0 ? [] : [
       {
         type: 'sankey',
         left: 24,

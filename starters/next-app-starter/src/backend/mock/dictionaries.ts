@@ -1,5 +1,6 @@
+import dictionariesFixture from "../fixtures/dictionaries.json";
 import { requestCookies } from "../auth/cookies";
-import { findUserBySession, SESSION_COOKIE } from "../auth/accounts";
+import { findUserBySession, SESSION_COOKIE } from "../mock/accounts";
 import { corsHeaders } from "../cors";
 
 type Item = { itemValue: string; itemName: string };
@@ -8,12 +9,7 @@ type Dictionary = { id: string; code: string; name: string; status: string; item
 const state = globalThis as typeof globalThis & {
   starterDictionaries?: Dictionary[];
 };
-state.starterDictionaries ??= [
-  { id: "status", code: "STATUS", name: "通用状态", status: "ENABLED", items: [{ itemValue: "ENABLED", itemName: "启用" }, { itemValue: "DISABLED", itemName: "禁用" }] },
-  { id: "priority", code: "PRIORITY", name: "优先级", status: "ENABLED", items: [{ itemValue: "HIGH", itemName: "高" }, { itemValue: "MEDIUM", itemName: "中" }, { itemValue: "LOW", itemName: "低" }] },
-  { id: "category", code: "CATEGORY", name: "业务分类", status: "ENABLED", items: [{ itemValue: "OPERATION", itemName: "运营" }, { itemValue: "TECH", itemName: "技术" }, { itemValue: "MANAGEMENT", itemName: "管理" }] },
-  { id: "notice_type", code: "NOTICE_TYPE", name: "通知类型", status: "DISABLED", items: [{ itemValue: "SYSTEM", itemName: "系统通知" }, { itemValue: "TASK", itemName: "任务提醒" }] },
-];
+state.starterDictionaries ??= structuredClone(dictionariesFixture);
 
 function authorized(request: Request): boolean {
   const cookies = requestCookies(request);
@@ -24,7 +20,17 @@ export async function GET(request: Request) {
   if (!authorized(request)) {
     return Response.json({ error: "未登录" }, { status: 401, headers: corsHeaders(request) });
   }
-  return Response.json(state.starterDictionaries, {
+  const params = new URL(request.url).searchParams;
+  const keyword = (params.get("keyword") ?? "").trim().toLowerCase();
+  const status = params.get("status") ?? "";
+  const filtered = state.starterDictionaries!.filter((row) =>
+    (!status || row.status === status) && `${row.name} ${row.code}`.toLowerCase().includes(keyword),
+  );
+  const page = Math.max(1, Number.parseInt(params.get("page") ?? "1", 10) || 1);
+  const result = params.has("page")
+    ? { records: filtered.slice((page - 1) * 10, page * 10), total: filtered.length, page, pageSize: 10 }
+    : filtered;
+  return Response.json(result, {
     headers: { "cache-control": "no-store", ...corsHeaders(request) },
   });
 }

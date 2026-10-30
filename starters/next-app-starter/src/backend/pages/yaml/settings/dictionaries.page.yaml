@@ -1,0 +1,147 @@
+dsl: "1.0"
+page:
+  id: dictionaries
+  title: "$i18n{page.dictionaries.title:字典管理}"
+i18n: { namespaces: [app] }
+state: { keyword: "", status: "", page: 1, selected: null }
+dataSources:
+  dictionaries:
+    type: http
+    autoLoad: true
+    request:
+      method: GET
+      url: /api/d/dictionaries
+      params: { keyword: "${state.keyword}", status: "${state.status}", page: "${state.page}" }
+body:
+  type: Page
+  props: { className: system-page }
+  children:
+    - type: Flex
+      props: { justify: space-between, align: center, wrap: true, gap: 12 }
+      children:
+        - type: Flex
+          props: { direction: vertical, gap: 2 }
+          children:
+            - type: Typography
+              props: { variant: h3, className: system-page-title, text: "$i18n{page.dictionaries.title:字典管理}" }
+            - type: Typography
+              props: { variant: muted, className: system-page-description, text: "$i18n{dictionaryPage.subtitle:维护业务可复用的字典类型和对应的值}" }
+        - type: Button
+          props: { text: "$i18n{dictionaryPage.create:新建类型}", variant: primary }
+          events:
+            onClick:
+              - action: overlay.open
+                params:
+                  overlay:
+                    type: drawer
+                    width: 840
+                    title: "$i18n{dictionaryPage.create:新建类型}"
+                    content:
+                      type: DictionaryEditor
+                      props: { mode: create }
+                      events:
+                        onSaved:
+                          - action: overlay.close
+                          - action: reload
+                            params: { dataSource: dictionaries }
+    - type: Alert
+      when: ${dataStatus.dictionaries.error != null}
+      props: { variant: error, message: "$i18n{dictionaryPage.loadError:加载字典失败，请刷新重试。}" }
+    - type: Card
+      children:
+        - type: Form
+          props: { name: dictionaryFilters, layout: inline, className: dictionary-search }
+          events:
+            onSubmit:
+              - action: setState
+                params: { keyword: "${event.keyword || ''}", status: "${event.status == '__ALL__' ? '' : event.status}", page: 1 }
+              - action: reload
+                params: { dataSource: dictionaries }
+          children:
+            - type: Input
+              props: { name: keyword, placeholder: "$i18n{dictionaryPage.search:搜索编码或名称}" }
+            - type: FilterSelect
+              props:
+                name: status
+                placeholder: "$i18n{dictionaryPage.all:全部状态}"
+                options:
+                  - { label: "$i18n{dictionaryPage.all:全部状态}", value: "" }
+                  - { label: "$i18n{dictionaryPage.enabled:启用}", value: ENABLED }
+                  - { label: "$i18n{dictionaryPage.disabled:禁用}", value: DISABLED }
+            - type: Button
+              props: { text: "$i18n{dictionaryPage.query:查询}", variant: primary, submit: true }
+            - type: Button
+              props: { text: "$i18n{dictionaryPage.reset:重置}" }
+              events:
+                onClick:
+                  - action: form.setValues
+                    params: { form: dictionaryFilters, values: { keyword: "", status: __ALL__ } }
+                  - action: setState
+                    params: { keyword: "", status: "", page: 1 }
+                  - action: reload
+                    params: { dataSource: dictionaries }
+        - type: Table
+          props:
+            rowKey: id
+            dataSource: ${data.dictionaries.records}
+            loading: ${dataStatus.dictionaries.loading}
+            pagination: false
+            columns:
+              - { title: "$i18n{dictionaryPage.name:类型名称}", dataIndex: name }
+              - { title: "$i18n{dictionaryPage.code:类型编码}", dataIndex: code }
+              - title: "$i18n{dictionaryPage.status:状态}"
+                cell:
+                  type: Text
+                  props: { text: "${row.status == 'ENABLED' ? t('common.enabled') : t('common.disabled')}" }
+              - title: "$i18n{dictionaryPage.items:字典项}"
+                cell:
+                  type: Text
+                  props: { text: "${row.items.length}" }
+              - title: "$i18n{dictionaryPage.actions:操作}"
+                cell:
+                  type: Flex
+                  props: { gap: small }
+                  children:
+                    - type: Button
+                      props: { text: "$i18n{dictionaryPage.view:查看}", variant: link, size: small }
+                      events:
+                        onClick:
+                          - action: setState
+                            params: { selected: "${row}" }
+                          - action: overlay.open
+                            params:
+                              overlay:
+                                type: drawer
+                                width: 840
+                                title: "$i18n{dictionaryPage.viewTitle:查看字典}"
+                                content:
+                                  type: DictionaryEditor
+                                  props: { mode: view, value: "${state.selected}" }
+                    - type: Button
+                      props: { text: "$i18n{dictionaryPage.edit:编辑}", variant: link, size: small }
+                      events:
+                        onClick:
+                          - action: setState
+                            params: { selected: "${row}" }
+                          - action: overlay.open
+                            params:
+                              overlay:
+                                type: drawer
+                                width: 840
+                                title: "$i18n{dictionaryPage.editTitle:编辑字典}"
+                                content:
+                                  type: DictionaryEditor
+                                  props: { mode: edit, value: "${state.selected}" }
+                                  events:
+                                    onSaved:
+                                      - action: overlay.close
+                                      - action: reload
+                                        params: { dataSource: dictionaries }
+        - type: Pagination
+          props: { total: "${data.dictionaries.total}", page: "${state.page}", pageSize: 10, showTotal: true, align: right }
+          events:
+            onChange:
+              - action: setState
+                params: { page: "${event}" }
+              - action: reload
+                params: { dataSource: dictionaries }

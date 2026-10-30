@@ -1,6 +1,0 @@
-dsl: "1.0"
-page:
-  id: system-settings
-  title: "$i18n{page.system-settings.title:系统设置}"
-body:
-  type: SystemSettings
