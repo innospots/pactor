@@ -209,6 +209,26 @@ describe('Login 业务组件', () => {
     expect(screen.getByRole('button', { name: '进入控制台' })).toBeTruthy();
   });
 
+  it('errorMessage：缺省非空即展示内联错误提示（destructive Alert）', () => {
+    renderDsl({
+      type: 'Login',
+      props: { errorMessage: '用户名或密码错误' },
+    });
+    expect(screen.getByText('用户名或密码错误')).toBeTruthy();
+    expect(document.querySelector('[data-slot=alert]')).not.toBeNull();
+  });
+
+  it('errorVisible：显式关闭时隐藏错误提示，驱动 DSL 失败/复位编排', () => {
+    renderDsl({
+      type: 'Login',
+      props: {
+        errorMessage: '${state.msg}',
+        errorVisible: '${state.show}',
+      },
+    }, { state: { msg: '用户名或密码错误', show: false } });
+    expect(screen.queryByText('用户名或密码错误')).toBeNull();
+  });
+
   it('未配置辅助入口与页脚时不渲染', () => {
     const { container } = renderDsl({ type: 'Login' });
     expect(container.querySelector('footer')).toBeNull();

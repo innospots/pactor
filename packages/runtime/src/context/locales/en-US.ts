@@ -51,6 +51,7 @@ export const enUS = {
   'pactor.formCardList.add': 'Add item',
   'pactor.formModal.submit': 'Submit',
   'pactor.formModal.cancel': 'Cancel',
+  'pactor.chart.empty': 'No data',
   'pactor.select.placeholder': 'Please select',
   'pactor.pagination.total': 'Total {{count}}',
   'pactor.pagination.pageSize': '{{size}} per page',

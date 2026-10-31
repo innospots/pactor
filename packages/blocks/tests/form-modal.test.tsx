@@ -1,9 +1,9 @@
 // @vitest-environment jsdom
 import './setup.js';
 
-import { screen } from '@testing-library/react';
+import { screen, act } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 
 import { expectEventState, renderDsl } from './helpers.js';
 
@@ -200,6 +200,113 @@ describe('FormModal DSL', () => {
 
     expect(await screen.findByRole('button', { name: 'Cancel' })).toBeTruthy();
     expect(screen.getByRole('button', { name: 'Submit' })).toBeTruthy();
+  });
+
+  it('initialValues 回填：打开弹层时表单字段带出默认数据（编辑场景）', async () => {
+    renderDsl(
+      {
+        type: 'FormModal',
+        props: {
+          open: true,
+          title: '编辑成员',
+          initialValues: { username: '李四', role: 'admin' },
+        },
+        children: FORM_CHILDREN,
+      },
+      { state: {} },
+    );
+
+    expect(await screen.findByRole('dialog')).toBeTruthy();
+    const username = screen.getByRole('textbox') as HTMLInputElement;
+    expect(username.value).toBe('李四');
+    // Select 选中项文案渲染
+    expect(screen.getByText('管理员')).toBeTruthy();
+  });
+
+  it('重开取最新 initialValues：切换编辑记录后重新打开，表单重建为新值', async () => {
+    const { context } = renderDsl(
+      {
+        type: 'FormModal',
+        props: {
+          open: '${state.open}',
+          title: '编辑成员',
+          initialValues: '${state.editing}',
+        },
+        children: FORM_CHILDREN,
+      },
+      { state: { open: false, editing: { username: '张三' } } },
+    );
+
+    expect(screen.queryByRole('dialog')).toBeNull();
+
+    // 打开：回填记录 A
+    act(() => context.state.set('open', true));
+    expect(await screen.findByRole('dialog')).toBeTruthy();
+    expect((screen.getByRole('textbox') as HTMLInputElement).value).toBe('张三');
+
+    // 关闭并切换记录后重开：回填记录 B
+    act(() => {
+      context.state.set('open', false);
+      context.state.set('editing', { username: '李四', role: 'member' });
+    });
+    await vi.waitFor(() => {
+      expect(screen.queryByRole('dialog')).toBeNull();
+    });
+    act(() => context.state.set('open', true));
+    expect(await screen.findByRole('dialog')).toBeTruthy();
+    expect((screen.getByRole('textbox') as HTMLInputElement).value).toBe('李四');
+  });
+
+  it('开启期间 initialValues 变化：异步记录加载完成后同步写入表单', async () => {
+    const { context } = renderDsl(
+      {
+        type: 'FormModal',
+        props: {
+          open: true,
+          title: '编辑成员',
+          initialValues: '${state.editing}',
+        },
+        children: FORM_CHILDREN,
+      },
+      { state: { editing: {} } },
+    );
+
+    expect(await screen.findByRole('dialog')).toBeTruthy();
+    expect((screen.getByRole('textbox') as HTMLInputElement).value).toBe('');
+
+    // 模拟异步加载完成：editing 到达，表单字段同步
+    act(() => context.state.set('editing', { username: '王五', role: 'admin' }));
+    await vi.waitFor(() => {
+      expect((screen.getByRole('textbox') as HTMLInputElement).value).toBe('王五');
+    });
+  });
+
+  it('编辑后提交：修改回填值，onSubmit 传出合并后的 values', async () => {
+    const user = userEvent.setup();
+    const { context } = renderDsl(
+      {
+        type: 'FormModal',
+        props: {
+          open: true,
+          title: '编辑成员',
+          initialValues: { username: '李四', role: 'admin' },
+        },
+        children: FORM_CHILDREN,
+        events: {
+          onSubmit: { action: 'setState', params: { submitted: '${event}' } },
+        },
+      },
+      { state: {} },
+    );
+
+    const username = await screen.findByRole('textbox');
+    await user.clear(username);
+    await user.type(username, '李四改');
+    await user.click(screen.getByRole('button', { name: '提交' }));
+    await expectEventState(context, 'submitted', {
+      username: '李四改',
+      role: 'admin',
+    });
   });
 
   it('复杂布局：children 内 Grid 多列表单项，提交传出全部 values', async () => {

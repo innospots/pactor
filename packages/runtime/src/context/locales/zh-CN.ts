@@ -51,6 +51,7 @@ export const zhCN = {
   'pactor.formCardList.add': '添加一项',
   'pactor.formModal.submit': '提交',
   'pactor.formModal.cancel': '取消',
+  'pactor.chart.empty': '暂无数据',
   'pactor.select.placeholder': '请选择',
   'pactor.pagination.total': '共 {{count}} 条',
   'pactor.pagination.pageSize': '每页 {{size}} 条',

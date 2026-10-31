@@ -27,7 +27,8 @@ body:
           对象下发（design/dynamic-page.md）；菜单随角色裁剪。}
         style: { marginBottom: 16 }
     - type: Button
-      props: { text: "$i18n{page.home.text5:查看月报（需 report:view）}" }
+      permission: report:view
+      props: { text: "$i18n{page.home.text5:查看月报}" }
       events:
         onClick:
           - action: navigate
