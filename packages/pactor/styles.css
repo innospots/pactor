@@ -5,7 +5,7 @@
  */
 
 /* ============================================================
- * @pactor-app/ui@1.58.0（构建产物内联，源顺序：ui → blocks → chart → chat）
+ * @pactor-app/ui@1.59.0（构建产物内联，源顺序：ui → blocks → chart → chat）
  * ============================================================ */
 /*! tailwindcss v4.3.3 | MIT License | https://tailwindcss.com */
 @layer properties;
@@ -473,6 +473,26 @@
   padding: 4px 0;
   overflow-x: auto;
   overflow-y: hidden;
+}
+.pactor-markdown-editor {
+  --pactor-markdown-fg: var(--foreground, light-dark(#1f2328, #e6edf3));
+  --pactor-markdown-border: var(--border, light-dark(#d1d9e0, #3d444d));
+  --pactor-markdown-radius: var(--radius, 6px);
+  border: 1px solid var(--pactor-markdown-border);
+  border-radius: var(--pactor-markdown-radius);
+  color: var(--pactor-markdown-fg);
+  overflow: hidden;
+}
+.pactor-markdown-editor:focus-within {
+  border-color: var(--primary, light-dark(#0969da, #4493f8));
+}
+.pactor-markdown-editor .pactor-markdown-editor-toolbar {
+  border-bottom: 1px solid var(--pactor-markdown-border);
+}
+.pactor-markdown-editor .pactor-markdown-editor-content {
+  padding: 8px 12px;
+  min-height: 8em;
+  outline: none;
 }
 :root {
   color-scheme: light;
@@ -1080,7 +1100,7 @@
 }
 
 /* ============================================================
- * @pactor-app/blocks@1.58.0（构建产物内联，源顺序：ui → blocks → chart → chat）
+ * @pactor-app/blocks@1.59.0（构建产物内联，源顺序：ui → blocks → chart → chat）
  * ============================================================ */
 /*! tailwindcss v4.3.3 | MIT License | https://tailwindcss.com */
 @layer properties;
@@ -1410,7 +1430,7 @@
 }
 
 /* ============================================================
- * @pactor-app/chart@1.58.0（构建产物内联，源顺序：ui → blocks → chart → chat）
+ * @pactor-app/chart@1.59.0（构建产物内联，源顺序：ui → blocks → chart → chat）
  * ============================================================ */
 /*! tailwindcss v4.3.3 | MIT License | https://tailwindcss.com */
 @layer properties;
@@ -1554,7 +1574,7 @@
 }
 
 /* ============================================================
- * @pactor-app/chat@1.58.0（构建产物内联，源顺序：ui → blocks → chart → chat）
+ * @pactor-app/chat@1.59.0（构建产物内联，源顺序：ui → blocks → chart → chat）
  * ============================================================ */
 /*! tailwindcss v4.3.3 | MIT License | https://tailwindcss.com */
 @layer properties;
@@ -1751,6 +1771,26 @@
   padding: 4px 0;
   overflow-x: auto;
   overflow-y: hidden;
+}
+.pactor-markdown-editor {
+  --pactor-markdown-fg: var(--foreground, light-dark(#1f2328, #e6edf3));
+  --pactor-markdown-border: var(--border, light-dark(#d1d9e0, #3d444d));
+  --pactor-markdown-radius: var(--radius, 6px);
+  border: 1px solid var(--pactor-markdown-border);
+  border-radius: var(--pactor-markdown-radius);
+  color: var(--pactor-markdown-fg);
+  overflow: hidden;
+}
+.pactor-markdown-editor:focus-within {
+  border-color: var(--primary, light-dark(#0969da, #4493f8));
+}
+.pactor-markdown-editor .pactor-markdown-editor-toolbar {
+  border-bottom: 1px solid var(--pactor-markdown-border);
+}
+.pactor-markdown-editor .pactor-markdown-editor-content {
+  padding: 8px 12px;
+  min-height: 8em;
+  outline: none;
 }
 :root {
   --pactor-chat-rail-width: 40px;
@@ -4463,6 +4503,9 @@ button.pactor-chat-trace__header:hover, .pactor-chat-trace__entry-header:hover, 
 :where(.divide-input > :not(:last-child)) {
     border-color: var(--input);
   }
+.self-center {
+    align-self: center;
+  }
 .self-end {
     align-self: flex-end;
   }
@@ -5696,6 +5739,9 @@ button.pactor-chat-trace__header:hover, .pactor-chat-trace__entry-header:hover, 
   }
 .hidden {
     display: none;
+  }
+.inline {
+    display: inline;
   }
 .inline-flex {
     display: inline-flex;
