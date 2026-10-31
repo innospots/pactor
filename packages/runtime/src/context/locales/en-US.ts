@@ -47,6 +47,8 @@ export const enUS = {
   'pactor.login.passwordRequired': 'Please enter password',
   'pactor.login.submit': 'Sign in',
   'pactor.cardList.total': 'Total {{count}}',
+  'pactor.formCardList.item': 'Item {{index}}',
+  'pactor.formCardList.add': 'Add item',
   'pactor.select.placeholder': 'Please select',
   'pactor.pagination.total': 'Total {{count}}',
   'pactor.pagination.pageSize': '{{size}} per page',

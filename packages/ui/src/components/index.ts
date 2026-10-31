@@ -246,13 +246,18 @@ export type { SelectOption, SelectProps } from './components/Select/index.js';
 export { Textarea } from './components/Textarea/index.js';
 export type { TextareaProps } from './components/Textarea/index.js';
 export { Checkbox } from './components/Checkbox/index.js';
-export type { CheckboxProps } from './components/Checkbox/index.js';
+export type {
+  CheckboxOption,
+  CheckboxProps,
+  CheckboxValue,
+  CheckboxVariant,
+} from './components/Checkbox/index.js';
 export { ChipFilter } from './components/ChipFilter/index.js';
 export type { ChipFilterItem, ChipFilterProps } from './components/ChipFilter/index.js';
 export { ChipNode } from './components/ChipNode/index.js';
 export type { ChipNodeProps } from './components/ChipNode/index.js';
 export { RadioGroup } from './components/RadioGroup/index.js';
-export type { RadioGroupOption, RadioGroupProps } from './components/RadioGroup/index.js';
+export type { RadioGroupOption, RadioGroupProps, RadioGroupVariant } from './components/RadioGroup/index.js';
 export { Switch } from './components/Switch/index.js';
 export type { SwitchProps } from './components/Switch/index.js';
 export { Slider } from './components/Slider/index.js';

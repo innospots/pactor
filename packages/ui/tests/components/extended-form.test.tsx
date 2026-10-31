@@ -299,6 +299,193 @@ describe('RadioGroup', () => {
     await user.click(screen.getByText('小'));
     await expectEventState(context, 'size', 's');
   });
+
+  it('cards 变体：行式卡片 + description，点击行选中后 onChange 传出 value', async () => {
+    const user = userEvent.setup();
+    const { container, context } = renderDsl({
+      type: 'RadioGroup',
+      props: {
+        variant: 'cards',
+        value: '${state.plan}',
+        options: [
+          { label: 'Solo', value: 'solo', description: '一个席位' },
+          { label: 'Team', value: 'team', description: '最多 20 席' },
+        ],
+      },
+      events: {
+        onChange: { action: 'setState', params: { plan: '${event}' } },
+      },
+    });
+
+    const group = container.querySelector('[data-slot=radio-group][data-variant=cards]');
+    expect(group).not.toBeNull();
+    expect(group!.getAttribute('role')).toBe('radiogroup');
+    expect(screen.getByText('最多 20 席')).toBeTruthy();
+
+    await user.click(screen.getByText('Team'));
+    await expectEventState(context, 'plan', 'team');
+    expect(
+      container.querySelector('[data-slot=radio-group-card][data-checked]'),
+    ).not.toBeNull();
+  });
+
+  it('cards 变体：原生 radio 同 name 分组，初始值命中选中行', () => {
+    const { container } = renderDsl({
+      type: 'RadioGroup',
+      props: {
+        variant: 'cards',
+        value: 'team',
+        options: [
+          { label: 'Solo', value: 'solo' },
+          { label: 'Team', value: 'team' },
+        ],
+      },
+    });
+
+    const radios = container.querySelectorAll('input[type=radio]');
+    expect(radios.length).toBe(2);
+    const names = new Set([...radios].map((radio) => radio.getAttribute('name')));
+    expect(names.size).toBe(1);
+    const checkedRow = container.querySelector('[data-slot=radio-group-card][data-checked]');
+    expect(checkedRow?.textContent).toContain('Team');
+  });
+});
+
+describe('Checkbox 组模式（options）', () => {
+  it('渲染 options，勾选后 onChange 传出完整 value 数组（toggle 语义）', async () => {
+    const user = userEvent.setup();
+    const { context } = renderDsl({
+      type: 'Checkbox',
+      props: {
+        value: '${state.fruits}',
+        options: [
+          { label: '苹果', value: 'a' },
+          { label: '香蕉', value: 'b' },
+        ],
+      },
+      events: {
+        onChange: { action: 'setState', params: { fruits: '${event}' } },
+      },
+    });
+
+    expect(screen.getByRole('checkbox', { name: '苹果' })).toBeTruthy();
+    await user.click(screen.getByRole('checkbox', { name: '香蕉' }));
+    await expectEventState(context, 'fruits', ['b']);
+    await user.click(screen.getByRole('checkbox', { name: '苹果' }));
+    await expectEventState(context, 'fruits', ['b', 'a']);
+    await user.click(screen.getByRole('checkbox', { name: '香蕉' }));
+    await expectEventState(context, 'fruits', ['a']);
+  });
+
+  it('Form 内勾选后提交：值为已勾选 value 数组', async () => {
+    const user = userEvent.setup();
+    const { container, context } = renderDsl({
+      type: 'Form',
+      children: [
+        {
+          type: 'Checkbox',
+          props: {
+            name: 'tags',
+            label: '标签',
+            options: [
+              { label: '红', value: 'red' },
+              { label: '蓝', value: 'blue' },
+            ],
+          },
+        },
+        { type: 'Button', props: { text: '提交', submit: true } },
+      ],
+    });
+
+    expect(container.querySelector('[data-slot=form-item]')).not.toBeNull();
+    await user.click(screen.getByRole('checkbox', { name: '蓝' }));
+    fireEvent.click(screen.getByRole('button', { name: '提交' }));
+
+    await vi.waitFor(() => {
+      expect(context.state.get('form')).toEqual({ tags: ['blue'] });
+    });
+  });
+
+  it('通用 props 作用于根节点（独立渲染）', () => {
+    const { container } = renderDsl({
+      type: 'Checkbox',
+      props: { options: [{ label: 'A', value: 'a' }], ...COMMON_PROPS },
+    });
+    expectCommonProps(container.querySelector('[data-slot=checkbox-group]'));
+  });
+
+  it('direction=horizontal 时选项横向排列', () => {
+    const { container } = renderDsl({
+      type: 'Checkbox',
+      props: {
+        direction: 'horizontal',
+        options: [
+          { label: 'A', value: 'a' },
+          { label: 'B', value: 'b' },
+        ],
+      },
+    });
+    const group = container.querySelector('[data-slot=checkbox-group]');
+    expect(group?.className).toContain('flex');
+    expect(group?.className).toContain('flex-wrap');
+  });
+
+  it('cards 变体：选中行各自高亮，勾选指示随选中态切换', async () => {
+    const user = userEvent.setup();
+    const { container, context } = renderDsl({
+      type: 'Checkbox',
+      props: {
+        variant: 'cards',
+        value: '${state.modules}',
+        options: [
+          { label: '基础报表', value: 'basic', description: '只读' },
+          { label: '高级分析', value: 'pro', description: '含导出' },
+        ],
+      },
+      events: {
+        onChange: { action: 'setState', params: { modules: '${event}' } },
+      },
+    });
+
+    expect(
+      container.querySelector('[data-slot=checkbox-group][data-variant=cards]'),
+    ).not.toBeNull();
+    expect(screen.getByText('含导出')).toBeTruthy();
+
+    await user.click(screen.getByText('高级分析'));
+    await expectEventState(context, 'modules', ['pro']);
+    // 选中行带高亮，勾选指示随选中态切换
+    const checkedRow = container.querySelector(
+      '[data-slot=checkbox-group-card][data-checked]',
+    );
+    expect(checkedRow?.textContent).toContain('高级分析');
+
+    await user.click(screen.getByText('基础报表'));
+    await expectEventState(context, 'modules', ['pro', 'basic']);
+    expect(
+      container.querySelectorAll('[data-slot=checkbox-group-card][data-checked]').length,
+    ).toBe(2);
+  });
+
+  it('disabled 选项不可勾选', async () => {
+    const user = userEvent.setup();
+    const { context } = renderDsl({
+      type: 'Checkbox',
+      props: {
+        options: [
+          { label: '可选', value: 'y' },
+          { label: '锁定', value: 'n', disabled: true },
+        ],
+      },
+      events: {
+        onChange: { action: 'setState', params: { picked: '${event}' } },
+      },
+    });
+
+    await user.click(screen.getByRole('checkbox', { name: '锁定' }));
+    await new Promise((resolve) => setTimeout(resolve, 20));
+    expect(context.state.get('picked')).toBeUndefined();
+  });
 });
 
 describe('Slider', () => {

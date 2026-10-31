@@ -4411,6 +4411,26 @@
   overflow-x: auto;
   overflow-y: hidden;
 }
+.pactor-markdown-editor {
+  --pactor-markdown-fg: var(--foreground, light-dark(#1f2328, #e6edf3));
+  --pactor-markdown-border: var(--border, light-dark(#d1d9e0, #3d444d));
+  --pactor-markdown-radius: var(--radius, 6px);
+  border: 1px solid var(--pactor-markdown-border);
+  border-radius: var(--pactor-markdown-radius);
+  color: var(--pactor-markdown-fg);
+  overflow: hidden;
+}
+.pactor-markdown-editor:focus-within {
+  border-color: var(--primary, light-dark(#0969da, #4493f8));
+}
+.pactor-markdown-editor .pactor-markdown-editor-toolbar {
+  border-bottom: 1px solid var(--pactor-markdown-border);
+}
+.pactor-markdown-editor .pactor-markdown-editor-content {
+  padding: 8px 12px;
+  min-height: 8em;
+  outline: none;
+}
 :root {
   color-scheme: light;
   --radius: 0.625rem;

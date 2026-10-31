@@ -47,6 +47,8 @@ export const zhCN = {
   'pactor.login.passwordRequired': '请输入密码',
   'pactor.login.submit': '登 录',
   'pactor.cardList.total': '共 {{count}} 个',
+  'pactor.formCardList.item': '第 {{index}} 项',
+  'pactor.formCardList.add': '添加一项',
   'pactor.select.placeholder': '请选择',
   'pactor.pagination.total': '共 {{count}} 条',
   'pactor.pagination.pageSize': '每页 {{size}} 条',
