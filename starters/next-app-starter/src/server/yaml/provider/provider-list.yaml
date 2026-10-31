@@ -63,7 +63,7 @@ body:
                   props:
                     value: ${state.keyword}
                     placeholder: 搜索供应商、ID、端点或能力
-                    className: border-0 bg-transparent px-0 shadow-none focus-visible:ring-0
+                    controlClassName: border-0 bg-transparent px-0 shadow-none focus-visible:ring-0
                     style:
                       flex: 1
                   events:
