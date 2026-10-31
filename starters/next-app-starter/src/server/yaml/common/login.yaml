@@ -17,6 +17,10 @@ page:
 i18n:
   namespaces: [ app ]
 
+state:
+  # 内联错误提示开关：失败分支置 true，重新提交 / 成功复位
+  loginFailed: false
+
 body:
   type: Login
   props:
@@ -29,8 +33,13 @@ body:
     title: $i18n{page.login.title:登录}
     subtitle: "{{DEMO_ACCOUNT_HINT}}"
     submitText: $i18n{page.login.submit:登 录}
+    errorMessage: $i18n{page.login.error:用户名或密码错误}
+    errorVisible: ${state.loginFailed}
   events:
     onSubmit:
+      - action: setState
+        params:
+          loginFailed: false
       - id: loginResult
         action: request
         params:
@@ -39,14 +48,10 @@ body:
           body:
             username: ${event.username}
             password: ${event.password}
-      - action: if
+      - action: setState
+        condition: ${actions.loginResult == null || actions.loginResult.token == null}
         params:
-          condition: ${actions.loginResult == null || actions.loginResult.token == null}
-          then:
-            - action: message
-              params:
-                messageType: error
-                text: $i18n{page.login.error:用户名或密码错误}
+          loginFailed: true
       - action: if
         params:
           condition: ${actions.loginResult != null && actions.loginResult.token != null}

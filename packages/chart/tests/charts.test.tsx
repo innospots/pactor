@@ -105,7 +105,14 @@ describe('EChartBase 生命周期（mock echarts）', () => {
 
   it('自定义 height / className / style 透传根节点', () => {
     const { container } = render(
-      <ColumnChart data={[]} height="50%" className="biz-probe" style={{ opacity: 0.5 }} />,
+      <ColumnChart
+        data={[{ m: '一月', v: 1 }]}
+        xKey="m"
+        yKeys={['v']}
+        height="50%"
+        className="biz-probe"
+        style={{ opacity: 0.5 }}
+      />,
     );
     const host = container.querySelector('[data-slot=column-chart]') as HTMLElement;
     expect(host.style.height).toBe('50%');
@@ -122,11 +129,33 @@ describe('EChartBase 生命周期（mock echarts）', () => {
 
   it('初始化失败降级为占位提示', () => {
     fake.setThrowOnInit(true);
-    const { container } = render(<LineChart data={[]} />);
+    const { container } = render(
+      <LineChart data={[{ m: '一月', v: 1 }]} xKey="m" yKeys={['v']} />,
+    );
     expect(container.querySelector('[data-slot=chart-fallback]')!.textContent).toContain(
       '当前环境不支持图表渲染',
     );
     expect(fake.instances).toHaveLength(0);
+  });
+
+  it('空数据渲染同高空态占位，不初始化 echarts', () => {
+    const { container } = render(<LineChart data={[]} height={320} />);
+    const empty = container.querySelector('[data-slot=chart-empty]') as HTMLElement;
+    expect(empty).not.toBeNull();
+    expect(empty.style.height).toBe('320px');
+    expect(empty.textContent).toContain('暂无数据');
+    expect(container.querySelector('[data-slot=line-chart]')).toBeNull();
+    expect(fake.instances).toHaveLength(0);
+  });
+
+  it('空数据 → 有数据：切换为图表并初始化实例', () => {
+    const { container, rerender } = render(<LineChart data={[]} xKey="m" yKeys={['v']} />);
+    expect(container.querySelector('[data-slot=chart-empty]')).not.toBeNull();
+    rerender(<LineChart data={[{ m: '一月', v: 1 }]} xKey="m" yKeys={['v']} />);
+    expect(container.querySelector('[data-slot=chart-empty]')).toBeNull();
+    expect(container.querySelector('[data-slot=line-chart]')).not.toBeNull();
+    expect(fake.instances).toHaveLength(1);
+    expect(fake.instances[0]!.setOption).toHaveBeenCalled();
   });
 });
 
@@ -246,7 +275,8 @@ describe('DSL 集成（注册表渲染 + 事件）', () => {
 
 /** 最近一轮 setOption 的 option 载荷 */
 function lastOption(instance: (typeof fake.instances)[number]) {
-  return instance.setOption.mock.calls.at(-1)![0] as { color?: string[] };
+  const calls = instance.setOption.mock.calls;
+  return calls[calls.length - 1]![0] as { color?: string[] };
 }
 
 describe('皮肤切换跟随（useChartTheme）', () => {

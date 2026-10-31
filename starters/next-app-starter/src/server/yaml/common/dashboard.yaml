@@ -49,6 +49,7 @@ body:
             gap: middle
           children:
             - type: Text
+              when: ${data.dashboard.realtime}
               props:
                 text:
                   $i18n:
@@ -134,6 +135,7 @@ body:
                     params:
                       dataSource: dashboard
     - type: Typography
+      when: ${data.dashboard.stats}
       props:
         variant: h4
         text:
@@ -144,6 +146,7 @@ body:
               end: ${state.range.end}
             fallback: 核心概览 · {{start}} — {{end}}
     - type: Row
+      when: ${data.dashboard.stats}
       props:
         gutter:
           - 16
@@ -302,6 +305,7 @@ body:
                           cost: ${data.dashboard.stats.avgCost}
                         fallback: 平均每次 {{cost}}
     - type: Card
+      when: ${data.dashboard.trend}
       props:
         title: $i18n{dashboard.trend.title:趋势分析}
       children:
@@ -340,6 +344,7 @@ body:
             style:
               height: 320
     - type: Row
+      when: ${data.dashboard.models}
       props:
         gutter:
           - 16
@@ -584,3 +589,23 @@ body:
                         params:
                           messageType: info
                           text: $i18n{dashboard.toast.clients:跳转客户端用量}
+    # 空态分支：数据服务未接入（/api/d/* 返回 {}）或所选范围无数据时，
+    # 数据区（核心概览 / 趋势 / 用量构成）整体隐藏，展示设计过的空态与重试入口
+    - type: Card
+      when: ${!data.dashboard.stats}
+      children:
+        - type: Empty
+          props:
+            title: $i18n{dashboard.empty.title:暂无看板数据}
+            description: $i18n{dashboard.empty.description:当前时间范围内没有数据，或数据服务尚未接入}
+          children:
+            - type: Button
+              props:
+                text: $i18n{dashboard.refresh:↻ 刷新}
+                variant: default
+                size: small
+              events:
+                onClick:
+                  - action: reload
+                    params:
+                      dataSource: dashboard

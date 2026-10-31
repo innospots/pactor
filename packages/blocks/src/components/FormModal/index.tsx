@@ -1,5 +1,5 @@
-import { useI18n } from '@pactor-app/runtime';
-import { useState, type CSSProperties, type ReactNode } from 'react';
+import { useI18n, useRenderer } from '@pactor-app/runtime';
+import { useEffect, useRef, useState, type CSSProperties, type ReactNode } from 'react';
 
 import { Button } from '@pactor-app/ui/ui';
 import {
@@ -27,7 +27,12 @@ export interface FormModalProps {
   formName?: string;
   /** 表单布局，默认 vertical */
   layout?: 'horizontal' | 'vertical' | 'inline';
-  /** 表单初始值（创建时生效；字段级 value 优先于 initialValues[name]） */
+  /**
+   * 表单初始值（编辑场景传入当前记录，如 `${state.editing}`）：
+   * 每次打开弹层时生效（关闭后表单卸载，重开以最新 initialValues 重建）；
+   * 弹层开启期间 initialValues 变化（如记录异步加载完成）会同步写入已挂载表单。
+   * 字段级 value 优先于 initialValues[name]。
+   */
   initialValues?: Record<string, unknown>;
   /** 取消按钮文字（缺省 i18n pactor.formModal.cancel） */
   cancelText?: string;
@@ -56,6 +61,8 @@ export interface FormModalProps {
  * open 受控（绑 ${state.x}，事件里 setState 关闭）；缺省经 defaultOpen
  * 内部自管理，此时取消 / 校验通过的提交会自动关闭。
  * 提交按钮走 Form type=submit 统一校验，通过后 onSubmit 传出 values（${event}）。
+ * 编辑场景：initialValues 传当前记录（${state.editing}）——每次打开以最新值
+ * 重建表单，开启期间值变化（异步加载完成）也会同步写入。
  * 内部复用 ui Form（依赖 Renderer 上下文），与 Login 同约定。
  */
 export function FormModal({
@@ -76,9 +83,37 @@ export function FormModal({
   style,
 }: FormModalProps) {
   const { t } = useI18n();
+  const { context } = useRenderer();
   const [innerOpen, setInnerOpen] = useState(defaultOpen);
   const controlled = open !== undefined;
   const visible = controlled ? open : innerOpen;
+  const resolvedFormName = formName ?? 'default';
+
+  // 编辑场景同步：弹层关闭时表单随 Dialog 内容卸载，重开以最新 initialValues
+  // 重建；开启期间 initialValues 变化（如编辑记录异步加载完成）则深比较后写入
+  // 已挂载表单。基线在打开瞬间记录，避免把挂载初始值再写一遍（覆盖字段级
+  // value 优先级）。
+  const serializedInitial = initialValues
+    ? JSON.stringify(initialValues)
+    : undefined;
+  const syncRef = useRef<{ opened: boolean; serialized: string | undefined }>({
+    opened: false,
+    serialized: undefined,
+  });
+  useEffect(() => {
+    if (!visible) {
+      syncRef.current = { opened: false, serialized: undefined };
+      return;
+    }
+    if (!syncRef.current.opened) {
+      syncRef.current = { opened: true, serialized: serializedInitial };
+      return;
+    }
+    if (serializedInitial && serializedInitial !== syncRef.current.serialized) {
+      syncRef.current.serialized = serializedInitial;
+      context.forms.get(resolvedFormName)?.setValues(initialValues ?? {});
+    }
+  }, [visible, serializedInitial, context, resolvedFormName, initialValues]);
 
   const close = () => {
     if (!controlled) setInnerOpen(false);

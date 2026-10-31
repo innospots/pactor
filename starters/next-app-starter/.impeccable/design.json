@@ -1,0 +1,459 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-10-31T14:07:23.971Z",
+  "title": "Design System: Pactor Next App Starter",
+  "extensions": {
+    "colorMeta": {
+      "harbor-slate": {
+        "role": "primary",
+        "displayName": "Harbor Slate 雾港蓝灰",
+        "canonical": "oklch(51.6% 0.043 244)",
+        "tonalRamp": [
+          "oklch(15% 0.021 244)",
+          "oklch(25% 0.034 244)",
+          "oklch(35% 0.043 244)",
+          "oklch(45% 0.043 244)",
+          "oklch(55% 0.043 244)",
+          "oklch(65% 0.038 244)",
+          "oklch(78% 0.030 244)",
+          "oklch(90% 0.019 244)"
+        ]
+      },
+      "harbor-slate-ink": {
+        "role": "neutral",
+        "displayName": "Harbor Slate Ink",
+        "canonical": "oklch(98.5% 0.003 248)",
+        "tonalRamp": [
+          "oklch(15% 0.002 248)",
+          "oklch(25% 0.002 248)",
+          "oklch(35% 0.002 248)",
+          "oklch(45% 0.002 248)",
+          "oklch(55% 0.002 248)",
+          "oklch(65% 0.002 248)",
+          "oklch(78% 0.002 248)",
+          "oklch(90% 0.002 248)"
+        ]
+      },
+      "cool-paper": {
+        "role": "neutral",
+        "displayName": "Cool Paper 冷纸灰",
+        "canonical": "oklch(97.2% 0.003 248)",
+        "tonalRamp": [
+          "oklch(15% 0.002 248)",
+          "oklch(25% 0.003 248)",
+          "oklch(35% 0.003 248)",
+          "oklch(45% 0.003 248)",
+          "oklch(55% 0.003 248)",
+          "oklch(65% 0.003 248)",
+          "oklch(78% 0.002 248)",
+          "oklch(90% 0.002 248)"
+        ]
+      },
+      "card-white": {
+        "role": "neutral",
+        "displayName": "Card White 卡片白",
+        "canonical": "oklch(100% 0 0)",
+        "tonalRamp": [
+          "oklch(100% 0 0)",
+          "oklch(100% 0 0)",
+          "oklch(100% 0 0)",
+          "oklch(100% 0 0)",
+          "oklch(100% 0 0)",
+          "oklch(100% 0 0)",
+          "oklch(100% 0 0)",
+          "oklch(100% 0 0)"
+        ]
+      },
+      "ink-charcoal": {
+        "role": "neutral",
+        "displayName": "Ink Charcoal 炭墨",
+        "canonical": "oklch(28.6% 0.018 252)",
+        "tonalRamp": [
+          "oklch(15% 0.009 252)",
+          "oklch(25% 0.014 252)",
+          "oklch(35% 0.018 252)",
+          "oklch(45% 0.018 252)",
+          "oklch(55% 0.018 252)",
+          "oklch(65% 0.016 252)",
+          "oklch(78% 0.012 252)",
+          "oklch(90% 0.008 252)"
+        ]
+      },
+      "ash-secondary": {
+        "role": "neutral",
+        "displayName": "Ash Secondary 灰岩",
+        "canonical": "oklch(94.4% 0.007 248)",
+        "tonalRamp": [
+          "oklch(15% 0.003 248)",
+          "oklch(25% 0.006 248)",
+          "oklch(35% 0.007 248)",
+          "oklch(45% 0.007 248)",
+          "oklch(55% 0.007 248)",
+          "oklch(65% 0.006 248)",
+          "oklch(78% 0.005 248)",
+          "oklch(90% 0.003 248)"
+        ]
+      },
+      "ash-secondary-ink": {
+        "role": "neutral",
+        "displayName": "Ash Secondary Ink",
+        "canonical": "oklch(36.5% 0.027 246)",
+        "tonalRamp": [
+          "oklch(15% 0.013 246)",
+          "oklch(25% 0.022 246)",
+          "oklch(35% 0.027 246)",
+          "oklch(45% 0.027 246)",
+          "oklch(55% 0.027 246)",
+          "oklch(65% 0.024 246)",
+          "oklch(78% 0.019 246)",
+          "oklch(90% 0.012 246)"
+        ]
+      },
+      "mist-muted": {
+        "role": "neutral",
+        "displayName": "Mist Muted 雾灰",
+        "canonical": "oklch(95.4% 0.005 248)",
+        "tonalRamp": [
+          "oklch(15% 0.003 248)",
+          "oklch(25% 0.004 248)",
+          "oklch(35% 0.005 248)",
+          "oklch(45% 0.005 248)",
+          "oklch(55% 0.005 248)",
+          "oklch(65% 0.005 248)",
+          "oklch(78% 0.004 248)",
+          "oklch(90% 0.002 248)"
+        ]
+      },
+      "mist-muted-ink": {
+        "role": "neutral",
+        "displayName": "Mist Muted Ink",
+        "canonical": "oklch(54.6% 0.024 248)",
+        "tonalRamp": [
+          "oklch(15% 0.012 248)",
+          "oklch(25% 0.019 248)",
+          "oklch(35% 0.024 248)",
+          "oklch(45% 0.024 248)",
+          "oklch(55% 0.024 248)",
+          "oklch(65% 0.021 248)",
+          "oklch(78% 0.017 248)",
+          "oklch(90% 0.011 248)"
+        ]
+      },
+      "frost-accent": {
+        "role": "neutral",
+        "displayName": "Frost Accent 霜蓝",
+        "canonical": "oklch(93.4% 0.010 248)",
+        "tonalRamp": [
+          "oklch(15% 0.005 248)",
+          "oklch(25% 0.008 248)",
+          "oklch(35% 0.010 248)",
+          "oklch(45% 0.010 248)",
+          "oklch(55% 0.010 248)",
+          "oklch(65% 0.009 248)",
+          "oklch(78% 0.007 248)",
+          "oklch(90% 0.005 248)"
+        ]
+      },
+      "frost-accent-ink": {
+        "role": "neutral",
+        "displayName": "Frost Accent Ink",
+        "canonical": "oklch(39.2% 0.040 245)",
+        "tonalRamp": [
+          "oklch(15% 0.020 245)",
+          "oklch(25% 0.032 245)",
+          "oklch(35% 0.040 245)",
+          "oklch(45% 0.040 245)",
+          "oklch(55% 0.040 245)",
+          "oklch(65% 0.036 245)",
+          "oklch(78% 0.028 245)",
+          "oklch(90% 0.018 245)"
+        ]
+      },
+      "signal-red": {
+        "role": "semantic",
+        "displayName": "Signal Red 信号红",
+        "canonical": "oklch(56.8% 0.128 22)",
+        "tonalRamp": [
+          "oklch(15% 0.064 22)",
+          "oklch(25% 0.102 22)",
+          "oklch(35% 0.128 22)",
+          "oklch(45% 0.128 22)",
+          "oklch(55% 0.128 22)",
+          "oklch(65% 0.115 22)",
+          "oklch(78% 0.089 22)",
+          "oklch(90% 0.057 22)"
+        ]
+      },
+      "signal-green": {
+        "role": "semantic",
+        "displayName": "Signal Green 苔藓绿",
+        "canonical": "oklch(54.7% 0.060 163)",
+        "tonalRamp": [
+          "oklch(15% 0.030 163)",
+          "oklch(25% 0.048 163)",
+          "oklch(35% 0.060 163)",
+          "oklch(45% 0.060 163)",
+          "oklch(55% 0.060 163)",
+          "oklch(65% 0.054 163)",
+          "oklch(78% 0.042 163)",
+          "oklch(90% 0.027 163)"
+        ]
+      },
+      "signal-amber": {
+        "role": "semantic",
+        "displayName": "Signal Amber 琥珀",
+        "canonical": "oklch(56.9% 0.097 72)",
+        "tonalRamp": [
+          "oklch(15% 0.048 72)",
+          "oklch(25% 0.077 72)",
+          "oklch(35% 0.097 72)",
+          "oklch(45% 0.097 72)",
+          "oklch(55% 0.097 72)",
+          "oklch(65% 0.087 72)",
+          "oklch(78% 0.068 72)",
+          "oklch(90% 0.044 72)"
+        ]
+      },
+      "signal-blue": {
+        "role": "semantic",
+        "displayName": "Signal Blue 信息蓝",
+        "canonical": "oklch(55.2% 0.052 244)",
+        "tonalRamp": [
+          "oklch(15% 0.026 244)",
+          "oklch(25% 0.042 244)",
+          "oklch(35% 0.052 244)",
+          "oklch(45% 0.052 244)",
+          "oklch(55% 0.052 244)",
+          "oklch(65% 0.047 244)",
+          "oklch(78% 0.037 244)",
+          "oklch(90% 0.024 244)"
+        ]
+      },
+      "hairline-border": {
+        "role": "neutral",
+        "displayName": "Hairline Border 发丝边",
+        "canonical": "oklch(89.5% 0.010 248)",
+        "tonalRamp": [
+          "oklch(15% 0.005 248)",
+          "oklch(25% 0.008 248)",
+          "oklch(35% 0.010 248)",
+          "oklch(45% 0.010 248)",
+          "oklch(55% 0.010 248)",
+          "oklch(65% 0.009 248)",
+          "oklch(78% 0.007 248)",
+          "oklch(90% 0.005 248)"
+        ]
+      },
+      "input-line": {
+        "role": "neutral",
+        "displayName": "Input Line",
+        "canonical": "oklch(85.3% 0.015 245)",
+        "tonalRamp": [
+          "oklch(15% 0.007 245)",
+          "oklch(25% 0.012 245)",
+          "oklch(35% 0.015 245)",
+          "oklch(45% 0.015 245)",
+          "oklch(55% 0.015 245)",
+          "oklch(65% 0.013 245)",
+          "oklch(78% 0.010 245)",
+          "oklch(90% 0.007 245)"
+        ]
+      },
+      "focus-ring": {
+        "role": "primary",
+        "displayName": "Focus Ring",
+        "canonical": "oklch(61.0% 0.037 244)",
+        "tonalRamp": [
+          "oklch(15% 0.018 244)",
+          "oklch(25% 0.029 244)",
+          "oklch(35% 0.037 244)",
+          "oklch(45% 0.037 244)",
+          "oklch(55% 0.037 244)",
+          "oklch(65% 0.033 244)",
+          "oklch(78% 0.026 244)",
+          "oklch(90% 0.016 244)"
+        ]
+      }
+    },
+    "typographyMeta": {
+      "display": {
+        "displayName": "Display",
+        "purpose": "仅营销级大标题（Typography h1），管理台页面几乎不用。"
+      },
+      "headline": {
+        "displayName": "Headline",
+        "purpose": "页面主标题（Typography h3 约定的页面层级），如「仪表盘」。"
+      },
+      "title": {
+        "displayName": "Title",
+        "purpose": "卡片标题、弹层标题（h4）。"
+      },
+      "body": {
+        "displayName": "Body",
+        "purpose": "界面正文工作字号（14px）；长段落 Typography p 为 16px/leading-7。"
+      },
+      "label": {
+        "displayName": "Label",
+        "purpose": "徽标、表单项标签、小字元信息（12px/500）。"
+      }
+    },
+    "shadows": [
+      {
+        "name": "card-rest",
+        "value": "0 4px 16px rgb(36 43 51 / 6%)",
+        "purpose": "卡片静息态的极轻环境影（--card-shadow），把卡片从冷灰底色里「揭」起来。"
+      },
+      {
+        "name": "hover-lift",
+        "value": "0 8px 24px color-mix(in srgb, var(--foreground) 12%, transparent)",
+        "purpose": "可点击卡片 hover 的浮起回应，同时描边加深到 20% 前景色。"
+      },
+      {
+        "name": "overlay-dim",
+        "value": "rgb(15 23 32 / 48%)",
+        "purpose": "弹层遮罩（--overlay-background），冷调深灰蓝而非纯黑。"
+      }
+    ],
+    "motion": [
+      {
+        "name": "ease-standard",
+        "value": "0.2s ease",
+        "purpose": "卡片 hover 阴影/描边、操作按钮淡入等状态过渡的统一时长与缓动。"
+      }
+    ],
+    "breakpoints": [
+      {
+        "name": "md",
+        "value": "768px"
+      },
+      {
+        "name": "lg",
+        "value": "1024px"
+      },
+      {
+        "name": "xl",
+        "value": "1280px"
+      }
+    ]
+  },
+  "components": [
+    {
+      "name": "Primary Button",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "主动作按钮，一个视图只许一个；Harbor Slate 底 + 近白文字。",
+      "html": "<button class=\"ds-btn-primary\">保存</button>",
+      "css": ".ds-btn-primary{display:inline-flex;align-items:center;justify-content:center;gap:6px;height:36px;padding:8px 16px;border:none;border-radius:8px;background:var(--primary,#536b7f);color:var(--primary-foreground,#f8fafc);font-family:var(--font-sans);font-size:14px;font-weight:500;line-height:1;cursor:pointer;transition:background-color .2s ease}.ds-btn-primary:hover{background:color-mix(in srgb,var(--primary,#536b7f) 88%,black)}.ds-btn-primary:focus-visible{outline:2px solid var(--ring,#718698);outline-offset:2px}"
+    },
+    {
+      "name": "Outline Button",
+      "kind": "button",
+      "refersTo": "button-outline",
+      "description": "次要动作：白底 hairline 描边，与主按钮并列出现。",
+      "html": "<button class=\"ds-btn-outline\">取消</button>",
+      "css": ".ds-btn-outline{display:inline-flex;align-items:center;justify-content:center;gap:6px;height:36px;padding:8px 16px;border:1px solid var(--border,#d7dde3);border-radius:8px;background:var(--card,#fff);color:var(--card-foreground,#242b33);font-family:var(--font-sans);font-size:14px;font-weight:500;line-height:1;cursor:pointer;transition:background-color .2s ease,border-color .2s ease}.ds-btn-outline:hover{background:var(--accent,#e4eaf0);color:var(--accent-foreground,#33485a)}.ds-btn-outline:focus-visible{outline:2px solid var(--ring,#718698);outline-offset:2px}"
+    },
+    {
+      "name": "Input",
+      "kind": "input",
+      "refersTo": "input-default",
+      "description": "白底单行输入：Input Line 描边、8px 圆角、36px 高，焦点环 Focus Ring。",
+      "html": "<input class=\"ds-input\" type=\"text\" placeholder=\"请输入用户名\" />",
+      "css": ".ds-input{height:36px;width:240px;padding:6px 12px;border:1px solid var(--input,#c7d0d8);border-radius:8px;background:var(--input-background,var(--card,#fff));color:var(--card-foreground,#242b33);font-family:var(--font-sans);font-size:14px;line-height:1.4;transition:border-color .2s ease,box-shadow .2s ease}.ds-input::placeholder{color:var(--muted-foreground,#66727e)}.ds-input:hover{border-color:var(--ring,#718698)}.ds-input:focus-visible{outline:none;border-color:var(--ring,#718698);box-shadow:0 0 0 3px color-mix(in srgb,var(--ring,#718698) 25%,transparent)}"
+    },
+    {
+      "name": "Status Badge",
+      "kind": "chip",
+      "refersTo": "badge-status",
+      "description": "启停状态徽标：颜色 + 圆点 + 文字三通道，图为「启用」态。",
+      "html": "<span class=\"ds-badge-enabled\">● 启用</span>",
+      "css": ".ds-badge-enabled{display:inline-flex;align-items:center;gap:4px;width:fit-content;padding:2px 8px;border:1px solid transparent;border-radius:6px;background:color-mix(in srgb,#22c55e 15%,transparent);border-color:color-mix(in srgb,#22c55e 45%,transparent);color:#16a34a;font-family:var(--font-sans);font-size:12px;font-weight:500;white-space:nowrap}"
+    },
+    {
+      "name": "Data Card",
+      "kind": "card",
+      "refersTo": "card-surface",
+      "description": "可点击数据卡（Provider/Model）：静息扁平，hover 描边加深 + 浮起，右上角操作组 hover 淡入。",
+      "html": "<div class=\"ds-card\"><div class=\"ds-card-head\"><span class=\"ds-card-title\">volcengine</span><span class=\"ds-card-actions\"><button class=\"ds-icon-btn\" aria-label=\"编辑\">✎</button></span></div><p class=\"ds-card-desc\">火山引擎方舟，豆包系列模型提供方</p><div class=\"ds-card-foot\"><span class=\"ds-badge-enabled\">● 启用</span></div></div>",
+      "css": ".ds-card{position:relative;display:flex;flex-direction:column;gap:12px;width:280px;padding:16px;border:1px solid var(--border,#d7dde3);border-radius:10px;background:var(--card,#fff);color:var(--card-foreground,#242b33);box-shadow:0 4px 16px rgb(36 43 51 / 6%);cursor:pointer;transition:box-shadow .2s ease,border-color .2s ease}.ds-card:hover{border-color:color-mix(in srgb,var(--foreground,#242b33) 20%,transparent);box-shadow:0 8px 24px color-mix(in srgb,var(--foreground,#242b33) 12%,transparent)}.ds-card-head{display:flex;align-items:center;justify-content:space-between}.ds-card-title{font-size:14px;font-weight:600}.ds-card-actions{opacity:0;pointer-events:none;transition:opacity .2s ease}.ds-card:hover .ds-card-actions{opacity:1;pointer-events:auto}.ds-icon-btn{border:none;background:transparent;color:var(--muted-foreground,#66727e);cursor:pointer;font-size:14px;padding:2px 6px;border-radius:6px}.ds-icon-btn:hover{background:var(--accent,#e4eaf0)}.ds-card-desc{margin:0;font-size:12px;color:var(--muted-foreground,#66727e);line-height:1.5}.ds-card-foot{margin-top:auto}.ds-badge-enabled{display:inline-flex;align-items:center;gap:4px;width:fit-content;padding:2px 8px;border-radius:6px;background:color-mix(in srgb,#22c55e 15%,transparent);color:#16a34a;font-size:12px;font-weight:500}"
+    },
+    {
+      "name": "Statistic Card",
+      "kind": "card",
+      "refersTo": "card-surface",
+      "description": "核心概览指标牌：标题 12px 灰字、数值大字、右上角图标弱化，标题与数值间 6px 节奏。",
+      "html": "<div class=\"ds-stat\"><div class=\"ds-stat-head\"><span class=\"ds-stat-label\">总请求数</span><svg class=\"ds-stat-icon\" width=\"16\" height=\"16\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><polyline points=\"22 7 13.5 15.5 8.5 10.5 2 17\"/><polyline points=\"16 7 22 7 22 13\"/></svg></div><span class=\"ds-stat-value\">128,402</span><span class=\"ds-stat-sub\">较昨日 +12.4%</span></div>",
+      "css": ".ds-stat{display:flex;flex-direction:column;gap:6px;width:220px;height:100%;padding:16px;border:1px solid var(--border,#d7dde3);border-radius:10px;background:var(--card,#fff);color:var(--card-foreground,#242b33);box-shadow:0 4px 16px rgb(36 43 51 / 6%);font-family:var(--font-sans)}.ds-stat-head{display:flex;align-items:center;justify-content:space-between}.ds-stat-label{font-size:12px;font-weight:500;color:var(--muted-foreground,#66727e)}.ds-stat-icon{color:var(--muted-foreground,#66727e);opacity:.65}.ds-stat-value{font-size:24px;font-weight:600;letter-spacing:-0.025em}.ds-stat-sub{font-size:12px;color:var(--muted-foreground,#66727e)}"
+    },
+    {
+      "name": "Sidebar Menu Item",
+      "kind": "nav",
+      "refersTo": "button-outline",
+      "description": "侧栏菜单项：圆角 8px，hover/active 同为 Frost Accent 底 + 深族文字，active 以字重区分。",
+      "html": "<nav class=\"ds-nav\"><a class=\"ds-nav-item\" href=\"#\"><svg width=\"16\" height=\"16\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><rect x=\"3\" y=\"3\" width=\"7\" height=\"7\"/><rect x=\"14\" y=\"3\" width=\"7\" height=\"7\"/><rect x=\"14\" y=\"14\" width=\"7\" height=\"7\"/><rect x=\"3\" y=\"14\" width=\"7\" height=\"7\"/></svg>仪表盘</a><a class=\"ds-nav-item ds-nav-item--active\" href=\"#\"><svg width=\"16\" height=\"16\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2\"/><circle cx=\"9\" cy=\"7\" r=\"4\"/><path d=\"M22 21v-2a4 4 0 0 0-3-3.87\"/><path d=\"M16 3.13a4 4 0 0 1 0 7.75\"/></svg>用户管理</a></nav>",
+      "css": ".ds-nav{display:flex;flex-direction:column;gap:2px;width:256px;padding:8px;background:var(--sidebar,var(--card,#fff));font-family:var(--font-sans)}.ds-nav-item{display:flex;align-items:center;gap:8px;padding:8px 12px;border-radius:8px;font-size:14px;font-weight:400;color:var(--sidebar-foreground,#242b33);text-decoration:none;transition:background-color .2s ease,color .2s ease}.ds-nav-item:hover{background:var(--sidebar-accent,var(--accent,#e4eaf0));color:var(--sidebar-accent-foreground,#33485a)}.ds-nav-item--active{background:var(--sidebar-accent,var(--accent,#e4eaf0));color:var(--sidebar-accent-foreground,#33485a);font-weight:600}"
+    },
+    {
+      "name": "Theme Switcher Trigger",
+      "kind": "custom",
+      "refersTo": "button-outline",
+      "description": "Header 右侧皮肤入口：色点 + 名称 + 下拉箭头；旁邻明暗切换图标按钮。",
+      "html": "<button class=\"ds-skin-trigger\"><span class=\"ds-skin-dot\"></span>中性<svg width=\"14\" height=\"14\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><polyline points=\"6 9 12 15 18 9\"/></svg></button>",
+      "css": ".ds-skin-trigger{display:inline-flex;align-items:center;gap:6px;padding:6px 8px;border:none;border-radius:6px;background:transparent;color:var(--muted-foreground,#66727e);font-family:var(--font-sans);font-size:14px;cursor:pointer;transition:background-color .2s ease,color .2s ease}.ds-skin-trigger:hover{background:color-mix(in srgb,var(--accent,#e4eaf0) 50%,transparent);color:var(--foreground,#242b33)}.ds-skin-trigger:focus-visible{outline:2px solid var(--ring,#718698);outline-offset:2px}.ds-skin-dot{width:12px;height:12px;border-radius:9999px;border:1px solid rgb(0 0 0 / 10%);background:#536b7f}"
+    }
+  ],
+  "narrative": {
+    "northStar": "The Quiet Console（安静控制台）",
+    "overview": "这是一套为长时间工作设计的管理台视觉系统：冷灰纸面底色（#f4f6f8）托出纯白卡片，唯一的彩色声音是低饱和的雾港蓝灰主色（#536b7f），像港口清晨的天光，专业但不冷漠。系统的设计语言全部服从 Operate 场景：扫读效率、状态可辨、动作可达，表达欲只出现在 hover 浮起、状态徽标这类精确的细节里。全部视觉决策走三层令牌架构：pactor ui 基线提供语义令牌与 preflight，public/skins/<skin>.css 是唯一令牌权威，项目级 globals.css 只承担皮肤无关的外壳规则。页面由 DSL 下发渲染，因此「美观」的护栏不在页面层，而在令牌与组件约定里。",
+    "keyCharacteristics": [
+      "低饱和蓝灰单主色，冷灰中性底色，无高彩度装饰",
+      "默认扁平，阴影仅作为交互状态的回应（hover 浮起、弹层遮罩）",
+      "10px 圆角基调，统一的 12/16px 间隙节奏",
+      "外壳固定（Header + 侧栏），仅内容区滚动",
+      "卡片操作按钮 hover / 聚焦才显现，静止时界面保持安静"
+    ],
+    "rules": [
+      {
+        "name": "The One Voice Rule",
+        "body": "任一屏内主色（Harbor Slate）占用不超过 10% 的表面。它是界面里唯一的大嗓门，稀有性就是它的意义；状态色各就各位，不与主色抢话。",
+        "section": "colors"
+      },
+      {
+        "name": "The Skin Authority Rule",
+        "body": "颜色只许来自语义令牌。组件与 DSL 里出现硬编码 hex 即违规；换肤靠替换 skins/*.css，令牌表之外不存在第二事实源。",
+        "section": "colors"
+      },
+      {
+        "name": "The Two-Weight Rule",
+        "body": "常规界面只用 400 与 600 两个字重，500 留给 label 级小字，800 留给 display。层级靠字号与灰度，不靠字重堆叠。",
+        "section": "typography"
+      },
+      {
+        "name": "The Content-Scrolls Rule",
+        "body": "视口内只允许内容区滚动。新增外壳级区域必须并入固定骨架，不得引入第二个纵向滚动容器。",
+        "section": "layout"
+      },
+      {
+        "name": "The Flat-By-Default Rule",
+        "body": "表面静止时扁平；阴影只允许作为状态的回应出现（hover、弹层、拖拽）。给静止元素加「装饰性投影」即违规。",
+        "section": "elevation"
+      }
+    ],
+    "dos": [
+      "Do 一切颜色走语义令牌（var(--primary) / var(--card) / var(--muted-foreground)…），包括 DSL 内联 style 与自定义组件。",
+      "Do 新皮肤以 public/skins/<name>.css 完整复制令牌表（明暗双段），并在 skin.ts 的 SKINS 注册色点与名称。",
+      "Do 暗色适配只改令牌表（[data-pactor-theme=dark] 段），组件不写暗色分支；必须写时用 color-mix 派生。",
+      "Do 保持「静止安静、hover 回应」：卡片操作按钮 hover 显现、投影只在交互态出现。",
+      "Do 页面遵守页头文法：主标题 h3 + 灰副标题 baseline 对齐 + 右侧操作区，区块间隔 16px。",
+      "Do 状态表达用三通道（颜色 + 圆点/图标 + 文字），暗色主题下提亮文字色（如 #4ade80）。"
+    ],
+    "donts": [
+      "Don't 在组件、DSL style 或页面 CSS 里硬编码 hex；skins/*.css 之外不存在颜色事实源。",
+      "Don't 给静止表面加装饰性投影，或用投影代替描边做分区；层次靠明度差与 hairline。",
+      "Don't 嵌套卡片；卡片网格里同尺寸卡片重复超过一屏时，改用列表或表格。",
+      "Don't 引入字重堆叠（同一视图出现三种以上字重）或加载 Web 字体；系统栈是有意的选择。",
+      "Don't 用纯色 #000 / #fff：最深的文字是 Ink Charcoal（#242b33），最亮的表面是 Card White（#ffffff），遮罩用冷调深灰蓝。",
+      "Don't 破坏外壳骨架：禁止在内容区之外新增滚动容器，禁止页面级 fixed 元素覆盖 Header。"
+    ]
+  }
+}

@@ -75,6 +75,7 @@ body:
                         params:
                           dataSource: providers
             - type: Text
+              when: ${data.providers.total}
               props:
                 text: 显示 ${data.providers.items.length} / ${data.providers.total}
                 type: secondary

@@ -1,4 +1,6 @@
 dashboard.coreOverview: 核心概览 · {{start}} — {{end}}
+dashboard.empty.title: 暂无看板数据
+dashboard.empty.description: 当前时间范围内没有数据，或数据服务尚未接入
 dashboard.link.allClients: 查看全部 → 客户端用量
 dashboard.link.allModels: 查看全部 → 模型用量
 dashboard.link.reliability: 查看可靠性分析 →
@@ -56,7 +58,7 @@ page.home.text1: 首页
 page.home.text2: 首页
 page.home.text3: 欢迎回来，{{name}}！
 page.home.text4: 本页与外壳布局均由 sitemap 对象下发（design/dynamic-page.md）；菜单随角色裁剪。
-page.home.text5: 查看月报（需 report:view）
+page.home.text5: 查看月报
 page.home.title: 首页
 page.login.brandTitle: 管理后台登录
 page.login.error: 用户名或密码错误

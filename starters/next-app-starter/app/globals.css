@@ -69,14 +69,15 @@ body {
   box-shadow: 0 8px 24px color-mix(in srgb, var(--foreground) 12%, transparent);
 }
 
-/* 操作按钮组（右上角）：仅 hover 卡片时显示 */
+/* 操作按钮组（右上角）：hover 卡片或焦点进入（键盘 Tab / 触屏）时显示 */
 .provider-card-actions {
   opacity: 0;
   pointer-events: none;
   transition: opacity 0.2s ease;
 }
 
-.provider-card:hover .provider-card-actions {
+.provider-card:hover .provider-card-actions,
+.provider-card:focus-within .provider-card-actions {
   opacity: 1;
   pointer-events: auto;
 }
@@ -106,14 +107,15 @@ body {
   box-shadow: 0 8px 24px color-mix(in srgb, var(--foreground) 12%, transparent);
 }
 
-/* 操作按钮组（右上角）：仅 hover 卡片时显示 */
+/* 操作按钮组（右上角）：hover 卡片或焦点进入（键盘 Tab / 触屏）时显示 */
 .model-card-actions {
   opacity: 0;
   pointer-events: none;
   transition: opacity 0.2s ease;
 }
 
-.model-card:hover .model-card-actions {
+.model-card:hover .model-card-actions,
+.model-card:focus-within .model-card-actions {
   opacity: 1;
   pointer-events: auto;
 }
@@ -130,15 +132,26 @@ body {
   margin-top: auto;
 }
 
-/* ── 启用状态徽标：绿色底纹（Badge 的 className 叠加，暗色主题提亮文字）── */
+/* ── 启用状态徽标：success 令牌派生底纹（Skin Authority：色值只出自令牌表）── */
 .badge-enabled {
-  background-color: color-mix(in srgb, #22c55e 15%, transparent);
-  border-color: color-mix(in srgb, #22c55e 45%, transparent);
-  color: #16a34a;
+  background-color: color-mix(in srgb, var(--success) 15%, transparent);
+  border-color: color-mix(in srgb, var(--success) 45%, transparent);
+  color: var(--success);
 }
 
 [data-pactor-theme="dark"] .badge-enabled {
-  color: #4ade80;
+  color: color-mix(in srgb, var(--success) 70%, white);
+}
+
+/* ── 已过期徽标：warning 令牌派生底纹（暗色主题文字向白提亮）── */
+.badge-expired {
+  background-color: color-mix(in srgb, var(--warning) 15%, transparent);
+  border-color: color-mix(in srgb, var(--warning) 45%, transparent);
+  color: var(--warning);
+}
+
+[data-pactor-theme="dark"] .badge-expired {
+  color: color-mix(in srgb, var(--warning) 70%, white);
 }
 
 /* Statistic：标题与数值之间统一 6px 节奏 */
