@@ -1384,6 +1384,9 @@
   :where(.divide-input > :not(:last-child)) {
     border-color: var(--input);
   }
+  .self-center {
+    align-self: center;
+  }
   .self-end {
     align-self: flex-end;
   }

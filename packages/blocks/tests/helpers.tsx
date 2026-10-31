@@ -5,6 +5,7 @@ import type { DslNode } from '@pactor-app/core';
 import {
   createRuntimeContext,
   DslRenderer,
+  I18nContextProvider,
   registerBuiltinActions,
   type CreateRuntimeContextOptions,
   type RuntimeContext,
@@ -30,7 +31,13 @@ export function renderDsl(
   registerBlockComponents(components);
   const context = createRuntimeContext({ ...options, components });
   registerBuiltinActions(context.actions);
-  const result = render(<DslRenderer context={context} node={node} />);
+  // 与 app shell 一致：DslRenderer 外包裹 I18nContextProvider（locale 选项随
+  // context.i18n 生效，内置 pactor.* 文案按 locale 回退）
+  const result = render(
+    <I18nContextProvider value={context.i18n}>
+      <DslRenderer context={context} node={node} />
+    </I18nContextProvider>,
+  );
   return { context, ...result };
 }
 

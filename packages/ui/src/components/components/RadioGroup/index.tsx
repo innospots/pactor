@@ -1,8 +1,10 @@
+import type { DslNode } from '@pactor-app/core';
 import { useEffect, useId, useLayoutEffect, useRef, useState } from 'react';
-import type { CSSProperties } from 'react';
+import type { CSSProperties, ReactNode } from 'react';
 
 import { cn } from '../../../lib/utils.js';
 import { RadioGroup as ShadcnRadioGroup, RadioGroupItem } from '../../../ui/radio-group.js';
+import { DslSlot } from '../../dsl-slot.js';
 import { useFormContext } from '../Form/context.js';
 import { FieldShell } from '../Form/form-item.js';
 import type { FieldRule } from '../Input/index.js';
@@ -13,6 +15,13 @@ export interface RadioGroupOption {
   value: string | number | boolean;
   /** 选项次级说明文案（cards 变体渲染在 label 下方） */
   description?: string;
+  /** 行右端占位内容（cards 变体）：ReactNode 或 DSL 节点（如图标 / 标签 / 操作按钮） */
+  trailing?: DslNode | ReactNode;
+  /**
+   * cards 变体：整卡可点开关（默认 true）。false 时该行不可点击选中
+   * （外观不变，区别于 disabled 的半透明置灰），行内 trailing 仍可交互。
+   */
+  clickable?: boolean;
   /** 单个选项禁用 */
   disabled?: boolean;
 }
@@ -33,6 +42,8 @@ export interface RadioGroupProps {
   direction?: 'horizontal' | 'vertical';
   /** 外观变体，默认 default */
   variant?: RadioGroupVariant;
+  /** cards 变体行边框，默认 true（false 隐藏边框） */
+  bordered?: boolean;
   /** 受控值（独立渲染时生效）；Form 内作为字段初始值（优先于 Form initialValues） */
   value?: string | number | boolean;
   disabled?: boolean;
@@ -60,6 +71,7 @@ function RadioCards({
   groupValue,
   groupName,
   disabled,
+  bordered = true,
   onSelect,
   className,
   style,
@@ -68,6 +80,7 @@ function RadioCards({
   groupValue: RadioGroupOption['value'];
   groupName: string;
   disabled?: boolean;
+  bordered?: boolean;
   onSelect: (value: RadioGroupOption['value']) => void;
   className?: string;
   style?: CSSProperties;
@@ -123,14 +136,21 @@ function RadioCards({
       {options.map((option) => {
         const checked = option.value === groupValue;
         const optionDisabled = disabled === true || option.disabled === true;
+        // clickable=false：功能上不可点选但外观不变（区别于 disabled 置灰）
+        const clickable = !optionDisabled && option.clickable !== false;
         return (
           <label
             key={String(option.value)}
             data-slot="radio-group-card"
             data-checked={checked || undefined}
             className={cn(
-              'relative flex items-start gap-3 rounded-md px-3 py-2.5',
-              optionDisabled ? 'cursor-not-allowed opacity-50' : 'cursor-pointer',
+              'relative flex items-start gap-3 rounded-md px-3 py-2.5 transition-colors duration-200 ease-out motion-reduce:transition-none',
+              bordered && (checked ? 'border border-primary' : 'border border-border'),
+              optionDisabled
+                ? 'cursor-not-allowed opacity-50'
+                : clickable
+                  ? 'cursor-pointer'
+                  : 'cursor-default',
             )}
           >
             <input
@@ -139,7 +159,7 @@ function RadioCards({
               name={groupName}
               value={String(option.value)}
               checked={checked}
-              disabled={optionDisabled}
+              disabled={!clickable}
               onChange={() => onSelect(option.value)}
             />
             <span
@@ -156,12 +176,23 @@ function RadioCards({
                 )}
               />
             </span>
-            <span className="flex min-w-0 flex-col gap-0.5">
+            <span className="flex min-w-0 flex-1 flex-col gap-0.5">
               <span className="text-sm leading-tight font-medium">{option.label}</span>
               {option.description ? (
                 <span className="text-xs text-muted-foreground">{option.description}</span>
               ) : null}
             </span>
+            {option.trailing != null ? (
+              // 占位区为中立区域：阻止 label 的隐式激活，避免与 trailing
+              // 内控件（如按钮）交互时误触选中切换
+              <span
+                data-slot="radio-group-card-trailing"
+                className="ml-auto shrink-0 self-center"
+                onClick={(event) => event.preventDefault()}
+              >
+                <DslSlot content={option.trailing} />
+              </span>
+            ) : null}
           </label>
         );
       })}
@@ -183,6 +214,7 @@ export function RadioGroup({
   options = [],
   direction = 'vertical',
   variant = 'default',
+  bordered,
   value,
   disabled,
   onChange,
@@ -221,6 +253,7 @@ export function RadioGroup({
         groupValue={groupValue}
         groupName={inForm && name ? name : controlId}
         disabled={disabled}
+        bordered={bordered}
         onSelect={handleChange}
         className={!inForm ? className : undefined}
         style={inForm ? undefined : style}

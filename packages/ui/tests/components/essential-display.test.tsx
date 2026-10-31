@@ -5,6 +5,7 @@
  * props 映射、受控/非受控、Form 集成（Segmented）与通用 props。
  */
 import { fireEvent, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { describe, expect, it, vi } from 'vitest';
 
 import { createComponentRegistry } from '../../src/components/index.js';
@@ -70,6 +71,135 @@ describe('List', () => {
       props: { items: [{ title: 'a' }], ...COMMON_PROPS },
     });
     expectCommonProps(container.querySelector('[data-slot=list]'));
+  });
+});
+
+describe('CardList', () => {
+  it('渲染卡片列表项：title / description / extra / 占位文本 avatar', () => {
+    const { container } = renderDsl({
+      type: 'CardList',
+      props: {
+        items: [
+          { key: '1', title: '张三', description: '前端工程师', avatar: '张', extra: '在线' },
+          { key: '2', title: '李四', description: '产品经理' },
+        ],
+      },
+    });
+
+    const cards = container.querySelectorAll('[data-slot=card-list-item]');
+    expect(cards.length).toBe(2);
+    // 卡片形态：边框 + 圆角 + 卡片底色
+    expect(cards[0]!.className).toContain('border');
+    expect(cards[0]!.className).toContain('rounded-lg');
+    expect(cards[0]!.className).toContain('bg-card');
+    expect(screen.getByText('张三')).toBeTruthy();
+    expect(screen.getByText('前端工程师')).toBeTruthy();
+    expect(screen.getByText('在线')).toBeTruthy();
+    expect(screen.getByText('张').getAttribute('data-slot')).toBe('card-list-item-avatar');
+  });
+
+  it('卡片间距默认 12px，gap 可自定义', () => {
+    const { container, unmount } = renderDsl({
+      type: 'CardList',
+      props: { items: [{ title: 'a' }, { title: 'b' }] },
+    });
+    expect((container.querySelector('[data-slot=card-list]') as HTMLElement).style.gap).toBe('12px');
+    unmount();
+
+    const { container: c2 } = renderDsl({
+      type: 'CardList',
+      props: { items: [{ title: 'a' }], gap: 24 },
+    });
+    expect((c2.querySelector('[data-slot=card-list]') as HTMLElement).style.gap).toBe('24px');
+  });
+
+  it('空 items 渲染空态文案', () => {
+    renderDsl({ type: 'CardList', props: { items: [] } });
+    expect(screen.getByText('暂无数据')).toBeTruthy();
+  });
+
+  it('通用 props 作用于根节点', () => {
+    const { container } = renderDsl({
+      type: 'CardList',
+      props: { items: [{ title: 'a' }], ...COMMON_PROPS },
+    });
+    expectCommonProps(container.querySelector('[data-slot=card-list]'));
+  });
+
+  it('selectable 单选：点击选中高亮并传出 key 数组，再点已选中项取消', async () => {
+    const user = userEvent.setup();
+    const { container, context } = renderDsl({
+      type: 'CardList',
+      props: {
+        selectable: true,
+        value: '${state.selected}',
+        items: [
+          { key: 'a', title: '方案 A' },
+          { key: 'b', title: '方案 B' },
+        ],
+      },
+      events: {
+        onChange: { action: 'setState', params: { selected: '${event}' } },
+      },
+    });
+
+    await user.click(screen.getByText('方案 A'));
+    await expectEventState(context, 'selected', ['a']);
+    const selectedRow = container.querySelector('[data-slot=card-list-item][data-selected]');
+    expect(selectedRow?.textContent).toContain('方案 A');
+    expect(selectedRow!.className).toContain('border-primary');
+
+    // 单选语义：点另一项替换；再点已选中项取消
+    await user.click(screen.getByText('方案 B'));
+    await expectEventState(context, 'selected', ['b']);
+    await user.click(screen.getByText('方案 B'));
+    await expectEventState(context, 'selected', []);
+  });
+
+  it('selectable 多选（multiple）：toggle 累加选中', async () => {
+    const user = userEvent.setup();
+    const { context } = renderDsl({
+      type: 'CardList',
+      props: {
+        selectable: true,
+        multiple: true,
+        value: '${state.selected}',
+        items: [
+          { key: 'a', title: '方案 A' },
+          { key: 'b', title: '方案 B' },
+        ],
+      },
+      events: {
+        onChange: { action: 'setState', params: { selected: '${event}' } },
+      },
+    });
+
+    await user.click(screen.getByText('方案 A'));
+    await user.click(screen.getByText('方案 B'));
+    await expectEventState(context, 'selected', ['a', 'b']);
+  });
+
+  it('项 content：description 下方渲染 DSL 节点', () => {
+    const { container } = renderDsl({
+      type: 'CardList',
+      props: {
+        items: [
+          {
+            key: '1',
+            title: '月度运营报告',
+            description: '已发布',
+            content: { type: 'Badge', props: { text: '月报' } },
+          },
+        ],
+      },
+    });
+
+    const slot = container.querySelector('[data-slot=card-list-item-content]');
+    expect(slot).not.toBeNull();
+    expect(slot!.textContent).toContain('月报');
+    // content 位于 description 之后
+    const desc = container.querySelector('[data-slot=card-list-item-description]')!;
+    expect(desc.compareDocumentPosition(slot!) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
   });
 });
 

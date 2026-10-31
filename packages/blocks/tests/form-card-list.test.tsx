@@ -321,4 +321,88 @@ describe('FormCardList DSL', () => {
     );
     expect(screen.getByText('自定义 张三')).toBeTruthy();
   });
+
+  it('itemForm 模式：Grid 复杂布局 + name 表单项（label 生效），编辑自动同步列表项', async () => {
+    const user = userEvent.setup();
+    const { container, context } = renderDsl(
+      {
+        type: 'FormCardList',
+        props: {
+          value: '${state.items}',
+          itemLabel: '成员 {index}',
+          itemForm: true,
+        },
+        children: [
+          {
+            type: 'Grid',
+            props: { columns: 2, gap: 12 },
+            children: [
+              {
+                type: 'Input',
+                props: { name: 'name', label: '姓名', value: '${row.name}' },
+              },
+              {
+                type: 'Select',
+                props: {
+                  name: 'role',
+                  label: '角色',
+                  value: '${row.role}',
+                  options: [
+                    { label: '管理员', value: 'admin' },
+                    { label: '成员', value: 'member' },
+                  ],
+                },
+              },
+            ],
+          },
+        ],
+        events: {
+          onChange: { action: 'setState', params: { items: '${event}' } },
+        },
+      },
+      { state: { items: [{ name: '张三', role: 'admin' }, { name: '李四', role: 'member' }] } },
+    );
+
+    // 复杂布局：每项一个两列 Grid，表单项 label 生效
+    const grids = container.querySelectorAll('[data-slot=grid][data-columns="2"]');
+    expect(grids.length).toBe(2);
+    expect(screen.getAllByText('姓名')).toHaveLength(2);
+    expect(screen.getAllByText('角色')).toHaveLength(2);
+    expect(screen.getByDisplayValue('张三')).toBeTruthy();
+
+    // 声明 name 的字段编辑：经 Form onValuesChange 自动合并回列表项（无需 updateItem）
+    const input = screen.getByDisplayValue('李四');
+    await user.clear(input);
+    await user.type(input, '王五');
+    await expectEventState(context, 'items', [
+      { name: '张三', role: 'admin' },
+      { name: '王五', role: 'member' },
+    ]);
+  });
+
+  it('itemForm 模式：每项 Form 名唯一（同页多个列表不冲突）', () => {
+    renderDsl(
+      {
+        type: 'Flex',
+        props: { direction: 'vertical' },
+        children: [
+          {
+            type: 'FormCardList',
+            props: { value: '${state.a}', itemForm: true },
+            children: [{ type: 'Input', props: { name: 'x', label: 'X' } }],
+          },
+          {
+            type: 'FormCardList',
+            props: { value: '${state.b}', itemForm: true },
+            children: [{ type: 'Input', props: { name: 'y', label: 'Y' } }],
+          },
+        ],
+      },
+      { state: { a: [{}], b: [{}] } },
+    );
+
+    // 两个列表各渲染一个表单项，重名注册未抛错
+    expect(screen.getByText('X')).toBeTruthy();
+    expect(screen.getByText('Y')).toBeTruthy();
+  });
 });
