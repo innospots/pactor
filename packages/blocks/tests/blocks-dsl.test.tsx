@@ -16,6 +16,7 @@ const BUSINESS_TYPES = [
   'EntityCard',
   'CardList',
   'FieldCondition',
+  'FormCardList',
   'ExpressionEditor',
   'RuleConfig',
   'RuleExpression',

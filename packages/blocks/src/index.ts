@@ -14,6 +14,7 @@ import { CardList } from './components/CardList/index.js';
 import { RecordingPage } from './components/RecordingPage/index.js';
 import { SiteFooter } from './components/SiteFooter/index.js';
 import { FieldCondition } from './components/FieldCondition/index.js';
+import { FormCardList } from './components/FormCardList/index.js';
 import { ExpressionEditor } from './components/ExpressionEditor/index.js';
 import { RuleConfig } from './components/RuleConfig/index.js';
 import { RuleExpression } from './components/RuleExpression/index.js';
@@ -84,6 +85,14 @@ export type {
   FieldConditionProps,
   FieldConditionValue,
 } from './components/FieldCondition/index.js';
+export { FormCardList } from './components/FormCardList/index.js';
+export type {
+  FormCardListField,
+  FormCardListFieldType,
+  FormCardListItem,
+  FormCardListItemScope,
+  FormCardListProps,
+} from './components/FormCardList/index.js';
 export { ExpressionEditor } from './components/ExpressionEditor/index.js';
 export type {
   ExpressionEditorProps,
@@ -124,6 +133,9 @@ export const blockComponents = {
   RecordingPage,
   SiteFooter,
   FieldCondition,
+  // 列表项模板（原始 DSL children）由 FormCardList 逐项渲染并注入
+  // { row, rowIndex, updateItem } 作用域（与 For 的 withScope 约定一致）
+  FormCardList: { component: FormCardList, withScope: true },
   ExpressionEditor,
   RuleConfig,
   RuleExpression,
