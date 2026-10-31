@@ -127,7 +127,7 @@ describe('EntityCard 业务组件', () => {
   });
 });
 
-describe('CardList 业务组件', () => {
+describe('EntityCardList 业务组件', () => {
   const items = [
     { ...item, id: 1 },
     { ...item, id: 2, title: '数据同步', tags: [{ text: '未安装' }] },
@@ -135,10 +135,10 @@ describe('CardList 业务组件', () => {
 
   it('网格渲染数据卡 + 计数；columns/gap 生效', () => {
     const { container } = renderDsl({
-      type: 'CardList',
+      type: 'EntityCardList',
       props: { items, columns: 2, gap: 8, showCount: true },
     });
-    const grid = container.querySelector('[data-slot=card-list-grid]') as HTMLElement;
+    const grid = container.querySelector('[data-slot=entity-card-list-grid]') as HTMLElement;
     expect(grid.style.gridTemplateColumns).toBe('repeat(2, minmax(0, 1fr))');
     expect(grid.style.gap).toBe('8px');
     expect(container.querySelectorAll('[data-slot=entity-card]').length).toBe(2);
@@ -147,13 +147,13 @@ describe('CardList 业务组件', () => {
 
   it('createText 渲染首格虚线新建占位卡并触发 onCreateClick', async () => {
     const { container, context } = renderDsl({
-      type: 'CardList',
+      type: 'EntityCardList',
       props: { items, createText: '新建插件' },
       events: {
         onCreateClick: { action: 'setState', params: { create: true } },
       },
     });
-    const grid = container.querySelector('[data-slot=card-list-grid]')!;
+    const grid = container.querySelector('[data-slot=entity-card-list-grid]')!;
     const createCard = grid.firstElementChild as HTMLElement;
     expect(createCard.className).toContain('border-dashed');
     fireEvent.click(screen.getByText('新建插件'));
@@ -161,13 +161,13 @@ describe('CardList 业务组件', () => {
   });
 
   it('空数据展示 Empty', () => {
-    renderDsl({ type: 'CardList', props: { items: [] } });
+    renderDsl({ type: 'EntityCardList', props: { items: [] } });
     expect(screen.getByText('暂无数据')).toBeTruthy();
   });
 
   it('onItemClick / onItemAction 事件参数携带 item 与 index', async () => {
     const { context } = renderDsl({
-      type: 'CardList',
+      type: 'EntityCardList',
       props: { items, hoverable: true },
       events: {
         onItemClick: { action: 'setState', params: { picked: '${event}' } },
@@ -198,7 +198,7 @@ describe('CardList 业务组件', () => {
       },
     ];
     const { container, context } = renderDsl({
-      type: 'CardList',
+      type: 'EntityCardList',
       props: { items: expandingItems },
       events: {
         onItemExpandingAction: { action: 'setState', params: { acted: '${event}' } },

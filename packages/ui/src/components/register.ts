@@ -68,6 +68,7 @@ import { Kbd } from './components/Kbd/index.js';
 import { Label } from './components/Label/index.js';
 import { Layout } from './components/Layout/index.js';
 import { Link } from './components/Link/index.js';
+import { CardList } from './components/CardList/index.js';
 import { List } from './components/List/index.js';
 import { LoadingOverlay } from './components/LoadingOverlay/index.js';
 import { Markdown } from './components/Markdown/index.js';
@@ -236,6 +237,8 @@ export const builtinComponents = {
   Transfer,
   Mentions,
   List,
+  // List 的卡片形态：每项一张 Card，项间 gap 分隔（默认 12px）
+  CardList,
   Tree,
   Descriptions,
   Timeline,

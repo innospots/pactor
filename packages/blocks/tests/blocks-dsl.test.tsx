@@ -14,9 +14,10 @@ import { renderDsl } from './helpers.js';
 const BUSINESS_TYPES = [
   'Login',
   'EntityCard',
-  'CardList',
+  'EntityCardList',
   'FieldCondition',
   'FormCardList',
+  'FormModal',
   'ExpressionEditor',
   'RuleConfig',
   'RuleExpression',

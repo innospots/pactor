@@ -1,0 +1,477 @@
+- generic [active] [ref=e1]:
+  - banner [ref=e2]:
+    - link "Pactor" [ref=e3] [cursor=pointer]:
+      - /url: /styles/overview
+      - img [ref=e5]
+      - generic [ref=e9]: Pactor
+    - navigation [ref=e10]:
+      - link "文档" [ref=e11] [cursor=pointer]:
+        - /url: /docs
+      - link "资产库" [ref=e12] [cursor=pointer]:
+        - /url: /styles/overview
+      - generic [ref=e13]:
+        - text: 主题生成器
+        - generic [ref=e14]: 待设计
+      - generic [ref=e15]:
+        - text: 案例
+        - generic [ref=e16]: 待设计
+    - generic [ref=e17]:
+      - button "搜索（即将上线）" [ref=e18] [cursor=pointer]:
+        - generic [ref=e19]: ⌕
+        - generic [ref=e20]: 搜索组件、主题、模板、素材…
+        - generic [ref=e21]: ⌘K
+      - button "切换深浅色模式" [ref=e22] [cursor=pointer]:
+        - img [ref=e23]
+      - generic "构建版本 dev · 57c178e" [ref=e25]: build dev
+  - generic [ref=e26]:
+    - complementary [ref=e27]:
+      - generic [ref=e29]:
+        - textbox "搜索当前分类菜单" [ref=e30]:
+          - /placeholder: 搜索菜单…
+        - tablist [ref=e32]:
+          - tab "样式" [ref=e33] [cursor=pointer]:
+            - img
+          - tab "组件" [selected] [ref=e34] [cursor=pointer]:
+            - img
+            - generic [ref=e35]: 组件
+          - tab "主题" [ref=e36] [cursor=pointer]:
+            - img
+          - tab "模板" [ref=e37] [cursor=pointer]:
+            - img
+          - tab "素材" [ref=e38] [cursor=pointer]:
+            - img
+      - generic [ref=e39]:
+        - generic [ref=e40]: 组件目录
+        - generic [ref=e41]: "144"
+      - generic [ref=e42]:
+        - group [ref=e43]:
+          - generic "通用 18" [ref=e44] [cursor=pointer]:
+            - generic [ref=e45]:
+              - img [ref=e46]
+              - text: 通用
+            - generic [ref=e50]:
+              - generic [ref=e51]: "18"
+              - img [ref=e52]
+        - group [ref=e54]:
+          - generic "布局 11" [ref=e55] [cursor=pointer]:
+            - generic [ref=e56]:
+              - img [ref=e57]
+              - text: 布局
+            - generic [ref=e59]:
+              - generic [ref=e60]: "11"
+              - img [ref=e61]
+        - group [ref=e63]:
+          - generic "导航 11" [ref=e64] [cursor=pointer]:
+            - generic [ref=e65]:
+              - img [ref=e66]
+              - text: 导航
+            - generic [ref=e67]:
+              - generic [ref=e68]: "11"
+              - img [ref=e69]
+        - group [ref=e71]:
+          - generic "数据录入 19" [ref=e72] [cursor=pointer]:
+            - generic [ref=e73]:
+              - img [ref=e74]
+              - text: 数据录入
+            - generic [ref=e77]:
+              - generic [ref=e78]: "19"
+              - img [ref=e79]
+        - group [ref=e81]:
+          - generic "数据展示 14" [ref=e82] [cursor=pointer]:
+            - generic [ref=e83]:
+              - img [ref=e84]
+              - text: 数据展示
+            - generic [ref=e86]:
+              - generic [ref=e87]: "14"
+              - img [ref=e88]
+        - group [ref=e90]:
+          - generic "反馈 14" [ref=e91] [cursor=pointer]:
+            - generic [ref=e92]:
+              - img [ref=e93]
+              - text: 反馈
+            - generic [ref=e96]:
+              - generic [ref=e97]: "14"
+              - img [ref=e98]
+        - group [ref=e100]:
+          - generic "图表 17" [ref=e101] [cursor=pointer]:
+            - generic [ref=e102]:
+              - img [ref=e103]
+              - text: 图表
+            - generic [ref=e105]:
+              - generic [ref=e106]: "17"
+              - img [ref=e107]
+        - group [ref=e109]:
+          - generic "媒体与内容 12" [ref=e110] [cursor=pointer]:
+            - generic [ref=e111]:
+              - img [ref=e112]
+              - text: 媒体与内容
+            - generic [ref=e116]:
+              - generic [ref=e117]: "12"
+              - img [ref=e118]
+        - group [ref=e120]:
+          - generic "AI 与会话 15" [ref=e121] [cursor=pointer]:
+            - generic [ref=e122]:
+              - img [ref=e123]
+              - text: AI 与会话
+            - generic [ref=e131]:
+              - generic [ref=e132]: "15"
+              - img [ref=e133]
+        - group [ref=e135]:
+          - generic "区块组件 13" [ref=e136] [cursor=pointer]:
+            - generic [ref=e137]:
+              - img [ref=e138]
+              - text: 区块组件
+            - generic [ref=e141]:
+              - generic [ref=e142]: "13"
+              - img [ref=e143]
+          - generic [ref=e145]:
+            - link "HeroSection" [ref=e146] [cursor=pointer]:
+              - /url: /components/blocks/hero-section
+            - group [ref=e147]:
+              - generic "Login" [ref=e148] [cursor=pointer]:
+                - generic [ref=e149]: Login
+                - img [ref=e151]
+            - group [ref=e153]:
+              - generic "EntityCard 2" [ref=e154] [cursor=pointer]:
+                - generic [ref=e155]: EntityCard
+                - generic [ref=e156]:
+                  - generic [ref=e157]: "2"
+                  - img [ref=e158]
+            - link "RecordingPage" [ref=e160] [cursor=pointer]:
+              - /url: /components/blocks/recording-page
+            - group [ref=e161]:
+              - generic "ExpressionEditor 5" [ref=e162] [cursor=pointer]:
+                - generic [ref=e163]: ExpressionEditor
+                - generic [ref=e164]:
+                  - generic [ref=e165]: "5"
+                  - img [ref=e166]
+            - link "FormCardList" [ref=e168] [cursor=pointer]:
+              - /url: /components/blocks/form-card-list
+            - link "FormModal" [ref=e169] [cursor=pointer]:
+              - /url: /components/blocks/form-modal
+            - link "SiteFooter" [ref=e170] [cursor=pointer]:
+              - /url: /components/blocks/site-footer
+      - generic [ref=e171]: 条目数由构建期资产数据统计；标注「待接入」的板块内容尚未接入，页面仅展示框架与占位说明。
+    - main [ref=e172]:
+      - generic [ref=e173]:
+        - generic [ref=e174]:
+          - generic [ref=e175]:
+            - text: 资产库 /
+            - link "组件" [ref=e176] [cursor=pointer]:
+              - /url: /components/overview
+            - text: /
+            - link "区块组件" [ref=e177] [cursor=pointer]:
+              - /url: /components/blocks
+            - text: / FormModal
+          - group [ref=e179]:
+            - button "复制此页" [ref=e180] [cursor=pointer]
+            - button "更多页面操作" [ref=e181] [cursor=pointer]:
+              - img
+        - generic [ref=e183] [cursor=pointer]:
+          - heading "FormModal" [level=1] [ref=e184]
+          - generic [ref=e185]: 表单弹层：Dialog 内嵌 Form（children 即表单项），可自定义标题与取消/提交按钮文字及事件。中文惯用名：表单弹窗 / 表单对话框。
+          - generic [ref=e187]:
+            - generic [ref=e188]: 稳定
+            - generic [ref=e189]: 本期新增
+            - generic [ref=e190]: 已接入
+        - generic [ref=e191]:
+          - heading "预览与 DSL" [level=2] [ref=e192]
+          - generic [ref=e194]:
+            - generic [ref=e195]:
+              - tablist [ref=e196]:
+                - tab "预览" [selected] [ref=e197] [cursor=pointer]:
+                  - img
+                  - text: 预览
+                - tab "DSL 结构" [ref=e198] [cursor=pointer]:
+                  - img
+                  - text: DSL 结构
+                - tab "YAML 结构" [ref=e199] [cursor=pointer]:
+                  - img
+                  - text: YAML 结构
+              - button "展开预览" [ref=e200] [cursor=pointer]:
+                - img
+            - tabpanel "预览" [ref=e482]:
+              - generic [ref=e484]:
+                - button "新建成员" [ref=e485] [cursor=pointer]
+                - generic [ref=e486]: 提交结果：（未提交）
+        - generic [ref=e204]:
+          - heading "何时用" [level=2] [ref=e205]
+          - generic [ref=e206]:
+            - paragraph [ref=e207]:
+              - strong [ref=e208]: 何时使用
+            - list [ref=e209]:
+              - listitem [ref=e210]: 新建 / 编辑类表单需要弹层承载：列表页「新建」、行操作「编辑」等。
+              - listitem [ref=e211]: 表单项需要 label / required 校验（children 内 Input / Select 声明 name 即自动成为表单项）。
+            - paragraph [ref=e212]:
+              - strong [ref=e213]: 何时不用
+            - list [ref=e214]:
+              - listitem [ref=e215]: 纯展示 / 确认类弹层（无表单）：使用 Dialog / AlertDialog。
+              - listitem [ref=e216]: 整页复杂表单：使用 Form + 布局组件（弹层内避免过重内容）。
+        - generic [ref=e217]:
+          - heading "变体" [level=2] [ref=e218]
+          - table [ref=e220]:
+            - rowgroup [ref=e221]:
+              - row "变体 视觉形态 适用场景" [ref=e222]:
+                - columnheader "变体" [ref=e223]
+                - columnheader "视觉形态" [ref=e224]
+                - columnheader "适用场景" [ref=e225]
+            - rowgroup [ref=e226]:
+              - 'row "受控开关 open 绑 ${state.x}，事件 setState 关闭 由页面状态驱动（列表页新建 / 编辑入口）" [ref=e227]':
+                - cell "受控开关" [ref=e228]
+                - 'cell "open 绑 ${state.x}，事件 setState 关闭" [ref=e229]'
+                - cell "由页面状态驱动（列表页新建 / 编辑入口）" [ref=e230]
+              - row "非受控 defaultOpen 取消 / 提交成功自动关闭 简单演示或初始即打开的场景" [ref=e231]:
+                - cell "非受控 defaultOpen" [ref=e232]
+                - cell "取消 / 提交成功自动关闭" [ref=e233]
+                - cell "简单演示或初始即打开的场景" [ref=e234]
+              - row "自定义按钮文字 cancelText / submitText 「放弃 / 保存」「取消 / 创建」等业务措辞" [ref=e235]:
+                - cell "自定义按钮文字" [ref=e236]
+                - cell "cancelText / submitText" [ref=e237]
+                - cell "「放弃 / 保存」「取消 / 创建」等业务措辞" [ref=e238]
+              - 'row "表单布局 layout: vertical（默认）/ horizontal / inline 与页面密度对齐" [ref=e239]':
+                - cell "表单布局" [ref=e240]
+                - 'cell "layout: vertical（默认）/ horizontal / inline" [ref=e241]'
+                - cell "与页面密度对齐" [ref=e242]
+              - row "复杂布局 children 内 Grid / Row / Col 多列排布表单项 两列姓名、地址分组等宽表单" [ref=e243]:
+                - cell "复杂布局" [ref=e244]
+                - cell "children 内 Grid / Row / Col 多列排布表单项" [ref=e245]
+                - cell "两列姓名、地址分组等宽表单" [ref=e246]
+        - generic [ref=e247]:
+          - heading "API 属性" [level=2] [ref=e248]
+          - table [ref=e250]:
+            - rowgroup [ref=e251]:
+              - row "属性 类型 默认值 说明" [ref=e252]:
+                - columnheader "属性" [ref=e253]
+                - columnheader "类型" [ref=e254]
+                - columnheader "默认值" [ref=e255]
+                - columnheader "说明" [ref=e256]
+            - rowgroup [ref=e257]:
+              - 'row "open boolean — 受控开关（可绑 ${state.x}）；缺省走 defaultOpen 内部自管理" [ref=e258]':
+                - cell "open" [ref=e259]:
+                  - code [ref=e260]: open
+                - cell "boolean" [ref=e261]:
+                  - code [ref=e262]: boolean
+                - cell "—" [ref=e263]
+                - 'cell "受控开关（可绑 ${state.x}）；缺省走 defaultOpen 内部自管理" [ref=e264]'
+              - row "defaultOpen boolean false 非受控模式初始开关（open 缺省时生效）" [ref=e265]:
+                - cell "defaultOpen" [ref=e266]:
+                  - code [ref=e267]: defaultOpen
+                - cell "boolean" [ref=e268]:
+                  - code [ref=e269]: boolean
+                - cell "false" [ref=e270]
+                - cell "非受控模式初始开关（open 缺省时生效）" [ref=e271]
+              - row "title string — 弹层标题" [ref=e272]:
+                - cell "title" [ref=e273]:
+                  - code [ref=e274]: title
+                - cell "string" [ref=e275]:
+                  - code [ref=e276]: string
+                - cell "—" [ref=e277]
+                - cell "弹层标题" [ref=e278]
+              - row "description string — 标题下辅助说明" [ref=e279]:
+                - cell "description" [ref=e280]:
+                  - code [ref=e281]: description
+                - cell "string" [ref=e282]:
+                  - code [ref=e283]: string
+                - cell "—" [ref=e284]
+                - cell "标题下辅助说明" [ref=e285]
+              - row "children（DSL） DslNode[] — 表单元素：Input / Select 等声明 name 自动成为表单项（label / rules 生效）" [ref=e286]:
+                - cell "children（DSL）" [ref=e287]:
+                  - code [ref=e288]: children（DSL）
+                - cell "DslNode[]" [ref=e289]:
+                  - code [ref=e290]: DslNode[]
+                - cell "—" [ref=e291]
+                - cell "表单元素：Input / Select 等声明 name 自动成为表单项（label / rules 生效）" [ref=e292]
+              - row "cancelText string i18n 取消 取消按钮文字" [ref=e293]:
+                - cell "cancelText" [ref=e294]:
+                  - code [ref=e295]: cancelText
+                - cell "string" [ref=e296]:
+                  - code [ref=e297]: string
+                - cell "i18n 取消" [ref=e298]
+                - cell "取消按钮文字" [ref=e299]
+              - row "submitText string i18n 提交 提交按钮文字" [ref=e300]:
+                - cell "submitText" [ref=e301]:
+                  - code [ref=e302]: submitText
+                - cell "string" [ref=e303]:
+                  - code [ref=e304]: string
+                - cell "i18n 提交" [ref=e305]
+                - cell "提交按钮文字" [ref=e306]
+              - row "formName string 'default' 表单名：form.setValues / form.submit 联动动作按名寻址" [ref=e307]:
+                - cell "formName" [ref=e308]:
+                  - code [ref=e309]: formName
+                - cell "string" [ref=e310]:
+                  - code [ref=e311]: string
+                - cell "'default'" [ref=e312]
+                - cell "表单名：form.setValues / form.submit 联动动作按名寻址" [ref=e313]
+              - row "layout 'vertical' | 'horizontal' | 'inline' 'vertical' 表单布局" [ref=e314]:
+                - cell "layout" [ref=e315]:
+                  - code [ref=e316]: layout
+                - cell "'vertical' | 'horizontal' | 'inline'" [ref=e317]:
+                  - code [ref=e318]: "'vertical' | 'horizontal' | 'inline'"
+                - cell "'vertical'" [ref=e319]
+                - cell "表单布局" [ref=e320]
+              - row "initialValues Record<string, unknown> — 表单初始值（字段级 value 优先）" [ref=e321]:
+                - cell "initialValues" [ref=e322]:
+                  - code [ref=e323]: initialValues
+                - cell "Record<string, unknown>" [ref=e324]:
+                  - code [ref=e325]: Record<string, unknown>
+                - cell "—" [ref=e326]
+                - cell "表单初始值（字段级 value 优先）" [ref=e327]
+              - 'row "onSubmit (values) => void — 提交事件（校验通过后触发），${event} 为表单 values" [ref=e328]':
+                - cell "onSubmit" [ref=e329]:
+                  - code [ref=e330]: onSubmit
+                - cell "(values) => void" [ref=e331]:
+                  - code [ref=e332]: (values) => void
+                - cell "—" [ref=e333]
+                - 'cell "提交事件（校验通过后触发），${event} 为表单 values" [ref=e334]'
+              - row "onCancel () => void — 取消按钮点击；未绑定时回退触发 onClose" [ref=e335]:
+                - cell "onCancel" [ref=e336]:
+                  - code [ref=e337]: onCancel
+                - cell "() => void" [ref=e338]:
+                  - code [ref=e339]: () => void
+                - cell "—" [ref=e340]
+                - cell "取消按钮点击；未绑定时回退触发 onClose" [ref=e341]
+              - row "onClose () => void — X / 遮罩 / Escape 关闭时触发" [ref=e342]:
+                - cell "onClose" [ref=e343]:
+                  - code [ref=e344]: onClose
+                - cell "() => void" [ref=e345]:
+                  - code [ref=e346]: () => void
+                - cell "—" [ref=e347]
+                - cell "X / 遮罩 / Escape 关闭时触发" [ref=e348]
+        - generic [ref=e349]:
+          - heading "使用规范" [level=2] [ref=e350]
+          - generic [ref=e351]:
+            - list [ref=e352]:
+              - listitem [ref=e353]: "受控用法必须 open 绑 state（如 ${state.editing}）且在 onSubmit / onCancel / onClose 里 setState 关闭，否则弹层不会关。"
+              - listitem [ref=e354]: "提交按钮走 Form 统一校验：必填未过会展示错误并阻止 onSubmit；校验通过后 values 同时写入 ${form.<field>} 路径。"
+              - listitem [ref=e355]: 内部复用 ui Form（依赖 Renderer 上下文），纯 React 使用需自行提供 Renderer / I18n 上下文。
+              - listitem [ref=e356]: 编辑场景回填：initialValues 创建时生效，动态回填用 form.setValues 动作（formName 寻址）。
+              - listitem [ref=e357]: 复杂布局：children 可直接放 Grid / Row / Col（表单项在任意深度都会注册进内嵌 Form），Grid columns 控制列数。
+            - paragraph [ref=e358]:
+              - strong [ref=e359]: 正例
+            - list [ref=e360]:
+              - listitem [ref=e361]: "✓ 列表页「新建成员」：Button onClick setState editing=true → FormModal open=${state.editing}，onSubmit 里 setState 关闭并写入结果。"
+              - listitem [ref=e362]: ✓ 行操作「编辑」：open 前用 form.setValues 回填当前行，submitText「保存」。
+            - paragraph [ref=e363]:
+              - strong [ref=e364]: 反例
+            - list [ref=e365]:
+              - listitem [ref=e366]: ✕ 在弹层内塞整页复杂表单（弹层适合轻量新建 / 编辑，复杂表单走独立页面）。
+              - listitem [ref=e367]: ✕ 受控 open 却忘记在事件里 setState 关闭（取消 / 关闭按钮会“没反应”）。
+        - generic [ref=e368]:
+          - heading "Design Token 映射" [level=2] [ref=e369]
+          - generic [ref=e370]: 不适用：组件 tokenRefs 为空：样式 Token 数据尚未接入，三层映射（Primitive → Semantic → Component）待样式 Token 接入后回填。
+        - generic [ref=e371]:
+          - heading "关联资产" [level=2] [ref=e372]
+          - generic [ref=e373]:
+            - link "HeroSection 落地页 Hero 区块：公告条 + 大字标题 + 双 CTA + 媒体区 / 客户标记（三变体） 稳定" [ref=e374] [cursor=pointer]:
+              - /url: /components/blocks/hero-section
+              - generic [ref=e375]:
+                - generic [ref=e376]: HeroSection
+                - generic [ref=e377]: 落地页 Hero 区块：公告条 + 大字标题 + 双 CTA + 媒体区 / 客户标记（三变体）
+                - generic [ref=e380]: 稳定
+            - link "Login 登录整页：品牌区 + 认证表单 + 辅助入口 稳定" [ref=e381] [cursor=pointer]:
+              - /url: /components/blocks/login
+              - generic [ref=e382]:
+                - generic [ref=e383]: Login
+                - generic [ref=e384]: 登录整页：品牌区 + 认证表单 + 辅助入口
+                - generic [ref=e387]: 稳定
+            - link "EntityCard 三层结构实体摘要卡：图标/标题/标签、描述与操作按钮 稳定" [ref=e388] [cursor=pointer]:
+              - /url: /components/blocks/entity-card
+              - generic [ref=e389]:
+                - generic [ref=e390]: EntityCard
+                - generic [ref=e391]: 三层结构实体摘要卡：图标/标题/标签、描述与操作按钮
+                - generic [ref=e394]: 稳定
+            - link "CardList 网格展示实体摘要卡片，附带新建占位与结果计数 稳定" [ref=e395] [cursor=pointer]:
+              - /url: /components/blocks/card-list
+              - generic [ref=e396]:
+                - generic [ref=e397]: CardList
+                - generic [ref=e398]: 网格展示实体摘要卡片，附带新建占位与结果计数
+                - generic [ref=e401]: 稳定
+            - link "RecordingPage 录音 / 会议记录工作区：左侧记录列表 + 右侧转写、纪要、AI 解读、知识记忆与翻译详情 稳定" [ref=e402] [cursor=pointer]:
+              - /url: /components/blocks/recording-page
+              - generic [ref=e403]:
+                - generic [ref=e404]: RecordingPage
+                - generic [ref=e405]: 录音 / 会议记录工作区：左侧记录列表 + 右侧转写、纪要、AI 解读、知识记忆与翻译详情
+                - generic [ref=e408]: 稳定
+            - link "ExpressionEditor 按模板占位符结构化编辑表达式，支持表达式文本与控件值双向解析 稳定" [ref=e409] [cursor=pointer]:
+              - /url: /components/blocks/expression-editor
+              - generic [ref=e410]:
+                - generic [ref=e411]: ExpressionEditor
+                - generic [ref=e412]: 按模板占位符结构化编辑表达式，支持表达式文本与控件值双向解析
+                - generic [ref=e415]: 稳定
+            - link "FieldCondition 以字段+操作符+值行式编辑 AND/OR 条件组 稳定" [ref=e416] [cursor=pointer]:
+              - /url: /components/blocks/field-condition
+              - generic [ref=e417]:
+                - generic [ref=e418]: FieldCondition
+                - generic [ref=e419]: 以字段+操作符+值行式编辑 AND/OR 条件组
+                - generic [ref=e422]: 稳定
+            - link "RuleConfig 评分规则配置：权重与带操作符/取值/评分的条件列表 稳定" [ref=e423] [cursor=pointer]:
+              - /url: /components/blocks/rule-config
+              - generic [ref=e424]:
+                - generic [ref=e425]: RuleConfig
+                - generic [ref=e426]: 评分规则配置：权重与带操作符/取值/评分的条件列表
+                - generic [ref=e429]: 稳定
+      - generic [ref=e489]:
+        - generic [ref=e490]:
+          - generic [ref=e491]:
+            - generic [ref=e493]: Pactor UI 资产库
+            - paragraph [ref=e494]: Pactor 动态应用运行时 —— 组件 / 主题 / 模板 / 素材的规范化资产管理平台。
+          - generic [ref=e495]:
+            - generic [ref=e496]:
+              - generic [ref=e497]: 资产
+              - generic [ref=e498]:
+                - link "组件" [ref=e500] [cursor=pointer]:
+                  - /url: /components
+                - link "主题" [ref=e502] [cursor=pointer]:
+                  - /url: /themes
+                - link "模板" [ref=e504] [cursor=pointer]:
+                  - /url: /templates
+                - link "素材" [ref=e506] [cursor=pointer]:
+                  - /url: /materials
+            - generic [ref=e507]:
+              - generic [ref=e508]: 资源
+              - generic [ref=e509]:
+                - link "使用文档" [ref=e511] [cursor=pointer]:
+                  - /url: /docs
+                - link "样式规范" [ref=e513] [cursor=pointer]:
+                  - /url: /styles/overview
+        - generic [ref=e516]: © 2026 Pactor UI 资产库 · 当前构建版本 dev · 最近同步 2026-10-31 09:55 UTC · Git commit 57c178e
+    - complementary [ref=e430]:
+      - generic [ref=e432]:
+        - generic [ref=e434]: 页面看板
+        - generic [ref=e435]:
+          - heading "页面目录" [level=4] [ref=e436]
+          - button "预览与 DSL" [ref=e437] [cursor=pointer]
+          - button "何时用" [ref=e438] [cursor=pointer]
+          - button "变体" [ref=e439] [cursor=pointer]
+          - button "API 属性" [ref=e440] [cursor=pointer]
+          - button "使用规范" [ref=e441] [cursor=pointer]
+          - button "Design Token 映射" [ref=e442] [cursor=pointer]
+        - generic [ref=e443]:
+          - heading "元信息" [level=4] [ref=e444]
+          - generic [ref=e445]:
+            - term [ref=e446]: 规范 ID
+            - definition [ref=e447]: component.form-modal
+            - term [ref=e448]: 分类
+            - definition [ref=e449]: 组件 / 区块组件
+            - term [ref=e450]: 用途
+            - definition [ref=e451]: 表单弹层：Dialog 内嵌 Form（children 即表单项），可自定义标题与取消/提交按钮文字及事件
+            - term [ref=e452]: 接入状态
+            - definition [ref=e453]: 已接入
+            - term [ref=e454]: 路由
+            - definition [ref=e455]: /components/blocks/form-modal
+        - generic [ref=e456]:
+          - heading "使用说明" [level=4] [ref=e457]
+          - generic [ref=e458]: 点击中间内容区带高亮边框的对象（卡片、Token 行、色板等），此处将切换为该对象的属性看板；点击 × 恢复本目录。
+  - generic [ref=e461]:
+    - button "Menu" [ref=e462]:
+      - img [ref=e464]
+      - generic: Menu
+    - button "Inspect" [ref=e468]:
+      - img [ref=e470]
+      - generic: Inspect
+    - button "Audit" [ref=e472]:
+      - img [ref=e474]
+      - generic: Audit
+    - button "Settings" [ref=e477]:
+      - img [ref=e479]
+      - generic: Settings
