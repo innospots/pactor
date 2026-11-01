@@ -1,3 +1,4 @@
+import { useI18n } from '@pactor-app/runtime';
 import type { CSSProperties } from 'react';
 
 import { CopyButton as ShadcnCopyButton } from '../../../ui/copy-button.js';
@@ -19,6 +20,8 @@ export interface CopyButtonProps {
   value: string;
   /** 初始态可选文字（图标恒显） */
   label?: string;
+  /** 可访问名称（缺省 i18n `pactor.copyButton.ariaLabel`；label 存在时读屏用 label） */
+  ariaLabel?: string;
   /** copied 态可选文字，缺省沿用 label */
   copiedLabel?: string;
   /** copied 态自动还原延迟（ms），默认 1500 */
@@ -49,6 +52,7 @@ export interface CopyButtonProps {
 export function CopyButton({
   value,
   label,
+  ariaLabel,
   copiedLabel,
   resetDelay,
   variant,
@@ -60,10 +64,12 @@ export function CopyButton({
   className,
   style,
 }: CopyButtonProps) {
+  const { t } = useI18n();
   return (
     <ShadcnCopyButton
       value={value}
       label={label}
+      ariaLabel={ariaLabel ?? (label === undefined ? t('pactor.copyButton.ariaLabel') : undefined)}
       copiedLabel={copiedLabel}
       resetDelay={resetDelay}
       variant={variant}

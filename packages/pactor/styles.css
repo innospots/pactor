@@ -1154,9 +1154,9 @@
   }
 }
 
-.ace_editor .ace_placeholder {
+.cm-editor .cm-placeholder {
+  color: var(--muted-foreground);
   font-size: 14px;
-  transform: none;
 }
 @keyframes pactor-hero-fade-up {
   from {
@@ -1194,6 +1194,18 @@
 @media (max-width: 640px) {
   [data-slot='entity-card-list-grid'] {
     grid-template-columns: minmax(0, 1fr) !important;
+  }
+}
+@media (max-width: 768px) {
+  [data-slot='file-manager'] {
+    flex-direction: column;
+  }
+  [data-slot='file-manager-nav'] {
+    width: 100%;
+    border-right: none;
+    border-bottom: 1px solid var(--border);
+    max-height: 240px;
+    overflow: auto;
   }
 }
 @property --tw-space-y-reverse {
@@ -5847,6 +5859,9 @@ button.pactor-chat-trace__header:hover, .pactor-chat-trace__entry-header:hover, 
 .min-h-10 {
     min-height: calc(var(--spacing) * 10);
   }
+.min-h-12 {
+    min-height: calc(var(--spacing) * 12);
+  }
 .min-h-\[var\(--hero-min-h\,80svh\)\] {
     min-height: var(--hero-min-h,80svh);
   }
@@ -5891,6 +5906,9 @@ button.pactor-chat-trace__header:hover, .pactor-chat-trace__entry-header:hover, 
   }
 .w-48 {
     width: calc(var(--spacing) * 48);
+  }
+.w-60 {
+    width: calc(var(--spacing) * 60);
   }
 .w-64 {
     width: calc(var(--spacing) * 64);
@@ -6125,6 +6143,10 @@ button.pactor-chat-trace__header:hover, .pactor-chat-trace__entry-header:hover, 
     border-top-style: var(--tw-border-style);
     border-top-width: 1px;
   }
+.border-r {
+    border-right-style: var(--tw-border-style);
+    border-right-width: 1px;
+  }
 .border-b {
     border-bottom-style: var(--tw-border-style);
     border-bottom-width: 1px;
@@ -6162,6 +6184,9 @@ button.pactor-chat-trace__header:hover, .pactor-chat-trace__entry-header:hover, 
   }
 .bg-background {
     background-color: var(--background);
+  }
+.bg-current {
+    background-color: currentcolor;
   }
 .bg-info\/10 {
     background-color: var(--info);
@@ -6388,6 +6413,9 @@ button.pactor-chat-trace__header:hover, .pactor-chat-trace__entry-header:hover, 
 .py-14 {
     padding-block: calc(var(--spacing) * 14);
   }
+.py-16 {
+    padding-block: calc(var(--spacing) * 16);
+  }
 .pt-3 {
     padding-top: calc(var(--spacing) * 3);
   }
@@ -6500,6 +6528,9 @@ button.pactor-chat-trace__header:hover, .pactor-chat-trace__entry-header:hover, 
   }
 .text-destructive {
     color: var(--destructive);
+  }
+.text-foreground {
+    color: var(--foreground);
   }
 .text-info {
     color: var(--info);
@@ -9531,6 +9562,13 @@ button.pactor-chat-trace__header:hover, .pactor-chat-trace__entry-header:hover, 
     .dark\:to-primary\/15 {
       --tw-gradient-stops: var(--tw-gradient-via-stops, var(--tw-gradient-position), var(--tw-gradient-from) var(--tw-gradient-from-position), var(--tw-gradient-to) var(--tw-gradient-to-position));
     }
+  }
+.\[\&_\.cm-editor\]\:bg-transparent .cm-editor {
+    background-color: transparent;
+  }
+.\[\&_\.cm-editor\]\:outline-none .cm-editor {
+    --tw-outline-style: none;
+    outline-style: none;
   }
 .\[\&_input\]\:border-destructive input {
     border-color: var(--destructive);

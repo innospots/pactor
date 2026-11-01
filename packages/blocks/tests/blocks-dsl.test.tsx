@@ -22,6 +22,7 @@ const BUSINESS_TYPES = [
   'RuleConfig',
   'RuleExpression',
   'ScriptEditor',
+  'FileManager',
 ];
 
 describe('blocks 组件 DSL 注册', () => {

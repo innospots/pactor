@@ -30,6 +30,8 @@ export { Flex } from './components/Flex/index.js';
 export type { FlexProps } from './components/Flex/index.js';
 export { Card } from './components/Card/index.js';
 export type { CardProps } from './components/Card/index.js';
+export { Panel } from './components/Panel/index.js';
+export type { PanelProps } from './components/Panel/index.js';
 export { Button } from './components/Button/index.js';
 export type {
   ButtonProps,

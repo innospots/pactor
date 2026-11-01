@@ -80,6 +80,7 @@ import { NavigationMenu } from './components/NavigationMenu/index.js';
 import { Notification } from './components/Notification/index.js';
 import { NumberInput } from './components/NumberInput/index.js';
 import { Page } from './components/Page/index.js';
+import { Panel } from './components/Panel/index.js';
 import { Pagination } from './components/Pagination/index.js';
 import { Popconfirm } from './components/Popconfirm/index.js';
 import { Popover } from './components/Popover/index.js';
@@ -142,6 +143,8 @@ export const builtinComponents = {
   For: { component: For, withScope: true },
   Flex,
   Card,
+  // header（左 title + 右 extra，底部分隔线）+ 内容区的区块容器
+  Panel,
   Button,
   Alert,
   Statistic,

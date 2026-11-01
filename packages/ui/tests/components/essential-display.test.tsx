@@ -216,6 +216,70 @@ describe('Tree', () => {
     { key: 'leaf', title: '叶子节点' },
   ];
 
+  it('键盘导航：roving tabindex + 方向键移动 + Enter 选中', async () => {
+    const user = userEvent.setup();
+    const { container, context } = renderDsl({
+      type: 'Tree',
+      props: { treeData, defaultExpandedKeys: ['parent'] },
+      events: {
+        onSelect: { action: 'setState', params: { selected: '${event}' } },
+      },
+    });
+
+    const rowOf = (key: string) =>
+      container.querySelector(
+        `[data-key=${key}] [data-slot=tree-node-row]`,
+      ) as HTMLElement;
+
+    // roving tabindex：只有当前节点在 Tab 序列
+    expect(rowOf('parent').tabIndex).toBe(0);
+    expect(rowOf('child-1').tabIndex).toBe(-1);
+
+    // Tab 进入树 → 焦点落在第一个节点
+    await user.tab();
+    expect(document.activeElement).toBe(rowOf('parent'));
+
+    // ↓ 移动到子节点一，Enter 选中
+    await user.keyboard('{ArrowDown}');
+    expect(document.activeElement).toBe(rowOf('child-1'));
+    await user.keyboard('{Enter}');
+    await expectEventState(context, 'selected', ['child-1']);
+
+    // ← 在子节点上回到父节点，再 ← 收起父节点
+    await user.keyboard('{ArrowLeft}');
+    expect(document.activeElement).toBe(rowOf('parent'));
+    await user.keyboard('{ArrowLeft}');
+    expect(screen.queryByText('子节点一')).toBeNull();
+
+    // → 重新展开，再 → 进入第一个子级
+    await user.keyboard('{ArrowRight}');
+    expect(screen.getByText('子节点一')).toBeTruthy();
+    await user.keyboard('{ArrowRight}');
+    expect(document.activeElement).toBe(rowOf('child-1'));
+
+    // End 到最后一个可见节点
+    await user.keyboard('{End}');
+    expect(document.activeElement).toBe(rowOf('leaf'));
+  });
+
+  it('节点 icon 渲染在标题前', () => {
+    const { container } = renderDsl({
+      type: 'Tree',
+      props: {
+        treeData: [{ key: 'f', title: 'README.md', icon: 'file-text' }],
+      },
+    });
+    const row = container.querySelector('[data-key=f] [data-slot=tree-node-row]')!;
+    const icon = row.querySelector('svg');
+    expect(icon).toBeTruthy();
+    // 图标在标题元素之前
+    const title = row.querySelector('[data-slot=tree-node-title]')!;
+    expect(
+      icon!.compareDocumentPosition(title) &
+        Node.DOCUMENT_POSITION_FOLLOWING,
+    ).toBeTruthy();
+  });
+
   it('缺省收起子节点；点击 chevron 展开并触发 onExpand', async () => {
     const { context } = renderDsl({
       type: 'Tree',
