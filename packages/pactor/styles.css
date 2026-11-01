@@ -5,7 +5,7 @@
  */
 
 /* ============================================================
- * @pactor-app/ui@1.59.0（构建产物内联，源顺序：ui → blocks → chart → chat）
+ * @pactor-app/ui@1.60.0（构建产物内联，源顺序：ui → blocks → chart → chat）
  * ============================================================ */
 /*! tailwindcss v4.3.3 | MIT License | https://tailwindcss.com */
 @layer properties;
@@ -1147,7 +1147,7 @@ div.pactor-markdown-editor-root.mdxeditor, div.pactor-markdown-editor-root.mdxed
 }
 
 /* ============================================================
- * @pactor-app/blocks@1.59.0（构建产物内联，源顺序：ui → blocks → chart → chat）
+ * @pactor-app/blocks@1.60.0（构建产物内联，源顺序：ui → blocks → chart → chat）
  * ============================================================ */
 /*! tailwindcss v4.3.3 | MIT License | https://tailwindcss.com */
 @layer properties;
@@ -1500,7 +1500,7 @@ div.pactor-markdown-editor-root.mdxeditor, div.pactor-markdown-editor-root.mdxed
 }
 
 /* ============================================================
- * @pactor-app/chart@1.59.0（构建产物内联，源顺序：ui → blocks → chart → chat）
+ * @pactor-app/chart@1.60.0（构建产物内联，源顺序：ui → blocks → chart → chat）
  * ============================================================ */
 /*! tailwindcss v4.3.3 | MIT License | https://tailwindcss.com */
 @layer properties;
@@ -1644,7 +1644,7 @@ div.pactor-markdown-editor-root.mdxeditor, div.pactor-markdown-editor-root.mdxed
 }
 
 /* ============================================================
- * @pactor-app/chat@1.59.0（构建产物内联，源顺序：ui → blocks → chart → chat）
+ * @pactor-app/chat@1.60.0（构建产物内联，源顺序：ui → blocks → chart → chat）
  * ============================================================ */
 /*! tailwindcss v4.3.3 | MIT License | https://tailwindcss.com */
 @layer properties;
@@ -1861,6 +1861,48 @@ div.pactor-markdown-editor-root.mdxeditor, div.pactor-markdown-editor-root.mdxed
   padding: 8px 12px;
   min-height: 8em;
   outline: none;
+}
+div.pactor-markdown-editor-root.mdxeditor, div.pactor-markdown-editor-root.mdxeditor-popup-container {
+  --basePageBg: var(--card, var(--slate-1));
+  --baseBase: var(--card, var(--slate-1));
+  --baseBgSubtle: var(--foreground, var(--slate-12));
+  @supports (color: color-mix(in lab, red, red)) {
+    --baseBgSubtle: color-mix(in srgb, var(--foreground, var(--slate-12)) 5%, var(--card, var(--slate-1)));
+  }
+  --baseBg: var(--foreground, var(--slate-12));
+  @supports (color: color-mix(in lab, red, red)) {
+    --baseBg: color-mix(in srgb, var(--foreground, var(--slate-12)) 8%, var(--card, var(--slate-1)));
+  }
+  --baseBgHover: var(--foreground, var(--slate-12));
+  @supports (color: color-mix(in lab, red, red)) {
+    --baseBgHover: color-mix(in srgb, var(--foreground, var(--slate-12)) 11%, var(--card, var(--slate-1)));
+  }
+  --baseBgActive: var(--foreground, var(--slate-12));
+  @supports (color: color-mix(in lab, red, red)) {
+    --baseBgActive: color-mix(in srgb, var(--foreground, var(--slate-12)) 15%, var(--card, var(--slate-1)));
+  }
+  --baseLine: var(--border, var(--slate-6));
+  --baseBorder: var(--border, var(--slate-7));
+  --baseBorderHover: var(--foreground, var(--slate-12));
+  @supports (color: color-mix(in lab, red, red)) {
+    --baseBorderHover: color-mix(in srgb, var(--foreground, var(--slate-12)) 24%, var(--border, var(--slate-7)));
+  }
+  --baseSolid: var(--muted-foreground, var(--slate-9));
+  --baseSolidHover: var(--foreground, var(--slate-10));
+  --baseText: var(--muted-foreground, var(--slate-11));
+  --baseTextContrast: var(--foreground, var(--slate-12));
+  --accentBase: var(--blue-1);
+  --accentBgSubtle: var(--blue-2);
+  --accentBg: var(--blue-3);
+  --accentBgHover: var(--blue-4);
+  --accentBgActive: var(--blue-5);
+  --accentLine: var(--blue-6);
+  --accentBorder: var(--blue-7);
+  --accentBorderHover: var(--blue-8);
+  --accentSolid: var(--blue-9);
+  --accentSolidHover: var(--blue-10);
+  --accentText: var(--blue-11);
+  --accentTextContrast: var(--blue-12);
 }
 :root {
   --pactor-chat-rail-width: 40px;
