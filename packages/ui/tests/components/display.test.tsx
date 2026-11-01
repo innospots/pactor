@@ -186,6 +186,76 @@ describe('Page / Card / Flex', () => {
   });
 });
 
+describe('Panel', () => {
+  it('渲染 header（左 title）与内容区 children', () => {
+    renderDsl({
+      type: 'Panel',
+      props: { title: '基本信息' },
+      children: [{ type: 'Button', props: { text: '编辑' } }],
+    });
+
+    const title = screen.getByText('基本信息');
+    expect(title.getAttribute('data-slot')).toBe('panel-title');
+    expect(title.parentElement?.className).toContain('border-b');
+    expect(screen.getByRole('button', { name: '编辑' })).toBeTruthy();
+  });
+
+  it('extra 在 header 右端渲染 DSL 子树', () => {
+    const { container } = renderDsl({
+      type: 'Panel',
+      props: {
+        title: '订单',
+        extra: [{ type: 'Button', props: { text: '导出', variant: 'link' } }],
+      },
+    });
+
+    const extra = container.querySelector('[data-slot=panel-extra]');
+    expect(extra).toBeTruthy();
+    expect(extra?.querySelector('button')?.textContent).toBe('导出');
+  });
+
+  it('bordered 缺省 true 渲染边框与阴影；false 去除', () => {
+    const { container, unmount } = renderDsl({
+      type: 'Panel',
+      props: { title: 'a' },
+    });
+    const panel = container.querySelector('[data-slot=panel]')!;
+    expect(panel.className).toContain('border');
+    expect(panel.className).toContain('shadow-xs');
+    unmount();
+
+    const { container: c2 } = renderDsl({
+      type: 'Panel',
+      props: { title: 'a', bordered: false },
+    });
+    const panel2 = c2.querySelector('[data-slot=panel]')!;
+    expect(panel2.className).toContain('border-transparent');
+    expect(panel2.className).not.toContain('shadow-xs');
+  });
+
+  it('无 title 与 extra 时不渲染 header', () => {
+    const { container } = renderDsl({
+      type: 'Panel',
+      children: [{ type: 'Text', props: { text: '仅内容' } }],
+    });
+
+    expect(container.querySelector('[data-slot=panel-header]')).toBeNull();
+    expect(screen.getByText('仅内容')).toBeTruthy();
+  });
+
+  it('通用 props：className / style / id 作用于根节点', () => {
+    const { container } = renderDsl({
+      type: 'Panel',
+      props: { id: 'sec-1', className: 'mt-4', style: { maxWidth: 480 } },
+    });
+
+    const panel = container.querySelector('[data-slot=panel]') as HTMLElement;
+    expect(panel.id).toBe('sec-1');
+    expect(panel.className).toContain('mt-4');
+    expect(panel.style.maxWidth).toBe('480px');
+  });
+});
+
 describe('Grid', () => {
   it('columns: 2 时两个子项以两列网格渲染', () => {
     const { container } = render(

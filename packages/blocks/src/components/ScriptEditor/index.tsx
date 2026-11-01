@@ -1,5 +1,17 @@
-import { useEffect, useRef } from 'react';
-import type { Ace } from 'ace-builds';
+import CodeMirror from '@uiw/react-codemirror';
+import {
+  autocompletion,
+  snippetCompletion,
+  type Completion,
+  type CompletionContext,
+  type CompletionResult,
+} from '@codemirror/autocomplete';
+import { javascript } from '@codemirror/lang-javascript';
+import { json } from '@codemirror/lang-json';
+import { python } from '@codemirror/lang-python';
+import { sql } from '@codemirror/lang-sql';
+import type { Extension } from '@codemirror/state';
+import { useEffect, useMemo, useState } from 'react';
 
 import { cn } from '../../lib/utils.js';
 
@@ -37,6 +49,10 @@ export interface ScriptEditorProps {
   readonly?: boolean;
   /** 编辑器高度（px），默认 160 */
   height?: number;
+  /** 是否显示边框与圆角，默认 true；嵌入式场景（如 FileManager 内容区）传 false 去边框 */
+  bordered?: boolean;
+  /** 主题：缺省跟随 documentElement 的 data-pactor-theme（与库换肤机制一致），可显式覆盖 */
+  theme?: 'light' | 'dark';
   className?: string;
 }
 
@@ -84,71 +100,96 @@ function buildVariableDoc(variable: ScriptVariableDef): string {
   return parts.join('');
 }
 
+/** info 文档 HTML → DOM 节点（CodeMirror info 回调在浏览器侧惰性调用，此处不触 DOM） */
+function docInfo(html: string): (() => Node) | undefined {
+  if (!html) return undefined;
+  return () => {
+    const template = document.createElement('template');
+    template.innerHTML = html;
+    const container = document.createElement('div');
+    container.appendChild(template.content.cloneNode(true));
+    return container;
+  };
+}
+
 /**
- * 构建 ace 自定义 completer：functions 以 snippet 补全，variables 直接补全名称。
- * 空/缺省配置时返回空候选，不影响 ace 默认补全。
+ * 构建 CodeMirror 自定义补全项：functions 以 snippet 补全（type: function），
+ * variables 直接补全名称（type: variable）。空/缺省配置时返回空候选。
  */
 export function buildScriptCompletions(
   functions?: ScriptFunctionDef[],
   variables?: ScriptVariableDef[],
-): Ace.Completer {
-  return {
-    getCompletions(_editor, _session, _position, _prefix, callback) {
-      const completions: Ace.Completion[] = [
-        ...(functions ?? []).map((fn) => ({
-          caption: fn.name,
-          snippet: buildFunctionSnippet(fn),
-          meta: 'function',
-          docHTML: buildFunctionDoc(fn),
-        })),
-        ...(variables ?? []).map((v) => ({
-          caption: v.name,
-          value: v.name,
-          meta: 'variable',
-          docHTML: buildVariableDoc(v),
-        })),
-      ];
-      callback(null, completions);
-    },
+): Completion[] {
+  return [
+    ...(functions ?? []).map((fn) =>
+      snippetCompletion(buildFunctionSnippet(fn), {
+        label: fn.name,
+        type: 'function',
+        info: docInfo(buildFunctionDoc(fn)),
+      }),
+    ),
+    ...(variables ?? []).map((v) => ({
+      label: v.name,
+      type: 'variable',
+      info: docInfo(buildVariableDoc(v)),
+    })),
+  ];
+}
+
+/**
+ * 自定义联想源：光标前词元匹配 functions/variables 候选；
+ * 空词且非显式触发（Ctrl-Space）时不弹窗。
+ */
+export function buildCompletionSource(
+  options: Completion[],
+): (context: CompletionContext) => CompletionResult | null {
+  return (context) => {
+    const word = context.matchBefore(/[\w$]*/);
+    if (!word || (word.from === word.to && !context.explicit)) return null;
+    return { from: word.from, options };
   };
 }
 
-// ─── Editor ───────────────────────────────────────────────────────────────────
+// ─── Language modes ───────────────────────────────────────────────────────────
 
-/**
- * 内置语法模式加载器：按需扩展，未列出的语言回退为纯文本。
- * mode 声明了 snippetFileId 时，language_tools 会调用 ace.config.loadModule
- * 加载对应 snippets 模块；未打包进 bundle 时 ace 会回退为按 URL 请求
- * <basePath>/snippets/*.js（打包器环境下 basePath 通常探测不到该目录 → 404），
- * 因此这里把 snippets 模块一并 import，提前注册到 ace 模块表。
- */
-const MODE_LOADERS: Record<string, () => Promise<unknown>> = {
-  javascript: () =>
-    Promise.all([
-      import('ace-builds/src-noconflict/mode-javascript'),
-      import('ace-builds/src-noconflict/snippets/javascript'),
-    ]),
-  json: () =>
-    Promise.all([
-      import('ace-builds/src-noconflict/mode-json'),
-      import('ace-builds/src-noconflict/snippets/json'),
-    ]),
-  python: () =>
-    Promise.all([
-      import('ace-builds/src-noconflict/mode-python'),
-      import('ace-builds/src-noconflict/snippets/python'),
-    ]),
-  sql: () =>
-    Promise.all([
-      import('ace-builds/src-noconflict/mode-sql'),
-      import('ace-builds/src-noconflict/snippets/sql'),
-    ]),
+/** 内置语法模式：未列出的语言回退为纯文本（不注册语言扩展） */
+const LANGUAGE_EXTENSIONS: Record<string, () => Extension> = {
+  javascript: () => javascript({ jsx: true, typescript: true }),
+  json: () => json(),
+  python: () => python(),
+  sql: () => sql(),
 };
 
-function getScriptMode(language: string): string {
-  return MODE_LOADERS[language] ? `ace/mode/${language}` : 'ace/mode/text';
+// ─── Editor ───────────────────────────────────────────────────────────────────
+
+/** 读取并跟随 pactor 主题（documentElement 的 data-pactor-theme，缺省 light） */
+function usePactorTheme(): 'light' | 'dark' {
+  const read = (): 'light' | 'dark' =>
+    typeof document !== 'undefined' &&
+    document.documentElement.getAttribute('data-pactor-theme') === 'dark'
+      ? 'dark'
+      : 'light';
+  const [theme, setTheme] = useState<'light' | 'dark'>(read);
+  useEffect(() => {
+    if (typeof document === 'undefined') return;
+    const observer = new MutationObserver(() => setTheme(read()));
+    observer.observe(document.documentElement, {
+      attributes: true,
+      attributeFilter: ['data-pactor-theme'],
+    });
+    return () => observer.disconnect();
+  }, []);
+  return theme;
 }
 
+/**
+ * 脚本编辑器（CodeMirror 6，经 @uiw/react-codemirror）：
+ * value/onChange 受控（react-codemirror 内部同步外部值且保持光标）；
+ * language 决定语法高亮（javascript/json/python/sql，其余纯文本）；
+ * functions/variables 注册自定义联想（snippet + 文档浮层，覆盖语言默认联想）；
+ * readonly 时内容只读（保留聚焦/选中/复制，经 readOnly 而非 editable=false）；
+ * theme 缺省跟随 data-pactor-theme 切换 CM 明暗主题；placeholder 走 CM 原生正文内渲染。
+ */
 export function ScriptEditor({
   id,
   value,
@@ -159,114 +200,57 @@ export function ScriptEditor({
   variables,
   readonly,
   height = 160,
+  bordered = true,
+  theme,
   className,
 }: ScriptEditorProps) {
-  const containerRef = useRef<HTMLDivElement>(null);
-  const editorRef = useRef<Ace.Editor | null>(null);
-  const onChangeRef = useRef(onChange);
-  onChangeRef.current = onChange;
-
-  // 挂载编辑器（仅执行一次）；ace 依赖 window，动态 import 规避 SSR
-  useEffect(() => {
-    let disposed = false;
-
-    (async () => {
-      const ace = await import('ace-builds');
-      await Promise.all([
-        import('ace-builds/src-noconflict/theme-textmate'),
-        import('ace-builds/src-noconflict/ext-language_tools'),
-        MODE_LOADERS[language]?.() ?? Promise.resolve(),
-      ]);
-      if (disposed || !containerRef.current) return;
-
-      const editor = ace.edit(containerRef.current, {
-        value: value ?? '',
-        theme: 'ace/theme/textmate',
-        mode: getScriptMode(language),
-        placeholder: placeholder ?? '',
-        showPrintMargin: false,
-        highlightActiveLine: true,
-        tabSize: 4,
-        useSoftTabs: true,
-        readOnly: readonly ?? false,
-        enableBasicAutocompletion: [buildScriptCompletions(functions, variables)],
-        enableLiveAutocompletion: true,
-        enableSnippets: true,
-      });
-      // 关闭语法检查 worker，避免按 URL 加载 worker-*.js 产生 404
-      editor.session.setUseWorker(false);
-
-      editor.on('change', () => {
-        onChangeRef.current?.(editor.getValue());
-      });
-
-      editorRef.current = editor;
-    })().catch(() => {
-      // ace 加载失败时保留空容器，不阻断表单其余字段
-    });
-
-    return () => {
-      disposed = true;
-      editorRef.current?.destroy();
-      editorRef.current = null;
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  // 外部值变化时同步到编辑器（仅当与编辑器内容不一致，避免光标跳动）
-  useEffect(() => {
-    const editor = editorRef.current;
-    if (!editor) return;
-    const next = value ?? '';
-    if (editor.getValue() !== next) {
-      editor.setValue(next, -1);
+  const extensions = useMemo<Extension[]>(() => {
+    const exts: Extension[] = [];
+    const lang = LANGUAGE_EXTENSIONS[language]?.();
+    if (lang) exts.push(lang);
+    const options = buildScriptCompletions(functions, variables);
+    if (options.length > 0) {
+      // override 替换语言默认联想（与原 ace 版 enableBasicAutocompletion 行为一致）
+      exts.push(autocompletion({ override: [buildCompletionSource(options)] }));
     }
-  }, [value]);
+    return exts;
+  }, [language, functions, variables]);
 
-  // 语言变化时按需加载语法模块（不重建编辑器）
-  useEffect(() => {
-    const editor = editorRef.current;
-    if (!editor) return;
-    let disposed = false;
-
-    (async () => {
-      await MODE_LOADERS[language]?.();
-      if (!disposed) editor.session.setMode(getScriptMode(language));
-    })().catch(() => {
-      // 语言模块加载失败时保留当前模式
-    });
-
-    return () => {
-      disposed = true;
-    };
-  }, [language]);
-
-  // placeholder 使用 Ace 原生正文内渲染
-  useEffect(() => {
-    editorRef.current?.setOption('placeholder', placeholder ?? '');
-  }, [placeholder]);
-
-  // functions / variables 变化时更新联想（不重建编辑器）
-  useEffect(() => {
-    editorRef.current?.setOptions({
-      enableBasicAutocompletion: [buildScriptCompletions(functions, variables)],
-    });
-  }, [functions, variables]);
-
-  // 只读状态跟随 prop
-  useEffect(() => {
-    editorRef.current?.setReadOnly(readonly ?? false);
-  }, [readonly]);
+  const pactorTheme = usePactorTheme();
+  const resolvedTheme = theme ?? pactorTheme;
 
   return (
     <div
+      data-slot="script-editor"
+      data-language={language}
+      data-readonly={readonly || undefined}
+      data-theme={resolvedTheme}
       className={cn(
-        'relative w-full rounded-md border bg-background overflow-hidden',
+        'relative w-full overflow-hidden bg-background text-sm',
+        bordered && 'rounded-md border',
+        // CM 焦点 outline 与外层容器边框视觉冲突，去掉编辑器内建 outline
+        '[&_.cm-editor]:outline-none [&_.cm-editor]:bg-transparent',
         readonly && 'bg-muted',
         className,
       )}
     >
-      <div ref={containerRef} id={id} style={{ height }} className="w-full" />
+      <CodeMirror
+        id={id}
+        value={value ?? ''}
+        onChange={(next) => onChange?.(next)}
+        placeholder={placeholder}
+        extensions={extensions}
+        theme={resolvedTheme}
+        // 只读用 readOnly 而非 editable=false：保留聚焦/选中/键盘滚动（editable=false
+        // 会把 contenteditable 置 false，键盘用户无法滚读长内容）
+        readOnly={readonly}
+        height={`${height}px`}
+        basicSetup={{
+          foldGutter: false,
+          highlightActiveLine: !readonly,
+          highlightActiveLineGutter: !readonly,
+        }}
+      />
     </div>
   );
 }

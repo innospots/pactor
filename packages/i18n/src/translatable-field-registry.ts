@@ -107,6 +107,8 @@ export function createDefaultTranslatableFieldRegistry(): TranslatableFieldRegis
   return new TranslatableFieldRegistry()
     .register('Page', 'props.title')
     .register('Card', 'props.title')
+    .register('Panel', 'props.title')
+    .register('FileManager', ['props.title', 'props.treeTitle'])
     .register('Statistic', 'props.title')
     .register('Alert', ['props.message', 'props.description'])
     .register('Empty', ['props.title', 'props.description'])

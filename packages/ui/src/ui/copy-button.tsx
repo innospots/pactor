@@ -13,6 +13,8 @@ export interface CopyButtonProps
   value: string;
   /** 初始态可选文字（图标恒显） */
   label?: React.ReactNode;
+  /** 可访问名称（图标恒显、label 缺省时读屏兜底；label 为字符串时缺省复用 label） */
+  ariaLabel?: string;
   /** copied 态可选文字，缺省沿用 label */
   copiedLabel?: React.ReactNode;
   /** copied 态自动还原延迟（ms），默认 1500 */
@@ -36,6 +38,7 @@ function CopyButton({
   size = 'sm',
   value,
   label,
+  ariaLabel,
   copiedLabel,
   resetDelay = 1500,
   onCopy,
@@ -80,6 +83,7 @@ function CopyButton({
       size={size}
       type={type}
       disabled={disabled}
+      aria-label={ariaLabel ?? (typeof label === 'string' ? label : undefined)}
       className={cn(className)}
       onClick={handleClick}
       {...props}
