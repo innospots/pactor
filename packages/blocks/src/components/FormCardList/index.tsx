@@ -15,7 +15,7 @@ import {
 } from '@pactor-app/ui/ui';
 import { Switch } from '@pactor-app/ui/ui';
 import { Textarea } from '@pactor-app/ui/ui';
-import { Card, Form } from '@pactor-app/ui/components';
+import { Card, Form, Popconfirm } from '@pactor-app/ui/components';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -101,6 +101,10 @@ export interface FormCardListProps {
   minItems?: number;
   /** 最多列表项数（达到后隐藏添加按钮） */
   maxItems?: number;
+  /** 删除前弹气泡确认（防止误点丢失已填内容），默认 true；传 false 关闭 */
+  confirmRemove?: boolean;
+  /** 删除确认气泡标题（confirmRemove 时生效，缺省走 i18n） */
+  confirmRemoveText?: string;
   /** 禁用：隐藏增删入口，fields 模式控件只读（模板模式自行处理 disabled） */
   disabled?: boolean;
   /** 通用：根节点 class（与内置样式合并） */
@@ -135,6 +139,8 @@ export function FormCardList({
   defaultItem,
   minItems = 0,
   maxItems,
+  confirmRemove = true,
+  confirmRemoveText,
   disabled,
   className,
   style,
@@ -187,18 +193,36 @@ export function FormCardList({
           {/* 第一行：序号 + 右端删除按钮 */}
           <div data-slot="form-card-list-item-header" className="flex items-center justify-between">
             <span className="text-sm font-medium">{resolveItemLabel(index)}</span>
-            {canDelete && (
-              <Button
-                type="button"
-                variant="ghost"
-                size="icon"
-                className="h-8 w-8 shrink-0 text-muted-foreground hover:text-destructive"
-                aria-label="delete-item"
-                onClick={() => removeItem(index)}
-              >
-                <Trash2 className="h-4 w-4" />
-              </Button>
-            )}
+            {canDelete &&
+              (() => {
+                const removeButton = (
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon"
+                    className="h-8 w-8 shrink-0 text-muted-foreground hover:text-destructive"
+                    aria-label={t('pactor.formCardList.removeItem', {
+                      index: index + 1,
+                    })}
+                    onClick={confirmRemove ? undefined : () => removeItem(index)}
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
+                );
+                return confirmRemove ? (
+                  <Popconfirm
+                    title={
+                      confirmRemoveText ?? t('pactor.formCardList.removeConfirm')
+                    }
+                    danger
+                    onConfirm={() => removeItem(index)}
+                  >
+                    {removeButton}
+                  </Popconfirm>
+                ) : (
+                  removeButton
+                );
+              })()}
           </div>
 
           {/* 列表项内容：DSL 模板 > renderItem > fields 固定表单 */}
@@ -215,19 +239,28 @@ export function FormCardList({
           ) : renderItem ? (
             renderItem(item, index)
           ) : (
-            fields.map((field) => (
-              <div key={field.name} data-slot="form-card-list-field" className="flex flex-col gap-1.5">
-                {field.label != null && (
-                  <span className="text-sm text-muted-foreground">{field.label}</span>
-                )}
-                <FieldControl
-                  field={field}
-                  value={item[field.name]}
-                  disabled={disabled}
-                  onChange={(v) => updateItem(index, { [field.name]: v })}
-                />
-              </div>
-            ))
+            fields.map((field) => {
+              const fieldId = `${formIdBase}-${index}-${field.name}`;
+              return (
+                <div key={field.name} data-slot="form-card-list-field" className="flex flex-col gap-1.5">
+                  {field.label != null && (
+                    <label
+                      htmlFor={fieldId}
+                      className="text-sm leading-normal font-medium"
+                    >
+                      {field.label}
+                    </label>
+                  )}
+                  <FieldControl
+                    id={fieldId}
+                    field={field}
+                    value={item[field.name]}
+                    disabled={disabled}
+                    onChange={(v) => updateItem(index, { [field.name]: v })}
+                  />
+                </div>
+              );
+            })
           )}
         </Card>
       ))}
@@ -299,11 +332,13 @@ function DslItemBody({
 // ─── Field control（fields 模式） ─────────────────────────────────────────────
 
 function FieldControl({
+  id,
   field,
   value,
   disabled,
   onChange,
 }: {
+  id?: string;
   field: FormCardListField;
   value: unknown;
   disabled?: boolean;
@@ -313,6 +348,7 @@ function FieldControl({
     case 'number':
       return (
         <Input
+          id={id}
           type="number"
           value={value == null ? '' : String(value)}
           disabled={disabled}
@@ -323,6 +359,7 @@ function FieldControl({
     case 'textarea':
       return (
         <Textarea
+          id={id}
           value={value == null ? '' : String(value)}
           disabled={disabled}
           placeholder={field.placeholder}
@@ -337,7 +374,7 @@ function FieldControl({
           disabled={disabled}
           onValueChange={(v) => onChange(v)}
         >
-          <SelectTrigger className="w-full">
+          <SelectTrigger id={id} className="w-full">
             <SelectValue placeholder={field.placeholder} />
           </SelectTrigger>
           <SelectContent>
@@ -352,6 +389,7 @@ function FieldControl({
     case 'switch':
       return (
         <Switch
+          id={id}
           checked={Boolean(value)}
           disabled={disabled}
           onCheckedChange={(checked) => onChange(checked)}
@@ -360,6 +398,7 @@ function FieldControl({
     default:
       return (
         <Input
+          id={id}
           value={value == null ? '' : String(value)}
           disabled={disabled}
           placeholder={field.placeholder}

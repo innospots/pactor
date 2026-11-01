@@ -49,6 +49,8 @@ export const zhCN = {
   'pactor.cardList.total': '共 {{count}} 个',
   'pactor.formCardList.item': '第 {{index}} 项',
   'pactor.formCardList.add': '添加一项',
+  'pactor.formCardList.removeItem': '删除第 {{index}} 项',
+  'pactor.formCardList.removeConfirm': '确定删除该列表项吗？已填写的内容将丢失。',
   'pactor.formModal.submit': '提交',
   'pactor.formModal.cancel': '取消',
   'pactor.chart.empty': '暂无数据',

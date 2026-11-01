@@ -1,3 +1,4 @@
+import { useI18n } from '@pactor-app/runtime';
 import type { CSSProperties, ReactNode } from 'react';
 
 import {
@@ -40,6 +41,7 @@ export function Sheet({
   className,
   style,
 }: SheetProps) {
+  const { t } = useI18n();
   return (
     <ShadcnSheet
       open={open ?? false}
@@ -49,7 +51,12 @@ export function Sheet({
         }
       }}
     >
-      <SheetContent side={side} className={className} style={style}>
+      <SheetContent
+        side={side}
+        className={className}
+        style={style}
+        closeLabel={t('pactor.overlay.close')}
+      >
         {title ? (
           <SheetHeader>
             <SheetTitle>{title}</SheetTitle>

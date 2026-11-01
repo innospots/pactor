@@ -49,6 +49,8 @@ export const enUS = {
   'pactor.cardList.total': 'Total {{count}}',
   'pactor.formCardList.item': 'Item {{index}}',
   'pactor.formCardList.add': 'Add item',
+  'pactor.formCardList.removeItem': 'Remove item {{index}}',
+  'pactor.formCardList.removeConfirm': 'Remove this item? Filled content will be lost.',
   'pactor.formModal.submit': 'Submit',
   'pactor.formModal.cancel': 'Cancel',
   'pactor.chart.empty': 'No data',

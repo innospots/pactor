@@ -146,6 +146,18 @@ export function Form({
     onSubmit?.(values);
   };
 
+  // 校验失败（errors 仅提交失败时非空，setValue 会逐字段清除）：焦点引导到
+  // 首个错误控件——aria-invalid 由 FieldShell 的 effect 先行下发（子 effect
+  // 先于父 effect 执行），此处按 DOM 查询即可命中
+  useEffect(() => {
+    if (Object.keys(errors).length === 0) {
+      return;
+    }
+    formElRef.current
+      ?.querySelector<HTMLElement>('[aria-invalid="true"]')
+      ?.focus();
+  }, [errors]);
+
   return (
     <FormContextProvider value={formContext}>
       <form

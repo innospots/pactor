@@ -1,6 +1,8 @@
 import { useI18n, useRenderer } from '@pactor-app/runtime';
 import { useEffect, useRef, useState, type CSSProperties, type ReactNode } from 'react';
 
+import { cn } from '../../lib/utils.js';
+
 import { Button } from '@pactor-app/ui/ui';
 import {
   Dialog as ShadcnDialog,
@@ -140,7 +142,13 @@ export function FormModal({
         }
       }}
     >
-      <DialogContent className={className} style={style}>
+      <DialogContent
+        // 表单弹层默认比通用 Dialog 宽一档（两列横向布局表单不局促）；
+        // twMerge 语义：调用方 className 可覆盖
+        className={cn('sm:max-w-2xl', className)}
+        style={style}
+        closeLabel={t('pactor.overlay.close')}
+      >
         {title || description ? (
           <DialogHeader>
             {title ? <DialogTitle>{title}</DialogTitle> : null}
