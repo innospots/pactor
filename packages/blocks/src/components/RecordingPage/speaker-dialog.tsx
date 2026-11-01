@@ -1,3 +1,5 @@
+import { useI18n } from '@pactor-app/runtime';
+
 import { cn } from '../../lib/utils.js';
 import {
   Dialog,
@@ -47,6 +49,7 @@ export function RecordingSpeakerDialog({
   onCancel,
   onConfirm,
 }: RecordingSpeakerDialogProps) {
+  const { t } = useI18n();
   const canApply = customName.trim() !== '' || selectedIndex >= 0;
 
   return (
@@ -57,6 +60,7 @@ export function RecordingSpeakerDialog({
       }}
     >
       <DialogContent
+        closeLabel={t('pactor.overlay.close')}
         data-slot="recording-speaker-dialog"
         className="gap-4 sm:max-w-xl"
       >

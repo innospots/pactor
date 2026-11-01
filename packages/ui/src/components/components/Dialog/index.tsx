@@ -1,5 +1,5 @@
 import type { DslNode } from '@pactor-app/core';
-import { useRenderer } from '@pactor-app/runtime';
+import { useI18n, useRenderer } from '@pactor-app/runtime';
 import { useState, type CSSProperties, type ReactNode } from 'react';
 
 import {
@@ -47,6 +47,7 @@ export function Dialog({
   style,
 }: DialogProps) {
   const { renderChildren } = useRenderer();
+  const { t } = useI18n();
   const [innerOpen, setInnerOpen] = useState(false);
   const controlled = open !== undefined;
   const visible = controlled ? open : innerOpen;
@@ -71,7 +72,11 @@ export function Dialog({
           {renderChildren([trigger])}
         </DialogTrigger>
       ) : null}
-      <DialogContent className={className} style={style}>
+      <DialogContent
+        className={className}
+        style={style}
+        closeLabel={t('pactor.overlay.close')}
+      >
         {title || description ? (
           <DialogHeader>
             {title ? <DialogTitle>{title}</DialogTitle> : null}

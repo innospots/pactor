@@ -2020,9 +2020,6 @@
   .text-\[0\.8rem\] {
     font-size: 0.8rem;
   }
-  .text-\[10px\] {
-    font-size: 10px;
-  }
   .text-\[11px\] {
     font-size: 11px;
   }
@@ -4457,8 +4454,8 @@
   --warning: oklch(0.769 0.188 70.08);
   --info: oklch(0.623 0.214 259.815);
   --border: oklch(0.922 0 0);
-  --input: oklch(0.922 0 0);
-  --ring: oklch(0.708 0 0);
+  --input: oklch(0.85 0 0);
+  --ring: oklch(0.556 0 0);
   --chart-1: oklch(0.646 0.222 41.116);
   --chart-2: oklch(0.6 0.118 184.704);
   --chart-3: oklch(0.398 0.07 227.392);
@@ -4480,6 +4477,7 @@
   --card-shadow: none;
   --shadow-color: oklch(0 0 0 / 10%);
   --overlay-background: oklch(0 0 0 / 50%);
+  --login-panel-shadow: 0 20px 25px -5px var(--shadow-color), 0 8px 10px -6px var(--shadow-color);
   --input-background: var(--card);
   --input-foreground: var(--card-foreground);
   --switch-track: var(--input);
@@ -4540,8 +4538,8 @@
   --warning: oklch(0.769 0.188 70.08);
   --info: oklch(0.623 0.214 259.815);
   --border: oklch(1 0 0 / 10%);
-  --input: oklch(1 0 0 / 15%);
-  --ring: oklch(0.556 0 0);
+  --input: oklch(1 0 0 / 25%);
+  --ring: oklch(0.708 0 0);
   --chart-1: oklch(0.488 0.243 264.376);
   --chart-2: oklch(0.696 0.17 162.48);
   --chart-3: oklch(0.769 0.188 70.08);
@@ -4579,8 +4577,8 @@
     --warning: oklch(0.769 0.188 70.08);
     --info: oklch(0.623 0.214 259.815);
     --border: oklch(1 0 0 / 10%);
-    --input: oklch(1 0 0 / 15%);
-    --ring: oklch(0.556 0 0);
+    --input: oklch(1 0 0 / 25%);
+    --ring: oklch(0.708 0 0);
     --chart-1: oklch(0.488 0.243 264.376);
     --chart-2: oklch(0.696 0.17 162.48);
     --chart-3: oklch(0.769 0.188 70.08);
@@ -4603,6 +4601,9 @@
   100% {
     background-position: -200% 0;
   }
+}
+[data-slot='form-item'] [aria-invalid='true'] {
+  border-color: var(--destructive);
 }
 .pactor-clearable {
   display: none;

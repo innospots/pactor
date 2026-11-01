@@ -394,7 +394,7 @@ export function Login({
     }
     if (variant === "float") {
       return (
-        <Card className="w-full max-w-[440px] p-4 shadow-xl md:p-6">
+        <Card className="w-full max-w-[440px] p-4 shadow-(--login-panel-shadow) md:p-6">
           {authContent}
         </Card>
       );
@@ -473,7 +473,7 @@ export function Login({
         brandSide === "left" ? "md:-ml-24" : "md:-mr-24",
       )}
     >
-      <Card className="p-2 shadow-xl md:p-4">{authContent}</Card>
+      <Card className="p-2 shadow-(--login-panel-shadow) md:p-4">{authContent}</Card>
     </div>
   );
 
@@ -493,7 +493,7 @@ export function Login({
         <div className="p-6 md:hidden">{brandIdentity}</div>
       ) : null}
       <div className="flex flex-1 items-center justify-center p-6">
-        <Card className="w-full max-w-[400px] p-2 shadow-xl md:p-4">
+        <Card className="w-full max-w-[400px] p-2 shadow-(--login-panel-shadow) md:p-4">
           {authContent}
         </Card>
       </div>

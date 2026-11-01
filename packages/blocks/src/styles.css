@@ -52,3 +52,18 @@
     transform: translate3d(2.5%, -3%, 0) scale(1.12);
   }
 }
+
+/* EntityCardList 网格窄视口降级：列数由 columns prop 经内联样式设置
+   （repeat(N, minmax(0,1fr))），内联样式优先级最高，此处以 !important 降级——
+   ≤1024px 最多两列、≤640px 单列，避免 320px 视口三列挤压溢出 */
+@media (max-width: 1024px) {
+  [data-slot='entity-card-list-grid'] {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+}
+
+@media (max-width: 640px) {
+  [data-slot='entity-card-list-grid'] {
+    grid-template-columns: minmax(0, 1fr) !important;
+  }
+}

@@ -108,9 +108,29 @@ describe('FormCardList', () => {
       />,
     );
 
-    const deleteButtons = screen.getAllByLabelText('delete-item');
+    const deleteButtons = screen.getAllByLabelText(/删除第 \d+ 项/);
     expect(deleteButtons).toHaveLength(2);
+    // 默认 confirmRemove：点击先弹确认气泡（不删），确认后才移除
     await user.click(deleteButtons[0]!);
+    expect(onChange).not.toHaveBeenCalled();
+    await user.click(screen.getByRole('button', { name: '确定' }));
+    expect(onChange).toHaveBeenLastCalledWith([{ name: '李四' }]);
+  });
+
+  it('confirmRemove: false 关闭确认气泡，点击即删', async () => {
+    const user = userEvent.setup();
+    const onChange = vi.fn();
+    render(
+      <FormCardList
+        fields={fields}
+        value={[{ name: '张三' }, { name: '李四' }]}
+        confirmRemove={false}
+        onChange={onChange}
+      />,
+    );
+
+    await user.click(screen.getAllByLabelText(/删除第 \d+ 项/)[0]!);
+    expect(screen.queryByRole('button', { name: '确定' })).toBeNull();
     expect(onChange).toHaveBeenLastCalledWith([{ name: '李四' }]);
   });
 
@@ -157,7 +177,7 @@ describe('FormCardList', () => {
         onChange={() => {}}
       />,
     );
-    expect(screen.queryByLabelText('delete-item')).toBeNull();
+    expect(screen.queryByLabelText(/删除第 \d+ 项/)).toBeNull();
   });
 
   it('maxItems：达到上限隐藏添加按钮', () => {
@@ -170,7 +190,7 @@ describe('FormCardList', () => {
       />,
     );
     expect(screen.queryByText('添加一项')).toBeNull();
-    expect(screen.getAllByLabelText('delete-item')).toHaveLength(2);
+    expect(screen.getAllByLabelText(/删除第 \d+ 项/)).toHaveLength(2);
   });
 
   it('disabled：隐藏增删入口且控件禁用', () => {
@@ -183,7 +203,7 @@ describe('FormCardList', () => {
       />,
     );
     expect(screen.queryByText('添加一项')).toBeNull();
-    expect(screen.queryByLabelText('delete-item')).toBeNull();
+    expect(screen.queryByLabelText(/删除第 \d+ 项/)).toBeNull();
     expect((screen.getByDisplayValue('张三') as HTMLInputElement).disabled).toBe(true);
   });
 
@@ -250,8 +270,9 @@ describe('FormCardList DSL', () => {
     await expectEventState(context, 'items', [{ name: '李四' }, {}]);
     expect(screen.getByText('成员 2')).toBeTruthy();
 
-    // 删除第一项
-    await user.click(screen.getAllByLabelText('delete-item')[0]!);
+    // 删除第一项（默认 confirmRemove：确认气泡里点确定）
+    await user.click(screen.getAllByLabelText(/删除第 \d+ 项/)[0]!);
+    await user.click(screen.getByRole('button', { name: '确定' }));
     await expectEventState(context, 'items', [{}]);
   });
 

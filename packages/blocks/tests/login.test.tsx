@@ -42,7 +42,7 @@ describe('Login 业务组件', () => {
     },
   );
 
-  it('authVariant：plain 无卡片容器，float 大尺寸悬浮卡片（440px + shadow-xl）', () => {
+  it('authVariant：plain 无卡片容器，float 大尺寸悬浮卡片（440px + shadow-(--login-panel-shadow)）', () => {
     const plain = renderDsl({
       type: 'Login',
       props: { layout: 'centered', authVariant: 'plain' },
@@ -57,7 +57,7 @@ describe('Login 业务组件', () => {
     const card = float.container.querySelector('[data-slot=card]');
     expect(card).not.toBeNull();
     expect(card!.className).toContain('max-w-[440px]');
-    expect(card!.className).toContain('shadow-xl');
+    expect(card!.className).toContain('shadow-(--login-panel-shadow)');
   });
 
   it('brandRatio 写入分栏比例 CSS 变量，brandSide=right 品牌面板在右', () => {

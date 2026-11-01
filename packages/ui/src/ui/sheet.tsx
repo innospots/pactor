@@ -77,8 +77,13 @@ function SheetContent({
   className,
   children,
   side = 'right',
+  closeLabel = 'Close',
   ...props
-}: DialogPrimitive.Popup.Props & VariantProps<typeof sheetVariants>) {
+}: DialogPrimitive.Popup.Props &
+  VariantProps<typeof sheetVariants> & {
+    /** 关闭按钮的无障碍名（sr-only）；上层适配器传入本地化文案 */
+    closeLabel?: string;
+  }) {
   return (
     <SheetPortal data-slot="sheet-portal">
       <SheetOverlay />
@@ -98,7 +103,7 @@ function SheetContent({
           }
         >
           <XIcon />
-          <span className="sr-only">Close</span>
+          <span className="sr-only">{closeLabel}</span>
         </DialogPrimitive.Close>
       </DialogPrimitive.Popup>
     </SheetPortal>

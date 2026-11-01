@@ -135,7 +135,7 @@ describe('FormModal DSL', () => {
       { state: {} },
     );
 
-    await user.click(await screen.findByRole('button', { name: 'Close' }));
+    await user.click(await screen.findByRole('button', { name: '关闭' }));
     await expectEventState(context, 'closed', true);
   });
 
