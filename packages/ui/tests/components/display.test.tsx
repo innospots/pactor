@@ -240,7 +240,50 @@ describe('Panel', () => {
     });
 
     expect(container.querySelector('[data-slot=panel-header]')).toBeNull();
-    expect(screen.getByText('仅内容')).toBeTruthy();
+    screen.getByText('仅内容');
+  });
+
+  it('icon 渲染在标题前', () => {
+    const { container } = renderDsl({
+      type: 'Panel',
+      props: { title: '流程控制', icon: 'git-branch' },
+    });
+
+    const title = container.querySelector('[data-slot=panel-title]')!;
+    expect(title.querySelector('[data-slot=icon]')).toBeTruthy();
+    expect(title.textContent).toContain('流程控制');
+  });
+
+  it('collapsible：header 右端渲染折叠按钮，点击卸载 / 恢复内容区', () => {
+    const { container } = renderDsl({
+      type: 'Panel',
+      props: { title: '流程控制', collapsible: true },
+      children: [{ type: 'Text', props: { text: '面板内容' } }],
+    });
+
+    const toggle = container.querySelector('[data-slot=panel-toggle]')!;
+    expect(toggle.getAttribute('aria-expanded')).toBe('true');
+    screen.getByText('面板内容');
+
+    fireEvent.click(toggle);
+    expect(toggle.getAttribute('aria-expanded')).toBe('false');
+    expect(screen.queryByText('面板内容')).toBeNull();
+    expect(container.querySelector('[data-slot=panel]')?.getAttribute('data-state')).toBe('closed');
+
+    fireEvent.click(toggle);
+    expect(toggle.getAttribute('aria-expanded')).toBe('true');
+    screen.getByText('面板内容');
+  });
+
+  it('collapsible=false 时不渲染折叠按钮，内容常驻', () => {
+    const { container } = renderDsl({
+      type: 'Panel',
+      props: { title: '流程控制' },
+      children: [{ type: 'Text', props: { text: '常驻内容' } }],
+    });
+
+    expect(container.querySelector('[data-slot=panel-toggle]')).toBeNull();
+    screen.getByText('常驻内容');
   });
 
   it('通用 props：className / style / id 作用于根节点', () => {

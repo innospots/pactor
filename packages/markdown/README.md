@@ -54,9 +54,11 @@ function Demo() {
 }
 ```
 
-常用 props：`readOnly`（隐藏工具栏）、`toolbar={false}`、`placeholder`、`renderToolbar`（自定义工具栏内容）、`plugins`（追加 MDXEditor 插件）、`editorProps`（透传底层 props）。容器带基础 class `pactor-markdown-editor`。注意：编辑器体积较大且依赖浏览器 DOM API，SSR 场景请动态导入（如 `next/dynamic` 的 `ssr: false`）。
+常用 props：`readOnly`（隐藏工具栏）、`toolbar={false}`、`placeholder`、`theme`（`'light' | 'dark'`）、`renderToolbar`（自定义工具栏内容）、`plugins`（追加 MDXEditor 插件）、`editorProps`（透传底层 props）。容器带基础 class `pactor-markdown-editor`。注意：编辑器体积较大且依赖浏览器 DOM API，SSR 场景请动态导入（如 `next/dynamic` 的 `ssr: false`）。
 
 `value` 为受控语义：用户输入经 `onChange` 回流不重复导入（光标不跳动）；外部变更（如 DSL state 回写）经 `setMarkdown` 同步进编辑器。
+
+明暗模式：`theme` 缺省跟随 `documentElement` 上的 `data-pactor-theme`（pactor 换肤约定）并监听其变化自动切换，也可显式传 `'light' | 'dark'` 固定。主题 class 会同时应用到编辑根节点与 portal 弹层的 `.mdxeditor-popup-container`（工具栏下拉、链接弹层），且原地切换、不重建弹层容器——打开中的下拉不会因换肤丢失；容器上还带 `data-theme` 属性便于宿主样式覆盖。
 
 ## DSL 使用
 
@@ -92,7 +94,7 @@ events:
         draft: '${event}'
 ```
 
-支持 props：`value` / `placeholder` / `readOnly` / `toolbar` / `autoFocus` / `className` / `style`。注意：编辑器依赖浏览器 DOM API 与 `@mdxeditor/editor/style.css`，仅适合 Page DSL（浏览器页面），不要注册进 Chat 的 Safe Registry。
+支持 props：`value` / `placeholder` / `readOnly` / `toolbar` / `autoFocus` / `theme` / `className` / `style`。`theme` 与组件用法一致：缺省跟随 `data-pactor-theme`，也可在 YAML 中写 `theme: dark` 固定。注意：编辑器依赖浏览器 DOM API 与 `@mdxeditor/editor/style.css`，仅适合 Page DSL（浏览器页面），不要注册进 Chat 的 Safe Registry。
 
 ## 文档
 
