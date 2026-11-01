@@ -149,6 +149,7 @@ export const TOKEN_GROUPS: TokenGroup[] = [
       { name: '--card-shadow', type: 'length', description: '卡片阴影', defaultValue: 'none' },
       { name: '--overlay-background', type: 'color', description: '模态遮罩（Dialog / Sheet / Drawer 幕布）', defaultValue: 'oklch(0 0 0 / 50%)' },
       { name: '--shadow-color', type: 'color', description: '弹层阴影颜色', defaultValue: 'oklch(0 0 0 / 10%)' },
+      { name: '--login-panel-shadow', type: 'length', description: 'Login 浮层卡阴影（全库唯一默认开启的静止态阴影）', defaultValue: '0 20px 25px -5px var(--shadow-color), 0 8px 10px -6px var(--shadow-color)' },
     ],
   },
 ];
