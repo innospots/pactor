@@ -4,10 +4,11 @@
  * Textarea / Checkbox / RadioGroup / Switch / Slider / NumberInput / Label / Field 的
  * Form 集成（name 即成表单项、值收集、错误展示）、事件值规范化与通用 props。
  */
-import { fireEvent, screen } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, expect, it, vi } from 'vitest';
 
+import { Checkbox } from '../../src/components/components/Checkbox/index.js';
 import {
   COMMON_PROPS_PROBE,
   expectCommonProps,
@@ -349,6 +350,106 @@ describe('RadioGroup', () => {
     const checkedRow = container.querySelector('[data-slot=radio-group-card][data-checked]');
     expect(checkedRow?.textContent).toContain('Team');
   });
+
+  it('cards 变体：trailing 行右端占位渲染 DSL 节点，点击占位区不切换选中', async () => {
+    const user = userEvent.setup();
+    const { container, context } = renderDsl({
+      type: 'RadioGroup',
+      props: {
+        variant: 'cards',
+        value: '${state.plan}',
+        options: [
+          {
+            label: 'Solo',
+            value: 'solo',
+            trailing: { type: 'Badge', props: { text: '推荐' } },
+          },
+          { label: 'Team', value: 'team' },
+        ],
+      },
+      events: {
+        onChange: { action: 'setState', params: { plan: '${event}' } },
+      },
+    });
+
+    const slot = container.querySelector('[data-slot=radio-group-card-trailing]');
+    expect(slot).not.toBeNull();
+    expect(slot!.textContent).toContain('推荐');
+
+    // 占位区为中立区域：点击不触发选中切换
+    await user.click(screen.getByText('推荐'));
+    expect(context.state.get('plan')).toBeUndefined();
+
+    // 点击行文本正常选中
+    await user.click(screen.getByText('Team'));
+    await expectEventState(context, 'plan', 'team');
+  });
+
+  it('cards 变体：默认显示 border，bordered=false 隐藏', () => {
+    const { container } = renderDsl({
+      type: 'RadioGroup',
+      props: {
+        variant: 'cards',
+        value: 'team',
+        options: [
+          { label: 'Solo', value: 'solo' },
+          { label: 'Team', value: 'team' },
+        ],
+      },
+    });
+
+    const rows = container.querySelectorAll('[data-slot=radio-group-card]');
+    expect(rows[0]!.className).toContain('border-border');
+    // 选中行 border-primary 高亮
+    expect(rows[1]!.className).toContain('border-primary');
+  });
+
+  it('cards 变体：bordered=false 隐藏行边框', () => {
+    const { container } = renderDsl({
+      type: 'RadioGroup',
+      props: {
+        variant: 'cards',
+        bordered: false,
+        options: [
+          { label: 'Solo', value: 'solo' },
+          { label: 'Team', value: 'team' },
+        ],
+      },
+    });
+
+    const rows = container.querySelectorAll('[data-slot=radio-group-card]');
+    expect(rows[0]!.className).not.toContain('border-border');
+    expect(rows[0]!.className).not.toContain('border-primary');
+  });
+
+  it('cards 变体：选项 clickable=false 禁用整卡点击（外观不变）', async () => {
+    const user = userEvent.setup();
+    const { container, context } = renderDsl({
+      type: 'RadioGroup',
+      props: {
+        variant: 'cards',
+        value: '${state.plan}',
+        options: [
+          { label: 'Solo', value: 'solo', clickable: false },
+          { label: 'Team', value: 'team' },
+        ],
+      },
+      events: {
+        onChange: { action: 'setState', params: { plan: '${event}' } },
+      },
+    });
+
+    const soloRow = container.querySelectorAll('[data-slot=radio-group-card]')[0]!;
+    // 不可点但外观不置灰
+    expect(soloRow.className).not.toContain('opacity-50');
+    expect(soloRow.className).not.toContain('cursor-pointer');
+
+    await user.click(screen.getByText('Solo'));
+    expect(context.state.get('plan')).toBeUndefined();
+
+    await user.click(screen.getByText('Team'));
+    await expectEventState(context, 'plan', 'team');
+  });
 });
 
 describe('Checkbox 组模式（options）', () => {
@@ -465,6 +566,112 @@ describe('Checkbox 组模式（options）', () => {
     expect(
       container.querySelectorAll('[data-slot=checkbox-group-card][data-checked]').length,
     ).toBe(2);
+  });
+
+  it('cards 变体：trailing 行右端占位（DSL 节点），点击占位区不触发勾选', async () => {
+    const user = userEvent.setup();
+    const { container, context } = renderDsl({
+      type: 'Checkbox',
+      props: {
+        variant: 'cards',
+        value: '${state.modules}',
+        options: [
+          {
+            label: '基础报表',
+            value: 'basic',
+            trailing: { type: 'Text', props: { text: '已含', type: 'secondary' } },
+          },
+          { label: '高级分析', value: 'pro' },
+        ],
+      },
+      events: {
+        onChange: { action: 'setState', params: { modules: '${event}' } },
+      },
+    });
+
+    const slot = container.querySelector('[data-slot=checkbox-group-card-trailing]');
+    expect(slot).not.toBeNull();
+    expect(slot!.textContent).toContain('已含');
+
+    await user.click(screen.getByText('已含'));
+    expect(context.state.get('modules')).toBeUndefined();
+
+    await user.click(screen.getByText('高级分析'));
+    await expectEventState(context, 'modules', ['pro']);
+  });
+
+  it('cards 变体：trailing 支持 ReactNode（纯 React 使用，不依赖 Renderer 上下文）', () => {
+    render(
+      <Checkbox
+        variant="cards"
+        options={[{ label: '基础报表', value: 'basic', trailing: <em>HOT</em> }]}
+        value={[]}
+        onChange={() => {}}
+      />,
+    );
+    const slot = document.querySelector('[data-slot=checkbox-group-card-trailing]');
+    expect(slot).not.toBeNull();
+    expect(slot!.textContent).toContain('HOT');
+  });
+
+  it('cards 变体：默认显示 border，bordered=false 隐藏', () => {
+    const { container, unmount } = renderDsl({
+      type: 'Checkbox',
+      props: {
+        variant: 'cards',
+        value: ['pro'],
+        options: [
+          { label: '基础报表', value: 'basic' },
+          { label: '高级分析', value: 'pro' },
+        ],
+      },
+    });
+
+    const rows = container.querySelectorAll('[data-slot=checkbox-group-card]');
+    expect(rows[0]!.className).toContain('border-border');
+    // 选中行 border-primary 高亮
+    expect(rows[1]!.className).toContain('border-primary');
+    unmount();
+
+    const again = renderDsl({
+      type: 'Checkbox',
+      props: {
+        variant: 'cards',
+        bordered: false,
+        options: [{ label: '基础报表', value: 'basic' }],
+      },
+    });
+    const row = again.container.querySelector('[data-slot=checkbox-group-card]')!;
+    expect(row.className).not.toContain('border-border');
+    expect(row.className).not.toContain('border-primary');
+  });
+
+  it('cards 变体：选项 clickable=false 禁用整卡点击（外观不变）', async () => {
+    const user = userEvent.setup();
+    const { container, context } = renderDsl({
+      type: 'Checkbox',
+      props: {
+        variant: 'cards',
+        value: '${state.modules}',
+        options: [
+          { label: '基础报表', value: 'basic', clickable: false },
+          { label: '高级分析', value: 'pro' },
+        ],
+      },
+      events: {
+        onChange: { action: 'setState', params: { modules: '${event}' } },
+      },
+    });
+
+    const basicRow = container.querySelectorAll('[data-slot=checkbox-group-card]')[0]!;
+    expect(basicRow.className).not.toContain('opacity-50');
+    expect(basicRow.className).not.toContain('cursor-pointer');
+
+    await user.click(screen.getByText('基础报表'));
+    expect(context.state.get('modules')).toBeUndefined();
+
+    await user.click(screen.getByText('高级分析'));
+    await expectEventState(context, 'modules', ['pro']);
   });
 
   it('disabled 选项不可勾选', async () => {

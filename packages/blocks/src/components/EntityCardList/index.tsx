@@ -14,7 +14,7 @@ import {
 } from '../EntityCard/index.js';
 
 /** 卡片数据项：字段与 EntityCard props 同形，可携带额外业务字段（事件参数原样回传） */
-export interface CardListItem {
+export interface EntityCardListItem {
   icon?: string;
   logo?: string;
   title?: string;
@@ -27,9 +27,9 @@ export interface CardListItem {
   [key: string]: unknown;
 }
 
-export interface CardListProps {
+export interface EntityCardListProps {
   /** 卡片数据 */
-  items?: CardListItem[];
+  items?: EntityCardListItem[];
   /** 网格列数，默认 3 */
   columns?: number;
   /** 卡片间距（px），默认 16 */
@@ -49,21 +49,21 @@ export interface CardListProps {
   /** 通用：根节点内联样式 */
   style?: CSSProperties;
   /** 整卡点击，参数 { item, index } */
-  onItemClick?: (event: { item: CardListItem; index: number }) => void;
+  onItemClick?: (event: { item: EntityCardListItem; index: number }) => void;
   /** 卡内操作按钮点击，参数 { key, text, item, index } */
-  onItemAction?: (event: { key: string; text: string; item: CardListItem; index: number }) => void;
+  onItemAction?: (event: { key: string; text: string; item: EntityCardListItem; index: number }) => void;
   /** 卡内展开式操作组选中（confirm 选项需二次点击），参数 { value, item, index } */
-  onItemExpandingAction?: (event: { value: string; item: CardListItem; index: number }) => void;
+  onItemExpandingAction?: (event: { value: string; item: EntityCardListItem; index: number }) => void;
   /** 新建占位卡点击 */
   onCreateClick?: () => void;
 }
 
 /**
- * CardList 卡片列表（区块组件）：响应式网格渲染实体摘要卡，
+ * EntityCardList 实体卡片列表（区块组件）：响应式网格渲染实体摘要卡，
  * 支持首格新建占位卡、空状态与结果计数；交互经 events 编排
  * （onItemClick / onItemAction / onCreateClick，参数经 ${event} 读取）。
  */
-export function CardList({
+export function EntityCardList({
   items,
   columns = 3,
   gap = 16,
@@ -78,17 +78,17 @@ export function CardList({
   onItemAction,
   onItemExpandingAction,
   onCreateClick,
-}: CardListProps) {
+}: EntityCardListProps) {
   const { t } = useI18n();
   const list = items ?? [];
 
   return (
-    <div data-slot="card-list" className={cn('flex flex-col gap-3', className)} style={style}>
+    <div data-slot="entity-card-list" className={cn('flex flex-col gap-3', className)} style={style}>
       {list.length === 0 && !createText ? (
         <Empty title={emptyText ?? t('pactor.table.empty')} />
       ) : (
         <div
-          data-slot="card-list-grid"
+          data-slot="entity-card-list-grid"
           className="grid"
           style={{ gridTemplateColumns: `repeat(${columns}, minmax(0, 1fr))`, gap }}
         >

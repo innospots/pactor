@@ -1,4 +1,10 @@
-import { useContext, type CSSProperties, type ReactNode } from "react";
+import {
+  useContext,
+  useEffect,
+  useRef,
+  type CSSProperties,
+  type ReactNode,
+} from "react";
 
 import { cn } from "../../../lib/utils.js";
 import { Field as ShadcnField } from "../../../ui/field.js";
@@ -42,8 +48,34 @@ export function FieldShell({
   // 已在手动 Field 内：间距由外层 Field 承担，自身只保留结构（避免
   // mb-2 / min-h-9 叠加）
   const inField = useContext(FieldNestContext);
+  const rootRef = useRef<HTMLDivElement | null>(null);
+  const errorId = htmlFor ? `${htmlFor}-error` : undefined;
+
+  // 校验/必填语义集中下发到外壳内首个可聚焦控件（18 个表单适配器免逐个接线）：
+  // aria-invalid / aria-describedby 随 error 增减，aria-required 随 rules 增减；
+  // 控件重渲染不会清理由外部设置的 aria 属性（React 只管理自己声明过的属性）
+  useEffect(() => {
+    const control = rootRef.current?.querySelector<HTMLElement>(
+      "input, textarea, select, button, [tabindex]:not([tabindex='-1'])",
+    );
+    if (!control) return;
+    if (error) {
+      control.setAttribute("aria-invalid", "true");
+      if (errorId) control.setAttribute("aria-describedby", errorId);
+    } else {
+      control.removeAttribute("aria-invalid");
+      control.removeAttribute("aria-describedby");
+    }
+    if (required) {
+      control.setAttribute("aria-required", "true");
+    } else {
+      control.removeAttribute("aria-required");
+    }
+  });
+
   return (
     <ShadcnField
+      ref={rootRef}
       data-slot="form-item"
       className={cn(
         // ShadcnField 基础为 flex-col：horizontal / inline 需显式回正为行向
@@ -76,7 +108,12 @@ export function FieldShell({
       ) : null}
       {children}
       {error ? (
-        <div data-slot="form-error" className="text-sm text-destructive">
+        <div
+          data-slot="form-error"
+          id={errorId}
+          role="alert"
+          className="text-sm text-destructive"
+        >
           {error}
         </div>
       ) : null}

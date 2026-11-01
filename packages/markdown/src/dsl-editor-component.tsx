@@ -26,6 +26,8 @@ export interface MarkdownEditorDslComponentProps {
   className?: string;
   /** 通用：根节点内联样式 */
   style?: CSSProperties;
+  /** 主题：缺省跟随 data-pactor-theme，可显式覆盖 */
+  theme?: 'light' | 'dark';
 }
 
 /**
@@ -42,6 +44,7 @@ export function MarkdownEditorDslComponent({
   onChange,
   className,
   style,
+  theme,
 }: MarkdownEditorDslComponentProps) {
   return (
     <MarkdownEditor
@@ -53,6 +56,7 @@ export function MarkdownEditorDslComponent({
       onChange={onChange}
       className={className}
       style={style}
+      theme={theme}
     />
   );
 }

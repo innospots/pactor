@@ -1,7 +1,10 @@
-import type { Ace } from 'ace-builds';
+// @vitest-environment jsdom
+import { CompletionContext } from '@codemirror/autocomplete';
+import { EditorState } from '@codemirror/state';
 import { describe, expect, it } from 'vitest';
 
 import {
+  buildCompletionSource,
   buildFunctionSnippet,
   buildScriptCompletions,
 } from '../src/components/ScriptEditor/index.js';
@@ -22,16 +25,10 @@ const variables = [
   { name: 'featureType', type: 'string', description: '特征类型' },
 ];
 
-function getCompletions(completer: Ace.Completer): Promise<Ace.Completion[]> {
-  return new Promise((resolve, reject) => {
-    completer.getCompletions(
-      null as any,
-      null as any,
-      null as any,
-      '',
-      (err, completions) => (err ? reject(err) : resolve(completions)),
-    );
-  });
+/** info 回调惰性返回文档节点（jsdom 下可直接调用取 DOM 断言） */
+function infoText(info: unknown): string {
+  expect(typeof info).toBe('function');
+  return (info as () => Node)().textContent ?? '';
 }
 
 describe('buildFunctionSnippet', () => {
@@ -54,46 +51,72 @@ describe('buildFunctionSnippet', () => {
 });
 
 describe('buildScriptCompletions', () => {
-  it('函数以 snippet 补全，meta 为 function，docHTML 含描述与参数', async () => {
-    const completions = await getCompletions(buildScriptCompletions(functions, []));
-    const sum = completions.find((c) => c.caption === 'SUM');
+  it('函数以 snippet 补全，type 为 function，info 文档含描述与参数', () => {
+    const completions = buildScriptCompletions(functions, []);
+    const sum = completions.find((c) => c.label === 'SUM');
     expect(sum).toBeTruthy();
-    expect(sum?.snippet).toBe('SUM(${1:field})');
-    expect(sum?.meta).toBe('function');
-    expect(sum?.docHTML).toContain('计算总和');
-    expect(sum?.docHTML).toContain('field');
-    expect(sum?.docHTML).toContain('需要计算总和的字段');
+    expect(sum?.type).toBe('function');
+    // snippetCompletion：apply 为 snippet 展开函数
+    expect(typeof sum?.apply).toBe('function');
+    const doc = infoText(sum?.info);
+    expect(doc).toContain('计算总和');
+    expect(doc).toContain('field');
+    expect(doc).toContain('需要计算总和的字段');
   });
 
-  it('变量直接补全名称，meta 为 variable，docHTML 含类型与描述', async () => {
-    const completions = await getCompletions(buildScriptCompletions([], variables));
-    const code = completions.find((c) => c.caption === 'featureCode');
+  it('变量直接补全名称，type 为 variable，info 文档含类型与描述', () => {
+    const completions = buildScriptCompletions([], variables);
+    const code = completions.find((c) => c.label === 'featureCode');
     expect(code).toBeTruthy();
-    expect(code?.value).toBe('featureCode');
-    expect(code?.meta).toBe('variable');
-    expect(code?.docHTML).toContain('string');
-    expect(code?.docHTML).toContain('特征编码');
+    expect(code?.type).toBe('variable');
+    // 无 apply：按 label 直接插入
+    expect(code?.apply).toBeUndefined();
+    const doc = infoText(code?.info);
+    expect(doc).toContain('string');
+    expect(doc).toContain('特征编码');
   });
 
-  it('函数与变量同时返回', async () => {
-    const completions = await getCompletions(
-      buildScriptCompletions(functions, variables),
+  it('函数与变量同时返回', () => {
+    expect(buildScriptCompletions(functions, variables)).toHaveLength(
+      functions.length + variables.length,
     );
-    expect(completions).toHaveLength(functions.length + variables.length);
   });
 
-  it('空配置返回空候选', async () => {
-    expect(await getCompletions(buildScriptCompletions())).toHaveLength(0);
-    expect(await getCompletions(buildScriptCompletions([], []))).toHaveLength(0);
+  it('空配置返回空候选', () => {
+    expect(buildScriptCompletions()).toHaveLength(0);
+    expect(buildScriptCompletions([], [])).toHaveLength(0);
   });
 
-  it('docHTML 转义 HTML 特殊字符', async () => {
-    const completions = await getCompletions(
-      buildScriptCompletions([
-        { name: 'F', description: '<b>desc</b> & "quoted"' },
-      ]),
-    );
-    expect(completions[0].docHTML).not.toContain('<b>desc</b>');
-    expect(completions[0].docHTML).toContain('&lt;b&gt;');
+  it('info 文档转义 HTML 特殊字符', () => {
+    const completions = buildScriptCompletions([
+      { name: 'F', description: '<b>desc</b> & "quoted"' },
+    ]);
+    const doc = infoText(completions[0]!.info);
+    // 作为文本呈现而非解析为标签
+    expect(doc).toContain('<b>desc</b>');
+  });
+});
+
+describe('buildCompletionSource', () => {
+  const options = buildScriptCompletions(functions, variables);
+  const source = buildCompletionSource(options);
+
+  function run(doc: string, explicit = false) {
+    const state = EditorState.create({ doc });
+    return source(new CompletionContext(state, doc.length, explicit));
+  }
+
+  it('词元命中：从词起点返回全部候选', () => {
+    const result = run('SU');
+    expect(result).toBeTruthy();
+    expect(result!.from).toBe(0);
+    expect(result!.options).toHaveLength(options.length);
+  });
+
+  it('空词且非显式触发返回 null；显式触发（Ctrl-Space）返回候选', () => {
+    expect(run('')).toBeNull();
+    const explicit = run('', true);
+    expect(explicit).toBeTruthy();
+    expect(explicit!.options).toHaveLength(options.length);
   });
 });

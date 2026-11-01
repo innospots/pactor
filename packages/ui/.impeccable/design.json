@@ -1,0 +1,108 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-10-31T00:00:00Z",
+  "title": "Design System: Pactor UI & Blocks",
+  "extensions": {
+    "colorMeta": {
+      "primary": { "role": "primary", "displayName": "Ink", "canonical": "oklch(0.205 0 0)", "tonalRamp": ["oklch(0.145 0 0)", "oklch(0.205 0 0)", "oklch(0.269 0 0)", "oklch(0.398 0 0)", "oklch(0.556 0 0)", "oklch(0.708 0 0)", "oklch(0.828 0 0)", "oklch(0.922 0 0)"] },
+      "background": { "role": "neutral", "displayName": "Paper", "canonical": "oklch(1 0 0)", "tonalRamp": ["oklch(0.97 0 0)", "oklch(0.975 0 0)", "oklch(0.98 0 0)", "oklch(0.985 0 0)", "oklch(0.99 0 0)", "oklch(0.995 0 0)", "oklch(1 0 0)", "oklch(1 0 0)"] },
+      "muted": { "role": "neutral", "displayName": "Whisper", "canonical": "oklch(0.97 0 0)", "tonalRamp": ["oklch(0.269 0 0)", "oklch(0.398 0 0)", "oklch(0.556 0 0)", "oklch(0.708 0 0)", "oklch(0.828 0 0)", "oklch(0.922 0 0)", "oklch(0.97 0 0)", "oklch(0.985 0 0)"] },
+      "destructive": { "role": "primary", "displayName": "Signal Red", "canonical": "oklch(0.577 0.245 27.325)", "tonalRamp": ["oklch(0.25 0.08 27)", "oklch(0.35 0.14 27)", "oklch(0.45 0.19 27)", "oklch(0.577 0.245 27.325)", "oklch(0.68 0.2 27)", "oklch(0.78 0.14 27)", "oklch(0.87 0.08 27)", "oklch(0.94 0.04 27)"] },
+      "success": { "role": "secondary", "displayName": "Verdant", "canonical": "oklch(0.696 0.17 162.48)", "tonalRamp": ["oklch(0.28 0.05 162)", "oklch(0.4 0.09 162)", "oklch(0.55 0.13 162)", "oklch(0.696 0.17 162.48)", "oklch(0.78 0.14 162)", "oklch(0.86 0.1 162)", "oklch(0.92 0.06 162)", "oklch(0.96 0.03 162)"] },
+      "info": { "role": "tertiary", "displayName": "Cerulean", "canonical": "oklch(0.623 0.214 259.815)", "tonalRamp": ["oklch(0.25 0.06 260)", "oklch(0.38 0.12 260)", "oklch(0.5 0.17 260)", "oklch(0.623 0.214 259.815)", "oklch(0.73 0.16 260)", "oklch(0.82 0.1 260)", "oklch(0.9 0.06 260)", "oklch(0.95 0.03 260)"] }
+    },
+    "typographyMeta": {
+      "body": { "displayName": "Body", "purpose": "组件默认字号：表单、列表、正文。" },
+      "label": { "displayName": "Label", "purpose": "按钮、表单标签、菜单项。" }
+    },
+    "shadows": [
+      { "name": "none-default", "value": "none", "purpose": "静止态默认无阴影（Flat-By-Default Rule）；浮层阴影由皮肤经 --card-shadow 授予。" }
+    ],
+    "motion": [
+      { "name": "toast-in", "value": "toast-in 200ms ease-out", "purpose": "Toast 右上角进场，上滑淡入。" },
+      { "name": "accordion", "value": "accordion-down/up 200ms ease-out", "purpose": "手风琴面板展开收起，高度关键帧。" },
+      { "name": "state-transition", "value": "transition-colors 150ms", "purpose": "hover/focus 颜色过渡（shadcn 基线）。" }
+    ],
+    "breakpoints": []
+  },
+  "components": [
+    {
+      "name": "Primary Button",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "主操作按钮：Ink 底，一屏一个。",
+      "html": "<button class=\"ds-btn-primary\">保存更改</button>",
+      "css": ".ds-btn-primary { background: var(--primary, oklch(0.205 0 0)); color: var(--primary-foreground, oklch(0.985 0 0)); padding: 8px 16px; font-size: 0.875rem; font-weight: 500; border: none; border-radius: calc(var(--radius, 0.625rem) * 0.8); transition: opacity 0.15s; } .ds-btn-primary:hover { opacity: 0.9; } .ds-btn-primary:focus-visible { outline: 2px solid var(--ring, oklch(0.708 0 0)); outline-offset: 2px; }"
+    },
+    {
+      "name": "Default Button",
+      "kind": "button",
+      "refersTo": "button-default",
+      "description": "次要操作：透明底 + hairline 边框（antd default ≈ shadcn outline）。",
+      "html": "<button class=\"ds-btn-default\">取消</button>",
+      "css": ".ds-btn-default { background: var(--background, oklch(1 0 0)); color: var(--foreground, oklch(0.145 0 0)); padding: 8px 16px; font-size: 0.875rem; font-weight: 500; border: 1px solid var(--border, oklch(0.922 0 0)); border-radius: calc(var(--radius, 0.625rem) * 0.8); transition: background 0.15s; } .ds-btn-default:hover { background: var(--accent, oklch(0.97 0 0)); } .ds-btn-default:focus-visible { outline: 2px solid var(--ring, oklch(0.708 0 0)); outline-offset: 2px; }"
+    },
+    {
+      "name": "Destructive Button",
+      "kind": "button",
+      "refersTo": "button-destructive",
+      "description": "危险操作：Signal Red 底。",
+      "html": "<button class=\"ds-btn-destructive\">删除</button>",
+      "css": ".ds-btn-destructive { background: var(--destructive, oklch(0.577 0.245 27.325)); color: var(--destructive-foreground, oklch(0.985 0 0)); padding: 8px 16px; font-size: 0.875rem; font-weight: 500; border: none; border-radius: calc(var(--radius, 0.625rem) * 0.8); transition: opacity 0.15s; } .ds-btn-destructive:hover { opacity: 0.9; } .ds-btn-destructive:focus-visible { outline: 2px solid var(--ring, oklch(0.708 0 0)); outline-offset: 2px; }"
+    },
+    {
+      "name": "Input",
+      "kind": "input",
+      "refersTo": "input",
+      "description": "文本输入：hairline 描边 + Panel 底，焦点 ring 环。",
+      "html": "<input class=\"ds-input\" placeholder=\"搜索…\" />",
+      "css": ".ds-input { background: var(--input-background, var(--card, oklch(1 0 0))); color: var(--foreground, oklch(0.145 0 0)); padding: 8px 12px; font-size: 0.875rem; border: 1px solid var(--input, oklch(0.922 0 0)); border-radius: calc(var(--radius, 0.625rem) * 0.8); min-width: 240px; transition: border-color 0.15s; } .ds-input::placeholder { color: var(--muted-foreground, oklch(0.556 0 0)); } .ds-input:focus-visible { outline: 2px solid color-mix(in oklch, var(--ring, oklch(0.708 0 0)) 50%, transparent); outline-offset: 0; border-color: var(--ring, oklch(0.708 0 0)); }"
+    },
+    {
+      "name": "Card",
+      "kind": "card",
+      "refersTo": "card",
+      "description": "容器卡：Panel 底 + hairline 边框，静止无阴影。",
+      "html": "<div class=\"ds-card\"><div class=\"ds-card-title\">月度报表</div><div class=\"ds-card-body\">卡片内容区域，扁平、无边距噪音。</div></div>",
+      "css": ".ds-card { background: var(--card, oklch(1 0 0)); color: var(--card-foreground, oklch(0.145 0 0)); border: 1px solid var(--border, oklch(0.922 0 0)); border-radius: var(--radius, 0.625rem); padding: 16px 24px; display: flex; flex-direction: column; gap: 16px; } .ds-card-title { font-size: 1.125rem; font-weight: 500; } .ds-card-body { font-size: 0.875rem; color: var(--muted-foreground, oklch(0.556 0 0)); }"
+    },
+    {
+      "name": "Badge",
+      "kind": "chip",
+      "refersTo": "badge",
+      "description": "状态徽标：Ink 底小胶囊。",
+      "html": "<span class=\"ds-badge\">已启用</span>",
+      "css": ".ds-badge { display: inline-flex; align-items: center; background: var(--primary, oklch(0.205 0 0)); color: var(--primary-foreground, oklch(0.985 0 0)); padding: 2px 10px; font-size: 0.75rem; font-weight: 500; border-radius: calc(var(--radius, 0.625rem) * 0.8); }"
+    },
+    {
+      "name": "Alert",
+      "kind": "custom",
+      "refersTo": "alert-info",
+      "description": "四态反馈条：语义色文字 + hairline 边框。",
+      "html": "<div class=\"ds-alert\"><strong>提示</strong> 配置已自动保存。</div>",
+      "css": ".ds-alert { background: var(--card, oklch(1 0 0)); color: var(--info, oklch(0.623 0.214 259.815)); border: 1px solid var(--border, oklch(0.922 0 0)); border-radius: var(--radius, 0.625rem); padding: 12px 16px; font-size: 0.875rem; } .ds-alert strong { font-weight: 500; margin-right: 4px; }"
+    },
+    {
+      "name": "Sidebar Nav Item",
+      "kind": "nav",
+      "refersTo": "sidebar-item",
+      "description": "侧栏菜单项：hover/选中用 Whisper 弱填充。",
+      "html": "<nav class=\"ds-nav\"><a class=\"ds-nav-item ds-nav-active\" href=\"#\">仪表盘</a><a class=\"ds-nav-item\" href=\"#\">用户管理</a></nav>",
+      "css": ".ds-nav { display: flex; flex-direction: column; gap: 2px; width: 200px; } .ds-nav-item { padding: 8px 12px; font-size: 0.875rem; color: var(--foreground, oklch(0.145 0 0)); text-decoration: none; border-radius: calc(var(--radius, 0.625rem) * 0.8); transition: background 0.15s; } .ds-nav-item:hover { background: var(--sidebar-accent, var(--accent, oklch(0.97 0 0))); } .ds-nav-active { background: var(--sidebar-accent, var(--accent, oklch(0.97 0 0))); font-weight: 500; }"
+    }
+  ],
+  "narrative": {
+    "northStar": "The Skin-Ready Instrument",
+    "overview": "Pactor UI 是一套刻意中性的工具型组件库：shadcn 语义令牌（OKLCH 灰阶）做基线，视觉性格被有意压到 token 层之下，把「性格」让给皮肤与业务页面。组件层是适配器：稳定的 DSL props 契约映射到 vendored shadcn/Base UI 实现，差异化全部沉淀在契约与令牌体系里。",
+    "keyCharacteristics": ["中性灰阶 OKLCH 令牌，三态主题（light/dark/跟随系统）", "扁平优先：阴影默认关闭，深度靠边框与色调分层", "双层令牌契约：语义令牌 + 组件级令牌", "DSL 契约优先，视觉实现跟随 shadcn 演进"],
+    "rules": [
+      { "name": "The Skin Authority Rule", "body": "任何组件颜色必须来自语义令牌或组件级令牌（var()），禁止硬编码 hex/oklch 字面值进组件。", "section": "colors" },
+      { "name": "The One Accent Rule", "body": "界面结构色只有灰阶；彩度只属于语义状态与图表色板。", "section": "colors" },
+      { "name": "The System Stack Rule", "body": "组件库不绑定任何 Web 字体；字体是皮肤的权利。", "section": "typography" },
+      { "name": "The Flat-By-Default Rule", "body": "组件静止态不带阴影；浮层阴影由皮肤经令牌授予。", "section": "elevation" },
+      { "name": "The Multiplicative Radius Rule", "body": "组件只引用 radius 档位，不写死 px 圆角。", "section": "shapes" }
+    ],
+    "dos": ["Do 用语义令牌表达一切颜色，组件级差异走 --<component>-<part>-<state> 令牌", "Do 用 radius 档位表达圆角，按比例派生新档位", "Do 保持 DSL 契约稳定，视觉实现跟随 shadcn 演进"],
+    "donts": ["Don't 在组件里写硬编码颜色字面值", "Don't 给静止态组件加阴影", "Don't 在组件里引入彩色装饰", "Don't 绑定 Web 字体"]
+  }
+}

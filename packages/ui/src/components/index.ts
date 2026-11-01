@@ -30,6 +30,8 @@ export { Flex } from './components/Flex/index.js';
 export type { FlexProps } from './components/Flex/index.js';
 export { Card } from './components/Card/index.js';
 export type { CardProps } from './components/Card/index.js';
+export { Panel } from './components/Panel/index.js';
+export type { PanelProps } from './components/Panel/index.js';
 export { Button } from './components/Button/index.js';
 export type {
   ButtonProps,
@@ -299,6 +301,8 @@ export type { MentionOption, MentionsProps } from './components/Mentions/index.j
 // 业务刚需类扩展组件（第五批：数据展示）
 export { List } from './components/List/index.js';
 export type { ListItemData, ListProps } from './components/List/index.js';
+export { CardList } from './components/CardList/index.js';
+export type { CardListItemData, CardListProps } from './components/CardList/index.js';
 export { Tree } from './components/Tree/index.js';
 export type { TreeNodeData, TreeProps } from './components/Tree/index.js';
 export { Descriptions } from './components/Descriptions/index.js';

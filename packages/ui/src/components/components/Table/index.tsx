@@ -699,6 +699,7 @@ export function Table({
             pageSize={pageSize}
             page={current}
             align="right"
+            showTotal
             onChange={goToPage}
           />
         </div>

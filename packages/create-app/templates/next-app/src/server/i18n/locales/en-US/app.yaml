@@ -1,4 +1,6 @@
 dashboard.coreOverview: Overview · {{start}} — {{end}}
+dashboard.empty.title: No dashboard data
+dashboard.empty.description: No data in the selected range, or the data service is not connected
 dashboard.link.allClients: View all → Client usage
 dashboard.link.allModels: View all → Model usage
 dashboard.link.reliability: View reliability analysis →
@@ -56,7 +58,7 @@ page.home.text1: Home
 page.home.text2: Home
 page.home.text3: Welcome back, {{name}}!
 page.home.text4: This page and layout are supplied by the sitemap; menus are filtered by role.
-page.home.text5: View monthly report (report:view required)
+page.home.text5: View monthly report
 page.home.title: Home
 page.login.brandTitle: Sign in to the admin console
 page.login.error: Invalid username or password

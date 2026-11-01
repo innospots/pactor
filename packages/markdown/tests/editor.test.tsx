@@ -1,9 +1,14 @@
 // @vitest-environment jsdom
-import { render, screen, waitFor } from '@testing-library/react';
-import { describe, expect, it, vi } from 'vitest';
+import { cleanup, render, screen, waitFor } from '@testing-library/react';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import { MarkdownEditor } from '../src/index.js';
 import './setup.js';
+
+afterEach(() => {
+  cleanup();
+  document.documentElement.removeAttribute('data-pactor-theme');
+});
 
 /** MarkdownEditor（基于 @mdxeditor/editor 的受控富文本编辑器） */
 describe('MarkdownEditor', () => {
@@ -55,5 +60,43 @@ describe('MarkdownEditor', () => {
     // setMarkdown 的 Markdown 导入为异步流程，等待编辑器内容刷新
     await waitFor(() => expect(container.textContent).toContain('第二版'));
     expect(container.textContent).not.toContain('第一版');
+  });
+
+  it('theme 缺省跟随 data-pactor-theme，可显式覆盖；弹层同步主题 class', async () => {
+    const { container, rerender } = render(<MarkdownEditor value="x" />);
+    const editorRoot = () => container.querySelector('.mdxeditor')!;
+    const popup = () => document.querySelector('.mdxeditor-popup-container')!;
+    const wrapper = () => container.firstElementChild as HTMLElement;
+
+    // 缺省 light：编辑根节点与 portal 弹层都带 light，不带 dark
+    await waitFor(() => {
+      expect(editorRoot().classList.contains('light')).toBe(true);
+      expect(popup()?.classList.contains('light')).toBe(true);
+    });
+    expect(editorRoot().classList.contains('pactor-markdown-editor-root')).toBe(true);
+    expect(editorRoot().classList.contains('dark')).toBe(false);
+    expect(popup().classList.contains('pactor-markdown-editor-root')).toBe(true);
+    expect(wrapper().getAttribute('data-theme')).toBe('light');
+
+    // 跟随 documentElement 的 pactor 主题切换
+    document.documentElement.setAttribute('data-pactor-theme', 'dark');
+    await waitFor(() => expect(editorRoot().classList.contains('dark')).toBe(true));
+    expect(editorRoot().classList.contains('light')).toBe(false);
+    expect(popup().classList.contains('dark')).toBe(true);
+    expect(wrapper().getAttribute('data-theme')).toBe('dark');
+
+    // 显式 theme 覆盖皮肤跟随
+    rerender(<MarkdownEditor value="x" theme="light" />);
+    await waitFor(() => {
+      expect(editorRoot().classList.contains('light')).toBe(true);
+      expect(popup().classList.contains('light')).toBe(true);
+    });
+    expect(editorRoot().classList.contains('dark')).toBe(false);
+
+    rerender(<MarkdownEditor value="x" theme="dark" />);
+    await waitFor(() => {
+      expect(editorRoot().classList.contains('dark')).toBe(true);
+      expect(popup().classList.contains('dark')).toBe(true);
+    });
   });
 });
