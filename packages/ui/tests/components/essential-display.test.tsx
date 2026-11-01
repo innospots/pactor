@@ -98,6 +98,71 @@ describe('CardList', () => {
     expect(screen.getByText('张').getAttribute('data-slot')).toBe('card-list-item-avatar');
   });
 
+  it('extra 支持 DSL 节点', () => {
+    const { container } = renderDsl({
+      type: 'CardList',
+      props: {
+        items: [
+          {
+            title: '张三',
+            extra: { type: 'Icon', props: { name: 'chevron-right' } },
+          },
+        ],
+      },
+    });
+
+    const extra = container.querySelector('[data-slot=card-list-item-extra]');
+    expect(extra).toBeTruthy();
+    expect(extra!.querySelector('[data-slot=icon]')).toBeTruthy();
+  });
+
+  it('titleExtra 支持 DSL 节点，渲染在标题右侧', () => {
+    const { container } = renderDsl({
+      type: 'CardList',
+      props: {
+        items: [
+          {
+            title: '模型诊断',
+            titleExtra: { type: 'Tag', props: { text: '智能任务', bordered: false } },
+          },
+        ],
+      },
+    });
+
+    const title = container.querySelector('[data-slot=card-list-item-title]')!;
+    const extra = container.querySelector('[data-slot=card-list-item-title-extra]');
+    expect(extra).not.toBeNull();
+    expect(extra!.textContent).toBe('智能任务');
+    expect(
+      title.compareDocumentPosition(extra!) & Node.DOCUMENT_POSITION_FOLLOWING,
+    ).toBeTruthy();
+  });
+
+  it('after 支持 DSL 节点，渲染在列表项之后', () => {
+    const { container } = renderDsl({
+      type: 'CardList',
+      props: {
+        items: [
+          {
+            key: 'a',
+            title: '人工审核',
+            after: { type: 'Text', props: { text: '通过 → 报告生成 / 拒绝 → 结束' } },
+          },
+          { key: 'b', title: '报告生成' },
+        ],
+      },
+    });
+
+    const cards = container.querySelectorAll('[data-slot=card-list-item]');
+    const after = container.querySelector('[data-slot=card-list-item-after]');
+    expect(cards.length).toBe(2);
+    expect(after).not.toBeNull();
+    expect(after!.textContent).toContain('通过 → 报告生成');
+    expect(
+      after!.compareDocumentPosition(cards[1]!) & Node.DOCUMENT_POSITION_FOLLOWING,
+    ).toBeTruthy();
+  });
+
   it('卡片间距默认 12px，gap 可自定义', () => {
     const { container, unmount } = renderDsl({
       type: 'CardList',
@@ -177,6 +242,60 @@ describe('CardList', () => {
     await user.click(screen.getByText('方案 A'));
     await user.click(screen.getByText('方案 B'));
     await expectEventState(context, 'selected', ['a', 'b']);
+  });
+
+  it('项 className / style 叠加到列表项根节点', () => {
+    const { container } = renderDsl({
+      type: 'CardList',
+      props: {
+        items: [
+          {
+            key: 'a',
+            title: '特殊样式项',
+            className: 'special-item bg-amber-50',
+            style: { borderWidth: 2 },
+          },
+        ],
+      },
+    });
+
+    const row = container.querySelector('[data-slot=card-list-item]') as HTMLElement;
+    expect(row.className).toContain('special-item');
+    expect(row.className).toContain('bg-amber-50');
+    expect(row.style.borderWidth).toBe('2px');
+  });
+
+  it('disabled 项不可点击 / 选中，并标记 aria-disabled', async () => {
+    const user = userEvent.setup();
+    const { container, context } = renderDsl({
+      type: 'CardList',
+      props: {
+        selectable: true,
+        value: '${state.selected}',
+        items: [
+          { key: 'a', title: '可用项' },
+          { key: 'b', title: '禁用项', disabled: true },
+        ],
+      },
+      events: {
+        onChange: { action: 'setState', params: { selected: '${event}' } },
+      },
+    });
+
+    const items = container.querySelectorAll('[data-slot=card-list-item]');
+    const disabled = items[1] as HTMLElement;
+    expect(disabled.getAttribute('data-disabled')).toBe('true');
+    expect(disabled.getAttribute('aria-disabled')).toBe('true');
+    expect(disabled.getAttribute('role')).toBe('button');
+    expect(disabled.hasAttribute('tabindex')).toBe(false);
+    expect(disabled.className).toContain('cursor-not-allowed');
+
+    await user.click(screen.getByText('禁用项'));
+    expect(context.state.get('selected')).toBeUndefined();
+    expect(container.querySelector('[data-slot=card-list-item][data-selected]')).toBeNull();
+
+    await user.click(screen.getByText('可用项'));
+    await expectEventState(context, 'selected', ['a']);
   });
 
   it('项 content：description 下方渲染 DSL 节点', () => {

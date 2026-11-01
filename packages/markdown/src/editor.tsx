@@ -1,4 +1,4 @@
-import { forwardRef, useEffect, useImperativeHandle, useRef } from 'react';
+import { forwardRef, useEffect, useId, useImperativeHandle, useRef, useState } from 'react';
 import type { CSSProperties, ReactNode } from 'react';
 import type { MDXEditorMethods, MDXEditorProps } from '@mdxeditor/editor';
 import {
@@ -46,6 +46,8 @@ export interface MarkdownEditorProps {
   className?: string;
   /** 通用：根节点内联样式 */
   style?: CSSProperties;
+  /** 主题：缺省跟随 documentElement 的 data-pactor-theme（与库换肤机制一致），可显式覆盖 */
+  theme?: 'light' | 'dark';
   /** 是否渲染工具栏，默认 true（readOnly 时强制隐藏） */
   toolbar?: boolean;
   /** 自定义工具栏内容：参数为默认工具栏节点 */
@@ -61,6 +63,26 @@ export interface MarkdownEditorProps {
     MDXEditorProps,
     'markdown' | 'onChange' | 'onBlur' | 'readOnly' | 'autoFocus' | 'placeholder' | 'plugins'
   >;
+}
+
+/** 读取并跟随 pactor 主题（documentElement 的 data-pactor-theme，缺省 light） */
+function usePactorTheme(): 'light' | 'dark' {
+  const read = (): 'light' | 'dark' =>
+    typeof document !== 'undefined' &&
+    document.documentElement.getAttribute('data-pactor-theme') === 'dark'
+      ? 'dark'
+      : 'light';
+  const [theme, setTheme] = useState<'light' | 'dark'>(read);
+  useEffect(() => {
+    if (typeof document === 'undefined') return;
+    const observer = new MutationObserver(() => setTheme(read()));
+    observer.observe(document.documentElement, {
+      attributes: true,
+      attributeFilter: ['data-pactor-theme'],
+    });
+    return () => observer.disconnect();
+  }, []);
+  return theme;
 }
 
 const defaultToolbarContents = (
@@ -103,6 +125,7 @@ export const MarkdownEditor = forwardRef<MDXEditorMethods, MarkdownEditorProps>(
       autoFocus,
       className,
       style,
+      theme,
       toolbar = true,
       renderToolbar,
       plugins,
@@ -114,6 +137,54 @@ export const MarkdownEditor = forwardRef<MDXEditorMethods, MarkdownEditorProps>(
     const containerClass = className
       ? `pactor-markdown-editor ${className}`
       : 'pactor-markdown-editor';
+
+    const pactorTheme = usePactorTheme();
+    const resolvedTheme = theme ?? pactorTheme;
+    /** 每个编辑器实例的稳定 class：用于定位其编辑根节点与 portal 弹层 */
+    const instanceId = useId().replace(/[^a-zA-Z0-9_-]/g, '');
+    const instanceClass = `pactor-markdown-editor-instance-${instanceId}`;
+    /**
+     * MDXEditor 的 className 会同时下发到编辑根节点与 portal 的
+     * `.mdxeditor-popup-container`（下拉 / 链接弹层）。这里只放稳定 class：
+     * className 变化会触发 MDXEditor 重建 portal 容器，打开中的 Radix 下拉
+     * 会丢失挂载点；因此明暗 class 改由 effect 原地切换，弹层节点在主题
+     * 切换时保持不变。编辑器根节点 / 弹层可能晚于本组件挂载（Lexical
+     * 初始化、portal 创建），用 MutationObserver 在节点出现时补上主题 class。
+     */
+    const mdxEditorClassName = [
+      'pactor-markdown-editor-root',
+      instanceClass,
+      editorProps?.className,
+    ]
+      .filter(Boolean)
+      .join(' ');
+
+    useEffect(() => {
+      if (typeof document === 'undefined') return;
+      const selector = `.${instanceClass}`;
+      const applyTheme = () => {
+        document.querySelectorAll<HTMLElement>(selector).forEach((element) => {
+          element.classList.toggle('dark', resolvedTheme === 'dark');
+          element.classList.toggle('light', resolvedTheme === 'light');
+        });
+      };
+      applyTheme();
+      const observer = new MutationObserver((records) => {
+        for (const record of records) {
+          for (const node of record.addedNodes) {
+            if (
+              node instanceof Element &&
+              (node.matches(selector) || node.querySelector(selector))
+            ) {
+              applyTheme();
+              return;
+            }
+          }
+        }
+      });
+      observer.observe(document.body, { childList: true, subtree: true });
+      return () => observer.disconnect();
+    }, [instanceClass, resolvedTheme]);
 
     /**
      * 受控同步：MDXEditor 的 markdown prop 仅作挂载初始值，
@@ -136,7 +207,7 @@ export const MarkdownEditor = forwardRef<MDXEditorMethods, MarkdownEditorProps>(
     };
 
     return (
-      <div className={containerClass} style={style}>
+      <div className={containerClass} style={style} data-theme={resolvedTheme}>
         <MDXEditor
           ref={innerRef}
           markdown={value}
@@ -185,6 +256,7 @@ export const MarkdownEditor = forwardRef<MDXEditorMethods, MarkdownEditorProps>(
             ...(plugins ?? []),
           ]}
           {...editorProps}
+          className={mdxEditorClassName}
         />
       </div>
     );
