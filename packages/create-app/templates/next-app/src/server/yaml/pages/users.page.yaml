@@ -86,7 +86,7 @@ body:
               - title: $i18n{page.users.text18:操作}
                 cell:
                   type: Button
-                  props: { text: "$i18n{page.users.text19:查看}", variant: primary, size: small }
+                  props: { text: "$i18n{page.users.text19:查看}", variant: link, size: small }
                   events:
                     onClick:
                       - action: message

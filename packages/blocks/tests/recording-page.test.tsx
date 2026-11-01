@@ -306,7 +306,7 @@ describe('RecordingPage 录音工作区', () => {
     fireEvent.click(container.querySelectorAll('[data-slot=recording-speaker-edit]')[1]);
     await screen.findByText('修改发言人');
     fireEvent.click(screen.getByText('王悦'));
-    fireEvent.click(screen.getByRole('button', { name: 'Close' }));
+    fireEvent.click(screen.getByRole('button', { name: '关闭' }));
     await vi.waitFor(() => {
       expect(screen.queryByText('修改发言人')).toBeNull();
     });

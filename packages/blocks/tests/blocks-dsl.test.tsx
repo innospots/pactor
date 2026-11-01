@@ -14,13 +14,15 @@ import { renderDsl } from './helpers.js';
 const BUSINESS_TYPES = [
   'Login',
   'EntityCard',
-  'CardList',
+  'EntityCardList',
   'FieldCondition',
   'FormCardList',
+  'FormModal',
   'ExpressionEditor',
   'RuleConfig',
   'RuleExpression',
   'ScriptEditor',
+  'FileManager',
 ];
 
 describe('blocks 组件 DSL 注册', () => {

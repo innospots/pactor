@@ -5,6 +5,7 @@
  * props 映射、受控/非受控、Form 集成（Segmented）与通用 props。
  */
 import { fireEvent, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { describe, expect, it, vi } from 'vitest';
 
 import { createComponentRegistry } from '../../src/components/index.js';
@@ -73,6 +74,254 @@ describe('List', () => {
   });
 });
 
+describe('CardList', () => {
+  it('渲染卡片列表项：title / description / extra / 占位文本 avatar', () => {
+    const { container } = renderDsl({
+      type: 'CardList',
+      props: {
+        items: [
+          { key: '1', title: '张三', description: '前端工程师', avatar: '张', extra: '在线' },
+          { key: '2', title: '李四', description: '产品经理' },
+        ],
+      },
+    });
+
+    const cards = container.querySelectorAll('[data-slot=card-list-item]');
+    expect(cards.length).toBe(2);
+    // 卡片形态：边框 + 圆角 + 卡片底色
+    expect(cards[0]!.className).toContain('border');
+    expect(cards[0]!.className).toContain('rounded-lg');
+    expect(cards[0]!.className).toContain('bg-card');
+    expect(screen.getByText('张三')).toBeTruthy();
+    expect(screen.getByText('前端工程师')).toBeTruthy();
+    expect(screen.getByText('在线')).toBeTruthy();
+    expect(screen.getByText('张').getAttribute('data-slot')).toBe('card-list-item-avatar');
+  });
+
+  it('extra 支持 DSL 节点', () => {
+    const { container } = renderDsl({
+      type: 'CardList',
+      props: {
+        items: [
+          {
+            title: '张三',
+            extra: { type: 'Icon', props: { name: 'chevron-right' } },
+          },
+        ],
+      },
+    });
+
+    const extra = container.querySelector('[data-slot=card-list-item-extra]');
+    expect(extra).toBeTruthy();
+    expect(extra!.querySelector('[data-slot=icon]')).toBeTruthy();
+  });
+
+  it('titleExtra 支持 DSL 节点，渲染在标题右侧', () => {
+    const { container } = renderDsl({
+      type: 'CardList',
+      props: {
+        items: [
+          {
+            title: '模型诊断',
+            titleExtra: { type: 'Tag', props: { text: '智能任务', bordered: false } },
+          },
+        ],
+      },
+    });
+
+    const title = container.querySelector('[data-slot=card-list-item-title]')!;
+    const extra = container.querySelector('[data-slot=card-list-item-title-extra]');
+    expect(extra).not.toBeNull();
+    expect(extra!.textContent).toBe('智能任务');
+    expect(
+      title.compareDocumentPosition(extra!) & Node.DOCUMENT_POSITION_FOLLOWING,
+    ).toBeTruthy();
+  });
+
+  it('after 支持 DSL 节点，渲染在列表项之后', () => {
+    const { container } = renderDsl({
+      type: 'CardList',
+      props: {
+        items: [
+          {
+            key: 'a',
+            title: '人工审核',
+            after: { type: 'Text', props: { text: '通过 → 报告生成 / 拒绝 → 结束' } },
+          },
+          { key: 'b', title: '报告生成' },
+        ],
+      },
+    });
+
+    const cards = container.querySelectorAll('[data-slot=card-list-item]');
+    const after = container.querySelector('[data-slot=card-list-item-after]');
+    expect(cards.length).toBe(2);
+    expect(after).not.toBeNull();
+    expect(after!.textContent).toContain('通过 → 报告生成');
+    expect(
+      after!.compareDocumentPosition(cards[1]!) & Node.DOCUMENT_POSITION_FOLLOWING,
+    ).toBeTruthy();
+  });
+
+  it('卡片间距默认 12px，gap 可自定义', () => {
+    const { container, unmount } = renderDsl({
+      type: 'CardList',
+      props: { items: [{ title: 'a' }, { title: 'b' }] },
+    });
+    expect((container.querySelector('[data-slot=card-list]') as HTMLElement).style.gap).toBe('12px');
+    unmount();
+
+    const { container: c2 } = renderDsl({
+      type: 'CardList',
+      props: { items: [{ title: 'a' }], gap: 24 },
+    });
+    expect((c2.querySelector('[data-slot=card-list]') as HTMLElement).style.gap).toBe('24px');
+  });
+
+  it('空 items 渲染空态文案', () => {
+    renderDsl({ type: 'CardList', props: { items: [] } });
+    expect(screen.getByText('暂无数据')).toBeTruthy();
+  });
+
+  it('通用 props 作用于根节点', () => {
+    const { container } = renderDsl({
+      type: 'CardList',
+      props: { items: [{ title: 'a' }], ...COMMON_PROPS },
+    });
+    expectCommonProps(container.querySelector('[data-slot=card-list]'));
+  });
+
+  it('selectable 单选：点击选中高亮并传出 key 数组，再点已选中项取消', async () => {
+    const user = userEvent.setup();
+    const { container, context } = renderDsl({
+      type: 'CardList',
+      props: {
+        selectable: true,
+        value: '${state.selected}',
+        items: [
+          { key: 'a', title: '方案 A' },
+          { key: 'b', title: '方案 B' },
+        ],
+      },
+      events: {
+        onChange: { action: 'setState', params: { selected: '${event}' } },
+      },
+    });
+
+    await user.click(screen.getByText('方案 A'));
+    await expectEventState(context, 'selected', ['a']);
+    const selectedRow = container.querySelector('[data-slot=card-list-item][data-selected]');
+    expect(selectedRow?.textContent).toContain('方案 A');
+    expect(selectedRow!.className).toContain('border-primary');
+
+    // 单选语义：点另一项替换；再点已选中项取消
+    await user.click(screen.getByText('方案 B'));
+    await expectEventState(context, 'selected', ['b']);
+    await user.click(screen.getByText('方案 B'));
+    await expectEventState(context, 'selected', []);
+  });
+
+  it('selectable 多选（multiple）：toggle 累加选中', async () => {
+    const user = userEvent.setup();
+    const { context } = renderDsl({
+      type: 'CardList',
+      props: {
+        selectable: true,
+        multiple: true,
+        value: '${state.selected}',
+        items: [
+          { key: 'a', title: '方案 A' },
+          { key: 'b', title: '方案 B' },
+        ],
+      },
+      events: {
+        onChange: { action: 'setState', params: { selected: '${event}' } },
+      },
+    });
+
+    await user.click(screen.getByText('方案 A'));
+    await user.click(screen.getByText('方案 B'));
+    await expectEventState(context, 'selected', ['a', 'b']);
+  });
+
+  it('项 className / style 叠加到列表项根节点', () => {
+    const { container } = renderDsl({
+      type: 'CardList',
+      props: {
+        items: [
+          {
+            key: 'a',
+            title: '特殊样式项',
+            className: 'special-item bg-amber-50',
+            style: { borderWidth: 2 },
+          },
+        ],
+      },
+    });
+
+    const row = container.querySelector('[data-slot=card-list-item]') as HTMLElement;
+    expect(row.className).toContain('special-item');
+    expect(row.className).toContain('bg-amber-50');
+    expect(row.style.borderWidth).toBe('2px');
+  });
+
+  it('disabled 项不可点击 / 选中，并标记 aria-disabled', async () => {
+    const user = userEvent.setup();
+    const { container, context } = renderDsl({
+      type: 'CardList',
+      props: {
+        selectable: true,
+        value: '${state.selected}',
+        items: [
+          { key: 'a', title: '可用项' },
+          { key: 'b', title: '禁用项', disabled: true },
+        ],
+      },
+      events: {
+        onChange: { action: 'setState', params: { selected: '${event}' } },
+      },
+    });
+
+    const items = container.querySelectorAll('[data-slot=card-list-item]');
+    const disabled = items[1] as HTMLElement;
+    expect(disabled.getAttribute('data-disabled')).toBe('true');
+    expect(disabled.getAttribute('aria-disabled')).toBe('true');
+    expect(disabled.getAttribute('role')).toBe('button');
+    expect(disabled.hasAttribute('tabindex')).toBe(false);
+    expect(disabled.className).toContain('cursor-not-allowed');
+
+    await user.click(screen.getByText('禁用项'));
+    expect(context.state.get('selected')).toBeUndefined();
+    expect(container.querySelector('[data-slot=card-list-item][data-selected]')).toBeNull();
+
+    await user.click(screen.getByText('可用项'));
+    await expectEventState(context, 'selected', ['a']);
+  });
+
+  it('项 content：description 下方渲染 DSL 节点', () => {
+    const { container } = renderDsl({
+      type: 'CardList',
+      props: {
+        items: [
+          {
+            key: '1',
+            title: '月度运营报告',
+            description: '已发布',
+            content: { type: 'Badge', props: { text: '月报' } },
+          },
+        ],
+      },
+    });
+
+    const slot = container.querySelector('[data-slot=card-list-item-content]');
+    expect(slot).not.toBeNull();
+    expect(slot!.textContent).toContain('月报');
+    // content 位于 description 之后
+    const desc = container.querySelector('[data-slot=card-list-item-description]')!;
+    expect(desc.compareDocumentPosition(slot!) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+  });
+});
+
 describe('Tree', () => {
   const treeData = [
     {
@@ -85,6 +334,70 @@ describe('Tree', () => {
     },
     { key: 'leaf', title: '叶子节点' },
   ];
+
+  it('键盘导航：roving tabindex + 方向键移动 + Enter 选中', async () => {
+    const user = userEvent.setup();
+    const { container, context } = renderDsl({
+      type: 'Tree',
+      props: { treeData, defaultExpandedKeys: ['parent'] },
+      events: {
+        onSelect: { action: 'setState', params: { selected: '${event}' } },
+      },
+    });
+
+    const rowOf = (key: string) =>
+      container.querySelector(
+        `[data-key=${key}] [data-slot=tree-node-row]`,
+      ) as HTMLElement;
+
+    // roving tabindex：只有当前节点在 Tab 序列
+    expect(rowOf('parent').tabIndex).toBe(0);
+    expect(rowOf('child-1').tabIndex).toBe(-1);
+
+    // Tab 进入树 → 焦点落在第一个节点
+    await user.tab();
+    expect(document.activeElement).toBe(rowOf('parent'));
+
+    // ↓ 移动到子节点一，Enter 选中
+    await user.keyboard('{ArrowDown}');
+    expect(document.activeElement).toBe(rowOf('child-1'));
+    await user.keyboard('{Enter}');
+    await expectEventState(context, 'selected', ['child-1']);
+
+    // ← 在子节点上回到父节点，再 ← 收起父节点
+    await user.keyboard('{ArrowLeft}');
+    expect(document.activeElement).toBe(rowOf('parent'));
+    await user.keyboard('{ArrowLeft}');
+    expect(screen.queryByText('子节点一')).toBeNull();
+
+    // → 重新展开，再 → 进入第一个子级
+    await user.keyboard('{ArrowRight}');
+    expect(screen.getByText('子节点一')).toBeTruthy();
+    await user.keyboard('{ArrowRight}');
+    expect(document.activeElement).toBe(rowOf('child-1'));
+
+    // End 到最后一个可见节点
+    await user.keyboard('{End}');
+    expect(document.activeElement).toBe(rowOf('leaf'));
+  });
+
+  it('节点 icon 渲染在标题前', () => {
+    const { container } = renderDsl({
+      type: 'Tree',
+      props: {
+        treeData: [{ key: 'f', title: 'README.md', icon: 'file-text' }],
+      },
+    });
+    const row = container.querySelector('[data-key=f] [data-slot=tree-node-row]')!;
+    const icon = row.querySelector('svg');
+    expect(icon).toBeTruthy();
+    // 图标在标题元素之前
+    const title = row.querySelector('[data-slot=tree-node-title]')!;
+    expect(
+      icon!.compareDocumentPosition(title) &
+        Node.DOCUMENT_POSITION_FOLLOWING,
+    ).toBeTruthy();
+  });
 
   it('缺省收起子节点；点击 chevron 展开并触发 onExpand', async () => {
     const { context } = renderDsl({

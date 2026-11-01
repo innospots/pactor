@@ -82,7 +82,7 @@ export function Image({
       />
       {preview ? (
         <ShadcnDialog open={previewOpen} onOpenChange={setPreviewOpen}>
-          <DialogContent className="sm:max-w-3xl" aria-label={alt || t('pactor.image.preview')}>
+          <DialogContent className="sm:max-w-3xl" aria-label={alt || t('pactor.image.preview')} closeLabel={t('pactor.imageViewer.close')}>
             <DialogTitle className="sr-only">{alt || t('pactor.image.preview')}</DialogTitle>
             <img
               data-slot="image-preview"

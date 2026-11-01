@@ -2,10 +2,12 @@ import { useI18n } from "@pactor-app/runtime";
 import {
   Fragment,
   useEffect,
+  useMemo,
   useRef,
   useState,
   type CSSProperties,
   type DragEvent,
+  type KeyboardEvent,
 } from "react";
 
 import { cn } from "../../../lib/utils.js";
@@ -67,6 +69,8 @@ export interface TreeNodeActionInfo {
 export interface TreeNodeData {
   key: string;
   title: string;
+  /** 节点图标（Icon 白名单，kebab-case / PascalCase 均可），渲染在标题前 */
+  icon?: string;
   children?: TreeNodeData[];
   disabled?: boolean;
   /** 行级操作（优先于 Tree 级 nodeActions） */
@@ -125,6 +129,27 @@ function someDescendantChecked(
   return (node.children ?? []).some(
     (child) => checked.has(child.key) || someDescendantChecked(child, checked),
   );
+}
+
+/** 扁平化当前可见节点（展开态驱动），键盘导航按此线性序列移动 */
+interface FlatTreeNode {
+  node: TreeNodeData;
+  parentKey: string | null;
+}
+
+function flattenVisibleTree(
+  nodes: TreeNodeData[],
+  expandedSet: Set<string>,
+): FlatTreeNode[] {
+  const out: FlatTreeNode[] = [];
+  const walk = (list: TreeNodeData[], parentKey: string | null) => {
+    for (const node of list) {
+      out.push({ node, parentKey });
+      if (expandedSet.has(node.key)) walk(node.children ?? [], node.key);
+    }
+  };
+  walk(nodes, null);
+  return out;
 }
 
 /**
@@ -244,6 +269,78 @@ export function Tree({
   const checked = checkedKeys !== undefined ? checkedKeys : innerChecked;
   const expandedSet = new Set(expanded);
   const checkedSet = new Set(checked);
+
+  // 键盘导航：roving tabindex——只有「当前节点」在 Tab 序列里（tabIndex=0），
+  // 方向键在可见节点间移动焦点，Enter/Space 选中，→ 展开/进入子级，← 收起/回到父级
+  const rootRef = useRef<HTMLDivElement>(null);
+  const [activeKey, setActiveKey] = useState<string | null>(null);
+  const visibleNodes = useMemo(
+    () => flattenVisibleTree(data, expandedSet),
+    [data, expanded],
+  );
+  const effectiveActiveKey =
+    activeKey !== null && visibleNodes.some((v) => v.node.key === activeKey)
+      ? activeKey
+      : (visibleNodes[0]?.node.key ?? null);
+
+  const focusNode = (key: string) => {
+    setActiveKey(key);
+    // jsdom 无 CSS.escape：key 里的引号转义兜底
+    const escaped =
+      typeof CSS !== "undefined" && CSS.escape
+        ? CSS.escape(key)
+        : key.replace(/(["\\])/g, "\\$1");
+    (
+      rootRef.current?.querySelector(
+        `[data-key="${escaped}"] [data-slot=tree-node-row]`,
+      ) as HTMLElement | null
+    )?.focus();
+  };
+
+  const handleRowKeyDown = (
+    event: KeyboardEvent<HTMLElement>,
+    node: TreeNodeData,
+    parentKey: string | null,
+  ) => {
+    const index = visibleNodes.findIndex((v) => v.node.key === node.key);
+    const children = node.children ?? [];
+    const hasChildren = children.length > 0;
+    const isExpanded = expandedSet.has(node.key);
+    const moveTo = (key: string | undefined) => {
+      if (key === undefined) return;
+      event.preventDefault();
+      focusNode(key);
+    };
+    switch (event.key) {
+      case "ArrowDown":
+        moveTo(visibleNodes[index + 1]?.node.key);
+        break;
+      case "ArrowUp":
+        moveTo(visibleNodes[index - 1]?.node.key);
+        break;
+      case "ArrowRight":
+        event.preventDefault();
+        if (hasChildren && !isExpanded) toggleExpand(node.key);
+        else if (hasChildren) moveTo(children[0]?.key);
+        break;
+      case "ArrowLeft":
+        event.preventDefault();
+        if (hasChildren && isExpanded) toggleExpand(node.key);
+        else if (parentKey !== null) moveTo(parentKey);
+        break;
+      case "Enter":
+      case " ":
+        event.preventDefault();
+        handleSelect(node);
+        break;
+      case "Home":
+        moveTo(visibleNodes[0]?.node.key);
+        break;
+      case "End":
+        moveTo(visibleNodes[visibleNodes.length - 1]?.node.key);
+        break;
+    }
+  };
 
   const toggleExpand = (key: string) => {
     const next = expandedSet.has(key)
@@ -389,7 +486,11 @@ export function Tree({
     );
   };
 
-  const renderNodes = (nodes: TreeNodeData[], depth: number) =>
+  const renderNodes = (
+    nodes: TreeNodeData[],
+    depth: number,
+    parentKey: string | null = null,
+  ) =>
     nodes.map((node) => {
       const children = node.children ?? [];
       const hasChildren = children.length > 0;
@@ -405,15 +506,16 @@ export function Tree({
         someDescendantChecked(node, checkedSet);
 
       return (
-        <div
-          key={node.key}
-          data-slot="tree-node"
-          data-key={node.key}
-          role="treeitem"
-          aria-expanded={hasChildren ? isExpanded : undefined}
-          aria-selected={selected.includes(node.key)}
-        >
+        <div key={node.key} data-slot="tree-node" data-key={node.key}>
           <div
+            data-slot="tree-node-row"
+            role="treeitem"
+            aria-expanded={hasChildren ? isExpanded : undefined}
+            aria-selected={selected.includes(node.key)}
+            aria-disabled={isDisabled || undefined}
+            tabIndex={node.key === effectiveActiveKey ? 0 : -1}
+            onFocus={() => setActiveKey(node.key)}
+            onKeyDown={(event) => handleRowKeyDown(event, node, parentKey)}
             className={cn(
               "group flex items-center gap-1 rounded-md py-1 pr-2 text-sm my-[2px]",
               !isDisabled && "cursor-pointer hover:bg-accent",
@@ -487,6 +589,13 @@ export function Tree({
                 onCheckedChange={(next) => handleCheck(node, next === true)}
               />
             ) : null}
+            {node.icon ? (
+              <Icon
+                name={node.icon}
+                size="sm"
+                className="shrink-0 text-muted-foreground"
+              />
+            ) : null}
             <span
               data-slot="tree-node-title"
               className="min-w-0 flex-1 truncate"
@@ -496,13 +605,16 @@ export function Tree({
             </span>
             {renderNodeActions(node)}
           </div>
-          {hasChildren && isExpanded ? renderNodes(children, depth + 1) : null}
+          {hasChildren && isExpanded ? (
+            <div role="group">{renderNodes(children, depth + 1, node.key)}</div>
+          ) : null}
         </div>
       );
     });
 
   return (
     <div
+      ref={rootRef}
       data-slot="tree"
       role="tree"
       className={cn("w-full", className)}

@@ -1,3 +1,5 @@
+import { useI18n } from '@pactor-app/runtime';
+
 import {
   Dialog,
   DialogContent,
@@ -38,6 +40,7 @@ export function RecordingPerspectiveDialog({
   onCancel,
   onConfirm,
 }: RecordingPerspectiveDialogProps) {
+  const { t } = useI18n();
   return (
     <Dialog
       open={open}
@@ -46,6 +49,7 @@ export function RecordingPerspectiveDialog({
       }}
     >
       <DialogContent
+        closeLabel={t('pactor.overlay.close')}
         data-slot="recording-perspective-dialog"
         className="gap-4 sm:max-w-xl"
       >

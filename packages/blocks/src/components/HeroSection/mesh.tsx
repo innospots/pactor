@@ -1,17 +1,18 @@
 import type { CSSProperties } from 'react';
 
 /** 装饰网格光斑：多层柔和渐变（纯 CSS，无 WebGL；Arc HeroMesh 的简化实现）。
- *  外层放大留出漂移余量（keyframes pactor-hero-mesh-drift 缓慢平移缩放） */
+ *  外层放大留出漂移余量（keyframes pactor-hero-mesh-drift 缓慢平移缩放）。
+ *  令牌是完整 oklch 颜色值（非旧 shadcn 的 HSL 三通道），直接消费，禁套 hsl() */
 const MESH_BLOB_STYLE: CSSProperties = {
   backgroundImage:
-    'radial-gradient(60% 55% at 18% 24%, color-mix(in oklch, hsl(var(--primary)) 18%, transparent)),' +
-    'radial-gradient(48% 45% at 82% 18%, color-mix(in oklch, hsl(var(--accent)) 14%, transparent)),' +
-    'radial-gradient(46% 50% at 62% 82%, color-mix(in oklch, hsl(var(--primary)) 11%, transparent))',
+    'radial-gradient(60% 55% at 18% 24%, color-mix(in oklch, var(--primary) 18%, transparent)),' +
+    'radial-gradient(48% 45% at 82% 18%, color-mix(in oklch, var(--accent) 14%, transparent)),' +
+    'radial-gradient(46% 50% at 62% 82%, color-mix(in oklch, var(--primary) 11%, transparent))',
 };
 
 /** 装饰网格点阵：细点 + 向下渐隐遮罩 */
 const MESH_DOTS_STYLE: CSSProperties = {
-  backgroundImage: 'radial-gradient(circle, hsl(var(--border)) 1px, transparent 1px)',
+  backgroundImage: 'radial-gradient(circle, var(--border) 1px, transparent 1px)',
   backgroundSize: '28px 28px',
   maskImage: 'linear-gradient(to bottom, black, transparent 85%)',
   WebkitMaskImage: 'linear-gradient(to bottom, black, transparent 85%)',

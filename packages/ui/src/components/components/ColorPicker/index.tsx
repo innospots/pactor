@@ -448,7 +448,7 @@ export function ColorPicker({
                     }}
                     onBlur={(event) => commitChannel(channel.key, event.currentTarget.value)}
                   />
-                  <span className="text-[10px] text-muted-foreground">{channel.label}</span>
+                  <span className="text-xs text-muted-foreground">{channel.label}</span>
                 </div>
               ))}
             </div>

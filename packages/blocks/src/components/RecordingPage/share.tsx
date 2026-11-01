@@ -1,5 +1,7 @@
 import { useState } from 'react';
 
+import { useI18n } from '@pactor-app/runtime';
+
 import { cn } from '../../lib/utils.js';
 import {
   Dialog,
@@ -81,6 +83,7 @@ export function RecordingShare({
   onShareConfirm,
   onShareChannel,
 }: RecordingShareProps) {
+  const { t } = useI18n();
   const [popoverOpen, setPopoverOpen] = useState(false);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [draftKeys, setDraftKeys] = useState<string[]>(selectedKeys);
@@ -178,7 +181,7 @@ export function RecordingShare({
         </PopoverContent>
       </Popover>
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-        <DialogContent data-slot="recording-share-dialog" className="gap-4 sm:max-w-xl">
+        <DialogContent closeLabel={t('pactor.overlay.close')} data-slot="recording-share-dialog" className="gap-4 sm:max-w-xl">
           <DialogTitle>{dialogTitle}</DialogTitle>
           {link !== undefined ? (
             <div className="flex items-center justify-between gap-3 rounded-lg border border-border px-4 py-3">

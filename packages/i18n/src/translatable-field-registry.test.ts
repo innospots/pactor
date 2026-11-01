@@ -100,6 +100,12 @@ describe('内置注册表（设计 4.4 常用展示字段）', () => {
     expect(registry.isTranslatableActionField('confirm', 'params.onOk')).toBe(false);
   });
 
+  it('Empty 空态标题与说明', () => {
+    expect(registry.isTranslatable('Empty', 'props.title')).toBe(true);
+    expect(registry.isTranslatable('Empty', 'props.description')).toBe(true);
+    expect(registry.isTranslatable('Empty', 'props.className')).toBe(false);
+  });
+
   it('不可翻译字段不注册（name/value/variant/className）', () => {
     for (const field of ['props.name', 'props.value', 'props.variant', 'props.className']) {
       expect(registry.isTranslatable('Button', field)).toBe(false);

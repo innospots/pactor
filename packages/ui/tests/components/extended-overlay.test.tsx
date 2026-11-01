@@ -200,7 +200,7 @@ describe('Dialog', () => {
     });
     await screen.findByText('编辑');
 
-    fireEvent.click(screen.getByRole('button', { name: 'Close' }));
+    fireEvent.click(screen.getByRole('button', { name: '关闭' }));
     await expectEventState(context, 'closed', true);
   });
 
@@ -497,7 +497,7 @@ describe('Sheet', () => {
     });
 
     await screen.findByText('设置');
-    fireEvent.click(screen.getByRole('button', { name: 'Close' }));
+    fireEvent.click(screen.getByRole('button', { name: '关闭' }));
     await expectEventState(context, 'sheetClosed', true);
   });
 

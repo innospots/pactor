@@ -1,7 +1,7 @@
 import type { DslChildren } from '@pactor-app/core';
 import { useI18n, useRenderer } from '@pactor-app/runtime';
 import { Plus, Trash2 } from 'lucide-react';
-import type { CSSProperties, ReactNode } from 'react';
+import { useId, type CSSProperties, type ReactNode } from 'react';
 
 import { cn } from '../../lib/utils.js';
 import { Button } from '@pactor-app/ui/ui';
@@ -15,7 +15,7 @@ import {
 } from '@pactor-app/ui/ui';
 import { Switch } from '@pactor-app/ui/ui';
 import { Textarea } from '@pactor-app/ui/ui';
-import { Card } from '@pactor-app/ui/components';
+import { Card, Form, Popconfirm } from '@pactor-app/ui/components';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -70,6 +70,21 @@ export interface FormCardListProps {
   renderItem?: (item: FormCardListItem, index: number) => ReactNode;
   /** fields 模式：固定表单字段定义（未提供模板时生效） */
   fields?: FormCardListField[];
+  /**
+   * 列表项表单模式（仅模板模式生效）：每项模板包一层 ui Form——
+   * Input / Select 等声明 name 自动成为表单项（label / rules 生效），
+   * 模板内可用 Grid / Row / Col 等布局组件排布复杂表单；
+   * 字段变更经 Form onValuesChange 自动合并回当前列表项（row 同步），
+   * 声明 name 的字段无需再手写 updateItem 回写。
+   */
+  itemForm?: boolean;
+  /** itemForm 模式的表单布局，默认 vertical */
+  formLayout?: 'horizontal' | 'vertical' | 'inline';
+  /**
+   * itemForm 模式的表单名前缀：每项按 `${formName}-${index}` 注册，
+   * 供 form.setValues 联动动作按名寻址；缺省自动生成（保证页面内唯一）。
+   */
+  formName?: string;
   /** 列表项唯一键字段（React key）；缺省按下标 */
   keyField?: string;
   /**
@@ -86,6 +101,10 @@ export interface FormCardListProps {
   minItems?: number;
   /** 最多列表项数（达到后隐藏添加按钮） */
   maxItems?: number;
+  /** 删除前弹气泡确认（防止误点丢失已填内容），默认 true；传 false 关闭 */
+  confirmRemove?: boolean;
+  /** 删除确认气泡标题（confirmRemove 时生效，缺省走 i18n） */
+  confirmRemoveText?: string;
   /** 禁用：隐藏增删入口，fields 模式控件只读（模板模式自行处理 disabled） */
   disabled?: boolean;
   /** 通用：根节点 class（与内置样式合并） */
@@ -111,18 +130,26 @@ export function FormCardList({
   itemBody,
   renderItem,
   fields = [],
+  itemForm,
+  formLayout,
+  formName,
   keyField,
   itemLabel,
   addText,
   defaultItem,
   minItems = 0,
   maxItems,
+  confirmRemove = true,
+  confirmRemoveText,
   disabled,
   className,
   style,
   dslChildren,
 }: FormCardListProps) {
   const { t } = useI18n();
+  // itemForm 模式每项 Form 名必须唯一（Registry 重名抛错）：
+  // formName 前缀缺省时用 useId 兜底，保证同页多个 FormCardList 不冲突
+  const formIdBase = useId().replace(/[^a-zA-Z0-9]/g, '');
   const items = value ?? [];
   const canDelete = !disabled && items.length > minItems;
   const canAdd = !disabled && (maxItems == null || items.length < maxItems);
@@ -166,18 +193,36 @@ export function FormCardList({
           {/* 第一行：序号 + 右端删除按钮 */}
           <div data-slot="form-card-list-item-header" className="flex items-center justify-between">
             <span className="text-sm font-medium">{resolveItemLabel(index)}</span>
-            {canDelete && (
-              <Button
-                type="button"
-                variant="ghost"
-                size="icon"
-                className="h-8 w-8 shrink-0 text-muted-foreground hover:text-destructive"
-                aria-label="delete-item"
-                onClick={() => removeItem(index)}
-              >
-                <Trash2 className="h-4 w-4" />
-              </Button>
-            )}
+            {canDelete &&
+              (() => {
+                const removeButton = (
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon"
+                    className="h-8 w-8 shrink-0 text-muted-foreground hover:text-destructive"
+                    aria-label={t('pactor.formCardList.removeItem', {
+                      index: index + 1,
+                    })}
+                    onClick={confirmRemove ? undefined : () => removeItem(index)}
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
+                );
+                return confirmRemove ? (
+                  <Popconfirm
+                    title={
+                      confirmRemoveText ?? t('pactor.formCardList.removeConfirm')
+                    }
+                    danger
+                    onConfirm={() => removeItem(index)}
+                  >
+                    {removeButton}
+                  </Popconfirm>
+                ) : (
+                  removeButton
+                );
+              })()}
           </div>
 
           {/* 列表项内容：DSL 模板 > renderItem > fields 固定表单 */}
@@ -185,23 +230,37 @@ export function FormCardList({
             <DslItemBody
               template={(dslChildren ?? itemBody)!}
               scope={itemScope(item, index)}
+              itemForm={itemForm}
+              formLayout={formLayout}
+              formName={`${formName ?? `form-card-list-${formIdBase}`}-${index}`}
+              initialValues={item}
+              onPatch={(patch) => updateItem(index, patch)}
             />
           ) : renderItem ? (
             renderItem(item, index)
           ) : (
-            fields.map((field) => (
-              <div key={field.name} data-slot="form-card-list-field" className="flex flex-col gap-1.5">
-                {field.label != null && (
-                  <span className="text-sm text-muted-foreground">{field.label}</span>
-                )}
-                <FieldControl
-                  field={field}
-                  value={item[field.name]}
-                  disabled={disabled}
-                  onChange={(v) => updateItem(index, { [field.name]: v })}
-                />
-              </div>
-            ))
+            fields.map((field) => {
+              const fieldId = `${formIdBase}-${index}-${field.name}`;
+              return (
+                <div key={field.name} data-slot="form-card-list-field" className="flex flex-col gap-1.5">
+                  {field.label != null && (
+                    <label
+                      htmlFor={fieldId}
+                      className="text-sm leading-normal font-medium"
+                    >
+                      {field.label}
+                    </label>
+                  )}
+                  <FieldControl
+                    id={fieldId}
+                    field={field}
+                    value={item[field.name]}
+                    disabled={disabled}
+                    onChange={(v) => updateItem(index, { [field.name]: v })}
+                  />
+                </div>
+              );
+            })
           )}
         </Card>
       ))}
@@ -227,30 +286,59 @@ export function FormCardList({
  * 列表项 DSL 模板渲染：独立子组件内调用 useRenderer（与 Card 的 ExtraSlot
  * 同理），FormCardList 作纯 React 组件使用（fields / renderItem 模式）时
  * 不依赖 Renderer 上下文。
+ * itemForm 模式包一层 ui Form：声明 name 的控件成为表单项（label / rules
+ * 生效），模板内可用 Grid / Row / Col 排布复杂布局；字段变更经
+ * onValuesChange 合并回当前列表项（onPatch → 整份列表 onChange）。
  */
 function DslItemBody({
   template,
   scope,
+  itemForm,
+  formLayout,
+  formName,
+  initialValues,
+  onPatch,
 }: {
   template: DslChildren;
   scope: FormCardListItemScope;
+  itemForm?: boolean;
+  formLayout?: 'horizontal' | 'vertical' | 'inline';
+  formName: string;
+  initialValues: FormCardListItem;
+  onPatch: (patch: FormCardListItem) => void;
 }) {
   const { renderChildren } = useRenderer();
+  const body = renderChildren(template, scope);
+  if (!itemForm) {
+    return (
+      <div data-slot="form-card-list-item-body" className="flex flex-col gap-3">
+        {body}
+      </div>
+    );
+  }
   return (
-    <div data-slot="form-card-list-item-body" className="flex flex-col gap-3">
-      {renderChildren(template, scope)}
-    </div>
+    <Form
+      name={formName}
+      layout={formLayout}
+      initialValues={initialValues}
+      className="flex flex-col gap-3"
+      onValuesChange={(changed) => onPatch(changed)}
+    >
+      {body}
+    </Form>
   );
 }
 
 // ─── Field control（fields 模式） ─────────────────────────────────────────────
 
 function FieldControl({
+  id,
   field,
   value,
   disabled,
   onChange,
 }: {
+  id?: string;
   field: FormCardListField;
   value: unknown;
   disabled?: boolean;
@@ -260,6 +348,7 @@ function FieldControl({
     case 'number':
       return (
         <Input
+          id={id}
           type="number"
           value={value == null ? '' : String(value)}
           disabled={disabled}
@@ -270,6 +359,7 @@ function FieldControl({
     case 'textarea':
       return (
         <Textarea
+          id={id}
           value={value == null ? '' : String(value)}
           disabled={disabled}
           placeholder={field.placeholder}
@@ -284,7 +374,7 @@ function FieldControl({
           disabled={disabled}
           onValueChange={(v) => onChange(v)}
         >
-          <SelectTrigger className="w-full">
+          <SelectTrigger id={id} className="w-full">
             <SelectValue placeholder={field.placeholder} />
           </SelectTrigger>
           <SelectContent>
@@ -299,6 +389,7 @@ function FieldControl({
     case 'switch':
       return (
         <Switch
+          id={id}
           checked={Boolean(value)}
           disabled={disabled}
           onCheckedChange={(checked) => onChange(checked)}
@@ -307,6 +398,7 @@ function FieldControl({
     default:
       return (
         <Input
+          id={id}
           value={value == null ? '' : String(value)}
           disabled={disabled}
           placeholder={field.placeholder}
