@@ -4,8 +4,8 @@
  * - 关键原语（Button/Input/Popover/Dialog/Select）可渲染
  */
 // @vitest-environment jsdom
-import { render, screen } from '@testing-library/react';
-import { describe, expect, it } from 'vitest';
+import { cleanup, fireEvent, render, screen } from '@testing-library/react';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import * as ui from '../src/ui/index.js';
 import {
@@ -27,6 +27,9 @@ import {
   TabsTrigger,
 } from '../src/ui/index.js';
 import './components/setup.js';
+
+// vitest globals 未开启，RTL 不会自动卸载上一条用例的 DOM，这里显式清理
+afterEach(cleanup);
 
 describe('/ui 子路径汇总导出', () => {
   it('各 vendored 模块的公开符号齐全', () => {
@@ -218,5 +221,67 @@ describe('/ui 原语可渲染', () => {
     const list = await screen.findByRole('listbox');
     const popup = list.closest('[data-slot="select-content"]');
     expect(popup?.className).toContain('min-w-(--anchor-width)');
+  });
+});
+
+describe('Input search', () => {
+  it('search=true 时前置搜索图标，并左留图标位内边距', () => {
+    const { container } = render(<Input aria-label="搜索" search placeholder="搜索" />);
+    const input = screen.getByLabelText('搜索');
+    // 加 !important：聚合样式中后段 px-3 会覆盖普通 pl-9
+    expect(input.className).toContain('pl-9!');
+    const wrapper = container.querySelector('[data-slot="input-search"]');
+    expect(wrapper).not.toBeNull();
+    // 图标为装饰性（aria-hidden），不参与无障碍名称
+    expect(wrapper?.querySelector('svg[aria-hidden="true"]')).not.toBeNull();
+  });
+
+  it('未开启 search 时不渲染包裹层与图标', () => {
+    const { container } = render(<Input aria-label="标题" />);
+    const input = screen.getByLabelText('标题');
+    expect(container.querySelector('[data-slot="input-search"]')).toBeNull();
+    expect(container.querySelector('svg')).toBeNull();
+    expect(input.className).not.toContain('pl-9');
+  });
+
+  it('回车触发 onSearch 并传出当前值；其他按键不触发', () => {
+    const onSearch = vi.fn();
+    render(
+      <Input aria-label="搜索" search onSearch={onSearch} defaultValue="pactor" />,
+    );
+    const input = screen.getByLabelText('搜索');
+    fireEvent.keyDown(input, { key: 'a' });
+    expect(onSearch).not.toHaveBeenCalled();
+    fireEvent.keyDown(input, { key: 'Enter' });
+    expect(onSearch).toHaveBeenCalledTimes(1);
+    expect(onSearch).toHaveBeenCalledWith('pactor');
+  });
+
+  it('IME 组字中的回车不触发 onSearch', () => {
+    const onSearch = vi.fn();
+    render(
+      <Input aria-label="搜索" search onSearch={onSearch} defaultValue="搜" />,
+    );
+    fireEvent.keyDown(screen.getByLabelText('搜索'), {
+      key: 'Enter',
+      isComposing: true,
+    });
+    expect(onSearch).not.toHaveBeenCalled();
+  });
+
+  it('自定义 onKeyDown 仍会先被调用', () => {
+    const onKeyDown = vi.fn();
+    const onSearch = vi.fn();
+    render(
+      <Input
+        aria-label="搜索"
+        search
+        onKeyDown={onKeyDown}
+        onSearch={onSearch}
+      />,
+    );
+    fireEvent.keyDown(screen.getByLabelText('搜索'), { key: 'Enter' });
+    expect(onKeyDown).toHaveBeenCalledTimes(1);
+    expect(onSearch).toHaveBeenCalledTimes(1);
   });
 });
