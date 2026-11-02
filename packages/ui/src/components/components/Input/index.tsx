@@ -31,6 +31,10 @@ export interface InputProps {
   disabled?: boolean;
   /** 最大输入长度（原生 maxLength，达到上限后无法继续输入） */
   maxLength?: number;
+  /** 搜索框形态：输入框左端显示搜索图标，文本左留图标位（用于关键词检索） */
+  search?: boolean;
+  /** 搜索提交：输入框聚焦时按回车触发，传出当前输入值（IME 组字回车不触发） */
+  onSearch?: (value: string) => void;
   /** 控件尺寸（默认 middle，即现行 h-9 尺寸；全局统一尺寸令牌见 control-size） */
   size?: ControlSize;
   /** hover 清除（缺省开启，传 false 关闭）：值为非空时鼠标悬停控件，右缘浮出
@@ -66,6 +70,8 @@ export function Input({
   placeholder,
   disabled,
   maxLength,
+  search,
+  onSearch,
   size = 'middle',
   allowClear,
   onChange,
@@ -119,6 +125,8 @@ export function Input({
       placeholder={placeholder ?? t('pactor.input.placeholder')}
       disabled={disabled}
       maxLength={maxLength}
+      search={search}
+      onSearch={onSearch}
       className={cn(
         CONTROL_SIZE_BOX[size],
         // 右缘浮动按钮（× / 眼睛）覆盖在控件内侧，文本预留右内边距避免被遮挡；
