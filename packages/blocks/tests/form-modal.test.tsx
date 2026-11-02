@@ -80,6 +80,27 @@ describe('FormModal DSL', () => {
     expect(screen.getByRole('button', { name: '保存' })).toBeTruthy();
   });
 
+  it('footerNote：底部操作区渲染辅助说明，按钮保持可用', async () => {
+    renderDsl(
+      {
+        type: 'FormModal',
+        props: {
+          open: true,
+          title: '新建能力模块',
+          footerNote: '创建后进入对应能力的独立开发页面',
+        },
+        children: FORM_CHILDREN,
+      },
+      { state: {} },
+    );
+
+    expect(
+      await screen.findByText('创建后进入对应能力的独立开发页面'),
+    ).toBeTruthy();
+    expect(screen.getByRole('button', { name: '取消' })).toBeTruthy();
+    expect(screen.getByRole('button', { name: '提交' })).toBeTruthy();
+  });
+
   it('取消按钮触发 onCancel（${event} 无关，动作自行 setState 关闭）', async () => {
     const user = userEvent.setup();
     const { context } = renderDsl(
