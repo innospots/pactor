@@ -1,0 +1,16 @@
+{
+  "modules": [
+    {
+      "package": "risk-analysis",
+      "enabled": true,
+      "menuMode": "hidden",
+      "access": "public"
+    },
+    {
+      "package": "risk-decision",
+      "enabled": true,
+      "menuMode": "hidden",
+      "access": "public"
+    }
+  ]
+}

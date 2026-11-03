@@ -1,0 +1,52 @@
+# 风险决策：总览（根路径）+ 对接日志（/integration-logs）。
+# 页面与布局 DSL 在 /api/sitemap 响应中内联下发。
+# 无侧栏：仅一个全宽内容区，顶栏由页面自绘。
+id: site
+resourceType: sitemap
+version: 1
+dslVersion: "1.0"
+app: { name: Pactor Console }
+
+layouts:
+  # 无菜单外壳：内容区铺满视口并独立滚动。
+  admin:
+    dsl: "1.0"
+    body:
+      type: Layout
+      props: { className: shell-root }
+      children:
+        - type: Content
+          props: { className: shell-content }
+          children:
+            - type: PageOutlet
+
+pages:
+  - id: risk-decision
+    path: /
+    title: 总览
+    version: 1
+    file: risk-decision/risk-decision.page.yaml
+  # 总览「查看对接日志」跳转进入
+  - id: integration-logs
+    path: /integration-logs
+    title: 对接日志
+    version: 1
+    file: risk-decision/integration-logs.page.yaml
+
+menus:
+  - id: risk-decision
+    type: page
+    pageId: risk-decision
+    path: /
+    title: 风险决策
+    icon: shield
+    layout: admin
+    public: true
+  - id: integration-logs
+    type: page
+    pageId: integration-logs
+    path: /integration-logs
+    title: 对接日志
+    icon: file-text
+    layout: admin
+    public: true

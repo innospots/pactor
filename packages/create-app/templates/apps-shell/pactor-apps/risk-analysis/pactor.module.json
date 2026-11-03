@@ -1,0 +1,12 @@
+{
+  "id": "pactor-app-risk-analysis",
+  "name": "risk-analysis",
+  "basePath": "/pactor-app-risk-analysis",
+  "yamlRoot": "src/server/yaml",
+  "clientEntry": "module/client.ts",
+  "serverEntry": "module/server.ts",
+  "apiPrefixes": ["/api/risk-analysis"],
+  "actions": [],
+  "publicDir": "public",
+  "target": "innospots-web-shell@3"
+}
