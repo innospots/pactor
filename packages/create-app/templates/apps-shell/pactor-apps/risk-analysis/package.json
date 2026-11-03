@@ -1,0 +1,48 @@
+{
+  "name": "risk-analysis",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev -p 8021",
+    "build": "next build",
+    "start": "next start -p 8021",
+    "lint": "eslint",
+    "typecheck": "tsc --noEmit",
+    "build:module": "pactor module build",
+    "pack:module": "pactor module pack --no-bump",
+    "publish:module": "pactor module publish"
+  },
+  "dependencies": {
+    "next": "16.3.5",
+    "pactor-app": "^1.62.0",
+    "react": "19.2.8",
+    "react-dom": "19.2.8",
+    "yaml": "^2.9.1"
+  },
+  "devDependencies": {
+    "@pactor-app/cli": "^1.62.0",
+    "@tailwindcss/postcss": "^4",
+    "@types/node": "^20",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "eslint": "^9",
+    "eslint-config-next": "16.3.5",
+    "tailwindcss": "^4",
+    "typescript": "^5"
+  },
+  "files": [
+    "dist-module"
+  ],
+  "exports": {
+    "./manifest": "./dist-module/manifest.json",
+    "./client": "./dist-module/client/index.js",
+    "./styles.css": "./dist-module/client/index.css",
+    "./server": "./dist-module/server/index.mjs"
+  },
+  "peerDependencies": {
+    "react": "19.2.8",
+    "react-dom": "19.2.8",
+    "next": "16.3.5",
+    "pactor-app": ">=1.55.0"
+  }
+}

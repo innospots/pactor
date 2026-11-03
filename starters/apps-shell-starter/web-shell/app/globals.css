@@ -1,0 +1,10 @@
+@import "tailwindcss";
+
+/* Tailwind v4 自动扫描会跳过 .generated 与 node_modules，
+   显式声明扫描装配后的模块 DSL，保证模块 YAML 中的工具类（p-4、flex 等）被生成 */
+@source "../.generated/pactor/dsl";
+
+html,
+body {
+  height: 100%;
+}
