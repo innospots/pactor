@@ -1,0 +1,19 @@
+{
+  "schemaVersion": "1",
+  "id": "pactor-app-risk-analysis",
+  "name": "risk-analysis",
+  "version": "0.1.0",
+  "pactorVersionRange": "link:../../../../packages/pactor",
+  "basePath": "/pactor-app-risk-analysis",
+  "sitemap": "dsl/sitemap.yaml",
+  "dslRoot": "dsl",
+  "assetsRoot": "assets",
+  "clientEntry": "client/index.js",
+  "styles": [
+    "client/index.css"
+  ],
+  "serverEntry": "server/index.mjs",
+  "apiPrefixes": [
+    "/api/risk-analysis"
+  ]
+}

@@ -1,0 +1,3 @@
+module.exports=[944330,a=>{"use strict";var b=a.i(473980);a.s(["default",0,function({children:a}){return(0,b.jsx)("html",{lang:"zh-CN",className:"h-full antialiased",children:(0,b.jsx)("body",{className:"flex min-h-full flex-col bg-zinc-50 text-zinc-900",children:a})})},"metadata",0,{title:"InnoSpots Web Shell",description:"统一 Pactor 模块化 Web 入口"}])},476614,function(a){a.n(a.i(944330))}];
+
+//# sourceMappingURL=starters_apps-shell-starter_web-shell_app_layout_tsx_19opmby._.js.map

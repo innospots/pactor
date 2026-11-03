@@ -1,0 +1,51 @@
+{
+  "menus": [
+    {
+      "id": "risk-analysis",
+      "type": "page",
+      "pageId": "pactor-app-risk-analysis:risk-data-value",
+      "path": "/pactor-app-risk-analysis",
+      "title": "风险分析",
+      "icon": "chart",
+      "order": 1,
+      "public": true
+    },
+    {
+      "id": "risk-decision",
+      "type": "page",
+      "pageId": "pactor-app-risk-decision:risk-decision",
+      "path": "/pactor-app-risk-decision",
+      "title": "风险决策",
+      "icon": "shield",
+      "order": 2,
+      "public": true
+    },
+    {
+      "id": "risk-analysis",
+      "type": "page",
+      "pageId": "pactor-app-risk-analysis:risk-data-value",
+      "title": "风险分析",
+      "icon": "chart",
+      "public": true,
+      "hidden": true
+    },
+    {
+      "id": "risk-decision",
+      "type": "page",
+      "pageId": "pactor-app-risk-decision:risk-decision",
+      "title": "风险决策",
+      "icon": "shield",
+      "public": true,
+      "hidden": true
+    },
+    {
+      "id": "integration-logs",
+      "type": "page",
+      "pageId": "pactor-app-risk-decision:integration-logs",
+      "title": "对接日志",
+      "icon": "file-text",
+      "public": true,
+      "hidden": true
+    }
+  ]
+}

@@ -1,0 +1,6 @@
+{
+  "/(workspace)/[...slug]/page": "app/(workspace)/[...slug]/page.js",
+  "/api/modules/[moduleId]/[[...path]]/route": "app/api/modules/[moduleId]/[[...path]]/route.js",
+  "/api/runtime/bootstrap/route": "app/api/runtime/bootstrap/route.js",
+  "/page": "app/page.js"
+}

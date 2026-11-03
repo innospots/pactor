@@ -1,0 +1,3 @@
+module.exports=[695655,a=>{"use strict";var b={"+":"inserted","-":"deleted","@":"meta"};a.s(["diff",0,{name:"diff",token:function(a){var c=a.string.search(/[\t ]+?$/);if(!a.sol()||0===c)return a.skipToEnd(),("error "+(b[a.string.charAt(0)]||"")).replace(/ $/,"");var d=b[a.peek()]||a.skipToEnd();return -1===c?a.skipToEnd():a.pos=c,d}}])}];
+
+//# sourceMappingURL=0ivy_%40codemirror_legacy-modes_mode_diff_0r1b_33.js.map

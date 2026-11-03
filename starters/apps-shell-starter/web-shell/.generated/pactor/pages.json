@@ -1,0 +1,34 @@
+{
+  "pages": [
+    {
+      "globalPageId": "pactor-app-risk-analysis:risk-data-value",
+      "moduleId": "pactor-app-risk-analysis",
+      "pageId": "risk-data-value",
+      "path": "/pactor-app-risk-analysis",
+      "title": "数据价值分析工作台",
+      "version": 1,
+      "public": true,
+      "dslRef": "dsl/pactor-app-risk-analysis/risk-data-value.yaml"
+    },
+    {
+      "globalPageId": "pactor-app-risk-decision:risk-decision",
+      "moduleId": "pactor-app-risk-decision",
+      "pageId": "risk-decision",
+      "path": "/pactor-app-risk-decision",
+      "title": "总览",
+      "version": 1,
+      "public": true,
+      "dslRef": "dsl/pactor-app-risk-decision/risk-decision.yaml"
+    },
+    {
+      "globalPageId": "pactor-app-risk-decision:integration-logs",
+      "moduleId": "pactor-app-risk-decision",
+      "pageId": "integration-logs",
+      "path": "/pactor-app-risk-decision/integration-logs",
+      "title": "对接日志",
+      "version": 1,
+      "public": true,
+      "dslRef": "dsl/pactor-app-risk-decision/integration-logs.yaml"
+    }
+  ]
+}

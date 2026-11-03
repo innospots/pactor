@@ -1,0 +1,33 @@
+id: site
+resourceType: sitemap
+version: 1
+dslVersion: "1.0"
+app:
+  name: Pactor Console
+layouts:
+  admin:
+    dsl: "1.0"
+    body:
+      type: Layout
+      props:
+        className: shell-root
+      children:
+        - type: Content
+          props:
+            className: shell-content
+          children:
+            - type: PageOutlet
+pages:
+  - id: risk-data-value
+    path: /
+    title: 数据价值分析工作台
+    version: 1
+    file: risk-analysis/risk-data-value.page.yaml
+menus:
+  - id: risk-analysis
+    type: page
+    pageId: risk-data-value
+    title: 风险分析
+    icon: chart
+    layout: admin
+    public: true

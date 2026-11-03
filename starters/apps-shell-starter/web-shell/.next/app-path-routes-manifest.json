@@ -1,0 +1,11 @@
+{
+  "/(workspace)/[...slug]/page": "/[...slug]",
+  "/_global-error/page": "/_global-error",
+  "/_not-found/page": "/_not-found",
+  "/api/modules/[moduleId]/[[...path]]/route": "/api/modules/[moduleId]/[[...path]]",
+  "/api/runtime/bootstrap/route": "/api/runtime/bootstrap",
+  "/api/runtime/fragments/[fragmentId]/route": "/api/runtime/fragments/[fragmentId]",
+  "/api/runtime/pages/[pageId]/route": "/api/runtime/pages/[pageId]",
+  "/favicon.ico/route": "/favicon.ico",
+  "/page": "/"
+}

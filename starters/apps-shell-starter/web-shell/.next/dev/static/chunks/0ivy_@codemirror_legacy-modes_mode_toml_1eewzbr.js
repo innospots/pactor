@@ -1,0 +1,90 @@
+(globalThis["TURBOPACK"] || (globalThis["TURBOPACK"] = [])).push([typeof document === "object" ? document.currentScript : undefined,
+"[project]/node_modules/.pnpm/@codemirror+legacy-modes@6.5.5/node_modules/@codemirror/legacy-modes/mode/toml.js [app-client] (ecmascript)", ((__turbopack_context__) => {
+"use strict";
+
+__turbopack_context__.s([
+    "toml",
+    ()=>toml
+]);
+const toml = {
+    name: "toml",
+    startState: function() {
+        return {
+            inString: false,
+            stringType: "",
+            lhs: true,
+            inArray: 0
+        };
+    },
+    token: function(stream, state) {
+        //check for state changes
+        let quote;
+        if (!state.inString && (quote = stream.match(/^('''|"""|'|")/))) {
+            state.stringType = quote[0];
+            state.inString = true; // Update state
+        }
+        if (stream.sol() && !state.inString && state.inArray === 0) {
+            state.lhs = true;
+        }
+        //return state
+        if (state.inString) {
+            while(state.inString){
+                if (stream.match(state.stringType)) {
+                    state.inString = false; // Clear flag
+                } else if (stream.peek() === '\\') {
+                    stream.next();
+                    stream.next();
+                } else if (stream.eol()) {
+                    break;
+                } else {
+                    stream.match(/^.[^\\\"\']*/);
+                }
+            }
+            return state.lhs ? "property" : "string"; // Token style
+        } else if (state.inArray && stream.peek() === ']') {
+            stream.next();
+            state.inArray--;
+            return 'bracket';
+        } else if (state.lhs && stream.peek() === '[' && stream.skipTo(']')) {
+            stream.next(); //skip closing ]
+            // array of objects has an extra open & close []
+            if (stream.peek() === ']') stream.next();
+            return "atom";
+        } else if (stream.peek() === "#") {
+            stream.skipToEnd();
+            return "comment";
+        } else if (stream.eatSpace()) {
+            return null;
+        } else if (state.lhs && stream.eatWhile(function(c) {
+            return c != '=' && c != ' ';
+        })) {
+            return "property";
+        } else if (state.lhs && stream.peek() === "=") {
+            stream.next();
+            state.lhs = false;
+            return null;
+        } else if (!state.lhs && stream.match(/^\d\d\d\d[\d\-\:\.T]*Z/)) {
+            return 'atom'; //date
+        } else if (!state.lhs && (stream.match('true') || stream.match('false'))) {
+            return 'atom';
+        } else if (!state.lhs && stream.peek() === '[') {
+            state.inArray++;
+            stream.next();
+            return 'bracket';
+        } else if (!state.lhs && stream.match(/^\-?\d+(?:\.\d+)?/)) {
+            return 'number';
+        } else if (!stream.eatSpace()) {
+            stream.next();
+        }
+        return null;
+    },
+    languageData: {
+        commentTokens: {
+            line: '#'
+        }
+    }
+};
+}),
+]);
+
+//# sourceMappingURL=0ivy_%40codemirror_legacy-modes_mode_toml_1eewzbr.js.map
