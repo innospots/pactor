@@ -1,0 +1,187 @@
+dsl: "1.0"
+page:
+  id: integration-logs
+  title: 对接日志
+state:
+  breadcrumb: 风险决策 / 对接日志
+  pageTitle: 对接日志
+  logs:
+    - key: "1"
+      time: 2026-10-19 10:42:18
+      system: 核心信贷系统
+      mode: API 实时
+      status: 成功
+      tone: ok
+      duration: 86ms
+      message: "-"
+    - key: "2"
+      time: 2026-10-19 10:41:52
+      system: 渠道管理平台
+      mode: API 实时
+      status: 成功
+      tone: ok
+      duration: 132ms
+      message: "-"
+    - key: "3"
+      time: 2026-10-19 10:40:07
+      system: 短信通知通道
+      mode: 消息队列
+      status: 失败
+      tone: danger
+      duration: 2.4s
+      message: 通道连接超时
+    - key: "4"
+      time: 2026-10-19 10:38:41
+      system: 征信数据服务
+      mode: 文件批量
+      status: 成功
+      tone: ok
+      duration: 1.8s
+      message: "-"
+    - key: "5"
+      time: 2026-10-19 10:35:19
+      system: 外部多头数据
+      mode: API 实时
+      status: 失败
+      tone: danger
+      duration: 3.1s
+      message: 上游返回 502
+    - key: "6"
+      time: 2026-10-19 10:31:06
+      system: 核心信贷系统
+      mode: API 实时
+      status: 成功
+      tone: ok
+      duration: 78ms
+      message: "-"
+    - key: "7"
+      time: 2026-10-19 10:28:33
+      system: 渠道管理平台
+      mode: API 实时
+      status: 成功
+      tone: ok
+      duration: 145ms
+      message: "-"
+    - key: "8"
+      time: 2026-10-19 10:24:58
+      system: 短信通知通道
+      mode: 消息队列
+      status: 成功
+      tone: ok
+      duration: 210ms
+      message: "-"
+    - key: "9"
+      time: 2026-10-19 10:20:12
+      system: 征信数据服务
+      mode: 文件批量
+      status: 成功
+      tone: ok
+      duration: 2.1s
+      message: "-"
+    - key: "10"
+      time: 2026-10-19 10:15:47
+      system: 外部多头数据
+      mode: API 实时
+      status: 成功
+      tone: ok
+      duration: 167ms
+      message: "-"
+body:
+  type: Page
+  props:
+    className: p-0 risk-page
+  children:
+    - type: Header
+      props:
+        className: risk-topbar
+      children:
+        - type: Flex
+          props:
+            direction: vertical
+            gap: 2
+            className: risk-topbar-heading
+          children:
+            - type: Text
+              props:
+                text: ${state.breadcrumb}
+                className: risk-topbar-breadcrumb
+            - type: Typography
+              props:
+                variant: h2
+                text: ${state.pageTitle}
+                className: risk-topbar-title
+        - type: Flex
+          props:
+            className: risk-topbar-actions
+            align: center
+            gap: 8
+          children:
+            - type: Button
+              props:
+                text: 返回总览
+                icon: arrow-left
+                size: small
+                variant: default
+              events:
+                onClick:
+                  - action: navigate
+                    params:
+                      to: /pactor-app-risk-decision/
+    - type: Text
+      props:
+        text: 记录各对接系统的调用与同步结果，按时间倒序展示
+        className: risk-page-subtitle
+    - type: Card
+      props:
+        title: 近期对接日志
+        className: risk-log-card
+      children:
+        - type: Table
+          props:
+            dataSource: ${state.logs}
+            rowKey: key
+            pagination: false
+            columns:
+              - title: 时间
+                dataIndex: time
+                cell:
+                  type: Text
+                  props:
+                    text: ${row.time}
+                    className: risk-log-time
+              - title: 系统
+                dataIndex: system
+                cell:
+                  type: Text
+                  props:
+                    text: ${row.system}
+                    className: risk-table-name
+              - title: 对接方式
+                dataIndex: mode
+                cell:
+                  type: Text
+                  props:
+                    text: ${row.mode}
+                    className: risk-table-mode
+              - title: 状态
+                dataIndex: status
+                cell:
+                  type: Text
+                  props:
+                    text: ${row.status}
+                    className: risk-status-state risk-status-state--${row.tone}
+              - title: 耗时
+                dataIndex: duration
+                align: right
+                cell:
+                  type: Text
+                  props:
+                    text: ${row.duration}
+                    className: risk-table-amount
+              - title: 说明
+                dataIndex: message
+                cell:
+                  type: Text
+                  props:
+                    text: ${row.message}
+                    className: risk-log-message risk-log-message--${row.tone}

@@ -1,0 +1,45 @@
+{
+  "generatedAt": "2026-11-03T01:50:24.928Z",
+  "modules": [
+    {
+      "id": "pactor-app-risk-analysis",
+      "name": "risk-analysis",
+      "package": "risk-analysis",
+      "version": "0.1.0",
+      "basePath": "/pactor-app-risk-analysis"
+    },
+    {
+      "id": "pactor-app-risk-decision",
+      "name": "risk-decision",
+      "package": "risk-decision",
+      "version": "0.1.0",
+      "basePath": "/pactor-app-risk-decision"
+    }
+  ],
+  "routes": [
+    {
+      "publicPath": "/pactor-app-risk-analysis",
+      "moduleId": "pactor-app-risk-analysis",
+      "pageId": "risk-data-value",
+      "globalPageId": "pactor-app-risk-analysis:risk-data-value",
+      "pattern": "/pactor-app-risk-analysis",
+      "paramNames": []
+    },
+    {
+      "publicPath": "/pactor-app-risk-decision",
+      "moduleId": "pactor-app-risk-decision",
+      "pageId": "risk-decision",
+      "globalPageId": "pactor-app-risk-decision:risk-decision",
+      "pattern": "/pactor-app-risk-decision",
+      "paramNames": []
+    },
+    {
+      "publicPath": "/pactor-app-risk-decision/integration-logs",
+      "moduleId": "pactor-app-risk-decision",
+      "pageId": "integration-logs",
+      "globalPageId": "pactor-app-risk-decision:integration-logs",
+      "pattern": "/pactor-app-risk-decision/integration-logs",
+      "paramNames": []
+    }
+  ]
+}
