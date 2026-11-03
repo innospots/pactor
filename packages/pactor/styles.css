@@ -5,7 +5,7 @@
  */
 
 /* ============================================================
- * @pactor-app/ui@1.61.0（构建产物内联，源顺序：ui → blocks → chart → chat）
+ * @pactor-app/ui@1.62.0（构建产物内联，源顺序：ui → blocks → chart → chat）
  * ============================================================ */
 /*! tailwindcss v4.3.3 | MIT License | https://tailwindcss.com */
 @layer properties;
@@ -1147,7 +1147,7 @@ div.pactor-markdown-editor-root.mdxeditor, div.pactor-markdown-editor-root.mdxed
 }
 
 /* ============================================================
- * @pactor-app/blocks@1.61.0（构建产物内联，源顺序：ui → blocks → chart → chat）
+ * @pactor-app/blocks@1.62.0（构建产物内联，源顺序：ui → blocks → chart → chat）
  * ============================================================ */
 /*! tailwindcss v4.3.3 | MIT License | https://tailwindcss.com */
 @layer properties;
@@ -1500,7 +1500,7 @@ div.pactor-markdown-editor-root.mdxeditor, div.pactor-markdown-editor-root.mdxed
 }
 
 /* ============================================================
- * @pactor-app/chart@1.61.0（构建产物内联，源顺序：ui → blocks → chart → chat）
+ * @pactor-app/chart@1.62.0（构建产物内联，源顺序：ui → blocks → chart → chat）
  * ============================================================ */
 /*! tailwindcss v4.3.3 | MIT License | https://tailwindcss.com */
 @layer properties;
@@ -1644,7 +1644,7 @@ div.pactor-markdown-editor-root.mdxeditor, div.pactor-markdown-editor-root.mdxed
 }
 
 /* ============================================================
- * @pactor-app/chat@1.61.0（构建产物内联，源顺序：ui → blocks → chart → chat）
+ * @pactor-app/chat@1.62.0（构建产物内联，源顺序：ui → blocks → chart → chat）
  * ============================================================ */
 /*! tailwindcss v4.3.3 | MIT License | https://tailwindcss.com */
 @layer properties;
