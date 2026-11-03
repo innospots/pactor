@@ -1,0 +1,11 @@
+{
+  "modules": [
+    {
+      "moduleId": "pactor-app-risk-analysis",
+      "package": "risk-analysis",
+      "prefixes": [
+        "/api/risk-analysis"
+      ]
+    }
+  ]
+}

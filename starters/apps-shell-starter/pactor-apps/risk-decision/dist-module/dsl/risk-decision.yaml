@@ -1,0 +1,300 @@
+dsl: "1.0"
+page:
+  id: risk-decision
+  title: 总览
+state:
+  pageTitle: 总览
+  breadcrumb: 风险决策 / 总览
+  actionLabel: 新建对接
+  rangeStart: 2026-10-13
+  rangeEnd: 2026-10-19
+  kpis:
+    - key: systems
+      label: 已对接系统
+      value: "6"
+      suffix: " 套"
+      footnote: 核心 4 套
+      tone: positive
+    - key: sync
+      label: 今日同步量
+      value: 126,000
+      suffix: ""
+      footnote: +8.2%↑
+      tone: positive
+    - key: success
+      label: 调用成功率
+      value: "99.96"
+      suffix: "%"
+      footnote: 均值 99.9%
+      tone: positive
+    - key: exceptions
+      label: 待处理异常
+      value: "2"
+      suffix: " 条"
+      footnote: 通道中断 1
+      tone: danger
+  syncTrend:
+    - date: 10-13
+      同步量: 11.8
+      失败量: 6
+    - date: 10-14
+      同步量: 12.3
+      失败量: 9
+    - date: 10-15
+      同步量: 12
+      失败量: 4
+    - date: 10-16
+      同步量: 12.7
+      失败量: 7
+    - date: 10-17
+      同步量: 13.1
+      失败量: 12
+    - date: 10-18
+      同步量: 12.4
+      失败量: 8
+    - date: 10-19
+      同步量: 12.6
+      失败量: 5
+  integrationStatus:
+    - key: core
+      tone: ok
+      text: 核心系统延迟 < 1s
+    - key: channel
+      tone: ok
+      text: 渠道同步 4.2 万
+    - key: sms
+      tone: attention
+      text: 短信通道 09:20 中断
+    - key: exception
+      tone: danger
+      text: 2 条异常待排查
+  lastSyncAt: 最近同步 10:42
+  connectedChannels: 已接入通道 4 条
+  systems:
+    - name: 核心信贷系统
+      mode: API 实时
+      sync: 4.8 万
+      status: 正常
+      tone: ok
+    - name: 渠道管理平台
+      mode: API 实时
+      sync: 4.2 万
+      status: 正常
+      tone: ok
+    - name: 短信通知通道
+      mode: 消息队列
+      sync: 1.1 万
+      status: 正常
+      tone: ok
+    - name: 征信数据服务
+      mode: 文件批量
+      sync: 0.9 万
+      status: 正常
+      tone: ok
+    - name: 外部多头数据
+      mode: API 实时
+      sync: 1.6 万
+      status: 异常
+      tone: danger
+body:
+  type: Page
+  props:
+    className: p-0 risk-page
+  children:
+    - type: Header
+      props:
+        className: risk-topbar
+      children:
+        - type: Flex
+          props:
+            direction: vertical
+            gap: 2
+            className: risk-topbar-heading
+          children:
+            - type: Text
+              props:
+                text: ${state.breadcrumb}
+                className: risk-topbar-breadcrumb
+            - type: Typography
+              props:
+                variant: h2
+                text: ${state.pageTitle}
+                className: risk-topbar-title
+        - type: Flex
+          props:
+            className: risk-topbar-actions
+            align: center
+            gap: 8
+          children:
+            - type: DatePicker
+              props:
+                mode: range
+                size: small
+                className: risk-date-range
+                value:
+                  start: ${state.rangeStart}
+                  end: ${state.rangeEnd}
+                presets:
+                  - label: 近 7 天
+                    days: 7
+                  - label: 近 30 天
+                    days: 30
+              events:
+                onChange:
+                  - action: setState
+                    params:
+                      rangeStart: ${event.start}
+                      rangeEnd: ${event.end}
+            - type: Button
+              props:
+                text: 导出报告
+                icon: download
+                size: small
+                variant: default
+              events:
+                onClick:
+                  - action: message
+                    params:
+                      messageType: info
+                      text: 导出报告（演示）
+            - type: Button
+              props:
+                text: ${state.actionLabel}
+                icon: plus
+                size: small
+                variant: primary
+              events:
+                onClick:
+                  - action: message
+                    params:
+                      messageType: info
+                      text: ${state.actionLabel}（演示）
+    - type: For
+      props:
+        className: risk-metrics
+        columns: 4
+        gap: 12
+        keyField: key
+        items: ${state.kpis}
+      children:
+        - type: Flex
+          props:
+            className: risk-metric-cell
+            direction: vertical
+          children:
+            - type: MetricCard
+              props:
+                title: ${row.label}
+                value: ${row.value}
+                suffix: ${row.suffix}
+                className: risk-metric
+            - type: Text
+              props:
+                text: ${row.footnote}
+                className: risk-metric-footnote risk-metric-footnote--${row.tone}
+    - type: Grid
+      props:
+        className: risk-decision-panels
+        columns: 2
+        gap: 16
+      children:
+        - type: Card
+          props:
+            title: 数据同步趋势（同步量/失败量）
+            className: risk-decision-card risk-decision-chart
+          children:
+            - type: ComposedChart
+              props:
+                data: ${state.syncTrend}
+                xKey: date
+                series:
+                  - type: area
+                    dataKey: 同步量
+                    name: 同步量（万）
+                  - type: line
+                    dataKey: 失败量
+                    name: 失败量（条）
+                    yAxisIndex: 1
+                colors:
+                  - "#c98a5e"
+                  - "#a89a8c"
+                height: 240
+        - type: Card
+          props:
+            title: 对接状态
+            className: risk-decision-card risk-status-card
+          children:
+            - type: Flex
+              props:
+                className: risk-status-list
+                direction: vertical
+                gap: 12
+              children:
+                - type: For
+                  props:
+                    keyField: key
+                    items: ${state.integrationStatus}
+                  children:
+                    - type: Flex
+                      props:
+                        className: risk-status-row risk-status-row--${row.tone}
+                        align: center
+                        gap: 9
+                      children:
+                        - type: Text
+                          props:
+                            text: ${row.text}
+            - type: Text
+              props:
+                text: ${state.lastSyncAt} · ${state.connectedChannels}
+                className: risk-status-footnote
+            - type: Button
+              props:
+                text: 查看对接日志
+                icon: file-text
+                size: small
+                variant: default
+                className: risk-status-action
+              events:
+                onClick:
+                  - action: navigate
+                    params:
+                      to: /pactor-app-risk-decision/integration-logs
+    - type: Card
+      props:
+        title: 对接系统明细（共 6 套系统）
+      children:
+        - type: Table
+          props:
+            dataSource: ${state.systems}
+            rowKey: name
+            pagination: false
+            columns:
+              - title: 系统名称
+                dataIndex: name
+                cell:
+                  type: Text
+                  props:
+                    text: ${row.name}
+                    className: risk-table-name
+              - title: 对接方式
+                dataIndex: mode
+                cell:
+                  type: Text
+                  props:
+                    text: ${row.mode}
+                    className: risk-table-mode
+              - title: 今日同步
+                dataIndex: sync
+                cell:
+                  type: Text
+                  props:
+                    text: ${row.sync}
+                    className: risk-table-amount
+              - title: 状态
+                dataIndex: status
+                cell:
+                  type: Text
+                  props:
+                    text: ${row.status}
+                    className: risk-status-state risk-status-state--${row.tone}

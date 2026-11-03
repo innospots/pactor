@@ -1,0 +1,316 @@
+dsl: "1.0"
+page:
+  id: roles
+  title: "$i18n{page.roles.title:角色管理}"
+  name: roleList
+
+state:
+  input: ""
+  status: ""
+  pageNo: 1
+  pageSize: 20
+
+dataSources:
+  roles:
+    type: http
+    autoLoad: true
+    request:
+      method: GET
+      url: /api/d/platform/roles
+      params:
+        input: ${state.input}
+        status: ${state.status}
+        pageNo: ${state.pageNo}
+        pageSize: ${state.pageSize}
+body:
+  type: Page
+  props: { className: system-page }
+  children:
+    - type: Flex
+      props:
+        justify: space-between
+        align: center
+      children:
+        - type: Flex
+          props:
+            direction: vertical
+            gap: 2
+          children:
+            - type: Typography
+              props:
+                variant: h3
+                className: system-page-title
+                text: "$i18n{page.roles.title:角色管理}"
+            - type: Typography
+              props:
+                variant: muted
+                className: system-page-description
+                text: "$i18n{page.roles.subtitle:创建角色、配置其资源权限，并绑定用户或组织单元。}"
+        - type: Button
+          props:
+            text: "$i18n{page.roles.create:+ 新建角色}"
+            variant: primary
+          events:
+            onClick:
+              - action: overlay.open
+                params:
+                  overlay:
+                    type: modal
+                    title: "$i18n{page.roles.createTitle:新建角色}"
+                    width: 520
+                    content:
+                      type: Form
+                      props:
+                        name: roleCreateForm
+                        layout: vertical
+                      events:
+                        onSubmit:
+                          - action: request
+                            params:
+                              method: POST
+                              url: /api/d/platform/roles
+                              body:
+                                roleName: ${event.roleName}
+                                roleCode: ${event.roleCode}
+                                description: ${event.description}
+                          - action: message
+                            params:
+                              messageType: success
+                              text: "$i18n{page.roles.created:角色已创建}"
+                          - action: overlay.close
+                          - action: reload
+                            params:
+                              dataSource: roles
+                      children:
+                        - type: Field
+                          props:
+                            label: "$i18n{page.roles.roleName:角色名称}"
+                            required: true
+                          children:
+                            - type: Input
+                              props:
+                                name: roleName
+                                placeholder: "$i18n{page.roles.roleNamePlaceholder:请输入角色名称}"
+                                rules:
+                                  - required: true
+                                    message: "$i18n{page.roles.roleNameRequired:请输入角色名称}"
+                        - type: Field
+                          props:
+                            label: "$i18n{page.roles.roleCode:角色编码}"
+                            required: true
+                          children:
+                            - type: Input
+                              props:
+                                name: roleCode
+                                placeholder: "$i18n{page.roles.roleCodePlaceholder:大写字母与下划线，如 OPERATOR}"
+                                rules:
+                                  - required: true
+                                    message: "$i18n{page.roles.roleCodeRequired:请输入角色编码}"
+                        - type: Field
+                          props:
+                            label: "$i18n{page.roles.description:描述}"
+                          children:
+                            - type: Textarea
+                              props:
+                                name: description
+                                placeholder: "$i18n{page.roles.descriptionPlaceholder:角色用途说明}"
+                        - type: Flex
+                          props:
+                            justify: end
+                            gap: small
+                            className: mt-4
+                          children:
+                            - type: Button
+                              props:
+                                text: "$i18n{page.roles.cancel:取消}"
+                              events:
+                                onClick:
+                                  - action: overlay.close
+                            - type: Button
+                              props:
+                                text: "$i18n{page.roles.save:保存}"
+                                variant: primary
+                                submit: true
+                                htmlType: submit
+    - type: Card
+      children:
+        - type: Form
+          props:
+            name: roleSearch
+            layout: inline
+            className: role-search-right
+            initialValues:
+              input: ${state.input}
+              status: "${state.status == '' ? '__ALL__' : state.status}"
+          events:
+            onSubmit:
+              - action: setState
+                params:
+                  input: ${event.input}
+                  status: "${event.status == '__ALL__' ? '' : event.status}"
+                  pageNo: 1
+              - action: reload
+                params:
+                  dataSource: roles
+          children:
+            - type: Field
+              props:
+                label: "$i18n{page.roles.searchLabel:名称/编码}"
+              children:
+                - type: Input
+                  props:
+                    name: input
+                    placeholder: "$i18n{page.roles.searchPlaceholder:模糊搜索}"
+            - type: Field
+              props:
+                label: "$i18n{page.roles.statusLabel:状态}"
+              children:
+                - type: FilterSelect
+                  props:
+                    name: status
+                    placeholder: "$i18n{page.roles.all:全部}"
+                    options:
+                      - label:
+                          "$i18n{page.roles.all:全部}"
+                        value: ""
+                      - label:
+                          "$i18n{page.roles.enabled:启用}"
+                        value: ENABLED
+                      - label:
+                          "$i18n{page.roles.disabled:禁用}"
+                        value: DISABLED
+            - type: Field
+              props:
+                label:  
+              children:
+                - type: Flex
+                  props:
+                    gap: small
+                  children:
+                    - type: Button
+                      props:
+                        text: "$i18n{page.roles.query:查询}"
+                        submit: true
+                        htmlType: submit
+                    - type: Button
+                      props:
+                        text: "$i18n{page.roles.reset:重置}"
+                      events:
+                        onClick:
+                          - action: form.setValues
+                            params:
+                              form: roleSearch
+                              values:
+                                input: ""
+                                status: __ALL__
+                          - action: setState
+                            params:
+                              input: ""
+                              status: ""
+                              pageNo: 1
+                          - action: reload
+                            params:
+                              dataSource: roles
+        - type: Table
+          props:
+            rowKey: roleId
+            dataSource: ${data.roles.records}
+            loading: ${dataStatus.roles.loading}
+            className: mt-4
+            columns:
+              - title:
+                  "$i18n{page.roles.column.name:角色名称}"
+                cell:
+                  type: Button
+                  props:
+                    text: ${row.roleName}
+                    variant: link
+                    size: small
+                  events:
+                    onClick:
+                      - action: navigate
+                        params:
+                          to: /settings/roles/${row.roleId}
+              - title:
+                  "$i18n{page.roles.column.code:编码}"
+                dataIndex: roleCode
+              - title:
+                  "$i18n{page.roles.column.scope:归属范围}"
+                dataIndex: ownerType
+              - title:
+                  "$i18n{page.roles.column.members:成员数}"
+                dataIndex: memberCount
+              - title:
+                  "$i18n{page.roles.column.status:状态}"
+                cell:
+                  type: Text
+                  props:
+                    text: "${row.status == 'ENABLED' ? t('common.enabled') : t('common.disabled')}"
+              - title:
+                  "$i18n{page.roles.column.actions:操作}"
+                align: center
+                fixed: right
+                width: 200
+                cell:
+                  type: Flex
+                  props:
+                    justify: center
+                    gap: small
+                  children:
+                    - type: Button
+                      props:
+                        text: "$i18n{page.roles.detail:详情}"
+                        variant: link
+                        size: small
+                      events:
+                        onClick:
+                          - action: navigate
+                            params:
+                              to: /settings/roles/${row.roleId}
+                    - type: Button
+                      props:
+                        text: "${row.status == 'ENABLED' ? t('common.disable') : t('common.enable')}"
+                        variant: link
+                        size: small
+                      events:
+                        onClick:
+                          - action: confirm
+                            params:
+                              title: "$i18n{page.roles.confirmStatusTitle:确认变更状态}"
+                              content: "$i18n{page.roles.confirmStatusContent:确定要变更该角色的启用状态吗？}"
+                          - action: request
+                            params:
+                              method: PUT
+                              url: /api/d/platform/roles/${row.roleId}/status
+                              body:
+                                status: "${row.status == 'ENABLED' ? 'DISABLED' : 'ENABLED'}"
+                          - action: message
+                            params:
+                              messageType: success
+                              text: "$i18n{page.roles.statusUpdated:状态已更新}"
+                          - action: reload
+                            params:
+                              dataSource: roles
+                    - type: Button
+                      props:
+                        text: "$i18n{page.roles.delete:删除}"
+                        variant: link
+                        size: small
+                        danger: true
+                      events:
+                        onClick:
+                          - action: confirm
+                            params:
+                              title: "$i18n{page.roles.deleteTitle:删除角色}"
+                              content: "$i18n{page.roles.deleteContent:将解除该角色的授权与成员绑定，确定删除吗？}"
+                          - action: request
+                            params:
+                              method: DELETE
+                              url: /api/d/platform/roles/${row.roleId}
+                          - action: message
+                            params:
+                              messageType: success
+                              text: "$i18n{page.roles.deleted:已删除}"
+                          - action: reload
+                            params:
+                              dataSource: roles

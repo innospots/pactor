@@ -1,0 +1,327 @@
+dsl: "1.0"
+page:
+  id: risk-data-value
+  title: 数据价值分析工作台
+state:
+  rangeStart: 2026-08-12
+  rangeEnd: 2026-08-12
+  page: 1
+  pageSize: 20
+dataSources:
+  dataValue:
+    type: http
+    request:
+      url: /api/modules/pactor-app-risk-analysis/risk-analysis/data-value
+      params:
+        start: ${state.rangeStart}
+        end: ${state.rangeEnd}
+    autoLoad: true
+  featureSource:
+    type: http
+    request:
+      url: /api/modules/pactor-app-risk-analysis/risk-analysis/feature-source-summary
+      params:
+        page: ${state.page}
+        pageSize: ${state.pageSize}
+        start: ${state.rangeStart}
+        end: ${state.rangeEnd}
+    autoLoad: true
+body:
+  type: Page
+  props:
+    className: p-0 risk-page
+  children:
+    - type: Header
+      props:
+        className: risk-topbar
+      children:
+        - type: Flex
+          props:
+            direction: vertical
+            gap: 2
+            className: risk-topbar-heading
+          children:
+            - type: Text
+              props:
+                text: 风险分析 / 数据价值分析工作台
+                className: risk-topbar-breadcrumb
+            - type: Typography
+              props:
+                variant: h2
+                text: 数据源价值
+                className: risk-topbar-title
+        - type: Flex
+          props:
+            className: risk-topbar-actions
+            align: center
+            gap: 8
+          children:
+            - type: DatePicker
+              props:
+                mode: range
+                size: small
+                className: risk-date-range
+                value:
+                  start: ${state.rangeStart}
+                  end: ${state.rangeEnd}
+                presets:
+                  - label: 今日
+                    days: 1
+                  - label: 近 7 天
+                    days: 7
+                  - label: 近 30 天
+                    days: 30
+              events:
+                onChange:
+                  - action: setState
+                    params:
+                      rangeStart: ${event.start}
+                      rangeEnd: ${event.end}
+                      page: 1
+                  - action: reload
+                    params:
+                      dataSource: dataValue
+                  - action: reload
+                    params:
+                      dataSource: featureSource
+    - type: Text
+      props:
+        text: 按数据来源维度分析特征价值，对比不同数据源的特征数量、预测能力和稳定性
+        className: risk-page-subtitle
+    - type: For
+      props:
+        className: risk-kpis
+        items: ${data.dataValue.kpis}
+        keyField: key
+        columns: 4
+        gap: 12
+      children:
+        - type: Card
+          props:
+            className: risk-kpi-card
+          children:
+            - type: Text
+              props:
+                text: ${row.label}
+                className: risk-kpi-label
+            - type: Flex
+              props:
+                className: risk-kpi-value
+                align: baseline
+                gap: 4
+              children:
+                - type: Text
+                  props:
+                    text: ${row.value}
+                    className: risk-kpi-number
+                - type: Text
+                  props:
+                    text: ${row.unit}
+                    type: secondary
+                    size: small
+            - type: Text
+              props:
+                text: ${row.footnote}
+                className: risk-kpi-footnote
+    - type: Flex
+      props:
+        className: risk-section
+      children:
+        - type: Flex
+          props:
+            className: risk-section-head
+            direction: vertical
+            gap: 3
+          children:
+            - type: Typography
+              props:
+                variant: h3
+                text: 特征来源汇总
+                className: risk-section-title
+            - type: Text
+              props:
+                text: 按特征来源聚合数量、区分能力与稳定性指标
+                className: risk-section-desc
+        - type: Card
+          props:
+            className: risk-table-card
+            contentClassName: p-0
+          children:
+            - type: Table
+              props:
+                className: risk-table
+                dataSource: ${data.featureSource.rows}
+                rowKey: source
+                pagination: false
+                scrollY: 470
+                columns:
+                  - title: 特征来源
+                    dataIndex: source
+                  - title: 特征数量
+                    dataIndex: count
+                    align: right
+                  - title: IV 值
+                    dataIndex: ivText
+                    align: right
+                  - title: KS 值
+                    dataIndex: ksText
+                    align: right
+                  - title: PSI 值
+                    dataIndex: psiText
+                    align: right
+                  - title: 空值率
+                    dataIndex: nullRateText
+                    align: right
+                  - title: 异常率
+                    dataIndex: abnormalRateText
+                    align: right
+                  - title: 成本级别
+                    dataIndex: cost
+                    cell:
+                      type: Text
+                      props:
+                        text: ${row.cost}
+                        className: risk-cost risk-cost--${row.costClass}
+        - type: Pagination
+          props:
+            className: risk-pagination
+            total: ${data.featureSource.total}
+            page: ${state.page}
+            pageSize: ${state.pageSize}
+            pageSizeOptions:
+              - 10
+              - 20
+              - 50
+            showTotal: true
+            align: right
+          events:
+            onChange:
+              - action: setState
+                params:
+                  page: ${event}
+              - action: reload
+                params:
+                  dataSource: featureSource
+            onPageSizeChange:
+              - action: setState
+                params:
+                  pageSize: ${event}
+                  page: 1
+              - action: reload
+                params:
+                  dataSource: featureSource
+    - type: Flex
+      props:
+        className: risk-section
+      children:
+        - type: Flex
+          props:
+            className: risk-section-head
+            direction: vertical
+            gap: 3
+          children:
+            - type: Typography
+              props:
+                variant: h3
+                text: 使用特征分布图
+                className: risk-section-title
+            - type: Text
+              props:
+                text: 颜色深浅表示特征价值，Low → High
+                className: risk-section-desc
+        - type: Card
+          props:
+            className: risk-dist-panel
+            contentClassName: p-0
+          children:
+            - type: For
+              props:
+                className: risk-dist-grid
+                items: ${data.dataValue.categories}
+                keyField: key
+                columns: 4
+                gap: 10
+              children:
+                - type: Flex
+                  props:
+                    direction: vertical
+                    gap: 2
+                    className: risk-dist-card
+                    style:
+                      background: ${row.bg}
+                  children:
+                    - type: Text
+                      props:
+                        text: ${row.key}
+                        className: risk-dist-key
+                    - type: Text
+                      props:
+                        text: ${row.pct}%
+                        className: risk-dist-pct
+                    - type: Text
+                      props:
+                        text: ${row.count} 个
+                        className: risk-dist-count
+            - type: Flex
+              props:
+                className: risk-dist-legend
+                align: center
+                gap: 8
+              children:
+                - type: Text
+                  props:
+                    text: Low
+                - type: Text
+                  props:
+                    text: ""
+                    className: risk-dist-gradient
+                - type: Text
+                  props:
+                    text: High
+                - type: Text
+                  props:
+                    text: 颜色深浅 = 特征价值高低
+                    className: risk-dist-legend-note
+    - type: Grid
+      props:
+        className: risk-chart-grid
+        columns: 2
+        gap: 16
+      children:
+        - type: Card
+          props:
+            title: IV-KS 特征价值散点图
+            className: risk-chart-card
+          children:
+            - type: Text
+              props:
+                text: 横轴 IV、纵轴 KS；颜色区分特征状态
+                className: risk-chart-desc
+            - type: ScatterChart
+              props:
+                data: ${data.dataValue.points}
+                xKey: iv
+                yKey: ks
+                seriesKey: status
+                height: 300
+        - type: Card
+          props:
+            title: PSI Top 排名
+            className: risk-chart-card
+          children:
+            - type: Text
+              props:
+                text: 按 PSI 从高到低排列，> 0.1 标记为指标漂移
+                className: risk-chart-desc
+            - type: BarChart
+              props:
+                data: ${data.dataValue.psi}
+                yKey: name
+                xKeys:
+                  - 稳定
+                  - 漂移
+                stacked: true
+                colors:
+                  - "#3b82f6"
+                  - "#f59e0b"
+                height: 300

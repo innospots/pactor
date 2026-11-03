@@ -1,0 +1,15 @@
+{
+  "schemaVersion": "1",
+  "id": "pactor-app-risk-decision",
+  "name": "risk-decision",
+  "version": "0.1.0",
+  "pactorVersionRange": "link:../../../../packages/pactor",
+  "basePath": "/pactor-app-risk-decision",
+  "sitemap": "dsl/sitemap.yaml",
+  "dslRoot": "dsl",
+  "assetsRoot": "assets",
+  "clientEntry": "client/index.js",
+  "styles": [
+    "client/index.css"
+  ]
+}

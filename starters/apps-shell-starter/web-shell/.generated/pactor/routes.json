@@ -1,0 +1,28 @@
+{
+  "routes": [
+    {
+      "publicPath": "/pactor-app-risk-analysis",
+      "moduleId": "pactor-app-risk-analysis",
+      "pageId": "risk-data-value",
+      "globalPageId": "pactor-app-risk-analysis:risk-data-value",
+      "pattern": "/pactor-app-risk-analysis",
+      "paramNames": []
+    },
+    {
+      "publicPath": "/pactor-app-risk-decision",
+      "moduleId": "pactor-app-risk-decision",
+      "pageId": "risk-decision",
+      "globalPageId": "pactor-app-risk-decision:risk-decision",
+      "pattern": "/pactor-app-risk-decision",
+      "paramNames": []
+    },
+    {
+      "publicPath": "/pactor-app-risk-decision/integration-logs",
+      "moduleId": "pactor-app-risk-decision",
+      "pageId": "integration-logs",
+      "globalPageId": "pactor-app-risk-decision:integration-logs",
+      "pattern": "/pactor-app-risk-decision/integration-logs",
+      "paramNames": []
+    }
+  ]
+}

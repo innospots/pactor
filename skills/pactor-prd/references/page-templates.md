@@ -6,7 +6,7 @@
 
 ## 数据列表标准模型（搜索 Form + 表格 + 抽屉新建/编辑）
 
-从成熟实现提取的完整闭环：搜索过滤、新建/编辑共用抽屉表单（分区 + 条件显隐 + 预填）、操作列 link 按钮。**完整可拷贝的骨架文件：生成工程内 `src/server/yaml/models/data-list.yaml`**（已注册进生成工程 sitemap 的可运行示例，菜单「页面骨架 / 数据列表」直接预览；复制后替换页面信息、字段、接口名与文案即可）。结构照抄，字段按线框图替换：
+从成熟实现提取的完整闭环：搜索过滤、新建/编辑共用抽屉表单（分区 + 条件显隐 + 预填）、操作列 link 按钮。**完整可拷贝的骨架文件：生成工程内 `src/backend/resources/yaml/analytics/data-list.page.yaml`**（已注册进生成工程 sitemap 的可运行示例，菜单「页面骨架 / 数据列表」直接预览；复制后替换页面信息、字段、接口名与文案即可）。结构照抄，字段按线框图替换：
 
 ```yaml
 dsl: "1.0"
@@ -354,7 +354,7 @@ body:
 
 ## 登录页（Login 业务组件，`@pactor-app/blocks`）
 
-登录页一律用 DSL `type: Login` 业务组件，禁止手写 Card+Form+自定义 CSS。**样板即生成工程内的 `src/server/yaml/common/login.yaml`**（可直接运行预览），核心结构：
+登录页一律用 DSL `type: Login` 业务组件，禁止手写 Card+Form+自定义 CSS。**样板即生成工程内的 `src/backend/resources/yaml/auth/login.page.yaml`**（可直接运行预览），核心结构：
 
 ```yaml
 body:
@@ -741,6 +741,6 @@ body:
 
 ## 通用约定
 
-- 页面 id kebab-case，与 sitemap.yaml 注册一致；文件按模块分目录存放 `src/server/yaml/<模块>/{{kebab-id}}.yaml`（见 project-structure.md）
+- 页面 id kebab-case，与 sitemap.yaml 注册一致；文件按模块分目录存放 `src/backend/resources/yaml/<模块>/{{kebab-id}}.page.yaml`（见 project-structure.md）
 - 表达式：`${state.x}` / `${data.x}` / `${route.params.x}` / `${event}`；支持 `.length`、比较、`&&`/`||`、三元
 - 任何「点击后请求并刷新」的交互都是同一闭环：`setState`（可选）→ `request` / http 数据源 → `reload dataSource` / `navigate`

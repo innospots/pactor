@@ -1,0 +1,45 @@
+id: site
+resourceType: sitemap
+version: 1
+dslVersion: "1.0"
+app:
+  name: Pactor Console
+layouts:
+  admin:
+    dsl: "1.0"
+    body:
+      type: Layout
+      props:
+        className: shell-root
+      children:
+        - type: Content
+          props:
+            className: shell-content
+          children:
+            - type: PageOutlet
+pages:
+  - id: risk-decision
+    path: /
+    title: 总览
+    version: 1
+    file: risk-decision/risk-decision.page.yaml
+  - id: integration-logs
+    path: /integration-logs
+    title: 对接日志
+    version: 1
+    file: risk-decision/integration-logs.page.yaml
+menus:
+  - id: risk-decision
+    type: page
+    pageId: risk-decision
+    title: 风险决策
+    icon: shield
+    layout: admin
+    public: true
+  - id: integration-logs
+    type: page
+    pageId: integration-logs
+    title: 对接日志
+    icon: file-text
+    layout: admin
+    public: true

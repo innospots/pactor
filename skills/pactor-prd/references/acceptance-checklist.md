@@ -50,7 +50,7 @@
 | # | 检查项 | 通过标准 |
 | --- | --- | --- |
 | A | 菜单完整性 | 菜单与 PRD 模块树一致，页面清单中每个页面均可达，hidden 详情 / 编辑页经真实入口可达 |
-| B | 模板占位、真实品牌与参考模块残留 | 新建工程从包含 `skills/` 的仓库根目录运行 `node skills/scripts/prd-template.mjs check <project> --rendered` 并通过；所有模式均检查页面、metadata、登录提示无未替换模板占位，无模板或其他项目的真实品牌、账号、皮肤残留；新建工程还须删除脚手架生成工程自带的 provider / route 参考模块与 `yaml/models/`，且无对应 sitemap、菜单或路由残留 |
+| B | 模板占位、真实品牌与样板残留 | 新建工程从包含 `skills/` 的仓库根目录运行 `node skills/scripts/prd-template.mjs check <project> --rendered` 并通过；所有模式均检查页面、metadata、登录提示无未替换模板占位，无模板或其他项目的真实品牌、账号、皮肤残留；PRD 未要求的脚手架演示页面还须删除其在 sitemap、菜单、fixture 与 mock 中的对应内容 |
 | C | 默认皮肤亮暗色 | 默认皮肤分别在亮色、暗色模式检查首页、登录、至少一个列表页和一个详情页：令牌生效，无白边、死色、遮挡或对比度异常；markdown 代码块在暗色下可读；不能替代每页截图矩阵 |
 | D | 每套已注册皮肤 | **每套已注册皮肤**都切换检查一次，不预设皮肤数量：全站组件（含图表和 body 浮层）随肤变化，首屏无闪烁，刷新后选择仍生效；不能用默认皮肤结果替代其他皮肤 |
 | E | 异常横向溢出 | 关键页面在 `1440×900` 和 `390×844` 检查 `document.documentElement.scrollWidth <= clientWidth`；无整页异常横向滚动、被裁主操作或浮层，表格只允许自身区域按契约横向滚动 |
@@ -79,13 +79,13 @@
 | 项目列表 | `docs/prd/ui-plan.md`：project-list 行完整，实现一致 | 通过：S1–S8 | 通过：F1–F6 | 通过：V1–V9；窄屏暗色 `docs/prd/ui-evidence/project-list/normal-narrow-dark.png` 已目检 | 通过：主题 / 布局 / 语义 / 状态响应式 | 无 error/warning | 通过 |
 | 路由详情 | `docs/prd/ui-plan.md`：实现与该页的窄屏规则不一致 | 不通过：S8 | 通过：F1–F6 | 不通过：V3；窄屏暗色 `docs/prd/ui-evidence/route-detail/error-narrow-dark.png` 出现整页横向溢出 | 不通过：布局 / 响应式 | 无 error/warning | 不通过：修复后重验全部三层 |
 
-全站：模板占位 / 真实品牌 / 参考模块残留 通过 / 默认皮肤亮暗色 通过 / 每套已注册皮肤 通过 / 异常横向溢出 不通过（route-detail）/ 原产品不适用：未提供；已按 PRD + UI 计划 + 模板目检 通过 / 自定义 CSS 不适用（无原产品 CSS）
+全站：模板占位 / 真实品牌 / 样板残留 通过 / 默认皮肤亮暗色 通过 / 每套已注册皮肤 通过 / 异常横向溢出 不通过（route-detail）/ 原产品不适用：未提供；已按 PRD + UI 计划 + 模板目检 通过 / 自定义 CSS 不适用（无原产品 CSS）
 结论：1/2 页通过；不通过项：route-detail S8、V3、全站 E；修复后重验该页全部三层及全站受影响项
 ```
 
 ## 常见坑（历史踩坑记录）
 
-- **dev server 不会因 YAML 改动热重载**（YAML 在服务端模块加载时读取）：改 `src/server/yaml/**` 后重启 dev server 再验
+- **dev server 不会因 YAML 改动热重载**（YAML 在服务端模块加载时读取）：改 `src/backend/resources/yaml/**` 后重启 dev server 再验
 - **端口冲突**：启动前 `lsof -nP -iTCP:<port> -sTCP:LISTEN`，已有 dev server 直接复用
 - **两段数据路径被当详情解析**：选项类接口用单段路径（`/api/d/project-members` 而非 `project/members`）
 - **toast 消失快误判未触发**：验证错误提示时在操作后立即截图/读 DOM

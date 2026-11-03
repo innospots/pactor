@@ -1,10 +1,13 @@
-# 数据接口层（接口文档优先 + 纯转发空数据约定）
+# 数据接口层（接口文档优先 + prototype mock / 其他环境转发）
 
 **接口文档驱动（优先）**：PRD/产品文档含接口文档或接口说明时，页面 dataSources 的 url 直接取文档中的接口地址——方法、参数、返回形状均以文档为准，不再使用下述 `/api/d/...` 命名约定。同源相对路径直接写；跨域绝对地址写完整 URL（`type: http` 原生支持）。转发层与命名约定仅在**无接口文档**时兜底。
 
-页面 DSL 的 http 数据源统一入口：`app/api/d/[...parts]/route.ts`（**纯转发层，不含任何路径映射**）。**路径即契约**：DSL 中的 url（如 `/api/d/providers`）就是服务端接口路径；转发层按相同路径、方法、查询与请求体原样转发到 `$NEXT_PUBLIC_API_BASE_URL/api/d/<parts>`（携带会话 cookie，匿名 401）。
+页面 DSL 的 http 数据源统一入口：`src/app/api/d/[...parts]/route.ts`。**路径即契约**：DSL 中的 url（如 `/api/d/projects`）就是业务接口路径。该路由先校验会话（匿名 401），然后按环境分流：
 
-**没有服务层接口时返回空数据（不报错）**：上游不可达（连接失败）、接口不存在（404）或返回非 JSON（如命中前端兜底 HTML）时，GET 返回 `{}`、POST 返回 `{ ok: true }`，页面按空态渲染。接真实后端只需把 `NEXT_PUBLIC_API_BASE_URL`（next.config.js 的 `API_BASE_URLS`）换成真实地址，页面 yaml 与转发层零改动。
+- `APP_ENV=prototype`：交给 `src/backend/mock/index.ts` 的本地 fixture/mock，适合无后端演示。
+- 其他环境：保留路径、方法、查询和请求体，原样转发到 `${PACTOR_SERVER_BASE_URL}/api/d/<parts>`。
+
+接入真实后端时，把 `PACTOR_SERVER_BASE_URL`（缺省读取 `NEXT_PUBLIC_API_BASE_URL`）换成真实地址，页面 YAML 与路由结构保持不变。
 
 ## 命名约定
 
@@ -17,13 +20,13 @@
 
 ```text
 浏览器（同源 /api/d/*）
-  → app/api/d/[...parts]/route.ts   纯转发：会话鉴权（匿名 401）→
-                                     fetch $NEXT_PUBLIC_API_BASE_URL/api/d/<parts>
-                                     不可达 / 404 / 非 JSON → 空数据（GET {} / POST { ok: true }）
-  → 服务端接口                        真实后端（与 DSL 同路径契约）
+  → src/app/api/d/[...parts]/route.ts   会话鉴权（匿名 401）
+      ├─ prototype → src/backend/mock/index.ts
+      └─ 其他环境 → fetch $PACTOR_SERVER_BASE_URL/api/d/<parts>
+  → 服务端接口                           真实后端（与 DSL 同路径契约）
 ```
 
-完整实现见脚手架生成工程 `app/api/d/[...parts]/route.ts`。
+完整实现见脚手架生成工程 `src/app/api/d/[...parts]/route.ts`。
 
 ## 对页面 yaml 的要求
 

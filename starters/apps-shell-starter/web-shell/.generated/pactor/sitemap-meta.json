@@ -1,0 +1,90 @@
+{
+  "layout": "shell",
+  "dslVersion": "1.0",
+  "app": {
+    "name": "InnoSpots"
+  },
+  "auth": {
+    "loginPath": "/login"
+  },
+  "layouts": {
+    "admin": {
+      "dsl": "1.0",
+      "body": {
+        "type": "Layout",
+        "props": {
+          "className": "shell-root"
+        },
+        "children": [
+          {
+            "type": "Content",
+            "props": {
+              "className": "shell-content"
+            },
+            "children": [
+              {
+                "type": "PageOutlet"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    "shell": {
+      "dsl": "1.0",
+      "body": {
+        "type": "Layout",
+        "props": {
+          "className": "h-dvh overflow-hidden bg-zinc-50"
+        },
+        "children": [
+          {
+            "type": "Sidebar",
+            "props": {
+              "className": "flex-1",
+              "style": {
+                "minHeight": 0
+              },
+              "brand": {
+                "title": "InnoSpots"
+              },
+              "collapsible": false,
+              "content": {
+                "type": "SitemapMenu",
+                "props": {
+                  "items": "${data.session.menus}"
+                },
+                "events": {
+                  "onSelect": [
+                    {
+                      "action": "navigate",
+                      "params": {
+                        "to": "${event}"
+                      }
+                    }
+                  ]
+                }
+              }
+            },
+            "children": [
+              {
+                "type": "Content",
+                "props": {
+                  "className": "overflow-y-auto",
+                  "style": {
+                    "background": "var(--background)"
+                  }
+                },
+                "children": [
+                  {
+                    "type": "PageOutlet"
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    }
+  }
+}

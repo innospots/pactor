@@ -40,7 +40,7 @@ const SOURCES = [
 /** 目录级排除（任意深度，按名称匹配） */
 const EXCLUDED_DIRS = new Set(['node_modules', '.next', 'dist', 'dist-module', '.generated']);
 /** 文件级排除（lockfile / 构建缓存 / next 自动生成）。
- * pnpm-workspace.yaml 同步保留：其中 onlyBuiltDependencies 是独立安装时
+ * pnpm-workspace.yaml 同步保留：其中 allowBuilds 是独立安装时
  * 批准原生依赖构建脚本的关键配置（避免 ERR_PNPM_IGNORED_BUILDS） */
 const EXCLUDED_FILES = new Set([
   'pnpm-lock.yaml',
@@ -98,6 +98,15 @@ function syncDir(src, dest, renamePackage, isRoot = true) {
       writeFileSync(to, transformPackageJson(readFileSync(from, 'utf8'), renamePackage), 'utf8');
     } else if (entry === 'README.md' && isRoot) {
       writeFileSync(to, transformReadme(readFileSync(from, 'utf8')), 'utf8');
+    } else if (src.startsWith(join(repoRoot, 'starters/next-app-starter')) && [
+      'src/backend/fixtures/system-settings.json',
+      'src/backend/pages/i18n/locales/en-US/app.yaml',
+      'src/backend/pages/i18n/locales/zh-CN/app.yaml',
+      'src/app/layout.tsx',
+      'src/backend/pages/yaml/sitemap.yaml',
+      'src/backend/pages/yaml/auth/login.page.yaml',
+    ].includes(from.slice(join(repoRoot, 'starters/next-app-starter').length + 1))) {
+      writeFileSync(to, readFileSync(from, 'utf8').replaceAll('Example Admin', '{{APP_TITLE}}'), 'utf8');
     } else {
       cpSync(from, to);
     }

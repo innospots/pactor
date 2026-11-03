@@ -26,14 +26,14 @@ version: 1.7.0
 
 ## 红线（必须遵守）
 
-1. **dataSources 一律 `type: http`，不写 `type: service`**；**PRD 含接口文档/说明时，url 取文档中的接口地址**（方法、路径、返回形状对齐，见「1. 输入解析」）；无接口文档时指向 `/api/d/...`（转发层空数据回退，后续按 `references/data-api.md` 接真实接口）
-2. **布局与间距以样板页为准**：新建工程时以脚手架生成工程内 `src/server/yaml/models/` 骨架与同类页为准；**增量时以目标工程内同模块/同类型页**为准。线框图只提取结构与功能，不逐像素还原 ASCII
+1. **dataSources 一律 `type: http`，不写 `type: service`**；**PRD 含接口文档/说明时，url 取文档中的接口地址**（方法、路径、返回形状对齐，见「1. 输入解析」）；无接口文档时指向 `/api/d/...`（prototype 使用本地 mock，其他环境原样转发，见 `references/data-api.md`）
+2. **布局与间距以样板页为准**：新建工程时以脚手架生成工程内 `src/backend/resources/yaml/analytics/data-list.page.yaml`、`settings/users.page.yaml` 等同类页为准；**增量时以目标工程内同模块/同类型页**为准。线框图只提取结构与功能，不逐像素还原 ASCII
 3. **样式与视觉依据一致**：原产品存在时，主题令牌（含深浅色）、自定义 CSS、换肤入口全部移植对齐；原产品不存在时以 PRD + UI 计划 + 同类标准骨架 / 模板目检，不虚报原产品对比，见 `references/theme-and-style.md` 与 `references/acceptance-checklist.md`
 4. **功能与 PRD / 原产品一致**：线框图描述的筛选/搜索/跳转/弹窗/提交等交互必须经 events/actions 闭环可用，禁止只画静态骨架；错误分支（校验失败提示等）也要实现
 5. **表单一律用 `Form` 组件**：凡是一组「字段 + 校验 + 提交」的表单——独立表单页、页面内嵌的配置面板（如树/列表右侧的编辑表单）、弹窗/抽屉表单、**搜索栏（关键词 + 查询/重置 的筛选区，用 `Form layout: inline`）**——都必须用 `Form` 包裹，字段经 `props.name` 绑定，校验用字段级 `rules`（required + message），提交用 `submit: true` 的 Button 触发 `onSubmit`；**禁止**散放 `Input`/`Select` + `setState` 攒草稿 + `if` 动作手写校验。上下结构字段及 data-list 搜索结构一律用 `Field` 包裹：label、必填星号（`required: true`）、行右提示（`labelHint`）由 `Field` 渲染，控件上只留 `name`/`rules` 等；直接使用控件自身 label 时不得在外层 `Field` 重复声明 label，禁止手写 `Text("*") + Label` 拼标签。回填联动（如点击列表/树节点填充表单）用 `form.setValues` 动作，不要绑 `${state.x}` 到字段 value；即点即生效的 ChipFilter 快筛行没有提交语义，不属于表单
-6. **列表页操作列规范**：操作列按钮样式统一 `Button variant: link`；「编辑」与「新建」指向同一个表单（同一路由页或同一弹窗），唯一区别是编辑以行数据预填（路由页按接口约定整体预填，通常为 `initialValues: ${data.detail}`，route 等预整形接口为 `${data.detail.form}`；弹窗/内嵌面板用 `form.setValues`）；**数据列表页（搜索 + 表格 + 新建/编辑）以生成工程内 `src/server/yaml/models/data-list.yaml` 为标准骨架生成**（结构与要点见 `references/page-templates.md`「数据列表标准模型」）
+6. **列表页操作列规范**：操作列按钮样式统一 `Button variant: link`；「编辑」与「新建」指向同一个表单（同一路由页或同一弹窗），唯一区别是编辑以行数据预填（路由页按接口约定整体预填，通常为 `initialValues: ${data.detail}`，route 等预整形接口为 `${data.detail.form}`；弹窗/内嵌面板用 `form.setValues`）；**数据列表页（搜索 + 表格 + 新建/编辑）以生成工程内 `src/backend/resources/yaml/analytics/data-list.page.yaml` 为标准骨架生成**（结构与要点见 `references/page-templates.md`「数据列表标准模型」）
 7. **文案以线框图为准**：标题、按钮、空态文案逐字取自线框图/PRD
-8. **登录页用 `Login` 业务组件**：PRD 含登录页时，以生成工程内 `src/server/yaml/common/login.yaml`（`type: Login`）为样板生成，禁止手写 Card+Form+自定义 CSS；**原型未明确布局方式时必须向用户提问**选择 `layout`（`split` 左右分栏 / `centered` 居中 / `brand-card` 品牌卡片 / `overlap` 卡片叠加 / `backdrop` 整页渐变背景，附效果简述，必要时含 `brandSide`/`brandRatio`/`authVariant` 修饰项），原型可判定布局则直接用、不提问；用户不答默认 `split` + `authVariant: card`；品牌区文案/logo/插画取自 PRD，提交闭环沿用 `onSubmit` → `request` + `message` + `app.reload` 模式
+8. **登录页用 `Login` 业务组件**：PRD 含登录页时，以生成工程内 `src/backend/resources/yaml/auth/login.page.yaml`（`type: Login`）为样板生成，禁止手写 Card+Form+自定义 CSS；**原型未明确布局方式时必须向用户提问**选择 `layout`（`split` 左右分栏 / `centered` 居中 / `brand-card` 品牌卡片 / `overlap` 卡片叠加 / `backdrop` 整页渐变背景，附效果简述，必要时含 `brandSide`/`brandRatio`/`authVariant` 修饰项），原型可判定布局则直接用、不提问；用户不答默认 `split` + `authVariant: card`；品牌区文案/logo/插画取自 PRD，提交闭环沿用 `onSubmit` → `request` + `message` + `app.reload` 模式
 9. DSL 语法细节（组件 props、表达式、动作）以 `pactor-dsl` skill 与 packages 当前导出（ui 内置注册表 / `@pactor-app/blocks` / `@pactor-app/chart`）为准，本 skill 只约定流程与产出物
 
 ## 国际化
@@ -64,7 +64,7 @@ PRD 要求多语言时，先读 [国际化参考](references/internationalizatio
 
 严格按 **create-pactor-app 脚手架（带 values）→ rendered check → install/dev 冒烟** 的顺序执行；冒烟后先通过 UI 计划门禁，再进入页面生成：
 
-1. 工程名由 README 产品名派生为 kebab-case 英文名，创建前确认一次；**工程必须经 create-pactor-app 脚手架创建**（模板唯一事实来源是 `starters/next-app-starter`，脚手架产物自带 PRD 起点内容：`/api/d` 转发层、`src/server/yaml/{common,models,provider,route}` 骨架、换肤支持），禁止从任何位置复制模板工程副本替代脚手架。
+1. 工程名由 README 产品名派生为 kebab-case 英文名，创建前确认一次；**工程必须经 create-pactor-app 脚手架创建**（模板唯一事实来源是 `starters/next-app-starter`，脚手架产物自带 PRD 起点内容：`/api/d` 数据层、`src/backend/resources/yaml/` 页面骨架、主题与国际化接线），禁止从任何位置复制模板工程副本替代脚手架。
 2. 按 **`template-placeholders.json`** 准备 flat values JSON：键必须恰好是清单登记的全部键，每个值都是字符串；键含义与示例直接读清单，不自行增删键。
 3. 用 `--values` 一次性完成脚手架与占位符渲染，然后做渲染后检查（`<values.json>` 为上一步的文件）：
 
@@ -75,7 +75,7 @@ PRD 要求多语言时，先读 [国际化参考](references/internationalizatio
 
    必须用支持 `--values` 的 CLI 版本（`@latest`）；`APP_NAME` 由脚手架按目录名替换，其余 `{{KEY}}` 由 `--values` 渲染。旧 CLI 不支持 `--values` 导致占位符残留时，rendered check 会拦截，可用 `node skills/scripts/prd-template.mjs render <project> --values <values.json>` 补渲染后复查；禁止手工逐文件替换或只改 `package.json`。**rendered check 未通过、仍有占位或真实项目残留时，禁止生成页面。**
 4. 执行 `pnpm -C <project> install` 与 `pnpm -C <project> dev` 完成模板冒烟（默认端口 9011），并核对 `references/project-structure.md`。冒烟通过后才进入 UI 计划门禁；门禁通过才进入阶段 3。
-5. 参考模块 provider/route 作样板；`yaml/models/` 是页面骨架目录（按模块目录结构存放，已注册 sitemap、菜单「页面骨架」分组可直接预览），阶段 3 按计划生成时复制到目标模块目录改字段与文案；**全站生成完成后删除**参考模块与 models/。
+5. `analytics/data-list.page.yaml`、`settings/users.page.yaml` 与 `settings/roles.page.yaml` 等模板页可作结构样板；阶段 3 按计划生成到目标模块目录，并替换字段、接口与文案。PRD 未要求的模板演示页、菜单、fixture 和 mock 在全站生成完成后清理。
 
 **增量**
 
@@ -98,10 +98,10 @@ PRD 要求多语言时，先读 [国际化参考](references/internationalizatio
 - **新建工程**：清单一行 = 一个文件 `yaml/<模块>/<page-id>.yaml`（或工程既定 A/B 规则）；`mkdir` 模块目录；N = P0/P1 行数
 - **增量**：仅 **add** 新建文件；**update** 改已有 yaml；**deprecate** 删文件并改 sitemap（须用户确认）
 - 校验见 `page-inventory-and-files.md`（全量）或 `incremental-wireframe-delta.md`（增量）
-- 用 `references/component-mapping.md` 与 `references/page-templates.md` 核对计划所选组件、骨架的合法 DSL（**数据列表页直接复制 `yaml/models/data-list.yaml` 替换占位符**）；表单一律 `Form` 包裹，不在生成时无理由重选布局或组件
+- 用 `references/component-mapping.md` 与 `references/page-templates.md` 核对计划所选组件、骨架的合法 DSL（**数据列表页直接复制 `yaml/analytics/data-list.page.yaml` 替换占位符**）；表单一律 `Form` 包裹，不在生成时无理由重选布局或组件
 - **组件/模板/业务组件拿不准时先查资产库**（`references/asset-library.md`）：组件详情含可套用的 DSL 示例与 whenToUse，线框模板含可渲染的提炼 DSL；业务组件以 details 条目 + `@pactor-app/blocks` 导出为准（catalog 的 integration 字段不可信）
 - 同步更新 `sitemap.yaml` 的 `pages` + `menus`（hidden 详情/编辑带 `activeMenu`）
-- 每页 dataSources 全部 `type: http`：**有接口文档 → url 取文档接口地址**；无 → 按 `references/data-api.md` 命名约定写 `/api/d/...`（转发层空数据回退，无需 mock）；交互 events + actions 闭环
+- 每页 dataSources 全部 `type: http`：**有接口文档 → url 取文档接口地址**；无 → 按 `references/data-api.md` 命名约定写 `/api/d/...`（prototype 走本地 mock，其他环境原样转发）；交互 events + actions 闭环
 
 ### 4. 样式移植
 
@@ -130,7 +130,7 @@ PRD 要求多语言时，先读 [国际化参考](references/internationalizatio
 | `references/component-mapping.md` | 阶段 3：把计划确定的区域与组件落为合法 Pactor DSL，不绕过 UI 计划重新选型 |
 | `references/asset-library.md` | 阶段 3–4：查资产库组件详情（DSL 示例/whenToUse）、线框模板（可渲染 DSL）、业务组件真伪核对、主题令牌；线上 https://pactor.innospots.com 或源码 `doc/` |
 | `references/page-templates.md` | 阶段 3：核对计划所选列表/详情/表单页 yaml 模板；数据列表页默认用「数据列表标准模型」（搜索 Form + 表格 + 抽屉新建/编辑） |
-| `references/data-api.md` | 阶段 3：数据接口层约定（纯转发、路径即契约、空数据回退、路径命名） |
+| `references/data-api.md` | 阶段 3：数据接口层约定（prototype mock、其他环境转发、路径契约与命名） |
 | `references/theme-and-style.md` | 阶段 4：主题令牌提取、皮肤、自定义 CSS、换肤 |
 | `references/acceptance-checklist.md` | 阶段 5：浏览器功能验收、未改页回归与结果输出格式；与 `references/ui-quality.md` 的静态检查、截图目检共同执行 |
 | `references/page-inventory-and-files.md` | 阶段 1–3：清单列 → 目录与文件批量创建、与 sitemap 对齐；创建 YAML 前必须先通过 UI 计划门禁 |
