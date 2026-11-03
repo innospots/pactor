@@ -172,7 +172,7 @@ pnpm --filter theme-studio dev           # :5710 主题工作室
 ```text
 packages/     @pactor-app/* 运行时与工具（core → runtime → app / ui / chat …）
 skills/       @pactor-app/skills — Agent 技能（DSL / 脚手架 / PRD 生成）
-starters/     pnpm create pactor-app 的模板源码
+starters/     pnpm create pactor-app 的模板源码（另含 apps-shell-starter：多应用 Shell + 模块示例）
 examples/     仓库内联调示例
 tools/        内部工具（如 theme-studio）
 ```

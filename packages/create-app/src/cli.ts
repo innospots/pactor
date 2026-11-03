@@ -18,11 +18,12 @@ import {
 /** 命令清单与用法（--help 输出） */
 export const HELP_TEXT = `create-pactor-app — 从模板创建 Pactor 应用
 
-用法: create-pactor-app <name> [-t next-app|spa] [--values <file>]
+用法: create-pactor-app <name> [-t next-app|spa|apps-shell] [--values <file>]
 
 参数:
   <name>                目标目录（可为相对/绝对路径，应用名取目录名）
-  -t, --template <id>   模板：next-app（Next.js 全栈）/ spa（Vite 纯前端）
+  -t, --template <id>   模板：next-app（Next.js 全栈）/ spa（Vite 纯前端）/
+                        apps-shell（多应用 Shell + 模块工程）
   --values <file>       模板 {{KEY}} 占位符值（flat JSON 字符串对象，覆盖模板默认值）
   -h, --help            显示帮助
 

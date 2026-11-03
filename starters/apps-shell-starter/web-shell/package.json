@@ -1,0 +1,37 @@
+{
+  "name": "innospots-web-shell",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "next dev -p 9020",
+    "assemble:modules": "node scripts/assemble-modules.mjs",
+    "validate:modules": "node scripts/validate-modules.mjs",
+    "smoke:module-api": "node scripts/smoke-module-api.mjs",
+    "build": "npm run assemble:modules && npm run validate:modules && next build",
+    "start": "next start -p 9020",
+    "lint": "eslint"
+  },
+  "dependencies": {
+    "@pactor-app/core": "link:../../../packages/core",
+    "@pactor-app/runtime": "link:../../../packages/runtime",
+    "@pactor-app/ui": "link:../../../packages/ui",
+    "next": "16.3.5",
+    "pactor-app": "link:../../../packages/pactor",
+    "react": "19.2.8",
+    "react-dom": "19.2.8",
+    "risk-analysis": "file:../pactor-apps/risk-analysis/risk-analysis-0.1.0.tgz",
+    "risk-decision": "file:../pactor-apps/risk-decision/risk-decision-0.1.0.tgz",
+    "yaml": "^2.9.1"
+  },
+  "devDependencies": {
+    "@tailwindcss/postcss": "^4.3.3",
+    "@types/node": "^20.19.43",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
+    "eslint": "^9.39.5",
+    "eslint-config-next": "16.3.5",
+    "tailwindcss": "^4.3.3",
+    "typescript": "^5.9.3"
+  }
+}

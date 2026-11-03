@@ -1,7 +1,7 @@
 ---
 name: pactor-project
 description: |
-  Use when initializing or scaffolding a new Pactor application — empty repo, greenfield project, or "how do I start" (skill id pactor-project). Triggers: pactor-project, create-pactor-app, pnpm create pactor-app, pactor create, 初始化项目, 创建脚手架, 新建 Pactor 工程, next-app/spa starter, copy starters/. Guides template choice (next-app vs spa vs minimal Vite), exact CLI commands, post-scaffold verification, and when to use pactor-prd or manual StaticDslLoader instead.
+  Use when initializing or scaffolding a new Pactor application — empty repo, greenfield project, or "how do I start" (skill id pactor-project). Triggers: pactor-project, create-pactor-app, pnpm create pactor-app, pactor create, 初始化项目, 创建脚手架, 新建 Pactor 工程, next-app/spa/apps-shell starter, copy starters/. Guides template choice (next-app vs spa vs apps-shell vs minimal Vite), exact CLI commands, post-scaffold verification, and when to use pactor-prd or manual StaticDslLoader instead.
 version: 1.1.0
 ---
 
@@ -14,7 +14,7 @@ version: 1.1.0
 - 用户要**新建 / 初始化** Pactor 项目，或问「怎么搭架子」
 - 提到 `pnpm create pactor-app`、`create-pactor-app`、`pactor create`
 - 要在现有空目录生成工程，或从 monorepo 的 `starters/` 复制模板
-- 在 **next-app（全栈）** 与 **spa（纯前端）** 之间选型
+- 在 **next-app（全栈）**、**spa（纯前端）** 与 **apps-shell（多应用 Shell + 模块）** 之间选型
 - 用户**不是**从 PRD 批量生成多模块后台（那种场景用 `pactor-prd` skill）
 
 ## What this skill does NOT cover
@@ -28,11 +28,13 @@ version: 1.1.0
 ## 选型（先问清楚再执行）
 
 ```text
-需要自带 mock API + 登录 + sitemap 端点？
-  ├─ 是 → next-app（Next.js 全栈，dev :9011）
-  └─ 否，只要浏览器壳，接口已有或另起服务？
-        ├─ 接口形态已是 sitemap + /pages/{id} → spa（Vite，dev :9012，baseUrl 指后端）
-        └─ 单页原型 / 教学最小集 → pactor create（Vite + StaticDslLoader，见 references/minimal-vite.md）
+多个业务模块要合一部署、且模块需独立开发/独立交付（npm 包 + 构建期装配）？
+  ├─ 是 → apps-shell（web-shell :9020 + 模块工程，模块独立 dev :8021/:8022）
+  └─ 否，单应用？
+        ├─ 需要自带 mock API + 登录 + sitemap 端点 → next-app（Next.js 全栈，dev :9011）
+        └─ 只要浏览器壳，接口已有或另起服务？
+              ├─ 接口形态已是 sitemap + /pages/{id} → spa（Vite，dev :9012，baseUrl 指后端）
+              └─ 单页原型 / 教学最小集 → pactor create（Vite + StaticDslLoader，见 references/minimal-vite.md）
 ```
 
 **默认推荐**：不确定时用 **next-app**（与 `create-pactor-app` 默认模板一致）。
@@ -44,24 +46,33 @@ version: 1.1.0
 3. **运行脚手架**（在目标父目录执行）：
 
 ```bash
-pnpm create pactor-app <dir-name>              # TTY 交互选模板；非 TTY 默认 next-app
-pnpm create pactor-app <dir-name> -t next-app  # Next.js 全栈 + mock API
-pnpm create pactor-app <dir-name> -t spa       # Vite SPA + SitemapApp
+pnpm create pactor-app <dir-name>                # TTY 交互选模板；非 TTY 默认 next-app
+pnpm create pactor-app <dir-name> -t next-app    # Next.js 全栈 + mock API
+pnpm create pactor-app <dir-name> -t spa         # Vite SPA + SitemapApp
+pnpm create pactor-app <dir-name> -t apps-shell  # 多应用 Shell + 模块工程
 ```
 
-等价：`npx create-pactor-app <dir-name> [-t next-app|spa]`。
+等价：`npx create-pactor-app <dir-name> [-t next-app|spa|apps-shell]`。
 
 4. **安装与启动**：
 
 ```bash
+# next-app / spa：
 cd <dir-name>
 pnpm install
+pnpm dev
+
+# apps-shell（Shell 以 file: 引用模块 tgz，必须先 pack 模块）：
+cd <dir-name>/pactor-apps/risk-analysis && pnpm install && pnpm pack:module
+cd ../risk-decision && pnpm install && pnpm pack:module
+cd ../../web-shell && pnpm install && pnpm assemble:modules
 pnpm dev
 ```
 
 5. **验收**：
    - **next-app**：打开 http://localhost:9011 ，用 `admin` / `pactor123` 登录
    - **spa**：先在同一机器启动 next-app 或兼容的 sitemap 服务（:9011），再开 http://localhost:9012
+   - **apps-shell**：打开 http://localhost:9020/pactor-app-risk-analysis 与 /pactor-app-risk-decision 均能渲染；模块可独立 dev（:8021/:8022）
 6. **告诉用户改哪里**：见 `references/templates.md` 中的「生成后首要修改点」。
 
 ## 备选入口
