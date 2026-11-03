@@ -441,6 +441,9 @@
   .flex-col {
     flex-direction: column;
   }
+  .flex-col-reverse {
+    flex-direction: column-reverse;
+  }
   .flex-wrap {
     flex-wrap: wrap;
   }
@@ -1127,6 +1130,9 @@
     }
   }
   @media (width >= 40rem) {
+    .sm\:mr-auto {
+      margin-right: auto;
+    }
     .sm\:max-w-2xl {
       max-width: var(--container-2xl);
     }

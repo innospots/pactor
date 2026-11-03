@@ -40,6 +40,11 @@ export interface FormModalProps {
   cancelText?: string;
   /** 提交按钮文字（缺省 i18n pactor.formModal.submit） */
   submitText?: string;
+  /**
+   * 底部左侧辅助说明（与取消 / 提交按钮同处操作区）：
+   * 桌面端贴左、按钮保持靠右；窄屏随操作区纵向排布。
+   */
+  footerNote?: string;
   /** 表单元素（DSL children；Input / Select 等声明 name 即自动成为表单项） */
   children?: ReactNode;
   /** 提交事件（校验通过后触发），参数为表单 values（${event}） */
@@ -59,7 +64,7 @@ export interface FormModalProps {
 /**
  * FormModal 表单弹层（区块组件）：Dialog 内嵌 Form——标题（title/description）
  * + DSL children 表单元素（声明 name 自动成为表单项，支持 rules 校验）
- * + 底部取消 / 提交按钮（文字可自定义）。
+ * + 底部取消 / 提交按钮（文字可自定义，可附左侧辅助说明 footerNote）。
  * open 受控（绑 ${state.x}，事件里 setState 关闭）；缺省经 defaultOpen
  * 内部自管理，此时取消 / 校验通过的提交会自动关闭。
  * 提交按钮走 Form type=submit 统一校验，通过后 onSubmit 传出 values（${event}）。
@@ -77,6 +82,7 @@ export function FormModal({
   initialValues,
   cancelText,
   submitText,
+  footerNote,
   children,
   onSubmit,
   onCancel,
@@ -164,6 +170,18 @@ export function FormModal({
         >
           {children}
           <DialogFooter>
+            {/* 辅助说明贴左，按钮保持靠右：auto 右外边距吃掉剩余空间。
+                用行内样式而非 sm:mr-auto —— 宿主的 Tailwind 构建不扫描
+                node_modules，响应式工具类可能缺失；窄屏下右外边距自动失效，
+                说明随 DialogFooter 的 flex-col-reverse 排到按钮下方。 */}
+            {footerNote ? (
+              <p
+                className="self-center text-sm leading-relaxed text-muted-foreground"
+                style={{ marginRight: 'auto' }}
+              >
+                {footerNote}
+              </p>
+            ) : null}
             <Button type="button" variant="outline" onClick={handleCancel}>
               {cancelText ?? t('pactor.formModal.cancel')}
             </Button>
