@@ -1,3 +1,0 @@
-{
-  "/(workspace)/[...slug]/page": "app/(workspace)/[...slug]/page.js"
-}
