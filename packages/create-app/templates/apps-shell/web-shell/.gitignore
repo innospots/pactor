@@ -10,3 +10,4 @@ dist
 .generated
 public/modules/*
 !public/modules/.gitkeep
+next-env.d.ts

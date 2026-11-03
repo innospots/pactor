@@ -246,6 +246,8 @@ dashboard.rangePlaceholder: Select range
 dashboard.preset.today: Today
 dashboard.preset.lastDays: Last {{days}} days
 dashboard.coreOverview: Core overview · {{start}} — {{end}}
+dashboard.empty.title: No dashboard data
+dashboard.empty.description: No data in the selected range, or the data service is not connected
 dashboard.metric.requests: Requests
 dashboard.metric.cost: Cost
 dashboard.metric.latency: Latency
