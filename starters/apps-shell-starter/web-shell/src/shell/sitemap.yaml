@@ -1,0 +1,39 @@
+# Shell 自带站点：固定左侧菜单 + 默认布局。
+# 由 scripts/assemble-modules.mjs 在 npm 模块之前装配：
+#   - layout: shell 作为缺省布局，模块页面未声明 layout 时自动落入；
+#   - menus 直接指向已安装模块的全局页面 id（<moduleId>:<pageId>），
+#     左侧只保留两个固定一级菜单；
+#   - 模块自身的菜单在 module-list.json 中以 menuMode: "hidden" 接入，
+#     仅保留隐藏路由（如风险决策的对接日志），不重复出现在导航中。
+id: shell
+resourceType: sitemap
+version: 1
+dslVersion: "1.0"
+app: { name: InnoSpots }
+auth: { loginPath: /login }
+layout: shell
+
+menus:
+  - {
+      id: risk-analysis,
+      type: page,
+      pageId: "pactor-app-risk-analysis:risk-data-value",
+      path: /pactor-app-risk-analysis,
+      title: 风险分析,
+      icon: chart,
+      order: 1,
+      public: true,
+    }
+  - {
+      id: risk-decision,
+      type: page,
+      pageId: "pactor-app-risk-decision:risk-decision",
+      path: /pactor-app-risk-decision,
+      title: 风险决策,
+      icon: shield,
+      order: 2,
+      public: true,
+    }
+
+layouts:
+  shell: layouts/shell.layout.yaml

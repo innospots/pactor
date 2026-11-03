@@ -1,17 +1,17 @@
-# 官方模板：next-app 与 spa
+# 官方模板：next-app、spa 与 apps-shell
 
 由 `create-pactor-app`（`packages/create-app/templates`）与仓库 `starters/` 提供，内容同步。
 
 ## 对比
 
-| | next-app | spa |
-| --- | --- | --- |
-| 模板 id | `next-app` | `spa` |
-| 栈 | Next.js App Router + React | Vite + React |
-| dev 端口 | 9011 | 9012 |
-| 自带 mock API | 是（`/api/sitemap`、`/api/pages/[id]`、登录 cookie） | 否（默认连 :9011） |
-| 路由 | Next 可选 catch-all + `SitemapApp` 内容区 | 框架内置 History 路由（不传 pathname/navigate） |
-| 适用 | 全栈起步、会话、sitemap 裁剪 | 纯前端部署、API 独立团队 |
+| | next-app | spa | apps-shell |
+| --- | --- | --- | --- |
+| 模板 id | `next-app` | `spa` | `apps-shell` |
+| 栈 | Next.js App Router + React | Vite + React | Next.js ×3（1 宿主 + 2 模块） |
+| dev 端口 | 9011 | 9012 | 9020（模块独立 dev 8021/8022） |
+| 自带 mock API | 是（`/api/sitemap`、`/api/pages/[id]`、登录 cookie） | 否（默认连 :9011） | 是（模块 server entry 随 tgz 分发） |
+| 路由 | Next 可选 catch-all + `SitemapApp` 内容区 | 框架内置 History 路由（不传 pathname/navigate） | Shell 构建期装配路由 + `PactorHost` |
+| 适用 | 全栈起步、会话、sitemap 裁剪 | 纯前端部署、API 独立团队 | 多业务模块合一部署、模块独立交付 |
 
 ## next-app 目录要点
 
@@ -65,13 +65,32 @@ vite.config.ts               # 通常无 pactor vite-plugin（页面由 API 下�
 
 本地联调：**先** `next-app`（或等价后端）**:9011`，**再** spa `:9012`。
 
+## apps-shell 目录要点
+
+```text
+web-shell/                     # 统一宿主（9020）：装配脚本、/api/runtime/*、/api/modules/<id>/*
+  src/shell/sitemap.yaml       # 左侧固定菜单（pageId 为 <moduleId>:<pageId>）
+  src/modules/module-list.json # 模块启停与菜单接入模式（menuMode/access）
+  scripts/assemble-modules.mjs # 构建期装配 → .generated/pactor + public/modules
+pactor-apps/
+  risk-analysis/               # 含 server entry 示例（8021）：module/server.ts + apiPrefixes
+  risk-decision/               # 纯 DSL 示例（8022）：仅 module/client.ts
+```
+
+生成后顺序（Shell 以 `file:` 引用模块 tgz）：两个模块各自 `pnpm install && pnpm pack:module`（`--no-bump`，tgz 文件名固定）→ `web-shell` `pnpm install && pnpm assemble:modules && pnpm dev`。改模块后重跑 `pack:module`，Shell 侧 `pnpm install --force && pnpm assemble:modules`。
+
 ## 生成后首要修改点
 
 ### 所有模板
 
-- `package.json` 的 `name`（脚手架已用目录名替换 `__APP_NAME__`）
+- `package.json` 的 `name`（单应用模板脚手架已用目录名替换 `__APP_NAME__`；apps-shell 各子包名互相引用，保持不变）
 - 品牌与标题：`src/server/yaml/sitemap.yaml`（next-app）内 `app.name`、菜单文案
 - 换真实后端：保持端点契约不变，替换 `app/api/*` 或 spa 的 `apiBaseUrl`（见 `@pactor-app/resource` 文档）
+
+### 仅 apps-shell
+
+- 替换业务模块：复制 `pactor-apps/` 下示例模块，改 `package.json` name、`pactor.module.json`（id/basePath/yamlRoot）、dev 端口，再在 web-shell `pnpm add` 新 tgz、`module-list.json` 启用、`src/shell/sitemap.yaml` 挂菜单
+- 模块改名/删模块后必须重新 `assemble:modules`（`pnpm dev` 不自动装配）
 
 ### 仅 next-app
 

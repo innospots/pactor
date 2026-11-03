@@ -1,0 +1,50 @@
+@import "tailwindcss";
+/* pactor 样式单入口：ui → blocks → chart → chat 的聚合产物 */
+@import "pactor-app/styles.css";
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto,
+    "Helvetica Neue", Arial, sans-serif;
+}
+
+body {
+  margin: 0;
+  background: var(--background);
+  color: var(--foreground);
+}
+
+/* ── 无菜单外壳：Layout 锁定视口高度，内容区独立滚动 ────────────── */
+.shell-root {
+  height: 100dvh;
+  overflow: hidden;
+}
+
+/* 聚合表内基础 display 工具类排在响应式变体之后，会压过变体：
+   按 Tailwind 语义重建 Pagination 文案的显隐组合
+   （断点与各变体一致：sm 40rem / md 48rem）。 */
+@media (min-width: 40rem) {
+  .hidden.sm\:block {
+    display: block;
+  }
+}
+
+@media (min-width: 48rem) {
+  .hidden.md\:block {
+    display: block;
+  }
+
+  .hidden.md\:flex {
+    display: flex;
+  }
+
+  .flex.md\:hidden {
+    display: none;
+  }
+}
+
+.shell-content {
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
