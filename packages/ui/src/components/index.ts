@@ -30,6 +30,8 @@ export { Flex } from './components/Flex/index.js';
 export type { FlexProps } from './components/Flex/index.js';
 export { Card } from './components/Card/index.js';
 export type { CardProps } from './components/Card/index.js';
+export { Panel } from './components/Panel/index.js';
+export type { PanelProps } from './components/Panel/index.js';
 export { Button } from './components/Button/index.js';
 export type {
   ButtonProps,
@@ -246,13 +248,18 @@ export type { SelectOption, SelectProps } from './components/Select/index.js';
 export { Textarea } from './components/Textarea/index.js';
 export type { TextareaProps } from './components/Textarea/index.js';
 export { Checkbox } from './components/Checkbox/index.js';
-export type { CheckboxProps } from './components/Checkbox/index.js';
+export type {
+  CheckboxOption,
+  CheckboxProps,
+  CheckboxValue,
+  CheckboxVariant,
+} from './components/Checkbox/index.js';
 export { ChipFilter } from './components/ChipFilter/index.js';
 export type { ChipFilterItem, ChipFilterProps } from './components/ChipFilter/index.js';
 export { ChipNode } from './components/ChipNode/index.js';
 export type { ChipNodeProps } from './components/ChipNode/index.js';
 export { RadioGroup } from './components/RadioGroup/index.js';
-export type { RadioGroupOption, RadioGroupProps } from './components/RadioGroup/index.js';
+export type { RadioGroupOption, RadioGroupProps, RadioGroupVariant } from './components/RadioGroup/index.js';
 export { Switch } from './components/Switch/index.js';
 export type { SwitchProps } from './components/Switch/index.js';
 export { Slider } from './components/Slider/index.js';
@@ -294,6 +301,8 @@ export type { MentionOption, MentionsProps } from './components/Mentions/index.j
 // 业务刚需类扩展组件（第五批：数据展示）
 export { List } from './components/List/index.js';
 export type { ListItemData, ListProps } from './components/List/index.js';
+export { CardList } from './components/CardList/index.js';
+export type { CardListItemData, CardListProps } from './components/CardList/index.js';
 export { Tree } from './components/Tree/index.js';
 export type { TreeNodeData, TreeProps } from './components/Tree/index.js';
 export { Descriptions } from './components/Descriptions/index.js';

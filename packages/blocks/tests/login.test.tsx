@@ -42,7 +42,7 @@ describe('Login 业务组件', () => {
     },
   );
 
-  it('authVariant：plain 无卡片容器，float 大尺寸悬浮卡片（440px + shadow-xl）', () => {
+  it('authVariant：plain 无卡片容器，float 大尺寸悬浮卡片（440px + shadow-(--login-panel-shadow)）', () => {
     const plain = renderDsl({
       type: 'Login',
       props: { layout: 'centered', authVariant: 'plain' },
@@ -57,7 +57,7 @@ describe('Login 业务组件', () => {
     const card = float.container.querySelector('[data-slot=card]');
     expect(card).not.toBeNull();
     expect(card!.className).toContain('max-w-[440px]');
-    expect(card!.className).toContain('shadow-xl');
+    expect(card!.className).toContain('shadow-(--login-panel-shadow)');
   });
 
   it('brandRatio 写入分栏比例 CSS 变量，brandSide=right 品牌面板在右', () => {
@@ -207,6 +207,26 @@ describe('Login 业务组件', () => {
     });
     expect(screen.getByText('欢迎回来')).toBeTruthy();
     expect(screen.getByRole('button', { name: '进入控制台' })).toBeTruthy();
+  });
+
+  it('errorMessage：缺省非空即展示内联错误提示（destructive Alert）', () => {
+    renderDsl({
+      type: 'Login',
+      props: { errorMessage: '用户名或密码错误' },
+    });
+    expect(screen.getByText('用户名或密码错误')).toBeTruthy();
+    expect(document.querySelector('[data-slot=alert]')).not.toBeNull();
+  });
+
+  it('errorVisible：显式关闭时隐藏错误提示，驱动 DSL 失败/复位编排', () => {
+    renderDsl({
+      type: 'Login',
+      props: {
+        errorMessage: '${state.msg}',
+        errorVisible: '${state.show}',
+      },
+    }, { state: { msg: '用户名或密码错误', show: false } });
+    expect(screen.queryByText('用户名或密码错误')).toBeNull();
   });
 
   it('未配置辅助入口与页脚时不渲染', () => {

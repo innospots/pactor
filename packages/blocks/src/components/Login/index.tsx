@@ -2,6 +2,7 @@ import { useI18n } from "@pactor-app/runtime";
 import type { CSSProperties, ReactNode } from "react";
 
 import { cn } from '../../lib/utils.js';
+import { Alert } from "@pactor-app/ui/components";
 import { Button } from "@pactor-app/ui/components";
 import { Card } from "@pactor-app/ui/components";
 import { Field } from "@pactor-app/ui/components";
@@ -71,6 +72,12 @@ export interface LoginProps {
   title?: string;
   /** 认证区说明 */
   subtitle?: string;
+  /** 内联错误提示文案（登录失败等）：展示在认证区标题下方、表单上方，
+   *  注册为可翻译字段（$i18n 可用） */
+  errorMessage?: string;
+  /** 是否展示内联错误提示（DSL 绑 ${state.x}，失败分支 setState 打开、
+   *  重新提交时复位）；缺省时 errorMessage 非空即展示 */
+  errorVisible?: boolean;
   usernameLabel?: string;
   usernamePlaceholder?: string;
   passwordLabel?: string;
@@ -218,6 +225,8 @@ export function Login({
   brand,
   title,
   subtitle,
+  errorMessage,
+  errorVisible,
   usernameLabel,
   usernamePlaceholder,
   passwordLabel,
@@ -316,6 +325,18 @@ export function Login({
           <p className="text-sm text-muted-foreground">{subtitle}</p>
         ) : null}
       </div>
+      {/* 内联错误提示：失败反馈贴近表单（替代易被忽略的角落 toast），
+          错误色令牌（destructive）+ 图标，可见性默认随 errorMessage，
+          DSL 可经 errorVisible 显式驱动（失败打开、重新提交复位） */}
+      {(errorVisible ?? (errorMessage != null && errorMessage !== "")) &&
+      errorMessage ? (
+        <Alert
+          variant="error"
+          showIcon
+          message={errorMessage}
+          className="mb-4"
+        />
+      ) : null}
       {/* 认证区内容：插槽优先（可内嵌 Tabs 多方式登录），缺省内置账号密码表单 */}
       {children ?? (
         <Form name="login" className="flex flex-col gap-2" onSubmit={onSubmit}>
@@ -373,7 +394,7 @@ export function Login({
     }
     if (variant === "float") {
       return (
-        <Card className="w-full max-w-[440px] p-4 shadow-xl md:p-6">
+        <Card className="w-full max-w-[440px] p-4 shadow-(--login-panel-shadow) md:p-6">
           {authContent}
         </Card>
       );
@@ -452,7 +473,7 @@ export function Login({
         brandSide === "left" ? "md:-ml-24" : "md:-mr-24",
       )}
     >
-      <Card className="p-2 shadow-xl md:p-4">{authContent}</Card>
+      <Card className="p-2 shadow-(--login-panel-shadow) md:p-4">{authContent}</Card>
     </div>
   );
 
@@ -472,7 +493,7 @@ export function Login({
         <div className="p-6 md:hidden">{brandIdentity}</div>
       ) : null}
       <div className="flex flex-1 items-center justify-center p-6">
-        <Card className="w-full max-w-[400px] p-2 shadow-xl md:p-4">
+        <Card className="w-full max-w-[400px] p-2 shadow-(--login-panel-shadow) md:p-4">
           {authContent}
         </Card>
       </div>

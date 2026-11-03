@@ -190,7 +190,7 @@ createPactorApplication({
 
 | DSL type | 关键 props | `${event}` |
 | --- | --- | --- |
-| `Input` | `name`、`label`、`rules`、`value`、`type: text/password`、`placeholder`、`maxLength`、`allowClear`、`disabled` | string |
+| `Input` | `name`、`label`、`rules`、`value`、`type: text/password`、`placeholder`、`maxLength`、`allowClear`、`search`、`disabled` | string |
 | `Textarea` | `name`、`label`、`rules`、`rows`、`autoSize`、`maxLength` | string |
 | `NumberInput` | `name`、`label`、`rules`、`min`、`max`、`step`、`precision` | number / undefined |
 | `Select` | `name`、`label`、`rules`、`options`、`showSearch`、`allowClear` | 选项 value |
@@ -213,6 +213,7 @@ createPactorApplication({
 - `Field.required` 只是视觉星号；校验必须写 `rules`。
 - 当前 `required` 仅把 `undefined` / `null` / `''` 判为空，布尔 `false` 会通过。协议确认、同意条款等布尔条件必须用 `onChange → state` 控制提交，并由服务端复验。
 - `Select` / `TreeSelect` / `Cascader` 的 value 在候选中必须唯一。
+- `Input` 的 `search` 只改变外观形态（前置搜索图标）；「回车才查」绑定 `events.onSearch`，「边输边筛」绑定 `events.onChange`，二者可同时声明。
 - Upload 只是 UI 采集，真正上传由 `onChange` 后的服务/请求动作完成。
 - 日期范围值统一为 `{ start, end }`；时间格式必须与 API 约定一致。
 

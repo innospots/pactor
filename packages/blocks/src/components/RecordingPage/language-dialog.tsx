@@ -1,3 +1,5 @@
+import { useI18n } from '@pactor-app/runtime';
+
 import { cn } from '../../lib/utils.js';
 import {
   Dialog,
@@ -80,6 +82,7 @@ export function RecordingLanguageDialog({
   onCancel,
   onConfirm,
 }: RecordingLanguageDialogProps) {
+  const { t } = useI18n();
   const renderColumn = (
     columnTitle: string,
     options: RecordingLanguageOption[],
@@ -109,6 +112,7 @@ export function RecordingLanguageDialog({
       }}
     >
       <DialogContent
+        closeLabel={t('pactor.overlay.close')}
         data-slot="recording-language-dialog"
         className="gap-6 sm:max-w-xl"
       >

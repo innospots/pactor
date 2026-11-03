@@ -68,6 +68,7 @@ import { Kbd } from './components/Kbd/index.js';
 import { Label } from './components/Label/index.js';
 import { Layout } from './components/Layout/index.js';
 import { Link } from './components/Link/index.js';
+import { CardList } from './components/CardList/index.js';
 import { List } from './components/List/index.js';
 import { LoadingOverlay } from './components/LoadingOverlay/index.js';
 import { Markdown } from './components/Markdown/index.js';
@@ -79,6 +80,7 @@ import { NavigationMenu } from './components/NavigationMenu/index.js';
 import { Notification } from './components/Notification/index.js';
 import { NumberInput } from './components/NumberInput/index.js';
 import { Page } from './components/Page/index.js';
+import { Panel } from './components/Panel/index.js';
 import { Pagination } from './components/Pagination/index.js';
 import { Popconfirm } from './components/Popconfirm/index.js';
 import { Popover } from './components/Popover/index.js';
@@ -141,6 +143,8 @@ export const builtinComponents = {
   For: { component: For, withScope: true },
   Flex,
   Card,
+  // header（左 title + 右 extra，底部分隔线）+ 内容区的区块容器
+  Panel,
   Button,
   Alert,
   Statistic,
@@ -236,6 +240,8 @@ export const builtinComponents = {
   Transfer,
   Mentions,
   List,
+  // List 的卡片形态：每项一张 Card，项间 gap 分隔（默认 12px）
+  CardList,
   Tree,
   Descriptions,
   Timeline,

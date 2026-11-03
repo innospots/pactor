@@ -62,8 +62,8 @@
   --warning: oklch(0.769 0.188 70.08);
   --info: oklch(0.623 0.214 259.815);
   --border: oklch(0.922 0 0);
-  --input: oklch(0.922 0 0);
-  --ring: oklch(0.708 0 0);
+  --input: oklch(0.85 0 0);
+  --ring: oklch(0.556 0 0);
   --chart-1: oklch(0.646 0.222 41.116);
   --chart-2: oklch(0.6 0.118 184.704);
   --chart-3: oklch(0.398 0.07 227.392);
@@ -89,6 +89,11 @@
   --card-shadow: none;
   --shadow-color: oklch(0 0 0 / 10%);
   --overlay-background: oklch(0 0 0 / 50%);
+
+  /* Login 浮层卡阴影（blocks Login 的 float/overlap/centered 变体）：全库唯一
+     默认开启的静止态阴影——认证卡在品牌背景上需要浮层感；皮肤置 none 即回纯扁平 */
+  --login-panel-shadow:
+    0 20px 25px -5px var(--shadow-color), 0 8px 10px -6px var(--shadow-color);
 
   /* 组件级皮肤令牌（命名 --<component>-<part>-<state>，默认值经 var()
      回退到语义令牌——只覆盖语义令牌时组件仍有合理视觉） */
@@ -158,8 +163,8 @@
   --warning: oklch(0.769 0.188 70.08);
   --info: oklch(0.623 0.214 259.815);
   --border: oklch(1 0 0 / 10%);
-  --input: oklch(1 0 0 / 15%);
-  --ring: oklch(0.556 0 0);
+  --input: oklch(1 0 0 / 25%);
+  --ring: oklch(0.708 0 0);
   --chart-1: oklch(0.488 0.243 264.376);
   --chart-2: oklch(0.696 0.17 162.48);
   --chart-3: oklch(0.769 0.188 70.08);
@@ -207,8 +212,8 @@
     --warning: oklch(0.769 0.188 70.08);
     --info: oklch(0.623 0.214 259.815);
     --border: oklch(1 0 0 / 10%);
-    --input: oklch(1 0 0 / 15%);
-    --ring: oklch(0.556 0 0);
+    --input: oklch(1 0 0 / 25%);
+    --ring: oklch(0.708 0 0);
     --chart-1: oklch(0.488 0.243 264.376);
     --chart-2: oklch(0.696 0.17 162.48);
     --chart-3: oklch(0.769 0.188 70.08);
@@ -372,6 +377,14 @@
   &::-webkit-scrollbar-corner {
     background: transparent;
   }
+}
+
+/* 校验错误态：FieldShell 把 aria-invalid 集中下发到表单项内首个可聚焦控件
+   （见 form-item.tsx），此处把边框标红对齐 shadcn aria-invalid:border-destructive
+   模式；未分层声明压过 utilities 层的 border-input（同 .pactor-clearable 的跨层
+   规避思路）。switch 等无边框控件不受影响（border-color 对其无害） */
+[data-slot='form-item'] [aria-invalid='true'] {
+  border-color: var(--destructive);
 }
 
 /* clearable 悬浮清除按钮（见 clearable.tsx）：专用类替代 hidden +

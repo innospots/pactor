@@ -259,3 +259,73 @@
   overflow-x: auto;
   overflow-y: hidden;
 }
+
+/* ---------- MarkdownEditor（@mdxeditor/editor 容器外观） ---------- */
+
+/**
+ * 编辑器自身排版样式来自 `@mdxeditor/editor/style.css`（需使用方引入），
+ * 这里只定义容器边框 / 圆角 / 内边距，令牌与 .pactor-markdown 保持一致。
+ */
+.pactor-markdown-editor {
+  --pactor-markdown-fg: var(--foreground, light-dark(#1f2328, #e6edf3));
+  --pactor-markdown-border: var(--border, light-dark(#d1d9e0, #3d444d));
+  --pactor-markdown-radius: var(--radius, 6px);
+
+  border: 1px solid var(--pactor-markdown-border);
+  border-radius: var(--pactor-markdown-radius);
+  color: var(--pactor-markdown-fg);
+  overflow: hidden;
+}
+
+.pactor-markdown-editor:focus-within {
+  border-color: var(--primary, light-dark(#0969da, #4493f8));
+}
+
+.pactor-markdown-editor .pactor-markdown-editor-toolbar {
+  border-bottom: 1px solid var(--pactor-markdown-border);
+}
+
+.pactor-markdown-editor .pactor-markdown-editor-content {
+  padding: 8px 12px;
+  min-height: 8em;
+  outline: none;
+}
+
+/**
+ * 明暗主题：`pactor-markdown-editor-root` 由组件同时挂到 MDXEditor 的编辑
+ * 根节点与 portal 的 `.mdxeditor-popup-container`（下拉 / 链接弹层）。
+ * 组件按 data-pactor-theme（或显式 theme）追加 `.light` / `.dark`，
+ * 激活 MDXEditor 内置的 Radix 令牌组；这里再把其基础令牌接到宿主语义令牌，
+ * 使画布 / 工具栏 / 弹层与宿主主题同色（无宿主令牌时回退 Radix 色阶）。
+ * 选择器带元素名提升优先级，确保覆盖 MDXEditor 自身的 ._editorRoot_* 声明。
+ */
+div.pactor-markdown-editor-root.mdxeditor,
+div.pactor-markdown-editor-root.mdxeditor-popup-container {
+  --basePageBg: var(--card, var(--slate-1));
+  --baseBase: var(--card, var(--slate-1));
+  --baseBgSubtle: color-mix(in srgb, var(--foreground, var(--slate-12)) 5%, var(--card, var(--slate-1)));
+  --baseBg: color-mix(in srgb, var(--foreground, var(--slate-12)) 8%, var(--card, var(--slate-1)));
+  --baseBgHover: color-mix(in srgb, var(--foreground, var(--slate-12)) 11%, var(--card, var(--slate-1)));
+  --baseBgActive: color-mix(in srgb, var(--foreground, var(--slate-12)) 15%, var(--card, var(--slate-1)));
+  --baseLine: var(--border, var(--slate-6));
+  --baseBorder: var(--border, var(--slate-7));
+  --baseBorderHover: color-mix(in srgb, var(--foreground, var(--slate-12)) 24%, var(--border, var(--slate-7)));
+  --baseSolid: var(--muted-foreground, var(--slate-9));
+  --baseSolidHover: var(--foreground, var(--slate-10));
+  --baseText: var(--muted-foreground, var(--slate-11));
+  --baseTextContrast: var(--foreground, var(--slate-12));
+
+  /* 弹层脱离编辑根节点，需自带强调色令牌（与 MDXEditor 默认同一色阶） */
+  --accentBase: var(--blue-1);
+  --accentBgSubtle: var(--blue-2);
+  --accentBg: var(--blue-3);
+  --accentBgHover: var(--blue-4);
+  --accentBgActive: var(--blue-5);
+  --accentLine: var(--blue-6);
+  --accentBorder: var(--blue-7);
+  --accentBorderHover: var(--blue-8);
+  --accentSolid: var(--blue-9);
+  --accentSolidHover: var(--blue-10);
+  --accentText: var(--blue-11);
+  --accentTextContrast: var(--blue-12);
+}

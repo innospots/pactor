@@ -38,6 +38,7 @@ export function loadPlaceholderDefaults(templatesDir: string): Record<string, st
 export const TEMPLATES = [
   { id: 'next-app', label: 'Next.js 全栈（含 mock API，dev 端口 9011）' },
   { id: 'spa', label: 'Vite 纯前端（dev 端口 9012）' },
+  { id: 'apps-shell', label: '多应用 Shell（web-shell + 模块工程，dev 端口 9020）' },
 ] as const;
 
 export type TemplateId = (typeof TEMPLATES)[number]['id'];
@@ -137,16 +138,31 @@ export function resolveTarget(name: string): string {
   return resolve(name);
 }
 
-/** 各模板 dev 端口（与模板 README 说法一致） */
-const DEV_HINTS: Record<TemplateId, string> = {
-  'next-app': '  pnpm dev        # http://localhost:9011',
-  spa: '  pnpm dev        # http://localhost:9012',
+/** 各模板生成后的启动步骤（与模板 README 说法一致） */
+const NEXT_STEPS: Record<TemplateId, (name: string) => string[]> = {
+  'next-app': (name) => [
+    `  cd ${name}`,
+    '  pnpm install',
+    '  pnpm dev        # http://localhost:9011',
+  ],
+  spa: (name) => [
+    `  cd ${name}`,
+    '  pnpm install',
+    '  pnpm dev        # http://localhost:9012',
+  ],
+  // 多工程模板：Shell 以 file: 引用模块 tgz，必须先 pack 模块再安装 Shell
+  'apps-shell': (name) => [
+    `  cd ${name}/pactor-apps/risk-analysis && pnpm install && pnpm pack:module`,
+    '  cd ../risk-decision && pnpm install && pnpm pack:module',
+    '  cd ../../web-shell && pnpm install && pnpm assemble:modules',
+    '  pnpm dev        # http://localhost:9020',
+  ],
 };
 
 /** 生成成功后的下一步提示 */
 export function printNextSteps(io: CliIo, name: string, template: TemplateId): void {
   io.out('下一步:');
-  io.out(`  cd ${name}`);
-  io.out('  pnpm install');
-  io.out(DEV_HINTS[template]);
+  for (const step of NEXT_STEPS[template](name)) {
+    io.out(step);
+  }
 }
