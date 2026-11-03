@@ -1,1 +1,13 @@
-.next/
+node_modules
+.next
+out
+dist
+*.log
+*.tsbuildinfo
+.env*.local
+.DS_Store
+.idea
+.generated
+public/modules/*
+!public/modules/.gitkeep
+next-env.d.ts

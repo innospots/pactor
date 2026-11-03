@@ -1,0 +1,10 @@
+{
+  "id": "pactor-app-risk-decision",
+  "name": "risk-decision",
+  "basePath": "/pactor-app-risk-decision",
+  "yamlRoot": "src/server/yaml",
+  "clientEntry": "module/client.ts",
+  "actions": [],
+  "publicDir": "public",
+  "target": "innospots-web-shell@2"
+}

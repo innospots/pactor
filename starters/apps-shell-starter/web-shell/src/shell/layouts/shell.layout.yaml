@@ -1,0 +1,32 @@
+# Shell 默认页面布局。
+# 最左侧为固定的一级菜单：Sidebar 关闭折叠（collapsible: false），
+# Menu 不开启 collapsible 且菜单项没有 children，因此既不能收起，
+# 也不能展开子菜单。
+# 右侧 Content 内的 PageOutlet 是页面出口：将来安装的三方应用命中
+# 自己的路由后，由同一布局在这里渲染。
+dsl: "1.0"
+body:
+  type: Layout
+  props: { className: "h-dvh overflow-hidden bg-zinc-50" }
+  children:
+    - type: Sidebar
+      props:
+        className: "flex-1"
+        style: { minHeight: 0 }
+        brand: { title: InnoSpots }
+        collapsible: false
+        content:
+          type: SitemapMenu
+          props:
+            items: ${data.session.menus}
+          events:
+            onSelect:
+              - action: navigate
+                params: { to: "${event}" }
+      children:
+        - type: Content
+          props:
+            className: "overflow-y-auto"
+            style: { background: "var(--background)" }
+          children:
+            - type: PageOutlet

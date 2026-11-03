@@ -94,6 +94,66 @@ describe('create-pactor-app', () => {
     expect(existsSync(join(target, 'src/app/layout.tsx'))).toBe(true);
   });
 
+  it('生成 apps-shell 模板：多工程结构、子包名保留、无 link:、tgz 引用与指引', async () => {
+    const target = join(workDir, 'my-apps');
+    const { io, out } = makeIo();
+    const code = await runCli([target, '-t', 'apps-shell'], io);
+
+    expect(code).toBe(0);
+    for (const file of [
+      'web-shell/package.json',
+      'web-shell/scripts/assemble-modules.mjs',
+      'web-shell/src/shell/sitemap.yaml',
+      'pactor-apps/risk-analysis/package.json',
+      'pactor-apps/risk-analysis/pactor.module.json',
+      'pactor-apps/risk-analysis/module/server.ts',
+      'pactor-apps/risk-decision/package.json',
+      'pactor-apps/risk-decision/module/client.ts',
+    ]) {
+      expect(existsSync(join(target, file)), file).toBe(true);
+    }
+
+    // 多工程模板：子包名互相引用（module-list / tgz file: / manifest id），必须保留
+    const shell = readPkg(join(target, 'web-shell'));
+    expect(shell.name).toBe('innospots-web-shell');
+    expectNoLinkDeps(shell);
+    const shellDeps = shell.dependencies as Record<string, string>;
+    expect(shellDeps['risk-analysis']).toBe(
+      'file:../pactor-apps/risk-analysis/risk-analysis-0.1.0.tgz',
+    );
+    expect(shellDeps['risk-decision']).toBe(
+      'file:../pactor-apps/risk-decision/risk-decision-0.1.0.tgz',
+    );
+
+    const riskAnalysis = readPkg(join(target, 'pactor-apps/risk-analysis'));
+    expect(riskAnalysis.name).toBe('risk-analysis');
+    expectNoLinkDeps(riskAnalysis);
+    const riskDecision = readPkg(join(target, 'pactor-apps/risk-decision'));
+    expect(riskDecision.name).toBe('risk-decision');
+    expectNoLinkDeps(riskDecision);
+
+    // 根 README 首行替换为应用名；子工程 README 标题保留
+    const rootReadme = readFileSync(join(target, 'README.md'), 'utf8');
+    expect(rootReadme.slice(0, rootReadme.indexOf('\n'))).toBe('# my-apps');
+    const shellReadme = readFileSync(join(target, 'web-shell/README.md'), 'utf8');
+    expect(shellReadme.startsWith('# InnoSpots Web Shell')).toBe(true);
+
+    // 产物不进入模板
+    for (const absent of [
+      'web-shell/.generated',
+      'pactor-apps/risk-analysis/dist-module',
+      'pactor-apps/risk-analysis/risk-analysis-0.1.0.tgz',
+      'web-shell/pnpm-lock.yaml',
+    ]) {
+      expect(existsSync(join(target, absent)), absent).toBe(false);
+    }
+
+    // 下一步指引：先 pack 模块再安装 Shell（9020）
+    expect(out.some((l) => l.includes('pack:module'))).toBe(true);
+    expect(out.some((l) => l.includes('assemble:modules'))).toBe(true);
+    expect(out.some((l) => l.includes('9020'))).toBe(true);
+  });
+
   it('name 为路径时应用名取 basename', async () => {
     const nested = join(workDir, 'a', 'b');
     mkdirSync(nested, { recursive: true });

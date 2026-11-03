@@ -29,14 +29,16 @@ const pactorVersion = JSON.parse(
   readFileSync(join(repoRoot, 'packages/pactor/package.json'), 'utf8'),
 ).version;
 
-/** starter 源目录 → 模板名 */
+/** starter 源 → 模板：renamePackage 为 true 时 package.json name 替换为 __APP_NAME__
+ * （单应用模板）；多工程模板（apps-shell）各子包名互相引用，必须保留 */
 const SOURCES = [
-  ['starters/next-app-starter', 'next-app'],
-  ['starters/spa-starter', 'spa'],
+  { source: 'starters/next-app-starter', template: 'next-app', renamePackage: true },
+  { source: 'starters/spa-starter', template: 'spa', renamePackage: true },
+  { source: 'starters/apps-shell-starter', template: 'apps-shell', renamePackage: false },
 ];
 
 /** 目录级排除（任意深度，按名称匹配） */
-const EXCLUDED_DIRS = new Set(['node_modules', '.next', 'dist']);
+const EXCLUDED_DIRS = new Set(['node_modules', '.next', 'dist', 'dist-module', '.generated']);
 /** 文件级排除（lockfile / 构建缓存 / next 自动生成）。
  * pnpm-workspace.yaml 同步保留：其中 allowBuilds 是独立安装时
  * 批准原生依赖构建脚本的关键配置（避免 ERR_PNPM_IGNORED_BUILDS） */
@@ -48,16 +50,19 @@ const EXCLUDED_FILES = new Set([
   'CLAUDE.md',
 ]);
 
-/** 是否排除该条目（.env* 一律排除，防敏感文件入库） */
+/** 是否排除该条目（.env* 一律排除，防敏感文件入库；模块打包产物 *.tgz 不进模板） */
 function isExcluded(name, isDirectory) {
   if (name === '.env' || name.startsWith('.env.')) return true;
+  if (!isDirectory && name.endsWith('.tgz')) return true;
   return isDirectory ? EXCLUDED_DIRS.has(name) : EXCLUDED_FILES.has(name);
 }
 
-/** 转换 package.json：占位应用名 + link: → ^version + 移除 packageManager */
-function transformPackageJson(content) {
+/** 转换 package.json：link: → ^version + 移除 packageManager；单应用模板另占位应用名 */
+function transformPackageJson(content, renamePackage) {
   const pkg = JSON.parse(content);
-  pkg.name = '__APP_NAME__';
+  if (renamePackage) {
+    pkg.name = '__APP_NAME__';
+  }
   for (const field of ['dependencies', 'devDependencies']) {
     for (const [dep, range] of Object.entries(pkg[field] ?? {})) {
       if (range.startsWith('link:')) {
@@ -76,8 +81,9 @@ function transformReadme(content) {
   return `# __APP_NAME__${content.slice(newline)}`;
 }
 
-/** 递归同步目录（全量覆盖，目标先清空） */
-function syncDir(src, dest) {
+/** 递归同步目录（全量覆盖，目标先清空）。README 标题替换仅作用于模板根，
+ * 多工程模板各子 README 保留原标题 */
+function syncDir(src, dest, renamePackage, isRoot = true) {
   mkdirSync(dest, { recursive: true });
   for (const entry of readdirSync(src)) {
     const from = join(src, entry);
@@ -85,12 +91,12 @@ function syncDir(src, dest) {
     const isDirectory = statSync(from).isDirectory();
     if (isExcluded(entry, isDirectory)) continue;
     if (isDirectory) {
-      syncDir(from, to);
+      syncDir(from, to, renamePackage, false);
       continue;
     }
     if (entry === 'package.json') {
-      writeFileSync(to, transformPackageJson(readFileSync(from, 'utf8')), 'utf8');
-    } else if (entry === 'README.md') {
+      writeFileSync(to, transformPackageJson(readFileSync(from, 'utf8'), renamePackage), 'utf8');
+    } else if (entry === 'README.md' && isRoot) {
       writeFileSync(to, transformReadme(readFileSync(from, 'utf8')), 'utf8');
     } else if (src.startsWith(join(repoRoot, 'starters/next-app-starter')) && [
       'src/backend/fixtures/system-settings.json',
@@ -107,7 +113,7 @@ function syncDir(src, dest) {
   }
 }
 
-for (const [source, template] of SOURCES) {
+for (const { source, template, renamePackage } of SOURCES) {
   const src = join(repoRoot, source);
   const dest = join(packageDir, 'templates', template);
   if (!existsSync(src)) {
@@ -115,7 +121,7 @@ for (const [source, template] of SOURCES) {
     process.exit(1);
   }
   rmSync(dest, { recursive: true, force: true });
-  syncDir(src, dest);
+  syncDir(src, dest, renamePackage);
   console.log(`已同步 ${source} → templates/${template}`);
 }
 console.log(`依赖版本: ^${pactorVersion}`);

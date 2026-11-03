@@ -1,0 +1,241 @@
+/* ─── 风险决策：总览 ──────────────────────────────────────────────────────
+ * 与 risk-decision.page.yaml 配套的视觉：
+ *   对接监控 KPI 行 → 数据同步趋势图 + 对接状态卡 → 对接系统明细表。
+ * KPI 卡由 @pactor-app/chart 的 MetricCard 渲染，本文件只补尺寸、
+ * 卡片脚注与双栏面板、状态圆点、明细表细节。
+ * 菜单 / 顶栏使用共享外壳（risk-shell.css）。
+ * ────────────────────────────────────────────────────────────────────────── */
+
+/* ─── 对接监控 KPI：MetricCard（@pactor-app/chart） ──────────────────────── */
+
+.risk-metrics {
+  align-items: stretch;
+}
+
+/* MetricCard 外层包裹：提供脚注的定位上下文 */
+.risk-metric-cell {
+  position: relative;
+  display: flex;
+  height: 100%;
+  flex-direction: column;
+}
+
+/* MetricCard 尺寸与卡片视觉对齐 KPI 行（覆盖组件的 p-4 / shadow-sm） */
+.risk-metric[data-slot="metric-card"] {
+  display: flex;
+  min-height: 112px;
+  flex: 1;
+  flex-direction: column;
+  padding: 15px 17px 36px;
+  border-radius: var(--radius);
+  box-shadow: none;
+}
+
+.risk-metric [data-slot="metric-card-title"] {
+  font-size: 12px;
+  line-height: 1.4;
+  color: var(--muted-foreground);
+}
+
+.risk-metric [data-slot="metric-card-value"] {
+  margin-top: 6px;
+  font-size: 30px;
+  font-weight: 600;
+  line-height: 1.05;
+  letter-spacing: -0.025em;
+}
+
+/* 卡片底部脚注：叠加在 MetricCard 的留白内。
+ * 正向 / 中性说明为绿色；含风险语义（告警、中断）为红色 */
+.risk-metric-footnote {
+  position: absolute;
+  right: 17px;
+  bottom: 13px;
+  left: 17px;
+  font-size: 11px;
+  line-height: 1.4;
+  color: var(--muted-foreground);
+}
+
+.risk-metric-footnote--positive {
+  color: var(--success);
+}
+
+.risk-metric-footnote--danger {
+  color: var(--destructive);
+}
+
+/* ─── 数据同步趋势 + 对接状态：双栏面板 ────────────────────────────────── */
+
+.risk-decision-panels {
+  align-items: stretch;
+}
+
+/* Card 自带 py-6 / gap-6 / px-6，统一为紧凑内边距 */
+.risk-decision-card {
+  gap: 0;
+  padding: 0;
+}
+
+.risk-decision-card [data-slot="card-header"] {
+  padding: 15px 18px 0;
+}
+
+.risk-decision-card [data-slot="card-content"] {
+  padding: 8px 18px 16px;
+}
+
+/* 趋势图：图表本身由 @pactor-app/chart 渲染（Canvas + 皮肤主题） */
+.risk-decision-chart [data-slot="card-content"] {
+  padding: 2px 12px 12px;
+}
+
+/* ─── 对接状态卡 ───────────────────────────────────────────────────────── */
+
+.risk-status-card {
+  height: 100%;
+}
+
+.risk-status-card [data-slot="card-content"] {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+}
+
+.risk-status-list {
+  display: flex;
+  flex-direction: column;
+}
+
+/* 每条状态：圆点（伪元素）+ 文案；圆点语义与明细表状态色字一致 */
+.risk-status-row {
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--foreground);
+}
+
+.risk-status-row::before {
+  content: "";
+  width: 7px;
+  height: 7px;
+  flex: 0 0 auto;
+  border-radius: 999px;
+  background: var(--muted-foreground);
+}
+
+.risk-status-row--ok::before {
+  background: var(--success);
+}
+
+.risk-status-row--attention::before {
+  background: var(--warning);
+}
+
+.risk-status-row--danger::before {
+  background: var(--destructive);
+}
+
+.risk-status-footnote {
+  margin-top: auto;
+  padding-top: 18px;
+  font-size: 11px;
+  line-height: 1.5;
+  color: var(--muted-foreground);
+}
+
+.risk-status-action {
+  align-self: flex-start;
+  margin-top: 12px;
+}
+
+/* ─── 对接系统明细表 ───────────────────────────────────────────────────── */
+
+.risk-table-name {
+  font-weight: 500;
+  color: var(--foreground);
+}
+
+.risk-table-mode {
+  color: var(--muted-foreground);
+}
+
+.risk-table-amount {
+  font-variant-numeric: tabular-nums;
+}
+
+/* 状态色仅用于文字，不加底色胶囊：正常绿 / 异常红 */
+.risk-status-state {
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.risk-status-state--ok {
+  color: var(--success);
+}
+
+.risk-status-state--danger {
+  color: var(--destructive);
+}
+
+/* ─── 对接日志 ─────────────────────────────────────────────────────────── */
+
+/* Card 默认留白收紧，与总览页明细卡保持一致 */
+.risk-log-card {
+  gap: 0;
+  padding: 0;
+}
+
+.risk-log-card [data-slot="card-header"] {
+  padding: 15px 18px 0;
+}
+
+.risk-log-card [data-slot="card-content"] {
+  padding: 8px 18px 16px;
+}
+
+/* 时间列：等宽数字，弱化处理 */
+.risk-log-time {
+  font-variant-numeric: tabular-nums;
+  color: var(--muted-foreground);
+}
+
+/* 说明列：正常日志弱化；失败原因与状态色一致 */
+.risk-log-message {
+  color: var(--muted-foreground);
+}
+
+.risk-log-message--danger {
+  color: var(--destructive);
+}
+
+/* ─── 日期区间 ──────────────────────────────────────────────────────────── */
+
+/* DatePicker 触发器默认占满可用宽度；顶栏内统一收成紧凑控件 */
+.risk-date-range {
+  width: 236px;
+  max-width: 100%;
+  flex: 0 0 auto;
+}
+
+/* ─── 响应式 ───────────────────────────────────────────────────────────── */
+
+/* Grid / For 组件以内联 gridTemplateColumns 输出列数，窄屏需 !important 覆盖 */
+@media (max-width: 1100px) {
+  .risk-metrics {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+
+  .risk-decision-panels {
+    grid-template-columns: minmax(0, 1fr) !important;
+  }
+}
+
+@media (max-width: 620px) {
+  .risk-metrics {
+    grid-template-columns: minmax(0, 1fr) !important;
+  }
+
+  .risk-status-card {
+    height: auto;
+  }
+}

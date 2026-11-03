@@ -13,9 +13,10 @@
  * 令牌实体由 ui styles.css 的 :root 提供，皮肤/暗色覆盖自动跟随） */
 @import '@pactor-app/ui/theme-bridge.css';
 
-.ace_editor .ace_placeholder {
+/* CodeMirror 占位符配色跟随语义令牌（CM 默认无颜色，主题基色由编辑器继承） */
+.cm-editor .cm-placeholder {
+  color: var(--muted-foreground);
   font-size: 14px;
-  transform: none;
 }
 
 /* HeroSection 入场与网格动画（参考 Arc UI hero-section）：
@@ -50,5 +51,35 @@
   }
   50% {
     transform: translate3d(2.5%, -3%, 0) scale(1.12);
+  }
+}
+
+/* EntityCardList 网格窄视口降级：列数由 columns prop 经内联样式设置
+   （repeat(N, minmax(0,1fr))），内联样式优先级最高，此处以 !important 降级——
+   ≤1024px 最多两列、≤640px 单列，避免 320px 视口三列挤压溢出 */
+@media (max-width: 1024px) {
+  [data-slot='entity-card-list-grid'] {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+}
+
+@media (max-width: 640px) {
+  [data-slot='entity-card-list-grid'] {
+    grid-template-columns: minmax(0, 1fr) !important;
+  }
+}
+
+/* FileManager 窄视口降级（≤768px）：左右分栏转上下堆叠——目录树整宽在上
+  （限高滚动），内容区在下，避免侧栏吃掉编辑器宽度 */
+@media (max-width: 768px) {
+  [data-slot='file-manager'] {
+    flex-direction: column;
+  }
+  [data-slot='file-manager-nav'] {
+    width: 100%;
+    border-right: none;
+    border-bottom: 1px solid var(--border);
+    max-height: 240px;
+    overflow: auto;
   }
 }

@@ -186,6 +186,119 @@ describe('Page / Card / Flex', () => {
   });
 });
 
+describe('Panel', () => {
+  it('渲染 header（左 title）与内容区 children', () => {
+    renderDsl({
+      type: 'Panel',
+      props: { title: '基本信息' },
+      children: [{ type: 'Button', props: { text: '编辑' } }],
+    });
+
+    const title = screen.getByText('基本信息');
+    expect(title.getAttribute('data-slot')).toBe('panel-title');
+    expect(title.parentElement?.className).toContain('border-b');
+    expect(screen.getByRole('button', { name: '编辑' })).toBeTruthy();
+  });
+
+  it('extra 在 header 右端渲染 DSL 子树', () => {
+    const { container } = renderDsl({
+      type: 'Panel',
+      props: {
+        title: '订单',
+        extra: [{ type: 'Button', props: { text: '导出', variant: 'link' } }],
+      },
+    });
+
+    const extra = container.querySelector('[data-slot=panel-extra]');
+    expect(extra).toBeTruthy();
+    expect(extra?.querySelector('button')?.textContent).toBe('导出');
+  });
+
+  it('bordered 缺省 true 渲染边框与阴影；false 去除', () => {
+    const { container, unmount } = renderDsl({
+      type: 'Panel',
+      props: { title: 'a' },
+    });
+    const panel = container.querySelector('[data-slot=panel]')!;
+    expect(panel.className).toContain('border');
+    expect(panel.className).toContain('shadow-xs');
+    unmount();
+
+    const { container: c2 } = renderDsl({
+      type: 'Panel',
+      props: { title: 'a', bordered: false },
+    });
+    const panel2 = c2.querySelector('[data-slot=panel]')!;
+    expect(panel2.className).toContain('border-transparent');
+    expect(panel2.className).not.toContain('shadow-xs');
+  });
+
+  it('无 title 与 extra 时不渲染 header', () => {
+    const { container } = renderDsl({
+      type: 'Panel',
+      children: [{ type: 'Text', props: { text: '仅内容' } }],
+    });
+
+    expect(container.querySelector('[data-slot=panel-header]')).toBeNull();
+    screen.getByText('仅内容');
+  });
+
+  it('icon 渲染在标题前', () => {
+    const { container } = renderDsl({
+      type: 'Panel',
+      props: { title: '流程控制', icon: 'git-branch' },
+    });
+
+    const title = container.querySelector('[data-slot=panel-title]')!;
+    expect(title.querySelector('[data-slot=icon]')).toBeTruthy();
+    expect(title.textContent).toContain('流程控制');
+  });
+
+  it('collapsible：header 右端渲染折叠按钮，点击卸载 / 恢复内容区', () => {
+    const { container } = renderDsl({
+      type: 'Panel',
+      props: { title: '流程控制', collapsible: true },
+      children: [{ type: 'Text', props: { text: '面板内容' } }],
+    });
+
+    const toggle = container.querySelector('[data-slot=panel-toggle]')!;
+    expect(toggle.getAttribute('aria-expanded')).toBe('true');
+    screen.getByText('面板内容');
+
+    fireEvent.click(toggle);
+    expect(toggle.getAttribute('aria-expanded')).toBe('false');
+    expect(screen.queryByText('面板内容')).toBeNull();
+    expect(container.querySelector('[data-slot=panel]')?.getAttribute('data-state')).toBe('closed');
+
+    fireEvent.click(toggle);
+    expect(toggle.getAttribute('aria-expanded')).toBe('true');
+    screen.getByText('面板内容');
+  });
+
+  it('collapsible=false 时不渲染折叠按钮，内容常驻', () => {
+    const { container } = renderDsl({
+      type: 'Panel',
+      props: { title: '流程控制' },
+      children: [{ type: 'Text', props: { text: '常驻内容' } }],
+    });
+
+    expect(container.querySelector('[data-slot=panel-toggle]')).toBeNull();
+    screen.getByText('常驻内容');
+  });
+
+  it('通用 props：className / style / id 作用于根节点', () => {
+    const { container } = renderDsl({
+      type: 'Panel',
+      props: { id: 'sec-1', className: 'mt-4', style: { maxWidth: 480 } },
+    });
+
+    const panel = container.querySelector('[data-slot=panel]') as HTMLElement;
+    expect(panel.id).toBe('sec-1');
+    expect(panel.className).toContain('mt-4');
+    expect(panel.style.maxWidth).toBe('480px');
+  });
+});
+
 describe('Grid', () => {
   it('columns: 2 时两个子项以两列网格渲染', () => {
     const { container } = render(

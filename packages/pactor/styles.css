@@ -5,7 +5,7 @@
  */
 
 /* ============================================================
- * @pactor-app/ui@1.58.0（构建产物内联，源顺序：ui → blocks → chart → chat）
+ * @pactor-app/ui@1.62.0（构建产物内联，源顺序：ui → blocks → chart → chat）
  * ============================================================ */
 /*! tailwindcss v4.3.3 | MIT License | https://tailwindcss.com */
 @layer properties;
@@ -17,6 +17,7 @@
       "Segoe UI Symbol", "Noto Color Emoji";
     --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono",
       "Courier New", monospace;
+    --color-amber-50: oklch(98.7% 0.022 95.277);
     --spacing: 0.25rem;
     --breakpoint-sm: 40rem;
     --breakpoint-md: 48rem;
@@ -474,6 +475,68 @@
   overflow-x: auto;
   overflow-y: hidden;
 }
+.pactor-markdown-editor {
+  --pactor-markdown-fg: var(--foreground, light-dark(#1f2328, #e6edf3));
+  --pactor-markdown-border: var(--border, light-dark(#d1d9e0, #3d444d));
+  --pactor-markdown-radius: var(--radius, 6px);
+  border: 1px solid var(--pactor-markdown-border);
+  border-radius: var(--pactor-markdown-radius);
+  color: var(--pactor-markdown-fg);
+  overflow: hidden;
+}
+.pactor-markdown-editor:focus-within {
+  border-color: var(--primary, light-dark(#0969da, #4493f8));
+}
+.pactor-markdown-editor .pactor-markdown-editor-toolbar {
+  border-bottom: 1px solid var(--pactor-markdown-border);
+}
+.pactor-markdown-editor .pactor-markdown-editor-content {
+  padding: 8px 12px;
+  min-height: 8em;
+  outline: none;
+}
+div.pactor-markdown-editor-root.mdxeditor, div.pactor-markdown-editor-root.mdxeditor-popup-container {
+  --basePageBg: var(--card, var(--slate-1));
+  --baseBase: var(--card, var(--slate-1));
+  --baseBgSubtle: var(--foreground, var(--slate-12));
+  @supports (color: color-mix(in lab, red, red)) {
+    --baseBgSubtle: color-mix(in srgb, var(--foreground, var(--slate-12)) 5%, var(--card, var(--slate-1)));
+  }
+  --baseBg: var(--foreground, var(--slate-12));
+  @supports (color: color-mix(in lab, red, red)) {
+    --baseBg: color-mix(in srgb, var(--foreground, var(--slate-12)) 8%, var(--card, var(--slate-1)));
+  }
+  --baseBgHover: var(--foreground, var(--slate-12));
+  @supports (color: color-mix(in lab, red, red)) {
+    --baseBgHover: color-mix(in srgb, var(--foreground, var(--slate-12)) 11%, var(--card, var(--slate-1)));
+  }
+  --baseBgActive: var(--foreground, var(--slate-12));
+  @supports (color: color-mix(in lab, red, red)) {
+    --baseBgActive: color-mix(in srgb, var(--foreground, var(--slate-12)) 15%, var(--card, var(--slate-1)));
+  }
+  --baseLine: var(--border, var(--slate-6));
+  --baseBorder: var(--border, var(--slate-7));
+  --baseBorderHover: var(--foreground, var(--slate-12));
+  @supports (color: color-mix(in lab, red, red)) {
+    --baseBorderHover: color-mix(in srgb, var(--foreground, var(--slate-12)) 24%, var(--border, var(--slate-7)));
+  }
+  --baseSolid: var(--muted-foreground, var(--slate-9));
+  --baseSolidHover: var(--foreground, var(--slate-10));
+  --baseText: var(--muted-foreground, var(--slate-11));
+  --baseTextContrast: var(--foreground, var(--slate-12));
+  --accentBase: var(--blue-1);
+  --accentBgSubtle: var(--blue-2);
+  --accentBg: var(--blue-3);
+  --accentBgHover: var(--blue-4);
+  --accentBgActive: var(--blue-5);
+  --accentLine: var(--blue-6);
+  --accentBorder: var(--blue-7);
+  --accentBorderHover: var(--blue-8);
+  --accentSolid: var(--blue-9);
+  --accentSolidHover: var(--blue-10);
+  --accentText: var(--blue-11);
+  --accentTextContrast: var(--blue-12);
+}
 :root {
   color-scheme: light;
   --radius: 0.625rem;
@@ -497,8 +560,8 @@
   --warning: oklch(0.769 0.188 70.08);
   --info: oklch(0.623 0.214 259.815);
   --border: oklch(0.922 0 0);
-  --input: oklch(0.922 0 0);
-  --ring: oklch(0.708 0 0);
+  --input: oklch(0.85 0 0);
+  --ring: oklch(0.556 0 0);
   --chart-1: oklch(0.646 0.222 41.116);
   --chart-2: oklch(0.6 0.118 184.704);
   --chart-3: oklch(0.398 0.07 227.392);
@@ -520,6 +583,7 @@
   --card-shadow: none;
   --shadow-color: oklch(0 0 0 / 10%);
   --overlay-background: oklch(0 0 0 / 50%);
+  --login-panel-shadow: 0 20px 25px -5px var(--shadow-color), 0 8px 10px -6px var(--shadow-color);
   --input-background: var(--card);
   --input-foreground: var(--card-foreground);
   --switch-track: var(--input);
@@ -580,8 +644,8 @@
   --warning: oklch(0.769 0.188 70.08);
   --info: oklch(0.623 0.214 259.815);
   --border: oklch(1 0 0 / 10%);
-  --input: oklch(1 0 0 / 15%);
-  --ring: oklch(0.556 0 0);
+  --input: oklch(1 0 0 / 25%);
+  --ring: oklch(0.708 0 0);
   --chart-1: oklch(0.488 0.243 264.376);
   --chart-2: oklch(0.696 0.17 162.48);
   --chart-3: oklch(0.769 0.188 70.08);
@@ -619,8 +683,8 @@
     --warning: oklch(0.769 0.188 70.08);
     --info: oklch(0.623 0.214 259.815);
     --border: oklch(1 0 0 / 10%);
-    --input: oklch(1 0 0 / 15%);
-    --ring: oklch(0.556 0 0);
+    --input: oklch(1 0 0 / 25%);
+    --ring: oklch(0.708 0 0);
     --chart-1: oklch(0.488 0.243 264.376);
     --chart-2: oklch(0.696 0.17 162.48);
     --chart-3: oklch(0.769 0.188 70.08);
@@ -643,6 +707,9 @@
   100% {
     background-position: -200% 0;
   }
+}
+[data-slot='form-item'] [aria-invalid='true'] {
+  border-color: var(--destructive);
 }
 .pactor-clearable {
   display: none;
@@ -1080,7 +1147,7 @@
 }
 
 /* ============================================================
- * @pactor-app/blocks@1.58.0（构建产物内联，源顺序：ui → blocks → chart → chat）
+ * @pactor-app/blocks@1.62.0（构建产物内联，源顺序：ui → blocks → chart → chat）
  * ============================================================ */
 /*! tailwindcss v4.3.3 | MIT License | https://tailwindcss.com */
 @layer properties;
@@ -1123,15 +1190,16 @@
     --font-weight-bold: 700;
     --tracking-tight: -0.025em;
     --leading-tight: 1.25;
+    --leading-normal: 1.5;
     --leading-relaxed: 1.625;
     --default-transition-duration: 150ms;
     --default-transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
   }
 }
 
-.ace_editor .ace_placeholder {
+.cm-editor .cm-placeholder {
+  color: var(--muted-foreground);
   font-size: 14px;
-  transform: none;
 }
 @keyframes pactor-hero-fade-up {
   from {
@@ -1159,6 +1227,28 @@
   }
   50% {
     transform: translate3d(2.5%, -3%, 0) scale(1.12);
+  }
+}
+@media (max-width: 1024px) {
+  [data-slot='entity-card-list-grid'] {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+}
+@media (max-width: 640px) {
+  [data-slot='entity-card-list-grid'] {
+    grid-template-columns: minmax(0, 1fr) !important;
+  }
+}
+@media (max-width: 768px) {
+  [data-slot='file-manager'] {
+    flex-direction: column;
+  }
+  [data-slot='file-manager-nav'] {
+    width: 100%;
+    border-right: none;
+    border-bottom: 1px solid var(--border);
+    max-height: 240px;
+    overflow: auto;
   }
 }
 @property --tw-space-y-reverse {
@@ -1410,7 +1500,7 @@
 }
 
 /* ============================================================
- * @pactor-app/chart@1.58.0（构建产物内联，源顺序：ui → blocks → chart → chat）
+ * @pactor-app/chart@1.62.0（构建产物内联，源顺序：ui → blocks → chart → chat）
  * ============================================================ */
 /*! tailwindcss v4.3.3 | MIT License | https://tailwindcss.com */
 @layer properties;
@@ -1554,7 +1644,7 @@
 }
 
 /* ============================================================
- * @pactor-app/chat@1.58.0（构建产物内联，源顺序：ui → blocks → chart → chat）
+ * @pactor-app/chat@1.62.0（构建产物内联，源顺序：ui → blocks → chart → chat）
  * ============================================================ */
 /*! tailwindcss v4.3.3 | MIT License | https://tailwindcss.com */
 @layer properties;
@@ -1751,6 +1841,68 @@
   padding: 4px 0;
   overflow-x: auto;
   overflow-y: hidden;
+}
+.pactor-markdown-editor {
+  --pactor-markdown-fg: var(--foreground, light-dark(#1f2328, #e6edf3));
+  --pactor-markdown-border: var(--border, light-dark(#d1d9e0, #3d444d));
+  --pactor-markdown-radius: var(--radius, 6px);
+  border: 1px solid var(--pactor-markdown-border);
+  border-radius: var(--pactor-markdown-radius);
+  color: var(--pactor-markdown-fg);
+  overflow: hidden;
+}
+.pactor-markdown-editor:focus-within {
+  border-color: var(--primary, light-dark(#0969da, #4493f8));
+}
+.pactor-markdown-editor .pactor-markdown-editor-toolbar {
+  border-bottom: 1px solid var(--pactor-markdown-border);
+}
+.pactor-markdown-editor .pactor-markdown-editor-content {
+  padding: 8px 12px;
+  min-height: 8em;
+  outline: none;
+}
+div.pactor-markdown-editor-root.mdxeditor, div.pactor-markdown-editor-root.mdxeditor-popup-container {
+  --basePageBg: var(--card, var(--slate-1));
+  --baseBase: var(--card, var(--slate-1));
+  --baseBgSubtle: var(--foreground, var(--slate-12));
+  @supports (color: color-mix(in lab, red, red)) {
+    --baseBgSubtle: color-mix(in srgb, var(--foreground, var(--slate-12)) 5%, var(--card, var(--slate-1)));
+  }
+  --baseBg: var(--foreground, var(--slate-12));
+  @supports (color: color-mix(in lab, red, red)) {
+    --baseBg: color-mix(in srgb, var(--foreground, var(--slate-12)) 8%, var(--card, var(--slate-1)));
+  }
+  --baseBgHover: var(--foreground, var(--slate-12));
+  @supports (color: color-mix(in lab, red, red)) {
+    --baseBgHover: color-mix(in srgb, var(--foreground, var(--slate-12)) 11%, var(--card, var(--slate-1)));
+  }
+  --baseBgActive: var(--foreground, var(--slate-12));
+  @supports (color: color-mix(in lab, red, red)) {
+    --baseBgActive: color-mix(in srgb, var(--foreground, var(--slate-12)) 15%, var(--card, var(--slate-1)));
+  }
+  --baseLine: var(--border, var(--slate-6));
+  --baseBorder: var(--border, var(--slate-7));
+  --baseBorderHover: var(--foreground, var(--slate-12));
+  @supports (color: color-mix(in lab, red, red)) {
+    --baseBorderHover: color-mix(in srgb, var(--foreground, var(--slate-12)) 24%, var(--border, var(--slate-7)));
+  }
+  --baseSolid: var(--muted-foreground, var(--slate-9));
+  --baseSolidHover: var(--foreground, var(--slate-10));
+  --baseText: var(--muted-foreground, var(--slate-11));
+  --baseTextContrast: var(--foreground, var(--slate-12));
+  --accentBase: var(--blue-1);
+  --accentBgSubtle: var(--blue-2);
+  --accentBg: var(--blue-3);
+  --accentBgHover: var(--blue-4);
+  --accentBgActive: var(--blue-5);
+  --accentLine: var(--blue-6);
+  --accentBorder: var(--blue-7);
+  --accentBorderHover: var(--blue-8);
+  --accentSolid: var(--blue-9);
+  --accentSolidHover: var(--blue-10);
+  --accentText: var(--blue-11);
+  --accentTextContrast: var(--blue-12);
 }
 :root {
   --pactor-chat-rail-width: 40px;
@@ -4463,6 +4615,9 @@ button.pactor-chat-trace__header:hover, .pactor-chat-trace__entry-header:hover, 
 :where(.divide-input > :not(:last-child)) {
     border-color: var(--input);
   }
+.self-center {
+    align-self: center;
+  }
 .self-end {
     align-self: flex-end;
   }
@@ -4723,6 +4878,9 @@ button.pactor-chat-trace__header:hover, .pactor-chat-trace__entry-header:hover, 
   }
 .bg-accent {
     background-color: var(--accent);
+  }
+.bg-amber-50 {
+    background-color: var(--color-amber-50);
   }
 .bg-background {
     background-color: var(--background);
@@ -5036,6 +5194,12 @@ button.pactor-chat-trace__header:hover, .pactor-chat-trace__entry-header:hover, 
 .pl-8 {
     padding-left: calc(var(--spacing) * 8);
   }
+.pl-9 {
+    padding-left: calc(var(--spacing) * 9);
+  }
+.pl-9\! {
+    padding-left: calc(var(--spacing) * 9) !important;
+  }
 .text-center {
     text-align: center;
   }
@@ -5095,9 +5259,6 @@ button.pactor-chat-trace__header:hover, .pactor-chat-trace__entry-header:hover, 
   }
 .text-\[0\.8rem\] {
     font-size: 0.8rem;
-  }
-.text-\[10px\] {
-    font-size: 10px;
   }
 .text-\[11px\] {
     font-size: 11px;
@@ -5697,6 +5858,9 @@ button.pactor-chat-trace__header:hover, .pactor-chat-trace__entry-header:hover, 
 .hidden {
     display: none;
   }
+.inline {
+    display: inline;
+  }
 .inline-flex {
     display: inline-flex;
   }
@@ -5789,6 +5953,9 @@ button.pactor-chat-trace__header:hover, .pactor-chat-trace__entry-header:hover, 
 .min-h-10 {
     min-height: calc(var(--spacing) * 10);
   }
+.min-h-12 {
+    min-height: calc(var(--spacing) * 12);
+  }
 .min-h-\[var\(--hero-min-h\,80svh\)\] {
     min-height: var(--hero-min-h,80svh);
   }
@@ -5833,6 +6000,9 @@ button.pactor-chat-trace__header:hover, .pactor-chat-trace__entry-header:hover, 
   }
 .w-48 {
     width: calc(var(--spacing) * 48);
+  }
+.w-60 {
+    width: calc(var(--spacing) * 60);
   }
 .w-64 {
     width: calc(var(--spacing) * 64);
@@ -5926,6 +6096,9 @@ button.pactor-chat-trace__header:hover, .pactor-chat-trace__entry-header:hover, 
   }
 .flex-col {
     flex-direction: column;
+  }
+.flex-col-reverse {
+    flex-direction: column-reverse;
   }
 .flex-wrap {
     flex-wrap: wrap;
@@ -6067,6 +6240,10 @@ button.pactor-chat-trace__header:hover, .pactor-chat-trace__entry-header:hover, 
     border-top-style: var(--tw-border-style);
     border-top-width: 1px;
   }
+.border-r {
+    border-right-style: var(--tw-border-style);
+    border-right-width: 1px;
+  }
 .border-b {
     border-bottom-style: var(--tw-border-style);
     border-bottom-width: 1px;
@@ -6104,6 +6281,9 @@ button.pactor-chat-trace__header:hover, .pactor-chat-trace__entry-header:hover, 
   }
 .bg-background {
     background-color: var(--background);
+  }
+.bg-current {
+    background-color: currentcolor;
   }
 .bg-info\/10 {
     background-color: var(--info);
@@ -6330,6 +6510,9 @@ button.pactor-chat-trace__header:hover, .pactor-chat-trace__entry-header:hover, 
 .py-14 {
     padding-block: calc(var(--spacing) * 14);
   }
+.py-16 {
+    padding-block: calc(var(--spacing) * 16);
+  }
 .pt-3 {
     padding-top: calc(var(--spacing) * 3);
   }
@@ -6391,6 +6574,10 @@ button.pactor-chat-trace__header:hover, .pactor-chat-trace__entry-header:hover, 
     font-size: var(--text-xs);
     line-height: var(--tw-leading, var(--text-xs--line-height));
   }
+.leading-normal {
+    --tw-leading: var(--leading-normal);
+    line-height: var(--leading-normal);
+  }
 .leading-relaxed {
     --tw-leading: var(--leading-relaxed);
     line-height: var(--leading-relaxed);
@@ -6439,6 +6626,9 @@ button.pactor-chat-trace__header:hover, .pactor-chat-trace__entry-header:hover, 
 .text-destructive {
     color: var(--destructive);
   }
+.text-foreground {
+    color: var(--foreground);
+  }
 .text-info {
     color: var(--info);
   }
@@ -6484,16 +6674,16 @@ button.pactor-chat-trace__header:hover, .pactor-chat-trace__entry-header:hover, 
 .opacity-100 {
     opacity: 100%;
   }
+.shadow-\(--login-panel-shadow\) {
+    --tw-shadow: var(--login-panel-shadow);
+    box-shadow: var(--tw-inset-shadow), var(--tw-inset-ring-shadow), var(--tw-ring-offset-shadow), var(--tw-ring-shadow), var(--tw-shadow);
+  }
 .shadow-md {
     --tw-shadow: 0 4px 6px -1px var(--tw-shadow-color, rgb(0 0 0 / 0.1)), 0 2px 4px -2px var(--tw-shadow-color, rgb(0 0 0 / 0.1));
     box-shadow: var(--tw-inset-shadow), var(--tw-inset-ring-shadow), var(--tw-ring-offset-shadow), var(--tw-ring-shadow), var(--tw-shadow);
   }
 .shadow-sm {
     --tw-shadow: 0 1px 3px 0 var(--tw-shadow-color, rgb(0 0 0 / 0.1)), 0 1px 2px -1px var(--tw-shadow-color, rgb(0 0 0 / 0.1));
-    box-shadow: var(--tw-inset-shadow), var(--tw-inset-ring-shadow), var(--tw-ring-offset-shadow), var(--tw-ring-shadow), var(--tw-shadow);
-  }
-.shadow-xl {
-    --tw-shadow: 0 20px 25px -5px var(--tw-shadow-color, rgb(0 0 0 / 0.1)), 0 8px 10px -6px var(--tw-shadow-color, rgb(0 0 0 / 0.1));
     box-shadow: var(--tw-inset-shadow), var(--tw-inset-ring-shadow), var(--tw-ring-offset-shadow), var(--tw-ring-shadow), var(--tw-shadow);
   }
 .ring-offset-background {
@@ -8772,6 +8962,12 @@ button.pactor-chat-trace__header:hover, .pactor-chat-trace__entry-header:hover, 
     }
   }
 @media (width >= 40rem) {
+    .sm\:mr-auto {
+      margin-right: auto;
+    }
+    .sm\:max-w-2xl {
+      max-width: var(--container-2xl);
+    }
     .sm\:max-w-xl {
       max-width: var(--container-xl);
     }
@@ -9466,6 +9662,13 @@ button.pactor-chat-trace__header:hover, .pactor-chat-trace__entry-header:hover, 
     .dark\:to-primary\/15 {
       --tw-gradient-stops: var(--tw-gradient-via-stops, var(--tw-gradient-position), var(--tw-gradient-from) var(--tw-gradient-from-position), var(--tw-gradient-to) var(--tw-gradient-to-position));
     }
+  }
+.\[\&_\.cm-editor\]\:bg-transparent .cm-editor {
+    background-color: transparent;
+  }
+.\[\&_\.cm-editor\]\:outline-none .cm-editor {
+    --tw-outline-style: none;
+    outline-style: none;
   }
 .\[\&_input\]\:border-destructive input {
     border-color: var(--destructive);

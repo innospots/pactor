@@ -52,4 +52,32 @@ if (typeof window !== 'undefined') {
   if (!Element.prototype.scrollIntoView) {
     Element.prototype.scrollIntoView = () => {};
   }
+
+  // CodeMirror 6 文本测量依赖 Range 矩形 API，jsdom 未实现（返回空矩形/空列表即可运行）
+  const zeroRect = () =>
+    ({
+      x: 0,
+      y: 0,
+      top: 0,
+      left: 0,
+      right: 0,
+      bottom: 0,
+      width: 0,
+      height: 0,
+      toJSON: () => ({}),
+    }) as DOMRect;
+  if (!Range.prototype.getBoundingClientRect) {
+    Range.prototype.getBoundingClientRect = zeroRect;
+  }
+  if (!Range.prototype.getClientRects) {
+    Range.prototype.getClientRects = () =>
+      ({
+        length: 0,
+        item: () => null,
+        [Symbol.iterator]: [][Symbol.iterator],
+      }) as unknown as DOMRectList;
+  }
+  if (!HTMLElement.prototype.getClientRects) {
+    HTMLElement.prototype.getClientRects = Range.prototype.getClientRects as never;
+  }
 }

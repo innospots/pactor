@@ -1,0 +1,237 @@
+/* ─── 数据价值分析工作台 ──────────────────────────────────────────────────
+ * 只保留本页视觉细节：KPI 卡片、特征来源表格、使用特征分布、图表容器、
+ * 日期区间。共享外壳见 risk-shell.css。
+ * 颜色全部走皮肤语义令牌（app/theme.css），切肤自动适配。
+ * ────────────────────────────────────────────────────────────────────────── */
+
+/* ─── KPI 卡片 ──────────────────────────────────────────────────────────── */
+
+.risk-kpis {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.risk-kpi-card {
+  display: flex;
+  min-height: 112px;
+  flex-direction: column;
+  gap: 6px;
+  padding: 15px 17px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--card);
+}
+
+.risk-kpi-label {
+  font-size: 12px;
+  line-height: 1.4;
+  color: var(--muted-foreground);
+}
+
+.risk-kpi-value {
+  display: flex;
+  align-items: baseline;
+  gap: 4px;
+}
+
+.risk-kpi-number {
+  font-size: 30px;
+  font-weight: 600;
+  line-height: 1.05;
+  letter-spacing: -0.025em;
+  color: var(--foreground);
+}
+
+.risk-kpi-footnote {
+  margin-top: auto;
+  font-size: 11px;
+  line-height: 1.4;
+  color: var(--muted-foreground);
+}
+
+/* ─── 特征来源表格 ──────────────────────────────────────────────────────── */
+
+.risk-table-card {
+  padding: 0;
+  overflow: hidden;
+}
+
+.risk-table-card [data-slot="card-content"] {
+  padding: 0;
+}
+
+.risk-table-card table {
+  width: 100%;
+  font-size: 13px;
+}
+
+.risk-table-card thead th {
+  background: color-mix(in srgb, var(--muted) 45%, var(--card));
+  color: var(--muted-foreground);
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.risk-cost {
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.risk-cost--low {
+  color: var(--success);
+}
+
+.risk-cost--mid {
+  color: var(--warning);
+}
+
+.risk-cost--high {
+  color: var(--destructive);
+}
+
+.risk-pagination {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 16px;
+  margin-top: 12px;
+}
+
+/* ─── 使用特征分布 ──────────────────────────────────────────────────────── */
+
+.risk-dist-panel {
+  padding: 16px;
+}
+
+.risk-dist-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.risk-dist-card {
+  display: flex;
+  min-height: 86px;
+  flex-direction: column;
+  gap: 3px;
+  padding: 11px 13px;
+  border: 1px solid color-mix(in srgb, var(--border) 72%, transparent);
+  border-radius: 10px;
+}
+
+.risk-dist-key {
+  overflow: hidden;
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.03em;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: color-mix(in srgb, var(--foreground) 72%, transparent);
+}
+
+.risk-dist-pct {
+  font-size: 23px;
+  font-weight: 600;
+  line-height: 1.15;
+  letter-spacing: -0.02em;
+  color: var(--foreground);
+}
+
+.risk-dist-count {
+  font-size: 11px;
+  color: var(--muted-foreground);
+}
+
+.risk-dist-legend {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 13px;
+  font-size: 11px;
+  color: var(--muted-foreground);
+}
+
+.risk-dist-gradient {
+  display: inline-block;
+  width: 132px;
+  height: 6px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: linear-gradient(90deg, var(--card), var(--primary));
+}
+
+.risk-dist-legend-note {
+  margin-left: 6px;
+  color: color-mix(in srgb, var(--muted-foreground) 80%, transparent);
+}
+
+/* ─── 图表 ──────────────────────────────────────────────────────────────── */
+
+.risk-chart-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+  margin-top: 24px;
+}
+
+/* Card 自带 py-6 / gap-6 / px-6，标题卡需统一为紧凑内边距 */
+.risk-chart-card {
+  gap: 0;
+  padding: 0;
+}
+
+.risk-chart-card [data-slot="card-header"] {
+  padding: 15px 18px 0;
+}
+
+.risk-chart-card [data-slot="card-content"] {
+  padding: 10px 18px 16px;
+}
+
+.risk-chart-desc {
+  margin: 2px 0 10px;
+  font-size: 12px;
+  color: var(--muted-foreground);
+}
+
+/* 图表本体由 @pactor-app/chart 渲染（Canvas + 主题调色板），卡片仅保留
+   紧凑内边距，图表高度由各组件的 height prop 控制。 */
+
+/* ─── 日期区间 ──────────────────────────────────────────────────────────── */
+
+/* DatePicker 触发器默认占满可用宽度；外壳内统一收成紧凑控件 */
+.risk-date-range {
+  width: 236px;
+  max-width: 100%;
+  flex: 0 0 auto;
+}
+
+/* ─── 响应式 ───────────────────────────────────────────────────────────── */
+
+@media (max-width: 1280px) {
+  .risk-dist-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 1100px) {
+  .risk-kpis {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .risk-chart-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .risk-dist-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 620px) {
+  .risk-kpis,
+  .risk-dist-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
