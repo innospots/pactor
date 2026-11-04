@@ -16,6 +16,7 @@
     "react": "^19.2.8",
     "react-dom": "^19.2.8",
     "@pactor-app/file-viewer": "workspace:*",
+    "@pactor-app/grid-layout": "workspace:*",
     "@file-viewer/preset-office": "^3.3.3"
   },
   "devDependencies": {
