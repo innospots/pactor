@@ -183,6 +183,56 @@ describe('CardList', () => {
     expect(screen.getByText('暂无数据')).toBeTruthy();
   });
 
+  it('columns 数字：横向 grid 排列，内联 gridTemplateColumns', () => {
+    const { container } = renderDsl({
+      type: 'CardList',
+      props: { items: [{ title: 'a' }, { title: 'b' }], columns: 3 },
+    });
+    const list = container.querySelector('[data-slot=card-list]') as HTMLElement;
+    expect(list.className).toContain('grid');
+    expect(list.className).not.toContain('flex-col');
+    expect(list.style.gridTemplateColumns).toBe('repeat(3, minmax(0, 1fr))');
+  });
+
+  it('columns 响应式对象：xs 为基础值，其余断点注入升序媒体类', () => {
+    const { container } = renderDsl({
+      type: 'CardList',
+      props: {
+        items: [{ title: 'a' }],
+        columns: { xs: 1, sm: 2, lg: 4 },
+      },
+    });
+    const list = container.querySelector('[data-slot=card-list]') as HTMLElement;
+    expect(list.style.gridTemplateColumns).toBe('repeat(1, minmax(0, 1fr))');
+    expect(list.className).toContain('pactor-card-list-sm-2');
+    expect(list.className).toContain('pactor-card-list-lg-4');
+    // 注入的 style 标签带对应媒体查询，且按断点升序排列（大断点覆盖小断点）
+    const tags = Array.from(
+      document.head.querySelectorAll('style[data-pactor-card-list-columns]'),
+    );
+    const sms = tags.findIndex((el) => el.getAttribute('data-pactor-card-list-columns') === 'sm');
+    const lgs = tags.findIndex((el) => el.getAttribute('data-pactor-card-list-columns') === 'lg');
+    expect(sms).toBeGreaterThanOrEqual(0);
+    expect(lgs).toBeGreaterThan(sms);
+    expect(tags[sms]!.textContent).toContain('@media (min-width: 576px)');
+    expect(tags[lgs]!.textContent).toContain('repeat(4,minmax(0,1fr))');
+  });
+
+  it('columns 缺省 xs 时基础值为 1 列；grid 模式下 after 占满整行', () => {
+    const { container } = renderDsl({
+      type: 'CardList',
+      props: {
+        items: [{ title: 'a', after: '提示条' }],
+        columns: { md: 3 },
+      },
+    });
+    const list = container.querySelector('[data-slot=card-list]') as HTMLElement;
+    expect(list.style.gridTemplateColumns).toBe('repeat(1, minmax(0, 1fr))');
+    expect(list.className).toContain('pactor-card-list-md-3');
+    const after = container.querySelector('[data-slot=card-list-item-after]') as HTMLElement;
+    expect(after.style.gridColumn).toBe('1 / -1');
+  });
+
   it('通用 props 作用于根节点', () => {
     const { container } = renderDsl({
       type: 'CardList',

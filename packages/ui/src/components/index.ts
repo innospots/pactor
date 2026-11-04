@@ -302,7 +302,7 @@ export type { MentionOption, MentionsProps } from './components/Mentions/index.j
 export { List } from './components/List/index.js';
 export type { ListItemData, ListProps } from './components/List/index.js';
 export { CardList } from './components/CardList/index.js';
-export type { CardListItemData, CardListProps } from './components/CardList/index.js';
+export type { CardListItemData, CardListProps, CardListColumns } from './components/CardList/index.js';
 export { Tree } from './components/Tree/index.js';
 export type { TreeNodeData, TreeProps } from './components/Tree/index.js';
 export { Descriptions } from './components/Descriptions/index.js';

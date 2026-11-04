@@ -63,6 +63,7 @@
     "@pactor-app/core": "workspace:*",
     "@pactor-app/expression": "workspace:*",
     "@pactor-app/file-viewer": "workspace:*",
+    "@pactor-app/graph": "workspace:*",
     "@pactor-app/grid-layout": "workspace:*",
     "@pactor-app/markdown": "workspace:*",
     "@pactor-app/permission": "workspace:*",

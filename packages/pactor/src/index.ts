@@ -11,3 +11,5 @@ export { registerChartComponents } from '@pactor-app/chart';
 export { registerFileViewerComponents, createFileViewerComponentRegistry } from '@pactor-app/file-viewer';
 // GridLayout 为可选可拖拽仪表盘容器，不进缺省注册表（需额外引入 @pactor-app/grid-layout/styles.css）
 export { registerGridLayoutComponents, createGridLayoutComponentRegistry } from '@pactor-app/grid-layout';
+// Graph 为可选关系图 / 流程图组件（G6 引擎较大），不进缺省注册表
+export { registerGraphComponents, createGraphComponentRegistry } from '@pactor-app/graph';
