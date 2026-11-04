@@ -27,10 +27,16 @@ export interface PageMeta {
   type?: string;
   /** 页面权限分组：宿主按分组做页面访问校验与权限查看 */
   grantGroup?: string;
+  /** catalog 领域键（转发 page-access 时为 domainKey） */
+  domain?: string;
+  /** catalog 模块键（转发 page-access 时为 moduleKey） */
+  module?: string;
+  /** 浏览授权分组（转发 page-access 时为 grantGroup；与 grantGroup 同义） */
+  group?: string;
   /**
    * 页面级扩展元数据（自由键值，如宿主业务标记 / 埋点信息）。
-   * Runtime 不消费，仅供宿主与工具链读取；框架能力请使用正式字段，
-   * 不要把应用私有键直接加到 `page` 顶层（Schema 对其保持封闭）
+   * Runtime 不消费，仅供宿主与工具链读取；框架能力请使用正式字段
+   * （如 domain / module / group / grantGroup），不要把应用私有键直接加到 `page` 顶层
    */
   meta?: Record<string, unknown>;
   permission?: PermissionConfig;
