@@ -188,6 +188,16 @@ describe('fetchSitemap', () => {
 });
 
 describe('createSitemapLoader', () => {
+  it('显示页面接口返回的访问拒绝原因', async () => {
+    const fetcher = vi.fn(async () => new Response(JSON.stringify({ reason: '无页面访问权限' }), {
+      status: 403,
+      headers: { 'content-type': 'application/json' },
+    })) as unknown as typeof fetch;
+    const sitemap = createSitemap({ pages: [{ id: 'restricted', path: '/restricted', title: '权限页' }] });
+    const loader = createSitemapLoader(sitemap, { fetcher });
+    await expect(loader.loadPage('restricted')).rejects.toThrow('无页面访问权限');
+  });
+
   it('内联页直接命中并注入 session dataSource', async () => {
     const loader = createSitemapLoader(createSitemap());
     const resource = await loader.loadPage('home');

@@ -74,8 +74,13 @@ export function createSitemapLoader(
           },
         );
         if (!res.ok) {
+          const body: unknown = await res.json().catch(() => null);
+          const data = typeof body === 'object' && body !== null ? body as Record<string, unknown> : {};
+          const reason = [data.reason, data.message, data.error].find(
+            (value): value is string => typeof value === 'string' && value.trim().length > 0,
+          );
           throw new Error(
-            `[@pactor-app/app] 页面 ${pageId} 加载失败：HTTP ${res.status}`,
+            reason ?? `[@pactor-app/app] 页面 ${pageId} 加载失败：HTTP ${res.status}`,
           );
         }
         resource = (await res.json()) as PageResource;
