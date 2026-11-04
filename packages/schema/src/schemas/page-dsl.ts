@@ -112,6 +112,15 @@ export const pageDslSchema = {
         type: { type: 'string' },
         /** 页面权限分组（宿主按分组做页面访问校验与权限查看） */
         grantGroup: { type: 'string' },
+        /** catalog 领域键（宿主 page-access → domainKey） */
+        domain: { type: 'string', minLength: 1 },
+        /** catalog 模块键（宿主 page-access → moduleKey） */
+        module: { type: 'string', minLength: 1 },
+        /**
+         * 浏览授权分组（宿主 page-access → grantGroup；与 grantGroup 同义，Nexus catalog 常用 group）。
+         * 缺省时宿主通常视为 view
+         */
+        group: { type: 'string', minLength: 1 },
         /** 页面级扩展元数据（自由键值，Runtime 不消费） */
         meta: { type: 'object' },
         permission: permissionSchema,

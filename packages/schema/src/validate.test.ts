@@ -113,6 +113,29 @@ describe('validatePageDsl', () => {
     );
   });
 
+  it('accepts page.domain / page.module / page.group（catalog 页面访问键），拒绝非字符串', () => {
+    const ok = validatePageDsl({
+      ...validPage,
+      page: {
+        ...validPage.page,
+        domain: 'operation',
+        module: 'user',
+        group: 'view',
+      },
+    });
+    expect(ok.valid).toBe(true);
+    expect(ok.errors).toEqual([]);
+
+    const bad = validatePageDsl({
+      ...validPage,
+      page: { ...validPage.page, domain: ['operation'] },
+    });
+    expect(bad.valid).toBe(false);
+    expect(bad.errors).toContainEqual(
+      expect.objectContaining({ path: '/page/domain', keyword: 'type' }),
+    );
+  });
+
   it('accepts page.meta（页面级扩展元数据），拒绝非对象', () => {
     const ok = validatePageDsl({
       ...validPage,
