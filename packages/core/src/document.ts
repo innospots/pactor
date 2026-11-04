@@ -17,6 +17,7 @@ export interface RequiresConfig {
 
 /** 页面元信息 */
 export interface PageMeta {
+  [key: string]: unknown;
   id: string;
   title?: string;
   /** 页面名称（标识用途，区别于展示的 title） */
@@ -36,7 +37,7 @@ export interface PageMeta {
   /**
    * 页面级扩展元数据（自由键值，如宿主业务标记 / 埋点信息）。
    * Runtime 不消费，仅供宿主与工具链读取；框架能力请使用正式字段
-   * （如 domain / module / group / grantGroup），不要把应用私有键直接加到 `page` 顶层
+   * （如 domain / module / group / grantGroup）；宿主也可以直接扩展 page 字段。
    */
   meta?: Record<string, unknown>;
   permission?: PermissionConfig;

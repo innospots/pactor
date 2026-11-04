@@ -125,7 +125,7 @@ export const pageDslSchema = {
         meta: { type: 'object' },
         permission: permissionSchema,
       },
-      additionalProperties: false,
+      additionalProperties: true,
     },
     /** 文档级扩展元数据（自由键值，如 version / author），Runtime 不消费 */
     meta: { type: 'object' },

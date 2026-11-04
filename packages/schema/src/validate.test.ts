@@ -187,6 +187,11 @@ describe('validatePageDsl', () => {
     );
   });
 
+  it('accepts application-specific page metadata while validating known fields', () => {
+    expect(validatePageDsl({ ...validPage, page: { ...validPage.page, 'access-mode': 'grant', custom: { enabled: true } } }).valid).toBe(true);
+    expect(validatePageDsl({ ...validPage, page: { ...validPage.page, id: '', 'access-mode': 'grant' } }).valid).toBe(false);
+  });
+
   it('rejects a nested node missing type and locates its path', () => {
     const doc = clone(validPage) as Record<string, any>;
     delete doc.body.children[0].children[0].type;
