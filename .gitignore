@@ -13,3 +13,4 @@ openspec
 design
 dist-pack/
 /.pnpm-store/
+/.local-pack/
