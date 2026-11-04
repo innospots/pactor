@@ -24,6 +24,10 @@
   },
   "scripts": {
     "build": "pnpm -r --if-present build",
+    "link:global": "node scripts/npm-link-global.mjs",
+    "local:install": "pnpm build && node scripts/npm-link-global.mjs",
+    "link:global": "node scripts/npm-link-global.mjs",
+    "local:install": "pnpm build && node scripts/npm-link-global.mjs",
     "test": "pnpm -r --if-present test && vitest run tests/",
     "typecheck": "pnpm -r --if-present typecheck",
     "docs:dev": "pnpm --filter pactor-docs dev",
