@@ -1,0 +1,20 @@
+/* @pactor-app/grid-layout 附加样式（build 时拼接在 react-grid-layout / react-resizable 官方样式之后） */
+
+/* 格子内容填满格子（RGL 只尺寸化外层 wrapper） */
+[data-slot='grid-layout-item'] {
+  overflow: hidden;
+}
+
+[data-slot='grid-layout-item'] > * {
+  height: 100%;
+  box-sizing: border-box;
+}
+
+/* 可拖拽格子悬停提示 */
+[data-slot='grid-layout'] .react-grid-item.react-draggable {
+  cursor: grab;
+}
+
+[data-slot='grid-layout'] .react-grid-item.react-draggable-dragging {
+  cursor: grabbing;
+}

@@ -1,0 +1,126 @@
+dsl: '1.0'
+page:
+  id: dashboard
+  title: 可拖拽仪表盘
+
+state:
+  # 初始布局：真实应用里这份数据由服务端下发（dataSource / bootstrap）
+  dashboardLayout:
+    - { i: kpi-orders, x: 0, y: 0, w: 3, h: 2 }
+    - { i: kpi-users, x: 3, y: 0, w: 3, h: 2 }
+    - { i: kpi-revenue, x: 6, y: 0, w: 3, h: 2 }
+    - { i: kpi-conversion, x: 9, y: 0, w: 3, h: 2 }
+    - { i: todo-card, x: 0, y: 2, w: 7, h: 6 }
+    - { i: intro-card, x: 7, y: 2, w: 5, h: 6 }
+    - { i: app-list, x: 0, y: 8, w: 12, h: 4 }
+
+dataSources:
+  todos:
+    type: service
+    service: todo.list
+    autoLoad: true
+    params:
+      keyword: ''
+
+body:
+  type: Page
+  props:
+    title: 可拖拽仪表盘
+  children:
+    - type: Alert
+      props:
+        variant: info
+        message: 拖拽卡片移动位置，拖拽右下角调整大小
+        description: 布局变化经 onLayoutChange 写回 state.dashboardLayout（本页刷新后还原）——真实应用里在此追加一个 request action 即可持久化到服务端，下次进入从 state 恢复。
+    - type: GridLayout
+      props:
+        cols: 12
+        rowHeight: 60
+        # 布局绑定 state：onLayoutChange 写回后形成受控闭环
+        layout: ${state.dashboardLayout}
+      events:
+        onLayoutChange:
+          - action: setState
+            params:
+              dashboardLayout: ${event.layout}
+      children:
+        - type: Card
+          props:
+            gridId: kpi-orders
+            title: 订单数
+          children:
+            - type: Statistic
+              props:
+                value: 1286
+                suffix: 单
+        - type: Card
+          props:
+            gridId: kpi-users
+            title: 活跃用户
+          children:
+            - type: Statistic
+              props:
+                value: 8432
+        - type: Card
+          props:
+            gridId: kpi-revenue
+            title: 本月收入
+          children:
+            - type: Statistic
+              props:
+                value: 92300.5
+                precision: 2
+                suffix: 元
+        - type: Card
+          props:
+            gridId: kpi-conversion
+            title: 转化率
+          children:
+            - type: Statistic
+              props:
+                value: 32.8
+                precision: 1
+                suffix: '%'
+        - type: Card
+          props:
+            gridId: todo-card
+            title: 待办列表
+          children:
+            - type: Table
+              props:
+                dataSource: ${data.todos}
+                pagination:
+                  pageSize: 5
+                columns:
+                  - title: 标题
+                    dataIndex: title
+                  - title: 负责人
+                    dataIndex: owner
+                  - title: 状态
+                    dataIndex: status
+        - type: Card
+          props:
+            gridId: intro-card
+            title: 布局持久化
+          children:
+            - type: Text
+              props:
+                text: 当前布局存放在 state.dashboardLayout，拖动任意卡片后这里的数据会实时更新。
+            - type: Text
+              props:
+                type: secondary
+                text: 持久化做法（真实应用）：onLayoutChange 里再加一个 request action，把 event.layout POST 到服务端；进入页面时由 dataSource 拉取并 setState 到 dashboardLayout。
+        - type: Card
+          props:
+            gridId: app-list
+            title: 应用入口（CardList 响应式横向排列）
+          children:
+            - type: CardList
+              props:
+                # 响应式列数：窄屏 1 列、sm 2 列、lg 4 列（缩小浏览器窗口可见变化）
+                columns: { xs: 1, sm: 2, lg: 4 }
+                items:
+                  - { title: 订单中心, description: 订单查询与售后处理, avatar: 订 }
+                  - { title: 客户管理, description: 客户档案与跟进记录, avatar: 客 }
+                  - { title: 数据报表, description: 经营分析看板, avatar: 报 }
+                  - { title: 系统设置, description: 权限与偏好配置, avatar: 设 }
