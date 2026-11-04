@@ -1,6 +1,6 @@
 {
   "name": "pactor-app",
-  "version": "1.62.0",
+  "version": "1.63.0",
   "description": "Pactor meta package: installs the full Server-Driven UI + AI-Native runtime stack (@pactor-app/*) and re-exports the one-stop application API (createPactorApplication)",
   "keywords": [
     "pactor",
@@ -62,6 +62,7 @@
     "@pactor-app/cli": "workspace:*",
     "@pactor-app/core": "workspace:*",
     "@pactor-app/expression": "workspace:*",
+    "@pactor-app/file-viewer": "workspace:*",
     "@pactor-app/markdown": "workspace:*",
     "@pactor-app/permission": "workspace:*",
     "@pactor-app/resource": "workspace:*",

@@ -43,3 +43,9 @@ next-env.d.ts
 # OpenNext Cloudflare 构建产物
 .open-next
 .dev.vars
+
+# file-viewer 静态资产（由 predev / prebuild 钩子里的 file-viewer-copy-assets 生成）
+/public/vendor
+/public/wasm
+/public/flyfish-viewer-*.json
+/public/file-viewer-copy-assets.*.json

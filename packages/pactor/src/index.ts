@@ -7,3 +7,5 @@ export { SitemapApp, createPactorComponentRegistry } from './sitemap-app.js';
 export { createChatComponentRegistry } from '@pactor-app/chat';
 export { registerBlockComponents } from '@pactor-app/blocks';
 export { registerChartComponents } from '@pactor-app/chart';
+// FileViewer 需注册期注入 preset（defaultOptions），不进 createPactorComponentRegistry 缺省注册表
+export { registerFileViewerComponents, createFileViewerComponentRegistry } from '@pactor-app/file-viewer';
