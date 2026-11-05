@@ -12,7 +12,7 @@
 | 编号 | 检查项 | 通过标准 |
 | --- | --- | --- |
 | S1 / S8 | UI 计划门禁与一致性 | `docs/prd/ui-plan.md` 有该 page id 的唯一完整行且早于本次 YAML 生成 / 修改；实际区域、布局、组件、字段、文案、交互、状态和窄屏规则逐项等于计划，差异已有 PRD 依据和书面变体理由 |
-| S2 | DSL 与路由 | validate 通过；文件、page id、sitemap pages / menus 一致；hidden 详情 / 编辑有真实入口和 activeMenu |
+| S2 | DSL、路由与授权元数据 | validate / 宿主加载通过；文件与 page id 一致；通用 Pactor 的 sitemap pages / menus 一致，Nexus 的 sitemap pages 一致且无重复 menus；Nexus `access-mode` 合法、grant 字段完整、页面 `lazy: true`；hidden 详情 / 编辑有真实入口和 activeMenu |
 | S3 | 布局、Field 间距与响应式 | 区域顺序和标准骨架 / 已论证变体符合计划；gap / gutter 来源合法，无新增 margin、空白文本或绝对定位补丁；Field 管理 label / labelHint / description / error；固定多列网格已按桌面 / 窄屏规则转换 |
 | S4 / S5 | Form 与组件语义 | 搜索为 inline Form，提交字段有 name / rules / submit，新建与编辑共用 Form；无嵌套 Form、双 label 或手写必填动作链；逐区组件和 props 符合当前组件契约及 `ui-quality.md` 第 5 节，不用 Text / CSS 拼凑现有组件 |
 | S6 / S7 | 数据、交互与状态接线 | 每个 PRD 交互都有 events / actions 闭环；查询和重置同步表单与请求状态；empty / loading / error / disabled 四项均有真实数据或事件来源、正确组件和条件表达式，不适用项在 UI 计划中有依据，不混用 empty 与 loading / error，不编造 props |
@@ -23,7 +23,7 @@
 
 | 编号 | 检查项 | 通过标准 |
 | --- | --- | --- |
-| F1 | 路由与数据源 | 菜单点击进入和直接访问 path 均正常，无 404；Network 中页面所有 http 数据源返回 200，无 401 / 404 / 500；请求参数与 UI 计划一致 |
+| F1 | 路由、访问与数据源 | 菜单点击进入和直接访问 path 均正常；Network 中页面所有 http 数据源返回 200，无意外 401 / 404 / 500；请求参数与 UI 计划一致；Nexus page-access 仅由 Next.js 页面懒加载链路调用，public 页不调用 |
 | F2 | 交互闭环 | 逐项操作 PRD 中的查询、重置、新建、编辑预填、提交、删除确认、跳转、弹窗 / 抽屉、重试和清空；每项都产生计划中的数据、路由或可见结果，实际操作不绕开 UI 计划 |
 | F3 | 表单与错误分支 | rules 校验失败时就地提示且不发出请求；提交成功有反馈，失败保留输入并有错误提示；新建 / 编辑复用同一 Form，删除有确认，错误凭证等失败分支可观察 |
 | F4 | empty / loading / error / disabled 行为 | 用真实响应或事件触发计划中适用的四项状态：初始空与筛选空可区分，loading 不闪 Empty，error 有反馈和重试，disabled 在鼠标与键盘下均不触发且解除后恢复；不适用项与 UI 计划依据一致 |
@@ -56,6 +56,17 @@
 | E | 异常横向溢出 | 关键页面在 `1440×900` 和 `390×844` 检查 `document.documentElement.scrollWidth <= clientWidth`；无整页异常横向滚动、被裁主操作或浮层，表格只允许自身区域按契约横向滚动 |
 | F | 原产品对比或替代目检 | 原产品存在时，关键页面与原产品并排目检，视觉风格、令牌 / 皮肤 / 自定义 CSS 和交互行为一致，排版以标准骨架为准；**原产品不存在时**，结果明确写「原产品不适用：未提供；已按 PRD + UI 计划 + 模板目检」，并依据 PRD、`docs/prd/ui-plan.md` 和同类标准骨架 / 模板逐项检查区域、布局、组件、文案、状态和交互，不得虚报「与原产品一致」或「原产品对比通过」 |
 | G | 自定义 CSS 挂载（适用时） | 有原产品页面级 CSS 时，在浏览器确认其真实生效并符合主题 / 布局契约，不以文件存在为准；无原产品 CSS 时明确记为不适用 |
+
+## 权限与 sitemap 专项（Nexus/Console 走查时必做）
+
+| # | 检查项 | 通过标准 |
+| --- | --- | --- |
+| P1 | 页面访问元数据 | 每个页面都有 `public` / `authenticated` / `grant`；`grant` 的 `domain`、`module`、`pageKey` 与 catalog `entryPageKey` 一致，`grantGroup` 存在于模块目录 |
+| P2 | 导航单一事实源 | 本地 `sitemap.yaml` 只含 `pages` + `layouts`；后端导航按 catalog 浏览组、`roles`、`hidden` 过滤并与 `/api/sitemap` 合并 |
+| P3 | 页面懒加载与 hidden route | 所有页面 `lazy: true`；不进导航的详情 / 编辑页仍可直达，有权限时显示，无权限时被 page-access 拒绝；`activeMenu` 正确 |
+| P4 | 页面操作过滤 | 授权按钮可用；无权限按钮消失，表单字段和提交禁用，`access.mode: disable` 的普通组件保留但禁用；自定义组件 / action 已显式声明依赖 |
+| P5 | endpoint 鉴权 | 页面 `action: request` 的 method/url 均可唯一匹配 `@EndpointGrant`；绕过 UI 直接调用无权限 API 返回 401/403，不得出现“前端提示失败但后端成功” |
+| P6 | 失败策略 | page-access 不可用、返回不完整、存在未知请求或模板无法匹配时，页面和操作 fail closed，且不展示成功提示 |
 
 ## 修复与重验
 

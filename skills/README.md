@@ -6,13 +6,13 @@
 
 | 目录 / skill id | 用途 |
 | --- | --- |
-| **`pactor-dsl`** | 框架与 `*.page.yaml` DSL 编写 |
+| **`pactor-dsl`** | 框架、`*.page.yaml` DSL、页面授权与 sitemap/navigation 编写 |
 | **`pactor-project`** | 新建工程、`pnpm create pactor-app`、模板选型 |
-| **`pactor-prd`** | PRD / 线框图 → 完整可运行后台（含 `template/`） |
+| **`pactor-prd`** | PRD / 线框图 → 完整可运行后台（经 `create-pactor-app` 脚手架） |
 
 ## 在本仓库使用（Cursor / Claude Code）
 
-`pactor-prd` 须连同 **`references/`** 与 **`template/`** 一起可见。
+`pactor-prd` 须连同 **`references/`**、**`template-placeholders.json`** 与技能根目录的 **`scripts/prd-template.mjs`** 一起可见。
 
 ```bash
 mkdir -p .cursor/skills
@@ -39,18 +39,19 @@ ln -s node_modules/@pactor-app/skills/pactor-prd ~/.claude/skills/pactor-prd
 
 | Skill | 典型触发 | 产出 |
 | --- | --- | --- |
-| **`pactor-dsl`** | 写/改 YAML 页面、表达式、动作、组件、主题、Chat | 规范与示例（不生成新仓库） |
+| **`pactor-dsl`** | 写/改 YAML 页面、表达式、动作、组件、主题、Chat、access-mode/grantGroup、请求级 action 过滤、sitemap/navigation | 规范与示例（不生成新仓库） |
 | **`pactor-project`** | 初始化项目、`pnpm create pactor-app` | next-app / spa 或最小 Vite 壳工程 |
-| **`pactor-prd`** | PRD/线框图 → 页面（**新工程**复制并渲染 template，**已有工程**线框图增量） | 逐页 UI 计划 + YAML + sitemap/http 数据源/样式 + 三层验收 |
+| **`pactor-prd`** | PRD/线框图 → 页面（**新工程**经 `create-pactor-app` 创建并渲染，**已有工程**线框图增量） | 逐页 UI 计划 + YAML + 访问元数据 + sitemap/navigation + http 数据源/样式 + 三层验收 |
 
-关系：**`pactor-project`** 搭通用壳；**`pactor-prd`** 新建模式从自带 **`template/`** 完成 render/check 与冒烟，经逐页 UI 计划门禁后按计划铺页（勿用脚手架空起）；日常改页用 **`pactor-dsl`**。
+关系：**`pactor-project`** 说明通用脚手架；**`pactor-prd`** 新建模式必须经 `create-pactor-app` + values 完成 render/check 与冒烟，经逐页 UI 计划门禁后按计划铺页；日常改页用 **`pactor-dsl`**。
 
 ---
 
 ## `pactor-dsl`
 
 - **入口**：`pactor-dsl/SKILL.md`，深参考 `pactor-dsl/references/dsl-authoring.md`
-- **能力**：DSL 语法；**按清单批量加页**（目录 A/B、`sitemap`/menus、`StaticDslLoader`）— `pactor-dsl/references/page-catalog-and-layout.md`；组件、dataSources、权限、Chat、`pactor validate`
+- **权限与导航**：`pactor-dsl/references/authorization-and-sitemap.md` 说明通用 Pactor 与 Nexus/Console 的差异、`access-mode`、`domain`/`module`/`pageKey`/`grantGroup`、endpoint `@EndpointGrant`、请求 method/url 批量鉴权、组件可见性/禁用规则、后端导航与 hidden route
+- **能力**：DSL 语法；**按清单批量加页**（目录 A/B、通用 `sitemap`/menus、host-owned navigation、`StaticDslLoader`）— `pactor-dsl/references/page-catalog-and-layout.md`；组件、dataSources、权限、Chat、`pactor validate`
 
 ---
 
@@ -68,8 +69,8 @@ ln -s node_modules/@pactor-app/skills/pactor-prd ~/.claude/skills/pactor-prd
 ### 能力摘要
 
 - 输入：产品总览 README + 分页 Markdown 线框图（可选原产品仓抽样式）
-- 产出：Next + Pactor 工程 — `docs/prd/ui-plan.md`、sitemap、分模块 YAML、http 数据源 + `app/api/d/[...parts]` 转发层、懒加载页面 API、neutral 默认皮肤与验收证据
-- **新建工程**：解析与页面清单 → 复制 `template/` → 按 PRD values render → rendered check → install/dev 冒烟 → 完成全量 P0/P1 UI 计划 → 按计划建 `yaml/<模块>/<id>.yaml` → 数据接口/样式 → 静态检查 + 浏览器功能 + 截图目检（`page-inventory-and-files.md`、`ui-quality.md`）
+- 产出：Next + Pactor 工程 — `docs/prd/ui-plan.md`、sitemap/navigation、分模块 YAML、页面访问元数据、http 数据源 + `app/api/d/[...parts]` 转发层、懒加载页面 API、neutral 默认皮肤与验收证据
+- **新建工程**：解析与页面清单 → `create-pactor-app` + PRD values render → rendered check → install/dev 冒烟 → 完成全量 P0/P1 UI 计划 → 按计划建 `yaml/<模块>/<id>.yaml` → 访问元数据/数据接口/样式 → 静态检查 + 浏览器功能 + 截图目检（`page-inventory-and-files.md`、`ui-quality.md`）
 - **增量**：现状清单 / delta 与摸底 → 只更新 **add/update** 页的 UI 计划 → 按计划只改相关 YAML、sitemap、数据接口；**deprecate** 经确认处理 → 变更页三层验收 + 回归（`incremental-wireframe-delta.md`）
 - 红线：dataSources 仅 `http`；表单一律 `Form`；列表操作列规范；功能闭环；文案跟线框图；新建工程的 rendered check / 冒烟未通过，或任一模式的完整 UI 计划门禁未通过时，不得生成页面；不得擅自偏离计划，三层验收任一失败均修复并重验
 
@@ -77,18 +78,17 @@ ln -s node_modules/@pactor-app/skills/pactor-prd ~/.claude/skills/pactor-prd
 
 | 路径 | 作用 |
 | --- | --- |
-| `pactor-prd/template/` | 可运行模板工程（common + provider/route 参考模块 + models 页面骨架 + neutral 默认皮肤） |
 | `pactor-prd/template-placeholders.json` | 模板 values 的完整键清单、说明与冒烟示例值 |
 | `pactor-prd/references/*.md` | 目录结构、UI 质量契约（`ui-quality.md`）、组件映射、页模板、数据接口、主题、验收清单、资产库查找（`doc/` 组件/模板/业务组件文档） |
 
-详见 [`pactor-prd/SKILL.md`](pactor-prd/SKILL.md) 与 [`pactor-prd/template/README.md`](pactor-prd/template/README.md)。
+详见 [`pactor-prd/SKILL.md`](pactor-prd/SKILL.md) 与 `starters/next-app-starter/`。
 
 ---
 
 ## 校验与发布
 
 ```bash
-cd skills && pnpm validate   # 目录名与 SKILL frontmatter、references、template 存在性
+cd skills && pnpm validate   # 目录名、SKILL frontmatter、references 与 starter/placeholder 契约
 ```
 
 ## 新增技能

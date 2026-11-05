@@ -1,13 +1,14 @@
 ---
 name: pactor-prd
 description: |
-  Use when PRD or markdown wireframes drive Pactor YAML pages (skill id pactor-prd). Greenfield: scaffold a new repo via create-pactor-app (next-app template). Incremental: in an existing Pactor project, add or update pages from new/changed wireframe files (DSL, sitemap, menus, data API, styles). Triggers: pactor-prd, prd-to-app, 线框图增量, 已有项目加页面, PRD 更新页面.
-version: 1.7.0
+  Use when PRD or markdown wireframes drive Pactor YAML pages (skill id pactor-prd). Greenfield: scaffold a new repo via create-pactor-app (next-app template). Incremental: in an existing Pactor project, add or update pages from new/changed wireframe files, including access-mode/domain/module/grant metadata, endpoint filtering, sitemap/navigation, data API, and styles. Triggers: pactor-prd, prd-to-app, 线框图增量, 已有项目加页面, PRD 更新页面, 权限页面, sitemap.
+metadata:
+  version: 1.8.0
 ---
 
 # PRD → YAML 页面应用生成
 
-把「产品文档 + Markdown 线框图」落到 **YAML 页面 + sitemap/数据接口/样式**；支持 **两种模式**（先选型再执行）：
+把「产品文档 + Markdown 线框图」落到 **YAML 页面 + 访问元数据 + sitemap/导航 + 数据接口/样式**；支持 **两种模式**（先选型再执行）：
 
 | 模式 | 何时用 | 脚手架 |
 | --- | --- | --- |
@@ -35,6 +36,7 @@ version: 1.7.0
 7. **文案以线框图为准**：标题、按钮、空态文案逐字取自线框图/PRD
 8. **登录页用 `Login` 业务组件**：PRD 含登录页时，以生成工程内 `src/backend/resources/yaml/auth/login.page.yaml`（`type: Login`）为样板生成，禁止手写 Card+Form+自定义 CSS；**原型未明确布局方式时必须向用户提问**选择 `layout`（`split` 左右分栏 / `centered` 居中 / `brand-card` 品牌卡片 / `overlap` 卡片叠加 / `backdrop` 整页渐变背景，附效果简述，必要时含 `brandSide`/`brandRatio`/`authVariant` 修饰项），原型可判定布局则直接用、不提问；用户不答默认 `split` + `authVariant: card`；品牌区文案/logo/插画取自 PRD，提交闭环沿用 `onSubmit` → `request` + `message` + `app.reload` 模式
 9. DSL 语法细节（组件 props、表达式、动作）以 `pactor-dsl` skill 与 packages 当前导出（ui 内置注册表 / `@pactor-app/blocks` / `@pactor-app/chart`）为准，本 skill 只约定流程与产出物
+10. **先识别授权宿主再写页面/sitemap**：Nexus/Console 页面必须声明 `access-mode`；`grant` 页面必须有与 catalog 对齐的 `domain`、`module`、`pageKey`，非 `view` 浏览组显式写 `grantGroup`。该宿主的本地 `sitemap.yaml` 只维护 `pages` + `layouts`，导航来自后端并通过 `/api/sitemap` 合并，禁止再维护重复 `menus`；所有页面 `lazy: true`。纯 Pactor starter 继续遵循其 `sitemap`/`menus` 或 bootstrap 菜单模式。完整契约见 `../pactor-dsl/references/authorization-and-sitemap.md`
 
 ## 国际化
 
@@ -52,6 +54,8 @@ PRD 要求多语言时，先读 [国际化参考](references/internationalizatio
 ### 1. 输入解析
 
 - 读 README / 变更线框图：模块树、页面 id（kebab-case）、path、菜单、P0/P1/P2
+- 识别目标工程的权限/sitemap profile（通用 Pactor 或 Nexus/Console）；读取同类页和实际 loader，不按目录名猜契约
+- 为每页提取 `access-mode` 与所需 `domain`/`module`/`pageKey`/`grantGroup`，并列出页面内所有写操作对应的 method/url；接口文档不足时明确待补项，不虚构授权组
 - 逐页读线框：页面类型、区域、字段、交互
 - **接口文档解析**：PRD 含接口文档/说明时，提取「资源 → 路径 / 方法 / 返回形状」接口清单，页面 dataSources 以该清单为准；无接口文档则按 `references/data-api.md` 命名约定写 `/api/d/...`
 - **新建工程**：输出全量 **页面清单表**（`references/page-inventory-and-files.md`）
@@ -80,7 +84,7 @@ PRD 要求多语言时，先读 [国际化参考](references/internationalizatio
 **增量**
 
 - **跳过脚手架**；执行 `incremental-wireframe-delta.md` 的「摸底」
-- 确认 yaml 布局模式 A/B 与 `sitemap`、data API 接线完整；缺则先补壳或转新建工程
+- 确认 yaml 布局模式 A/B、授权宿主、`sitemap`/导航、data API 接线完整；缺则先补壳或转新建工程
 
 ### 阶段 3 前置门禁：逐页 UI 计划（新建 / 增量必经）
 
@@ -100,7 +104,8 @@ PRD 要求多语言时，先读 [国际化参考](references/internationalizatio
 - 校验见 `page-inventory-and-files.md`（全量）或 `incremental-wireframe-delta.md`（增量）
 - 用 `references/component-mapping.md` 与 `references/page-templates.md` 核对计划所选组件、骨架的合法 DSL（**数据列表页直接复制 `yaml/analytics/data-list.page.yaml` 替换占位符**）；表单一律 `Form` 包裹，不在生成时无理由重选布局或组件
 - **组件/模板/业务组件拿不准时先查资产库**（`references/asset-library.md`）：组件详情含可套用的 DSL 示例与 whenToUse，线框模板含可渲染的提炼 DSL；业务组件以 details 条目 + `@pactor-app/blocks` 导出为准（catalog 的 integration 字段不可信）
-- 同步更新 `sitemap.yaml` 的 `pages` + `menus`（hidden 详情/编辑带 `activeMenu`）
+- 同步更新 `sitemap.yaml`：通用 Pactor 更新 `pages` + `menus`；Nexus/Console 只更新 `pages`，所有页面 `lazy: true`，导航更新到后端 `meta-sitemap`/持久化菜单，hidden 详情/编辑带 `activeMenu`
+- Nexus/Console 页面同时写入 `access-mode` 和所需 grant 元数据；为所有 `action: request` 确认后端 endpoint method/path 可鉴权，自定义组件/action 用节点 `access.requests`/`access.grantGroups` 显式声明依赖
 - 每页 dataSources 全部 `type: http`：**有接口文档 → url 取文档接口地址**；无 → 按 `references/data-api.md` 命名约定写 `/api/d/...`（prototype 走本地 mock，其他环境原样转发）；交互 events + actions 闭环
 
 ### 4. 样式移植
@@ -111,8 +116,8 @@ PRD 要求多语言时，先读 [国际化参考](references/internationalizatio
 
 **新建工程**对逐页全站执行三层验收；**增量**对所有 add / update 页执行三层全项验收，并抽至少 1～2 个未改页做菜单可达、控制台无新增 error 的回归。三层互相不能替代：
 
-1. **静态检查**：按 `references/ui-quality.md` 第 7.1 节逐页执行 S1–S8，运行 `npx pactor validate <实际文件路径>`，核对 UI 计划门禁、DSL / 路由、骨架与间距、Form / Field、组件语义与 props、数据与交互、状态接线及计划一致性。
-2. **浏览器功能验收**：使用目标项目真实 dev server，按 `references/acceptance-checklist.md` 在浏览器逐项操作路由、数据源、查询 / 重置、新建 / 编辑 / 提交、删除确认、重试、清空、禁用及适用的 hover / focus；检查成功与失败反馈、Network 和控制台。实际功能通过不免除静态检查或截图目检。
+1. **静态检查**：按 `references/ui-quality.md` 第 7.1 节逐页执行 S1–S8，运行 `npx pactor validate <实际文件路径>`，核对 UI 计划门禁、DSL / 路由、骨架与间距、Form / Field、组件语义与 props、数据与交互、状态接线及计划一致性。Nexus/Console 另核对 `access-mode`、grant 必填项、`lazy: true`、endpoint grant、请求过滤声明和导航单一事实源；宿主扩展是否被通用 schema 接受以实际版本为准，必须启动宿主验证。
+2. **浏览器功能验收**：使用目标项目真实 dev server，按 `references/acceptance-checklist.md` 在浏览器逐项操作路由、数据源、查询 / 重置、新建 / 编辑 / 提交、删除确认、重试、清空、禁用及适用的 hover / focus；检查成功与失败反馈、Network、page-access 调用位置和控制台。Nexus/Console 另用有权限和无权限账号验证菜单、懒加载页面、按钮/表单裁剪、hidden 路由及直接 API 拒绝。实际功能通过不免除静态检查或截图目检。
 3. **截图目检**：按 `references/ui-quality.md` 第 7.2～7.3 节生成真实页面的适用截图矩阵并执行 V1–V9，覆盖桌面 `1440×900`、窄屏 `390×844`、亮色 / 暗色及计划中适用的状态，证据保存到 `docs/prd/ui-evidence/<page-id>/`；逐项目检信息层级、Field 间距、溢出、主题可读性、状态和计划一致性。
 
 任一层任何一项失败，都按 `references/ui-quality.md` 第 8 节登记并修复，然后对该页重新执行三层全部检查与完整适用截图矩阵，不得只复查失败项或降低矩阵。共享骨架、主题或公共组件修复影响多页时，所有受影响变更页都要重验，并执行未改页回归；仍有未处理失败时不得交付。
@@ -134,6 +139,7 @@ PRD 要求多语言时，先读 [国际化参考](references/internationalizatio
 | `references/theme-and-style.md` | 阶段 4：主题令牌提取、皮肤、自定义 CSS、换肤 |
 | `references/acceptance-checklist.md` | 阶段 5：浏览器功能验收、未改页回归与结果输出格式；与 `references/ui-quality.md` 的静态检查、截图目检共同执行 |
 | `references/page-inventory-and-files.md` | 阶段 1–3：清单列 → 目录与文件批量创建、与 sitemap 对齐；创建 YAML 前必须先通过 UI 计划门禁 |
+| `../pactor-dsl/references/authorization-and-sitemap.md` | 目标为 Nexus/Console 或页面涉及 `access-mode`、grantGroup、请求级 action 过滤、后端导航、hidden route 时必读 |
 
 ## Sibling skills
 

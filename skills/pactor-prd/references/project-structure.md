@@ -1,6 +1,11 @@
 # 目标项目目录结构约定
 
-以脚手架（`create-pactor-app` next-app 模板）生成工程的实际文件为准。下面列出关键接线；构建配置、锁文件和 workspace 文件随模板完整保留。
+以目标工程的实际 loader 为准，先区分两种 profile：
+
+- **通用 next-app starter**：本地 sitemap 可包含 `pages` + `menus` + `layouts`，前端可能有自己的 page-access 门禁；
+- **Nexus/Console 集成**：Next.js 服务端在懒加载页面时调用后端 page-access；导航由后端 `/api/d/platform/navigation/menus` 提供，本地 sitemap 不重复 `menus`。
+
+下面是通用脚手架的典型结构；接入 Nexus 时保留目标工程真实路径，不按本示例重命名目录。
 
 ```text
 <project>/
@@ -17,8 +22,9 @@
 │   │   │   ├── sitemap/route.ts     返回按会话裁剪、按 locale 本地化的 sitemap
 │   │   │   ├── pages/[id]/route.ts  懒加载页面端点（PageResource envelope）
 │   │   │   ├── auth/                登录、登出与演示会话
-│   │   │   ├── page-access/         页面访问校验转发
+│   │   │   ├── page-access/         可选：本地/服务端页面访问校验转发
 │   │   │   ├── public/page-access/  原型页面访问校验实现
+│   │   │   ├── public/pages/[id]/   Nexus：懒加载 + 服务端 page-access
 │   │   │   └── d/[...parts]/        prototype mock；其他环境原样转发
 │   │   ├── globals.css              全局样式与通用后台 CSS
 │   │   ├── icon.svg                 Next.js 浏览器 icon
@@ -61,7 +67,7 @@
 - 脚手架创建是唯一安全替换入口：values 在生成时一次写入，之后不要再对工程做占位替换。不要手工逐文件替换或只修改 `package.json`。
 - rendered check 通过后才执行 install/dev 冒烟；冒烟通过后再生成页面。**任何占位未替换时禁止进入页面生成。**
 
-## sitemap.yaml 骨架
+## 通用 Pactor sitemap.yaml 骨架
 
 ```yaml
 # 页面 DSL 按模块分目录存放：yaml/<模块>/<id>.page.yaml；
@@ -106,8 +112,71 @@ layouts:
 - 页面按 PRD 模块树分目录：`src/backend/resources/yaml/<模块>/<id>.page.yaml`（如 `src/backend/resources/yaml/project/project-list.page.yaml`）；模块目录名用 kebab-case 英文域。批量建文件与清单对齐见 **`page-inventory-and-files.md`**。
 - 页面 id kebab-case，= 文件名去掉 `.page.yaml`；`pages:` 注册、`menus:` 引用、文件名三者一致。
 - 列表/详情/编辑成组路径：`/projects`、`/projects/:code`、`/projects/:code/edit`、`/projects/new`。
-- 详情/编辑页不进菜单（`hidden: true`），用 `activeMenu` 保持列表菜单高亮。
+- 通用 Pactor 中详情/编辑页不进菜单时可在本地菜单使用 `hidden: true` + `activeMenu`；Nexus 的导航项在后端，本地只登记页面路由。
 - 菜单图标仅一级菜单配置（目录 group 与「首页」这类独立页面项都要配），用 pactor Icon 白名单 kebab-case 名；二级及以下菜单项一律不配图标。
-- 登录/注册页 `public: true` + `layout: login`；其余默认需登录。
-- `src/backend/resources/sitemap.ts` 只按会话过滤（public/permission），不要在代码里拼接业务字段——数据归 YAML。
-- 懒加载页面端点固定为 `src/app/api/pages/[id]/route.ts`，与框架缺省请求 `/api/pages/{id}` 对齐；无需额外配置 `pageEndpoint`。
+- 通用 Pactor 登录/注册页可使 `public: true` + `layout: login`；Nexus 以页面 DSL 的 `access-mode: public` 为准，sitemap 不重复权限元数据。
+- 通用 starter 的 `sitemap.ts` 可按 public/permission 过滤本地菜单；Nexus 由后端按 catalog 浏览组、`roles`、`hidden` 裁剪导航。把页面隐藏不等于拒绝直接访问。
+- 通用 starter 常使用 `src/app/api/pages/[id]/route.ts`，与框架缺省 `/api/pages/{id}` 对齐；Nexus 实际使用 `/api/public/pages/{id}` 并在 `pageEndpoint` 显式配置。以目标工程代码为准。
+
+## Nexus/Console sitemap 与页面元数据
+
+Nexus 本地 sitemap 骨架：
+
+```yaml
+id: site
+resourceType: sitemap
+version: 1
+dslVersion: '1.0'
+app: { name: Nexus Console }
+auth: { loginPath: /login }
+
+pages:
+  - { id: login, path: /login, title: 登录, version: 1, lazy: true, layout: login }
+  - { id: role-list, path: /system/roles, title: 角色管理, version: 1, lazy: true, layout: admin }
+  - { id: role-detail, path: /system/roles/:roleId, title: 角色详情, version: 1, lazy: true, layout: admin, activeMenu: nav-roles }
+
+layouts:
+  admin: { dsl: '1.0', body: { type: PageOutlet } }
+  login: { dsl: '1.0', body: { type: PageOutlet } }
+```
+
+这里没有 `menus`。后端导航放在 `meta-sitemap.yaml`/持久化菜单：
+
+```yaml
+menus:
+  - id: nav-roles
+    type: page
+    pageId: role-list
+    title: 角色管理
+    domainKey: operation
+    moduleKey: role
+    viewGroup: view
+```
+
+对应页面：
+
+```yaml
+dsl: '1.0'
+page:
+  id: role-list
+  title: 角色管理
+  access-mode: grant
+  domain: operation
+  module: role
+  pageKey: platform-role-main
+  grantGroup: view
+body:
+  type: Page
+  children: []
+```
+
+Nexus 关键约束：
+
+- 当前宿主加载时强制每个页面 `lazy: true`；
+- `public` 页面不调用 page-access；`authenticated` / `grant` 在 Next.js 懒加载接口内检查；
+- `grant` 必须有 `domain`、`module`、`pageKey`，`pageKey` 命中 catalog 模块 `entryPageKey`；
+- 页面文件是访问元数据唯一事实源，不在 sitemap 重复 `access-mode`/grant 字段；
+- Next.js `/api/sitemap` 先取页面与布局，再调用后端导航接口并按当前会话合并；后端失败应返回错误，不回退到伪造的本地菜单；
+- 后端未返回的已注册页面由宿主追加 hidden route，`hidden` 只影响导航可见性。
+
+动态 endpoint 使用 `@EndpointModule` + `@EndpointGrant` 注册。页面中的 `action: request`、命名 action 和显式 `access.requests` 会批量送 page-access；后端以 method + 路径模板复用真实接口授权。完整规则见 `pactor-dsl/references/authorization-and-sitemap.md`。

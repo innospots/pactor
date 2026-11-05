@@ -10,6 +10,7 @@ Pair this reference with:
 - `references/component-contracts.md` for exact high-frequency props, events, slots, form behavior, overlays, blocks, charts, and chat.
 - `references/component-catalog.md` for every registered DSL type, package registration, purpose, and online documentation link.
 - `references/page-catalog-and-layout.md` when adding routes, menus, or global layouts.
+- `references/authorization-and-sitemap.md` when the host enforces `access-mode`/grant groups, request-level action filtering, or backend-owned navigation.
 - `references/examples/index.md` for complete page baselines, data contracts, host registration, and route/layout mapping.
 - `references/examples/search-list.page.yaml` for the production search/list baseline covering filters, server pagination, table cells, async states, permissions, retry, confirm, and feedback.
 
@@ -25,7 +26,13 @@ page:                         # REQUIRED. Page meta
   # name: customerList        # programmatic name (optional)
   # description: ...          # read by tooling, not the runtime
   # type: list                # page pattern hint (list / detail / form ...)
-  # permission: customer:view # page-level guard; denied users get a 403 page
+  # permission: customer:view # generic Pactor page guard; denied users get a 403 page
+  # Nexus/Console host extension below (optional in generic Pactor, enforced by that host):
+  # access-mode: grant
+  # domain: sales
+  # module: customer
+  # pageKey: customer-main
+  # grantGroup: view
 meta:                         # optional free-form metadata, runtime ignores it
   version: '1.0'
 state:                        # optional, reactive page state (initial values)
@@ -216,7 +223,7 @@ Action catalog:
 
 Multiple forms on one page: every `Form` registers under `props.name` (default `default`) — name additional forms explicitly (e.g. a drawer edit form `name: edit`) and address them with `form.setValues`'s `form` param.
 
-## 7. Permission
+## 7. Generic permission vs host authorization
 
 ```yaml
 permission: customer:delete                              # single code
@@ -224,7 +231,30 @@ permission: [customer:delete, customer:admin]            # any match passes
 permission: { code: customer:delete, denied: disabled }  # hidden (default) | disabled | readonly
 ```
 
-Applies at page / menu / component / action levels. In expressions: `${!permission('customer:edit')}`. Frontend permissions only shape UI — the backend must still authorize.
+Generic Pactor applies these `permission` guards at page / menu / component / action levels. In expressions: `${!permission('customer:edit')}`. Frontend permissions only shape UI — the backend must still authorize.
+
+Some integrated hosts add a separate authorization contract. Nexus/Console reads page metadata such as:
+
+```yaml
+page:
+  id: role-list
+  access-mode: grant       # public | authenticated | grant
+  domain: operation
+  module: role
+  pageKey: platform-role-main
+  grantGroup: view
+```
+
+In that host:
+
+- `public` skips page-access;
+- `authenticated` and `grant` are checked while the Next.js server lazy-loads the page;
+- `grant` requires `domain`, `module`, and a `pageKey` matching the catalog module's `entryPageKey`;
+- the host can remove/disable controls whose `action: request` method/url or explicit `access.grantGroups` fail;
+- custom components/actions must declare `access.requests` or `access.grantGroups` when their dependencies are not statically visible;
+- `state.grantGroupList`, `state.grantGroups`, and `state.grantGroupsAll` are injected for `when` expressions.
+
+Do not assume `page.permission` automatically maps to host grant groups. Read [`authorization-and-sitemap.md`](authorization-and-sitemap.md) for the full contract, sitemap ownership, and request-matching rules.
 
 ## 8. Recipes (copy-paste starting points)
 
@@ -585,6 +615,9 @@ body:
 | `children` nested inside `props:` | `children` is a NODE-level key (sibling of `props:`); nested under `props:` it is silently dropped |
 | `navigate` param `path` / `url` | `to` |
 | `message` param `type: success` | `messageType: success` — a `type` (or `action`) key inside action `params` makes the engine treat params as a nested DSL/action config and SKIP expression evaluation |
+| Treating Pactor `permission: customer:edit` as equivalent to Nexus `access-mode`/grant groups | Follow the target host contract; Nexus grant pages use `access-mode: grant`, `domain`, `module`, `pageKey`, and request/access filtering |
+| Hiding a Button and assuming its API is protected | Keep backend endpoint authorization authoritative; UI filtering only prevents accidental access |
+| Using a partial expression such as `/api/items/prefix-${row.id}` in bulk action authorization | Expressions must occupy a complete path segment; use `/api/items/${row.id}` or declare a resolvable endpoint |
 | Reading full form values in `onValuesChange` | It only carries the changed field; use `onSubmit` or `${form.x}` |
 | Expecting actions to re-render UI | Only the state/data changes they produce do |
 | Inventing component `type` names or props | Use registry names (SKILL.md list) and documented props |
@@ -601,7 +634,7 @@ npx pactor validate src/server/yaml/pages/home.page.yaml
 npx pactor lint src/server/yaml
 ```
 
-The command must run in the consumer project with `@pactor-app/cli` installed. It checks schema shape (top-level keys, node structure, action configs) but does NOT validate component props. Correctness of props comes from the bundled component catalog/contracts and the online docs.
+The command must run in the consumer project with `@pactor-app/cli` installed. It checks schema shape (top-level keys, node structure, action configs) but does NOT validate component props. Correctness of props comes from the bundled component catalog/contracts and the online docs. Host extensions such as Nexus node-level `access` may not be understood by every generic schema version; also start the host and verify its loader, page-access, and full page request against the installed host implementation.
 
 ## 11. Version-drift lookup
 

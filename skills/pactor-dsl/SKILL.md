@@ -1,9 +1,9 @@
 ---
 name: pactor-dsl
 description: |
-  Use for Pactor DSL and runtime wiring inside an existing app (skill id pactor-dsl). Triggers: write/edit *.page.yaml, add N pages with module folders and sitemap/menus, state, dataSources, events, actions, expressions, custom components/actions/services, themes, permissions, Chat/ChatShell, vite-plugin, pactor validate. NOT for empty-repo scaffold (use pactor-project) or full PRD-to-repo generation (use pactor-prd).
+  Use for Pactor DSL and runtime wiring inside an existing app (skill id pactor-dsl). Triggers: write/edit *.page.yaml, add N pages with module folders and sitemap/navigation, state, dataSources, events, actions, expressions, custom components/actions/services, themes, page permission, access-mode/domain/module/grantGroup, request-level action filtering, sitemap/menu visibility, Chat/ChatShell, vite-plugin, pactor validate. NOT for empty-repo scaffold (use pactor-project) or full PRD-to-repo generation (use pactor-prd).
 metadata:
-  version: 2.3.0
+  version: 2.4.0
 ---
 
 # Pactor DSL
@@ -18,7 +18,8 @@ Activate when the user works with **Pactor DSL or runtime APIs** in a project th
 - Creating or registering custom components / actions / services
 - Building AI chat pages (`Chat`, `ChatShell`, `ChatServicesProvider`)
 - Configuring themes, skins, layouts, menus, or sidebars
-- Integrating data sources, routers, resources, or permissions
+- Integrating data sources, routers, resources, page access, or permissions
+- Working in a Nexus/Console-style host with `access-mode`, catalog `domain`/`module`/`pageKey`, grant groups, endpoint request filtering, and backend-owned navigation
 - Handling form linkage, event linkage, or action orchestration
 - Using `@pactor-app/vite-plugin` or `@pactor-app/cli`
 - Mentioning packages: `@pactor-app/core`, `@pactor-app/runtime`, `@pactor-app/app`, `@pactor-app/ui`, `@pactor-app/router`, `@pactor-app/resource`, `@pactor-app/permission`, `@pactor-app/expression`, `@pactor-app/schema`, `@pactor-app/chat`, `@pactor-app/markdown`
@@ -26,7 +27,7 @@ Activate when the user works with **Pactor DSL or runtime APIs** in a project th
 ## What you can do with this skill
 
 - Explain Pactor architecture, package boundaries, and dependency rules
-- **Batch-create pages** from a page inventory: file paths (`yaml/<module>/<id>.yaml` vs `yaml/pages/*.page.yaml`), `sitemap.yaml` `pages`/`menus`, or `StaticDslLoader.pages` — see `references/page-catalog-and-layout.md`
+- **Batch-create pages** from a page inventory: file paths (`yaml/<module>/<id>.yaml` vs `yaml/pages/*.page.yaml`), generic `sitemap.yaml` `pages`/`menus`, a host-owned navigation source, or `StaticDslLoader.pages` — see `references/page-catalog-and-layout.md`
 - **Build complete page structures** for list, detail, form, dashboard, card-list, tree master-detail, login, register, chat, navigation, and overlay workflows — see `references/page-blueprints.md`
 - **Choose components without omissions** from the source-audited catalog of 175 DSL types, with per-component online documentation links — see `references/component-catalog.md`
 - **Copy complete, schema-valid page baselines** for search/list, detail, edit, login, register, chat, dialog, drawer, navigation, dashboard, card list, and tree master-detail — see `references/examples/index.md`
@@ -199,9 +200,9 @@ Component prop/event details:
 
 When the user asks for **N pages** or a **module tree**:
 
-1. Read `references/page-catalog-and-layout.md` — pick layout **A** (flat `pages/*.page.yaml`) or **B** (`<module>/<id>.yaml`) to match the project; output a **page inventory table** with at least: id, page type, path, file, layout, menu group, hidden/activeMenu, permission, primary data source.
+1. Read `references/page-catalog-and-layout.md` — pick layout **A** (flat `pages/*.page.yaml`) or **B** (`<module>/<id>.yaml`) to match the project; output a **page inventory table** with at least: id, page type, path, file, layout, menu group, hidden/activeMenu, primary data source. If the host uses `access-mode`, also record `access-mode`, `domain`, `module`, `pageKey`, and `grantGroup`; if it uses generic Pactor permission guards, record `permission`.
 2. Read `references/page-blueprints.md` for the selected page types, `references/examples/index.md` for a matching complete baseline, and `references/component-catalog.md` plus `references/component-contracts.md` before choosing components.
-3. Create **one YAML file per row**; register all ids in the host's sitemap resource (SitemapApp) or `StaticDslLoader` + `bootstrap.menus`. Create/update the global layout DSL with `PageOutlet`; a page file is not a substitute for a missing layout.
+3. Create **one YAML file per row**; register all ids in the host's sitemap resource (SitemapApp) or `StaticDslLoader` + `bootstrap.menus`. Create/update the global layout DSL with `PageOutlet`; a page file is not a substitute for a missing layout. In Nexus/Console, do not duplicate backend navigation as local `menus`.
 4. Per file: use the skeleton below — never invent the top-level shape; declare `state` / `dataSources` / `actions`, then `body`; wire `events` → actions and render loading / empty / error / disabled states. Start from the closest baseline in the table above; for a production-complete search/list page, use [`search-list.page.yaml`](references/examples/search-list.page.yaml) and remove irrelevant business fields.
 5. Validate in the consumer project: run `npx pactor lint <project-dsl-directory>` for all pages (recursive), or `npx pactor validate <file...>` for explicit files (`@pactor-app/cli`). Then run the page-completeness checklist in `references/page-blueprints.md`; schema validation alone does not prove layout, props, routing, or behavior.
 
@@ -214,7 +215,13 @@ dsl: '1.0'                      # required, DSL spec version
 page:                           # required
   id: customer-list             # globally unique
   title: Customer List
-  permission: customer:view     # optional page guard
+  permission: customer:view     # optional generic Pactor page guard
+  # Nexus/Console host extension; do not treat as universal Pactor requirements:
+  # access-mode: grant
+  # domain: sales
+  # module: customer
+  # pageKey: customer-main
+  # grantGroup: view
 state:                          # optional, reactive initial state
   keyword: ''
 dataSources:                    # optional, named data sources
@@ -272,6 +279,21 @@ Facts that are NOT guessable and must be followed:
 - A complete non-trivial page also covers the four runtime states: `loading` from `${dataStatus.x.loading}`, `empty` only after a successful load with no rows, `error` from `${dataStatus.x.error}`, and `disabled` from permission/business conditions.
 
 **Full DSL grammar, action catalog, expression/scopes tables, and copy-paste recipes: read `references/dsl-authoring.md`.** Page count, folders, sitemap, and layout registration: **`references/page-catalog-and-layout.md`**. Page structure and acceptance: **`references/page-blueprints.md`**. Component props and links: **`references/component-catalog.md`** + [Pactor docs](https://pactor.innospots.com/components/overview/).
+
+## Workflow: host authorization and sitemap
+
+Pactor core and a host integration are different contracts. Before adding permission metadata or changing navigation, determine which one the project uses.
+
+- Generic Pactor uses `page.permission`, menu/component/action `permission`, and the host-populated PermissionStore.
+- Nexus/Console pages use `page.access-mode`, catalog `domain`/`module`/`pageKey`, and `grantGroup`; `grant` pages require non-empty domain, module, and pageKey.
+- In the current Nexus host, `access-mode` is mandatory and may be `public`, `authenticated`, or `grant`. `grantGroup` defaults to `view`; use it instead of the `group` compatibility alias.
+- `public` skips page-access. `authenticated` and `grant` are checked by the Next.js server when loading `/api/public/pages/{id}`; the browser must not call page-access directly.
+- The host collects `action: request`, expands named `action: call`, and verifies method/url templates in one page-access call. It also injects `state.grantGroupList`, `state.grantGroups`, and `state.grantGroupsAll` for `when` conditions.
+- Buttons disappear when any required request or group is denied; forms disable fields/submit; non-button components use explicit `access.mode: disable` when they should remain visible but disabled. Custom components/actions must declare `access.requests` or `access.grantGroups`.
+- Frontend results only shape the UI. Every backend endpoint must remain authorized, normally through `@EndpointModule` + `@EndpointGrant`; the real API filter is the security boundary.
+- In the Nexus host, `sitemap.yaml` owns `pages` and `layouts`, every page is `lazy: true`, and navigation comes from backend `meta-sitemap`/persisted menus through `/api/sitemap`. Do not add a second local `menus` tree. Hidden routes still require page-access; `hidden` is not security.
+
+Read [references/authorization-and-sitemap.md](references/authorization-and-sitemap.md) before editing Nexus page access metadata, component `access` rules, endpoint-facing action filtering, navigation ownership, or hidden route behavior.
 
 ## Workflow: custom component
 
@@ -343,7 +365,8 @@ Pitfall: action `params` objects with a `type` (or `action`) key are treated as 
 
 - **Routing** (`@pactor-app/router`): dynamic routes from bootstrap `menus`, supports Path Matcher, params, hidden routes
 - **Resources** (`@pactor-app/resource`): loads page/fragment DSL with HttpDslResourceLoader or StaticDslLoader, cache, versioning
-- **Permissions** (`@pactor-app/permission`): page/menu/component/action guards. Frontend permissions only control UI; backend APIs must still authorize
+- **Permissions** (`@pactor-app/permission`): page/menu/component/action guards. Nexus host access-mode/grant filtering is a separate host contract
+- Frontend permissions and filtered UI are not security boundaries; backend APIs must still authorize every request
 
 Bootstrap orchestration:
 
@@ -418,6 +441,7 @@ npx pactor create my-app
 4. **Allow React escape hatch**: 70%–80% ordinary pages use pure DSL; complex pages can be written directly in React
 5. **Frontend permissions only control UI**: hiding menus, buttons, or intercepting actions does not replace backend authorization
 6. **No eval in expressions**: use a controlled AST; disallow access to `window`, `document`, `localStorage`, `fetch`, `eval`, and other globals
+7. **Host contract is explicit**: do not invent `access-mode` behavior in a host that does not implement it; in Nexus, endpoint authorization and page/action filtering must agree
 
 ## Common pitfalls
 
@@ -425,6 +449,10 @@ npx pactor create my-app
 - **Do not** write `if (type === 'Button')` branches in a Renderer; use `ComponentRegistry`.
 - **Do not** inject JavaScript from the server into DSL; register actions/services/capabilities in the frontend.
 - **Do not** rely on frontend permission checks for security; enforce authorization on backend APIs.
+- **Do not** equate Pactor `page.permission` with Nexus `access-mode: grant`; they read different stores and execute in different layers.
+- **Do not** make every page call page-access from the browser. The Nexus Next.js server performs the check while lazy-loading the page DSL; `public` skips it.
+- **Do not** duplicate backend navigation under a local Nexus `sitemap.yaml` `menus` key, and do not treat `hidden: true` as authorization.
+- **Do not** rely on button hiding for custom components that issue requests internally; declare `access.requests` or `access.grantGroups` and keep backend endpoint authorization.
 - **Do not** expect `@pactor-app/blocks` / `@pactor-app/chart` components to be in the builtin registry; merge them explicitly (`registerBlockComponents` / `registerChartComponents` into the existing `ComponentRegistry`).
 - **Do not** forget to import `@pactor-app/ui/styles.css` when using the default shadcn kit (`@pactor-app/chat/styles.css` / `@pactor-app/blocks/styles.css` / `@pactor-app/chart/styles.css` additionally for chat / blocks / chart surfaces).
 - **Do not** use `Chart` or `Splitter` as DSL types; use concrete chart types and `Resizable`.
@@ -436,6 +464,7 @@ npx pactor create my-app
 ## References (bundled — works from npm install)
 
 - **Page inventory & directories**: `references/page-catalog-and-layout.md`
+- **Page access, action filtering & sitemap ownership**: `references/authorization-and-sitemap.md`
 - **Page blueprints & completeness checklist**: `references/page-blueprints.md`
 - **Complete component catalog & docs links**: `references/component-catalog.md`
 - **High-frequency component props, events, slots, and constraints**: `references/component-contracts.md`

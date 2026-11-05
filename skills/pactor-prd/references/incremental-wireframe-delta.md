@@ -14,9 +14,10 @@
 
 ## 0. 摸底（只读）
 
-1. 扫描 `src/backend/resources/yaml/**`（排除 `sitemap.yaml`），建立 **现状清单**：`page id`、文件路径、`sitemap.pages` 的 path、`menus` 引用。
-2. 确认懒加载 API `src/app/api/pages/[id]` 存在，并与框架缺省请求 `/api/pages/{id}` 对齐。
-3. 读工程内 **同类页** 一份（同模块列表页或表单页）作为排版样板（增量时红线「以模板为准」= **以本工程同类页为准**）。
+1. 扫描目标工程实际的 YAML 根（通用 starter 常见 `src/backend/resources/yaml/**`，Nexus 常见 `src/backend/pages/yaml/**`；排除 `sitemap.yaml`），建立 **现状清单**：`page id`、文件路径、`sitemap.pages` 的 path、导航引用、访问元数据。
+2. 判定授权/sitemap profile：通用 Pactor 用本地 `menus`/bootstrap 与 `permission`；Nexus/Console 用页面 `access-mode` + 后端导航，并禁止本地 sitemap 重复 `menus`。
+3. 确认实际懒加载 API：通用 starter 常见 `/api/pages/{id}`；Nexus 当前为 `/api/public/pages/{id}`，服务端在该路由内执行 page-access。不要按 `pageEndpoint` 缺省值猜测。
+4. 读工程内 **同类页** 一份（同模块列表页或表单页）作为排版样板（增量时红线「以模板为准」= **以本工程同类页为准**）。
 
 ## 1. 解析线框图增量
 
@@ -27,13 +28,13 @@
 
 对 **每个** 线框图文件输出 delta 行：
 
-| 变更 | page id | 模块 | 文件路径 | path | 菜单 | 说明 |
-| --- | --- | --- | --- | --- | --- | --- |
-| add | order-list | order | yaml/order/order-list.yaml | /orders | 进菜单 | 新列表 |
-| update | order-list | order | （同上） | /orders | | 线框图改筛选区 |
-| add | order-edit | order | yaml/order/order-edit.yaml | /orders/:id/edit | hidden | 新编辑页 |
-| rename-id | order-detail → order-view | … | 需迁文件 + 改 sitemap | | | 少见，须用户确认 |
-| deprecate | old-page | | | | 下架 | 用户确认后删 yaml + 从 sitemap 移除 |
+| 变更 | page id | 模块 | 文件路径 | path | 导航 | access-mode | domain/module/pageKey/grantGroup | 说明 |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| add | order-list | order | yaml/order/order-list.yaml | /orders | 进菜单 | grant | operation/order/platform-order-main/view | 新列表 |
+| update | order-list | order | （同上） | /orders | | 不变 | 不变 | 线框图改筛选区 |
+| add | order-edit | order | yaml/order/order-edit.yaml | /orders/:id/edit | hidden | grant | operation/order/platform-order-main/view | 新编辑页 |
+| rename-id | order-detail → order-view | … | 需迁文件 + 改 sitemap | | | | | 少见，须用户确认 |
+| deprecate | old-page | | | | 下架 | | | 用户确认后删 yaml + 从 sitemap/导航移除 |
 
 **update** 不臆造新 page id；**deprecate** 必须用户明确，避免误删。
 
@@ -41,12 +42,12 @@
 
 | 变更 | 动作 |
 | --- | --- |
-| **add 页面** | `mkdir` 模块目录；新建 yaml；`sitemap.yaml` 增加 `pages` + `menus`；dataSources 直接声明最终接口路径（无需注册） |
-| **update 页面** | 改对应 yaml（结构/字段/交互/文案）；若 path 或 id 变则同步 `sitemap.yaml`、检查 `router.push` / 菜单 `pageId` |
+| **add 页面** | `mkdir` 模块目录；新建 yaml 与访问元数据；`sitemap.yaml` 增加 `pages`。通用 Pactor 同时增 `menus`；Nexus 增后端导航项，不增本地 `menus`。dataSources 直接声明最终接口路径（无需注册） |
+| **update 页面** | 改对应 yaml（结构/字段/交互/文案/访问元数据）；若 path 或 id 变则同步 `sitemap.yaml`、导航 `pageId`、`activeMenu` 与 `router.push` |
 | **update 仅文案/字段** | 只改 yaml |
 | **add 数据源** | yaml 内 `dataSources` 声明即可（路径即契约，转发层无需注册） |
 | **样式** | 仅当线框图要求新页面级样式时改 `globals.css` / 皮肤；见 `theme-and-style.md` |
-| **deprecate** | 删 yaml；从 `pages`/`menus` 移除；全局搜 `pageId` / 路径引用 |
+| **deprecate** | 删 yaml；从 `pages` 与对应导航源移除；全局搜 `pageId` / 路径引用 |
 
 **禁止**：为增量在仓库根重新运行脚手架覆盖工程。
 
@@ -62,9 +63,11 @@
 ## 4. 交叉检查（增量）
 
 ```text
-对每个 add：存在 yaml 且 sitemap.pages 含 id 且 menus 正确
-对每个 update：page.id 未变（除非走 rename 流程）且 validate 通过
-数据接口：变更页涉及的所有 http 路径在 Network 200（无后端时为空数据 {}，页面按空态渲染）
+对每个 add：存在 yaml 且 sitemap.pages 含 id；通用 Pactor 的 menus 或 Nexus 的后端导航正确
+对每个 update：page.id 未变（除非走 rename 流程）且 validate / 宿主加载通过
+Nexus：access-mode 合法，grant 三字段完整，pages[].lazy === true，本地 sitemap 无 menus
+权限：有权限/无权限账号下列表、按钮、表单和直接 API 结果符合预期
+数据接口：变更页涉及的所有 http 路径在 Network 200；预期拒绝的接口返回 401/403 而非误报成功
 ```
 
 `npx pactor validate` 仅覆盖改动的 yaml 路径。
