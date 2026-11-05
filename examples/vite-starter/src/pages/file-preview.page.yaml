@@ -1,0 +1,31 @@
+dsl: '1.0'
+page:
+  id: file-preview
+  title: 文件预览
+
+body:
+  type: Page
+  props:
+    title: 文件预览
+  children:
+    - type: Alert
+      props:
+        variant: info
+        message: FileViewer 组件由 @pactor-app/file-viewer 注册，格式能力来自注册期注入的 @file-viewer/preset-office
+        description: 预览 public/files/sample.pdf；换成自己的文件地址只需改下面 props.url，也支持表达式绑定 dataSource。
+    - type: Card
+      props:
+        title: PDF 预览
+      children:
+        - type: FileViewer
+          props:
+            url: /files/sample.pdf
+            height: 640
+            watermark:
+              text: Pactor 示例
+              opacity: 0.12
+          events:
+            onEvent:
+              - action: setState
+                params:
+                  viewerEvent: ${event.type}

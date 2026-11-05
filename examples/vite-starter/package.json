@@ -14,7 +14,11 @@
     "@pactor-app/resource": "workspace:*",
     "@pactor-app/ui": "workspace:*",
     "react": "^19.2.8",
-    "react-dom": "^19.2.8"
+    "react-dom": "^19.2.8",
+    "@pactor-app/file-viewer": "workspace:*",
+    "@pactor-app/graph": "workspace:*",
+    "@pactor-app/grid-layout": "workspace:*",
+    "@file-viewer/preset-office": "^3.3.3"
   },
   "devDependencies": {
     "@types/react": "^19.2.18",
@@ -22,6 +26,7 @@
     "@vitejs/plugin-react": "^5.0.0",
     "@pactor-app/vite-plugin": "workspace:*",
     "typescript": "^5.6.3",
-    "vite": "^8.2.1"
+    "vite": "^8.2.1",
+    "@file-viewer/vite-plugin": "^3.3.3"
   }
 }

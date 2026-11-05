@@ -9,7 +9,9 @@
     "lint": "eslint",
     "test": "vitest run",
     "preview": "opennextjs-cloudflare build && opennextjs-cloudflare preview",
-    "deploy": "opennextjs-cloudflare build && opennextjs-cloudflare deploy"
+    "deploy": "opennextjs-cloudflare build && opennextjs-cloudflare deploy",
+    "predev": "file-viewer-copy-assets ./public",
+    "prebuild": "file-viewer-copy-assets ./public"
   },
   "dependencies": {
     "@pactor-app/app": "workspace:*",
@@ -18,7 +20,11 @@
     "next": "16.3.4",
     "react": "19.2.8",
     "react-dom": "19.2.8",
-    "react-router-dom": "^7"
+    "react-router-dom": "^7",
+    "@pactor-app/file-viewer": "workspace:*",
+    "@pactor-app/graph": "workspace:*",
+    "@pactor-app/grid-layout": "workspace:*",
+    "@file-viewer/preset-office": "^3.3.3"
   },
   "devDependencies": {
     "@opennextjs/cloudflare": "^1.20.6",
@@ -35,7 +41,8 @@
     "tailwindcss": "^4",
     "typescript": "^5",
     "vitest": "^2.1.9",
-    "wrangler": "^4.121.0"
+    "wrangler": "^4.121.0",
+    "file-viewer-copy-assets": "^3.3.3"
   },
   "packageManager": "pnpm@10.27.0"
 }

@@ -33,11 +33,23 @@ export interface CardListItemData {
   disabled?: boolean;
 }
 
+/** 响应式断点（对齐 antd / Col：xs 为基础值，其余 min-width 起步生效） */
+export type CardListBreakpoint = 'xs' | 'sm' | 'md' | 'lg' | 'xl' | 'xxl';
+
+/**
+ * 横向排列列数：number 为固定列数；对象形式按断点响应式
+ * （如 `{ xs: 1, sm: 2, lg: 3 }`——xs 即基础值，其余断点 min-width 起步生效，
+ * 未配置的更大断点继承最近的较小配置）。未设置时保持默认纵向堆叠。
+ */
+export type CardListColumns = number | Partial<Record<CardListBreakpoint, number>>;
+
 export interface CardListProps {
   /** 列表数据（可含表达式解析后的数组）；为空时渲染空态 */
   items?: CardListItemData[];
   /** 卡片间距（px），默认 12 */
   gap?: number;
+  /** 横向排列列数（CSS grid，配置同 Grid 的 columns + 响应式对象）；缺省纵向堆叠 */
+  columns?: CardListColumns;
   /** 可配置点击选中：整卡可点，点击切换选中态（选中行高亮） */
   selectable?: boolean;
   /** 多选（默认 false 单选，再点已选中项取消）；selectable 时生效 */
@@ -56,6 +68,64 @@ function isImageSrc(avatar: string): boolean {
   return /^(https?:|data:|\/|\.)/.test(avatar);
 }
 
+/** 响应式列数断点查询（xs 走基础内联样式，不参与注入） */
+const COLUMN_BREAKPOINTS = {
+  sm: '(min-width: 576px)',
+  md: '(min-width: 768px)',
+  lg: '(min-width: 992px)',
+  xl: '(min-width: 1200px)',
+  xxl: '(min-width: 1600px)',
+} as const;
+
+type ColumnMediaBreakpoint = keyof typeof COLUMN_BREAKPOINTS;
+
+const BREAKPOINT_ORDER = Object.keys(COLUMN_BREAKPOINTS) as ColumnMediaBreakpoint[];
+
+/** 已注入的响应式类名（构建期/服务端不注入，仅客户端补 style 标签；模式同 Col） */
+const injected = new Set<string>();
+
+/**
+ * 注入断点媒体类：按断点升序插入 style 标签，保证同优先级下
+ * 大断点规则后出现、覆盖小断点（跨组件实例也稳定）。
+ */
+function injectColumnsClass(bp: ColumnMediaBreakpoint, cols: number): string {
+  const cls = `pactor-card-list-${bp}-${cols}`;
+  if (injected.has(cls)) return cls;
+  injected.add(cls);
+  if (typeof document !== 'undefined') {
+    const style = document.createElement('style');
+    style.setAttribute('data-pactor-card-list-columns', bp);
+    style.textContent = `@media ${COLUMN_BREAKPOINTS[bp]}{.${cls}{grid-template-columns:repeat(${cols},minmax(0,1fr)) !important}}`;
+    const idx = BREAKPOINT_ORDER.indexOf(bp);
+    const later = Array.from(
+      document.head.querySelectorAll('style[data-pactor-card-list-columns]'),
+    ).find(
+      (el) =>
+        BREAKPOINT_ORDER.indexOf(
+          el.getAttribute('data-pactor-card-list-columns') as ColumnMediaBreakpoint,
+        ) > idx,
+    );
+    document.head.insertBefore(style, later ?? null);
+  }
+  return cls;
+}
+
+/** 解析 columns：返回基础列数（内联样式）与按断点升序的媒体类名 */
+function resolveColumns(columns: CardListColumns): { base: number; mediaClasses: string[] } {
+  if (typeof columns === 'number') {
+    return { base: Math.max(1, columns), mediaClasses: [] };
+  }
+  const base = Math.max(1, columns.xs ?? 1);
+  const mediaClasses: string[] = [];
+  for (const bp of BREAKPOINT_ORDER) {
+    const value = columns[bp];
+    if (value !== undefined) {
+      mediaClasses.push(injectColumnsClass(bp, Math.max(1, value)));
+    }
+  }
+  return { base, mediaClasses };
+}
+
 /**
  * CardList 适配器（shadcn kit，语义对齐 antd 版）：List 的卡片形态——
  * 每个列表项一张 Card（边框 + 圆角 + 投影），项间以 gap 分隔（默认 12px）；
@@ -64,10 +134,15 @@ function isImageSrc(avatar: string): boolean {
  * className / style 叠加特殊样式，disabled 可单独锁定该项点击（selectable 时
  * 同时禁止选中）；selectable 开启点击选中（默认单选、multiple 多选，受控
  * value + onChange）。items 为空时复用 Empty 原语渲染空态。
+ *
+ * 排列：缺省纵向堆叠；`columns` 开启横向 grid 排列（配置同 Grid 的 columns），
+ * 支持响应式对象（如 `{ xs: 1, sm: 2, lg: 3 }`，断点语义同 Col），
+ * 响应式样式经客户端注入的 style 标签实现（SSR 先按基础值渲染）。
  */
 export function CardList({
   items = [],
   gap = 12,
+  columns,
   selectable,
   multiple,
   value,
@@ -97,11 +172,25 @@ export function CardList({
     }
   };
 
+  const isGrid = columns !== undefined;
+  const resolved = isGrid ? resolveColumns(columns) : undefined;
+
   return (
     <div
       data-slot="card-list"
-      className={cn('flex w-full flex-col', className)}
-      style={{ gap, ...style }}
+      className={cn(
+        'w-full',
+        isGrid ? 'grid' : 'flex flex-col',
+        resolved?.mediaClasses,
+        className,
+      )}
+      style={{
+        gap,
+        ...(resolved
+          ? { gridTemplateColumns: `repeat(${resolved.base}, minmax(0, 1fr))` }
+          : {}),
+        ...style,
+      }}
     >
       {items.map((item, index) => {
         const itemKey = keyOf(item, index);
@@ -198,7 +287,11 @@ export function CardList({
               ) : null}
             </div>
             {item.after != null ? (
-              <div data-slot="card-list-item-after" className="w-full">
+              <div
+                data-slot="card-list-item-after"
+                className="w-full"
+                style={isGrid ? { gridColumn: '1 / -1' } : undefined}
+              >
                 <DslSlot content={item.after} />
               </div>
             ) : null}

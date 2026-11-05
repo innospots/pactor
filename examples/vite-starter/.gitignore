@@ -1,0 +1,4 @@
+# file-viewer 静态资产（dev/build 时由 @file-viewer/vite-plugin copyAssets 生成）
+/public/vendor
+/public/wasm
+/public/flyfish-viewer-*.json
