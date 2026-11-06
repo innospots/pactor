@@ -97,18 +97,19 @@ describe('通用 props 契约（className / style）', () => {
     expectCommonProps(document.querySelector('[data-slot=datepicker-trigger]'));
   });
 
-  it('Input / Select 在 Form 内：通用 props 挂在 form-item 容器', () => {
+  it('Input / Select / MultiSelect 在 Form 内：通用 props 挂在 form-item 容器', () => {
     const node: DslNode = {
       type: 'Form',
       children: [
         { type: 'Input', props: { name: 'a', label: 'A', ...COMMON_PROPS } },
         { type: 'Select', props: { name: 'b', label: 'B', options: [], ...COMMON_PROPS } },
+        { type: 'MultiSelect', props: { name: 'c', label: 'C', options: [], ...COMMON_PROPS } },
       ],
     };
     const { container } = renderDsl(node);
 
     const items = container.querySelectorAll('[data-slot=form-item]');
-    expect(items).toHaveLength(2);
+    expect(items).toHaveLength(3);
     for (const item of items) {
       expect(item.classList.contains('biz-probe')).toBe(true);
       expect((item as HTMLElement).style.flexGrow).toBe('1');

@@ -55,6 +55,25 @@ describe('缺省 placeholder', () => {
     expect(value?.textContent).toContain('请选择');
   });
 
+  it('MultiSelect：缺省触发器显示「请选择」，显式空串不显示占位', () => {
+    const { container, unmount } = renderDsl({
+      type: 'MultiSelect',
+      props: { options: [{ value: 'a', label: '选项A' }] },
+    });
+    expect(
+      container.querySelector('[data-slot=multi-select-placeholder]')?.textContent,
+    ).toBe('请选择');
+    unmount();
+
+    renderDsl({
+      type: 'MultiSelect',
+      props: { options: [{ value: 'a', label: '选项A' }], placeholder: '' },
+    });
+    expect(
+      document.querySelector('[data-slot=multi-select-placeholder]')?.textContent,
+    ).toBe('');
+  });
+
   it('Combobox：缺省触发器与过滤输入均显示「请选择」', () => {
     const { container } = renderDsl({
       type: 'Combobox',

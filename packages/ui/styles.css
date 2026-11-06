@@ -849,6 +849,9 @@
   .w-\(--sidebar-width\) {
     width: var(--sidebar-width);
   }
+  .w-0 {
+    width: 0px;
+  }
   .w-1\/2 {
     width: calc(1 / 2 * 100%);
   }
@@ -1437,6 +1440,9 @@
   }
   .rounded-\[2px\] {
     border-radius: 2px;
+  }
+  .rounded-\[3px\] {
+    border-radius: 3px;
   }
   .rounded-\[4px\] {
     border-radius: 4px;
@@ -2383,6 +2389,11 @@
     transition-timing-function: var(--tw-ease, var(--default-transition-timing-function));
     transition-duration: var(--tw-duration, var(--default-transition-duration));
   }
+  .transition-\[width\,opacity\,margin\] {
+    transition-property: width,opacity,margin;
+    transition-timing-function: var(--tw-ease, var(--default-transition-timing-function));
+    transition-duration: var(--tw-duration, var(--default-transition-duration));
+  }
   .transition-\[width\] {
     transition-property: width;
     transition-timing-function: var(--tw-ease, var(--default-transition-timing-function));
@@ -2486,6 +2497,15 @@
       opacity: 100%;
     }
     .group-hover\/menu-item\:opacity-100:is(:where(.group\/menu-item):hover *) {
+      opacity: 100%;
+    }
+    .group-hover\/tag\:ml-1:is(:where(.group\/tag):hover *) {
+      margin-left: var(--spacing);
+    }
+    .group-hover\/tag\:w-3\.5:is(:where(.group\/tag):hover *) {
+      width: calc(var(--spacing) * 3.5);
+    }
+    .group-hover\/tag\:opacity-100:is(:where(.group\/tag):hover *) {
       opacity: 100%;
     }
     .group-hover\/user-menu\:text-foreground:is(:where(.group\/user-menu):hover *) {
@@ -2871,6 +2891,14 @@
     @supports (color: color-mix(in lab, red, red)) {
       .hover\:bg-destructive\/90:hover {
         background-color: color-mix(in oklab, var(--destructive) 90%, transparent);
+      }
+    }
+    .hover\:bg-foreground\/10:hover {
+      background-color: var(--foreground);
+    }
+    @supports (color: color-mix(in lab, red, red)) {
+      .hover\:bg-foreground\/10:hover {
+        background-color: color-mix(in oklab, var(--foreground) 10%, transparent);
       }
     }
     .hover\:bg-muted:hover {

@@ -21,6 +21,7 @@ describe('输入控件表面令牌', () => {
     { type: 'Textarea', slot: 'textarea' },
     { type: 'Mentions', slot: 'mentions', props: { options: [] } },
     { type: 'Select', slot: 'select-trigger', props: { options: [] } },
+    { type: 'MultiSelect', slot: 'select-trigger', props: { options: [] } },
     {
       type: 'Combobox',
       slot: 'combobox-trigger',

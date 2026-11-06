@@ -146,6 +146,13 @@ export function createDefaultTranslatableFieldRegistry(): TranslatableFieldRegis
       'props.ariaLabel',
       'props.options[*].label',
     ])
+    .register('MultiSelect', [
+      'props.label',
+      'props.placeholder',
+      'props.ariaLabel',
+      'props.options[*].label',
+      'props.rules[*].message',
+    ])
     .register('DatePicker', ['props.placeholder', 'props.presets[*].label'])
     .register('ToggleGroup', ['props.options[*].label'])
     .registerAction('message', ['params.text'])

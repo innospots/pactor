@@ -62,6 +62,7 @@ import { ImageViewer } from './components/ImageViewer/index.js';
 import { Input } from './components/Input/index.js';
 import { InputGroup } from './components/InputGroup/index.js';
 import { InputOTP } from './components/InputOTP/index.js';
+import { MultiSelect } from './components/MultiSelect/index.js';
 import { Item } from './components/Item/index.js';
 import { JSONViewer } from './components/JSONViewer/index.js';
 import { Kbd } from './components/Kbd/index.js';
@@ -154,6 +155,8 @@ export const builtinComponents = {
   Input,
   NumberInput,
   Select,
+  // 多选下拉：触发器内以标签展示已选项，可限制最多可选数量
+  MultiSelect,
   // Layout 需要原始 DSL 子树做方向推导（含 Sider 判定），以 withScope 注册
   Layout: { component: Layout, withScope: true },
   Header,

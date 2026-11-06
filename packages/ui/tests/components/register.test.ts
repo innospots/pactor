@@ -44,6 +44,7 @@ const EXTENDED_TYPES = [
   'AspectRatio',
   'Progress',
   'Textarea',
+  'MultiSelect',
   'Checkbox',
   'ChipFilter',
   'ChipNode',

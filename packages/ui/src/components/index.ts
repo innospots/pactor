@@ -245,6 +245,12 @@ export { NumberInput } from './components/NumberInput/index.js';
 export type { NumberInputProps } from './components/NumberInput/index.js';
 export { Select } from './components/Select/index.js';
 export type { SelectOption, SelectProps } from './components/Select/index.js';
+export { MultiSelect } from './components/MultiSelect/index.js';
+export type {
+  MultiSelectOption,
+  MultiSelectProps,
+  MultiSelectValue,
+} from './components/MultiSelect/index.js';
 export { Textarea } from './components/Textarea/index.js';
 export type { TextareaProps } from './components/Textarea/index.js';
 export { Checkbox } from './components/Checkbox/index.js';
