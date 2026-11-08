@@ -33,6 +33,8 @@ export interface TextareaProps {
   className?: string;
   /** 通用：根节点内联样式（同 className 的挂载规则） */
   style?: CSSProperties;
+  /** 控件 id；缺省自动生成。独立渲染时供外部 label 的 htmlFor 关联 */
+  id?: string;
 }
 
 /**
@@ -54,10 +56,12 @@ export function Textarea({
   onChange,
   className,
   style,
+  id,
 }: TextareaProps) {
   const form = useFormContext();
   const { t } = useI18n();
-  const controlId = useId();
+  const generatedId = useId();
+  const controlId = id ?? generatedId;
   const inForm = form?.inForm === true && typeof name === 'string' && name !== '';
 
   useEffect(() => {
@@ -100,6 +104,7 @@ export function Textarea({
 
   return (
     <ShadcnTextarea
+      id={controlId}
       value={value ?? ''}
       placeholder={placeholder ?? t('pactor.input.placeholder')}
       rows={rows}

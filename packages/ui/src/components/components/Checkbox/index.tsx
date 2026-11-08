@@ -44,6 +44,9 @@ interface CheckboxBaseProps {
   className?: string;
   /** 通用：根节点内联样式（同 className 的挂载规则） */
   style?: CSSProperties;
+  /** 控件 id；缺省自动生成。单选模式挂勾选框，组模式挂分组根节点，
+   *  独立渲染时供外部 label 的 htmlFor 关联 */
+  id?: string;
 }
 
 /** 单选模式（缺省）：单个布尔命题，value / onChange 为 boolean */
@@ -88,6 +91,7 @@ function CheckboxCards({
   onToggle,
   className,
   style,
+  id,
 }: {
   options: CheckboxOption[];
   groupValue: CheckboxValue[];
@@ -97,12 +101,14 @@ function CheckboxCards({
   onToggle: (value: CheckboxValue) => void;
   className?: string;
   style?: CSSProperties;
+  id?: string;
 }) {
   return (
     <div
       data-slot="checkbox-group"
       data-variant="cards"
       role="group"
+      id={id}
       className={cn('flex flex-col gap-1', className)}
       style={style}
     >
@@ -192,9 +198,10 @@ function CheckboxCards({
  * 两种模式在 Form 内声明 name 均自动成为表单项（label / rules 生效）。
  */
 export function Checkbox(props: CheckboxProps) {
-  const { name, label, rules, disabled, className, style } = props;
+  const { name, label, rules, disabled, className, style, id } = props;
   const form = useFormContext();
-  const controlId = useId();
+  const generatedId = useId();
+  const controlId = id ?? generatedId;
   const inForm = form?.inForm === true && typeof name === 'string' && name !== '';
   const isGroup = props.options !== undefined;
 
@@ -237,11 +244,13 @@ export function Checkbox(props: CheckboxProps) {
           onToggle={handleToggle}
           className={!inForm ? className : undefined}
           style={inForm ? undefined : style}
+          id={controlId}
         />
       ) : (
         <div
           data-slot="checkbox-group"
           role="group"
+          id={controlId}
           className={cn(
             props.direction === 'horizontal'
               ? 'flex flex-wrap items-center gap-x-6 gap-y-2'

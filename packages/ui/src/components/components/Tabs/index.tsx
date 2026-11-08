@@ -1,19 +1,25 @@
 import type { DslNode } from '@pactor-app/core';
-import { useRenderer } from '@pactor-app/runtime';
+import { useI18n, useRenderer } from '@pactor-app/runtime';
 import type { CSSProperties } from 'react';
 
 import { cn } from '../../../lib/utils.js';
 import {
   Tabs as ShadcnTabs,
+  TabsAddButton,
   TabsContent,
   TabsList,
   TabsTrigger,
 } from '../../../ui/tabs.js';
+import { Icon } from '../Icon/index.js';
 
 /** Tabs 页签定义；`children` 为 DSL 子树，经 Renderer children 机制渲染 */
 export interface TabItem {
   key: string;
   label: string;
+  /** 页签名前缀图标（Icon 白名单名称，page 变体） */
+  icon?: string;
+  /** 是否在页签右侧显示关闭按钮（page 变体），点击触发 Tabs.onClose */
+  closable?: boolean;
   children?: DslNode[];
   /**
    * 页签栏右端扩展区（DSL 子树列表，如区块操作按钮——与 Card.extra
@@ -32,12 +38,18 @@ export interface TabsProps {
   items?: TabItem[];
   /** 当前激活页签 key（可绑表达式） */
   activeKey?: string;
-  /** 页签栏样式：default 胶囊（缺省）/ line 下划线 */
-  variant?: 'default' | 'line';
+  /** 页签栏样式：default 胶囊（缺省）/ line 下划线 / page 可编辑页面页签 */
+  variant?: 'default' | 'line' | 'page';
   /** 页签位置：top 顶部（缺省）/ left 左侧竖排（子 Tab 较多或左侧需放摘要时用） */
   tabPosition?: 'top' | 'left';
   /** 页签切换事件，传出新激活的 key */
   onChange?: (key: string) => void;
+  /** page 变体页签关闭事件，传出被关闭页签的 key（关闭不切换激活页签） */
+  onClose?: (key: string) => void;
+  /** page 变体页签栏尾部的新增按钮文案；缺省不渲染新增按钮 */
+  addLabel?: string;
+  /** page 变体新增按钮点击事件 */
+  onAdd?: () => void;
   /** 页签内容区 class（TabsContent 根节点，与内置样式合并；内间距
    *  由消费方按需传入，如 p-4） */
   contentClassName?: string;
@@ -60,13 +72,18 @@ export function Tabs({
   variant,
   tabPosition = 'top',
   onChange,
+  onClose,
+  addLabel,
+  onAdd,
   contentClassName,
   contentStyle,
   className,
   style,
 }: TabsProps) {
   const { renderChildren } = useRenderer();
+  const { t } = useI18n();
   const vertical = tabPosition === 'left';
+  const page = variant === 'page';
   // 页签栏右端扩展区：当前激活项（受控 activeKey / 非受控首项）的 extra
   const activeItem =
     items.find((item) => item.key === (activeKey ?? items[0]?.key)) ?? items[0];
@@ -86,6 +103,16 @@ export function Tabs({
         <TabsTrigger
           key={item.key}
           value={item.key}
+          icon={
+            page && item.icon ? <Icon name={item.icon} size="sm" /> : undefined
+          }
+          closable={page && item.closable}
+          closeLabel={
+            page && item.closable
+              ? t('pactor.layout.closeTab', { title: item.label })
+              : undefined
+          }
+          onClose={() => onClose?.(item.key)}
           // 胶囊变体挂专用手写类（styles.css 中 .pactor-tabs-pill）：
           // 消费方多层样式叠加 / 全局 button cursor 重置会击败 tailwind
           // 的 .cursor-pointer 工具类，专用类保证胶囊页签恒显手型
@@ -94,6 +121,9 @@ export function Tabs({
           {item.label}
         </TabsTrigger>
       ))}
+      {page && !vertical && addLabel ? (
+        <TabsAddButton label={addLabel} onClick={() => onAdd?.()} />
+      ) : null}
     </TabsList>
   );
   return (

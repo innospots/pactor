@@ -1,5 +1,6 @@
 import {
   useEffect,
+  useId,
   useLayoutEffect,
   useRef,
   useState,
@@ -39,6 +40,9 @@ export interface SegmentedProps {
   className?: string;
   /** 通用：根节点内联样式（同 className 的挂载规则） */
   style?: CSSProperties;
+  /** 控件根节点 id；缺省自动生成。分组控件无法被 label 的 htmlFor 关联，
+   * 供外部 aria-labelledby 引用（独立渲染时也可作为锚点） */
+  id?: string;
 }
 
 /**
@@ -56,8 +60,11 @@ export function Segmented({
   onChange,
   className,
   style,
+  id,
 }: SegmentedProps) {
   const form = useFormContext();
+  const generatedId = useId();
+  const controlId = id ?? generatedId;
   const inForm =
     form?.inForm === true && typeof name === "string" && name !== "";
   const [innerValue, setInnerValue] = useState<string | number | undefined>(
@@ -105,6 +112,7 @@ export function Segmented({
 
   const control = (
     <div
+      id={controlId}
       data-slot="segmented"
       role="radiogroup"
       className={cn(

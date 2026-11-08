@@ -19,8 +19,16 @@ export interface SwitchProps {
   onChange?: (checked: boolean) => void;
   /** 通用：根节点 class（Form 内为 form-item 容器，独立渲染时为控件包裹） */
   className?: string;
+  /** 控件本体（switch）class：独立渲染时用于精确控制外观尺寸 */
+  controlClassName?: string;
   /** 通用：根节点内联样式（同 className 的挂载规则） */
   style?: CSSProperties;
+  /** 控件 id；缺省自动生成。独立渲染时供外部 label 的 htmlFor 关联 */
+  id?: string;
+  /** 无可见文本标签时的无障碍名称 */
+  'aria-label'?: string;
+  /** 关联说明文案（如提示行 id） */
+  'aria-describedby'?: string;
 }
 
 /**
@@ -35,10 +43,15 @@ export function Switch({
   disabled,
   onChange,
   className,
+  controlClassName,
   style,
+  id,
+  'aria-label': ariaLabel,
+  'aria-describedby': ariaDescribedBy,
 }: SwitchProps) {
   const form = useFormContext();
-  const controlId = useId();
+  const generatedId = useId();
+  const controlId = id ?? generatedId;
   const inForm = form?.inForm === true && typeof name === 'string' && name !== '';
 
   useEffect(() => {
@@ -69,6 +82,9 @@ export function Switch({
         checked={checked}
         disabled={disabled}
         name={inForm ? name : undefined}
+        aria-label={ariaLabel}
+        aria-describedby={ariaDescribedBy}
+        className={controlClassName}
         onCheckedChange={handleChange}
       />
       {label ? (

@@ -60,6 +60,12 @@ export interface MultiSelectProps {
   controlClassName?: string;
   /** 通用：根节点内联样式（同 className 的挂载规则） */
   style?: CSSProperties;
+  /** 触发器 id；缺省自动生成。独立渲染时供外部 label 的 htmlFor 关联 */
+  id?: string;
+  /** 触发器 class：独立渲染时补充设计稿尺寸 / 圆角等样式 */
+  triggerClassName?: string;
+  /** 触发器图标 class：定制下拉箭头尺寸 / 颜色 */
+  iconClassName?: string;
 }
 
 /**
@@ -86,10 +92,14 @@ export function MultiSelect({
   className,
   controlClassName,
   style,
+  id,
+  triggerClassName,
+  iconClassName,
 }: MultiSelectProps) {
   const form = useFormContext();
   const { t } = useI18n();
-  const controlId = useId();
+  const generatedId = useId();
+  const controlId = id ?? generatedId;
   const inForm = form?.inForm === true && typeof name === 'string' && name !== '';
 
   // 注册字段校验规则，同时把 value prop 作为字段级初始值交给 Form 上下文合并
@@ -150,11 +160,13 @@ export function MultiSelect({
           id={controlId}
           aria-label={ariaLabel}
           size={CONTROL_SIZE_SELECT_ATTR[size]}
+          iconClassName={iconClassName}
           className={cn(
             CONTROL_SIZE_TRIGGER_TEXT[size],
             // 触发器恒撑满控件包裹节点；py-1 给标签留出垂直空间
             //（vendored 基类 py-2 在 h-9 下只剩 18px 内容高，标签会被裁切）
             'w-full overflow-hidden py-1',
+            triggerClassName,
           )}
         >
           {selectedOptions.length > 0 ? (

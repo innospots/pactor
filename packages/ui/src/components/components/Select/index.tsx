@@ -58,6 +58,12 @@ export interface SelectProps {
   controlClassName?: string;
   /** 通用：根节点内联样式（同 className 的挂载规则） */
   style?: CSSProperties;
+  /** 触发器 id；缺省自动生成。独立渲染时供外部 label 的 htmlFor 关联 */
+  id?: string;
+  /** 触发器 class：独立渲染时补充设计稿尺寸 / 圆角等样式 */
+  triggerClassName?: string;
+  /** 触发器图标 class：定制下拉箭头尺寸 / 颜色，clearable 的悬停隐藏自动合并 */
+  iconClassName?: string;
 }
 
 /**
@@ -85,10 +91,14 @@ export function Select({
   className,
   controlClassName,
   style,
+  id,
+  triggerClassName,
+  iconClassName,
 }: SelectProps) {
   const form = useFormContext();
   const { t } = useI18n();
   const controlId = useId();
+  const triggerId = id ?? controlId;
   const inForm = form?.inForm === true && typeof name === 'string' && name !== '';
   const [query, setQuery] = useState('');
   const searchInputRef = useRef<HTMLInputElement>(null);
@@ -160,10 +170,10 @@ export function Select({
         }}
       >
         <SelectTrigger
-          id={controlId}
+          id={triggerId}
           title={selectedLabel}
           size={CONTROL_SIZE_SELECT_ATTR[size]}
-          iconClassName={showClear ? CLEARABLE_ICON_HIDE : undefined}
+          iconClassName={cn(iconClassName, showClear ? CLEARABLE_ICON_HIDE : undefined)}
           className={cn(
             CONTROL_SIZE_TRIGGER_TEXT[size],
             // 触发器恒撑满控件包裹节点：基类 w-fit 会让选择框宽度随
@@ -172,6 +182,7 @@ export function Select({
             // 自然宽度场景包裹节点为内容尺寸，w-full 退化为 auto
             'w-full',
             CLEARABLE_GROUP,
+            triggerClassName,
           )}
         >
           <SelectValue placeholder={placeholder ?? t('pactor.select.placeholder')} />
@@ -228,7 +239,7 @@ export function Select({
       <FieldShell
         layout={form.layout}
         label={label}
-        htmlFor={controlId}
+        htmlFor={triggerId}
         rules={rules}
         error={form.errors[name]}
         className={className}

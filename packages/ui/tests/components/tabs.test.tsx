@@ -102,6 +102,84 @@ describe('Tabs 容器', () => {
   });
 });
 
+describe('Tabs page 变体（可编辑页面页签）', () => {
+  it('variant=page：页签栏标记 page，激活页签渲染 icon，尾部渲染新增按钮', async () => {
+    const { container, context } = renderDsl({
+      type: 'Tabs',
+      props: {
+        variant: 'page',
+        addLabel: '新建页面',
+        items: [
+          { key: 'a', label: '页签A', icon: 'eye' },
+          { key: 'b', label: '页签B' },
+        ],
+      },
+      events: {
+        onAdd: { action: 'setState', params: { added: true } },
+      },
+    });
+
+    const list = container.querySelector('[data-slot=tabs-list]') as HTMLElement;
+    expect(list.getAttribute('data-variant')).toBe('page');
+    expect(list.className).toContain('pactor-tabs-page');
+
+    const trigger = container.querySelector('[data-slot=tabs-trigger]') as HTMLElement;
+    const icon = trigger.querySelector('[data-slot=tabs-trigger-icon]');
+    expect(icon).not.toBeNull();
+    expect(icon?.querySelector('svg')).not.toBeNull();
+    // 页签名始终作为可访问名称的一部分（图标装饰性 aria-hidden）
+    expect(screen.getByRole('tab', { name: '页签A' })).toBeTruthy();
+
+    fireEvent.click(screen.getByRole('button', { name: '新建页面' }));
+    await vi.waitFor(() => {
+      expect(context.state.get('added')).toBe(true);
+    });
+  });
+
+  it('closable：关闭按钮传出页签 key，且不切换激活页签', async () => {
+    const { container, context } = renderDsl({
+      type: 'Tabs',
+      props: {
+        variant: 'page',
+        items: [
+          { key: 'a', label: '页签A' },
+          { key: 'b', label: '页签B', closable: true },
+        ],
+      },
+      events: {
+        onClose: { action: 'setState', params: { closed: '${event}' } },
+      },
+    });
+
+    const close = screen.getByRole('button', { name: '关闭 页签B' });
+    expect(close.getAttribute('data-slot')).toBe('tabs-trigger-close');
+    // 关闭按钮与页签按钮是兄弟节点，不在 Tab 内部
+    expect(close.closest('[data-slot=tabs-trigger]')).toBeNull();
+
+    fireEvent.click(close);
+    await vi.waitFor(() => {
+      expect(context.state.get('closed')).toBe('b');
+    });
+    expect(
+      container.querySelector('[data-slot=tabs-trigger][aria-selected=true]')?.textContent,
+    ).toContain('页签A');
+  });
+
+  it('非 page 变体忽略 closable / addLabel（不渲染关闭与新增按钮）', () => {
+    const { container } = renderDsl({
+      type: 'Tabs',
+      props: {
+        addLabel: '新建页面',
+        items: [{ key: 'a', label: '页签A', closable: true, icon: 'eye' }],
+      },
+    });
+
+    expect(container.querySelector('[data-slot=tabs-trigger-icon]')).toBeNull();
+    expect(container.querySelector('[data-slot=tabs-trigger-close]')).toBeNull();
+    expect(container.querySelector('[data-slot=tabs-add]')).toBeNull();
+  });
+});
+
 describe('Tabs 内容区样式', () => {
   it('contentClassName/contentStyle 作用于全部页签内容区，item 级 className/style 叠加', () => {
     const { container } = renderDsl({

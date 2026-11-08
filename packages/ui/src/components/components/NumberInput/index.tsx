@@ -52,6 +52,8 @@ export interface NumberInputProps {
   controlClassName?: string;
   /** 通用：根节点内联样式（同 className 的挂载规则） */
   style?: CSSProperties;
+  /** 控件 id；缺省自动生成。独立渲染时供外部 label 的 htmlFor 关联 */
+  id?: string;
 }
 
 function clamp(value: number, min?: number, max?: number): number {
@@ -107,10 +109,12 @@ export function NumberInput({
   className,
   controlClassName,
   style,
+  id,
 }: NumberInputProps) {
   const form = useFormContext();
   const { t } = useI18n();
-  const controlId = useId();
+  const generatedId = useId();
+  const controlId = id ?? generatedId;
   const inForm = form?.inForm === true && typeof name === 'string' && name !== '';
 
   // 注册/注销字段校验规则（rules 每次渲染刷新，卸载时注销）；

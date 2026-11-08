@@ -1,5 +1,5 @@
 import { format, isValid, parseISO } from 'date-fns';
-import { useEffect, type CSSProperties } from 'react';
+import { useEffect, useId, type CSSProperties } from 'react';
 
 import { cn } from '../../../lib/utils.js';
 import { Calendar as ShadcnCalendar } from '../../../ui/calendar.js';
@@ -24,6 +24,9 @@ export interface CalendarProps {
   className?: string;
   /** 通用：根节点内联样式（同 className 的挂载规则） */
   style?: CSSProperties;
+  /** 根节点 id；缺省自动生成。供外部 aria-labelledby 引用
+   * （如独立渲染时把可见标签挂到日历上） */
+  id?: string;
 }
 
 /** ISO 字符串 → Date（非法输入返回 undefined） */
@@ -48,8 +51,11 @@ export function Calendar({
   onChange,
   className,
   style,
+  id,
 }: CalendarProps) {
   const form = useFormContext();
+  const generatedId = useId();
+  const controlId = id ?? generatedId;
   const inForm = form?.inForm === true && typeof name === 'string' && name !== '';
 
   useEffect(() => {
@@ -72,6 +78,7 @@ export function Calendar({
 
   const calendar = (
     <ShadcnCalendar
+      id={controlId}
       mode={mode}
       selected={parseValue(current)}
       onSelect={handleSelect}

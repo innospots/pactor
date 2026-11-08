@@ -35,6 +35,10 @@ export interface ColorPickerProps {
   className?: string;
   /** 通用：根节点内联样式（同 className 的挂载规则） */
   style?: CSSProperties;
+  /** 触发器 id；缺省自动生成。独立渲染时供外部 label 的 htmlFor 关联 */
+  id?: string;
+  /** 触发器 class：独立渲染时补充设计稿尺寸 / 圆角等样式 */
+  triggerClassName?: string;
 }
 
 interface Hsva {
@@ -200,9 +204,12 @@ export function ColorPicker({
   onChange,
   className,
   style,
+  id,
+  triggerClassName,
 }: ColorPickerProps) {
   const form = useFormContext();
-  const controlId = useId();
+  const generatedId = useId();
+  const controlId = id ?? generatedId;
   const inForm = form?.inForm === true && typeof name === 'string' && name !== '';
   const [open, setOpen] = useState(false);
   const { t } = useI18n();
@@ -332,6 +339,7 @@ export function ColorPicker({
           'flex h-9 w-full min-w-0 cursor-pointer items-center gap-2 rounded-md border border-input bg-(--input-background) px-3 py-1 text-sm text-(--input-foreground) shadow-xs transition-colors outline-none hover:bg-accent focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:cursor-not-allowed disabled:opacity-50',
           currentHex === '' && 'text-muted-foreground',
           !inForm && className,
+          triggerClassName,
         )}
         style={inForm ? undefined : style}
       >

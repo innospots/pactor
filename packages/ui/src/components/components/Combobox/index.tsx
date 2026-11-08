@@ -52,6 +52,12 @@ export interface ComboboxProps {
   className?: string;
   /** 通用：根节点内联样式（同 className 的挂载规则） */
   style?: CSSProperties;
+  /** 触发器 id；缺省自动生成。独立渲染时供外部 label 的 htmlFor 关联 */
+  id?: string;
+  /** 触发器 class：独立渲染时补充设计稿尺寸 / 圆角等样式 */
+  triggerClassName?: string;
+  /** 触发器图标 class：定制上下箭头尺寸 / 颜色，clearable 的悬停隐藏自动合并 */
+  iconClassName?: string;
 }
 
 /**
@@ -73,10 +79,14 @@ export function Combobox({
   onChange,
   className,
   style,
+  id,
+  triggerClassName,
+  iconClassName,
 }: ComboboxProps) {
   const form = useFormContext();
   const { t } = useI18n();
-  const controlId = useId();
+  const generatedId = useId();
+  const controlId = id ?? generatedId;
   const inForm = form?.inForm === true && typeof name === 'string' && name !== '';
   const [open, setOpen] = useState(false);
 
@@ -124,7 +134,7 @@ export function Combobox({
         id={controlId}
         type="button"
         disabled={disabled}
-        iconClassName={showClear ? CLEARABLE_ICON_HIDE : undefined}
+        iconClassName={cn(iconClassName, showClear && CLEARABLE_ICON_HIDE)}
         endAdornment={
           showClear ? (
             <ClearHoverButton label={t('pactor.control.clear')} onClear={handleClear} />
@@ -135,6 +145,7 @@ export function Combobox({
           CLEARABLE_GROUP,
           !selected && 'text-muted-foreground',
           !inForm && className,
+          triggerClassName,
         )}
         style={inForm ? undefined : style}
       >

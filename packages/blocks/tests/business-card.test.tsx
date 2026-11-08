@@ -187,6 +187,57 @@ describe('EntityCardList 业务组件', () => {
     await expectEventState(context, 'picked', { item: items[1], index: 1 });
   });
 
+  it('menuItems 为每张卡片渲染右上角菜单触发器；未配置时不渲染', () => {
+    const { container } = renderDsl({
+      type: 'EntityCardList',
+      props: {
+        items,
+        menuItems: [{ value: 'copy', label: '复制' }],
+        menuLabel: '更多',
+      },
+    });
+
+    expect(screen.getAllByRole('button', { name: '更多' }).length).toBe(2);
+    expect(
+      container.querySelectorAll('[data-slot=entity-card-list-menu-trigger]').length,
+    ).toBe(2);
+  });
+
+  it('未配置 menuItems 时不渲染菜单触发器', () => {
+    const { container } = renderDsl({ type: 'EntityCardList', props: { items } });
+    expect(container.querySelector('[data-slot=entity-card-list-menu-trigger]')).toBeNull();
+  });
+
+  it('点击菜单项回传 { value, item, index }，danger 项标记 destructive，且不触发整卡点击', async () => {
+    const { context } = renderDsl({
+      type: 'EntityCardList',
+      props: {
+        items,
+        hoverable: true,
+        menuLabel: '更多',
+        menuItems: [
+          { value: 'copy', label: '复制', icon: 'copy' },
+          { value: 'delete', label: '删除', icon: 'trash', danger: true },
+        ],
+      },
+      events: {
+        onItemClick: { action: 'setState', params: { clicked: '${event}' } },
+        onMenuSelect: { action: 'setState', params: { selected: '${event}' } },
+      },
+    });
+
+    fireEvent.click(screen.getAllByRole('button', { name: '更多' })[1]!);
+    const deleteItem = await screen.findByRole('menuitem', { name: '删除' });
+    expect(deleteItem.getAttribute('data-variant')).toBe('destructive');
+    fireEvent.click(deleteItem);
+    await expectEventState(context, 'selected', {
+      value: 'delete',
+      item: items[1],
+      index: 1,
+    });
+    expect(context.state.get('clicked')).toBeUndefined();
+  });
+
   it('item.expandingActions 透传 EntityCard；onItemExpandingAction 参数 { value, item, index }', async () => {
     const expandingItems = [
       {

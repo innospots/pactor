@@ -42,6 +42,8 @@ export interface UploadProps {
   className?: string;
   /** 通用：根节点内联样式（同 className 的挂载规则） */
   style?: CSSProperties;
+  /** 文件选择 input 的 id；缺省自动生成。独立渲染时供外部 label 关联 */
+  id?: string;
 }
 
 /** accept 单条规则匹配：'.png' 按扩展名、'image/*' 按 MIME 前缀、其余按完整 MIME */
@@ -88,9 +90,11 @@ export function Upload({
   onChange,
   className,
   style,
+  id,
 }: UploadProps) {
   const form = useFormContext();
-  const controlId = useId();
+  const generatedId = useId();
+  const controlId = id ?? generatedId;
   const inForm = form?.inForm === true && typeof name === 'string' && name !== '';
   const inputRef = useRef<HTMLInputElement>(null);
 

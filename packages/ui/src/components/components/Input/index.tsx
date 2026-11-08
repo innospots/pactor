@@ -52,6 +52,10 @@ export interface InputProps {
   controlClassName?: string;
   /** 通用：根节点内联样式（挂载规则同 className） */
   style?: CSSProperties;
+  /** 控件 id；缺省自动生成。独立渲染时供外部 label 的 htmlFor 关联 */
+  id?: string;
+  /** 原生 spellcheck 开关（如页面名称等非自然语言输入可传 false） */
+  spellCheck?: boolean;
 }
 
 /**
@@ -78,10 +82,13 @@ export function Input({
   className,
   controlClassName,
   style,
+  id,
+  spellCheck,
 }: InputProps) {
   const form = useFormContext();
   const { t } = useI18n();
-  const controlId = useId();
+  const generatedId = useId();
+  const controlId = id ?? generatedId;
   const [passwordVisible, setPasswordVisible] = useState(false);
   const inForm = form?.inForm === true && typeof name === 'string' && name !== '';
 
@@ -117,6 +124,9 @@ export function Input({
   };
 
   const inFormRoot = inForm === true;
+  // 裸控件形态：关闭 hover 清除且非密码时不需要包裹节点承载浮动按钮，
+  // 此时 className / style 按文档挂到 input 本身
+  const bareControl = allowClear === false && type !== 'password';
   const input = (
     <ShadcnInput
       id={controlId}
@@ -125,6 +135,7 @@ export function Input({
       placeholder={placeholder ?? t('pactor.input.placeholder')}
       disabled={disabled}
       maxLength={maxLength}
+      spellCheck={spellCheck}
       search={search}
       onSearch={onSearch}
       className={cn(
@@ -135,8 +146,10 @@ export function Input({
         // px-3（padding-inline）会盖掉前段的 pr-*，必须提高声明优先级
         (allowClear !== false || showPasswordToggle) && 'pr-8!',
         allowClear !== false && showPasswordToggle && 'pr-14!',
+        !inFormRoot && bareControl && className,
         controlClassName,
       )}
+      style={!inFormRoot && bareControl ? style : undefined}
       onChange={(event) => {
         if (inForm && form && name) {
           form.setValue(name, event.target.value);
@@ -183,19 +196,18 @@ export function Input({
   // allowClear 缺省开启或 password 类型时，输入框常态带包裹节点（group + relative）
   // 承载悬浮按钮（避免输入过程中值由空变有时结构切换导致输入框重建失焦）；
   // 其余情况保持裸控件（className/style 挂 input 本身）
-  const control =
-    allowClear !== false || type === 'password' ? (
-      <span
-        className={cn('group relative flex items-center', !inFormRoot && className)}
-        style={inFormRoot ? undefined : style}
-      >
-        {input}
-        {clearButton}
-        {passwordButton}
-      </span>
-    ) : (
-      input
-    );
+  const control = bareControl ? (
+    input
+  ) : (
+    <span
+      className={cn('group relative flex items-center', !inFormRoot && className)}
+      style={inFormRoot ? undefined : style}
+    >
+      {input}
+      {clearButton}
+      {passwordButton}
+    </span>
+  );
 
   if (inForm && form && name) {
     return (
