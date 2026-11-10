@@ -48,6 +48,7 @@ const EXTENDED_TYPES = [
   'Checkbox',
   'ChipFilter',
   'ChipNode',
+  'ChipSelect',
   'RadioGroup',
   'Switch',
   'Slider',

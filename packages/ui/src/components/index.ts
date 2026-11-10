@@ -264,6 +264,8 @@ export { ChipFilter } from './components/ChipFilter/index.js';
 export type { ChipFilterItem, ChipFilterProps } from './components/ChipFilter/index.js';
 export { ChipNode } from './components/ChipNode/index.js';
 export type { ChipNodeProps } from './components/ChipNode/index.js';
+export { ChipSelect } from './components/ChipSelect/index.js';
+export type { ChipSelectItem, ChipSelectProps } from './components/ChipSelect/index.js';
 export { RadioGroup } from './components/RadioGroup/index.js';
 export type { RadioGroupOption, RadioGroupProps, RadioGroupVariant } from './components/RadioGroup/index.js';
 export { Switch } from './components/Switch/index.js';

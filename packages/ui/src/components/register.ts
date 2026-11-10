@@ -22,6 +22,7 @@ import { Cascader } from './components/Cascader/index.js';
 import { Checkbox } from './components/Checkbox/index.js';
 import { ChipFilter } from './components/ChipFilter/index.js';
 import { ChipNode } from './components/ChipNode/index.js';
+import { ChipSelect } from './components/ChipSelect/index.js';
 import { CodeBlock } from './components/CodeBlock/index.js';
 import { Collapsible } from './components/Collapsible/index.js';
 import { ColorPicker } from './components/ColorPicker/index.js';
@@ -181,6 +182,8 @@ export const builtinComponents = {
   Checkbox,
   ChipFilter,
   ChipNode,
+  // 维度筛选：点选后以可关闭 Chip 展示，x 删除
+  ChipSelect,
   RadioGroup,
   Switch,
   Slider,

@@ -11,6 +11,7 @@ import {
 } from '../../../ui/select.js';
 import { useFormContext } from '../Form/context.js';
 import { FieldShell } from '../Form/form-item.js';
+import { Icon } from '../Icon/index.js';
 import { CLEARABLE_GROUP, CLEARABLE_ICON_HIDE, ClearHoverButton } from '../../clearable.js';
 import {
   CONTROL_SIZE_SELECT_ATTR,
@@ -23,6 +24,8 @@ import type { FieldRule } from '../Input/index.js';
 export interface SelectOption {
   label: string;
   value: string | number | boolean;
+  /** 选项图标（Icon 白名单键，如 `grid`）：下拉项与触发器选中值前置展示 */
+  icon?: string;
   /** 单个选项禁用 */
   disabled?: boolean;
 }
@@ -133,13 +136,17 @@ export function Select({
   };
 
   const inFormRoot = inForm === true;
+  const selectedOption =
+    selectedValue === null
+      ? undefined
+      : options.find((option) => option.value === selectedValue);
+  const selectedIcon = selectedOption?.icon;
   // 选中值对应的完整 label：触发器内文案会被省略号截断，title 提供
   // 原生 hover 提示；未选中时不给 title，避免空提示
   const selectedLabel =
     selectedValue === null
       ? undefined
-      : (options.find((option) => option.value === selectedValue)?.label ??
-        String(selectedValue));
+      : (selectedOption?.label ?? String(selectedValue));
   const select = (
     <span
       className={cn(
@@ -185,7 +192,16 @@ export function Select({
             triggerClassName,
           )}
         >
-          <SelectValue placeholder={placeholder ?? t('pactor.select.placeholder')} />
+          <SelectValue placeholder={placeholder ?? t('pactor.select.placeholder')}>
+            {selectedIcon
+              ? () => (
+                  <span className="flex min-w-0 items-center gap-2">
+                    <Icon name={selectedIcon} size="sm" />
+                    <span className="truncate">{selectedOption?.label}</span>
+                  </span>
+                )
+              : undefined}
+          </SelectValue>
           {showClear ? (
             <ClearHoverButton
               label={t('pactor.select.clear')}
@@ -221,6 +237,7 @@ export function Select({
               value={option.value}
               disabled={option.disabled}
             >
+              {option.icon ? <Icon name={option.icon} size="sm" /> : null}
               {option.label}
             </SelectItem>
           ))}

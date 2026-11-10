@@ -111,6 +111,7 @@ export function createDefaultTranslatableFieldRegistry(): TranslatableFieldRegis
     .register('FileManager', ['props.title', 'props.treeTitle'])
     .register('Statistic', 'props.title')
     .register('Alert', ['props.message', 'props.description'])
+    .register('Badge', 'props.text')
     .register('Empty', ['props.title', 'props.description'])
     .register('Typography', 'props.text')
     .register('Login', [
