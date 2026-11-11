@@ -5,7 +5,9 @@ import { cn } from '../../../lib/utils.js';
 import {
   Select as ShadcnSelect,
   SelectContent,
+  SelectGroup,
   SelectItem,
+  SelectLabel,
   SelectTrigger,
   SelectValue,
 } from '../../../ui/select.js';
@@ -30,6 +32,48 @@ export interface SelectOption {
   disabled?: boolean;
 }
 
+/**
+ * Select 选项分组（结构对齐 antd 的 options 分组）：label 为分组标题，
+ * options 为组内选项。分组只用作展示分隔，选中值仍取组内选项的 value。
+ */
+export interface SelectOptionGroup {
+  label: string;
+  options: SelectOption[];
+}
+
+/** options 数组元素：平铺选项与分组可混排，顺序即渲染顺序 */
+export type SelectOptionEntry = SelectOption | SelectOptionGroup;
+
+function isSelectOptionGroup(option: SelectOptionEntry): option is SelectOptionGroup {
+  return Array.isArray((option as SelectOptionGroup).options);
+}
+
+/** 展开分组得到全部叶子选项：触发器 value→label 映射与自动搜索计数共用 */
+function flattenSelectOptions(options: SelectOptionEntry[]): SelectOption[] {
+  return options.flatMap((option) =>
+    isSelectOptionGroup(option) ? option.options : [option],
+  );
+}
+
+/**
+ * 搜索过滤：按叶子选项 label 匹配；整组子项都不匹配时隐藏分组标题，
+ * 部分匹配时保留分组与命中的子项，与分组混排的平铺选项行为不变。
+ */
+function filterSelectOptions(
+  options: SelectOptionEntry[],
+  keyword: string,
+): SelectOptionEntry[] {
+  return options.flatMap<SelectOptionEntry>((option) => {
+    if (isSelectOptionGroup(option)) {
+      const children = option.options.filter((child) =>
+        child.label.toLowerCase().includes(keyword),
+      );
+      return children.length > 0 ? [{ ...option, options: children }] : [];
+    }
+    return option.label.toLowerCase().includes(keyword) ? [option] : [];
+  });
+}
+
 export interface SelectProps {
   /** 字段名；在 Form 内声明 name 即自动成为表单项 */
   name?: string;
@@ -37,8 +81,8 @@ export interface SelectProps {
   label?: string;
   /** 校验规则 */
   rules?: FieldRule[];
-  /** 选项列表 */
-  options?: SelectOption[];
+  /** 选项列表；元素可为平铺选项或分组（分组与平铺选项可混排） */
+  options?: SelectOptionEntry[];
   /**
    * 选项搜索：true 始终展示搜索框；false 禁止；缺省选项数 > 10 时自动展示。
    * 按 label 包含匹配过滤（大小写不敏感）
@@ -106,10 +150,12 @@ export function Select({
   const [query, setQuery] = useState('');
   const searchInputRef = useRef<HTMLInputElement>(null);
 
-  const searchEnabled = showSearch ?? options.length > 10;
+  // 分组仅参与展示；自动搜索阈值、选中项回查与 value→label 映射都按叶子选项计算
+  const flatOptions = flattenSelectOptions(options);
+  const searchEnabled = showSearch ?? flatOptions.length > 10;
   const keyword = query.trim().toLowerCase();
   const visibleOptions = keyword
-    ? options.filter((option) => option.label.toLowerCase().includes(keyword))
+    ? filterSelectOptions(options, keyword)
     : options;
 
   // 注册字段校验规则，同时把 value prop 作为字段级初始值交给 Form 上下文合并
@@ -139,7 +185,7 @@ export function Select({
   const selectedOption =
     selectedValue === null
       ? undefined
-      : options.find((option) => option.value === selectedValue);
+      : flatOptions.find((option) => option.value === selectedValue);
   const selectedIcon = selectedOption?.icon;
   // 选中值对应的完整 label：触发器内文案会被省略号截断，title 提供
   // 原生 hover 提示；未选中时不给 title，避免空提示
@@ -147,6 +193,18 @@ export function Select({
     selectedValue === null
       ? undefined
       : (selectedOption?.label ?? String(selectedValue));
+  // 分组内的选项左侧缩进，与平铺选项 / 分组标题形成层级（对齐 antd 分组视觉）
+  const renderOption = (option: SelectOption, grouped = false) => (
+    <SelectItem
+      key={String(option.value)}
+      value={option.value}
+      disabled={option.disabled}
+      className={grouped ? 'pl-8' : undefined}
+    >
+      {option.icon ? <Icon name={option.icon} size="sm" /> : null}
+      {option.label}
+    </SelectItem>
+  );
   const select = (
     <span
       className={cn(
@@ -162,7 +220,7 @@ export function Select({
       style={inFormRoot ? undefined : style}
     >
       <ShadcnSelect<SelectOption['value']>
-        items={options}
+        items={flatOptions}
         value={selectedValue}
         onValueChange={handleChange}
         disabled={disabled}
@@ -231,16 +289,16 @@ export function Select({
               />
             </div>
           ) : null}
-          {visibleOptions.map((option) => (
-            <SelectItem
-              key={String(option.value)}
-              value={option.value}
-              disabled={option.disabled}
-            >
-              {option.icon ? <Icon name={option.icon} size="sm" /> : null}
-              {option.label}
-            </SelectItem>
-          ))}
+          {visibleOptions.map((option, index) =>
+            isSelectOptionGroup(option) ? (
+              <SelectGroup key={`group-${index}-${option.label}`}>
+                <SelectLabel>{option.label}</SelectLabel>
+                {option.options.map((child) => renderOption(child, true))}
+              </SelectGroup>
+            ) : (
+              renderOption(option)
+            ),
+          )}
           {visibleOptions.length === 0 ? (
             <div className="px-2 py-3 text-center text-sm text-muted-foreground">
               {t('pactor.command.empty')}

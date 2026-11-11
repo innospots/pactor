@@ -54,6 +54,9 @@ export interface InputProps {
   style?: CSSProperties;
   /** 控件 id；缺省自动生成。独立渲染时供外部 label 的 htmlFor 关联 */
   id?: string;
+  /** 无障碍名称（透传原生 aria-label）：独立渲染且无法通过外部 label
+   *  htmlFor 关联时使用，避免控件在可访问性树中无名 */
+  ariaLabel?: string;
   /** 原生 spellcheck 开关（如页面名称等非自然语言输入可传 false） */
   spellCheck?: boolean;
 }
@@ -83,6 +86,7 @@ export function Input({
   controlClassName,
   style,
   id,
+  ariaLabel,
   spellCheck,
 }: InputProps) {
   const form = useFormContext();
@@ -136,6 +140,7 @@ export function Input({
       disabled={disabled}
       maxLength={maxLength}
       spellCheck={spellCheck}
+      aria-label={ariaLabel}
       search={search}
       onSearch={onSearch}
       className={cn(

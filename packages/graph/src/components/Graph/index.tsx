@@ -94,10 +94,20 @@ export interface GraphProps {
   plugins?: GraphPluginSwitches;
   /** 渲染后自适应：view（缺省，缩放适配容器）| center（仅居中）| false（不自适应） */
   autoFit?: 'view' | 'center' | false;
+  /**
+   * 画布内边距（自适应 fitView 时生效）：数字或 [上, 右, 下, 左]。
+   * 用于让图内容避开画布上叠加的图例 / 工具栏等浮层。
+   */
+  padding?: GraphOptions['padding'];
   /** 主题：light（缺省）| dark */
   theme?: 'light' | 'dark';
   /** 画布背景色 */
   background?: string;
+  /**
+   * 元素动画：false 关闭；对象作为全局动画基础配置。
+   * 缺省沿用 G6 动画（新增 / 更新元素各 1000ms）。
+   */
+  animation?: boolean | Record<string, unknown>;
   /** 容器高度（px），缺省 400；宽度随容器自适应 */
   height?: number;
   onNodeClick?: (event: GraphNodeEventPayload) => void;
@@ -132,8 +142,10 @@ export function buildGraphOptions(
     | 'behaviors'
     | 'plugins'
     | 'autoFit'
+    | 'padding'
     | 'theme'
     | 'background'
+    | 'animation'
   >,
 ): GraphOptions {
   const layout =
@@ -154,8 +166,10 @@ export function buildGraphOptions(
     behaviors: (props.behaviors ?? DEFAULT_BEHAVIORS) as GraphOptions['behaviors'],
     plugins: plugins as GraphOptions['plugins'],
     autoFit: props.autoFit === false ? undefined : (props.autoFit ?? 'view'),
+    padding: props.padding,
     theme: props.theme,
     background: props.background,
+    animation: props.animation as GraphOptions['animation'],
   };
 }
 
@@ -290,8 +304,16 @@ export function Graph(props: GraphProps) {
     if (!container) {
       return;
     }
+    // 每次（重）建都换一个独占的内部容器：上一实例的 destroy 会延后到 render
+    // 落定后执行，两代实例若共用容器，HTML 渲染器的相机层（#g-canvas-camera）
+    // 会被新旧实例互相复用；旧实例稍后销毁时会连新实例的相机一起移除，HTML
+    // 节点整批消失。独占容器让相机随各自的宿主一起销毁。
+    const host = document.createElement('div');
+    host.style.position = 'absolute';
+    host.style.inset = '0';
+    container.appendChild(host);
     const graph = new G6Graph({
-      container,
+      container: host,
       ...latestOptionsRef.current,
       data: latestDataRef.current as GraphOptions['data'],
     });
@@ -318,6 +340,8 @@ export function Graph(props: GraphProps) {
     return () => {
       observer?.disconnect();
       graphRef.current = null;
+      // 旧画布在延时销毁期间仍叠在新画布上方，避免它拦截新图的交互。
+      host.style.pointerEvents = 'none';
       void ready.finally(() => {
         cancelPendingPluginTimers(graph);
         // 延时 destroy：render 落定后仍有动画/事件会给插件调度新的 debounce，
@@ -330,6 +354,7 @@ export function Graph(props: GraphProps) {
           } catch {
             // destroy 期间的瞬态错误忽略
           }
+          host.remove();
         }, DESTROY_DELAY_MS);
       });
     };
@@ -351,7 +376,7 @@ export function Graph(props: GraphProps) {
       ref={containerRef}
       data-slot="graph"
       className={className}
-      style={{ width: '100%', height, ...style }}
+      style={{ width: '100%', height, position: 'relative', ...style }}
     />
   );
 }

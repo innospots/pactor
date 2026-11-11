@@ -244,7 +244,12 @@ export type { FieldRule, InputProps } from './components/Input/index.js';
 export { NumberInput } from './components/NumberInput/index.js';
 export type { NumberInputProps } from './components/NumberInput/index.js';
 export { Select } from './components/Select/index.js';
-export type { SelectOption, SelectProps } from './components/Select/index.js';
+export type {
+  SelectOption,
+  SelectOptionEntry,
+  SelectOptionGroup,
+  SelectProps,
+} from './components/Select/index.js';
 export { MultiSelect } from './components/MultiSelect/index.js';
 export type {
   MultiSelectOption,

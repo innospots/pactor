@@ -114,6 +114,16 @@ describe('buildGraphOptions', () => {
     expect(options.background).toBe('#111');
     expect(options.autoFit).toBeUndefined();
   });
+
+  it('animation 透传：false 关闭元素动画，缺省不设置', () => {
+    expect(buildGraphOptions({ animation: false }).animation).toBe(false);
+    expect(buildGraphOptions({}).animation).toBeUndefined();
+  });
+
+  it('padding 透传：自适应时留出内边距，缺省不设置', () => {
+    expect(buildGraphOptions({ padding: [24, 0, 64, 0] }).padding).toEqual([24, 0, 64, 0]);
+    expect(buildGraphOptions({}).padding).toBeUndefined();
+  });
 });
 
 describe('Graph 组件', () => {
@@ -121,11 +131,15 @@ describe('Graph 组件', () => {
     const { container } = render(<Graph data={sampleData} layout="dagre" height={320} />);
     expect(instances.length).toBe(1);
     const graph = lastInstance();
-    expect(graph.options.container).toBe(container.querySelector('[data-slot="graph"]'));
+    const slot = container.querySelector('[data-slot="graph"]') as HTMLElement;
+    // 图实例挂在 slot 内独占的内部容器上，slot 自身只负责尺寸与定位
+    expect((graph.options.container as HTMLElement).parentElement).toBe(slot);
+    expect((graph.options.container as HTMLElement).style.position).toBe('absolute');
+    expect(slot.style.height).toBe('320px');
+    expect(slot.style.position).toBe('relative');
     expect(graph.options.layout).toEqual({ type: 'dagre' });
     expect(graph.options.data).toEqual({ ...sampleData, combos: [] });
     expect(graph.render).toHaveBeenCalledTimes(1);
-    expect((graph.options.container as HTMLElement).style.height).toBe('320px');
   });
 
   it('data 缺省补齐空数组；卸载 destroy（render 落定 + 插件 debounce 窗口后）', async () => {
@@ -163,6 +177,24 @@ describe('Graph 组件', () => {
     expect(lastInstance().options.layout).toEqual({ type: 'grid' });
     expect(lastInstance().options.data).toEqual({ ...sampleData, combos: [] });
     expect(lastInstance().setData).not.toHaveBeenCalled();
+  });
+
+  it('spec 变化时新旧实例各占独立内部容器，旧容器随销毁移除', async () => {
+    const { rerender } = render(<Graph data={sampleData} layout="force" />);
+    const firstHost = lastInstance().options.container as HTMLElement;
+    await act(async () => {
+      rerender(<Graph data={sampleData} layout="grid" />);
+    });
+    const secondHost = lastInstance().options.container as HTMLElement;
+    expect(secondHost).not.toBe(firstHost);
+    expect(secondHost.isConnected).toBe(true);
+    expect(firstHost.style.pointerEvents).toBe('none');
+    // 旧实例延时销毁后连同内部容器一起从文档移除，不会留着相机层干扰新实例
+    await act(async () => {
+      await new Promise((resolve) => setTimeout(resolve, 250));
+    });
+    expect(firstHost.isConnected).toBe(false);
+    expect(secondHost.isConnected).toBe(true);
   });
 
   it('onNodeClick 载荷 { node: { id, data } }，data 取图内 datum', () => {
