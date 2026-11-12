@@ -188,13 +188,13 @@ describe('/ui 原语可渲染', () => {
     const list = screen.getByRole('tab', { name: '甲' })
       .parentElement as HTMLElement;
     expect(list.dataset.size).toBe('sm');
-    expect(list.className).toContain('h-8');
+    expect(list.className).toContain('h-(--pactor-control-height-sm)');
     expect(screen.getByRole('tab', { name: '甲' }).className).toContain(
-      'group-data-[size=sm]/tabs-list:text-xs',
+      'group-data-[size=sm]/tabs-list:text-[length:var(--pactor-control-text-sm)]',
     );
   });
 
-  it('Tabs：List size 缺省为 default（h-9）', () => {
+  it('Tabs：List size 缺省为 default（md 档高度令牌）', () => {
     render(
       <Tabs defaultValue="b">
         <TabsList>
@@ -205,7 +205,7 @@ describe('/ui 原语可渲染', () => {
     const list = screen.getByRole('tab', { name: '乙' })
       .parentElement as HTMLElement;
     expect(list.dataset.size).toBe('default');
-    expect(list.className).toContain('h-9');
+    expect(list.className).toContain('h-(--pactor-control-height-md)');
   });
 
   it('Tabs：page 变体标记 data-variant 且非 closable 页签保持单按钮结构', () => {

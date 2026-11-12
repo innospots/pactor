@@ -48,4 +48,8 @@ describe('pactor-app aggregated styles', () => {
     expect(css).toContain('.size-\\(--pactor-control-box\\)');
     expect(css).toContain('.data-\\[size\\=sm\\]\\:h-\\(--pactor-control-height-sm\\)');
   });
+
+  it('菜单项编译为密度令牌引用', () => {
+    expect(css).toContain('.py-\\(--pactor-menu-item-padding-y\\)');
+  });
 });

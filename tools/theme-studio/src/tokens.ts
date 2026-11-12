@@ -152,6 +152,7 @@ export const TOKEN_GROUPS: TokenGroup[] = [
       { name: '--pactor-control-text-md', type: 'length', description: '控件正文字号（Button / Input / Select / 菜单项 / 表格）', defaultValue: '0.875rem', slider: { min: 0.75, max: 1, step: 0.0625 } },
       { name: '--pactor-control-text-lg', type: 'length', description: '控件大字号（表单控件 large 档）', defaultValue: '1rem', slider: { min: 0.875, max: 1.25, step: 0.0625 } },
       { name: '--pactor-control-box', type: 'length', description: 'Checkbox / Radio 控件盒尺寸', defaultValue: '1rem', slider: { min: 0.75, max: 1.25, step: 0.0625 } },
+      { name: '--pactor-menu-item-padding-y', type: 'length', description: '菜单项纵向内边距（DropdownMenu / ContextMenu / Menubar 项）', defaultValue: '0.375rem', slider: { min: 0.125, max: 0.75, step: 0.0625 } },
     ],
   },
   {

@@ -40,6 +40,8 @@ export interface TabsProps {
   activeKey?: string;
   /** 页签栏样式：default 胶囊（缺省）/ line 下划线 / page 可编辑页面页签 */
   variant?: 'default' | 'line' | 'page';
+  /** 尺寸（仅压缩 default 胶囊变体为 sm 档）：default（缺省）/ sm */
+  size?: 'default' | 'sm';
   /** 页签位置：top 顶部（缺省）/ left 左侧竖排（子 Tab 较多或左侧需放摘要时用） */
   tabPosition?: 'top' | 'left';
   /** 页签切换事件，传出新激活的 key */
@@ -70,6 +72,7 @@ export function Tabs({
   items = [],
   activeKey,
   variant,
+  size = 'default',
   tabPosition = 'top',
   onChange,
   onClose,
@@ -90,6 +93,7 @@ export function Tabs({
   const tabList = (
     <TabsList
       variant={variant}
+      size={size}
       className={
         vertical
           ? cn(

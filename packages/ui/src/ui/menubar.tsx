@@ -38,7 +38,7 @@ function MenubarTrigger({
     <MenuPrimitive.Trigger
       data-slot="menubar-trigger"
       className={cn(
-        'flex cursor-pointer items-center rounded-sm px-2 py-1 text-sm font-medium outline-hidden select-none hover:bg-(--menu-hover-background) hover:text-(--menu-hover-foreground) focus:bg-(--menu-hover-background) focus:text-(--menu-hover-foreground) data-open:bg-(--menu-active-background) data-open:text-(--menu-active-foreground)',
+        'flex cursor-pointer items-center rounded-sm px-2 py-1 text-[length:var(--pactor-control-text-md)] font-medium outline-hidden select-none hover:bg-(--menu-hover-background) hover:text-(--menu-hover-foreground) focus:bg-(--menu-hover-background) focus:text-(--menu-hover-foreground) data-open:bg-(--menu-active-background) data-open:text-(--menu-active-foreground)',
         className,
       )}
       {...props}
@@ -87,7 +87,7 @@ function MenubarItem({
       data-slot="menubar-item"
       data-variant={variant}
       className={cn(
-        "relative flex cursor-pointer items-center gap-2 rounded-sm px-2 py-1.5 text-sm outline-hidden select-none focus:bg-(--menu-hover-background) focus:text-(--menu-hover-foreground) data-[variant=destructive]:text-destructive data-[variant=destructive]:focus:bg-destructive/10 data-[variant=destructive]:focus:text-destructive data-disabled:pointer-events-none data-disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
+        "relative flex cursor-pointer items-center gap-2 rounded-sm px-2 py-(--pactor-menu-item-padding-y) text-[length:var(--pactor-control-text-md)] outline-hidden select-none focus:bg-(--menu-hover-background) focus:text-(--menu-hover-foreground) data-[variant=destructive]:text-destructive data-[variant=destructive]:focus:bg-destructive/10 data-[variant=destructive]:focus:text-destructive data-disabled:pointer-events-none data-disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
         className,
       )}
       {...props}
