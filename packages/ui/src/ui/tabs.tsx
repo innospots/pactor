@@ -108,7 +108,7 @@ function TabsTrigger({
       data-slot="tabs-trigger"
       data-closable={closable || undefined}
       className={cn(
-        "inline-flex h-[calc(100%-1px)] flex-1 cursor-pointer items-center justify-center gap-1.5 rounded-md border border-transparent px-2 py-1 text-[length:var(--pactor-control-text-md)] font-medium whitespace-nowrap text-foreground transition-colors focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 focus-visible:outline-1 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
+        "inline-flex h-[calc(100%-1px)] flex-1 cursor-pointer items-center justify-center gap-1.5 rounded-md border border-transparent px-2 py-1 text-[length:var(--pactor-control-text-md)] leading-5 font-medium whitespace-nowrap text-foreground transition-colors focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 focus-visible:outline-1 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
         // default 变体：激活态胶囊（边框 + 卡片底 + 阴影）
         'group-data-[variant=default]/tabs-list:data-active:border-border group-data-[variant=default]/tabs-list:data-active:bg-card group-data-[variant=default]/tabs-list:data-active:shadow-sm',
         // line 变体：下划线指示——弱化未激活文字，激活态底部 2px 主色线
@@ -116,7 +116,7 @@ function TabsTrigger({
         // flex-1 拉伸，触发器保持自然宽度
         'group-data-[variant=line]/tabs-list:-mb-px group-data-[variant=line]/tabs-list:h-9 group-data-[variant=line]/tabs-list:flex-none group-data-[variant=line]/tabs-list:rounded-none group-data-[variant=line]/tabs-list:border-x-0 group-data-[variant=line]/tabs-list:border-t-0 group-data-[variant=line]/tabs-list:border-b-2 group-data-[variant=line]/tabs-list:py-1.5 group-data-[variant=line]/tabs-list:text-muted-foreground group-data-[variant=line]/tabs-list:data-active:border-b-primary group-data-[variant=line]/tabs-list:data-active:text-foreground',
         // size=sm：小字号 + 收紧纵向 padding（高度随 List sm 档令牌自动收缩）
-        'group-data-[size=sm]/tabs-list:py-0.5 group-data-[size=sm]/tabs-list:text-[length:var(--pactor-control-text-sm)]',
+        'group-data-[size=sm]/tabs-list:py-0.5 group-data-[size=sm]/tabs-list:text-[length:var(--pactor-control-text-sm)] group-data-[size=sm]/tabs-list:leading-4',
         className,
       )}
       {...props}

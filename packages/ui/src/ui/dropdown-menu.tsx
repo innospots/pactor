@@ -69,7 +69,7 @@ function DropdownMenuItem({
       data-slot="dropdown-menu-item"
       data-variant={variant}
       className={cn(
-        "relative flex cursor-pointer items-center gap-2 rounded-sm px-2 py-(--pactor-menu-item-padding-y) text-[length:var(--pactor-control-text-md)] outline-hidden select-none focus:bg-(--menu-hover-background) focus:text-(--menu-hover-foreground) data-[variant=destructive]:text-destructive data-[variant=destructive]:focus:bg-destructive/10 data-[variant=destructive]:focus:text-destructive data-disabled:pointer-events-none data-disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
+        "relative flex cursor-pointer items-center gap-2 rounded-sm px-2 py-(--pactor-menu-item-padding-y) text-[length:var(--pactor-control-text-md)] leading-5 outline-hidden select-none focus:bg-(--menu-hover-background) focus:text-(--menu-hover-foreground) data-[variant=destructive]:text-destructive data-[variant=destructive]:focus:bg-destructive/10 data-[variant=destructive]:focus:text-destructive data-disabled:pointer-events-none data-disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
         className,
       )}
       {...props}
@@ -98,7 +98,7 @@ function DropdownMenuRadioItem({
     <MenuPrimitive.RadioItem
       data-slot="dropdown-menu-radio-item"
       className={cn(
-        "relative flex cursor-pointer items-center gap-2 rounded-sm px-2 py-(--pactor-menu-item-padding-y) text-[length:var(--pactor-control-text-md)] outline-hidden select-none focus:bg-(--menu-hover-background) focus:text-(--menu-hover-foreground) data-disabled:pointer-events-none data-disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
+        "relative flex cursor-pointer items-center gap-2 rounded-sm px-2 py-(--pactor-menu-item-padding-y) text-[length:var(--pactor-control-text-md)] leading-5 outline-hidden select-none focus:bg-(--menu-hover-background) focus:text-(--menu-hover-foreground) data-disabled:pointer-events-none data-disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
         className,
       )}
       {...props}
@@ -134,7 +134,7 @@ function DropdownMenuSubTrigger({
     <MenuPrimitive.SubmenuTrigger
       data-slot="dropdown-menu-sub-trigger"
       className={cn(
-        "flex cursor-pointer items-center gap-2 rounded-sm px-2 py-(--pactor-menu-item-padding-y) text-[length:var(--pactor-control-text-md)] outline-hidden select-none focus:bg-(--menu-hover-background) focus:text-(--menu-hover-foreground) data-open:bg-(--menu-active-background) data-open:text-(--menu-active-foreground) [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
+        "flex cursor-pointer items-center gap-2 rounded-sm px-2 py-(--pactor-menu-item-padding-y) text-[length:var(--pactor-control-text-md)] leading-5 outline-hidden select-none focus:bg-(--menu-hover-background) focus:text-(--menu-hover-foreground) data-open:bg-(--menu-active-background) data-open:text-(--menu-active-foreground) [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
         className,
       )}
       {...props}

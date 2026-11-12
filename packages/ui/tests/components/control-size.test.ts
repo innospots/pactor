@@ -28,7 +28,7 @@ describe('control-size 令牌映射', () => {
     // 注：断言的是精确字符串；若 twMerge 版本导致输出顺序不同（语义等价），
     // 以实际稳定输出为准调整本断言，关键是不再残留 h-9 / text-sm
     expect(cn('h-9 px-3 text-sm', CONTROL_SIZE_BOX.small)).toBe(
-      'h-(--pactor-control-height-sm) px-2.5 text-[length:var(--pactor-control-text-sm)]',
+      'h-(--pactor-control-height-sm) px-2.5 text-[length:var(--pactor-control-text-sm)] leading-4',
     );
   });
 });

@@ -34,4 +34,10 @@ describe('Table 密度', () => {
     expect(cell?.className).toContain('py-(--pactor-table-cell-padding-y)');
     expect(cell?.className).not.toContain(' py-1');
   });
+
+  it('非法 size 值按 middle 回退，不崩溃', () => {
+    renderDsl({ type: 'Table', props: { columns, dataSource, size: 'medium' } });
+    const cell = screen.getByText('Alice').closest('td');
+    expect(cell?.className).toContain('py-(--pactor-table-cell-padding-y)');
+  });
 });

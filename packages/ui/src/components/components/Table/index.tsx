@@ -220,6 +220,8 @@ export function Table({
 }: TableProps) {
   const { renderChildren } = useRenderer();
   const { t } = useI18n();
+  // DSL 传入非法 size（如 'medium'）时按 middle 回退，避免 TABLE_SIZE 取到 undefined 崩溃
+  const tier = TABLE_SIZE[size] ?? TABLE_SIZE.middle;
   const [current, setCurrent] = useState(1);
 
   const childrenField = childrenColumnName;
@@ -507,14 +509,14 @@ export function Table({
             {rowDraggable ? (
               <TableHead
                 data-slot="table-drag-head"
-                className={cn(stickyHeadClass(null, false), TABLE_SIZE[size].head)}
+                className={cn(stickyHeadClass(null, false), tier.head)}
                 style={{ width: 36, minWidth: 36 }}
               />
             ) : null}
             {rowSelection ? (
               <TableHead
                 data-slot="table-selection-head"
-                className={cn(stickyHeadClass(null, false), TABLE_SIZE[size].head)}
+                className={cn(stickyHeadClass(null, false), tier.head)}
                 style={{ width: 36, minWidth: 36 }}
               >
                 <ShadcnCheckbox
@@ -539,7 +541,7 @@ export function Table({
                   className={cn(
                     columnClass(column, scrolledX, isSortedColumn),
                     stickyHeadClass(column, isSortedColumn),
-                    TABLE_SIZE[size].head,
+                    tier.head,
                   )}
                   style={columnWidthStyle(column)}
                   aria-sort={
@@ -583,7 +585,7 @@ export function Table({
         <TableBody>
           {flatRows.length === 0 ? (
             <TableRow className="hover:bg-transparent">
-              <TableCell colSpan={colSpan} className={cn(TABLE_SIZE[size].cell)}>
+              <TableCell colSpan={colSpan} className={cn(tier.cell)}>
                 <div
                   data-slot="table-empty"
                   className="flex flex-col items-center gap-2 py-8 text-muted-foreground"
@@ -608,7 +610,7 @@ export function Table({
                 {rowDraggable ? (
                   <TableCell
                     data-slot="table-drag-cell"
-                    className={cn(dropIndicatorClass(flat.key), TABLE_SIZE[size].cell)}
+                    className={cn(dropIndicatorClass(flat.key), tier.cell)}
                   >
                     <button
                       type="button"
@@ -626,7 +628,7 @@ export function Table({
                 {rowSelection ? (
                   <TableCell
                     data-slot="table-selection-cell"
-                    className={cn(dropIndicatorClass(flat.key), TABLE_SIZE[size].cell)}
+                    className={cn(dropIndicatorClass(flat.key), tier.cell)}
                   >
                     <ShadcnCheckbox
                       aria-label={t('pactor.table.selectRow')}
@@ -658,7 +660,7 @@ export function Table({
                             sort.dataIndex === column.dataIndex,
                         ),
                         dropIndicatorClass(flat.key),
-                        TABLE_SIZE[size].cell,
+                        tier.cell,
                       )}
                       style={columnWidthStyle(column)}
                     >

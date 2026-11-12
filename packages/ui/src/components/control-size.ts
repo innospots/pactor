@@ -8,17 +8,21 @@
  * vendored 基类中的 h-9 / px-3 / text-sm）；vendored SelectTrigger 的高度走
  * data-size 属性（属性选择器优先级高于普通类），用 CONTROL_SIZE_SELECT_ATTR
  * 换算后传 size prop，文本/内边距用 CONTROL_SIZE_TRIGGER_TEXT。
+ *
+ * 行高说明：text-[length:var()] 只设 font-size，不携带 Tailwind 内建字号类的
+ * 配套 line-height，因此每档显式补 leading-*（sm→leading-4 / md→leading-5 /
+ * lg→leading-6），与原 text-xs / text-sm / text-base 的行高一致。
  */
 export type ControlSize = 'small' | 'middle' | 'large';
 
 /** 单行盒式控件：高度 + 水平内边距 + 字号 */
 export const CONTROL_SIZE_BOX: Record<ControlSize, string> = {
   small:
-    'h-(--pactor-control-height-sm) px-2.5 text-[length:var(--pactor-control-text-sm)]',
+    'h-(--pactor-control-height-sm) px-2.5 text-[length:var(--pactor-control-text-sm)] leading-4',
   middle:
-    'h-(--pactor-control-height-md) px-3 text-[length:var(--pactor-control-text-md)]',
+    'h-(--pactor-control-height-md) px-3 text-[length:var(--pactor-control-text-md)] leading-5',
   large:
-    'h-(--pactor-control-height-lg) px-4 text-[length:var(--pactor-control-text-lg)]',
+    'h-(--pactor-control-height-lg) px-4 text-[length:var(--pactor-control-text-lg)] leading-6',
 };
 
 /**
@@ -28,18 +32,18 @@ export const CONTROL_SIZE_BOX: Record<ControlSize, string> = {
  */
 export const CONTROL_SIZE_BOX_GROW: Record<ControlSize, string> = {
   small:
-    'min-h-(--pactor-control-height-sm) px-2.5 py-1 text-[length:var(--pactor-control-text-sm)]',
+    'min-h-(--pactor-control-height-sm) px-2.5 py-1 text-[length:var(--pactor-control-text-sm)] leading-4',
   middle:
-    'min-h-(--pactor-control-height-md) px-3 py-1.5 text-[length:var(--pactor-control-text-md)]',
+    'min-h-(--pactor-control-height-md) px-3 py-1.5 text-[length:var(--pactor-control-text-md)] leading-5',
   large:
-    'min-h-(--pactor-control-height-lg) px-4 py-1.5 text-[length:var(--pactor-control-text-lg)]',
+    'min-h-(--pactor-control-height-lg) px-4 py-1.5 text-[length:var(--pactor-control-text-lg)] leading-6',
 };
 
 /** 多行文本控件（Textarea / Mentions）：内边距 + 字号（高度由行数/内容决定） */
 export const CONTROL_SIZE_AREA: Record<ControlSize, string> = {
-  small: 'px-2.5 py-1.5 text-[length:var(--pactor-control-text-sm)]',
-  middle: 'px-3 py-2 text-[length:var(--pactor-control-text-md)]',
-  large: 'px-4 py-2.5 text-[length:var(--pactor-control-text-lg)]',
+  small: 'px-2.5 py-1.5 text-[length:var(--pactor-control-text-sm)] leading-4',
+  middle: 'px-3 py-2 text-[length:var(--pactor-control-text-md)] leading-5',
+  large: 'px-4 py-2.5 text-[length:var(--pactor-control-text-lg)] leading-6',
 };
 
 /** vendored SelectTrigger 的 size 属性值（高度由 data-size 变体承载） */
@@ -51,7 +55,7 @@ export const CONTROL_SIZE_SELECT_ATTR = {
 
 /** vendored SelectTrigger 的文本/内边距类（高度走 size 属性，这里不含 h-*） */
 export const CONTROL_SIZE_TRIGGER_TEXT: Record<ControlSize, string> = {
-  small: 'px-2.5 text-[length:var(--pactor-control-text-sm)]',
-  middle: 'px-3 text-[length:var(--pactor-control-text-md)]',
-  large: 'px-4 text-[length:var(--pactor-control-text-lg)]',
+  small: 'px-2.5 text-[length:var(--pactor-control-text-sm)] leading-4',
+  middle: 'px-3 text-[length:var(--pactor-control-text-md)] leading-5',
+  large: 'px-4 text-[length:var(--pactor-control-text-lg)] leading-6',
 };

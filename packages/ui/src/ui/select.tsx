@@ -52,7 +52,7 @@ function SelectTrigger({
       className={cn(
         // 触发器是 <button>，UA 默认 text-align:center 会让选中值 / placeholder
         // 居中；显式左对齐（消费方可传 text-center 经 tailwind-merge 覆盖）
-        "flex w-fit cursor-pointer items-center justify-between gap-2 rounded-md border border-input bg-(--input-background) px-3 py-2 text-left text-[length:var(--pactor-control-text-md)] text-(--input-foreground) whitespace-nowrap transition-colors outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:cursor-not-allowed disabled:opacity-50 data-[size=default]:h-(--pactor-control-height-md) data-[size=sm]:h-(--pactor-control-height-sm) data-[size=lg]:h-(--pactor-control-height-lg) data-[placeholder]:text-muted-foreground [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
+        "flex w-fit cursor-pointer items-center justify-between gap-2 rounded-md border border-input bg-(--input-background) px-3 py-2 text-left text-[length:var(--pactor-control-text-md)] leading-5 text-(--input-foreground) whitespace-nowrap transition-colors outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:cursor-not-allowed disabled:opacity-50 data-[size=default]:h-(--pactor-control-height-md) data-[size=sm]:h-(--pactor-control-height-sm) data-[size=lg]:h-(--pactor-control-height-lg) data-[placeholder]:text-muted-foreground [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
         className,
       )}
       {...props}

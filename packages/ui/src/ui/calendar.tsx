@@ -52,7 +52,7 @@ function Calendar({
         ),
         week: cn('mt-2 flex w-full', defaultClassNames.week),
         day: cn(
-          'h-(--pactor-calendar-day-size) w-(--pactor-calendar-day-size) p-0 text-center text-[length:var(--pactor-control-text-md)]',
+          'h-(--pactor-calendar-day-size) w-(--pactor-calendar-day-size) p-0 text-center text-[length:var(--pactor-control-text-md)] leading-5',
           defaultClassNames.day,
         ),
         day_button: cn(

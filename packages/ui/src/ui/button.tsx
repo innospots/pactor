@@ -10,7 +10,7 @@ import { cn } from '../lib/utils.js';
  * `asChild` 语义经 Base UI 的 `render` 模式消化（合并 props 到唯一子元素）。
  */
 const buttonVariants = cva(
-  "inline-flex shrink-0 cursor-pointer items-center justify-center gap-2 whitespace-nowrap rounded-md text-[length:var(--pactor-control-text-md)] font-medium outline-none transition-colors focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
+  "inline-flex shrink-0 cursor-pointer items-center justify-center gap-2 whitespace-nowrap rounded-md text-[length:var(--pactor-control-text-md)] leading-5 font-medium outline-none transition-colors focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
   {
     variants: {
       variant: {
@@ -26,8 +26,8 @@ const buttonVariants = cva(
       },
       size: {
         default: 'h-(--pactor-control-height-md) px-4 py-2',
-        xs: "h-(--pactor-control-height-xs) gap-1 rounded-md px-2 text-[length:var(--pactor-control-text-sm)] has-[>svg]:px-1.5 [&_svg:not([class*='size-'])]:size-3",
-        sm: 'h-(--pactor-control-height-sm) gap-1.5 rounded-md px-3 text-[length:var(--pactor-control-text-sm)]',
+        xs: "h-(--pactor-control-height-xs) gap-1 rounded-md px-2 text-[length:var(--pactor-control-text-sm)] leading-4 has-[>svg]:px-1.5 [&_svg:not([class*='size-'])]:size-3",
+        sm: 'h-(--pactor-control-height-sm) gap-1.5 rounded-md px-3 text-[length:var(--pactor-control-text-sm)] leading-4',
         lg: 'h-(--pactor-control-height-lg) rounded-md px-6',
         icon: 'size-(--pactor-control-height-md)',
         'icon-xs': "size-(--pactor-control-height-xs) rounded-md [&_svg:not([class*='size-'])]:size-3",

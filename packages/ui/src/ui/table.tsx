@@ -20,7 +20,7 @@ function Table({
     >
       <table
         data-slot="table"
-        className={cn('w-full caption-bottom text-[length:var(--pactor-control-text-md)]', className)}
+        className={cn('w-full caption-bottom text-[length:var(--pactor-control-text-md)] leading-5', className)}
         {...props}
       />
     </div>
