@@ -121,6 +121,28 @@ export const globalSizeStorageKey = 'pactor.size';
 
 契约文档化：任何自定义组件 / 宿主脚本写 `document.documentElement.dataset.pactorSize` 即可全局切换；消费方在 CSS 中使用 `var(--pactor-control-height-md)` 等令牌即自动跟随。需要在首屏避免闪烁的宿主可在 HTML 头部内联脚本提前写属性（与暗色主题防闪烁同一手法，写入文档）。
 
+### 4.5 自定义数值（GlobalSizeValues API）
+
+三档预设之外，允许用户 / 宿主直接自定义各档数值。落点仍是令牌：在 `documentElement` 上写**内联** CSS 变量，内联样式优先级高于样式表中的 `:root` 与 `[data-pactor-size]` 块，因此自定义数值天然覆盖档位预设。
+
+```ts
+/** 各令牌的可覆盖数值（值为合法 CSS 长度，如 '2.5rem' / '40px'） */
+export interface GlobalSizeValues {
+  heightXs?: string; heightSm?: string; heightMd?: string; heightLg?: string;
+  textSm?: string; textMd?: string; textLg?: string;
+  box?: string;
+}
+
+/** 应用自定义数值：参数即完整覆盖集——给出的键写内联变量，
+ *  未给出的键移除既有内联覆盖；传 null 清除全部，回到档位预设 */
+export function applyGlobalSizeValues(values: GlobalSizeValues | null): void;
+
+/** 读取当前内联覆盖（不含样式表档位值；无覆盖返回 {}） */
+export function readGlobalSizeValues(): GlobalSizeValues;
+```
+
+优先级（高 → 低）：**内联自定义值 > `[data-pactor-size]` 档位预设 > `:root` default 档**。持久化（localStorage 键、首屏防闪烁内联脚本）由宿主负责，与皮肤（skin.ts）同一模式；example-admin SkinSettings 演示：滑杆调控件高度基准（md），其余高度档按比例派生后经 `applyGlobalSizeValues` 写入。
+
 ### 5. 文档
 
 - `docs/src/content/docs/components/`：UserMenu、Input 等受影响组件的 props 更新；
@@ -146,3 +168,4 @@ export const globalSizeStorageKey = 'pactor.size';
 3. 只令牌化高度与字号，不动内边距 / 圆角 / 图标尺寸。
 4. UserMenu 的「界面密度」入口缺省关闭（`showSize` 默认 false），与 `showLanguage` 一致，由宿主按需开启。
 5. 尺寸偏好持久化 key 为 `pactor.size`，与 `pactor.locale` 同命名空间。
+6. 自定义数值经 documentElement 内联变量实现（优先级高于档位预设），`applyGlobalSizeValues(null)` 清除后回到档位；自定义值的持久化由宿主自负（ui 包只提供 apply/read，保持与主题一致的轻契约）。

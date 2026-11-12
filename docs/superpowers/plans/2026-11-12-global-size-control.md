@@ -17,6 +17,7 @@
 - **default 档值 = 现行尺寸**（h-6/8/9/10 = 1.5/2/2.25/2.5rem，text-xs/sm/base = 0.75/0.875/1rem）：不设置 `data-pactor-size` 时任何组件视觉零变化。
 - 令牌命名前缀 `--pactor-control-`；属性 `data-pactor-size`；持久化 key `pactor.size`。
 - 不新增依赖；不改动 `control-size.ts` 的导出签名（`ControlSize` / `CONTROL_SIZE_*` 名字与 Record 形状不变）。
+- 自定义数值优先级：**documentElement 内联变量 > `[data-pactor-size]` 档位 > `:root` default**（内联样式天然胜出，无需额外 CSS）。
 - i18n key 必须同时加进 `packages/runtime/src/context/locales/zh-CN.ts` 与 `en-US.ts`。
 - 提交信息用中文 / 英文均可，遵循仓库现有 `feat(ui): ...` 风格。
 - 测试命令：`cd packages/ui && pnpm test`（单文件：`pnpm vitest run tests/<file>`）；样式构建断言：`pnpm vitest run tests/build-styles.test.mjs`（仓库根目录）。
@@ -42,6 +43,9 @@
   - `readGlobalSize(): GlobalSize`（读 documentElement，非法/未设置回退 `'default'`）
   - `applyGlobalSize(size: GlobalSize): void`（default 移除属性，其余写 `data-pactor-size`）
   - `readStoredGlobalSize(): GlobalSize | null`、`persistGlobalSize(size): void`
+  - `interface GlobalSizeValues { heightXs?/heightSm?/heightMd?/heightLg?/textSm?/textMd?/textLg?/box?: string }`
+  - `applyGlobalSizeValues(values: GlobalSizeValues | null): void`（参数即完整覆盖集：给出的键写内联变量，未给出的键移除既有内联覆盖，null 清除全部）
+  - `readGlobalSizeValues(): GlobalSizeValues`（只读内联覆盖，无覆盖返回 `{}`）
   - 以上全部从 `@pactor-app/ui` 包根与 `@pactor-app/ui/ui` 均可导入。
 
 - [ ] **Step 1: 写失败测试**
@@ -54,14 +58,17 @@ import { afterEach, describe, expect, it } from 'vitest';
 
 import {
   applyGlobalSize,
+  applyGlobalSizeValues,
   globalSizeStorageKey,
   persistGlobalSize,
   readGlobalSize,
+  readGlobalSizeValues,
   readStoredGlobalSize,
 } from '../src/lib/global-size.js';
 
 afterEach(() => {
   document.documentElement.removeAttribute('data-pactor-size');
+  applyGlobalSizeValues(null);
   window.localStorage.removeItem(globalSizeStorageKey);
 });
 
@@ -87,6 +94,32 @@ describe('global-size', () => {
     expect(readStoredGlobalSize()).toBe('compact');
     window.localStorage.setItem(globalSizeStorageKey, 'huge');
     expect(readStoredGlobalSize()).toBeNull();
+  });
+
+  it('自定义数值：写内联变量、参数即完整覆盖集、null 清除全部', () => {
+    const style = document.documentElement.style;
+
+    applyGlobalSizeValues({ heightMd: '40px', textMd: '15px' });
+    expect(style.getPropertyValue('--pactor-control-height-md')).toBe('40px');
+    expect(style.getPropertyValue('--pactor-control-text-md')).toBe('15px');
+    expect(readGlobalSizeValues()).toEqual({ heightMd: '40px', textMd: '15px' });
+
+    // 第二次调用未给出的键移除既有覆盖（不与上一次合并）
+    applyGlobalSizeValues({ heightLg: '48px' });
+    expect(style.getPropertyValue('--pactor-control-height-md')).toBe('');
+    expect(style.getPropertyValue('--pactor-control-height-lg')).toBe('48px');
+
+    applyGlobalSizeValues(null);
+    expect(readGlobalSizeValues()).toEqual({});
+  });
+
+  it('内联自定义值优先于档位预设（inline style 高于样式表选择器）', () => {
+    // jsdom 不计算样式表级联，此处断言实现机制：内联变量与属性可共存，
+    // 浏览器中 inline style 优先级天然高于 [data-pactor-size] 块
+    applyGlobalSize('compact');
+    applyGlobalSizeValues({ heightMd: '40px' });
+    expect(document.documentElement.getAttribute('data-pactor-size')).toBe('compact');
+    expect(document.documentElement.style.getPropertyValue('--pactor-control-height-md')).toBe('40px');
   });
 });
 ```
@@ -167,6 +200,59 @@ export function persistGlobalSize(size: GlobalSize): void {
     // 忽略：存储被禁用时不影响菜单内切换
   }
 }
+
+/**
+ * 自定义数值覆盖：三档预设之外允许直接指定各令牌数值。
+ * 经 documentElement 内联变量实现，优先级高于样式表中的档位预设
+ * （inline style > [data-pactor-size] > :root）；持久化由宿主负责。
+ */
+export interface GlobalSizeValues {
+  heightXs?: string;
+  heightSm?: string;
+  heightMd?: string;
+  heightLg?: string;
+  textSm?: string;
+  textMd?: string;
+  textLg?: string;
+  box?: string;
+}
+
+const valueTokens: Record<keyof GlobalSizeValues, string> = {
+  heightXs: '--pactor-control-height-xs',
+  heightSm: '--pactor-control-height-sm',
+  heightMd: '--pactor-control-height-md',
+  heightLg: '--pactor-control-height-lg',
+  textSm: '--pactor-control-text-sm',
+  textMd: '--pactor-control-text-md',
+  textLg: '--pactor-control-text-lg',
+  box: '--pactor-control-box',
+};
+
+const valueKeys = Object.keys(valueTokens) as (keyof GlobalSizeValues)[];
+
+/** 应用自定义数值：参数即完整覆盖集——给出的键写内联变量，
+ *  未给出的键移除既有内联覆盖；传 null 清除全部，回到档位预设 */
+export function applyGlobalSizeValues(values: GlobalSizeValues | null): void {
+  if (typeof document === 'undefined') return;
+  const style = document.documentElement.style;
+  for (const key of valueKeys) {
+    const value = values?.[key];
+    if (value) style.setProperty(valueTokens[key], value);
+    else style.removeProperty(valueTokens[key]);
+  }
+}
+
+/** 读取当前内联覆盖（不含样式表档位值；无覆盖返回 {}） */
+export function readGlobalSizeValues(): GlobalSizeValues {
+  if (typeof document === 'undefined') return {};
+  const style = document.documentElement.style;
+  const values: GlobalSizeValues = {};
+  for (const key of valueKeys) {
+    const value = style.getPropertyValue(valueTokens[key]).trim();
+    if (value) values[key] = value;
+  }
+  return values;
+}
 ```
 
 - [ ] **Step 4: styles.css 加令牌与档位块**
@@ -222,12 +308,14 @@ export function persistGlobalSize(size: GlobalSize): void {
 ```ts
 export {
   applyGlobalSize,
+  applyGlobalSizeValues,
   globalSizeStorageKey,
   persistGlobalSize,
   readGlobalSize,
+  readGlobalSizeValues,
   readStoredGlobalSize,
 } from '../lib/global-size.js';
-export type { GlobalSize } from '../lib/global-size.js';
+export type { GlobalSize, GlobalSizeValues } from '../lib/global-size.js';
 ```
 
 `packages/ui/src/components/index.ts` 在 control-size 导出块（`export type { ControlSize } from './control-size.js';`）之后追加：
@@ -235,12 +323,14 @@ export type { GlobalSize } from '../lib/global-size.js';
 ```ts
 export {
   applyGlobalSize,
+  applyGlobalSizeValues,
   globalSizeStorageKey,
   persistGlobalSize,
   readGlobalSize,
+  readGlobalSizeValues,
   readStoredGlobalSize,
 } from '../lib/global-size.js';
-export type { GlobalSize } from '../lib/global-size.js';
+export type { GlobalSize, GlobalSizeValues } from '../lib/global-size.js';
 ```
 
 - [ ] **Step 6: 跑测试确认通过**
@@ -821,13 +911,20 @@ git commit -m "feat(ui): DSL UserMenu 透传密度切换 props"
 - import 区加：
 
 ```ts
-import { applyGlobalSize, readGlobalSize, type GlobalSize } from '@pactor-app/ui';
+import {
+  applyGlobalSize,
+  applyGlobalSizeValues,
+  readGlobalSize,
+  type GlobalSize,
+} from '@pactor-app/ui';
 ```
 
 - 组件内 `const skin = ...` 行之后加：
 
 ```ts
   const [density, setDensity] = useState<GlobalSize>(() => readGlobalSize());
+  /** 自定义控件高度基准（md，px）；null = 跟随密度档位预设 */
+  const [heightMd, setHeightMd] = useState<number | null>(null);
 ```
 
 - 「圆角」区块之后、「恢复默认」按钮之前加：
@@ -868,9 +965,58 @@ import { applyGlobalSize, readGlobalSize, type GlobalSize } from '@pactor-app/ui
               </button>
             ))}
           </div>
+
+          <div style={{ fontWeight: 600, margin: '16px 0 8px' }}>
+            控件高度（自定义）
+            {heightMd !== null && (
+              <button
+                type="button"
+                onClick={() => {
+                  applyGlobalSizeValues(null);
+                  setHeightMd(null);
+                }}
+                style={{
+                  marginLeft: 8,
+                  border: 'none',
+                  background: 'transparent',
+                  color: 'var(--primary)',
+                  cursor: 'pointer',
+                  fontSize: 12,
+                  fontWeight: 400,
+                }}
+              >
+                恢复档位
+              </button>
+            )}
+          </div>
+          <input
+            type="range"
+            min={32}
+            max={44}
+            step={1}
+            value={heightMd ?? 36}
+            aria-label="控件高度"
+            style={{ width: '100%' }}
+            onChange={(event) => {
+              const md = Number(event.target.value);
+              setHeightMd(md);
+              // 其余高度档按 default 档阶梯派生（24/32/36/40 → md-12/md-4/md/md+4）
+              applyGlobalSizeValues({
+                heightXs: `${md - 12}px`,
+                heightSm: `${md - 4}px`,
+                heightMd: `${md}px`,
+                heightLg: `${md + 4}px`,
+              });
+            }}
+          />
+          {heightMd !== null && (
+            <div style={{ color: 'var(--muted-foreground)', fontSize: 12 }}>
+              当前 {heightMd}px（自定义值优先于密度档位）
+            </div>
+          )}
 ```
 
-- 文件头注释「（主色预设 / 暗黑开关 / 圆角滑杆 / 恢复默认）」改为「（主色预设 / 暗黑开关 / 圆角滑杆 / 界面密度 / 恢复默认）」。
+- 文件头注释「（主色预设 / 暗黑开关 / 圆角滑杆 / 恢复默认）」改为「（主色预设 / 暗黑开关 / 圆角滑杆 / 界面密度 / 控件高度自定义 / 恢复默认）」。
 
 - [ ] **Step 2: 构建并手动验证**
 
@@ -885,7 +1031,7 @@ pnpm --filter @pactor-app/ui build && pnpm --filter example-admin dev
 `MEMORY.md` 最新条目之后追加一行：
 
 ```markdown
-- **全局密度档位**（2026-11-12 global-size-control）：`data-pactor-size="compact|comfortable"`（不设置=default）切换 `--pactor-control-*` 令牌（高度/字号/控件盒），default 档=现行尺寸零视觉变化；`control-size.ts` 四组映射已令牌化（12 个 DSL 表单控件自动跟随），vendored 原语 button/input/select/toggle/combobox/input-group/input-otp/checkbox/radio 同步。**坑：字号必须 `text-[length:var(--x)]`，`text-(--x)` 编译为 color 且 tailwind-merge 不去重**。UserMenu 新增 size/defaultSize/showSize/sizes/onSizeChange（与 theme 同构，持久化 `pactor.size`）；自定义组件用包根导出 applyGlobalSize/readGlobalSize（example-admin SkinSettings 已演示）。
+- **全局密度档位**（2026-11-12 global-size-control）：`data-pactor-size="compact|comfortable"`（不设置=default）切换 `--pactor-control-*` 令牌（高度/字号/控件盒），default 档=现行尺寸零视觉变化；`control-size.ts` 四组映射已令牌化（12 个 DSL 表单控件自动跟随），vendored 原语 button/input/select/toggle/combobox/input-group/input-otp/checkbox/radio 同步。**坑：字号必须 `text-[length:var(--x)]`，`text-(--x)` 编译为 color 且 tailwind-merge 不去重**。UserMenu 新增 size/defaultSize/showSize/sizes/onSizeChange（与 theme 同构，持久化 `pactor.size`）；自定义数值走 applyGlobalSizeValues/readGlobalSizeValues（documentElement 内联变量，优先级高于档位预设，null 清除）；自定义组件入口 applyGlobalSize/readGlobalSize（example-admin SkinSettings 已演示三档切换 + 高度滑杆）。
 ```
 
 - [ ] **Step 4: Commit**
@@ -921,4 +1067,5 @@ Expected: 计数 > 0（令牌定义 + 工具类引用均存在）。
 1. default 档与改动前像素级一致；
 2. compact / comfortable 差异明显（控件高度 ±4px 以上）；
 3. 弹层（Select/Dropdown 等 portal 挂 body）同样跟随；
-4. 刷新后密度偏好保持（UserMenu 非受控路径）。
+4. 刷新后密度偏好保持（UserMenu 非受控路径）；
+5. SkinSettings 控件高度滑杆：拖动后 Button/Input 高度按自定义值渲染，且覆盖密度档位；「恢复档位」后回到预设。
