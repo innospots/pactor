@@ -47,13 +47,16 @@ function Calendar({
         month_grid: cn('w-full border-collapse', defaultClassNames.month_grid),
         weekdays: cn('flex', defaultClassNames.weekdays),
         weekday: cn(
-          'w-8 rounded-md text-[0.8rem] font-normal text-muted-foreground',
+          'w-(--pactor-calendar-day-size) rounded-md text-[0.8rem] font-normal text-muted-foreground',
           defaultClassNames.weekday,
         ),
         week: cn('mt-2 flex w-full', defaultClassNames.week),
-        day: cn('h-8 w-8 p-0 text-center text-sm', defaultClassNames.day),
+        day: cn(
+          'h-(--pactor-calendar-day-size) w-(--pactor-calendar-day-size) p-0 text-center text-[length:var(--pactor-control-text-md)]',
+          defaultClassNames.day,
+        ),
         day_button: cn(
-          'size-8 cursor-pointer rounded-md p-0 font-normal hover:bg-(--calendar-day-hover-background) hover:text-(--calendar-day-hover-foreground) aria-selected:opacity-100',
+          'size-(--pactor-calendar-day-size) cursor-pointer rounded-md p-0 font-normal hover:bg-(--calendar-day-hover-background) hover:text-(--calendar-day-hover-foreground) aria-selected:opacity-100',
           defaultClassNames.day_button,
         ),
         selected: cn(

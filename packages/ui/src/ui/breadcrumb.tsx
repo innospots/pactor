@@ -103,7 +103,10 @@ function BreadcrumbEllipsis({ className, ...props }: React.ComponentProps<'span'
       data-slot="breadcrumb-ellipsis"
       role="presentation"
       aria-hidden="true"
-      className={cn('flex size-9 items-center justify-center', className)}
+      className={cn(
+        'flex size-(--pactor-control-height-md) items-center justify-center',
+        className,
+      )}
       {...props}
     >
       <MoreHorizontalIcon className="size-4" />

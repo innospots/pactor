@@ -57,4 +57,8 @@ describe('pactor-app aggregated styles', () => {
     expect(css).toContain('.py-\\(--pactor-table-cell-padding-y\\)');
     expect(css).toContain('.h-\\(--pactor-table-head-height\\)');
   });
+
+  it('日历日期格编译为密度令牌引用', () => {
+    expect(css).toContain('.size-\\(--pactor-calendar-day-size\\)');
+  });
 });

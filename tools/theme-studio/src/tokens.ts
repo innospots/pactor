@@ -155,6 +155,7 @@ export const TOKEN_GROUPS: TokenGroup[] = [
       { name: '--pactor-menu-item-padding-y', type: 'length', description: '菜单项纵向内边距（DropdownMenu / ContextMenu / Menubar 项）', defaultValue: '0.375rem', slider: { min: 0.125, max: 0.75, step: 0.0625 } },
       { name: '--pactor-table-head-height', type: 'length', description: '表格表头行高', defaultValue: '2.5rem', slider: { min: 1.75, max: 3.5, step: 0.125 } },
       { name: '--pactor-table-cell-padding-y', type: 'length', description: '表格单元格纵向内边距（行高由此派生）', defaultValue: '0.5rem', slider: { min: 0.125, max: 1, step: 0.0625 } },
+      { name: '--pactor-calendar-day-size', type: 'length', description: '日历日期格尺寸（DatePicker 面板）', defaultValue: '2rem', slider: { min: 1.5, max: 2.75, step: 0.125 } },
     ],
   },
   {
