@@ -69,6 +69,12 @@
   }
 }
 
+/* EntityCardList 卡片菜单：为右上角常显的省略号触发器预留头部空间，
+   避免标题 / 标签被遮挡（仅配置 menuItems 时存在该外壳） */
+[data-slot='entity-card-list-item'] [data-slot='entity-card-header'] {
+  padding-right: 40px;
+}
+
 /* FileManager 窄视口降级（≤768px）：左右分栏转上下堆叠——目录树整宽在上
   （限高滚动），内容区在下，避免侧栏吃掉编辑器宽度 */
 @media (max-width: 768px) {

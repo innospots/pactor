@@ -244,7 +244,18 @@ export type { FieldRule, InputProps } from './components/Input/index.js';
 export { NumberInput } from './components/NumberInput/index.js';
 export type { NumberInputProps } from './components/NumberInput/index.js';
 export { Select } from './components/Select/index.js';
-export type { SelectOption, SelectProps } from './components/Select/index.js';
+export type {
+  SelectOption,
+  SelectOptionEntry,
+  SelectOptionGroup,
+  SelectProps,
+} from './components/Select/index.js';
+export { MultiSelect } from './components/MultiSelect/index.js';
+export type {
+  MultiSelectOption,
+  MultiSelectProps,
+  MultiSelectValue,
+} from './components/MultiSelect/index.js';
 export { Textarea } from './components/Textarea/index.js';
 export type { TextareaProps } from './components/Textarea/index.js';
 export { Checkbox } from './components/Checkbox/index.js';
@@ -258,6 +269,8 @@ export { ChipFilter } from './components/ChipFilter/index.js';
 export type { ChipFilterItem, ChipFilterProps } from './components/ChipFilter/index.js';
 export { ChipNode } from './components/ChipNode/index.js';
 export type { ChipNodeProps } from './components/ChipNode/index.js';
+export { ChipSelect } from './components/ChipSelect/index.js';
+export type { ChipSelectItem, ChipSelectProps } from './components/ChipSelect/index.js';
 export { RadioGroup } from './components/RadioGroup/index.js';
 export type { RadioGroupOption, RadioGroupProps, RadioGroupVariant } from './components/RadioGroup/index.js';
 export { Switch } from './components/Switch/index.js';

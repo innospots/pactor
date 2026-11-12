@@ -23,6 +23,7 @@ import {
   SelectTrigger,
   SelectValue,
   Tabs,
+  TabsAddButton,
   TabsList,
   TabsTrigger,
 } from '../src/ui/index.js';
@@ -100,6 +101,7 @@ describe('/ui 子路径汇总导出', () => {
       'TableRow',
       // tabs / textarea
       'Tabs',
+      'TabsAddButton',
       'TabsContent',
       'TabsList',
       'TabsTrigger',
@@ -204,6 +206,101 @@ describe('/ui 原语可渲染', () => {
       .parentElement as HTMLElement;
     expect(list.dataset.size).toBe('default');
     expect(list.className).toContain('h-9');
+  });
+
+  it('Tabs：page 变体标记 data-variant 且非 closable 页签保持单按钮结构', () => {
+    render(
+      <Tabs defaultValue="a">
+        <TabsList variant="page">
+          <TabsTrigger value="a">甲</TabsTrigger>
+        </TabsList>
+      </Tabs>,
+    );
+    const tab = screen.getByRole('tab', { name: '甲' });
+    const list = tab.parentElement as HTMLElement;
+    expect(list.dataset.variant).toBe('page');
+    expect(list.className).toContain('pactor-tabs-page');
+    expect(tab.dataset.slot).toBe('tabs-trigger');
+  });
+
+  it('Tabs：iconPosition 控制状态图标位于页签名前 / 后', () => {
+    const { unmount } = render(
+      <Tabs defaultValue="a">
+        <TabsList variant="page">
+          <TabsTrigger icon={<span>图标</span>} value="a">
+            甲
+          </TabsTrigger>
+        </TabsList>
+      </Tabs>,
+    );
+    expect(
+      screen.getByRole('tab', { name: '甲' }).firstElementChild?.getAttribute(
+        'data-slot',
+      ),
+    ).toBe('tabs-trigger-icon');
+    unmount();
+
+    render(
+      <Tabs defaultValue="a">
+        <TabsList variant="page">
+          <TabsTrigger icon={<span>图标</span>} iconPosition="end" value="a">
+            甲
+          </TabsTrigger>
+        </TabsList>
+      </Tabs>,
+    );
+    expect(
+      screen.getByRole('tab', { name: '甲' }).lastElementChild?.getAttribute(
+        'data-slot',
+      ),
+    ).toBe('tabs-trigger-icon');
+  });
+
+  it('Tabs：closable 页签的关闭按钮与页签按钮为兄弟节点，关闭不切换激活页签', () => {
+    const onClose = vi.fn();
+    render(
+      <Tabs defaultValue="a">
+        <TabsList variant="page">
+          <TabsTrigger value="a">甲</TabsTrigger>
+          <TabsTrigger
+            closable
+            closeLabel="关闭 乙"
+            value="b"
+            onClose={onClose}
+          >
+            乙
+          </TabsTrigger>
+        </TabsList>
+      </Tabs>,
+    );
+
+    const tab = screen.getByRole('tab', { name: '乙' });
+    const wrapper = tab.parentElement as HTMLElement;
+    const close = screen.getByRole('button', { name: '关闭 乙' });
+    expect(wrapper.dataset.slot).toBe('tabs-trigger-wrapper');
+    expect(close.parentElement).toBe(wrapper);
+    expect(close.contains(tab)).toBe(false);
+
+    fireEvent.click(close);
+    expect(onClose).toHaveBeenCalledTimes(1);
+    expect(
+      screen.getByRole('tab', { name: '甲' }).getAttribute('aria-selected'),
+    ).toBe('true');
+  });
+
+  it('Tabs：TabsAddButton 使用 aria-label 并触发 onClick', () => {
+    const onAdd = vi.fn();
+    render(
+      <Tabs defaultValue="a">
+        <TabsList variant="page">
+          <TabsTrigger value="a">甲</TabsTrigger>
+          <TabsAddButton label="新建页面" onClick={onAdd} />
+        </TabsList>
+      </Tabs>,
+    );
+
+    fireEvent.click(screen.getByRole('button', { name: '新建页面' }));
+    expect(onAdd).toHaveBeenCalledTimes(1);
   });
 
   it('Select：弹层最小宽度跟随触发器（--anchor-width）', async () => {

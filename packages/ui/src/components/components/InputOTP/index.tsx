@@ -1,4 +1,4 @@
-import { useEffect, useState, type CSSProperties } from 'react';
+import { useEffect, useId, useState, type CSSProperties } from 'react';
 
 import { cn } from '../../../lib/utils.js';
 import {
@@ -29,6 +29,9 @@ export interface InputOTPProps {
   className?: string;
   /** 通用：根节点内联样式（同 className 的挂载规则） */
   style?: CSSProperties;
+  /** 输入框 id（挂在隐藏的真实 input 上）；缺省自动生成。
+   * 独立渲染时供外部 label 的 htmlFor 关联 */
+  id?: string;
 }
 
 /**
@@ -48,8 +51,11 @@ export function InputOTP({
   onComplete,
   className,
   style,
+  id,
 }: InputOTPProps) {
   const form = useFormContext();
+  const generatedId = useId();
+  const controlId = id ?? generatedId;
   const inForm = form?.inForm === true && typeof name === 'string' && name !== '';
 
   useEffect(() => {
@@ -87,6 +93,7 @@ export function InputOTP({
 
   const control = (
     <ShadcnInputOTP
+      id={controlId}
       maxLength={length}
       value={current}
       onChange={handleChange}

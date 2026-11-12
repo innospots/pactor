@@ -43,6 +43,7 @@ export { EntityCardList } from './components/EntityCardList/index.js';
 export type {
   EntityCardListItem,
   EntityCardListProps,
+  EntityCardMenuItem,
 } from './components/EntityCardList/index.js';
 export { RecordingPage } from './components/RecordingPage/index.js';
 export type {

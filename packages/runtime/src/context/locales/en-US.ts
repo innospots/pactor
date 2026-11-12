@@ -19,6 +19,7 @@ export const enUS = {
   'pactor.table.dragRow': 'Drag to reorder',
   'pactor.form.required': 'Required',
   'pactor.control.clear': 'Clear',
+  'pactor.chipSelect.remove': 'Remove {{text}}',
   'pactor.select.clear': 'Clear',
   'pactor.select.search': 'Search options',
   'pactor.input.clear': 'Clear',

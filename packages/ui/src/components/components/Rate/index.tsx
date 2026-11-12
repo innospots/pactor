@@ -1,6 +1,6 @@
 import { useI18n } from '@pactor-app/runtime';
 import { Star } from 'lucide-react';
-import { useEffect, useState, type CSSProperties } from 'react';
+import { useEffect, useId, useState, type CSSProperties } from 'react';
 
 import { cn } from '../../../lib/utils.js';
 import { useFormContext } from '../Form/context.js';
@@ -27,6 +27,9 @@ export interface RateProps {
   className?: string;
   /** 通用：根节点内联样式（同 className 的挂载规则） */
   style?: CSSProperties;
+  /** 控件根节点 id；缺省自动生成。分组控件无法被 label 的 htmlFor 关联，
+   * 供外部 aria-labelledby 引用（独立渲染时也可作为锚点） */
+  id?: string;
 }
 
 /**
@@ -45,8 +48,11 @@ export function Rate({
   onChange,
   className,
   style,
+  id,
 }: RateProps) {
   const form = useFormContext();
+  const generatedId = useId();
+  const controlId = id ?? generatedId;
   const inForm = form?.inForm === true && typeof name === 'string' && name !== '';
 
   useEffect(() => {
@@ -126,6 +132,7 @@ export function Rate({
 
   const control = (
     <div
+      id={controlId}
       data-slot="rate"
       role="radiogroup"
       className={cn(

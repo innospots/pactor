@@ -404,6 +404,176 @@
   cursor: pointer;
 }
 
+/* page 变体：可编辑页面页签（TabsList variant="page"）。
+   列表是浅灰页签条；inset shadow 作为整条底部分隔线，每个页签自带 1px
+   描边和顶部圆角，底边压在分隔线上。激活页签用卡片底 + 主色文字，并把
+   自身底边设为透明，让卡片底覆盖分隔线，形成与内容区连通的缺口。
+   关闭按钮与页签按钮是兄弟节点（见 tabs.tsx），绝对定位在页签右侧。 */
+[data-slot='tabs-list'][data-variant='page'] {
+  display: flex;
+  width: 100%;
+  height: auto;
+  align-items: flex-end;
+  justify-content: flex-start;
+  gap: 2px;
+  padding: 8px 10px 0;
+  overflow-x: auto;
+  border-radius: 0;
+  background: color-mix(in srgb, var(--muted) 82%, var(--background));
+  box-shadow: inset 0 -1px 0 var(--border);
+  scrollbar-width: none;
+}
+
+[data-slot='tabs-list'][data-variant='page']::-webkit-scrollbar {
+  display: none;
+}
+
+[data-slot='tabs-list'][data-variant='page']
+  > [data-slot='tabs-trigger-wrapper'] {
+  position: relative;
+  display: inline-flex;
+  flex: none;
+  align-items: stretch;
+}
+
+[data-slot='tabs-list'][data-variant='page'] [data-slot='tabs-trigger'] {
+  display: inline-flex;
+  height: 36px;
+  min-width: 0;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 0 12px;
+  border: 1px solid var(--border);
+  border-radius: 6px 6px 0 0;
+  background: color-mix(in srgb, var(--card) 62%, var(--muted));
+  color: var(--muted-foreground);
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 20px;
+  white-space: nowrap;
+  transition:
+    background-color 0.15s ease,
+    border-color 0.15s ease,
+    color 0.15s ease;
+}
+
+[data-slot='tabs-list'][data-variant='page']
+  [data-slot='tabs-trigger'][data-closable] {
+  padding-right: 32px;
+}
+
+[data-slot='tabs-list'][data-variant='page']
+  [data-slot='tabs-trigger'][data-active] {
+  border-bottom-color: transparent;
+  background: var(--card);
+  color: var(--primary);
+}
+
+@media (hover: hover) {
+  [data-slot='tabs-list'][data-variant='page']
+    [data-slot='tabs-trigger']:not([data-active]):hover {
+    border-color: color-mix(
+      in srgb,
+      var(--border) 70%,
+      var(--muted-foreground)
+    );
+    background: var(--card);
+    color: var(--foreground);
+  }
+}
+
+[data-slot='tabs-list'][data-variant='page'] [data-slot='tabs-trigger-icon'] {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  color: color-mix(in srgb, var(--muted-foreground) 78%, var(--primary));
+}
+
+[data-slot='tabs-list'][data-variant='page']
+  [data-slot='tabs-trigger-icon']
+  svg {
+  width: 12px;
+  height: 12px;
+}
+
+[data-slot='tabs-list'][data-variant='page'] [data-slot='tabs-trigger-close'] {
+  position: absolute;
+  top: 50%;
+  right: 4px;
+  display: inline-flex;
+  width: 20px;
+  height: 20px;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  border: 0;
+  border-radius: 4px;
+  background: transparent;
+  color: var(--muted-foreground);
+  cursor: pointer;
+  /* 垂直居中由 TabsTrigger 关闭按钮的 -translate-y-1/2（translate 属性）
+     承担；此处不能再写 transform: translateY(-50%)，否则两套位移叠加，
+     关闭按钮会整体上移半个自身高度。 */
+  transition:
+    background-color 0.15s ease,
+    color 0.15s ease;
+}
+
+[data-slot='tabs-list'][data-variant='page']
+  [data-slot='tabs-trigger-close']:hover {
+  background: var(--muted);
+  color: var(--foreground);
+}
+
+[data-slot='tabs-list'][data-variant='page']
+  [data-slot='tabs-trigger-close']
+  svg {
+  width: 12px;
+  height: 12px;
+}
+
+[data-slot='tabs-list'][data-variant='page'] > [data-slot='tabs-add'] {
+  display: inline-flex;
+  width: 36px;
+  height: 36px;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  border: 1px solid var(--border);
+  border-radius: 6px 6px 0 0;
+  background: transparent;
+  color: var(--muted-foreground);
+  cursor: pointer;
+  transition:
+    background-color 0.15s ease,
+    border-color 0.15s ease,
+    color 0.15s ease;
+}
+
+[data-slot='tabs-list'][data-variant='page'] > [data-slot='tabs-add']:hover {
+  border-color: var(--primary);
+  background: var(--card);
+  color: var(--primary);
+}
+
+[data-slot='tabs-list'][data-variant='page'] > [data-slot='tabs-add'] svg {
+  width: 15px;
+  height: 15px;
+}
+
+[data-slot='tabs-list'][data-variant='page']
+  [data-slot='tabs-trigger']:focus-visible,
+[data-slot='tabs-list'][data-variant='page']
+  [data-slot='tabs-trigger-close']:focus-visible,
+[data-slot='tabs-list'][data-variant='page']
+  > [data-slot='tabs-add']:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 1px;
+}
+
 @media (hover: hover) {
   .group:hover .pactor-clearable {
     display: inline-flex;

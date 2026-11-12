@@ -53,6 +53,9 @@ export interface RadioGroupProps {
   className?: string;
   /** 通用：根节点内联样式（同 className 的挂载规则） */
   style?: CSSProperties;
+  /** 控件根节点 id；缺省自动生成。分组控件无法被 label 的 htmlFor 关联，
+   * 供外部 aria-labelledby 引用（独立渲染时也可作为锚点） */
+  id?: string;
 }
 
 interface HighlightBox {
@@ -75,6 +78,7 @@ function RadioCards({
   onSelect,
   className,
   style,
+  id,
 }: {
   options: RadioGroupOption[];
   groupValue: RadioGroupOption['value'];
@@ -84,6 +88,7 @@ function RadioCards({
   onSelect: (value: RadioGroupOption['value']) => void;
   className?: string;
   style?: CSSProperties;
+  id?: string;
 }) {
   const listRef = useRef<HTMLDivElement>(null);
   const [highlight, setHighlight] = useState<HighlightBox | null>(null);
@@ -119,6 +124,7 @@ function RadioCards({
   return (
     <div
       ref={listRef}
+      id={id}
       data-slot="radio-group"
       data-variant="cards"
       role="radiogroup"
@@ -220,9 +226,11 @@ export function RadioGroup({
   onChange,
   className,
   style,
+  id,
 }: RadioGroupProps) {
   const form = useFormContext();
-  const controlId = useId();
+  const generatedId = useId();
+  const controlId = id ?? generatedId;
   const inForm = form?.inForm === true && typeof name === 'string' && name !== '';
 
   useEffect(() => {
@@ -249,6 +257,7 @@ export function RadioGroup({
   const group =
     variant === 'cards' ? (
       <RadioCards
+        id={controlId}
         options={options}
         groupValue={groupValue}
         groupName={inForm && name ? name : controlId}
@@ -260,6 +269,7 @@ export function RadioGroup({
       />
     ) : (
       <ShadcnRadioGroup<RadioGroupOption['value']>
+        id={controlId}
         value={groupValue}
         onValueChange={handleChange}
         disabled={disabled}

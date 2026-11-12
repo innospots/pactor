@@ -111,6 +111,7 @@ export function createDefaultTranslatableFieldRegistry(): TranslatableFieldRegis
     .register('FileManager', ['props.title', 'props.treeTitle'])
     .register('Statistic', 'props.title')
     .register('Alert', ['props.message', 'props.description'])
+    .register('Badge', 'props.text')
     .register('Empty', ['props.title', 'props.description'])
     .register('Typography', 'props.text')
     .register('Login', [
@@ -145,6 +146,13 @@ export function createDefaultTranslatableFieldRegistry(): TranslatableFieldRegis
       'props.description',
       'props.ariaLabel',
       'props.options[*].label',
+    ])
+    .register('MultiSelect', [
+      'props.label',
+      'props.placeholder',
+      'props.ariaLabel',
+      'props.options[*].label',
+      'props.rules[*].message',
     ])
     .register('DatePicker', ['props.placeholder', 'props.presets[*].label'])
     .register('ToggleGroup', ['props.options[*].label'])

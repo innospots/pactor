@@ -5,7 +5,7 @@
  */
 
 /* ============================================================
- * @pactor-app/ui@1.65.0（构建产物内联，源顺序：ui → blocks → chart → chat）
+ * @pactor-app/ui@1.66.0（构建产物内联，源顺序：ui → blocks → chart → chat）
  * ============================================================ */
 /*! tailwindcss v4.3.3 | MIT License | https://tailwindcss.com */
 @layer properties;
@@ -717,6 +717,138 @@ div.pactor-markdown-editor-root.mdxeditor, div.pactor-markdown-editor-root.mdxed
 .pactor-tabs-pill {
   cursor: pointer;
 }
+[data-slot='tabs-list'][data-variant='page'] {
+  display: flex;
+  width: 100%;
+  height: auto;
+  align-items: flex-end;
+  justify-content: flex-start;
+  gap: 2px;
+  padding: 8px 10px 0;
+  overflow-x: auto;
+  border-radius: 0;
+  background: var(--muted);
+  @supports (color: color-mix(in lab, red, red)) {
+    background: color-mix(in srgb, var(--muted) 82%, var(--background));
+  }
+  box-shadow: inset 0 -1px 0 var(--border);
+  scrollbar-width: none;
+}
+[data-slot='tabs-list'][data-variant='page']::-webkit-scrollbar {
+  display: none;
+}
+[data-slot='tabs-list'][data-variant='page'] > [data-slot='tabs-trigger-wrapper'] {
+  position: relative;
+  display: inline-flex;
+  flex: none;
+  align-items: stretch;
+}
+[data-slot='tabs-list'][data-variant='page'] [data-slot='tabs-trigger'] {
+  display: inline-flex;
+  height: 36px;
+  min-width: 0;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 0 12px;
+  border: 1px solid var(--border);
+  border-radius: 6px 6px 0 0;
+  background: var(--card);
+  @supports (color: color-mix(in lab, red, red)) {
+    background: color-mix(in srgb, var(--card) 62%, var(--muted));
+  }
+  color: var(--muted-foreground);
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 20px;
+  white-space: nowrap;
+  transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+}
+[data-slot='tabs-list'][data-variant='page'] [data-slot='tabs-trigger'][data-closable] {
+  padding-right: 32px;
+}
+[data-slot='tabs-list'][data-variant='page'] [data-slot='tabs-trigger'][data-active] {
+  border-bottom-color: transparent;
+  background: var(--card);
+  color: var(--primary);
+}
+@media (hover: hover) {
+  [data-slot='tabs-list'][data-variant='page'] [data-slot='tabs-trigger']:not([data-active]):hover {
+    border-color: var(--border);
+    @supports (color: color-mix(in lab, red, red)) {
+      border-color: color-mix( in srgb, var(--border) 70%, var(--muted-foreground) );
+    }
+    background: var(--card);
+    color: var(--foreground);
+  }
+}
+[data-slot='tabs-list'][data-variant='page'] [data-slot='tabs-trigger-icon'] {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  color: var(--muted-foreground);
+  @supports (color: color-mix(in lab, red, red)) {
+    color: color-mix(in srgb, var(--muted-foreground) 78%, var(--primary));
+  }
+}
+[data-slot='tabs-list'][data-variant='page'] [data-slot='tabs-trigger-icon'] svg {
+  width: 12px;
+  height: 12px;
+}
+[data-slot='tabs-list'][data-variant='page'] [data-slot='tabs-trigger-close'] {
+  position: absolute;
+  top: 50%;
+  right: 4px;
+  display: inline-flex;
+  width: 20px;
+  height: 20px;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  border: 0;
+  border-radius: 4px;
+  background: transparent;
+  color: var(--muted-foreground);
+  cursor: pointer;
+  transition: background-color 0.15s ease, color 0.15s ease;
+}
+[data-slot='tabs-list'][data-variant='page'] [data-slot='tabs-trigger-close']:hover {
+  background: var(--muted);
+  color: var(--foreground);
+}
+[data-slot='tabs-list'][data-variant='page'] [data-slot='tabs-trigger-close'] svg {
+  width: 12px;
+  height: 12px;
+}
+[data-slot='tabs-list'][data-variant='page'] > [data-slot='tabs-add'] {
+  display: inline-flex;
+  width: 36px;
+  height: 36px;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  border: 1px solid var(--border);
+  border-radius: 6px 6px 0 0;
+  background: transparent;
+  color: var(--muted-foreground);
+  cursor: pointer;
+  transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+}
+[data-slot='tabs-list'][data-variant='page'] > [data-slot='tabs-add']:hover {
+  border-color: var(--primary);
+  background: var(--card);
+  color: var(--primary);
+}
+[data-slot='tabs-list'][data-variant='page'] > [data-slot='tabs-add'] svg {
+  width: 15px;
+  height: 15px;
+}
+[data-slot='tabs-list'][data-variant='page'] [data-slot='tabs-trigger']:focus-visible, [data-slot='tabs-list'][data-variant='page'] [data-slot='tabs-trigger-close']:focus-visible, [data-slot='tabs-list'][data-variant='page'] > [data-slot='tabs-add']:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 1px;
+}
 @media (hover: hover) {
   .group:hover .pactor-clearable {
     display: inline-flex;
@@ -1147,7 +1279,7 @@ div.pactor-markdown-editor-root.mdxeditor, div.pactor-markdown-editor-root.mdxed
 }
 
 /* ============================================================
- * @pactor-app/blocks@1.65.0（构建产物内联，源顺序：ui → blocks → chart → chat）
+ * @pactor-app/blocks@1.66.0（构建产物内联，源顺序：ui → blocks → chart → chat）
  * ============================================================ */
 /*! tailwindcss v4.3.3 | MIT License | https://tailwindcss.com */
 @layer properties;
@@ -1238,6 +1370,9 @@ div.pactor-markdown-editor-root.mdxeditor, div.pactor-markdown-editor-root.mdxed
   [data-slot='entity-card-list-grid'] {
     grid-template-columns: minmax(0, 1fr) !important;
   }
+}
+[data-slot='entity-card-list-item'] [data-slot='entity-card-header'] {
+  padding-right: 40px;
 }
 @media (max-width: 768px) {
   [data-slot='file-manager'] {
@@ -1500,7 +1635,7 @@ div.pactor-markdown-editor-root.mdxeditor, div.pactor-markdown-editor-root.mdxed
 }
 
 /* ============================================================
- * @pactor-app/chart@1.65.0（构建产物内联，源顺序：ui → blocks → chart → chat）
+ * @pactor-app/chart@1.66.0（构建产物内联，源顺序：ui → blocks → chart → chat）
  * ============================================================ */
 /*! tailwindcss v4.3.3 | MIT License | https://tailwindcss.com */
 @layer properties;
@@ -1644,7 +1779,7 @@ div.pactor-markdown-editor-root.mdxeditor, div.pactor-markdown-editor-root.mdxed
 }
 
 /* ============================================================
- * @pactor-app/chat@1.65.0（构建产物内联，源顺序：ui → blocks → chart → chat）
+ * @pactor-app/chat@1.66.0（构建产物内联，源顺序：ui → blocks → chart → chat）
  * ============================================================ */
 /*! tailwindcss v4.3.3 | MIT License | https://tailwindcss.com */
 @layer properties;
@@ -4037,6 +4172,9 @@ button.pactor-chat-trace__header:hover, .pactor-chat-trace__entry-header:hover, 
 .max-h-\[300px\] {
     max-height: 300px;
   }
+.max-h-\[min\(440px\,calc\(100dvh-220px\)\)\] {
+    max-height: min(440px, calc(100dvh - 220px));
+  }
 .max-h-full {
     max-height: 100%;
   }
@@ -4078,6 +4216,9 @@ button.pactor-chat-trace__header:hover, .pactor-chat-trace__entry-header:hover, 
   }
 .w-\(--sidebar-width\) {
     width: var(--sidebar-width);
+  }
+.w-0 {
+    width: 0px;
   }
 .w-1\/2 {
     width: calc(1 / 2 * 100%);
@@ -4168,6 +4309,9 @@ button.pactor-chat-trace__header:hover, .pactor-chat-trace__entry-header:hover, 
   }
 .w-\[209px\] {
     width: 209px;
+  }
+.w-\[760px\] {
+    width: 760px;
   }
 .w-auto {
     width: auto;
@@ -4504,6 +4648,9 @@ button.pactor-chat-trace__header:hover, .pactor-chat-trace__entry-header:hover, 
 .place-items-center {
     place-items: center;
   }
+.content-start {
+    align-content: flex-start;
+  }
 .items-baseline {
     align-items: baseline;
   }
@@ -4668,6 +4815,9 @@ button.pactor-chat-trace__header:hover, .pactor-chat-trace__entry-header:hover, 
 .rounded-\[2px\] {
     border-radius: 2px;
   }
+.rounded-\[3px\] {
+    border-radius: 3px;
+  }
 .rounded-\[4px\] {
     border-radius: 4px;
   }
@@ -4806,6 +4956,12 @@ button.pactor-chat-trace__header:hover, .pactor-chat-trace__entry-header:hover, 
   }
 .border-primary {
     border-color: var(--primary);
+  }
+.border-primary\/40 {
+    border-color: var(--primary);
+    @supports (color: color-mix(in lab, red, red)) {
+      border-color: color-mix(in oklab, var(--primary) 40%, transparent);
+    }
   }
 .border-sidebar-border {
     border-color: var(--sidebar-border);
@@ -5061,6 +5217,9 @@ button.pactor-chat-trace__header:hover, .pactor-chat-trace__entry-header:hover, 
   }
 .px-3 {
     padding-inline: calc(var(--spacing) * 3);
+  }
+.px-3\.5 {
+    padding-inline: calc(var(--spacing) * 3.5);
   }
 .px-4 {
     padding-inline: calc(var(--spacing) * 4);
@@ -5613,6 +5772,11 @@ button.pactor-chat-trace__header:hover, .pactor-chat-trace__entry-header:hover, 
     transition-timing-function: var(--tw-ease, var(--default-transition-timing-function));
     transition-duration: var(--tw-duration, var(--default-transition-duration));
   }
+.transition-\[width\,opacity\,margin\] {
+    transition-property: width,opacity,margin;
+    transition-timing-function: var(--tw-ease, var(--default-transition-timing-function));
+    transition-duration: var(--tw-duration, var(--default-transition-duration));
+  }
 .transition-\[width\] {
     transition-property: width;
     transition-timing-function: var(--tw-ease, var(--default-transition-timing-function));
@@ -5726,6 +5890,9 @@ button.pactor-chat-trace__header:hover, .pactor-chat-trace__entry-header:hover, 
 .top-1\/3 {
     top: calc(1 / 3 * 100%);
   }
+.top-4 {
+    top: calc(var(--spacing) * 4);
+  }
 .top-16 {
     top: calc(var(--spacing) * 16);
   }
@@ -5734,6 +5901,9 @@ button.pactor-chat-trace__header:hover, .pactor-chat-trace__entry-header:hover, 
   }
 .-right-24 {
     right: calc(var(--spacing) * -24);
+  }
+.right-5 {
+    right: calc(var(--spacing) * 5);
   }
 .right-10 {
     right: calc(var(--spacing) * 10);
@@ -5920,6 +6090,9 @@ button.pactor-chat-trace__header:hover, .pactor-chat-trace__entry-header:hover, 
 .h-8 {
     height: calc(var(--spacing) * 8);
   }
+.h-9 {
+    height: calc(var(--spacing) * 9);
+  }
 .h-10 {
     height: calc(var(--spacing) * 10);
   }
@@ -6066,6 +6239,9 @@ button.pactor-chat-trace__header:hover, .pactor-chat-trace__entry-header:hover, 
   }
 .min-w-32 {
     min-width: calc(var(--spacing) * 32);
+  }
+.min-w-\[168px\] {
+    min-width: 168px;
   }
 .flex-1 {
     flex: 1;
@@ -6231,6 +6407,10 @@ button.pactor-chat-trace__header:hover, .pactor-chat-trace__entry-header:hover, 
 .border {
     border-style: var(--tw-border-style);
     border-width: 1px;
+  }
+.border-0 {
+    border-style: var(--tw-border-style);
+    border-width: 0px;
   }
 .border-\[12px\] {
     border-style: var(--tw-border-style);
@@ -6470,6 +6650,9 @@ button.pactor-chat-trace__header:hover, .pactor-chat-trace__entry-header:hover, 
   }
 .px-2 {
     padding-inline: calc(var(--spacing) * 2);
+  }
+.px-2\.5 {
+    padding-inline: calc(var(--spacing) * 2.5);
   }
 .px-3 {
     padding-inline: calc(var(--spacing) * 3);
@@ -7608,6 +7791,15 @@ button.pactor-chat-trace__header:hover, .pactor-chat-trace__entry-header:hover, 
     .group-hover\/menu-item\:opacity-100:is(:where(.group\/menu-item):hover *) {
       opacity: 100%;
     }
+    .group-hover\/tag\:ml-1:is(:where(.group\/tag):hover *) {
+      margin-left: var(--spacing);
+    }
+    .group-hover\/tag\:w-3\.5:is(:where(.group\/tag):hover *) {
+      width: calc(var(--spacing) * 3.5);
+    }
+    .group-hover\/tag\:opacity-100:is(:where(.group\/tag):hover *) {
+      opacity: 100%;
+    }
     .group-hover\/user-menu\:text-foreground:is(:where(.group\/user-menu):hover *) {
       color: var(--foreground);
     }
@@ -8037,6 +8229,9 @@ button.pactor-chat-trace__header:hover, .pactor-chat-trace__entry-header:hover, 
     box-shadow: var(--tw-inset-shadow), var(--tw-inset-ring-shadow), var(--tw-ring-offset-shadow), var(--tw-ring-shadow), var(--tw-shadow);
   }
 @media (hover: hover) {
+    .hover\:border-primary:hover {
+      border-color: var(--primary);
+    }
     .hover\:border-primary\/50:hover {
       border-color: var(--primary);
     }
@@ -8081,6 +8276,14 @@ button.pactor-chat-trace__header:hover, .pactor-chat-trace__entry-header:hover, 
         background-color: color-mix(in oklab, var(--destructive) 90%, transparent);
       }
     }
+    .hover\:bg-foreground\/10:hover {
+      background-color: var(--foreground);
+    }
+    @supports (color: color-mix(in lab, red, red)) {
+      .hover\:bg-foreground\/10:hover {
+        background-color: color-mix(in oklab, var(--foreground) 10%, transparent);
+      }
+    }
     .hover\:bg-muted:hover {
       background-color: var(--muted);
     }
@@ -8094,6 +8297,14 @@ button.pactor-chat-trace__header:hover, .pactor-chat-trace__entry-header:hover, 
     }
     .hover\:bg-primary:hover {
       background-color: var(--primary);
+    }
+    .hover\:bg-primary\/10:hover {
+      background-color: var(--primary);
+    }
+    @supports (color: color-mix(in lab, red, red)) {
+      .hover\:bg-primary\/10:hover {
+        background-color: color-mix(in oklab, var(--primary) 10%, transparent);
+      }
     }
     .hover\:bg-primary\/90:hover {
       background-color: var(--primary);
@@ -8321,6 +8532,26 @@ button.pactor-chat-trace__header:hover, .pactor-chat-trace__entry-header:hover, 
 .focus-visible\:outline-1:focus-visible {
     outline-style: var(--tw-outline-style);
     outline-width: 1px;
+  }
+.focus-visible\:outline-2:focus-visible {
+    outline-style: var(--tw-outline-style);
+    outline-width: 2px;
+  }
+.focus-visible\:outline-offset-1:focus-visible {
+    outline-offset: 1px;
+  }
+.focus-visible\:outline-ring:focus-visible {
+    outline-color: var(--ring);
+  }
+.focus-visible\:outline-none:focus-visible {
+    --tw-outline-style: none;
+    outline-style: none;
+  }
+.focus-visible\:bg-muted:focus-visible {
+    background-color: var(--muted);
+  }
+.focus-visible\:text-foreground:focus-visible {
+    color: var(--foreground);
   }
 .focus-visible\:outline-none:focus-visible {
     --tw-outline-style: none;
@@ -8880,6 +9111,12 @@ button.pactor-chat-trace__header:hover, .pactor-chat-trace__entry-header:hover, 
       transition-timing-function: var(--ease-out);
     }
   }
+.data-\[popup-open\]\:bg-muted[data-popup-open] {
+    background-color: var(--muted);
+  }
+.data-\[popup-open\]\:text-foreground[data-popup-open] {
+    color: var(--foreground);
+  }
 .data-\[open\=true\]\:rotate-90[data-open="true"] {
     rotate: 90deg;
   }
@@ -9274,6 +9511,10 @@ button.pactor-chat-trace__header:hover, .pactor-chat-trace__entry-header:hover, 
   }
 .\[\&_svg\]\:block svg {
     display: block;
+  }
+.\[\&_svg\]\:size-3 svg {
+    width: calc(var(--spacing) * 3);
+    height: calc(var(--spacing) * 3);
   }
 .\[\&_svg\]\:size-3\.5 svg {
     width: calc(var(--spacing) * 3.5);

@@ -19,6 +19,7 @@ export const zhCN = {
   'pactor.table.dragRow': '拖拽排序',
   'pactor.form.required': '必填',
   'pactor.control.clear': '清除',
+  'pactor.chipSelect.remove': '移除 {{text}}',
   'pactor.select.clear': '清除',
   'pactor.select.search': '搜索选项',
   'pactor.input.clear': '清除',

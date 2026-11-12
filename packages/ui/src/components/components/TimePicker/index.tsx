@@ -40,6 +40,12 @@ export interface TimePickerProps {
   className?: string;
   /** 通用：根节点内联样式（同 className 的挂载规则） */
   style?: CSSProperties;
+  /** 触发器 id；缺省自动生成。独立渲染时供外部 label 的 htmlFor 关联 */
+  id?: string;
+  /** 触发器 class：独立渲染时补充设计稿尺寸 / 圆角等样式 */
+  triggerClassName?: string;
+  /** 触发器图标 class：定制图标尺寸 / 颜色，clearable 的悬停隐藏自动合并 */
+  iconClassName?: string;
 }
 
 /**
@@ -61,10 +67,14 @@ export function TimePicker({
   onChange,
   className,
   style,
+  id,
+  triggerClassName,
+  iconClassName,
 }: TimePickerProps) {
   const form = useFormContext();
   const { t } = useI18n();
-  const controlId = useId();
+  const generatedId = useId();
+  const controlId = id ?? generatedId;
   const inForm = form?.inForm === true && typeof name === 'string' && name !== '';
   const [open, setOpen] = useState(false);
   const withSeconds = format !== 'HH:mm';
@@ -127,6 +137,7 @@ export function TimePicker({
           CLEARABLE_GROUP,
           displayText === '' && 'text-muted-foreground',
           !inForm && className,
+          triggerClassName,
         )}
         style={inForm ? undefined : style}
       >
@@ -139,7 +150,11 @@ export function TimePicker({
           <ClearHoverButton label={t('pactor.control.clear')} onClear={handleClear} />
         ) : null}
         <Clock
-          className={cn('size-4 shrink-0 opacity-50', showClear && CLEARABLE_ICON_HIDE)}
+          className={cn(
+            'size-4 shrink-0 opacity-50',
+            showClear && CLEARABLE_ICON_HIDE,
+            iconClassName,
+          )}
         />
       </PopoverTrigger>
       <PopoverContent className="w-auto p-3">

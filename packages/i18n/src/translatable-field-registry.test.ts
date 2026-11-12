@@ -108,6 +108,11 @@ describe('内置注册表（设计 4.4 常用展示字段）', () => {
     expect(registry.isTranslatableActionField('confirm', 'params.onOk')).toBe(false);
   });
 
+  it('Badge 文案', () => {
+    expect(registry.isTranslatable('Badge', 'props.text')).toBe(true);
+    expect(registry.isTranslatable('Badge', 'props.variant')).toBe(false);
+  });
+
   it('Empty 空态标题与说明', () => {
     expect(registry.isTranslatable('Empty', 'props.title')).toBe(true);
     expect(registry.isTranslatable('Empty', 'props.description')).toBe(true);

@@ -1,6 +1,6 @@
 {
   "name": "@pactor-app/graph",
-  "version": "1.65.0",
+  "version": "1.66.0",
   "description": "Pactor graph: AntV G6-backed DSL relation/flow graph component (Graph) with component registry for the Renderer",
   "keywords": [
     "pactor",

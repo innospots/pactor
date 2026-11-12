@@ -1,4 +1,4 @@
-import { useEffect, type CSSProperties } from 'react';
+import { useEffect, useId, type CSSProperties } from 'react';
 
 import {
   Slider as ShadcnSlider,
@@ -33,6 +33,9 @@ export interface SliderProps {
   className?: string;
   /** 通用：根节点内联样式（同 className 的挂载规则） */
   style?: CSSProperties;
+  /** 控件根节点 id；缺省自动生成。供外部 aria-labelledby 引用
+   * （如独立渲染时把可见标签挂到滑块上） */
+  id?: string;
 }
 
 /**
@@ -51,8 +54,11 @@ export function Slider({
   onChange,
   className,
   style,
+  id,
 }: SliderProps) {
   const form = useFormContext();
+  const generatedId = useId();
+  const controlId = id ?? generatedId;
   const inForm = form?.inForm === true && typeof name === 'string' && name !== '';
 
   useEffect(() => {
@@ -75,6 +81,7 @@ export function Slider({
 
   const slider = (
     <ShadcnSlider
+      id={controlId}
       value={numberValue}
       min={min}
       max={max}

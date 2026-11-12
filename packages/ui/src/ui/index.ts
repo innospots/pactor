@@ -267,7 +267,13 @@ export {
   TableHeader,
   TableRow,
 } from './table.js';
-export { Tabs, TabsContent, TabsList, TabsTrigger } from './tabs.js';
+export {
+  Tabs,
+  TabsAddButton,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
+} from './tabs.js';
 export { Textarea } from './textarea.js';
 export { Toggle, toggleVariants } from './toggle.js';
 export { ToggleGroup, ToggleGroupItem } from './toggle-group.js';

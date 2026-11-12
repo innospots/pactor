@@ -639,6 +639,28 @@ describe('Select 选项', () => {
     });
   });
 
+  it('选项 icon：触发器选中值与下拉项均渲染图标', async () => {
+    const user = userEvent.setup();
+    const { container } = renderDsl({
+      type: 'Select',
+      props: {
+        value: 'grid',
+        options: [
+          { label: '仪表盘', value: 'grid', icon: 'grid' },
+          { label: '趋势图', value: 'chart', icon: 'chart' },
+        ],
+      },
+    });
+
+    expect(
+      container.querySelector('[data-slot=select-trigger] [data-slot=icon]'),
+    ).not.toBeNull();
+
+    await user.click(screen.getByRole('combobox'));
+    const option = await screen.findByRole('option', { name: '仪表盘' });
+    expect(option.querySelector('[data-slot=icon]')).not.toBeNull();
+  });
+
   it('disabled 选项标记 data-disabled 且点击不触发 onChange', async () => {
     const user = userEvent.setup();
     const { context } = renderDsl({
