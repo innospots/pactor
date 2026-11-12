@@ -49,6 +49,8 @@
 | `--pactor-control-height-lg` | 2.25rem (36px) | 2.5rem (40px, h-10) | 3rem (48px) |
 | `--pactor-control-text-sm` | 0.75rem (12px) | 0.75rem (12px, text-xs) | 0.8125rem (13px) |
 | `--pactor-control-text-md` | 0.8125rem (13px) | 0.875rem (14px, text-sm) | 0.9375rem (15px) |
+| `--pactor-control-text-lg` | 0.875rem (14px) | 1rem (16px, text-base) | 1.0625rem (17px) |
+| `--pactor-control-box` | 0.875rem (14px) | 1rem (16px, size-4) | 1.125rem (18px) |
 
 档位切换规则（与 `data-pactor-theme` 三态同款契约）：
 
@@ -66,18 +68,20 @@
 
 把硬编码高度 / 字号类替换为令牌引用，Tailwind v4 var 语法编译为 `height: var(--token)`，运行时切换档位无需重建样式表：
 
+**关键发现（实施前的代码勘察）**：DSL 适配层已有统一尺寸映射 `packages/ui/src/components/control-size.ts`（`CONTROL_SIZE_BOX` / `CONTROL_SIZE_BOX_GROW` / `CONTROL_SIZE_AREA` / `CONTROL_SIZE_TRIGGER_TEXT`，被 Input / Select / DatePicker / Textarea / Combobox / MultiSelect / NumberInput / TimePicker / TreeSelect / Cascader / Mentions 等 12 个表单控件共用），且 DSL Input 等组件**已有 `size?: ControlSize`（small/middle/large）prop**。因此最大的杠杆是把 control-size.ts 里的硬编码类（`h-8/h-9/h-10`、`text-xs/text-sm/text-base`）换成令牌引用——一处改动，全部盒式表单控件跟随全局档位；vendored 原语层（button/input/select/toggle/combobox/input-otp/input-group/checkbox/radio）再逐一令牌化。
+
 | 文件 | 改动 |
 |------|------|
+| `packages/ui/src/components/control-size.ts` | 四组映射全部令牌化（高度 → `--pactor-control-height-sm/md/lg`，字号 → `--pactor-control-text-sm/md/lg`）；12 个 DSL 表单控件零改动自动跟随 |
 | `packages/ui/src/ui/button.tsx` | size 各档 `h-6/h-8/h-9/h-10` → `h-(--pactor-control-height-xs/sm/md/lg)`；`text-xs/text-sm` → `text-(--pactor-control-text-sm/md)`；icon 各档 `size-6/8/9/10` 同步令牌化 |
-| `packages/ui/src/ui/input.tsx` | `h-9` → 令牌 md；**新增 `size?: 'sm' \| 'default' \| 'lg'`**（对齐 Select 的 `data-size` 模式） |
-| `packages/ui/src/ui/select.tsx` | `data-[size=*]:h-*` → 令牌 |
-| `packages/ui/src/ui/textarea.tsx` | 多行输入不跟随控件高度：仅字号令牌化，`min-h-16` 保持现状 |
-| `packages/ui/src/ui/checkbox.tsx` / `radio-group.tsx` / `switch.tsx` | 控件盒尺寸令牌化：新增 `--pactor-control-box`（default 1rem 即 size-4，compact 0.875rem，comfortable 1.125rem） |
-| `packages/ui/src/ui/toggle.tsx` / `toggle-group.tsx` | 高度令牌化 |
-| `packages/ui/src/ui/input-otp.tsx` / `combobox.tsx` / `input-group.tsx` / `slider.tsx` | 高度 / 槽位尺寸令牌化 |
-| `packages/ui/src/components/components/{Button,Input,Select,...}` | DSL 适配层：Input 等缺少 `size` prop 的组件补齐并透传；现有 `small/middle/large` 映射不变 |
+| `packages/ui/src/ui/input.tsx` | `h-9` → 令牌 md；`text-sm` → 令牌 text-md |
+| `packages/ui/src/ui/select.tsx` | `data-[size=*]:h-*` → 令牌；`text-sm` → 令牌 text-md |
+| `packages/ui/src/ui/toggle.tsx` / `toggle-group.tsx` | `h-8/h-9/h-10` → 令牌 |
+| `packages/ui/src/ui/combobox.tsx` / `input-group.tsx` / `input-otp.tsx` | `h-9`（OTP 含 `w-9`）→ 令牌；字号令牌化 |
+| `packages/ui/src/ui/checkbox.tsx` / `radio-group.tsx` | `size-4` → `size-(--pactor-control-box)` |
+| `packages/ui/src/ui/textarea.tsx` / `switch.tsx` / `slider.tsx` | **保持现状**：Textarea 高度由行数决定（内边距/字号走 DSL 层 CONTROL_SIZE_AREA 已覆盖）；Switch/Slider 是轨道几何（宽高成比例），缩放会破碎比例，一期不动 |
 
-单组件 `size` prop 语义不变、优先级最高：全局档位只改各档对应的令牌值。
+单组件 `size` prop 语义不变、优先级最高：全局档位只改各档对应的令牌值。DSL 层不再新增 size prop（已存在），仅 UserMenu 增加密度切换入口。
 
 二期（不在本次范围）：Table / Tabs / Menu / Pagination 等复合组件的尺寸令牌化。
 
@@ -106,7 +110,7 @@ interface UserMenuProps {
 
 ### 4. 自定义组件 / 宿主入口
 
-从 `@pactor-app/ui` 导出轻量工具（`packages/ui/src/lib/global-size.ts`，UserMenu 内部同样使用）：
+从 `@pactor-app/ui` 导出轻量工具（`packages/ui/src/lib/global-size.ts`，UserMenu 内部同样使用），经 `ui/index.ts` 与包根（`components/index.ts` re-export）双向导出：
 
 ```ts
 export type GlobalSize = 'compact' | 'default' | 'comfortable';
