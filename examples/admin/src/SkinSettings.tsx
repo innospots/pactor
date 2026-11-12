@@ -8,21 +8,11 @@
  */
 import { useEffect, useRef, useState, useSyncExternalStore } from 'react';
 
-import {
-  applyGlobalSize,
-  applyGlobalSizeValues,
-  readGlobalSize,
-  type GlobalSize,
-} from '@pactor-app/ui';
-
 import { ACCENT_PRESETS, DEFAULT_SKIN, getSkin, setSkin, subscribeSkin } from './skin';
 
 export function SkinSettings() {
   const [open, setOpen] = useState(false);
   const skin = useSyncExternalStore(subscribeSkin, getSkin);
-  const [density, setDensity] = useState<GlobalSize>(() => readGlobalSize());
-  /** 自定义控件高度基准（md，px）；null = 跟随密度档位预设 */
-  const [heightMd, setHeightMd] = useState<number | null>(null);
   const rootRef = useRef<HTMLDivElement>(null);
 
   // 点击面板外关闭
@@ -136,17 +126,14 @@ export function SkinSettings() {
               <button
                 key={option.value}
                 type="button"
-                aria-pressed={density === option.value}
-                onClick={() => {
-                  applyGlobalSize(option.value);
-                  setDensity(option.value);
-                }}
+                aria-pressed={skin.density === option.value}
+                onClick={() => setSkin({ density: option.value })}
                 style={{
                   flex: 1,
                   padding: '4px 0',
                   borderRadius: 'var(--radius)',
                   border:
-                    density === option.value
+                    skin.density === option.value
                       ? '2px solid var(--foreground)'
                       : '1px solid var(--border)',
                   background: 'transparent',
@@ -162,13 +149,10 @@ export function SkinSettings() {
 
           <div style={{ fontWeight: 600, margin: '16px 0 8px' }}>
             控件高度（自定义）
-            {heightMd !== null && (
+            {skin.heightMd !== null && (
               <button
                 type="button"
-                onClick={() => {
-                  applyGlobalSizeValues(null);
-                  setHeightMd(null);
-                }}
+                onClick={() => setSkin({ heightMd: null })}
                 style={{
                   marginLeft: 8,
                   border: 'none',
@@ -188,24 +172,14 @@ export function SkinSettings() {
             min={32}
             max={44}
             step={1}
-            value={heightMd ?? 36}
+            value={skin.heightMd ?? 36}
             aria-label="控件高度"
             style={{ width: '100%' }}
-            onChange={(event) => {
-              const md = Number(event.target.value);
-              setHeightMd(md);
-              // 其余高度档按 default 档阶梯派生（24/32/36/40 → md-12/md-4/md/md+4）
-              applyGlobalSizeValues({
-                heightXs: `${md - 12}px`,
-                heightSm: `${md - 4}px`,
-                heightMd: `${md}px`,
-                heightLg: `${md + 4}px`,
-              });
-            }}
+            onChange={(event) => setSkin({ heightMd: Number(event.target.value) })}
           />
-          {heightMd !== null && (
+          {skin.heightMd !== null && (
             <div style={{ color: 'var(--muted-foreground)', fontSize: 12 }}>
-              当前 {heightMd}px（自定义值优先于密度档位）
+              当前 {skin.heightMd}px（自定义值优先于密度档位）
             </div>
           )}
 
