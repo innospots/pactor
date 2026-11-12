@@ -23,7 +23,7 @@ describe('Button', () => {
     });
 
     const button = screen.getByRole('button', { name: '删除' });
-    expect(button.className).toContain('h-8');
+    expect(button.className).toContain('h-(--pactor-control-height-sm)');
     expect(button).toHaveProperty('disabled', true);
   });
 

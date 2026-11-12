@@ -40,4 +40,12 @@ describe('pactor-app aggregated styles', () => {
     expect(css).toContain("[data-pactor-size='compact']");
     expect(css).toContain("[data-pactor-size='comfortable']");
   });
+
+  it('控件原语编译为令牌引用（运行时随密度档位变化）', () => {
+    // Tailwind v4 var 语法编译为 var() 引用；选择器中的 ( ) 转义为 \( \)
+    expect(css).toContain('.h-\\(--pactor-control-height-md\\)');
+    expect(css).toContain('.text-\\[length\\:var\\(--pactor-control-text-md\\)\\]');
+    expect(css).toContain('.size-\\(--pactor-control-box\\)');
+    expect(css).toContain('.data-\\[size\\=sm\\]\\:h-\\(--pactor-control-height-sm\\)');
+  });
 });

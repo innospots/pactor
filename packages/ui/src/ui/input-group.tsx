@@ -55,7 +55,7 @@ function InputGroupInput({
     <input
       data-slot="input-group-input"
       className={cn(
-        'h-9 min-w-0 flex-1 border-0 bg-transparent px-3 py-1 text-base shadow-none outline-none placeholder:text-muted-foreground disabled:cursor-not-allowed md:text-sm',
+        'h-(--pactor-control-height-md) min-w-0 flex-1 border-0 bg-transparent px-3 py-1 text-base shadow-none outline-none placeholder:text-muted-foreground disabled:cursor-not-allowed md:text-sm',
         className,
       )}
       {...props}
