@@ -23,9 +23,11 @@ import {
   SignOutContent,
 } from './parts.js';
 import { languageLabel } from './options.js';
+import type { GlobalSize } from '../../lib/global-size.js';
 import type {
   LanguageOption,
   LanguagePreference,
+  SizeOption,
   ThemePreference,
   UserMenuItem,
   UserMenuUser,
@@ -110,8 +112,11 @@ export interface UserMenuDropdownProps {
   showStatus: boolean;
   showTheme: boolean;
   showLanguage: boolean;
+  showSize: boolean;
   status: UserStatus;
   theme: ThemePreference;
+  size: GlobalSize;
+  sizes?: SizeOption[];
   language: LanguagePreference;
   languages: LanguageOption[];
   signingOut: boolean;
@@ -121,6 +126,7 @@ export interface UserMenuDropdownProps {
   onSelectItem: (item: UserMenuItem) => void;
   onStatusChange: (status: UserStatus) => void;
   onThemeChange: (theme: ThemePreference) => void;
+  onSizeChange: (size: GlobalSize) => void;
   onLanguageChange: (language: LanguagePreference) => void;
   onSignOut: () => void;
 }
@@ -135,8 +141,11 @@ export function UserMenuDropdown({
   showStatus,
   showTheme,
   showLanguage,
+  showSize,
   status,
   theme,
+  size,
+  sizes,
   language,
   languages,
   signingOut,
@@ -146,6 +155,7 @@ export function UserMenuDropdown({
   onSelectItem,
   onStatusChange,
   onThemeChange,
+  onSizeChange,
   onLanguageChange,
   onSignOut,
 }: UserMenuDropdownProps) {
@@ -185,7 +195,7 @@ export function UserMenuDropdown({
             ))}
           </>
         ) : null}
-        {showLanguage || showTheme || showStatus ? (
+        {showLanguage || showTheme || showStatus || showSize ? (
           <>
             <DropdownMenuSeparator />
             {showLanguage ? (
@@ -199,10 +209,14 @@ export function UserMenuDropdown({
               sheet={false}
               showStatus={showStatus}
               showTheme={showTheme}
+              showSize={showSize}
               status={status}
               theme={theme}
+              size={size}
+              sizes={sizes}
               onStatusChange={onStatusChange}
               onThemeChange={onThemeChange}
+              onSizeChange={onSizeChange}
             />
           </>
         ) : null}

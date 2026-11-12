@@ -280,6 +280,7 @@ export { ToggleGroup, ToggleGroupItem } from './toggle-group.js';
 export { Typography, typographyVariants } from './typography.js';
 export {
   defaultLanguages,
+  defaultSizes,
   languages,
   PresenceDot,
   UserMenu,
@@ -288,6 +289,7 @@ export {
 export type {
   LanguageOption,
   LanguagePreference,
+  SizeOption,
   ThemePreference,
   UserMenuItem,
   UserMenuProps,

@@ -1,5 +1,12 @@
 import { useEffect, useId, useRef, useState, useSyncExternalStore } from 'react';
 
+import {
+  applyGlobalSize,
+  persistGlobalSize,
+  readGlobalSize,
+  readStoredGlobalSize,
+} from '../../lib/global-size.js';
+import type { GlobalSize } from '../../lib/global-size.js';
 import { cn } from '../../lib/utils.js';
 import { UserMenuDropdown } from './menu-dropdown.js';
 import { UserMenuSheet } from './menu-sheet.js';
@@ -64,7 +71,7 @@ function persistLanguagePreference(language: LanguagePreference): void {
 
 /**
  * UserMenu 账户菜单：头像触发器 + 账号信息头 / 账户入口 / 内联主题、
- * 语言与在线状态切换 / 退出登录。视觉与交互设计参考 Arc UI
+ * 密度、语言与在线状态切换 / 退出登录。视觉与交互设计参考 Arc UI
  * （https://uiarc.dev/components/user-menu），Tailwind 实现。
  *
  * - 桌面端复用 DropdownMenu（Base UI Menu）：定位翻转、外部关闭、焦点
@@ -75,6 +82,10 @@ function persistLanguagePreference(language: LanguagePreference): void {
  *   缺省 中文 / English，宿主可传入更多语言；
  * - 主题选择会应用到 documentElement：light / dark 写 data-pactor-theme，
  *   system 移除该属性（与 Header 的深浅色切换同款契约）；
+ * - 密度选择（showSize）与主题同契：compact / comfortable 写
+ *   data-pactor-size，default 移除；非受控时持久化到 localStorage 的
+ *   pactor.size，仅当存在持久化偏好或显式 defaultSize 时挂载即恢复，
+ *   否则不动 documentElement（不重置宿主已设密度）；
  * - 语言选择缺省写入 localStorage 的 pactor.locale（与 Application 的
  *   localeStorage 缺省 key 一致），受控 language 时由父级决定持久化；
  * - onSignOut 返回 Promise 时退出项显示进度，结束后再关闭。
@@ -96,6 +107,11 @@ export function UserMenu({
   theme: themeProp,
   defaultTheme,
   onThemeChange,
+  size: sizeProp,
+  defaultSize,
+  onSizeChange,
+  showSize = false,
+  sizes,
   showTheme = true,
   language: languageProp,
   defaultLanguage,
@@ -135,6 +151,9 @@ export function UserMenu({
   const [innerTheme, setInnerTheme] = useState<ThemePreference>(
     () => defaultTheme ?? readThemePreference(),
   );
+  const [innerSize, setInnerSize] = useState<GlobalSize>(
+    () => defaultSize ?? readStoredGlobalSize() ?? 'default',
+  );
   const [innerLanguage, setInnerLanguage] = useState<LanguagePreference>(
     () =>
       defaultLanguage ??
@@ -149,6 +168,7 @@ export function UserMenu({
   const showStatus = statusProp !== undefined || onStatusChange !== undefined;
   const status = statusProp ?? innerStatus;
   const theme = themeProp ?? innerTheme;
+  const size = sizeProp ?? innerSize;
   const language = languageProp ?? innerLanguage;
   const sheet = hydrated && compact;
   const sidebar = variant === 'sidebar';
@@ -174,6 +194,26 @@ export function UserMenu({
     setInnerTheme(readThemePreference());
   }, [open, themeProp, defaultTheme]);
 
+  // 非受控且存在持久化偏好（或显式 defaultSize）时，挂载即恢复（刷新后密度保持）；
+  // 无持久化偏好则不动 documentElement——页面当前密度可能由 SkinSettings
+  // 等宿主组件设置，UserMenu 挂载不得擅自重置；
+  // 需要首屏防闪烁的宿主应在 HTML 头部内联脚本提前写 data-pactor-size
+  useEffect(() => {
+    if (sizeProp !== undefined) return;
+    if (defaultSize !== undefined || readStoredGlobalSize() !== null) {
+      applyGlobalSize(size);
+    }
+    // 仅挂载时执行一次；受控切换由 changeSize / 宿主负责应用
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // 非受控且未显式指定 defaultSize 时，打开菜单按页面当前密度回显，
+  // 避免 SkinSettings 等外部切换后分段控件仍停留在过期偏好
+  useEffect(() => {
+    if (!open || sizeProp !== undefined || defaultSize !== undefined) return;
+    setInnerSize(readGlobalSize());
+  }, [open, sizeProp, defaultSize]);
+
   function setTriggerRef(node: HTMLButtonElement | null): void {
     if (typeof ref === 'function') ref(node);
     else if (ref) (ref as { current: HTMLButtonElement | null }).current = node;
@@ -194,6 +234,17 @@ export function UserMenu({
     setInnerTheme(value);
     applyThemePreference(value);
     onThemeChange?.(value);
+  }
+
+  function changeSize(value: GlobalSize): void {
+    // 应用属性与 theme 同契（受控也应用，与 changeTheme 一致）；
+    // 受控时由父级回写 size；非受控时内部记住选择并持久化
+    if (sizeProp === undefined) {
+      setInnerSize(value);
+      persistGlobalSize(value);
+    }
+    applyGlobalSize(value);
+    onSizeChange?.(value);
   }
 
   function changeLanguage(value: LanguagePreference): void {
@@ -269,8 +320,11 @@ export function UserMenu({
             showStatus={showStatus}
             showTheme={showTheme}
             showLanguage={showLanguage}
+            showSize={showSize}
             status={status}
             theme={theme}
+            size={size}
+            sizes={sizes}
             language={language}
             languages={languages}
             signingOut={signingOut}
@@ -281,6 +335,7 @@ export function UserMenu({
             }}
             onStatusChange={changeStatus}
             onThemeChange={changeTheme}
+            onSizeChange={changeSize}
             onLanguageChange={changeLanguage}
             onSignOut={signOut}
           />
@@ -295,8 +350,11 @@ export function UserMenu({
           showStatus={showStatus}
           showTheme={showTheme}
           showLanguage={showLanguage}
+          showSize={showSize}
           status={status}
           theme={theme}
+          size={size}
+          sizes={sizes}
           language={language}
           languages={languages}
           signingOut={signingOut}
@@ -306,6 +364,7 @@ export function UserMenu({
           onSelectItem={selectItem}
           onStatusChange={changeStatus}
           onThemeChange={changeTheme}
+          onSizeChange={changeSize}
           onLanguageChange={changeLanguage}
           onSignOut={signOut}
         />
