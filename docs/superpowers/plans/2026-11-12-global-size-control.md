@@ -18,6 +18,7 @@
 - 令牌命名前缀 `--pactor-control-`；属性 `data-pactor-size`；持久化 key `pactor.size`。
 - 不新增依赖；不改动 `control-size.ts` 的导出签名（`ControlSize` / `CONTROL_SIZE_*` 名字与 Record 形状不变）。
 - 自定义数值优先级：**documentElement 内联变量 > `[data-pactor-size]` 档位 > `:root` default**（内联样式天然胜出，无需额外 CSS）。
+- **防漂移约束**：`styles.css` `:root` 新增的任何令牌必须同步注册到 `tools/theme-studio/src/tokens.ts`（`tools/theme-studio/tests/tokens.test.ts` 与 `:root` 双向比对，缺失即红）；验证命令 `pnpm --filter theme-studio test`。
 - i18n key 必须同时加进 `packages/runtime/src/context/locales/zh-CN.ts` 与 `en-US.ts`。
 - 提交信息用中文 / 英文均可，遵循仓库现有 `feat(ui): ...` 风格。
 - 测试命令：`cd packages/ui && pnpm test`（单文件：`pnpm vitest run tests/<file>`）；样式构建断言：`pnpm vitest run tests/build-styles.test.mjs`（仓库根目录）。
@@ -32,6 +33,7 @@
 - Create: `packages/ui/src/lib/global-size.ts`
 - Modify: `packages/ui/src/ui/index.ts`（文件尾部 user-menu 导出块之后追加）
 - Modify: `packages/ui/src/components/index.ts`（control-size 导出块之后追加）
+- Modify: `tools/theme-studio/src/tokens.ts`（新增「控件尺寸」分组，皮肤工具可视化编辑）
 - Test: `packages/ui/tests/global-size.test.ts`（新建）
 - Test: `tests/build-styles.test.mjs`（追加一个 it）
 
@@ -333,15 +335,38 @@ export {
 export type { GlobalSize, GlobalSizeValues } from '../lib/global-size.js';
 ```
 
-- [ ] **Step 6: 跑测试确认通过**
+- [ ] **Step 6: theme-studio 注册令牌（皮肤 CSS 可视化编辑入口）**
 
-Run: `cd packages/ui && pnpm vitest run tests/global-size.test.ts`，然后回仓库根目录 `pnpm vitest run tests/build-styles.test.mjs`
+`tools/theme-studio/src/tokens.ts` 在 `key: 'size'` 分组之后插入新分组（防漂移测试要求 `:root` 令牌与清单一一对应；注册后 theme-studio 的 TokenEditor 出现「控件尺寸」分组，皮肤导出即携带这些数值）：
+
+```ts
+  {
+    key: 'control-size',
+    title: '控件尺寸（全局密度 default 档）',
+    tokens: [
+      { name: '--pactor-control-height-xs', type: 'length', description: '控件高度 xs 档（Button xs / icon-xs）', defaultValue: '1.5rem', slider: { min: 1, max: 2, step: 0.125 } },
+      { name: '--pactor-control-height-sm', type: 'length', description: '控件高度 sm 档（Button sm、Sidebar 菜单行、Avatar）', defaultValue: '2rem', slider: { min: 1.5, max: 2.5, step: 0.125 } },
+      { name: '--pactor-control-height-md', type: 'length', description: '控件高度 md 档（Input / Select / Button 默认、Tabs、Pagination）', defaultValue: '2.25rem', slider: { min: 1.75, max: 3, step: 0.125 } },
+      { name: '--pactor-control-height-lg', type: 'length', description: '控件高度 lg 档（Button lg）', defaultValue: '2.5rem', slider: { min: 2, max: 3.5, step: 0.125 } },
+      { name: '--pactor-control-text-sm', type: 'length', description: '控件小字号（Button xs/sm、Tabs sm、Badge）', defaultValue: '0.75rem', slider: { min: 0.625, max: 0.875, step: 0.0625 } },
+      { name: '--pactor-control-text-md', type: 'length', description: '控件正文字号（Button / Input / Select / 菜单项 / 表格）', defaultValue: '0.875rem', slider: { min: 0.75, max: 1, step: 0.0625 } },
+      { name: '--pactor-control-text-lg', type: 'length', description: '控件大字号（表单控件 large 档）', defaultValue: '1rem', slider: { min: 0.875, max: 1.25, step: 0.0625 } },
+      { name: '--pactor-control-box', type: 'length', description: 'Checkbox / Radio 控件盒尺寸', defaultValue: '1rem', slider: { min: 0.75, max: 1.25, step: 0.0625 } },
+    ],
+  },
+```
+
+说明：皮肤工具编辑的是 `:root`（default 档）数值；按档位（compact / comfortable）的皮肤级覆盖在皮肤 CSS 中手写 `[data-pactor-size='compact'] { --pactor-control-*: ... }` 块（与 `data-pactor-theme` 暗色块同一手法），设计文档已给出示例。
+
+- [ ] **Step 7: 跑测试确认通过**
+
+Run: `cd packages/ui && pnpm vitest run tests/global-size.test.ts`，然后回仓库根目录 `pnpm vitest run tests/build-styles.test.mjs && pnpm --filter theme-studio test`
 Expected: 全部 PASS（build-styles 会先执行样式构建，耗时正常；根级 vitest 只认根 tests/ 目录，不要在 packages/ui 里跑它）
 
-- [ ] **Step 7: Commit**
+- [ ] **Step 8: Commit**
 
 ```bash
-git add packages/ui/src/styles.css packages/ui/src/lib/global-size.ts packages/ui/src/ui/index.ts packages/ui/src/components/index.ts packages/ui/tests/global-size.test.ts tests/build-styles.test.mjs
+git add packages/ui/src/styles.css packages/ui/src/lib/global-size.ts packages/ui/src/ui/index.ts packages/ui/src/components/index.ts packages/ui/tests/global-size.test.ts tests/build-styles.test.mjs tools/theme-studio/src/tokens.ts
 git commit -m "feat(ui): 全局密度令牌与 global-size 工具（data-pactor-size 契约）"
 ```
 
@@ -1049,6 +1074,7 @@ git commit -m "feat(example-admin): SkinSettings 演示全局密度切换"
 - Modify: `packages/ui/src/styles.css`（menu 令牌，三块同改）
 - Modify: `packages/ui/src/ui/dropdown-menu.tsx`、`context-menu.tsx`、`menubar.tsx`、`tabs.tsx`、`navigation-menu.tsx`、`sidebar.tsx`
 - Modify: `packages/ui/src/components/components/Tabs/index.tsx`
+- Modify: `tools/theme-studio/src/tokens.ts`（control-size 分组追加 menu 令牌）
 - Test: `tests/build-styles.test.mjs`（追加断言）
 
 **Interfaces:**
@@ -1058,6 +1084,12 @@ git commit -m "feat(example-admin): SkinSettings 演示全局密度切换"
 - [ ] **Step 1: styles.css 加菜单令牌（三块同改）**
 
 `:root` 令牌区追加 `--pactor-menu-item-padding-y: 0.375rem;`；`[data-pactor-size='compact']` 块追加 `--pactor-menu-item-padding-y: 0.25rem;`；`[data-pactor-size='comfortable']` 块追加 `--pactor-menu-item-padding-y: 0.5rem;`。
+
+`tools/theme-studio/src/tokens.ts` 的 `control-size` 分组追加：
+
+```ts
+      { name: '--pactor-menu-item-padding-y', type: 'length', description: '菜单项纵向内边距（DropdownMenu / ContextMenu / Menubar 项）', defaultValue: '0.375rem', slider: { min: 0.125, max: 0.75, step: 0.0625 } },
+```
 
 - [ ] **Step 2: 写失败测试（编译产物断言）**
 
@@ -1103,13 +1135,13 @@ Expected: FAIL（断言不成立）
 
 - [ ] **Step 6: 跑测试 + 回归**
 
-Run: `pnpm vitest run tests/build-styles.test.mjs && cd packages/ui && pnpm vitest run tests/components/sidebar.test.tsx tests/components/extended-overlay.test.tsx tests/components/extended-composite.test.tsx tests/layout`
+Run: `pnpm vitest run tests/build-styles.test.mjs && pnpm --filter theme-studio test && cd packages/ui && pnpm vitest run tests/components/sidebar.test.tsx tests/components/extended-overlay.test.tsx tests/components/extended-composite.test.tsx tests/layout`
 Expected: 全部 PASS
 
 - [ ] **Step 7: Commit**
 
 ```bash
-git add packages/ui/src/styles.css packages/ui/src/ui/dropdown-menu.tsx packages/ui/src/ui/context-menu.tsx packages/ui/src/ui/menubar.tsx packages/ui/src/ui/tabs.tsx packages/ui/src/ui/navigation-menu.tsx packages/ui/src/ui/sidebar.tsx packages/ui/src/components/components/Tabs tests/build-styles.test.mjs
+git add packages/ui/src/styles.css packages/ui/src/ui/dropdown-menu.tsx packages/ui/src/ui/context-menu.tsx packages/ui/src/ui/menubar.tsx packages/ui/src/ui/tabs.tsx packages/ui/src/ui/navigation-menu.tsx packages/ui/src/ui/sidebar.tsx packages/ui/src/components/components/Tabs tests/build-styles.test.mjs tools/theme-studio/src/tokens.ts
 git commit -m "feat(ui): 菜单族/Tabs/NavigationMenu/Sidebar 菜单行随全局密度缩放，DSL Tabs 透传 size"
 ```
 
@@ -1121,6 +1153,7 @@ git commit -m "feat(ui): 菜单族/Tabs/NavigationMenu/Sidebar 菜单行随全�
 - Modify: `packages/ui/src/styles.css`（table 令牌，三块同改）
 - Modify: `packages/ui/src/ui/table.tsx`
 - Modify: `packages/ui/src/components/components/Table/index.tsx`
+- Modify: `tools/theme-studio/src/tokens.ts`（control-size 分组追加 table 令牌）
 - Test: `packages/ui/tests/components/table-density.test.tsx`（新建）
 
 **Interfaces:**
@@ -1130,6 +1163,13 @@ git commit -m "feat(ui): 菜单族/Tabs/NavigationMenu/Sidebar 菜单行随全�
 - [ ] **Step 1: styles.css 加表格令牌（三块同改）+ 失败断言**
 
 `:root` 追加 `--pactor-table-head-height: 2.5rem;` 与 `--pactor-table-cell-padding-y: 0.5rem;`；compact 块追加 `2rem` / `0.25rem`；comfortable 块追加 `3rem` / `0.75rem`。
+
+`tools/theme-studio/src/tokens.ts` 的 `control-size` 分组追加：
+
+```ts
+      { name: '--pactor-table-head-height', type: 'length', description: '表格表头行高', defaultValue: '2.5rem', slider: { min: 1.75, max: 3.5, step: 0.125 } },
+      { name: '--pactor-table-cell-padding-y', type: 'length', description: '表格单元格纵向内边距（行高由此派生）', defaultValue: '0.5rem', slider: { min: 0.125, max: 1, step: 0.0625 } },
+```
 
 `tests/build-styles.test.mjs` 追加：
 
@@ -1209,13 +1249,13 @@ const TABLE_SIZE: Record<ControlSize, { head: string; cell: string }> = {
 
 - [ ] **Step 5: 跑测试 + 回归**
 
-Run: `cd packages/ui && pnpm vitest run tests/components/table-density.test.tsx tests/components/table-tree-dnd.test.tsx tests/components/contract.test.tsx`，然后回仓库根目录 `pnpm vitest run tests/build-styles.test.mjs`
+Run: `cd packages/ui && pnpm vitest run tests/components/table-density.test.tsx tests/components/table-tree-dnd.test.tsx tests/components/contract.test.tsx`，然后回仓库根目录 `pnpm vitest run tests/build-styles.test.mjs && pnpm --filter theme-studio test`
 Expected: 全部 PASS
 
 - [ ] **Step 6: Commit**
 
 ```bash
-git add packages/ui/src/styles.css packages/ui/src/ui/table.tsx packages/ui/src/components/components/Table packages/ui/tests/components/table-density.test.tsx
+git add packages/ui/src/styles.css packages/ui/src/ui/table.tsx packages/ui/src/components/components/Table packages/ui/tests/components/table-density.test.tsx tools/theme-studio/src/tokens.ts
 git commit -m "feat(ui): Table 密度——行高/单元格令牌化 + DSL size prop（small/middle/large）"
 ```
 
@@ -1226,6 +1266,7 @@ git commit -m "feat(ui): Table 密度——行高/单元格令牌化 + DSL size 
 **Files:**
 - Modify: `packages/ui/src/styles.css`（calendar 令牌，三块同改）
 - Modify: `packages/ui/src/ui/calendar.tsx`、`avatar.tsx`、`badge.tsx`、`breadcrumb.tsx`
+- Modify: `tools/theme-studio/src/tokens.ts`（control-size 分组追加 calendar 令牌）
 
 **Interfaces:**
 - Consumes: Task 1 令牌；新增令牌 `--pactor-calendar-day-size`。Produces: 无新导出。
@@ -1233,6 +1274,12 @@ git commit -m "feat(ui): Table 密度——行高/单元格令牌化 + DSL size 
 - [ ] **Step 1: styles.css 加日历令牌（三块同改）+ 失败断言**
 
 `:root` 追加 `--pactor-calendar-day-size: 2rem;`；compact 块追加 `1.75rem`；comfortable 块追加 `2.25rem`。
+
+`tools/theme-studio/src/tokens.ts` 的 `control-size` 分组追加：
+
+```ts
+      { name: '--pactor-calendar-day-size', type: 'length', description: '日历日期格尺寸（DatePicker 面板）', defaultValue: '2rem', slider: { min: 1.5, max: 2.75, step: 0.125 } },
+```
 
 `tests/build-styles.test.mjs` 追加：
 
@@ -1252,13 +1299,13 @@ git commit -m "feat(ui): Table 密度——行高/单元格令牌化 + DSL size 
 
 - [ ] **Step 3: 跑测试 + 回归**
 
-Run: `pnpm vitest run tests/build-styles.test.mjs && cd packages/ui && pnpm test`
+Run: `pnpm vitest run tests/build-styles.test.mjs && pnpm --filter theme-studio test && cd packages/ui && pnpm test`
 Expected: 全部 PASS
 
 - [ ] **Step 4: Commit**
 
 ```bash
-git add packages/ui/src/styles.css packages/ui/src/ui/calendar.tsx packages/ui/src/ui/avatar.tsx packages/ui/src/ui/badge.tsx packages/ui/src/ui/breadcrumb.tsx
+git add packages/ui/src/styles.css packages/ui/src/ui/calendar.tsx packages/ui/src/ui/avatar.tsx packages/ui/src/ui/badge.tsx packages/ui/src/ui/breadcrumb.tsx tools/theme-studio/src/tokens.ts
 git commit -m "feat(ui): Calendar/Avatar/Badge/Breadcrumb 尺寸随全局密度缩放"
 ```
 

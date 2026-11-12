@@ -138,7 +138,27 @@ export const globalSizeStorageKey = 'pactor.size';
 
 契约文档化：任何自定义组件 / 宿主脚本写 `document.documentElement.dataset.pactorSize` 即可全局切换；消费方在 CSS 中使用 `var(--pactor-control-height-md)` 等令牌即自动跟随。需要在首屏避免闪烁的宿主可在 HTML 头部内联脚本提前写属性（与暗色主题防闪烁同一手法，写入文档）。
 
-### 4.5 自定义数值（GlobalSizeValues API）
+### 4.5 皮肤 CSS 设置尺寸数值（一等能力）
+
+与颜色、圆角同权：尺寸令牌就是皮肤契约的一部分，皮肤 CSS（`styles.css` 之后加载）直接覆盖即可：
+
+```css
+/* 改 default 档基准（皮肤最常用） */
+:root {
+  --pactor-control-height-md: 2.5rem;
+  --pactor-control-text-md: 0.9375rem;
+}
+/* 按档覆盖（与 data-pactor-theme 暗色块同一手法） */
+[data-pactor-size='compact'] {
+  --pactor-control-height-md: 1.75rem;
+}
+```
+
+**theme-studio 集成**：全部尺寸令牌注册进 `tools/theme-studio/src/tokens.ts` 的「控件尺寸（全局密度 default 档）」分组（length 类型 + 滑杆），TokenEditor 可视化编辑并随皮肤 CSS 导出；按档覆盖块超出编辑器 `:root` 模型，保持手写 CSS（上例）。**防漂移约束**：`styles.css` `:root` 新增令牌必须同步注册 tokens.ts——`tools/theme-studio/tests/tokens.test.ts` 与 `:root` 双向比对，缺失即测试失败。
+
+优先级（高 → 低）：**内联自定义值（4.6）> 皮肤 CSS / `[data-pactor-size]` 档位 > `:root` default**。注意皮肤 CSS 若覆盖 `:root` 令牌值，其优先级低于内联自定义值、高于内置 default；皮肤 CSS 里写的 `[data-pactor-size]` 块则与内置档位块按加载顺序决胜（皮肤在后，胜出）。
+
+### 4.6 自定义数值（GlobalSizeValues API）
 
 三档预设之外，允许用户 / 宿主直接自定义各档数值。落点仍是令牌：在 `documentElement` 上写**内联** CSS 变量，内联样式优先级高于样式表中的 `:root` 与 `[data-pactor-size]` 块，因此自定义数值天然覆盖档位预设。
 
