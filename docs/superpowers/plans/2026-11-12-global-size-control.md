@@ -413,7 +413,9 @@ describe('control-size 令牌映射', () => {
 
   it('cn 合并时令牌类覆盖 vendored 基类（h-9 / text-sm 被去重）', () => {
     // tailwind-merge 须把 h-(--x) 归 h 组、text-[length:...] 归 font-size 组，
-    // 否则基类与令牌类并存、胜负取决于样式表顺序
+    // 否则基类与令牌类并存、胜负取决于样式表顺序。
+    // 注：断言的是精确字符串；若 twMerge 版本导致输出顺序不同（语义等价），
+    // 以实际稳定输出为准调整本断言，关键是不再残留 h-9 / text-sm
     expect(cn('h-9 px-3 text-sm', CONTROL_SIZE_BOX.small)).toBe(
       'h-(--pactor-control-height-sm) px-2.5 text-[length:var(--pactor-control-text-sm)]',
     );
@@ -541,7 +543,7 @@ Expected: 全部 PASS
 - [ ] **Step 7: Commit**
 
 ```bash
-git add packages/ui/src/ui tests/build-styles.test.mjs
+git add packages/ui/src/ui/button.tsx packages/ui/src/ui/input.tsx packages/ui/src/ui/select.tsx packages/ui/src/ui/toggle.tsx packages/ui/src/ui/combobox.tsx packages/ui/src/ui/input-group.tsx packages/ui/src/ui/input-otp.tsx packages/ui/src/ui/checkbox.tsx packages/ui/src/ui/radio-group.tsx tests/build-styles.test.mjs
 git commit -m "feat(ui): 表单原语尺寸令牌化（button/input/select/toggle/combobox/input-group/input-otp/checkbox/radio）"
 ```
 
@@ -624,6 +626,12 @@ describe('UserMenu 密度切换', () => {
     window.localStorage.setItem(globalSizeStorageKey, 'compact');
     render(<UiUserMenu user={USER} showSize />);
     expect(document.documentElement.getAttribute('data-pactor-size')).toBe('compact');
+  });
+
+  it('无持久化偏好时挂载不动 documentElement（不重置宿主已设密度）', () => {
+    document.documentElement.setAttribute('data-pactor-size', 'comfortable');
+    render(<UiUserMenu user={USER} showSize />);
+    expect(document.documentElement.getAttribute('data-pactor-size')).toBe('comfortable');
   });
 });
 ```
@@ -740,10 +748,15 @@ import type { GlobalSize } from '../../lib/global-size.js';
 - 主题回显 effect（`if (!open || themeProp !== undefined ...) return;` 那个）之后加两个 effect：
 
 ```ts
-  // 非受控时挂载即应用持久化偏好（刷新后密度保持）；
+  // 非受控且存在持久化偏好（或显式 defaultSize）时，挂载即恢复（刷新后密度保持）；
+  // 无持久化偏好则不动 documentElement——页面当前密度可能由 SkinSettings
+  // 等宿主组件设置，UserMenu 挂载不得擅自重置；
   // 需要首屏防闪烁的宿主应在 HTML 头部内联脚本提前写 data-pactor-size
   useEffect(() => {
-    if (sizeProp === undefined) applyGlobalSize(size);
+    if (sizeProp !== undefined) return;
+    if (defaultSize !== undefined || readStoredGlobalSize() !== null) {
+      applyGlobalSize(size);
+    }
     // 仅挂载时执行一次；受控切换由 changeSize / 宿主负责应用
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -1043,21 +1056,23 @@ import {
 
 - 文件头注释「（主色预设 / 暗黑开关 / 圆角滑杆 / 恢复默认）」改为「（主色预设 / 暗黑开关 / 圆角滑杆 / 界面密度 / 控件高度自定义 / 恢复默认）」。
 
-- [ ] **Step 2: 构建并手动验证**
+- [ ] **Step 2: 构建验证（视觉验收统一在 Task 10）**
 
 ```bash
-pnpm --filter @pactor-app/ui build && pnpm --filter example-admin dev
+pnpm --filter @pactor-app/ui build && pnpm --filter example-admin build
 ```
 
-浏览器打开 admin 示例 → 头部「皮肤」→ 界面密度三档切换：Button/Input/Select 高度与字号即时变化；default 档与改动前视觉一致。
+Expected: 构建成功（example-admin 引用 workspace dist，确认新导出 `applyGlobalSize` / `applyGlobalSizeValues` 可被示例解析；浏览器视觉验收见 Task 10 Step 3）。
 
 - [ ] **Step 3: MEMORY.md 条目**
 
 `MEMORY.md` 最新条目之后追加一行：
 
 ```markdown
-- **全局密度档位**（2026-11-12 global-size-control）：`data-pactor-size="compact|comfortable"`（不设置=default）切换 `--pactor-control-*` 令牌（高度/字号/控件盒），default 档=现行尺寸零视觉变化；`control-size.ts` 四组映射已令牌化（12 个 DSL 表单控件自动跟随），vendored 原语 button/input/select/toggle/combobox/input-group/input-otp/checkbox/radio 同步。**坑：字号必须 `text-[length:var(--x)]`，`text-(--x)` 编译为 color 且 tailwind-merge 不去重**。UserMenu 新增 size/defaultSize/showSize/sizes/onSizeChange（与 theme 同构，持久化 `pactor.size`）；自定义数值走 applyGlobalSizeValues/readGlobalSizeValues（documentElement 内联变量，优先级高于档位预设，null 清除）；自定义组件入口 applyGlobalSize/readGlobalSize（example-admin SkinSettings 已演示三档切换 + 高度滑杆）。
+- **全局密度档位（一期）**（2026-11-12 global-size-control）：`data-pactor-size="compact|comfortable"`（不设置=default）切换 `--pactor-control-*` 令牌（高度/字号/控件盒），default 档=现行尺寸零视觉变化；`control-size.ts` 四组映射已令牌化（12 个 DSL 表单控件自动跟随），vendored 原语 button/input/select/toggle/combobox/input-group/input-otp/checkbox/radio 同步。**坑：字号必须 `text-[length:var(--x)]`，`text-(--x)` 编译为 color 且 tailwind-merge 不去重**。UserMenu 新增 size/defaultSize/showSize/sizes/onSizeChange（与 theme 同构，持久化 `pactor.size`；非受控挂载仅在存在持久化偏好时恢复，不清除宿主已设属性）；自定义数值走 applyGlobalSizeValues/readGlobalSizeValues（documentElement 内联变量，优先级高于档位预设，null 清除）；自定义组件入口 applyGlobalSize/readGlobalSize（example-admin SkinSettings 已演示三档切换 + 高度滑杆）。二期（Table/菜单族/Tabs/Calendar 等）见后续任务补充。
 ```
+
+（条目按一期范围撰写；Task 9 完成后再补二期一句，避免日志先行于代码。）
 
 - [ ] **Step 4: Commit**
 
@@ -1302,10 +1317,14 @@ git commit -m "feat(ui): Table 密度——行高/单元格令牌化 + DSL size 
 Run: `pnpm vitest run tests/build-styles.test.mjs && pnpm --filter theme-studio test && cd packages/ui && pnpm test`
 Expected: 全部 PASS
 
-- [ ] **Step 4: Commit**
+- [ ] **Step 4: MEMORY.md 补二期 + Commit**
+
+`MEMORY.md` 一期条目末尾的「二期（Table/菜单族/Tabs/Calendar 等）见后续任务补充。」改为：
+
+`二期已落地：菜单项（--pactor-menu-item-padding-y）、Table（--pactor-table-head-height / --pactor-table-cell-padding-y + DSL size prop，middle 跟随全局、small/large 局部强制）、Tabs（含 DSL size 透传）、NavigationMenu、Sidebar 菜单行、Calendar（--pactor-calendar-day-size）、Avatar/Badge/Breadcrumb 同步令牌化；Pagination 复用 buttonVariants 自动跟随。`
 
 ```bash
-git add packages/ui/src/styles.css packages/ui/src/ui/calendar.tsx packages/ui/src/ui/avatar.tsx packages/ui/src/ui/badge.tsx packages/ui/src/ui/breadcrumb.tsx tools/theme-studio/src/tokens.ts
+git add packages/ui/src/styles.css packages/ui/src/ui/calendar.tsx packages/ui/src/ui/avatar.tsx packages/ui/src/ui/badge.tsx packages/ui/src/ui/breadcrumb.tsx tools/theme-studio/src/tokens.ts MEMORY.md
 git commit -m "feat(ui): Calendar/Avatar/Badge/Breadcrumb 尺寸随全局密度缩放"
 ```
 
