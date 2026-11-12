@@ -2,6 +2,7 @@
  * 表单控件统一尺寸令牌：small / middle / large，默认 middle（= 现行 h-9 尺寸）。
  * 所有盒式表单控件（Input / Select / DatePicker / 业务组件
  * 内嵌控件等）共用同一映射，保证同一 size 下高度、内边距、字号一致。
+ * 档位值引用 --pactor-control-* 令牌，随全局密度（data-pactor-size）整体缩放。
  *
  * 使用方式：把控件尺寸类合并到控件 className 末位（cn/tailwind-merge 会覆盖
  * vendored 基类中的 h-9 / px-3 / text-sm）；vendored SelectTrigger 的高度走
@@ -12,9 +13,12 @@ export type ControlSize = 'small' | 'middle' | 'large';
 
 /** 单行盒式控件：高度 + 水平内边距 + 字号 */
 export const CONTROL_SIZE_BOX: Record<ControlSize, string> = {
-  small: 'h-8 px-2.5 text-xs',
-  middle: 'h-9 px-3 text-sm',
-  large: 'h-10 px-4 text-base',
+  small:
+    'h-(--pactor-control-height-sm) px-2.5 text-[length:var(--pactor-control-text-sm)]',
+  middle:
+    'h-(--pactor-control-height-md) px-3 text-[length:var(--pactor-control-text-md)]',
+  large:
+    'h-(--pactor-control-height-lg) px-4 text-[length:var(--pactor-control-text-lg)]',
 };
 
 /**
@@ -23,16 +27,19 @@ export const CONTROL_SIZE_BOX: Record<ControlSize, string> = {
  * 否则控件会被内容撑得比定高的 h-* 控件高，同行混排时大小不一。
  */
 export const CONTROL_SIZE_BOX_GROW: Record<ControlSize, string> = {
-  small: 'min-h-8 px-2.5 py-1 text-xs',
-  middle: 'min-h-9 px-3 py-1.5 text-sm',
-  large: 'min-h-10 px-4 py-1.5 text-base',
+  small:
+    'min-h-(--pactor-control-height-sm) px-2.5 py-1 text-[length:var(--pactor-control-text-sm)]',
+  middle:
+    'min-h-(--pactor-control-height-md) px-3 py-1.5 text-[length:var(--pactor-control-text-md)]',
+  large:
+    'min-h-(--pactor-control-height-lg) px-4 py-1.5 text-[length:var(--pactor-control-text-lg)]',
 };
 
 /** 多行文本控件（Textarea / Mentions）：内边距 + 字号（高度由行数/内容决定） */
 export const CONTROL_SIZE_AREA: Record<ControlSize, string> = {
-  small: 'px-2.5 py-1.5 text-xs',
-  middle: 'px-3 py-2 text-sm',
-  large: 'px-4 py-2.5 text-base',
+  small: 'px-2.5 py-1.5 text-[length:var(--pactor-control-text-sm)]',
+  middle: 'px-3 py-2 text-[length:var(--pactor-control-text-md)]',
+  large: 'px-4 py-2.5 text-[length:var(--pactor-control-text-lg)]',
 };
 
 /** vendored SelectTrigger 的 size 属性值（高度由 data-size 变体承载） */
@@ -44,7 +51,7 @@ export const CONTROL_SIZE_SELECT_ATTR = {
 
 /** vendored SelectTrigger 的文本/内边距类（高度走 size 属性，这里不含 h-*） */
 export const CONTROL_SIZE_TRIGGER_TEXT: Record<ControlSize, string> = {
-  small: 'px-2.5 text-xs',
-  middle: 'px-3 text-sm',
-  large: 'px-4 text-base',
+  small: 'px-2.5 text-[length:var(--pactor-control-text-sm)]',
+  middle: 'px-3 text-[length:var(--pactor-control-text-md)]',
+  large: 'px-4 text-[length:var(--pactor-control-text-lg)]',
 };
