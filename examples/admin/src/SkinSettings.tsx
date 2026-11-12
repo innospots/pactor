@@ -1,6 +1,6 @@
 /**
  * SkinSettings（@pactor-app/app headerExtra 槽位）：头部「皮肤」按钮 → 下拉面板
- * （主色预设 / 暗黑开关 / 圆角滑杆 / 恢复默认）。
+ * （主色预设 / 暗黑开关 / 圆角滑杆 / 界面密度 / 控件高度自定义 / 恢复默认）。
  *
  * shadcn kit 没有设置面板类组件，面板用原生控件 + 语义 token
  * （--radius / --border / --popover / --foreground …）内联样式拼装；
@@ -8,11 +8,21 @@
  */
 import { useEffect, useRef, useState, useSyncExternalStore } from 'react';
 
+import {
+  applyGlobalSize,
+  applyGlobalSizeValues,
+  readGlobalSize,
+  type GlobalSize,
+} from '@pactor-app/ui';
+
 import { ACCENT_PRESETS, DEFAULT_SKIN, getSkin, setSkin, subscribeSkin } from './skin';
 
 export function SkinSettings() {
   const [open, setOpen] = useState(false);
   const skin = useSyncExternalStore(subscribeSkin, getSkin);
+  const [density, setDensity] = useState<GlobalSize>(() => readGlobalSize());
+  /** 自定义控件高度基准（md，px）；null = 跟随密度档位预设 */
+  const [heightMd, setHeightMd] = useState<number | null>(null);
   const rootRef = useRef<HTMLDivElement>(null);
 
   // 点击面板外关闭
@@ -113,6 +123,91 @@ export function SkinSettings() {
             style={{ width: '100%' }}
             onChange={(event) => setSkin({ radius: Number(event.target.value) })}
           />
+
+          <div style={{ fontWeight: 600, margin: '16px 0 8px' }}>界面密度</div>
+          <div style={{ display: 'flex', gap: 8 }}>
+            {(
+              [
+                { value: 'compact', label: '紧凑' },
+                { value: 'default', label: '默认' },
+                { value: 'comfortable', label: '宽松' },
+              ] as const
+            ).map((option) => (
+              <button
+                key={option.value}
+                type="button"
+                aria-pressed={density === option.value}
+                onClick={() => {
+                  applyGlobalSize(option.value);
+                  setDensity(option.value);
+                }}
+                style={{
+                  flex: 1,
+                  padding: '4px 0',
+                  borderRadius: 'var(--radius)',
+                  border:
+                    density === option.value
+                      ? '2px solid var(--foreground)'
+                      : '1px solid var(--border)',
+                  background: 'transparent',
+                  color: 'inherit',
+                  cursor: 'pointer',
+                  fontSize: 12,
+                }}
+              >
+                {option.label}
+              </button>
+            ))}
+          </div>
+
+          <div style={{ fontWeight: 600, margin: '16px 0 8px' }}>
+            控件高度（自定义）
+            {heightMd !== null && (
+              <button
+                type="button"
+                onClick={() => {
+                  applyGlobalSizeValues(null);
+                  setHeightMd(null);
+                }}
+                style={{
+                  marginLeft: 8,
+                  border: 'none',
+                  background: 'transparent',
+                  color: 'var(--primary)',
+                  cursor: 'pointer',
+                  fontSize: 12,
+                  fontWeight: 400,
+                }}
+              >
+                恢复档位
+              </button>
+            )}
+          </div>
+          <input
+            type="range"
+            min={32}
+            max={44}
+            step={1}
+            value={heightMd ?? 36}
+            aria-label="控件高度"
+            style={{ width: '100%' }}
+            onChange={(event) => {
+              const md = Number(event.target.value);
+              setHeightMd(md);
+              // 其余高度档按 default 档阶梯派生（24/32/36/40 → md-12/md-4/md/md+4）
+              applyGlobalSizeValues({
+                heightXs: `${md - 12}px`,
+                heightSm: `${md - 4}px`,
+                heightMd: `${md}px`,
+                heightLg: `${md + 4}px`,
+              });
+            }}
+          />
+          {heightMd !== null && (
+            <div style={{ color: 'var(--muted-foreground)', fontSize: 12 }}>
+              当前 {heightMd}px（自定义值优先于密度档位）
+            </div>
+          )}
 
           <button
             type="button"
