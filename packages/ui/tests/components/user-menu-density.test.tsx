@@ -6,6 +6,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import { UserMenu as UiUserMenu } from '../../src/ui/user-menu/index.js';
 import { globalSizeStorageKey } from '../../src/lib/global-size.js';
+import { expectEventState, renderDsl } from './helpers.js';
 
 const USER = { name: 'Emma Collins', email: 'emma@example.com' };
 
@@ -57,5 +58,21 @@ describe('UserMenu 密度切换', () => {
     document.documentElement.setAttribute('data-pactor-size', 'comfortable');
     render(<UiUserMenu user={USER} showSize />);
     expect(document.documentElement.getAttribute('data-pactor-size')).toBe('comfortable');
+  });
+
+  it('DSL：showSize 透传；选择经 events.onSizeChange 传出密度值', async () => {
+    const { context } = renderDsl({
+      type: 'UserMenu',
+      props: { user: USER, showSize: true },
+      events: {
+        onSizeChange: { action: 'setState', params: { density: '${event}' } },
+      },
+    });
+
+    fireEvent.click(screen.getByRole('button', { name: /账户菜单/ }));
+    fireEvent.click(screen.getByRole('menuitemradio', { name: '紧凑' }));
+
+    await expectEventState(context, 'density', 'compact');
+    expect(document.documentElement.getAttribute('data-pactor-size')).toBe('compact');
   });
 });
