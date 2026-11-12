@@ -7,11 +7,18 @@ import { useFormContext } from '../Form/context.js';
 import { FieldShell } from '../Form/form-item.js';
 import type { FieldRule } from '../Input/index.js';
 
-/** 文件元数据（可序列化，DSL 语义值；不携带 File 对象本体） */
+/**
+ * 文件元数据（默认可序列化，DSL 语义值；不携带 File 对象本体）。
+ *
+ * `keepFiles` 为 true 时额外带上原始 `raw`（浏览器 File），供调用方自己上传；
+ * 此时字段值不可 JSON 序列化，不要写进页面 state/DSL。
+ */
 export interface UploadFileMeta {
   name: string;
   size: number;
   type: string;
+  /** 原始文件；仅当 `keepFiles` 为 true 时存在 */
+  raw?: File;
 }
 
 export interface UploadProps {
@@ -31,6 +38,13 @@ export interface UploadProps {
   maxSize?: number;
   /** 文件总数上限，超出不进列表 */
   maxCount?: number;
+  /**
+   * 保留原始 File 到每个元数据的 `raw` 上。
+   *
+   * 默认 false（字段值保持可序列化）。需要真正上传文件时打开它：
+   * 调用方从 `value[].raw` 拿到字节，上传时机与请求目标由调用方决定。
+   */
+  keepFiles?: boolean;
   /** 拖拽区形态（点击或拖入文件选择） */
   drag?: boolean;
   /** 选择区下方的辅助说明文案 */
@@ -72,8 +86,9 @@ function formatSize(size: number): string {
  * Upload 适配器（shadcn kit）：纯 UI 组件，不发起任何网络请求。
  * hidden file input + 文件列表（名称/大小/移除）；选择时按
  * accept / maxSize / maxCount 校验，不合规文件不进列表。
- * 字段值与 onChange 均为可序列化元数据数组 `Array<{ name, size, type }>`；
- * Form 内声明 `name` 自动成为表单项。
+ * 字段值与 onChange 均为元数据数组 `Array<{ name, size, type }>`；
+ * 需要真正上传时传 `keepFiles`，元数据上会多一个 `raw`（原始 File），
+ * 由调用方决定何时、往哪上传。Form 内声明 `name` 自动成为表单项。
  */
 export function Upload({
   name,
@@ -84,6 +99,7 @@ export function Upload({
   accept,
   maxSize,
   maxCount,
+  keepFiles,
   drag,
   tip,
   disabled,
@@ -147,7 +163,11 @@ export function Upload({
         rejectedCount += 1;
         continue;
       }
-      accepted.push({ name: file.name, size: file.size, type: file.type });
+      accepted.push(
+        keepFiles === true
+          ? { name: file.name, size: file.size, type: file.type, raw: file }
+          : { name: file.name, size: file.size, type: file.type },
+      );
       if (multiple !== true) break;
     }
     setRejected(rejectedCount);
