@@ -51,6 +51,10 @@
 | `--pactor-control-text-md` | 0.8125rem (13px) | 0.875rem (14px, text-sm) | 0.9375rem (15px) |
 | `--pactor-control-text-lg` | 0.875rem (14px) | 1rem (16px, text-base) | 1.0625rem (17px) |
 | `--pactor-control-box` | 0.875rem (14px) | 1rem (16px, size-4) | 1.125rem (18px) |
+| `--pactor-menu-item-padding-y` | 0.25rem | 0.375rem (py-1.5) | 0.5rem |
+| `--pactor-table-head-height` | 2rem | 2.5rem (h-10) | 3rem |
+| `--pactor-table-cell-padding-y` | 0.25rem | 0.5rem (p-2) | 0.75rem |
+| `--pactor-calendar-day-size` | 1.75rem | 2rem (size-8) | 2.25rem |
 
 档位切换规则（与 `data-pactor-theme` 三态同款契约）：
 
@@ -81,9 +85,22 @@
 | `packages/ui/src/ui/checkbox.tsx` / `radio-group.tsx` | `size-4` → `size-(--pactor-control-box)` |
 | `packages/ui/src/ui/textarea.tsx` / `switch.tsx` / `slider.tsx` | **保持现状**：Textarea 高度由行数决定（内边距/字号走 DSL 层 CONTROL_SIZE_AREA 已覆盖）；Switch/Slider 是轨道几何（宽高成比例），缩放会破碎比例，一期不动 |
 
-单组件 `size` prop 语义不变、优先级最高：全局档位只改各档对应的令牌值。DSL 层不再新增 size prop（已存在），仅 UserMenu 增加密度切换入口。
+单组件 `size` prop 语义不变、优先级最高：全局档位只改各档对应的令牌值。
 
-二期（不在本次范围）：Table / Tabs / Menu / Pagination 等复合组件的尺寸令牌化。
+**二期（已纳入本计划）**：
+
+| 组件 | 改动 |
+|------|------|
+| `table.tsx`（vendored） | TableHead `h-10` → `--pactor-table-head-height`；TableCell `p-2` → `px-2 py-(--pactor-table-cell-padding-y)`；`text-sm` → text-md 令牌 |
+| DSL `Table` | 新增 `size?: ControlSize`：middle = 跟随全局令牌（空类），small / large 给覆盖类（`h-8` / `px-2 py-1`、`h-12 px-3` / `px-3 py-2.5`），与全局密度独立、局部优先 |
+| `dropdown-menu.tsx` / `context-menu.tsx` / `menubar.tsx` | 菜单项 `py-1.5 text-sm` → `py-(--pactor-menu-item-padding-y)` + text-md 令牌（menubar 顶栏触发器 `py-1` 保持） |
+| `tabs.tsx` + DSL `Tabs` | List `h-9` / sm `h-8` → control-height md/sm 令牌，触发器字号令牌化；DSL 适配层补 `size?: 'default' \| 'sm'` 透传（ui 层早有该 prop） |
+| `navigation-menu.tsx` | 触发器 `h-9` → control-height md 令牌，字号令牌化 |
+| `sidebar.tsx` menu-button | default `h-8 text-sm` → control-height sm + text-md 令牌；sm / lg 档字号令牌化，`h-7` / `h-12` 保持 |
+| `calendar.tsx` | 日期格 `size-8` / `w-8` / `h-8` → `--pactor-calendar-day-size`，day 字号令牌化；nav 按钮 `size-7` 保持 |
+| `avatar.tsx` / `badge.tsx` / `breadcrumb.tsx` | Avatar `size-8` → control-height sm；Badge `text-xs` → text-sm 令牌；Breadcrumb 更多按钮 `size-9` → control-height md |
+
+**明确不做**：Pagination（页码按钮复用 `buttonVariants`，Task 3 后自动跟随全局，零改动）；DSL `Menu`（其行 padding `py-2` 语义是侧栏导航，已由 Sidebar menu-button 覆盖，动它会破坏 default 档零变化承诺）；`Kbd`（`h-5` 与控件阶梯不对齐，收益低）；Card / Alert / Empty / Dialog / Drawer（间距型，密度语义弱）。
 
 ### 3. UserMenu 尺寸切换（`packages/ui/src/ui/user-menu/`）
 
