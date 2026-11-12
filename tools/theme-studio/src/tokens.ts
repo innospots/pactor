@@ -141,6 +141,20 @@ export const TOKEN_GROUPS: TokenGroup[] = [
     ],
   },
   {
+    key: 'control-size',
+    title: '控件尺寸（全局密度 default 档）',
+    tokens: [
+      { name: '--pactor-control-height-xs', type: 'length', description: '控件高度 xs 档（Button xs / icon-xs）', defaultValue: '1.5rem', slider: { min: 1, max: 2, step: 0.125 } },
+      { name: '--pactor-control-height-sm', type: 'length', description: '控件高度 sm 档（Button sm、Sidebar 菜单行、Avatar）', defaultValue: '2rem', slider: { min: 1.5, max: 2.5, step: 0.125 } },
+      { name: '--pactor-control-height-md', type: 'length', description: '控件高度 md 档（Input / Select / Button 默认、Tabs、Pagination）', defaultValue: '2.25rem', slider: { min: 1.75, max: 3, step: 0.125 } },
+      { name: '--pactor-control-height-lg', type: 'length', description: '控件高度 lg 档（Button lg）', defaultValue: '2.5rem', slider: { min: 2, max: 3.5, step: 0.125 } },
+      { name: '--pactor-control-text-sm', type: 'length', description: '控件小字号（Button xs/sm、Tabs sm、Badge）', defaultValue: '0.75rem', slider: { min: 0.625, max: 0.875, step: 0.0625 } },
+      { name: '--pactor-control-text-md', type: 'length', description: '控件正文字号（Button / Input / Select / 菜单项 / 表格）', defaultValue: '0.875rem', slider: { min: 0.75, max: 1, step: 0.0625 } },
+      { name: '--pactor-control-text-lg', type: 'length', description: '控件大字号（表单控件 large 档）', defaultValue: '1rem', slider: { min: 0.875, max: 1.25, step: 0.0625 } },
+      { name: '--pactor-control-box', type: 'length', description: 'Checkbox / Radio 控件盒尺寸', defaultValue: '1rem', slider: { min: 0.75, max: 1.25, step: 0.0625 } },
+    ],
+  },
+  {
     key: 'style',
     title: '风格',
     tokens: [

@@ -294,3 +294,13 @@ export type {
   UserMenuUser,
   UserStatus,
 } from './user-menu/index.js';
+export {
+  applyGlobalSize,
+  applyGlobalSizeValues,
+  globalSizeStorageKey,
+  persistGlobalSize,
+  readGlobalSize,
+  readGlobalSizeValues,
+  readStoredGlobalSize,
+} from '../lib/global-size.js';
+export type { GlobalSize, GlobalSizeValues } from '../lib/global-size.js';

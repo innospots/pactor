@@ -32,4 +32,12 @@ describe('pactor-app aggregated styles', () => {
     expect(css.indexOf(md)).toBeGreaterThan(-1);
     expect(css.lastIndexOf(sm)).toBeLessThan(css.indexOf(md));
   });
+
+  it('包含全局密度令牌与档位选择器', () => {
+    expect(css).toContain('--pactor-control-height-md');
+    expect(css).toContain('--pactor-control-text-lg');
+    expect(css).toContain('--pactor-control-box');
+    expect(css).toContain("[data-pactor-size='compact']");
+    expect(css).toContain("[data-pactor-size='comfortable']");
+  });
 });

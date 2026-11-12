@@ -14,6 +14,16 @@ export {
   CONTROL_SIZE_TRIGGER_TEXT,
 } from './control-size.js';
 export type { ControlSize } from './control-size.js';
+export {
+  applyGlobalSize,
+  applyGlobalSizeValues,
+  globalSizeStorageKey,
+  persistGlobalSize,
+  readGlobalSize,
+  readGlobalSizeValues,
+  readStoredGlobalSize,
+} from '../lib/global-size.js';
+export type { GlobalSize, GlobalSizeValues } from '../lib/global-size.js';
 
 // 展示与布局组件
 export { Page } from './components/Page/index.js';

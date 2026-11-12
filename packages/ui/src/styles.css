@@ -138,6 +138,42 @@
   --flex-gap-md: calc(var(--flex-gap) * 1.33);
   --flex-gap-lg: calc(var(--flex-gap) * 2);
   --grid-gap: 16px;
+
+  /* 控件尺寸令牌（全局密度档位基准；default 档 = 现行尺寸，默认视觉零变化。
+     compact / comfortable 经下方 [data-pactor-size] 块覆盖；
+     属性可挂在 documentElement 或任意容器上，经变量继承局部生效） */
+  --pactor-control-height-xs: 1.5rem;
+  --pactor-control-height-sm: 2rem;
+  --pactor-control-height-md: 2.25rem;
+  --pactor-control-height-lg: 2.5rem;
+  --pactor-control-text-sm: 0.75rem;
+  --pactor-control-text-md: 0.875rem;
+  --pactor-control-text-lg: 1rem;
+  --pactor-control-box: 1rem;
+}
+
+/* 全局密度档位 compact（紧凑）：高度 -4px、正文字号 -1px */
+[data-pactor-size='compact'] {
+  --pactor-control-height-xs: 1.25rem;
+  --pactor-control-height-sm: 1.75rem;
+  --pactor-control-height-md: 2rem;
+  --pactor-control-height-lg: 2.25rem;
+  --pactor-control-text-sm: 0.75rem;
+  --pactor-control-text-md: 0.8125rem;
+  --pactor-control-text-lg: 0.875rem;
+  --pactor-control-box: 0.875rem;
+}
+
+/* 全局密度档位 comfortable（宽松）：高度 +4px（lg +8px）、正文字号 +1px */
+[data-pactor-size='comfortable'] {
+  --pactor-control-height-xs: 1.75rem;
+  --pactor-control-height-sm: 2.25rem;
+  --pactor-control-height-md: 2.5rem;
+  --pactor-control-height-lg: 3rem;
+  --pactor-control-text-sm: 0.8125rem;
+  --pactor-control-text-md: 0.9375rem;
+  --pactor-control-text-lg: 1.0625rem;
+  --pactor-control-box: 1.125rem;
 }
 
 /* 暗色皮肤：全仓约定的属性开关（挂在根或任意容器上） */
