@@ -22,6 +22,7 @@ import {
 } from '../../../ui/table.js';
 import { Icon } from '../Icon/index.js';
 import { Pagination } from '../Pagination/index.js';
+import type { ControlSize } from '../../control-size.js';
 import {
   childrenOf,
   collectParentKeys,
@@ -74,6 +75,13 @@ export interface TableRowDropInfo {
   position: 'before' | 'after';
 }
 
+/** 行密度档位：middle = 跟随全局密度令牌（不加覆盖类）；small / large 强制局部档 */
+const TABLE_SIZE: Record<ControlSize, { head: string; cell: string }> = {
+  small: { head: 'h-8', cell: 'px-2 py-1' },
+  middle: { head: '', cell: '' },
+  large: { head: 'h-12 px-3', cell: 'px-3 py-2.5' },
+};
+
 export interface TableProps {
   columns?: TableColumn[];
   /** 数据行（通常为 `${data.xxx}` 表达式解析结果） */
@@ -82,6 +90,8 @@ export interface TableProps {
   rowKey?: string;
   loading?: boolean;
   pagination?: TablePagination;
+  /** 行密度：middle（缺省，跟随全局密度档位）/ small / large（强制局部档，与全局密度独立） */
+  size?: ControlSize;
   /** 空态文案（缺省走 i18n「暂无数据」）；空态同时展示图标 */
   emptyText?: string;
   /** 行多选：首列渲染 Checkbox（表头为当前页全选），选中变化经 onSelectChange 传出 */
@@ -192,6 +202,7 @@ export function Table({
   rowKey = 'id',
   loading,
   pagination,
+  size = 'middle',
   emptyText,
   rowSelection,
   selectionDisabledField,
@@ -496,14 +507,14 @@ export function Table({
             {rowDraggable ? (
               <TableHead
                 data-slot="table-drag-head"
-                className={stickyHeadClass(null, false)}
+                className={cn(stickyHeadClass(null, false), TABLE_SIZE[size].head)}
                 style={{ width: 36, minWidth: 36 }}
               />
             ) : null}
             {rowSelection ? (
               <TableHead
                 data-slot="table-selection-head"
-                className={stickyHeadClass(null, false)}
+                className={cn(stickyHeadClass(null, false), TABLE_SIZE[size].head)}
                 style={{ width: 36, minWidth: 36 }}
               >
                 <ShadcnCheckbox
@@ -528,6 +539,7 @@ export function Table({
                   className={cn(
                     columnClass(column, scrolledX, isSortedColumn),
                     stickyHeadClass(column, isSortedColumn),
+                    TABLE_SIZE[size].head,
                   )}
                   style={columnWidthStyle(column)}
                   aria-sort={
@@ -571,7 +583,7 @@ export function Table({
         <TableBody>
           {flatRows.length === 0 ? (
             <TableRow className="hover:bg-transparent">
-              <TableCell colSpan={colSpan}>
+              <TableCell colSpan={colSpan} className={cn(TABLE_SIZE[size].cell)}>
                 <div
                   data-slot="table-empty"
                   className="flex flex-col items-center gap-2 py-8 text-muted-foreground"
@@ -596,7 +608,7 @@ export function Table({
                 {rowDraggable ? (
                   <TableCell
                     data-slot="table-drag-cell"
-                    className={dropIndicatorClass(flat.key)}
+                    className={cn(dropIndicatorClass(flat.key), TABLE_SIZE[size].cell)}
                   >
                     <button
                       type="button"
@@ -614,7 +626,7 @@ export function Table({
                 {rowSelection ? (
                   <TableCell
                     data-slot="table-selection-cell"
-                    className={dropIndicatorClass(flat.key)}
+                    className={cn(dropIndicatorClass(flat.key), TABLE_SIZE[size].cell)}
                   >
                     <ShadcnCheckbox
                       aria-label={t('pactor.table.selectRow')}
@@ -646,6 +658,7 @@ export function Table({
                             sort.dataIndex === column.dataIndex,
                         ),
                         dropIndicatorClass(flat.key),
+                        TABLE_SIZE[size].cell,
                       )}
                       style={columnWidthStyle(column)}
                     >

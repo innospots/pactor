@@ -151,6 +151,8 @@
   --pactor-control-text-lg: 1rem;
   --pactor-control-box: 1rem;
   --pactor-menu-item-padding-y: 0.375rem;
+  --pactor-table-head-height: 2.5rem;
+  --pactor-table-cell-padding-y: 0.5rem;
 }
 
 /* 全局密度档位 compact（紧凑）：高度 -4px、正文字号 -1px */
@@ -164,6 +166,8 @@
   --pactor-control-text-lg: 0.875rem;
   --pactor-control-box: 0.875rem;
   --pactor-menu-item-padding-y: 0.25rem;
+  --pactor-table-head-height: 2rem;
+  --pactor-table-cell-padding-y: 0.25rem;
 }
 
 /* 全局密度档位 comfortable（宽松）：高度 +4px（lg +8px）、正文字号 +1px */
@@ -177,6 +181,8 @@
   --pactor-control-text-lg: 1.0625rem;
   --pactor-control-box: 1.125rem;
   --pactor-menu-item-padding-y: 0.5rem;
+  --pactor-table-head-height: 3rem;
+  --pactor-table-cell-padding-y: 0.75rem;
 }
 
 /* 暗色皮肤：全仓约定的属性开关（挂在根或任意容器上） */
