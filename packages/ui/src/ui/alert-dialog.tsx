@@ -55,7 +55,7 @@ function AlertDialogContent({
       <AlertDialogPrimitive.Popup
         data-slot="alert-dialog-content"
         className={cn(
-          'fixed top-[50%] left-[50%] z-50 grid w-full max-w-[calc(100%-2rem)] translate-x-[-50%] translate-y-[-50%] gap-4 rounded-lg border border-border bg-popover p-6 shadow-lg shadow-(color:--shadow-color) duration-200 data-open:animate-in data-open:fade-in-0 data-open:zoom-in-95 data-closed:animate-out data-closed:fill-mode-forwards data-closed:fade-out-0 data-closed:zoom-out-95 sm:max-w-lg',
+          'fixed top-[50%] left-[50%] z-50 grid w-full max-w-[calc(100%-2rem)] translate-x-[-50%] translate-y-[-50%] gap-4 rounded-lg border border-border bg-popover p-(--pactor-panel-padding) shadow-lg shadow-(color:--shadow-color) duration-200 data-open:animate-in data-open:fade-in-0 data-open:zoom-in-95 data-closed:animate-out data-closed:fill-mode-forwards data-closed:fade-out-0 data-closed:zoom-out-95 sm:max-w-lg',
           className,
         )}
         {...props}
@@ -100,7 +100,10 @@ function AlertDialogTitle({
   return (
     <AlertDialogPrimitive.Title
       data-slot="alert-dialog-title"
-      className={cn('text-lg font-semibold', className)}
+      className={cn(
+        'text-[length:var(--pactor-control-text-lg)] leading-7 font-semibold',
+        className,
+      )}
       {...props}
     />
   );
@@ -113,7 +116,10 @@ function AlertDialogDescription({
   return (
     <AlertDialogPrimitive.Description
       data-slot="alert-dialog-description"
-      className={cn('text-sm text-muted-foreground', className)}
+      className={cn(
+        'text-[length:var(--pactor-control-text-md)] leading-5 text-muted-foreground',
+        className,
+      )}
       {...props}
     />
   );

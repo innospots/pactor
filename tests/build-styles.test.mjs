@@ -61,4 +61,15 @@ describe('pactor-app aggregated styles', () => {
   it('日历日期格编译为密度令牌引用', () => {
     expect(css).toContain('.size-\\(--pactor-calendar-day-size\\)');
   });
+
+  it('三期：轨道几何 / 面板间距 / 导航行编译为密度令牌引用', () => {
+    expect(css).toContain('.h-\\(--pactor-switch-track-h\\)');
+    expect(css).toContain('.w-\\(--pactor-switch-track-w\\)');
+    expect(css).toContain('.h-\\(--pactor-slider-track-size\\)');
+    expect(css).toContain('.h-\\(--pactor-kbd-size\\)');
+    expect(css).toContain('.p-\\(--pactor-panel-padding\\)');
+    expect(css).toContain('.px-\\(--pactor-card-padding\\)');
+    expect(css).toContain('.py-\\(--pactor-alert-padding-y\\)');
+    expect(css).toContain('.py-\\(--pactor-menu-nav-padding-y\\)');
+  });
 });

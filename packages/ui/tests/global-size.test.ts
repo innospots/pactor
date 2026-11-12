@@ -58,6 +58,22 @@ describe('global-size', () => {
     expect(readGlobalSizeValues()).toEqual({});
   });
 
+  it('自定义数值：面板 / 卡片间距键（三期令牌）', () => {
+    const style = document.documentElement.style;
+
+    applyGlobalSizeValues({ panelPadding: '28px', cardPadding: '18px' });
+    expect(style.getPropertyValue('--pactor-panel-padding')).toBe('28px');
+    expect(style.getPropertyValue('--pactor-card-padding')).toBe('18px');
+    expect(readGlobalSizeValues()).toEqual({
+      panelPadding: '28px',
+      cardPadding: '18px',
+    });
+
+    applyGlobalSizeValues(null);
+    expect(style.getPropertyValue('--pactor-panel-padding')).toBe('');
+    expect(style.getPropertyValue('--pactor-card-padding')).toBe('');
+  });
+
   it('内联自定义值优先于档位预设（inline style 高于样式表选择器）', () => {
     // jsdom 不计算样式表级联，此处断言实现机制：内联变量与属性可共存，
     // 浏览器中 inline style 优先级天然高于 [data-pactor-size] 块

@@ -369,9 +369,9 @@ describe('Icon', () => {
 
 describe('Text', () => {
   it.each([
-    ['small', 'text-xs'],
-    ['large', 'text-lg'],
-  ] as const)('size: %s 映射字号类 %s', (size, cls) => {
+    ['small', 'text-[length:var(--pactor-control-text-sm)]'],
+    ['large', 'text-[length:var(--pactor-control-text-lg)]'],
+  ] as const)('size: %s 映射字号类 %s（密度令牌）', (size, cls) => {
     renderDsl({
       type: 'Text',
       props: { text: '正文', size },

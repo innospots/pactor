@@ -8,7 +8,7 @@ function Empty({ className, ...props }: React.ComponentProps<'div'>) {
     <div
       data-slot="empty"
       className={cn(
-        'flex min-w-0 flex-1 flex-col items-center justify-center gap-4 rounded-lg border-dashed p-6 text-center text-balance',
+        'flex min-w-0 flex-1 flex-col items-center justify-center gap-4 rounded-lg border-dashed p-(--pactor-panel-padding) text-center text-balance',
         className,
       )}
       {...props}
@@ -30,7 +30,10 @@ function EmptyTitle({ className, ...props }: React.ComponentProps<'div'>) {
   return (
     <div
       data-slot="empty-title"
-      className={cn('text-lg font-medium tracking-tight', className)}
+      className={cn(
+        'text-[length:var(--pactor-control-text-lg)] leading-7 font-medium tracking-tight',
+        className,
+      )}
       {...props}
     />
   );
@@ -40,7 +43,10 @@ function EmptyDescription({ className, ...props }: React.ComponentProps<'p'>) {
   return (
     <p
       data-slot="empty-description"
-      className={cn('text-sm text-muted-foreground', className)}
+      className={cn(
+        'text-[length:var(--pactor-control-text-md)] leading-5 text-muted-foreground',
+        className,
+      )}
       {...props}
     />
   );
@@ -51,7 +57,7 @@ function EmptyContent({ className, ...props }: React.ComponentProps<'div'>) {
     <div
       data-slot="empty-content"
       className={cn(
-        'flex w-full max-w-sm min-w-0 flex-col items-center gap-2 text-sm text-balance',
+        'flex w-full max-w-sm min-w-0 flex-col items-center gap-2 text-[length:var(--pactor-control-text-md)] leading-5 text-balance',
         className,
       )}
       {...props}

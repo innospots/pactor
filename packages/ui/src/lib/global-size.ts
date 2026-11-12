@@ -67,6 +67,10 @@ export interface GlobalSizeValues {
   textMd?: string;
   textLg?: string;
   box?: string;
+  /** 面板内边距（Dialog / AlertDialog / Empty / vendored Card） */
+  panelPadding?: string;
+  /** 卡片级内边距（DSL Card、Alert 横向、Drawer/Sheet 头尾、Popover/HoverCard） */
+  cardPadding?: string;
 }
 
 const valueTokens: Record<keyof GlobalSizeValues, string> = {
@@ -78,6 +82,8 @@ const valueTokens: Record<keyof GlobalSizeValues, string> = {
   textMd: '--pactor-control-text-md',
   textLg: '--pactor-control-text-lg',
   box: '--pactor-control-box',
+  panelPadding: '--pactor-panel-padding',
+  cardPadding: '--pactor-card-padding',
 };
 
 const valueKeys = Object.keys(valueTokens) as (keyof GlobalSizeValues)[];

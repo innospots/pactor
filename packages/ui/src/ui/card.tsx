@@ -26,7 +26,7 @@ function Card({
     <div
       data-slot="card"
       className={cn(
-        'flex flex-col gap-6 border border-border bg-card py-6 text-card-foreground shadow-(--card-shadow)',
+        'flex flex-col gap-(--pactor-panel-padding) border border-border bg-card py-(--pactor-panel-padding) text-card-foreground shadow-(--card-shadow)',
         cardRoundedClasses[rounded],
         className,
       )}
@@ -40,7 +40,7 @@ function CardHeader({ className, ...props }: React.ComponentProps<'div'>) {
     <div
       data-slot="card-header"
       className={cn(
-        'grid auto-rows-min grid-rows-[auto_auto] items-start gap-1.5 px-6 has-data-[slot=card-action]:grid-cols-[1fr_auto] [.border-b]:pb-6',
+        'grid auto-rows-min grid-rows-[auto_auto] items-start gap-1.5 px-(--pactor-panel-padding) has-data-[slot=card-action]:grid-cols-[1fr_auto] [.border-b]:pb-(--pactor-panel-padding)',
         className,
       )}
       {...props}
@@ -62,7 +62,10 @@ function CardDescription({ className, ...props }: React.ComponentProps<'div'>) {
   return (
     <div
       data-slot="card-description"
-      className={cn('text-sm text-muted-foreground', className)}
+      className={cn(
+        'text-[length:var(--pactor-control-text-md)] leading-5 text-muted-foreground',
+        className,
+      )}
       {...props}
     />
   );
@@ -85,7 +88,7 @@ function CardContent({ className, ...props }: React.ComponentProps<'div'>) {
   return (
     <div
       data-slot="card-content"
-      className={cn('px-6', className)}
+      className={cn('px-(--pactor-panel-padding)', className)}
       {...props}
     />
   );
@@ -95,7 +98,10 @@ function CardFooter({ className, ...props }: React.ComponentProps<'div'>) {
   return (
     <div
       data-slot="card-footer"
-      className={cn('flex items-center px-6 [.border-t]:pt-6', className)}
+      className={cn(
+        'flex items-center px-(--pactor-panel-padding) [.border-t]:pt-(--pactor-panel-padding)',
+        className,
+      )}
       {...props}
     />
   );
