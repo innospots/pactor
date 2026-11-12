@@ -4638,6 +4638,34 @@ div.pactor-markdown-editor-root.mdxeditor, div.pactor-markdown-editor-root.mdxed
   --flex-gap-md: calc(var(--flex-gap) * 1.33);
   --flex-gap-lg: calc(var(--flex-gap) * 2);
   --grid-gap: 16px;
+  --pactor-control-height-xs: 1.5rem;
+  --pactor-control-height-sm: 2rem;
+  --pactor-control-height-md: 2.25rem;
+  --pactor-control-height-lg: 2.5rem;
+  --pactor-control-text-sm: 0.75rem;
+  --pactor-control-text-md: 0.875rem;
+  --pactor-control-text-lg: 1rem;
+  --pactor-control-box: 1rem;
+}
+[data-pactor-size='compact'] {
+  --pactor-control-height-xs: 1.25rem;
+  --pactor-control-height-sm: 1.75rem;
+  --pactor-control-height-md: 2rem;
+  --pactor-control-height-lg: 2.25rem;
+  --pactor-control-text-sm: 0.75rem;
+  --pactor-control-text-md: 0.8125rem;
+  --pactor-control-text-lg: 0.875rem;
+  --pactor-control-box: 0.875rem;
+}
+[data-pactor-size='comfortable'] {
+  --pactor-control-height-xs: 1.75rem;
+  --pactor-control-height-sm: 2.25rem;
+  --pactor-control-height-md: 2.5rem;
+  --pactor-control-height-lg: 3rem;
+  --pactor-control-text-sm: 0.8125rem;
+  --pactor-control-text-md: 0.9375rem;
+  --pactor-control-text-lg: 1.0625rem;
+  --pactor-control-box: 1.125rem;
 }
 [data-pactor-theme='dark'] {
   color-scheme: dark;
