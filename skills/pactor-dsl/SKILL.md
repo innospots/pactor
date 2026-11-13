@@ -355,6 +355,7 @@ Pitfall: action `params` objects with a `type` (or `action`) key are treated as 
 ## Workflow: theming and skins
 
 - The built-in kit is shadcn (`@pactor-app/ui`); theming = overriding its CSS variable tokens at `:root` (`--primary` / `--muted` / `--radius` / ...), dark via `data-pactor-theme="dark"`
+- Global density: `data-pactor-size="compact|comfortable"` on `<html>` (unset = default) rescales control height/text/padding tokens (`--pactor-control-*`, `--pactor-panel-padding`, `--pactor-card-padding`, ...); hosts can set it via `applyGlobalSize()` or custom values via `applyGlobalSizeValues()` from `@pactor-app/ui`, and DSL `UserMenu` exposes it with `showSize: true`
 - Portaled overlays (Tooltip / Select / DropdownMenu popups) mount at `document.body` — token overrides must live at `:root`, not on an inner container
 - Chat surfaces use a separate `--pactor-chat-*` token set (same override + dark mechanism)
 - Layout and theme config usually come from bootstrap

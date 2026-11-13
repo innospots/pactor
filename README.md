@@ -142,7 +142,7 @@ createPactorApplication({
 - **Server-Driven UI** — 页面 YAML/JSON 描述，Runtime 动态渲染
 - **数据与联动** — `state`、`dataSources`（static / service / http）、`${表达式}`、事件 → 标准动作（`setState`、`reload`、`navigate` 等）
 - **权限** — 页面 / 菜单 / 组件 / 动作四层守卫（前端控 UI，接口仍需后端鉴权）
-- **主题** — CSS 变量换肤，暗色 `data-pactor-theme="dark"`
+- **主题** — CSS 变量换肤，暗色 `data-pactor-theme="dark"`；全局密度三档 `data-pactor-size="compact|comfortable"`（控件高度/字号/面板间距令牌化，支持皮肤 CSS 与 JS 自定义数值）
 - **国际化** — DSL 内 `${t('key')}`
 - **AI** — `@pactor-app/chat`：流式对话、`Chat` / `ChatShell` DSL 组件
 
