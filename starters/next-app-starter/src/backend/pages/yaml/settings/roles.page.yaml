@@ -249,68 +249,63 @@ body:
               - title:
                   "$i18n{page.roles.column.actions:操作}"
                 align: center
+                fitContent: true
                 fixed: right
-                width: 200
                 cell:
-                  type: Flex
-                  props:
-                    justify: center
-                    gap: small
-                  children:
-                    - type: Button
-                      props:
-                        text: "$i18n{page.roles.detail:详情}"
-                        variant: link
-                        size: small
-                      events:
-                        onClick:
-                          - action: navigate
-                            params:
-                              to: /settings/roles/${row.roleId}
-                    - type: Button
-                      props:
-                        text: "${row.status == 'ENABLED' ? t('common.disable') : t('common.enable')}"
-                        variant: link
-                        size: small
-                      events:
-                        onClick:
-                          - action: confirm
-                            params:
-                              title: "$i18n{page.roles.confirmStatusTitle:确认变更状态}"
-                              content: "$i18n{page.roles.confirmStatusContent:确定要变更该角色的启用状态吗？}"
-                          - action: request
-                            params:
-                              method: PUT
-                              url: /api/d/platform/roles/${row.roleId}/status
-                              body:
-                                status: "${row.status == 'ENABLED' ? 'DISABLED' : 'ENABLED'}"
-                          - action: message
-                            params:
-                              messageType: success
-                              text: "$i18n{page.roles.statusUpdated:状态已更新}"
-                          - action: reload
-                            params:
-                              dataSource: roles
-                    - type: Button
-                      props:
-                        text: "$i18n{page.roles.delete:删除}"
-                        variant: link
-                        size: small
-                        danger: true
-                      events:
-                        onClick:
-                          - action: confirm
-                            params:
-                              title: "$i18n{page.roles.deleteTitle:删除角色}"
-                              content: "$i18n{page.roles.deleteContent:将解除该角色的授权与成员绑定，确定删除吗？}"
-                          - action: request
-                            params:
-                              method: DELETE
-                              url: /api/d/platform/roles/${row.roleId}
-                          - action: message
-                            params:
-                              messageType: success
-                              text: "$i18n{page.roles.deleted:已删除}"
-                          - action: reload
-                            params:
-                              dataSource: roles
+                  - type: Button
+                    props:
+                      text: "$i18n{page.roles.detail:详情}"
+                      variant: link
+                      size: small
+                    events:
+                      onClick:
+                        - action: navigate
+                          params:
+                            to: /settings/roles/${row.roleId}
+                  - type: Button
+                    props:
+                      text: "${row.status == 'ENABLED' ? t('common.disable') : t('common.enable')}"
+                      variant: link
+                      size: small
+                    events:
+                      onClick:
+                        - action: confirm
+                          params:
+                            title: "$i18n{page.roles.confirmStatusTitle:确认变更状态}"
+                            content: "$i18n{page.roles.confirmStatusContent:确定要变更该角色的启用状态吗？}"
+                        - action: request
+                          params:
+                            method: PUT
+                            url: /api/d/platform/roles/${row.roleId}/status
+                            body:
+                              status: "${row.status == 'ENABLED' ? 'DISABLED' : 'ENABLED'}"
+                        - action: message
+                          params:
+                            messageType: success
+                            text: "$i18n{page.roles.statusUpdated:状态已更新}"
+                        - action: reload
+                          params:
+                            dataSource: roles
+                  - type: Button
+                    props:
+                      text: "$i18n{page.roles.delete:删除}"
+                      variant: link
+                      size: small
+                      danger: true
+                    events:
+                      onClick:
+                        - action: confirm
+                          params:
+                            title: "$i18n{page.roles.deleteTitle:删除角色}"
+                            content: "$i18n{page.roles.deleteContent:将解除该角色的授权与成员绑定，确定删除吗？}"
+                        - action: request
+                          params:
+                            method: DELETE
+                            url: /api/d/platform/roles/${row.roleId}
+                        - action: message
+                          params:
+                            messageType: success
+                            text: "$i18n{page.roles.deleted:已删除}"
+                        - action: reload
+                          params:
+                            dataSource: roles

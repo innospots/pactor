@@ -91,79 +91,76 @@ body:
                   props: { text: "${row.status == 'DISABLED' ? t('common.inactive') : t('common.enabled')}" }
               - title: "$i18n{page.users.actions:操作}"
                 align: center
+                fitContent: true
                 fixed: right
-                width: 250
                 cell:
-                  type: Flex
-                  props: { justify: center, gap: small }
-                  children:
-                    - type: Button
-                      props: { text: "${row.status == 'DISABLED' ? t('common.enable') : t('common.inactive')}", variant: link, size: small }
-                      events:
-                        onClick:
-                          - action: confirm
-                            params:
-                              title: "$i18n{page.users.confirmStatusTitle:变更状态}"
-                              content: "$i18n{page.users.confirmStatusContent:确定变更该用户的状态吗？}"
-                          - action: request
-                            params: { method: PATCH, url: /api/d/users, body: { id: "${row.id}", action: status, status: "${row.status == 'DISABLED' ? 'ENABLED' : 'DISABLED'}" } }
-                          - action: reload
-                            params: { dataSource: users }
-                    - type: Button
-                      props: { text: "$i18n{page.users.edit:修改}", variant: link, size: small }
-                      events:
-                        onClick:
-                          - action: overlay.open
-                            params:
-                              overlay:
-                                type: modal
-                                title: "$i18n{page.users.editTitle:修改用户}"
-                                width: 520
-                                content:
-                                  type: Form
-                                  props: { layout: vertical, initialValues: "${row}" }
-                                  events:
-                                    onSubmit:
-                                      - action: request
-                                        params: { method: PATCH, url: /api/d/users, body: { id: "${row.id}", action: edit, name: "${event.name}", email: "${event.email}", role: "${event.role}" } }
-                                      - action: overlay.close
-                                      - action: reload
-                                        params: { dataSource: users }
-                                  children:
-                                    - type: Input
-                                      props: { name: name, label: "$i18n{page.users.name:姓名}", rules: [{ required: true, message: "$i18n{page.users.nameRequired:请输入姓名}" }] }
-                                    - type: Input
-                                      props: { name: email, label: "$i18n{page.users.email:邮箱}", rules: [{ required: true, message: "$i18n{page.users.emailRequired:请输入邮箱}" }] }
-                                    - type: Select
-                                      props:
-                                        name: role
-                                        label: "$i18n{page.users.role:角色}"
-                                        options:
-                                          - { label: "$i18n{page.users.roleAdmin:管理员}", value: admin }
-                                          - { label: "$i18n{page.users.roleMember:成员}", value: member }
-                                          - { label: "$i18n{page.users.roleGuest:访客}", value: guest }
-                                    - type: Button
-                                      props: { text: "$i18n{page.users.save:保存}", variant: primary, submit: true }
-                    - type: Button
-                      props: { text: "$i18n{page.users.resetPassword:密码重置}", variant: link, size: small }
-                      events:
-                        onClick:
-                          - action: message
-                            params:
-                              messageType: info
-                              text: "$i18n{page.users.resetUnavailable:示例用户未接入登录账号，暂不支持密码重置}"
-                    - type: Button
-                      props: { text: "$i18n{page.users.delete:删除}", variant: link, size: small, danger: true }
-                      events:
-                        onClick:
-                          - action: confirm
-                            params:
-                              title: "$i18n{page.users.deleteTitle:删除用户}"
-                              content: "$i18n{page.users.deleteContent:确定删除该示例用户吗？}"
-                          - action: request
-                            params: { method: DELETE, url: "/api/d/users?id=${row.id}" }
-                          - action: reload
-                            params: { dataSource: users }
+                  - type: Button
+                    props: { text: "${row.status == 'DISABLED' ? t('common.enable') : t('common.inactive')}", variant: link, size: small }
+                    events:
+                      onClick:
+                        - action: confirm
+                          params:
+                            title: "$i18n{page.users.confirmStatusTitle:变更状态}"
+                            content: "$i18n{page.users.confirmStatusContent:确定变更该用户的状态吗？}"
+                        - action: request
+                          params: { method: PATCH, url: /api/d/users, body: { id: "${row.id}", action: status, status: "${row.status == 'DISABLED' ? 'ENABLED' : 'DISABLED'}" } }
+                        - action: reload
+                          params: { dataSource: users }
+                  - type: Button
+                    props: { text: "$i18n{page.users.edit:修改}", variant: link, size: small }
+                    events:
+                      onClick:
+                        - action: overlay.open
+                          params:
+                            overlay:
+                              type: modal
+                              title: "$i18n{page.users.editTitle:修改用户}"
+                              width: 520
+                              content:
+                                type: Form
+                                props: { layout: vertical, initialValues: "${row}" }
+                                events:
+                                  onSubmit:
+                                    - action: request
+                                      params: { method: PATCH, url: /api/d/users, body: { id: "${row.id}", action: edit, name: "${event.name}", email: "${event.email}", role: "${event.role}" } }
+                                    - action: overlay.close
+                                    - action: reload
+                                      params: { dataSource: users }
+                                children:
+                                  - type: Input
+                                    props: { name: name, label: "$i18n{page.users.name:姓名}", rules: [{ required: true, message: "$i18n{page.users.nameRequired:请输入姓名}" }] }
+                                  - type: Input
+                                    props: { name: email, label: "$i18n{page.users.email:邮箱}", rules: [{ required: true, message: "$i18n{page.users.emailRequired:请输入邮箱}" }] }
+                                  - type: Select
+                                    props:
+                                      name: role
+                                      label: "$i18n{page.users.role:角色}"
+                                      options:
+                                        - { label: "$i18n{page.users.roleAdmin:管理员}", value: admin }
+                                        - { label: "$i18n{page.users.roleMember:成员}", value: member }
+                                        - { label: "$i18n{page.users.roleGuest:访客}", value: guest }
+                                  - type: Button
+                                    props: { text: "$i18n{page.users.save:保存}", variant: primary, submit: true }
+                  - type: Button
+                    props: { text: "$i18n{page.users.resetPassword:密码重置}", variant: link, size: small }
+                    events:
+                      onClick:
+                        - action: message
+                          params:
+                            messageType: info
+                            text: "$i18n{page.users.resetUnavailable:示例用户未接入登录账号，暂不支持密码重置}"
+                  - type: Button
+                    props: { text: "$i18n{page.users.delete:删除}", variant: link, size: small, danger: true }
+                    events:
+                      onClick:
+                        - action: confirm
+                          params:
+                            title: "$i18n{page.users.deleteTitle:删除用户}"
+                            content: "$i18n{page.users.deleteContent:确定删除该示例用户吗？}"
+                        - action: request
+                          params: { method: DELETE, url: "/api/d/users?id=${row.id}" }
+                        - action: reload
+                          params: { dataSource: users }
 
     - type: Dialog
       props:

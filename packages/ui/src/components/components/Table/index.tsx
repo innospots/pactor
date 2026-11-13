@@ -40,6 +40,12 @@ export interface TableColumn {
   title?: string;
   dataIndex?: string;
   width?: number | string;
+  /**
+   * 按内容收缩列宽：列宽由单元格内容决定，剩余空间分给其他列。
+   * 操作列（尤其配合 `align: 'center'`）用它替代固定 `width`；
+   * 两者同时声明时以 `width` 为准。
+   */
+  fitContent?: boolean;
   /** 列内容水平对齐（表头与单元格同时生效），默认 left */
   align?: 'left' | 'center' | 'right';
   /** 列固定（sticky）：right 常用于操作列固定最右；单侧仅支持一列 */
@@ -48,7 +54,12 @@ export interface TableColumn {
   sorter?: boolean;
   /** 默认排序方向（仅 sorter 列；页面初始序） */
   defaultSortOrder?: SortOrder;
-  cell?: DslNode;
+  /**
+   * 行模板 DSL 子树：单节点，或以数组声明多个并列节点（操作列常用）。
+   * 数组节点直接作为单元格子元素渲染，不额外包裹容器，
+   * 列的 `align` 因此直接作用于这些节点，列宽也可由 `fitContent` 按内容收缩。
+   */
+  cell?: DslNode | DslNode[];
 }
 
 /** 排序方向 */
@@ -178,9 +189,12 @@ function columnClass(
 
 /** 列宽样式：width + minWidth 同设，避免 table auto 布局把 width 压缩为建议值 */
 function columnWidthStyle(column: TableColumn): CSSProperties | undefined {
-  return column.width !== undefined
-    ? { width: column.width, minWidth: column.width }
-    : undefined;
+  if (column.width !== undefined) {
+    return { width: column.width, minWidth: column.width };
+  }
+  // `width: 1%` 是 table auto 布局下按内容收缩列的写法：百分比只是建议值，
+  // 实际宽度由内容（单元格已 nowrap）撑开，剩余空间分给其他列。
+  return column.fitContent ? { width: '1%' } : undefined;
 }
 
 /**
@@ -641,7 +655,10 @@ export function Table({
                 ) : null}
                 {columns.map((column, columnIndex) => {
                   const cellContent = column.cell
-                    ? renderChildren([column.cell], { row: flat.row, rowIndex })
+                    ? renderChildren(
+                        Array.isArray(column.cell) ? column.cell : [column.cell],
+                        { row: flat.row, rowIndex },
+                      )
                     : renderCellValue(
                         column.dataIndex === undefined
                           ? undefined

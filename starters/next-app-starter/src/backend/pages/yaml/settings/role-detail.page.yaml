@@ -468,8 +468,8 @@ body:
                         - title:
                             "$i18n{page.role-detail.members.actions:操作}"
                           align: center
+                          fitContent: true
                           fixed: right
-                          width: 120
                           cell:
                             type: Button
                             props:
