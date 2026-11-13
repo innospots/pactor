@@ -8,8 +8,10 @@
  * 生产构建使用 Webpack：Turbopack 的 CSS 子进程在部分受限环境无法绑定端口。
  * 跨平台：Windows 下经 shell 解析 next.cmd。
  */
-import { spawn } from 'node:child_process';
+import { spawn, spawnSync } from 'node:child_process';
 import { createRequire } from 'node:module';
+import { dirname, join } from 'node:path';
+import { fileURLToPath } from 'node:url';
 
 const ENVS = ['prototype', 'development', 'test', 'production'];
 const env = process.argv[2];
@@ -21,6 +23,12 @@ if (!ENVS.includes(env)) {
 
 process.env.APP_ENV = env;
 console.log(`\n构建目标环境: ${env}（APP_ENV=${env}）\n`);
+
+const scriptDir = dirname(fileURLToPath(import.meta.url));
+const sync = spawnSync(process.execPath, [join(scriptDir, 'sync-theme-css.mjs')], {
+  stdio: 'inherit',
+});
+if (sync.status !== 0) process.exit(sync.status ?? 1);
 
 const require = createRequire(import.meta.url);
 const nextBin = require.resolve('next/dist/bin/next');

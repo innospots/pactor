@@ -95,7 +95,7 @@ components:
 
 这是一套为长时间工作设计的管理台视觉系统：冷灰纸面底色（#f4f6f8）托出纯白卡片，唯一的彩色声音是低饱和的雾港蓝灰主色（#536b7f），像港口清晨的天光，专业但不冷漠。系统的设计语言全部服从 Operate 场景：扫读效率、状态可辨、动作可达，表达欲只出现在 hover 浮起、状态徽标这类精确的细节里。
 
-全部视觉决策走三层令牌架构：pactor ui 基线提供语义令牌与 preflight，`public/skins/<skin>.css` 是唯一令牌权威（当前仅 neutral 一套，明暗双主题内联其中），项目级 `globals.css` 只承担皮肤无关的外壳规则。页面由 DSL 下发渲染，因此「美观」的护栏不在页面层，而在这份令牌与组件约定里。
+全部视觉决策走三层令牌架构：pactor ui 基线提供语义令牌与 preflight，`@pactor-app/theme` 的皮肤 CSS 是唯一令牌权威（14 套预置皮肤，明暗双主题内联其中），`public/themes/*.css` 只是同步生成的首屏副本；项目级 `globals.css` 只承担皮肤无关的外壳规则。页面由 DSL 下发渲染，因此「美观」的护栏不在页面层，而在这份令牌与组件约定里。
 
 **Key Characteristics:**
 - 低饱和蓝灰单主色，冷灰中性底色，无高彩度装饰
@@ -132,7 +132,7 @@ components:
 ### Named Rules
 **The One Voice Rule.** 任一屏内主色（Harbor Slate）占用不超过 10% 的表面。它是界面里唯一的大嗓门，稀有性就是它的意义；状态色各就各位，不与主色抢话。
 
-**The Skin Authority Rule.** 颜色只许来自语义令牌（var(--primary)、var(--card)…）。组件与 DSL 里出现硬编码 hex 即违规；换肤靠替换 skins/*.css，令牌表之外不存在第二事实源。
+**The Skin Authority Rule.** 颜色只许来自语义令牌（var(--primary)、var(--card)…）。组件与 DSL 里出现硬编码 hex 即违规；换肤靠切换 `@pactor-app/theme` 的皮肤，令牌表之外不存在第二事实源。
 
 ## Typography
 
@@ -215,20 +215,20 @@ components:
 核心概览指标牌：卡片同高网格（.stat-card height 100%），标题 12px 灰字、数值大字、右上角图标弱化（muted-ink 65% 透明度）避免与主数字争夺层级，标题与数值间固定 6px 节奏。
 
 ### Theme Switcher（Signature）
-Header 右侧的皮肤与明暗入口：皮肤项为「色点 + 名称」下拉（当前项打勾），切换即换 link 皮肤样式表并持久化 localStorage(mc-skin)；明暗按钮写 data-pactor-theme="dark"，缺省跟随系统。首屏由 layout.tsx 内联脚本预置，避免闪烁。
+Header 右侧的皮肤与明暗入口：皮肤项为「色点 + 名称」下拉（当前项打勾），切换即由主题包运行时注入皮肤样式并持久化 localStorage(mc-skin)；明暗按钮写 data-pactor-theme="dark"，缺省跟随系统。首屏由 layout.tsx 内联脚本以 `<link>` 预置 `/themes/<skin>.css`，避免闪烁。
 
 ## Do's and Don'ts
 
 ### Do:
 - **Do** 一切颜色走语义令牌（var(--primary) / var(--card) / var(--muted-foreground)…），包括 DSL 内联 style 与自定义组件。
-- **Do** 新皮肤以 public/skins/<name>.css 完整复制令牌表（明暗双段），并在 skin.ts 的 SKINS 注册色点与名称。
+- **Do** 新皮肤在 `@pactor-app/theme` 中登记（`themes.json` + `src/skins/<name>.css`，明暗双段），构建后运行 `pnpm theme:sync` 更新 starter 的首屏副本；色点、名称与文案由主题包注册表自动提供。
 - **Do** 暗色适配只改令牌表（[data-pactor-theme='dark'] 段），组件不写暗色分支；必须写时用 color-mix 派生（如 hover 阴影取 foreground 12%）。
 - **Do** 保持「静止安静、hover 回应」：卡片操作按钮 hover 显现、投影只在交互态出现。
 - **Do** 页面遵守页头文法：主标题 h3 + 灰副标题 baseline 对齐 + 右侧操作区，区块间隔 16px。
 - **Do** 状态表达用三通道（颜色 + 圆点/图标 + 文字），暗色主题下提亮文字色（如 #4ade80）。
 
 ### Don't:
-- **Don't** 在组件、DSL style 或页面 CSS 里硬编码 hex；skins/*.css 之外不存在颜色事实源。
+- **Don't** 在组件、DSL style 或页面 CSS 里硬编码 hex；`@pactor-app/theme` 之外不存在颜色事实源。
 - **Don't** 给静止表面加装饰性投影，或用投影代替描边做分区；层次靠明度差与 hairline。
 - **Don't** 嵌套卡片；卡片网格里同尺寸卡片重复超过一屏时，改用列表或表格。
 - **Don't** 引入字重堆叠（同一视图出现 400/500/600/700/800 三种以上）或加载 Web 字体；系统栈是有意的选择。

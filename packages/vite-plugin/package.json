@@ -1,6 +1,6 @@
 {
   "name": "@pactor-app/vite-plugin",
-  "version": "1.67.0",
+  "version": "1.68.0",
   "description": "Pactor Vite plugin: import .page.yaml / .fragment.yaml DSL files as JS modules with build-time validation and HMR",
   "keywords": [
     "pactor",

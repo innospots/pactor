@@ -3,14 +3,16 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev -p 9011",
+    "dev": "node scripts/sync-theme-css.mjs && next dev -p 9011",
     "build": "node scripts/build.mjs production",
     "start": "next start -p 9011",
     "lint": "eslint",
     "build:dev": "node scripts/build.mjs development",
     "build:test": "node scripts/build.mjs test",
     "build:prototype": "node scripts/build.mjs prototype",
-    "dev:backend": "APP_ENV=development next dev -p 9011"
+    "dev:backend": "node scripts/sync-theme-css.mjs && APP_ENV=development next dev -p 9011",
+    "theme:sync": "node scripts/sync-theme-css.mjs",
+    "theme:check": "node scripts/sync-theme-css.mjs --check"
   },
   "dependencies": {
     "@pactor-app/blocks": "link:../../packages/blocks",
@@ -19,6 +21,7 @@
     "@pactor-app/i18n": "link:../../packages/i18n",
     "@pactor-app/router": "link:../../packages/router",
     "@pactor-app/runtime": "link:../../packages/runtime",
+    "@pactor-app/theme": "link:../../packages/theme",
     "@pactor-app/ui": "link:../../packages/ui",
     "lucide-react": "1.64.0",
     "next": "16.4.3",

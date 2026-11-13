@@ -196,6 +196,7 @@ tools/        内部工具（如 theme-studio）
 | `resource` | `@pactor-app/resource` | DSL 加载与缓存 |
 | `router` | `@pactor-app/router` | 菜单与路由 |
 | `ui` | `@pactor-app/ui` | 默认 UI 组件库 |
+| `theme` | `@pactor-app/theme` | 预置皮肤包（14 套，静态 CSS + 运行时切换） |
 | `markdown` | `@pactor-app/markdown` | Markdown + DSL 片段 |
 | `chat` | `@pactor-app/chat` | AI 对话能力 |
 | `vite-plugin` | `@pactor-app/vite-plugin` | YAML 导入与 HMR |
