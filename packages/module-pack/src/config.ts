@@ -53,6 +53,11 @@ export interface ModulePackConfig {
   };
   /** 产物目录（工程相对路径，默认 dist-module） */
   outDir: string;
+  /**
+   * yamlRoot 下的站点地图文件名（默认 sitemap.yaml）。
+   * 双模式工程可用 sitemap.module.yaml 专供模块打包，独立应用仍用全量 sitemap.yaml。
+   */
+  sitemap: string;
 }
 
 export const CONFIG_DEFAULTS = {
@@ -61,6 +66,7 @@ export const CONFIG_DEFAULTS = {
   publicDir: 'public',
   target: DEFAULT_TARGET,
   outDir: 'dist-module',
+  sitemap: 'sitemap.yaml',
 } as const;
 
 type AnyRecord = Record<string, unknown>;
@@ -139,6 +145,7 @@ export function loadModuleConfig(projectDir: string, configPath?: string): Modul
         readBoolean(rewrite, 'absoluteApiToRelative', file, 'rewrite') ?? true,
     },
     outDir: readString(raw, 'outDir', file) ?? CONFIG_DEFAULTS.outDir,
+    sitemap: readString(raw, 'sitemap', file) ?? CONFIG_DEFAULTS.sitemap,
   };
 }
 

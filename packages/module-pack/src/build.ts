@@ -92,9 +92,9 @@ export function buildModule(options: BuildModuleOptions = {}): BuildModuleResult
   // 1) sitemap 展开
   let site: Record<string, unknown>;
   try {
-    site = loadYamlExpanded(yamlRoot, 'sitemap.yaml') as Record<string, unknown>;
+    site = loadYamlExpanded(yamlRoot, config.sitemap) as Record<string, unknown>;
   } catch (error) {
-    const message = `sitemap 展开失败: ${(error as Error).message}`;
+    const message = `sitemap 展开失败（${config.sitemap}）: ${(error as Error).message}`;
     throw new ModuleBuildError(message, [message]);
   }
   const sitePages = Array.isArray(site.pages)

@@ -10,7 +10,10 @@
     "build:dev": "node scripts/build.mjs development",
     "build:test": "node scripts/build.mjs test",
     "build:prototype": "node scripts/build.mjs prototype",
-    "dev:backend": "APP_ENV=development next dev -p 9011"
+    "dev:backend": "APP_ENV=development next dev -p 9011",
+    "build:module": "pactor module build",
+    "validate:module": "pactor module validate",
+    "pack:module": "pactor module pack --no-bump"
   },
   "dependencies": {
     "@pactor-app/blocks": "link:../../packages/blocks",
@@ -27,7 +30,23 @@
     "react-dom": "19.3.1",
     "yaml": "^2.9.1"
   },
+  "files": [
+    "dist-module"
+  ],
+  "exports": {
+    "./manifest": "./dist-module/manifest.json",
+    "./client": "./dist-module/client/index.js",
+    "./styles.css": "./dist-module/client/index.css",
+    "./server": "./dist-module/server/index.mjs"
+  },
+  "peerDependencies": {
+    "react": "19.3.1",
+    "react-dom": "19.3.1",
+    "next": "16.4.3",
+    "pactor-app": ">=1.55.0"
+  },
   "devDependencies": {
+    "@pactor-app/cli": "link:../../packages/cli",
     "@tailwindcss/postcss": "^4.3.3",
     "@types/node": "^26.6.6",
     "@types/react": "^19.3.0",

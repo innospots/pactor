@@ -1,7 +1,7 @@
 ---
 name: pactor-dsl
 description: |
-  Use for Pactor DSL and runtime wiring inside an existing app (skill id pactor-dsl). Triggers: write/edit *.page.yaml, add N pages with module folders and sitemap/navigation, state, dataSources, events, actions, expressions, custom components/actions/services, themes, page permission, access-mode/domain/module/grantGroup, request-level action filtering, sitemap/menu visibility, Chat/ChatShell, vite-plugin, pactor validate. NOT for empty-repo scaffold (use pactor-project) or full PRD-to-repo generation (use pactor-prd).
+  Use for Pactor DSL and runtime wiring inside an existing app (skill id pactor-dsl). Triggers: write/edit *.page.yaml, add N pages with module folders and sitemap/navigation, state, dataSources, events, actions, expressions, custom components/actions/services, themes, page permission, access-mode/domain/module/grantGroup, request-level action filtering, sitemap/menu visibility, Chat/ChatShell, vite-plugin, pactor validate. NOT for empty-repo scaffold (use pactor-project), Shell module pack/assemble (use pactor-module), or full PRD-to-repo generation (use pactor-prd).
 metadata:
   version: 2.4.0
 ---

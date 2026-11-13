@@ -22,6 +22,7 @@
   "files": [
     "README.md",
     "pactor-dsl",
+    "pactor-module",
     "pactor-project",
     "pactor-prd",
     "scripts"

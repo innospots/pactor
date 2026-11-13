@@ -12,7 +12,7 @@ import { fileURLToPath } from 'node:url';
 
 const skillsRoot = join(dirname(fileURLToPath(import.meta.url)), '..');
 const repoRoot = join(skillsRoot, '..');
-const SKILL_DIRS = ['pactor-dsl', 'pactor-project', 'pactor-prd'];
+const SKILL_DIRS = ['pactor-dsl', 'pactor-module', 'pactor-project', 'pactor-prd'];
 
 function readSkillName(skillDir) {
   const skillPath = join(skillDir, 'SKILL.md');
