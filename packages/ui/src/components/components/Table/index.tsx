@@ -44,6 +44,7 @@ export interface TableColumn {
    * 按内容收缩列宽：列宽由单元格内容决定，剩余空间分给其他列。
    * 操作列（尤其配合 `align: 'center'`）用它替代固定 `width`；
    * 两者同时声明时以 `width` 为准。
+   * 仅在 `table-layout: auto` 的表格中生效；`fixed` 布局的表格请显式声明 `width`。
    */
   fitContent?: boolean;
   /** 列内容水平对齐（表头与单元格同时生效），默认 left */
