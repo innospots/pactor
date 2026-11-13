@@ -129,13 +129,13 @@ describe('ActionButton 紧凑工具栏按钮', () => {
     expect(button.textContent).toBe('');
     expect(button.querySelector('svg')).not.toBeNull();
     // icon-only 缺省回退 icon-sm 方形尺寸
-    expect(button.className).toContain('size-8');
+    expect(button.className).toContain('size-(--pactor-control-height-sm)');
   });
 
   it('带 label 渲染文字且默认 size=sm', () => {
     render(<ActionButton icon={<SaveIcon />} label="保存" />);
     const button = screen.getByRole('button', { name: '保存' });
-    expect(button.className).toContain('h-8');
+    expect(button.className).toContain('h-(--pactor-control-height-sm)');
   });
 
   it('tooltip：悬浮显示提示浮层', async () => {

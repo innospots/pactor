@@ -87,6 +87,7 @@ const EXTENDED_TYPES = [
   'ToggleGroup',
   'ButtonGroup',
   'InputGroup',
+  'SearchInput',
   'Item',
   'Typography',
   // 扩展按钮族（spec: extended-button-components DSL 层登记）

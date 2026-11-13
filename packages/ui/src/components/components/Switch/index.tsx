@@ -88,7 +88,10 @@ export function Switch({
         onCheckedChange={handleChange}
       />
       {label ? (
-        <label htmlFor={controlId} className="text-sm leading-none font-medium">
+        <label
+          htmlFor={controlId}
+          className="text-[length:var(--pactor-control-text-md)] leading-none font-medium"
+        >
           {label}
         </label>
       ) : null}

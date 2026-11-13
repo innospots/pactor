@@ -14,8 +14,11 @@ function InputGroup({ className, ...props }: React.ComponentProps<'div'>) {
       role="group"
       className={cn(
         'group/input-group relative flex w-full items-center rounded-md border border-input bg-(--input-background) text-(--input-foreground) transition-colors outline-none focus-within:border-ring focus-within:ring-[3px] focus-within:ring-ring/50 has-disabled:opacity-50',
-        // 消化 DSL 子元素：Input 去边框/焦点环并伸展；Text 作前后缀；Button 贴边去圆角
-        '[&_[data-slot=input]]:min-w-0 [&_[data-slot=input]]:flex-1 [&_[data-slot=input]]:border-0 [&_[data-slot=input]]:shadow-none [&_[data-slot=input]]:focus-visible:ring-0',
+        // 消化 DSL 子元素：Input 去边框/焦点环并伸展；Text 作前后缀；Button 贴边去圆角。
+        // 焦点环复位加 !important：消费方常以无层级规则给 [data-slot=input]:focus-visible
+        // 全局加 box-shadow（如 portal-web components.css），无层级规则会压过工具类，
+        // 输入框自身的焦点环便在按钮左侧露出一条竖线。
+        '[&_[data-slot=input]]:min-w-0 [&_[data-slot=input]]:flex-1 [&_[data-slot=input]]:border-0 [&_[data-slot=input]]:shadow-none [&_[data-slot=input]]:focus-visible:ring-0!',
         '[&>[data-slot=text]]:shrink-0 [&>[data-slot=text]]:px-3 [&>[data-slot=text]]:text-sm [&>[data-slot=text]]:text-muted-foreground',
         '[&>[data-slot=button]]:shrink-0 [&>[data-slot=button]]:rounded-none [&>[data-slot=button]]:first:rounded-l-md [&>[data-slot=button]]:last:rounded-r-md',
         className,
@@ -55,7 +58,7 @@ function InputGroupInput({
     <input
       data-slot="input-group-input"
       className={cn(
-        'h-9 min-w-0 flex-1 border-0 bg-transparent px-3 py-1 text-base shadow-none outline-none placeholder:text-muted-foreground disabled:cursor-not-allowed md:text-sm',
+        'h-(--pactor-control-height-md) min-w-0 flex-1 border-0 bg-transparent px-3 py-1 text-base shadow-none outline-none placeholder:text-muted-foreground disabled:cursor-not-allowed md:text-sm',
         className,
       )}
       {...props}

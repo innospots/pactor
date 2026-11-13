@@ -1,7 +1,8 @@
 import { useI18n } from '@pactor-app/runtime';
-import { LogOut, SunMoon } from 'lucide-react';
+import { LogOut, StretchVertical, SunMoon } from 'lucide-react';
 import type { ReactNode } from 'react';
 
+import type { GlobalSize } from '../../lib/global-size.js';
 import { cn } from '../../lib/utils.js';
 import { Avatar, AvatarFallback, AvatarImage } from '../avatar.js';
 import { Badge } from '../badge.js';
@@ -11,9 +12,14 @@ import {
 } from '../dropdown-menu.js';
 import { Kbd } from '../kbd.js';
 import { Spinner } from '../spinner.js';
-import { themes, userStatuses } from './options.js';
+import { defaultSizes, themes, userStatuses } from './options.js';
 import { PresenceDot } from './presence-dot.js';
-import type { ThemePreference, UserMenuUser, UserStatus } from './types.js';
+import type {
+  SizeOption,
+  ThemePreference,
+  UserMenuUser,
+  UserStatus,
+} from './types.js';
 
 // 用户资料可能异步就绪（如切换语言触发页面运行时重建的首帧），
 // name 暂缺时按空串回退，避免整页渲染崩溃
@@ -243,26 +249,34 @@ function Segmented<T extends string>({
   );
 }
 
-/** 主题 / 在线状态两行内联切换；sheet 切换为抽屉样式 */
+/** 主题 / 密度 / 在线状态内联切换行；sheet 切换为抽屉样式 */
 export function PreferenceRows({
   sheet,
   showStatus,
   showTheme,
+  showSize,
   status,
   theme,
+  size,
+  sizes,
   onStatusChange,
   onThemeChange,
+  onSizeChange,
 }: {
   sheet: boolean;
   showStatus: boolean;
   showTheme: boolean;
+  showSize: boolean;
   status: UserStatus;
   theme: ThemePreference;
+  size: GlobalSize;
+  sizes?: SizeOption[];
   onStatusChange: (status: UserStatus) => void;
   onThemeChange: (theme: ThemePreference) => void;
+  onSizeChange: (size: GlobalSize) => void;
 }) {
   const { t } = useI18n();
-  if (!showStatus && !showTheme) return null;
+  if (!showStatus && !showTheme && !showSize) return null;
   return (
     <>
       {showStatus ? (
@@ -293,6 +307,22 @@ export function PreferenceRows({
           options={themes.map((option) => ({
             ...option,
             label: t(option.labelKey),
+          }))}
+          sheet={sheet}
+        />
+      ) : null}
+      {showSize ? (
+        <Segmented
+          label={t('pactor.userMenu.size')}
+          icon={<StretchVertical size={16} strokeWidth={1.75} aria-hidden="true" />}
+          value={size}
+          onChange={onSizeChange}
+          options={defaultSizes.map((option) => ({
+            value: option.value,
+            label:
+              sizes?.find((item) => item.value === option.value)?.label ??
+              t(option.labelKey),
+            icon: option.icon,
           }))}
           sheet={sheet}
         />

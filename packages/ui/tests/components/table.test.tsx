@@ -63,6 +63,34 @@ describe('列定义与数据绑定', () => {
     expect(firstRowCells[0].className).not.toContain('sticky');
   });
 
+  it('fitContent：列宽只作 1% 建议值，由单元格内容撑开而非固定宽度', () => {
+    const { container } = renderTable({
+      columns: [
+        { title: '姓名', dataIndex: 'name' },
+        { title: '操作', align: 'center', fitContent: true },
+      ],
+    });
+
+    const opHead = container.querySelector('thead th:last-child') as HTMLElement;
+    const opCell = container.querySelector('tbody tr:first-child td:last-child') as HTMLElement;
+    expect(opHead.style.width).toBe('1%');
+    expect(opHead.style.minWidth).toBe('');
+    expect(opCell.style.width).toBe('1%');
+  });
+
+  it('fitContent 与 width 同时声明时以 width 为准', () => {
+    const { container } = renderTable({
+      columns: [
+        { title: '姓名', dataIndex: 'name' },
+        { title: '操作', width: 200, fitContent: true },
+      ],
+    });
+
+    const opHead = container.querySelector('thead th:last-child') as HTMLElement;
+    expect(opHead.style.width).toBe('200px');
+    expect(opHead.style.minWidth).toBe('200px');
+  });
+
   it('fixed 右列默认无阴影；横向滚动后出现左阴影，回滚到最左消失', () => {
     const { container } = renderTable({
       columns: [
@@ -134,6 +162,33 @@ describe('cell 行模板', () => {
 
     expect(screen.getByRole('button', { name: '第 0 行' })).toBeTruthy();
     expect(screen.getByRole('button', { name: '第 1 行' })).toBeTruthy();
+  });
+
+  it('cell 数组：多个节点直接渲染在单元格内，按列 align 居中且无额外包裹', () => {
+    renderDsl({
+      type: 'Table',
+      props: {
+        dataSource: DATA,
+        columns: [
+          { title: '姓名', dataIndex: 'name' },
+          {
+            title: '操作',
+            align: 'center',
+            cell: [
+              { type: 'Button', props: { text: '编辑' } },
+              { type: 'Button', props: { text: '删除' } },
+            ],
+          },
+        ],
+      },
+    });
+
+    expect(screen.getAllByRole('button', { name: '编辑' })).toHaveLength(2);
+    expect(screen.getAllByRole('button', { name: '删除' })).toHaveLength(2);
+
+    const cell = screen.getAllByRole('button', { name: '编辑' })[0]!.closest('td');
+    expect(cell?.className).toContain('text-center');
+    expect(cell?.querySelector('[data-slot="flex"]')).toBeNull();
   });
 });
 

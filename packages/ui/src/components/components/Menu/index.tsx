@@ -216,7 +216,7 @@ export function Menu({
             {groupLabel !== undefined && (
               <div
                 data-slot="menu-group"
-                className="px-3 pb-1 pt-3 text-xs font-medium text-muted-foreground first:pt-1"
+                className="px-3 pb-1 pt-3 text-[length:var(--pactor-control-text-sm)] leading-4 font-medium text-muted-foreground first:pt-1"
               >
                 {groupLabel}
               </div>
@@ -321,17 +321,17 @@ function MenuEntry({
       className={cn(
         // w-full 兜底非 flex 父容器（rail / flyout）；flex-1 min-w-0 供
         // 行容器（trailing / actions 与按钮同级）内收缩
-        "flex w-full min-w-0 flex-1 items-center gap-2 text-sm transition-colors",
+        "flex w-full min-w-0 flex-1 items-center gap-2 text-[length:var(--pactor-control-text-md)] leading-5 transition-colors",
         mode === "horizontal"
-          ? "px-3 py-2"
+          ? "px-3 py-(--pactor-menu-nav-padding-y)"
           : depth > 0 && !collapsed
             ? // 子菜单项（竖线容器内）：与左侧竖线间距 4px（pl-1），
               // hover 右移 4px（pl-2，缩进反馈）；选中态保留该右移
               cn(
-                "py-2 pl-1 pr-3 text-left transition-[padding-left] duration-150 hover:pl-2",
+                "py-(--pactor-menu-nav-padding-y) pl-1 pr-3 text-left transition-[padding-left] duration-150 hover:pl-2",
                 selected && "pl-2",
               )
-            : "px-3 py-2 text-left",
+            : "px-3 py-(--pactor-menu-nav-padding-y) text-left",
         collapsed && "justify-center px-0",
         // 行容器形态下圆角与悬浮/选中底色由 menu-item-row 承担，按钮本体透明
         hasRowExtras
@@ -397,7 +397,7 @@ function MenuEntry({
       {item.badge !== undefined && !collapsed ? (
         <span
           data-slot="menu-item-badge"
-          className="shrink-0 rounded-full bg-muted px-1.5 py-0.5 text-xs text-muted-foreground"
+          className="shrink-0 rounded-full bg-muted px-1.5 py-0.5 text-[length:var(--pactor-control-text-sm)] leading-4 text-muted-foreground"
         >
           {item.badge}
         </span>
@@ -429,7 +429,7 @@ function MenuEntry({
               }
             }}
           >
-            <div className="px-3 pt-2 pb-1 text-xs font-semibold text-muted-foreground">
+            <div className="px-3 pt-2 pb-1 text-[length:var(--pactor-control-text-sm)] leading-4 font-semibold text-muted-foreground">
               {item.label}
             </div>
             {/* 子菜单以非 collapsed 完整形态渲染（label/icon/badge/dot/选中态）；
@@ -475,7 +475,7 @@ function MenuEntry({
           {item.trailing !== undefined ? (
             <span
               data-slot="menu-item-trailing"
-              className="shrink-0 text-xs text-muted-foreground"
+              className="shrink-0 text-[length:var(--pactor-control-text-sm)] leading-4 text-muted-foreground"
             >
               {item.trailing}
             </span>

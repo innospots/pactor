@@ -32,4 +32,44 @@ describe('pactor-app aggregated styles', () => {
     expect(css.indexOf(md)).toBeGreaterThan(-1);
     expect(css.lastIndexOf(sm)).toBeLessThan(css.indexOf(md));
   });
+
+  it('包含全局密度令牌与档位选择器', () => {
+    expect(css).toContain('--pactor-control-height-md');
+    expect(css).toContain('--pactor-control-text-lg');
+    expect(css).toContain('--pactor-control-box');
+    expect(css).toContain("[data-pactor-size='compact']");
+    expect(css).toContain("[data-pactor-size='comfortable']");
+  });
+
+  it('控件原语编译为令牌引用（运行时随密度档位变化）', () => {
+    // Tailwind v4 var 语法编译为 var() 引用；选择器中的 ( ) 转义为 \( \)
+    expect(css).toContain('.h-\\(--pactor-control-height-md\\)');
+    expect(css).toContain('.text-\\[length\\:var\\(--pactor-control-text-md\\)\\]');
+    expect(css).toContain('.size-\\(--pactor-control-box\\)');
+    expect(css).toContain('.data-\\[size\\=sm\\]\\:h-\\(--pactor-control-height-sm\\)');
+  });
+
+  it('菜单项编译为密度令牌引用', () => {
+    expect(css).toContain('.py-\\(--pactor-menu-item-padding-y\\)');
+  });
+
+  it('表格编译为密度令牌引用', () => {
+    expect(css).toContain('.py-\\(--pactor-table-cell-padding-y\\)');
+    expect(css).toContain('.h-\\(--pactor-table-head-height\\)');
+  });
+
+  it('日历日期格编译为密度令牌引用', () => {
+    expect(css).toContain('.size-\\(--pactor-calendar-day-size\\)');
+  });
+
+  it('三期：轨道几何 / 面板间距 / 导航行编译为密度令牌引用', () => {
+    expect(css).toContain('.h-\\(--pactor-switch-track-h\\)');
+    expect(css).toContain('.w-\\(--pactor-switch-track-w\\)');
+    expect(css).toContain('.h-\\(--pactor-slider-track-size\\)');
+    expect(css).toContain('.h-\\(--pactor-kbd-size\\)');
+    expect(css).toContain('.p-\\(--pactor-panel-padding\\)');
+    expect(css).toContain('.px-\\(--pactor-card-padding\\)');
+    expect(css).toContain('.py-\\(--pactor-alert-padding-y\\)');
+    expect(css).toContain('.py-\\(--pactor-menu-nav-padding-y\\)');
+  });
 });

@@ -51,6 +51,10 @@
 | `--pactor-control-text-md` | 0.8125rem (13px) | 0.875rem (14px, text-sm) | 0.9375rem (15px) |
 | `--pactor-control-text-lg` | 0.875rem (14px) | 1rem (16px, text-base) | 1.0625rem (17px) |
 | `--pactor-control-box` | 0.875rem (14px) | 1rem (16px, size-4) | 1.125rem (18px) |
+| `--pactor-menu-item-padding-y` | 0.25rem | 0.375rem (py-1.5) | 0.5rem |
+| `--pactor-table-head-height` | 2rem | 2.5rem (h-10) | 3rem |
+| `--pactor-table-cell-padding-y` | 0.25rem | 0.5rem (p-2) | 0.75rem |
+| `--pactor-calendar-day-size` | 1.75rem | 2rem (size-8) | 2.25rem |
 
 档位切换规则（与 `data-pactor-theme` 三态同款契约）：
 
@@ -81,9 +85,22 @@
 | `packages/ui/src/ui/checkbox.tsx` / `radio-group.tsx` | `size-4` → `size-(--pactor-control-box)` |
 | `packages/ui/src/ui/textarea.tsx` / `switch.tsx` / `slider.tsx` | **保持现状**：Textarea 高度由行数决定（内边距/字号走 DSL 层 CONTROL_SIZE_AREA 已覆盖）；Switch/Slider 是轨道几何（宽高成比例），缩放会破碎比例，一期不动 |
 
-单组件 `size` prop 语义不变、优先级最高：全局档位只改各档对应的令牌值。DSL 层不再新增 size prop（已存在），仅 UserMenu 增加密度切换入口。
+单组件 `size` prop 语义不变、优先级最高：全局档位只改各档对应的令牌值。
 
-二期（不在本次范围）：Table / Tabs / Menu / Pagination 等复合组件的尺寸令牌化。
+**二期（已纳入本计划）**：
+
+| 组件 | 改动 |
+|------|------|
+| `table.tsx`（vendored） | TableHead `h-10` → `--pactor-table-head-height`；TableCell `p-2` → `px-2 py-(--pactor-table-cell-padding-y)`；`text-sm` → text-md 令牌 |
+| DSL `Table` | 新增 `size?: ControlSize`：middle = 跟随全局令牌（空类），small / large 给覆盖类（`h-8` / `px-2 py-1`、`h-12 px-3` / `px-3 py-2.5`），与全局密度独立、局部优先 |
+| `dropdown-menu.tsx` / `context-menu.tsx` / `menubar.tsx` | 菜单项 `py-1.5 text-sm` → `py-(--pactor-menu-item-padding-y)` + text-md 令牌（menubar 顶栏触发器 `py-1` 保持） |
+| `tabs.tsx` + DSL `Tabs` | List `h-9` / sm `h-8` → control-height md/sm 令牌，触发器字号令牌化；DSL 适配层补 `size?: 'default' \| 'sm'` 透传（ui 层早有该 prop） |
+| `navigation-menu.tsx` | 触发器 `h-9` → control-height md 令牌，字号令牌化 |
+| `sidebar.tsx` menu-button | default `h-8 text-sm` → control-height sm + text-md 令牌；sm / lg 档字号令牌化，`h-7` / `h-12` 保持 |
+| `calendar.tsx` | 日期格 `size-8` / `w-8` / `h-8` → `--pactor-calendar-day-size`，day 字号令牌化；nav 按钮 `size-7` 保持 |
+| `avatar.tsx` / `badge.tsx` / `breadcrumb.tsx` | Avatar `size-8` → control-height sm；Badge `text-xs` → text-sm 令牌；Breadcrumb 更多按钮 `size-9` → control-height md |
+
+**明确不做**：Pagination（页码按钮复用 `buttonVariants`，Task 3 后自动跟随全局，零改动）；DSL `Menu`（其行 padding `py-2` 语义是侧栏导航，已由 Sidebar menu-button 覆盖，动它会破坏 default 档零变化承诺）；`Kbd`（`h-5` 与控件阶梯不对齐，收益低）；Card / Alert / Empty / Dialog / Drawer（间距型，密度语义弱）。
 
 ### 3. UserMenu 尺寸切换（`packages/ui/src/ui/user-menu/`）
 
@@ -121,7 +138,27 @@ export const globalSizeStorageKey = 'pactor.size';
 
 契约文档化：任何自定义组件 / 宿主脚本写 `document.documentElement.dataset.pactorSize` 即可全局切换；消费方在 CSS 中使用 `var(--pactor-control-height-md)` 等令牌即自动跟随。需要在首屏避免闪烁的宿主可在 HTML 头部内联脚本提前写属性（与暗色主题防闪烁同一手法，写入文档）。
 
-### 4.5 自定义数值（GlobalSizeValues API）
+### 4.5 皮肤 CSS 设置尺寸数值（一等能力）
+
+与颜色、圆角同权：尺寸令牌就是皮肤契约的一部分，皮肤 CSS（`styles.css` 之后加载）直接覆盖即可：
+
+```css
+/* 改 default 档基准（皮肤最常用） */
+:root {
+  --pactor-control-height-md: 2.5rem;
+  --pactor-control-text-md: 0.9375rem;
+}
+/* 按档覆盖（与 data-pactor-theme 暗色块同一手法） */
+[data-pactor-size='compact'] {
+  --pactor-control-height-md: 1.75rem;
+}
+```
+
+**theme-studio 集成**：全部尺寸令牌注册进 `tools/theme-studio/src/tokens.ts` 的「控件尺寸（全局密度 default 档）」分组（length 类型 + 滑杆），TokenEditor 可视化编辑并随皮肤 CSS 导出；按档覆盖块超出编辑器 `:root` 模型，保持手写 CSS（上例）。**防漂移约束**：`styles.css` `:root` 新增令牌必须同步注册 tokens.ts——`tools/theme-studio/tests/tokens.test.ts` 与 `:root` 双向比对，缺失即测试失败。
+
+优先级（高 → 低）：**内联自定义值（4.6）> 皮肤 CSS / `[data-pactor-size]` 档位 > `:root` default**。注意皮肤 CSS 若覆盖 `:root` 令牌值，其优先级低于内联自定义值、高于内置 default；皮肤 CSS 里写的 `[data-pactor-size]` 块则与内置档位块按加载顺序决胜（皮肤在后，胜出）。
+
+### 4.6 自定义数值（GlobalSizeValues API）
 
 三档预设之外，允许用户 / 宿主直接自定义各档数值。落点仍是令牌：在 `documentElement` 上写**内联** CSS 变量，内联样式优先级高于样式表中的 `:root` 与 `[data-pactor-size]` 块，因此自定义数值天然覆盖档位预设。
 
@@ -169,3 +206,35 @@ export function readGlobalSizeValues(): GlobalSizeValues;
 4. UserMenu 的「界面密度」入口缺省关闭（`showSize` 默认 false），与 `showLanguage` 一致，由宿主按需开启。
 5. 尺寸偏好持久化 key 为 `pactor.size`，与 `pactor.locale` 同命名空间。
 6. 自定义数值经 documentElement 内联变量实现（优先级高于档位预设），`applyGlobalSizeValues(null)` 清除后回到档位；自定义值的持久化由宿主自负（ui 包只提供 apply/read，保持与主题一致的轻契约）。
+
+---
+
+## 三期：轨道几何 + 间距型组件 + DSL Menu/Text（2026-11-12 补充，已确认）
+
+一、二期落地后，剩余未覆盖组件按「密度语义成立与否」分类收口。三期原则不变：default 档值 = 现行尺寸（零视觉变化）；新令牌全部注册 theme-studio；字号替换配套 `leading-*`（终审规则）。
+
+### 新增令牌
+
+| 令牌 | compact | default（现状） | comfortable | 用途 |
+|------|---------|----------------|-------------|------|
+| `--pactor-switch-track-w` | 1.75rem | 2rem (w-8) | 2.25rem | Switch 轨道宽 |
+| `--pactor-switch-track-h` | 1rem | 1.15rem | 1.25rem | Switch 轨道高 |
+| `--pactor-slider-track-size` | 0.25rem | 0.375rem (h-1.5) | 0.5rem | Slider 轨道厚度 |
+| `--pactor-kbd-size` | 1.125rem | 1.25rem (h-5) | 1.375rem | Kbd 高度 / 最小宽 |
+| `--pactor-panel-padding` | 1.25rem | 1.5rem (p-6) | 1.75rem | Dialog / AlertDialog / Empty / vendored Card |
+| `--pactor-card-padding` | 0.75rem | 1rem (p-4) | 1.25rem | DSL Card、Alert 横向、Drawer/Sheet 头尾、Popover / HoverCard |
+| `--pactor-alert-padding-y` | 0.5rem | 0.75rem (py-3) | 1rem | Alert 纵向 |
+| `--pactor-menu-nav-padding-y` | 0.375rem | 0.5rem (py-2) | 0.625rem | DSL Menu 导航行 |
+
+### 组件改动
+
+- **Switch / Slider（轨道几何，推翻一期「保持现状」）**：几何等比缩放有安全做法——Switch 拇指复用 `--pactor-control-box`（14/16/18 与轨道等比），`translate-x` 改用 `calc(var(--pactor-control-box) - 2px)`（与原 `calc(100% - 2px)` 等价，拇指宽 = box）；轨道宽高走新令牌。Slider 拇指同样复用 box，轨道厚度走新令牌。
+- **Kbd**：`h-5 min-w-5` → `--pactor-kbd-size`；`text-xs` → text-sm 令牌 + leading-4。
+- **面板间距族**：vendored Card（py/px/gap、border-b/t 的 pb/pt）、Dialog、AlertDialog、Empty → `--pactor-panel-padding`；DSL Card 适配器（gap-4/py-4/px-4）、Alert px-4、Drawer/Sheet header/footer p-4、Popover/HoverCard p-4 → `--pactor-card-padding`；Alert py-3 → `--pactor-alert-padding-y`，Alert 图标列 `calc(var(--spacing)*4)` 与 `[&>svg]:size-4` → `--pactor-control-box`。以上组件的 text-sm/text-lg 一律换令牌并配套 leading（leading-none 等既有行高类保留）。
+- **DSL Menu**（推翻二期「不动」：二期理由是「py-2 语义被 Sidebar 覆盖」，但 DSL Menu 独立使用场景（右轨、自定义导航）不经过 Sidebar）：导航行 `py-2` → `--pactor-menu-nav-padding-y`（与 dropdown 语义的 `--pactor-menu-item-padding-y` 分开，避免破坏各自零变化承诺）；行文本 / 分组标题 / badge / trailing 字号令牌化。
+- **DSL Text**：`small` text-xs → text-sm 令牌 + leading-4；`large` text-lg → text-lg 令牌 + leading-7（middle 继承不动）。
+- **GlobalSizeValues 扩展**：新增可选键 `panelPadding` / `cardPadding`（向后兼容），SkinSettings 演示「面板间距」滑杆（panel 为基准，card 按 2/3 派生）。
+
+### 三期仍不做（终裁）
+
+Icon（sm/default/lg = 16/20/24px 显式语义）、Space（布局 gap 档位）、Container（断点语义）、QRCode（显式 px）、Tooltip（px-3 py-1.5 极小提示层，密度语义弱）、Form 错误文本等散点 text-sm（跟随页面排版而非控件密度）。

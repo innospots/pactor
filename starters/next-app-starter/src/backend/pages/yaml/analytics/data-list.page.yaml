@@ -352,8 +352,8 @@ body:
                     dataIndex: status
                   - title: "$i18n{page.data-list.column.actions:操作}"
                     align: center
+                    fitContent: true
                     fixed: right
-                    width: 120
                     cell:
                       type: Button
                       props:
