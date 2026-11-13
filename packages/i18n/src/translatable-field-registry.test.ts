@@ -84,6 +84,8 @@ describe('内置注册表（设计 4.4 常用展示字段）', () => {
     expect(registry.isTranslatable('Input', 'props.label')).toBe(true);
     expect(registry.isTranslatable('Input', 'props.placeholder')).toBe(true);
     expect(registry.isTranslatable('Input', 'props.description')).toBe(true);
+    expect(registry.isTranslatable('SearchInput', 'props.placeholder')).toBe(true);
+    expect(registry.isTranslatable('SearchInput', 'props.buttonText')).toBe(true);
   });
 
   it('Login 品牌区、标题与账号提示', () => {

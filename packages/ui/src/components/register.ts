@@ -64,6 +64,7 @@ import { Input } from './components/Input/index.js';
 import { InputGroup } from './components/InputGroup/index.js';
 import { InputOTP } from './components/InputOTP/index.js';
 import { MultiSelect } from './components/MultiSelect/index.js';
+import { SearchInput } from './components/SearchInput/index.js';
 import { Item } from './components/Item/index.js';
 import { JSONViewer } from './components/JSONViewer/index.js';
 import { Kbd } from './components/Kbd/index.js';
@@ -222,6 +223,8 @@ export const builtinComponents = {
   ToggleGroup,
   ButtonGroup,
   InputGroup,
+  // 搜索框：左输入框 + 右搜索按钮的一体化组合框
+  SearchInput,
   Item,
   Typography,
   // 扩展按钮族（spec: extended-button-components DSL 层登记）

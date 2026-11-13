@@ -153,7 +153,7 @@ High-frequency selection map:
 | --- | --- |
 | Page shell and responsive layout | `Page`, `Flex`, `Grid`, `Row` + `Col`, `Space`, `Container`, `Card` |
 | Page context and actions | `Breadcrumb`, `Typography`, `Text`, `Button`, `DropdownMenu` |
-| Search and data entry | `Form` + `Input` / `Select` / `DatePicker` / `NumberInput` / `Combobox`; add `Field` for descriptions or grouped controls |
+| Search and data entry | `Form` + `Input` / `SearchInput` / `Select` / `DatePicker` / `NumberInput` / `Combobox`; add `Field` for descriptions or grouped controls |
 | Structured results | `Table`, `Pagination`, `Descriptions`, `Tree`, `List`, `CardList` |
 | Status and feedback | `Alert`, `Badge`, `Status`, `Empty`, `Skeleton`, `Progress`, `Message`, `Dialog`, `Drawer` |
 | Charts | `MetricCard`, `LineChart`, `ColumnChart`, `BarChart`, `AreaChart`, `PieChart`, `DonutChart`, … |

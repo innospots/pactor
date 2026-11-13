@@ -1546,6 +1546,9 @@
   .rounded-none {
     border-radius: 0;
   }
+  .rounded-none\! {
+    border-radius: 0 !important;
+  }
   .rounded-sm {
     border-radius: calc(var(--radius) * 0.6);
   }
@@ -1562,6 +1565,10 @@
   .rounded-t-md {
     border-top-left-radius: calc(var(--radius) * 0.8);
     border-top-right-radius: calc(var(--radius) * 0.8);
+  }
+  .rounded-r-md\! {
+    border-top-right-radius: calc(var(--radius) * 0.8) !important;
+    border-bottom-right-radius: calc(var(--radius) * 0.8) !important;
   }
   .border {
     border-style: var(--tw-border-style);
@@ -4007,9 +4014,9 @@
     --tw-shadow: 0 0 #0000;
     box-shadow: var(--tw-inset-shadow), var(--tw-inset-ring-shadow), var(--tw-ring-offset-shadow), var(--tw-ring-shadow), var(--tw-shadow);
   }
-  .\[\&_\[data-slot\=input\]\]\:focus-visible\:ring-0 [data-slot=input]:focus-visible {
-    --tw-ring-shadow: var(--tw-ring-inset,) 0 0 0 calc(0px + var(--tw-ring-offset-width)) var(--tw-ring-color, currentcolor);
-    box-shadow: var(--tw-inset-shadow), var(--tw-inset-ring-shadow), var(--tw-ring-offset-shadow), var(--tw-ring-shadow), var(--tw-shadow);
+  .\[\&_\[data-slot\=input\]\]\:focus-visible\:ring-0\! [data-slot=input]:focus-visible {
+    --tw-ring-shadow: var(--tw-ring-inset,) 0 0 0 calc(0px + var(--tw-ring-offset-width)) var(--tw-ring-color, currentcolor) !important;
+    box-shadow: var(--tw-inset-shadow), var(--tw-inset-ring-shadow), var(--tw-ring-offset-shadow), var(--tw-ring-shadow), var(--tw-shadow) !important;
   }
   .\[\&_\[data-slot\=text\]\]\:hidden [data-slot=text] {
     display: none;

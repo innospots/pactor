@@ -251,6 +251,8 @@ export { useFormContext } from './components/Form/context.js';
 export type { FormContextValue } from './components/Form/context.js';
 export { Input } from './components/Input/index.js';
 export type { FieldRule, InputProps } from './components/Input/index.js';
+export { SearchInput } from './components/SearchInput/index.js';
+export type { SearchInputProps } from './components/SearchInput/index.js';
 export { NumberInput } from './components/NumberInput/index.js';
 export type { NumberInputProps } from './components/NumberInput/index.js';
 export { Select } from './components/Select/index.js';

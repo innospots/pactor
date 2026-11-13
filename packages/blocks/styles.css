@@ -249,6 +249,12 @@
     width: calc(var(--spacing) * 96);
     height: calc(var(--spacing) * 96);
   }
+  .h-\(--pactor-control-height-lg\) {
+    height: var(--pactor-control-height-lg);
+  }
+  .h-\(--pactor-control-height-sm\) {
+    height: var(--pactor-control-height-sm);
+  }
   .h-2 {
     height: calc(var(--spacing) * 2);
   }
@@ -273,9 +279,6 @@
   .h-9 {
     height: calc(var(--spacing) * 9);
   }
-  .h-10 {
-    height: calc(var(--spacing) * 10);
-  }
   .h-12 {
     height: calc(var(--spacing) * 12);
   }
@@ -294,17 +297,17 @@
   .max-h-60 {
     max-height: calc(var(--spacing) * 60);
   }
+  .min-h-\(--pactor-control-height-lg\) {
+    min-height: var(--pactor-control-height-lg);
+  }
+  .min-h-\(--pactor-control-height-sm\) {
+    min-height: var(--pactor-control-height-sm);
+  }
   .min-h-0 {
     min-height: 0px;
   }
-  .min-h-8 {
-    min-height: calc(var(--spacing) * 8);
-  }
   .min-h-9 {
     min-height: calc(var(--spacing) * 9);
-  }
-  .min-h-10 {
-    min-height: calc(var(--spacing) * 10);
   }
   .min-h-12 {
     min-height: calc(var(--spacing) * 12);
@@ -936,6 +939,12 @@
   .text-xs {
     font-size: var(--text-xs);
     line-height: var(--tw-leading, var(--text-xs--line-height));
+  }
+  .text-\[length\:var\(--pactor-control-text-lg\)\] {
+    font-size: var(--pactor-control-text-lg);
+  }
+  .text-\[length\:var\(--pactor-control-text-sm\)\] {
+    font-size: var(--pactor-control-text-sm);
   }
   .leading-normal {
     --tw-leading: var(--leading-normal);

@@ -191,6 +191,7 @@ createPactorApplication({
 | DSL type | 关键 props | `${event}` |
 | --- | --- | --- |
 | `Input` | `name`、`label`、`rules`、`value`、`type: text/password`、`placeholder`、`maxLength`、`allowClear`、`search`、`disabled` | string |
+| `SearchInput` | `name`、`label`、`rules`、`value`、`placeholder`、`maxLength`、`allowClear`、`buttonText`、`disabled` | string |
 | `Textarea` | `name`、`label`、`rules`、`rows`、`autoSize`、`maxLength` | string |
 | `NumberInput` | `name`、`label`、`rules`、`min`、`max`、`step`、`precision` | number / undefined |
 | `Select` | `name`、`label`、`rules`、`options`、`showSearch`、`allowClear` | 选项 value |
@@ -214,6 +215,7 @@ createPactorApplication({
 - 当前 `required` 仅把 `undefined` / `null` / `''` 判为空，布尔 `false` 会通过。协议确认、同意条款等布尔条件必须用 `onChange → state` 控制提交，并由服务端复验。
 - `Select` / `TreeSelect` / `Cascader` 的 value 在候选中必须唯一。
 - `Input` 的 `search` 只改变外观形态（前置搜索图标）；「回车才查」绑定 `events.onSearch`，「边输边筛」绑定 `events.onChange`，二者可同时声明。
+- `SearchInput` 直接渲染「左输入框 + 右搜索按钮」一体化组合框，无需再手写 `InputGroup`。缺省为仅图标按钮（无障碍名称取内置「搜索」，不显示 tooltip）；`buttonText` 为图标 + 该文案。在 Form 内按钮走表单提交（`onSubmit`），独立渲染时点击调用 `events.onSearch`；两种情况下点击都会先回调 `onSearch`，输入框回车也会触发 `onSearch`。固定宽度写在 `className`（Form 内即 `form-item` 容器）。
 - Upload 只是 UI 采集，真正上传由 `onChange` 后的服务/请求动作完成。
 - 日期范围值统一为 `{ start, end }`；时间格式必须与 API 约定一致。
 

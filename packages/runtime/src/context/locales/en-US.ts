@@ -23,6 +23,7 @@ export const enUS = {
   'pactor.select.clear': 'Clear',
   'pactor.select.search': 'Search options',
   'pactor.input.clear': 'Clear',
+  'pactor.searchInput.search': 'Search',
   'pactor.input.showPassword': 'Show password',
   'pactor.input.hidePassword': 'Hide password',
   'pactor.input.placeholder': 'Please enter',

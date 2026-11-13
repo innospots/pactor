@@ -23,6 +23,7 @@ export const zhCN = {
   'pactor.select.clear': '清除',
   'pactor.select.search': '搜索选项',
   'pactor.input.clear': '清除',
+  'pactor.searchInput.search': '搜索',
   'pactor.input.showPassword': '显示密码',
   'pactor.input.hidePassword': '隐藏密码',
   'pactor.input.placeholder': '请输入',
