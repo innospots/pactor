@@ -922,6 +922,15 @@ importers:
         specifier: ^8.17.1
         version: 8.20.0
 
+  packages/theme:
+    devDependencies:
+      jsdom:
+        specifier: ^30.0.1
+        version: 30.0.1(@noble/hashes@1.8.0)
+      vitest:
+        specifier: ^3.2.4
+        version: 3.2.7(@types/debug@4.1.13)(@types/node@24.13.3)(jsdom@30.0.1(@noble/hashes@1.8.0))(lightningcss@1.33.0)(terser@5.16.9)
+
   packages/ui:
     dependencies:
       '@base-ui/react':

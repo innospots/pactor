@@ -48,6 +48,7 @@ const EXCLUDED_FILES = new Set([
   'next-env.d.ts',
   'AGENTS.md',
   'CLAUDE.md',
+  'hook.cache.json',
 ]);
 
 /** 是否排除该条目（.env* 一律排除，防敏感文件入库；模块打包产物 *.tgz 不进模板） */

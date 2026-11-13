@@ -1,0 +1,65 @@
+{
+  "name": "@pactor-app/theme",
+  "version": "1.68.0",
+  "description": "Pactor theme: 14 installable preset skins with static CSS entries and a framework-agnostic runtime switcher",
+  "keywords": [
+    "pactor",
+    "theme",
+    "skin",
+    "css",
+    "design-tokens"
+  ],
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/innospots/pactor.git",
+    "directory": "packages/theme"
+  },
+  "homepage": "https://github.com/innospots/pactor/tree/main/packages/theme",
+  "bugs": "https://github.com/innospots/pactor/issues",
+  "type": "module",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.js"
+      },
+      "require": {
+        "types": "./dist/index.d.cts",
+        "default": "./dist/index.cjs"
+      }
+    },
+    "./skins/*.css": "./skins/*.css",
+    "./themes.json": "./themes.json"
+  },
+  "sideEffects": [
+    "**/*.css"
+  ],
+  "engines": {
+    "node": ">=18"
+  },
+  "files": [
+    "dist",
+    "skins",
+    "themes.json"
+  ],
+  "scripts": {
+    "build": "node scripts/build-skins.mjs && tsup",
+    "build:skins": "node scripts/build-skins.mjs",
+    "check:skins": "node scripts/build-skins.mjs --check",
+    "test": "node scripts/build-skins.mjs --check && vitest run",
+    "test:dist": "node scripts/smoke-dist.mjs",
+    "typecheck": "tsc --noEmit",
+    "prepublishOnly": "pnpm build && pnpm test:dist"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "devDependencies": {
+    "jsdom": "^30.0.1",
+    "vitest": "^3.2.4"
+  }
+}

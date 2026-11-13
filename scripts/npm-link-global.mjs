@@ -24,6 +24,7 @@ const PACKAGES = [
   { dir: "router", name: "@pactor-app/router" },
   { dir: "runtime", name: "@pactor-app/runtime" },
   { dir: "ui", name: "@pactor-app/ui" },
+  { dir: "theme", name: "@pactor-app/theme" },
   { dir: "app", name: "@pactor-app/app" },
   { dir: "pactor", name: "pactor-app" },
 ];

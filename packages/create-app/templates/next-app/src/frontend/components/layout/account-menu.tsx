@@ -3,8 +3,7 @@
 import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 import { Languages, LogOut, Monitor, Moon, Palette, Sun, UserRound } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { applySkinStylesheet, DEFAULT_SKIN, PREFERENCES_CHANGE_EVENT, resolveSkin, selectSkin, SKINS, SKIN_STORAGE_KEY, type SkinValue } from "../../skin";
-import { themeText } from "../../themes";
+import { applySkinStylesheet, DEFAULT_SKIN, PREFERENCES_CHANGE_EVENT, resolveSkin, selectSkin, SKINS, SKIN_STORAGE_KEY, themeText, type SkinValue } from "../../skin";
 import { useHostI18n } from "../../i18n/messages";
 import type { SessionUser } from "../../types/session";
 
@@ -25,7 +24,7 @@ export function AccountMenu({ user }: { user?: SessionUser }) {
   const skin = useSyncExternalStore(subscribe, skinSnapshot, () => DEFAULT_SKIN);
   const mode = useSyncExternalStore(subscribe, modeSnapshot, () => "system" as Mode);
   const systemDark = useSyncExternalStore(systemSubscribe, systemSnapshot, () => false);
-  useEffect(() => { applySkinStylesheet(skin); }, [skin]);
+  useEffect(() => { void applySkinStylesheet(skin); }, [skin]);
   useEffect(() => { if (mode === "dark" || (mode === "system" && systemDark)) document.documentElement.setAttribute("data-pactor-theme", "dark"); else document.documentElement.removeAttribute("data-pactor-theme"); }, [mode, systemDark]);
   useEffect(() => {
     if (!open) return;
@@ -46,7 +45,7 @@ export function AccountMenu({ user }: { user?: SessionUser }) {
       <div className="account-identity"><span className="account-avatar">{initial}</span><div><strong>{name}</strong><small>{username}</small></div></div>
       <button className="account-row account-action" onClick={() => { setOpen(false); router.push("/profile"); }}><UserRound size={19} /><span>{t("account.profile")}</span></button>
       <div className="account-preferences"><label className="account-row"><Languages size={19} /><span>{t("account.language")}</span><select aria-label={t("account.language")} value={locale} onChange={(e) => changeLocale(e.target.value)}><option value="zh-CN">{t("account.languageZh")}</option><option value="en-US">{t("account.languageEn")}</option></select></label>
-        <label className="account-row"><Palette size={19} /><span>{t("account.colorTheme")}</span><select aria-label={t("account.colorTheme")} value={skin} onChange={(event) => selectSkin(event.target.value as SkinValue)}>{SKINS.map((theme) => <option key={theme.value} value={theme.value}>{themeText(theme, locale).label}</option>)}</select></label>
+        <label className="account-row"><Palette size={19} /><span>{t("account.colorTheme")}</span><select aria-label={t("account.colorTheme")} value={skin} onChange={(event) => selectSkin(event.target.value as SkinValue)}>{SKINS.map((theme) => <option key={theme.name} value={theme.name}>{themeText(theme, locale).label}</option>)}</select></label>
         <div className="account-row"><Sun size={19} /><span>{t("account.appearance")}</span><div className="account-mode" role="group" aria-label={t("account.appearance")}>{([ ["light", Sun, "account.light"], ["dark", Moon, "account.dark"], ["system", Monitor, "account.system"] ] as const).map(([value, Icon, label]) => <button type="button" key={value} aria-label={t(label)} title={t(label)} aria-pressed={mode === value} onClick={() => changeMode(value)}><Icon size={17} /></button>)}</div></div></div>
       <button className="account-row account-action account-logout" onClick={logout}><LogOut size={19} /><span>{t("account.signOut")}</span></button>{error && <p role="alert" className="account-error">{t("account.signOutError")}</p>}
     </div>}

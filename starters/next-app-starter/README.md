@@ -55,7 +55,7 @@ pnpm dev
 | 菜单、路由与布局 | `src/backend/pages/yaml/sitemap.yaml` |
 | 页面访问权限 | `src/backend/pages/page-access.ts` |
 | 中英文语言包 | `src/backend/pages/i18n/locales/*/app.yaml` |
-| 主题与明暗模式 | `public/themes/*.css`、`src/frontend/skin.ts` |
+| 主题与明暗模式 | `@pactor-app/theme`、`src/frontend/skin.ts` |
 
 ### 环境与命令
 
@@ -93,9 +93,10 @@ pnpm --config.lockfile=false install
 ```text
 next-app-starter/
 ├── public/
-│   ├── themes/                 14 套主题 CSS
-│   └── skins/neutral.css       基础语义令牌
-├── scripts/build.mjs           按 APP_ENV 执行 Next 构建
+│   └── themes/                 14 套主题 CSS（由 @pactor-app/theme 同步生成）
+├── scripts/
+│   ├── build.mjs               按 APP_ENV 执行 Next 构建
+│   └── sync-theme-css.mjs      从主题包同步 public/themes
 ├── src/
 │   ├── app/
 │   │   ├── [[...slug]]/        Next 动态页面入口
@@ -115,11 +116,10 @@ next-app-starter/
 │       ├── App.tsx             SitemapApp 宿主与页面访问门禁接线
 │       ├── components/         auth、workbench、layout、settings、shared
 │       ├── i18n/               宿主自身文案
-│       ├── themes/             主题注册表
 │       ├── config.ts           sitemap / pageAccess / apiBaseUrl 配置
 │       ├── locale.tsx          中英文语言状态
 │       ├── page-access.tsx     页面访问门禁 UI
-│       └── skin.ts             主题换肤与持久化
+│       └── skin.ts             主题包适配、换肤与持久化
 ├── next.config.js              环境地址、根路径重定向
 └── package.json
 ```
@@ -224,18 +224,22 @@ NODE
 
 ## 主题
 
+- 主题包：`@pactor-app/theme`，提供 14 套预置皮肤、注册表元数据与运行时换肤。
 - 默认主题：`qing-ming`（青冥深蓝）。
-- 主题 CSS：`public/themes/*.css`。
-- 注册表：`src/frontend/themes/index.ts`。
-- 运行时换肤：`src/frontend/skin.ts`。
-- 首屏主题注入：`src/app/layout.tsx`。
+- 注册表：直接使用 `@pactor-app/theme` 的 `THEMES`（`src/frontend/skin.ts` 负责适配）。
+- 运行时换肤：`src/frontend/skin.ts` 调用 `applyTheme`，按需加载并注入 `<style>`。
+- 首屏主题注入：`src/app/layout.tsx` 内联脚本读取 `mc-skin`，以
+  `<link href="/themes/<skin>.css">` 在首屏预置，避免闪烁。
+- 主题 CSS 副本：`public/themes/*.css` 由主题包同步生成，不要手改。
+  修改皮肤后运行 `pnpm theme:sync`；`pnpm theme:check` 可校验副本是否最新。
 - 持久化键：`mc-skin`、`mc-mode`。
 
-- 中性皮肤：`qing-hui`（starter `neutral.css` 的完整冷灰版本）。
+- 中性皮肤：`qing-hui`（中性冷灰，主题包默认）。
 - 品牌皮肤：`portal`（portal-web 的 MBB 尺度令牌与默认青冥配色）。
 
 账户菜单提供 14 套配色、浅色 / 深色 / 跟随系统切换，并同步
-`data-pactor-theme`。
+`data-pactor-theme`。主题包中新增皮肤后，starter 会从 `THEMES` 自动获得
+名称、色点与文案；只需再运行 `pnpm theme:sync` 更新首屏 CSS 副本。
 
 ## 页面访问校验
 
