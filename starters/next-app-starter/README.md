@@ -14,7 +14,7 @@
 - **智能助手**：运行在工作台内，支持本地会话历史、快捷提问和示例回复。
 - **系统管理**：系统设置、字典管理、审计日志、角色管理、角色详情与授权、
   用户管理、主题设置、个人中心。
-- **主题**：12 套中国传统色主题，默认 `qing-ming`，支持浅色、深色和跟随系统。
+- **主题**：14 套内置主题（12 套中国传统色、青灰冷调、Portal 品牌皮肤），默认 `qing-ming`，支持浅色、深色和跟随系统。
 - **国际化**：`zh-CN` / `en-US`，覆盖菜单、页面标题、按钮和页面主要文案。
 - **访问控制**：页面加载前执行 `pageKey` / `grantGroup` 校验，并展示 403 或跳转登录。
 - **工程分层**：`src/app` 固定宿主入口、`src/backend` 服务端资源、
@@ -93,7 +93,7 @@ pnpm --config.lockfile=false install
 ```text
 next-app-starter/
 ├── public/
-│   ├── themes/                 12 套主题 CSS
+│   ├── themes/                 14 套主题 CSS
 │   └── skins/neutral.css       基础语义令牌
 ├── scripts/build.mjs           按 APP_ENV 执行 Next 构建
 ├── src/
@@ -231,7 +231,10 @@ NODE
 - 首屏主题注入：`src/app/layout.tsx`。
 - 持久化键：`mc-skin`、`mc-mode`。
 
-账户菜单提供 12 套配色、浅色 / 深色 / 跟随系统切换，并同步
+- 中性皮肤：`qing-hui`（starter `neutral.css` 的完整冷灰版本）。
+- 品牌皮肤：`portal`（portal-web 的 MBB 尺度令牌与默认青冥配色）。
+
+账户菜单提供 14 套配色、浅色 / 深色 / 跟随系统切换，并同步
 `data-pactor-theme`。
 
 ## 页面访问校验
