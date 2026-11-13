@@ -1,6 +1,6 @@
 {
   "name": "@pactor-app/grid-layout",
-  "version": "1.66.0",
+  "version": "1.67.0",
   "description": "Pactor grid layout: react-grid-layout-backed DSL draggable/resizable dashboard container (GridLayout) with component registry for the Renderer",
   "keywords": [
     "pactor",

@@ -14,13 +14,13 @@
   },
   "dependencies": {
     "next": "16.3.5",
-    "pactor-app": "^1.66.0",
+    "pactor-app": "^1.67.0",
     "react": "19.2.8",
     "react-dom": "19.2.8",
     "yaml": "^2.9.1"
   },
   "devDependencies": {
-    "@pactor-app/cli": "^1.66.0",
+    "@pactor-app/cli": "^1.67.0",
     "@tailwindcss/postcss": "^4",
     "@types/node": "^20",
     "@types/react": "^19",

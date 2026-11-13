@@ -75,6 +75,8 @@ body:
                   props: { text: "${row.result == '成功' ? t('audit.success') : row.result == '失败' ? t('audit.failure') : row.result}" }
               - { title: "$i18n{auditPage.ip:来源 IP}", dataIndex: ip }
               - title: "$i18n{auditPage.actions:操作}"
+                align: center
+                fitContent: true
                 cell:
                   type: Button
                   props: { text: "$i18n{auditPage.view:查看}", variant: link, size: small }
