@@ -4,7 +4,7 @@
  * 装配器生成的 client-registry.ts 以 "<pkg>/client" 形式引入各模块，此处统一兜底。
  */
 declare module "*/client" {
-  export const extensions: import("@/runtime/register-extensions").ModuleExtensionBundle;
+  export const extensions: import("@pactor-app/shell/client").ModuleExtensionBundle;
 }
 
 /**
@@ -13,5 +13,5 @@ declare module "*/client" {
  * 引入 handlers，此处统一兜底。
  */
 declare module "*/server" {
-  export const handlers: import("@/server/modules/types").ModuleApiHandlers;
+  export const handlers: import("@pactor-app/shell/server").ModuleApiHandlers;
 }

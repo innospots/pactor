@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation";
 
-import { resolvePublicPath } from "@/modules/route-resolver";
+import { resolvePublicPath } from "@pactor-app/shell/server";
 
 type PageProps = {
   params: Promise<{ slug: string[] }>;

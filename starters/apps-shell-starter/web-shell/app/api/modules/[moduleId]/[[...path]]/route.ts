@@ -1,7 +1,9 @@
 import {
-  dispatchModuleApi,
+  createModuleDispatcher,
   type ModuleApiRouteContext,
-} from "@/server/modules/dispatch";
+} from "@pactor-app/shell/server";
+
+import { moduleServers } from "@generated/pactor/server-registry";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
@@ -14,26 +16,28 @@ export const runtime = "nodejs";
  *
  * 不导出 HEAD：Next 会把 HEAD 自动映射到 GET 并去掉响应体。
  */
+const dispatch = createModuleDispatcher(moduleServers);
+
 export function GET(request: Request, context: ModuleApiRouteContext) {
-  return dispatchModuleApi(request, context);
+  return dispatch(request, context);
 }
 
 export function POST(request: Request, context: ModuleApiRouteContext) {
-  return dispatchModuleApi(request, context);
+  return dispatch(request, context);
 }
 
 export function PUT(request: Request, context: ModuleApiRouteContext) {
-  return dispatchModuleApi(request, context);
+  return dispatch(request, context);
 }
 
 export function PATCH(request: Request, context: ModuleApiRouteContext) {
-  return dispatchModuleApi(request, context);
+  return dispatch(request, context);
 }
 
 export function DELETE(request: Request, context: ModuleApiRouteContext) {
-  return dispatchModuleApi(request, context);
+  return dispatch(request, context);
 }
 
 export function OPTIONS(request: Request, context: ModuleApiRouteContext) {
-  return dispatchModuleApi(request, context);
+  return dispatch(request, context);
 }

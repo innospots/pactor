@@ -49,6 +49,12 @@
                 "title": "InnoSpots"
               },
               "collapsible": false,
+              "sidebarFooter": {
+                "type": "SkinSwitcher",
+                "props": {
+                  "allowDefault": true
+                }
+              },
               "content": {
                 "type": "SitemapMenu",
                 "props": {

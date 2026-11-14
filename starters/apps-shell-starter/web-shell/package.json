@@ -5,10 +5,11 @@
   "type": "module",
   "scripts": {
     "dev": "next dev -p 9020",
-    "assemble:modules": "node scripts/assemble-modules.mjs",
-    "validate:modules": "node scripts/validate-modules.mjs",
+    "assemble:modules": "pactor-shell assemble",
+    "validate:modules": "pactor-shell validate",
+    "theme:sync": "pactor-shell theme sync",
     "smoke:module-api": "node scripts/smoke-module-api.mjs",
-    "build": "npm run assemble:modules && npm run validate:modules && next build",
+    "build": "npm run assemble:modules && npm run validate:modules && npm run theme:sync && next build",
     "start": "next start -p 9020",
     "lint": "eslint"
   },
@@ -17,6 +18,7 @@
     "@pactor-app/runtime": "link:../../../packages/runtime",
     "@pactor-app/ui": "link:../../../packages/ui",
     "next": "16.3.5",
+    "@pactor-app/shell": "link:../../../packages/shell",
     "pactor-app": "link:../../../packages/pactor",
     "react": "19.2.8",
     "react-dom": "19.2.8",

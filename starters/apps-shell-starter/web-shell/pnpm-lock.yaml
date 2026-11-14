@@ -14,6 +14,9 @@ importers:
       '@pactor-app/runtime':
         specifier: link:../../../packages/runtime
         version: link:../../../packages/runtime
+      '@pactor-app/shell':
+        specifier: link:../../../packages/shell
+        version: link:../../../packages/shell
       '@pactor-app/ui':
         specifier: link:../../../packages/ui
         version: link:../../../packages/ui

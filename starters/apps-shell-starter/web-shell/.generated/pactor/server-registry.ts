@@ -3,7 +3,7 @@ import { handlers as pactor_app_risk_analysisHandlers } from "risk-analysis/serv
 import type {
   ModuleApiHandlers,
   ModuleServerRegistry,
-} from "@/server/modules/types";
+} from "@pactor-app/shell/server";
 
 export const moduleServers: ModuleServerRegistry = {
   "pactor-app-risk-analysis": {
