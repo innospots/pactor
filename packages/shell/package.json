@@ -1,0 +1,73 @@
+{
+  "name": "@pactor-app/shell",
+  "version": "1.69.0",
+  "description": "Pactor App Shell：Next.js (App Router) 专用容器组件包 —— 一级菜单 / 皮肤设置 / 布局外壳、Runtime DSL API handler 工厂与构建期模块装配 CLI",
+  "keywords": ["pactor", "app-shell", "nextjs", "skin", "theme"],
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/innospots/pactor.git",
+    "directory": "packages/shell"
+  },
+  "homepage": "https://github.com/innospots/pactor/tree/main/packages/shell",
+  "bugs": "https://github.com/innospots/pactor/issues",
+  "type": "module",
+  "exports": {
+    ".": {
+      "import": { "types": "./dist/client/index.d.ts", "default": "./dist/client/index.js" },
+      "require": { "types": "./dist/client/index.d.cts", "default": "./dist/client/index.cjs" }
+    },
+    "./client": {
+      "import": { "types": "./dist/client/index.d.ts", "default": "./dist/client/index.js" },
+      "require": { "types": "./dist/client/index.d.cts", "default": "./dist/client/index.cjs" }
+    },
+    "./server": {
+      "import": { "types": "./dist/server/index.d.ts", "default": "./dist/server/index.js" },
+      "require": { "types": "./dist/server/index.d.cts", "default": "./dist/server/index.cjs" }
+    },
+    "./server/routes": {
+      "import": { "types": "./dist/server/routes.d.ts", "default": "./dist/server/routes.js" },
+      "require": { "types": "./dist/server/routes.d.cts", "default": "./dist/server/routes.cjs" }
+    },
+    "./next": {
+      "import": { "types": "./dist/next.d.ts", "default": "./dist/next.js" },
+      "require": { "types": "./dist/next.d.cts", "default": "./dist/next.cjs" }
+    },
+    "./styles.css": "./styles.css"
+  },
+  "bin": { "pactor-shell": "./dist/bin/cli.js" },
+  "sideEffects": ["./styles.css"],
+  "engines": { "node": ">=20" },
+  "files": ["dist", "styles.css"],
+  "scripts": {
+    "build": "tsup",
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit"
+  },
+  "publishConfig": { "access": "public" },
+  "dependencies": {
+    "@pactor-app/core": "workspace:*",
+    "@pactor-app/runtime": "workspace:*",
+    "@pactor-app/theme": "workspace:*",
+    "yaml": "^2.9.1"
+  },
+  "peerDependencies": {
+    "next": ">=15",
+    "pactor-app": ">=1.55.0",
+    "react": ">=18",
+    "react-dom": ">=18"
+  },
+  "devDependencies": {
+    "@testing-library/dom": "^10.4.1",
+    "@testing-library/react": "^16.3.2",
+    "@types/node": "^20.19.43",
+    "@types/react": "^19.2.18",
+    "@types/react-dom": "^19.2.4",
+    "jsdom": "^30.0.1",
+    "next": "16.3.5",
+    "pactor-app": "workspace:*",
+    "react": "^19.2.8",
+    "react-dom": "^19.2.8",
+    "vitest": "^3.2.4"
+  }
+}
