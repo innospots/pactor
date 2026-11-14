@@ -4,7 +4,7 @@
 
 > 整体架构与术语见 InnoSpots 前端模块化设计（Build-time Composition + Runtime DSL Loading）。UI 模块侧打包使用 Pactor CLI：`pnpm build:module`（`pactor module build`）/ `pnpm pack:module`（`pactor module pack`）。
 
-**当前接入**：`pactor-apps` 下两个 tgz 模块 `risk-analysis` / `risk-decision`（版本随 pack 递增，以 `package.json` 的 `file:` 引用为准）。风险分析的业务 API 已随 tgz 的 `server/index.mjs` 分发，由 Shell 的 `/api/modules/<moduleId>/*` 统一承接。左侧固定菜单定义在 `src/shell/sitemap.yaml`，模块启停与菜单接入模式在 `src/modules/module-list.json`。
+**当前接入**：`pactor-apps` 下两个 tgz 模块 `risk-analysis` / `risk-decision`（版本随 pack 递增，以 `package.json` 的 `file:` 引用为准）。风险分析的业务 API 已随 tgz 的 `server/index.mjs` 分发，由 Shell 的 `/api/modules/<moduleId>/*` 统一承接。左侧固定菜单定义在 `src/shell/sitemap.yaml`，模块启停与菜单接入模式在 `src/modules/module-list.json`。外壳能力（菜单 / 皮肤 / 布局、Runtime API、装配 CLI）来自 `@pactor-app/shell` 包（`packages/shell`），本工程为最薄宿主示范。
 
 ---
 
@@ -141,7 +141,7 @@
 | 项 | 现状 | 影响 |
 | --- | --- | --- |
 | 模块样式 | 两个 tgz 都在 `module/client.ts` 中 import 页面 CSS，构建后 manifest 声明 `styles`；装配器生成 `.generated/pactor/module-styles.ts`，layout 固定引入该文件 | 新模块需在 `module/client.ts` import 自己的 CSS，并在 `package.json` 声明 `exports["./styles.css"]`；Shell 不再手工补齐模块页面样式 |
-| 皮肤 / 主题 | 两个应用共用同一套皮肤，已收敛到 Shell 的 `src/modules/styles/theme.css` 统一引入 | 主题切换 / 持久化仍未实现，深色变量当前无入口 |
+| 皮肤 / 主题 | 基础皮肤 `src/modules/styles/theme.css`（晨雾奶芙）；预置皮肤切换、light/dark 模式与持久化由 `@pactor-app/shell` 提供（SkinHeadScript 首屏恢复 + 侧栏底部 SkinSwitcher，DSL 组件名 `SkinSwitcher`） | 默认皮肤即宿主基础皮肤；`public/themes` 由 `pactor-shell theme sync` 生成 |
 | Pactor 版本 | Shell `package.json` 与模块 `peerDependencies` 需人工对齐 | 版本漂移可能导致运行时异常 |
 | 组件/动作重名 | 多模块同名时先注册者占用短名，后续模块只保留命名空间键并 `console.warn` | 缺少构建期硬失败与白名单策略 |
 
@@ -270,53 +270,36 @@ flowchart LR
 ```text
 web-shell/
 ├── app/
-│   ├── layout.tsx                 # 根 Layout、全局样式
+│   ├── layout.tsx                 # 根 Layout、全局样式、SkinHeadScript 首屏防闪烁
 │   ├── page.tsx                   # Shell 首页（装配状态概览）
 │   ├── globals.css
 │   ├── (workspace)/
-│   │   ├── layout.tsx             # 挂载 PactorHost（跨导航常驻）
+│   │   ├── layout.tsx             # 挂载 WorkspaceShell（AppShell + PactorShellHost）
 │   │   └── [...slug]/page.tsx     # 必选 catch-all；按路由表校验，非法路径 404
 │   ├── api/runtime/
-│   │   ├── bootstrap/route.ts     # 合并后的 sitemap（会话裁剪入口）
+│   │   ├── bootstrap/route.ts     # re-export @pactor-app/shell/server/routes
 │   │   ├── pages/[pageId]/route.ts
 │   │   └── fragments/[fragmentId]/route.ts
 │   └── api/modules/[moduleId]/[[...path]]/route.ts
-│                                   # 模块 server API 统一分发
+│                                   # createModuleDispatcher(moduleServers) 分发
 ├── src/
 │   ├── shell/                     # Shell 自带默认站点（构建期最先装配）
 │   │   ├── sitemap.yaml           # 默认布局 + 两个固定一级菜单（指向模块页面）
 │   │   └── layouts/
-│   │       └── shell.layout.yaml  # 左侧不可展开菜单 + 右侧 PageOutlet
+│   │       └── shell.layout.yaml  # 左侧不可展开菜单 + 右侧 PageOutlet + 侧栏底部 SkinSwitcher
+│   ├── components/
+│   │   └── WorkspaceShell.tsx     # AppShell + PactorShellHost 装配（client）
 │   ├── modules/
 │   │   ├── module-list.json       # 启用哪些 UI 包、菜单接入模式、访问级别
-│   │   ├── styles/                # Shell 统一皮肤（theme.css）
-│   │   ├── registry.ts            # 读取 .generated 索引
-│   │   ├── route-resolver.ts      # URL → globalPageId
-│   │   └── types.ts
-│   ├── runtime/
-│   │   ├── PactorHost.tsx         # SitemapApp + 模块组件注册 + HTTP 数据源
-│   │   ├── pactor-adapter.ts
-│   │   └── register-extensions.ts
-│   └── server/
-│       ├── auth/session.ts        # 会话占位（待接统一登录）
-│       ├── modules/               # 模块 API 契约 + 通用分发器
-│       └── runtime/               # bootstrap / pages / fragments 实现
-├── .generated/pactor/             # assemble 生成（勿手改，可提交占位或 CI 生成）
-│   ├── assembly.json
-│   ├── routes.json
-│   ├── menus.json
-│   ├── pages.json
-│   ├── sitemap-meta.json
-│   ├── servers.json               # 模块 API 前缀清单（供校验脚本读取）
-│   ├── server-registry.ts         # 对各模块 <pkg>/server 的静态 import
-│   ├── client-registry.ts         # 对各模块 @xxx/client 的静态 import
-│   └── dsl/<moduleId>/*.yaml      # 自 npm 包 / src/shell 复制的页面 DSL
-├── public/modules/                # 模块静态资源：<moduleId>/<version>/
+│   │   └── styles/theme.css       # Shell 基础皮肤（晨雾奶芙，皮肤系统的默认基底）
+│   └── types/pactor-modules.d.ts  # 模块 client/server 入口的通配类型声明
+├── .generated/pactor/             # pactor-shell assemble 生成（勿手改，可提交占位或 CI 生成）
+├── public/
+│   ├── modules/                   # 模块静态资源：<moduleId>/<version>/
+│   └── themes/                    # pactor-shell theme sync 生成的预置皮肤 CSS
 ├── scripts/
-│   ├── assemble-modules.mjs       # 构建期装配（含 server-registry）
-│   ├── validate-modules.mjs       # 路由 / pageId / 模块 API 校验
 │   └── smoke-module-api.mjs       # /api/modules/* 运行时冒烟
-├── next.config.ts
+├── next.config.ts                 # withShell(...)
 └── package.json
 ```
 
@@ -563,10 +546,11 @@ pnpm start    # 默认端口 9020
 
 | 脚本 | 作用 |
 | --- | --- |
-| `pnpm assemble:modules` | 仅装配，写入 `.generated` 与 `public/modules` |
-| `pnpm validate:modules` | 校验重复 URL / `globalPageId` / 菜单 `pageId` 引用 / 模块 API 前缀与 DSL 残留 |
+| `pnpm assemble:modules` | `pactor-shell assemble`：装配，写入 `.generated` 与 `public/modules` |
+| `pnpm validate:modules` | `pactor-shell validate`：校验重复 URL / `globalPageId` / 菜单 `pageId` 引用 / 模块 API 前缀与 DSL 残留 |
+| `pnpm theme:sync` | `pactor-shell theme sync`：同步 `@pactor-app/theme` 预置皮肤到 `public/themes`（`pactor-shell theme check` 供 CI 校验漂移） |
 | `pnpm smoke:module-api` | 对已启动的 Shell 冒烟 `/api/modules/*`（GET/HEAD/OPTIONS/405/404） |
-| `pnpm build` | 完整发布构建（已包含装配与校验） |
+| `pnpm build` | 完整发布构建（装配 → 校验 → theme sync → `next build`） |
 | `pnpm lint` | ESLint |
 
 ### 与 UI 模块联调（推荐流程）
