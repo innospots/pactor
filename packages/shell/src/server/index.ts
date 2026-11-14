@@ -7,3 +7,4 @@ export * from './bootstrap.js';
 export * from './pages.js';
 export * from './fragments.js';
 export * from './route-resolver.js';
+export * from './module-dispatch.js';
