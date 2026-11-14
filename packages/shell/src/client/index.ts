@@ -5,3 +5,5 @@ export { SkinHeadScript } from '../skin/SkinHeadScript.js';
 export type { SkinHeadScriptProps } from '../skin/SkinHeadScript.js';
 export { SkinSwitcher } from './SkinSwitcher.js';
 export type { SkinSwitcherProps } from './SkinSwitcher.js';
+export { PactorShellHost } from './PactorShellHost.js';
+export type { PactorShellHostProps } from './PactorShellHost.js';
