@@ -10,10 +10,10 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@pactor-app/core": "^1.68.0",
-    "@pactor-app/runtime": "^1.68.0",
-    "@pactor-app/ui": "^1.68.0",
-    "pactor-app": "^1.68.0",
+    "@pactor-app/core": "^1.69.0",
+    "@pactor-app/runtime": "^1.69.0",
+    "@pactor-app/ui": "^1.69.0",
+    "pactor-app": "^1.69.0",
     "react": "19.2.8",
     "react-dom": "19.2.8",
     "react-router-dom": "^7.18.2"

@@ -1,6 +1,6 @@
 {
   "name": "@pactor-app/theme",
-  "version": "1.68.0",
+  "version": "1.69.0",
   "description": "Pactor theme: 14 installable preset skins with static CSS entries and a framework-agnostic runtime switcher",
   "keywords": [
     "pactor",
