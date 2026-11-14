@@ -134,6 +134,13 @@ export function createDefaultTranslatableFieldRegistry(): TranslatableFieldRegis
       'props.ariaLabel',
       'props.rules[*].message',
     ])
+    .register('SearchInput', [
+      'props.label',
+      'props.placeholder',
+      'props.buttonText',
+      'props.ariaLabel',
+      'props.rules[*].message',
+    ])
     .register('Table', [
       'props.label',
       'props.description',

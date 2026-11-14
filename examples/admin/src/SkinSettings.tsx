@@ -1,6 +1,6 @@
 /**
  * SkinSettings（@pactor-app/app headerExtra 槽位）：头部「皮肤」按钮 → 下拉面板
- * （主色预设 / 暗黑开关 / 圆角滑杆 / 恢复默认）。
+ * （主色预设 / 暗黑开关 / 圆角滑杆 / 界面密度 / 控件高度自定义 / 面板间距自定义 / 恢复默认）。
  *
  * shadcn kit 没有设置面板类组件，面板用原生控件 + 语义 token
  * （--radius / --border / --popover / --foreground …）内联样式拼装；
@@ -113,6 +113,111 @@ export function SkinSettings() {
             style={{ width: '100%' }}
             onChange={(event) => setSkin({ radius: Number(event.target.value) })}
           />
+
+          <div style={{ fontWeight: 600, margin: '16px 0 8px' }}>界面密度</div>
+          <div style={{ display: 'flex', gap: 8 }}>
+            {(
+              [
+                { value: 'compact', label: '紧凑' },
+                { value: 'default', label: '默认' },
+                { value: 'comfortable', label: '宽松' },
+              ] as const
+            ).map((option) => (
+              <button
+                key={option.value}
+                type="button"
+                aria-pressed={skin.density === option.value}
+                onClick={() => setSkin({ density: option.value })}
+                style={{
+                  flex: 1,
+                  padding: '4px 0',
+                  borderRadius: 'var(--radius)',
+                  border:
+                    skin.density === option.value
+                      ? '2px solid var(--foreground)'
+                      : '1px solid var(--border)',
+                  background: 'transparent',
+                  color: 'inherit',
+                  cursor: 'pointer',
+                  fontSize: 12,
+                }}
+              >
+                {option.label}
+              </button>
+            ))}
+          </div>
+
+          <div style={{ fontWeight: 600, margin: '16px 0 8px' }}>
+            控件高度（自定义）
+            {skin.heightMd !== null && (
+              <button
+                type="button"
+                onClick={() => setSkin({ heightMd: null })}
+                style={{
+                  marginLeft: 8,
+                  border: 'none',
+                  background: 'transparent',
+                  color: 'var(--primary)',
+                  cursor: 'pointer',
+                  fontSize: 12,
+                  fontWeight: 400,
+                }}
+              >
+                恢复档位
+              </button>
+            )}
+          </div>
+          <input
+            type="range"
+            min={32}
+            max={44}
+            step={1}
+            value={skin.heightMd ?? 36}
+            aria-label="控件高度"
+            style={{ width: '100%' }}
+            onChange={(event) => setSkin({ heightMd: Number(event.target.value) })}
+          />
+          {skin.heightMd !== null && (
+            <div style={{ color: 'var(--muted-foreground)', fontSize: 12 }}>
+              当前 {skin.heightMd}px（自定义值优先于密度档位）
+            </div>
+          )}
+
+          <div style={{ fontWeight: 600, margin: '16px 0 8px' }}>
+            面板间距（自定义）
+            {skin.panelPadding !== null && (
+              <button
+                type="button"
+                onClick={() => setSkin({ panelPadding: null })}
+                style={{
+                  marginLeft: 8,
+                  border: 'none',
+                  background: 'transparent',
+                  color: 'var(--primary)',
+                  cursor: 'pointer',
+                  fontSize: 12,
+                  fontWeight: 400,
+                }}
+              >
+                恢复档位
+              </button>
+            )}
+          </div>
+          <input
+            type="range"
+            min={16}
+            max={32}
+            step={1}
+            value={skin.panelPadding ?? 24}
+            aria-label="面板间距"
+            style={{ width: '100%' }}
+            onChange={(event) => setSkin({ panelPadding: Number(event.target.value) })}
+          />
+          {skin.panelPadding !== null && (
+            <div style={{ color: 'var(--muted-foreground)', fontSize: 12 }}>
+              当前 {skin.panelPadding}px（Dialog / Card / 空态等面板内边距）
+            </div>
+          )}
 
           <button
             type="button"

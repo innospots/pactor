@@ -68,7 +68,7 @@ export function Card({
       rounded={rounded}
       id={id}
       className={cn(
-        'gap-4 py-4',
+        'gap-(--pactor-card-padding) py-(--pactor-card-padding)',
         !bordered && 'border-transparent shadow-none',
         hoverable &&
           'cursor-pointer transition-colors hover:border-primary/50 hover:bg-accent/50',
@@ -78,13 +78,13 @@ export function Card({
       onClick={onClick}
     >
       {title || extra ? (
-        <CardHeader className="px-4">
+        <CardHeader className="px-(--pactor-card-padding)">
           {title ? <CardTitle>{title}</CardTitle> : null}
           {extra ? <ExtraSlot extra={extra} /> : null}
         </CardHeader>
       ) : null}
       {loading ? (
-        <CardContent className={cn('px-4', contentClassName)}>
+        <CardContent className={cn('px-(--pactor-card-padding)', contentClassName)}>
           <div data-slot="card-loading" className="flex flex-col gap-3">
             <ShadcnSkeleton className="h-4 w-full" />
             <ShadcnSkeleton className="h-4 w-3/4" />
@@ -92,7 +92,7 @@ export function Card({
           </div>
         </CardContent>
       ) : (
-        <CardContent className={cn('px-4', contentClassName)}>{children}</CardContent>
+        <CardContent className={cn('px-(--pactor-card-padding)', contentClassName)}>{children}</CardContent>
       )}
     </ShadcnCard>
   );

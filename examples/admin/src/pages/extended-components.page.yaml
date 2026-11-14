@@ -12,6 +12,7 @@ meta:
 
 state:
   switchOn: true
+  ratio: 40
   sortInfo: ''
   pageNo: 1
   cmd: ''
@@ -92,6 +93,49 @@ body:
           props:
             text: 当前状态：${state.switchOn}
             type: secondary
+
+    # 密度三期：Slider / Kbd / Empty（轨道几何与面板间距随全局密度缩放）
+    - type: Card
+      props:
+        title: 密度三期：Slider / Kbd / Empty（皮肤面板切密度看变化）
+      children:
+        - type: Flex
+          props: { gap: 24, align: start }
+          children:
+            - type: Flex
+              props: { direction: vertical, gap: 8, style: { flex: 1 } }
+              children:
+                - type: Slider
+                  props:
+                    value: ${state.ratio}
+                    min: 0
+                    max: 100
+                  events:
+                    onChange:
+                      action: setState
+                      params:
+                        ratio: ${event}
+                - type: Text
+                  props:
+                    text: 当前值：${state.ratio}
+                    type: secondary
+                - type: Flex
+                  props: { gap: 4 }
+                  children:
+                    - type: Kbd
+                      props: { text: ⌘ }
+                    - type: Kbd
+                      props: { text: K }
+                    - type: Text
+                      props:
+                        text: 打开搜索
+                        type: secondary
+            - type: Empty
+              props:
+                icon: inbox
+                title: 暂无数据
+                description: Empty 面板内边距随密度档位缩放
+                style: { flex: 1 }
 
     # 反馈与弹层类
     - type: Card

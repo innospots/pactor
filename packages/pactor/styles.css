@@ -5,7 +5,7 @@
  */
 
 /* ============================================================
- * @pactor-app/ui@1.66.0（构建产物内联，源顺序：ui → blocks → chart → chat）
+ * @pactor-app/ui@1.67.0（构建产物内联，源顺序：ui → blocks → chart → chat）
  * ============================================================ */
 /*! tailwindcss v4.3.3 | MIT License | https://tailwindcss.com */
 @layer properties;
@@ -621,6 +621,70 @@ div.pactor-markdown-editor-root.mdxeditor, div.pactor-markdown-editor-root.mdxed
   --flex-gap-md: calc(var(--flex-gap) * 1.33);
   --flex-gap-lg: calc(var(--flex-gap) * 2);
   --grid-gap: 16px;
+  --pactor-control-height-xs: 1.5rem;
+  --pactor-control-height-sm: 2rem;
+  --pactor-control-height-md: 2.25rem;
+  --pactor-control-height-lg: 2.5rem;
+  --pactor-control-text-sm: 0.75rem;
+  --pactor-control-text-md: 0.875rem;
+  --pactor-control-text-lg: 1rem;
+  --pactor-control-box: 1rem;
+  --pactor-menu-item-padding-y: 0.375rem;
+  --pactor-table-head-height: 2.5rem;
+  --pactor-table-cell-padding-y: 0.5rem;
+  --pactor-calendar-day-size: 2rem;
+  --pactor-switch-track-w: 2rem;
+  --pactor-switch-track-h: 1.15rem;
+  --pactor-slider-track-size: 0.375rem;
+  --pactor-kbd-size: 1.25rem;
+  --pactor-panel-padding: 1.5rem;
+  --pactor-card-padding: 1rem;
+  --pactor-alert-padding-y: 0.75rem;
+  --pactor-menu-nav-padding-y: 0.5rem;
+}
+[data-pactor-size='compact'] {
+  --pactor-control-height-xs: 1.25rem;
+  --pactor-control-height-sm: 1.75rem;
+  --pactor-control-height-md: 2rem;
+  --pactor-control-height-lg: 2.25rem;
+  --pactor-control-text-sm: 0.75rem;
+  --pactor-control-text-md: 0.8125rem;
+  --pactor-control-text-lg: 0.875rem;
+  --pactor-control-box: 0.875rem;
+  --pactor-menu-item-padding-y: 0.25rem;
+  --pactor-table-head-height: 2rem;
+  --pactor-table-cell-padding-y: 0.25rem;
+  --pactor-calendar-day-size: 1.75rem;
+  --pactor-switch-track-w: 1.75rem;
+  --pactor-switch-track-h: 1rem;
+  --pactor-slider-track-size: 0.25rem;
+  --pactor-kbd-size: 1.125rem;
+  --pactor-panel-padding: 1.25rem;
+  --pactor-card-padding: 0.75rem;
+  --pactor-alert-padding-y: 0.5rem;
+  --pactor-menu-nav-padding-y: 0.375rem;
+}
+[data-pactor-size='comfortable'] {
+  --pactor-control-height-xs: 1.75rem;
+  --pactor-control-height-sm: 2.25rem;
+  --pactor-control-height-md: 2.5rem;
+  --pactor-control-height-lg: 3rem;
+  --pactor-control-text-sm: 0.8125rem;
+  --pactor-control-text-md: 0.9375rem;
+  --pactor-control-text-lg: 1.0625rem;
+  --pactor-control-box: 1.125rem;
+  --pactor-menu-item-padding-y: 0.5rem;
+  --pactor-table-head-height: 3rem;
+  --pactor-table-cell-padding-y: 0.75rem;
+  --pactor-calendar-day-size: 2.25rem;
+  --pactor-switch-track-w: 2.25rem;
+  --pactor-switch-track-h: 1.25rem;
+  --pactor-slider-track-size: 0.5rem;
+  --pactor-kbd-size: 1.375rem;
+  --pactor-panel-padding: 1.75rem;
+  --pactor-card-padding: 1.25rem;
+  --pactor-alert-padding-y: 1rem;
+  --pactor-menu-nav-padding-y: 0.625rem;
 }
 [data-pactor-theme='dark'] {
   color-scheme: dark;
@@ -1279,7 +1343,7 @@ div.pactor-markdown-editor-root.mdxeditor, div.pactor-markdown-editor-root.mdxed
 }
 
 /* ============================================================
- * @pactor-app/blocks@1.66.0（构建产物内联，源顺序：ui → blocks → chart → chat）
+ * @pactor-app/blocks@1.67.0（构建产物内联，源顺序：ui → blocks → chart → chat）
  * ============================================================ */
 /*! tailwindcss v4.3.3 | MIT License | https://tailwindcss.com */
 @layer properties;
@@ -1635,7 +1699,7 @@ div.pactor-markdown-editor-root.mdxeditor, div.pactor-markdown-editor-root.mdxed
 }
 
 /* ============================================================
- * @pactor-app/chart@1.66.0（构建产物内联，源顺序：ui → blocks → chart → chat）
+ * @pactor-app/chart@1.67.0（构建产物内联，源顺序：ui → blocks → chart → chat）
  * ============================================================ */
 /*! tailwindcss v4.3.3 | MIT License | https://tailwindcss.com */
 @layer properties;
@@ -1779,7 +1843,7 @@ div.pactor-markdown-editor-root.mdxeditor, div.pactor-markdown-editor-root.mdxed
 }
 
 /* ============================================================
- * @pactor-app/chat@1.66.0（构建产物内联，源顺序：ui → blocks → chart → chat）
+ * @pactor-app/chat@1.67.0（构建产物内联，源顺序：ui → blocks → chart → chat）
  * ============================================================ */
 /*! tailwindcss v4.3.3 | MIT License | https://tailwindcss.com */
 @layer properties;
@@ -3986,6 +4050,30 @@ button.pactor-chat-trace__header:hover, .pactor-chat-trace__entry-header:hover, 
 .aspect-square {
     aspect-ratio: 1 / 1;
   }
+.size-\(--pactor-calendar-day-size\) {
+    width: var(--pactor-calendar-day-size);
+    height: var(--pactor-calendar-day-size);
+  }
+.size-\(--pactor-control-box\) {
+    width: var(--pactor-control-box);
+    height: var(--pactor-control-box);
+  }
+.size-\(--pactor-control-height-lg\) {
+    width: var(--pactor-control-height-lg);
+    height: var(--pactor-control-height-lg);
+  }
+.size-\(--pactor-control-height-md\) {
+    width: var(--pactor-control-height-md);
+    height: var(--pactor-control-height-md);
+  }
+.size-\(--pactor-control-height-sm\) {
+    width: var(--pactor-control-height-sm);
+    height: var(--pactor-control-height-sm);
+  }
+.size-\(--pactor-control-height-xs\) {
+    width: var(--pactor-control-height-xs);
+    height: var(--pactor-control-height-xs);
+  }
 .size-1\.5 {
     width: calc(var(--spacing) * 1.5);
     height: calc(var(--spacing) * 1.5);
@@ -4058,8 +4146,35 @@ button.pactor-chat-trace__header:hover, .pactor-chat-trace__entry-header:hover, 
     width: 100%;
     height: 100%;
   }
-.h-1\.5 {
-    height: calc(var(--spacing) * 1.5);
+.h-\(--pactor-calendar-day-size\) {
+    height: var(--pactor-calendar-day-size);
+  }
+.h-\(--pactor-control-height-lg\) {
+    height: var(--pactor-control-height-lg);
+  }
+.h-\(--pactor-control-height-md\) {
+    height: var(--pactor-control-height-md);
+  }
+.h-\(--pactor-control-height-sm\) {
+    height: var(--pactor-control-height-sm);
+  }
+.h-\(--pactor-control-height-xs\) {
+    height: var(--pactor-control-height-xs);
+  }
+.h-\(--pactor-kbd-size\) {
+    height: var(--pactor-kbd-size);
+  }
+.h-\(--pactor-slider-track-size\) {
+    height: var(--pactor-slider-track-size);
+  }
+.h-\(--pactor-switch-track-h\) {
+    height: var(--pactor-switch-track-h);
+  }
+.h-\(--pactor-table-head-height\) {
+    height: var(--pactor-table-head-height);
+  }
+.h-\(--x\) {
+    height: var(--x);
   }
 .h-2 {
     height: calc(var(--spacing) * 2);
@@ -4099,9 +4214,6 @@ button.pactor-chat-trace__header:hover, .pactor-chat-trace__entry-header:hover, 
   }
 .h-36 {
     height: calc(var(--spacing) * 36);
-  }
-.h-\[1\.15rem\] {
-    height: 1.15rem;
   }
 .h-\[22\%\] {
     height: 22%;
@@ -4178,6 +4290,15 @@ button.pactor-chat-trace__header:hover, .pactor-chat-trace__entry-header:hover, 
 .max-h-full {
     max-height: 100%;
   }
+.min-h-\(--pactor-control-height-lg\) {
+    min-height: var(--pactor-control-height-lg);
+  }
+.min-h-\(--pactor-control-height-md\) {
+    min-height: var(--pactor-control-height-md);
+  }
+.min-h-\(--pactor-control-height-sm\) {
+    min-height: var(--pactor-control-height-sm);
+  }
 .min-h-0 {
     min-height: 0px;
   }
@@ -4187,14 +4308,8 @@ button.pactor-chat-trace__header:hover, .pactor-chat-trace__entry-header:hover, 
 .min-h-4 {
     min-height: calc(var(--spacing) * 4);
   }
-.min-h-8 {
-    min-height: calc(var(--spacing) * 8);
-  }
 .min-h-9 {
     min-height: calc(var(--spacing) * 9);
-  }
-.min-h-10 {
-    min-height: calc(var(--spacing) * 10);
   }
 .min-h-16 {
     min-height: calc(var(--spacing) * 16);
@@ -4213,6 +4328,15 @@ button.pactor-chat-trace__header:hover, .pactor-chat-trace__entry-header:hover, 
   }
 .w-\(--anchor-width\) {
     width: var(--anchor-width);
+  }
+.w-\(--pactor-calendar-day-size\) {
+    width: var(--pactor-calendar-day-size);
+  }
+.w-\(--pactor-control-height-md\) {
+    width: var(--pactor-control-height-md);
+  }
+.w-\(--pactor-switch-track-w\) {
+    width: var(--pactor-switch-track-w);
   }
 .w-\(--sidebar-width\) {
     width: var(--sidebar-width);
@@ -4243,9 +4367,6 @@ button.pactor-chat-trace__header:hover, .pactor-chat-trace__entry-header:hover, 
   }
 .w-7 {
     width: calc(var(--spacing) * 7);
-  }
-.w-8 {
-    width: calc(var(--spacing) * 8);
   }
 .w-9 {
     width: calc(var(--spacing) * 9);
@@ -4375,6 +4496,9 @@ button.pactor-chat-trace__header:hover, .pactor-chat-trace__entry-header:hover, 
   }
 .min-w-\(--anchor-width\) {
     min-width: var(--anchor-width);
+  }
+.min-w-\(--pactor-kbd-size\) {
+    min-width: var(--pactor-kbd-size);
   }
 .min-w-0 {
     min-width: 0px;
@@ -4702,6 +4826,12 @@ button.pactor-chat-trace__header:hover, .pactor-chat-trace__entry-header:hover, 
 .gap-\(--grid-gap\) {
     gap: var(--grid-gap);
   }
+.gap-\(--pactor-card-padding\) {
+    gap: var(--pactor-card-padding);
+  }
+.gap-\(--pactor-panel-padding\) {
+    gap: var(--pactor-panel-padding);
+  }
 .gap-0 {
     gap: 0px;
   }
@@ -4845,6 +4975,9 @@ button.pactor-chat-trace__header:hover, .pactor-chat-trace__entry-header:hover, 
 .rounded-none {
     border-radius: 0;
   }
+.rounded-none\! {
+    border-radius: 0 !important;
+  }
 .rounded-sm {
     border-radius: calc(var(--radius) * 0.6);
   }
@@ -4861,6 +4994,10 @@ button.pactor-chat-trace__header:hover, .pactor-chat-trace__entry-header:hover, 
 .rounded-t-md {
     border-top-left-radius: calc(var(--radius) * 0.8);
     border-top-right-radius: calc(var(--radius) * 0.8);
+  }
+.rounded-r-md\! {
+    border-top-right-radius: calc(var(--radius) * 0.8) !important;
+    border-bottom-right-radius: calc(var(--radius) * 0.8) !important;
   }
 .border {
     border-style: var(--tw-border-style);
@@ -5170,6 +5307,12 @@ button.pactor-chat-trace__header:hover, .pactor-chat-trace__entry-header:hover, 
 .object-\[50\%_15\%\] {
     object-position: 50% 15%;
   }
+.p-\(--pactor-card-padding\) {
+    padding: var(--pactor-card-padding);
+  }
+.p-\(--pactor-panel-padding\) {
+    padding: var(--pactor-panel-padding);
+  }
 .p-0 {
     padding: 0px;
   }
@@ -5199,6 +5342,12 @@ button.pactor-chat-trace__header:hover, .pactor-chat-trace__entry-header:hover, 
   }
 .p-px {
     padding: 1px;
+  }
+.px-\(--pactor-card-padding\) {
+    padding-inline: var(--pactor-card-padding);
+  }
+.px-\(--pactor-panel-padding\) {
+    padding-inline: var(--pactor-panel-padding);
   }
 .px-0 {
     padding-inline: 0px;
@@ -5232,6 +5381,24 @@ button.pactor-chat-trace__header:hover, .pactor-chat-trace__entry-header:hover, 
   }
 .px-\[0\.3rem\] {
     padding-inline: 0.3rem;
+  }
+.py-\(--pactor-alert-padding-y\) {
+    padding-block: var(--pactor-alert-padding-y);
+  }
+.py-\(--pactor-card-padding\) {
+    padding-block: var(--pactor-card-padding);
+  }
+.py-\(--pactor-menu-item-padding-y\) {
+    padding-block: var(--pactor-menu-item-padding-y);
+  }
+.py-\(--pactor-menu-nav-padding-y\) {
+    padding-block: var(--pactor-menu-nav-padding-y);
+  }
+.py-\(--pactor-panel-padding\) {
+    padding-block: var(--pactor-panel-padding);
+  }
+.py-\(--pactor-table-cell-padding-y\) {
+    padding-block: var(--pactor-table-cell-padding-y);
   }
 .py-0 {
     padding-block: 0px;
@@ -5419,11 +5586,23 @@ button.pactor-chat-trace__header:hover, .pactor-chat-trace__entry-header:hover, 
 .text-\[0\.8rem\] {
     font-size: 0.8rem;
   }
+.text-\[9px\] {
+    font-size: 9px;
+  }
 .text-\[11px\] {
     font-size: 11px;
   }
 .text-\[13px\] {
     font-size: 13px;
+  }
+.text-\[length\:var\(--pactor-control-text-lg\)\] {
+    font-size: var(--pactor-control-text-lg);
+  }
+.text-\[length\:var\(--pactor-control-text-md\)\] {
+    font-size: var(--pactor-control-text-md);
+  }
+.text-\[length\:var\(--pactor-control-text-sm\)\] {
+    font-size: var(--pactor-control-text-sm);
   }
 .leading-4 {
     --tw-leading: calc(var(--spacing) * 4);
@@ -5432,6 +5611,10 @@ button.pactor-chat-trace__header:hover, .pactor-chat-trace__entry-header:hover, 
 .leading-5 {
     --tw-leading: calc(var(--spacing) * 5);
     line-height: calc(var(--spacing) * 5);
+  }
+.leading-6 {
+    --tw-leading: calc(var(--spacing) * 6);
+    line-height: calc(var(--spacing) * 6);
   }
 .leading-7 {
     --tw-leading: calc(var(--spacing) * 7);
@@ -6069,6 +6252,12 @@ button.pactor-chat-trace__header:hover, .pactor-chat-trace__entry-header:hover, 
     width: calc(var(--spacing) * 96);
     height: calc(var(--spacing) * 96);
   }
+.h-\(--pactor-control-height-lg\) {
+    height: var(--pactor-control-height-lg);
+  }
+.h-\(--pactor-control-height-sm\) {
+    height: var(--pactor-control-height-sm);
+  }
 .h-2 {
     height: calc(var(--spacing) * 2);
   }
@@ -6093,9 +6282,6 @@ button.pactor-chat-trace__header:hover, .pactor-chat-trace__entry-header:hover, 
 .h-9 {
     height: calc(var(--spacing) * 9);
   }
-.h-10 {
-    height: calc(var(--spacing) * 10);
-  }
 .h-12 {
     height: calc(var(--spacing) * 12);
   }
@@ -6114,17 +6300,17 @@ button.pactor-chat-trace__header:hover, .pactor-chat-trace__entry-header:hover, 
 .max-h-60 {
     max-height: calc(var(--spacing) * 60);
   }
+.min-h-\(--pactor-control-height-lg\) {
+    min-height: var(--pactor-control-height-lg);
+  }
+.min-h-\(--pactor-control-height-sm\) {
+    min-height: var(--pactor-control-height-sm);
+  }
 .min-h-0 {
     min-height: 0px;
   }
-.min-h-8 {
-    min-height: calc(var(--spacing) * 8);
-  }
 .min-h-9 {
     min-height: calc(var(--spacing) * 9);
-  }
-.min-h-10 {
-    min-height: calc(var(--spacing) * 10);
   }
 .min-h-12 {
     min-height: calc(var(--spacing) * 12);
@@ -6756,6 +6942,12 @@ button.pactor-chat-trace__header:hover, .pactor-chat-trace__entry-header:hover, 
 .text-xs {
     font-size: var(--text-xs);
     line-height: var(--tw-leading, var(--text-xs--line-height));
+  }
+.text-\[length\:var\(--pactor-control-text-lg\)\] {
+    font-size: var(--pactor-control-text-lg);
+  }
+.text-\[length\:var\(--pactor-control-text-sm\)\] {
+    font-size: var(--pactor-control-text-sm);
   }
 .leading-normal {
     --tw-leading: var(--leading-normal);
@@ -7976,9 +8168,12 @@ button.pactor-chat-trace__header:hover, .pactor-chat-trace__entry-header:hover, 
 .group-data-\[size\=sm\]\/tabs-list\:py-0\.5:is(:where(.group\/tabs-list)[data-size="sm"] *) {
     padding-block: calc(var(--spacing) * 0.5);
   }
-.group-data-\[size\=sm\]\/tabs-list\:text-xs:is(:where(.group\/tabs-list)[data-size="sm"] *) {
-    font-size: var(--text-xs);
-    line-height: var(--tw-leading, var(--text-xs--line-height));
+.group-data-\[size\=sm\]\/tabs-list\:text-\[length\:var\(--pactor-control-text-sm\)\]:is(:where(.group\/tabs-list)[data-size="sm"] *) {
+    font-size: var(--pactor-control-text-sm);
+  }
+.group-data-\[size\=sm\]\/tabs-list\:leading-4:is(:where(.group\/tabs-list)[data-size="sm"] *) {
+    --tw-leading: calc(var(--spacing) * 4);
+    line-height: calc(var(--spacing) * 4);
   }
 .group-data-\[size\=xs\]\/attachment\:w-7:is(:where(.group\/attachment)[data-size="xs"] *) {
     width: calc(var(--spacing) * 7);
@@ -8691,8 +8886,8 @@ button.pactor-chat-trace__header:hover, .pactor-chat-trace__entry-header:hover, 
       }
     }
   }
-.has-\[\>svg\]\:grid-cols-\[calc\(var\(--spacing\)\*4\)_1fr\]:has( > svg) {
-    grid-template-columns: calc(var(--spacing) * 4) 1fr;
+.has-\[\>svg\]\:grid-cols-\[var\(--pactor-control-box\)_1fr\]:has( > svg) {
+    grid-template-columns: var(--pactor-control-box) 1fr;
   }
 .has-\[\>svg\]\:gap-x-3:has( > svg) {
     column-gap: calc(var(--spacing) * 3);
@@ -8715,8 +8910,8 @@ button.pactor-chat-trace__header:hover, .pactor-chat-trace__entry-header:hover, 
 .aria-selected\:opacity-100[aria-selected="true"] {
     opacity: 100%;
   }
-.data-checked\:translate-x-\[calc\(100\%-2px\)\][data-checked] {
-    --tw-translate-x: calc(100% - 2px);
+.data-checked\:translate-x-\[calc\(var\(--pactor-control-box\)-2px\)\][data-checked] {
+    --tw-translate-x: calc(var(--pactor-control-box) - 2px);
     translate: var(--tw-translate-x) var(--tw-translate-y);
   }
 .data-checked\:border-\(color\:--radio-checked\)[data-checked] {
@@ -8897,14 +9092,14 @@ button.pactor-chat-trace__header:hover, .pactor-chat-trace__entry-header:hover, 
 .data-\[side\=top\]\:-bottom-1[data-side="top"] {
     bottom: calc(var(--spacing) * -1);
   }
-.data-\[size\=default\]\:h-9[data-size="default"] {
-    height: calc(var(--spacing) * 9);
+.data-\[size\=default\]\:h-\(--pactor-control-height-md\)[data-size="default"] {
+    height: var(--pactor-control-height-md);
   }
-.data-\[size\=lg\]\:h-10[data-size="lg"] {
-    height: calc(var(--spacing) * 10);
+.data-\[size\=lg\]\:h-\(--pactor-control-height-lg\)[data-size="lg"] {
+    height: var(--pactor-control-height-lg);
   }
-.data-\[size\=sm\]\:h-8[data-size="sm"] {
-    height: calc(var(--spacing) * 8);
+.data-\[size\=sm\]\:h-\(--pactor-control-height-sm\)[data-size="sm"] {
+    height: var(--pactor-control-height-sm);
   }
 :is(.\*\:data-\[slot\=attachment\]\:flex-none > *)[data-slot="attachment"] {
     flex: none;
@@ -9492,9 +9687,9 @@ button.pactor-chat-trace__header:hover, .pactor-chat-trace__entry-header:hover, 
     --tw-shadow: 0 0 #0000;
     box-shadow: var(--tw-inset-shadow), var(--tw-inset-ring-shadow), var(--tw-ring-offset-shadow), var(--tw-ring-shadow), var(--tw-shadow);
   }
-.\[\&_\[data-slot\=input\]\]\:focus-visible\:ring-0 [data-slot=input]:focus-visible {
-    --tw-ring-shadow: var(--tw-ring-inset,) 0 0 0 calc(0px + var(--tw-ring-offset-width)) var(--tw-ring-color, currentcolor);
-    box-shadow: var(--tw-inset-shadow), var(--tw-inset-ring-shadow), var(--tw-ring-offset-shadow), var(--tw-ring-shadow), var(--tw-shadow);
+.\[\&_\[data-slot\=input\]\]\:focus-visible\:ring-0\! [data-slot=input]:focus-visible {
+    --tw-ring-shadow: var(--tw-ring-inset,) 0 0 0 calc(0px + var(--tw-ring-offset-width)) var(--tw-ring-color, currentcolor) !important;
+    box-shadow: var(--tw-inset-shadow), var(--tw-inset-ring-shadow), var(--tw-ring-offset-shadow), var(--tw-ring-shadow), var(--tw-shadow) !important;
   }
 .\[\&_\[data-slot\=text\]\]\:hidden [data-slot=text] {
     display: none;
@@ -9526,6 +9721,10 @@ button.pactor-chat-trace__header:hover, .pactor-chat-trace__entry-header:hover, 
   }
 .\[\&_svg\]\:shrink-0 svg {
     flex-shrink: 0;
+  }
+.\[\&_svg\:not\(\[class\*\=\'size-\'\]\)\]\:size-\(--pactor-control-box\) svg:not([class*='size-']) {
+    width: var(--pactor-control-box);
+    height: var(--pactor-control-box);
   }
 .\[\&_svg\:not\(\[class\*\=\'size-\'\]\)\]\:size-3 svg:not([class*='size-']) {
     width: calc(var(--spacing) * 3);
@@ -9577,11 +9776,11 @@ button.pactor-chat-trace__header:hover, .pactor-chat-trace__entry-header:hover, 
 .\[\&\:has\(\[role\=checkbox\]\)\]\:pr-0:has([role=checkbox]) {
     padding-right: 0px;
   }
-.\[\.border-b\]\:pb-6:is(.border-b) {
-    padding-bottom: calc(var(--spacing) * 6);
+.\[\.border-b\]\:pb-\(--pactor-panel-padding\):is(.border-b) {
+    padding-bottom: var(--pactor-panel-padding);
   }
-.\[\.border-t\]\:pt-6:is(.border-t) {
-    padding-top: calc(var(--spacing) * 6);
+.\[\.border-t\]\:pt-\(--pactor-panel-padding\):is(.border-t) {
+    padding-top: var(--pactor-panel-padding);
   }
 .\[button\]\:text-left:is(button) {
     text-align: left;
@@ -9782,6 +9981,10 @@ button.pactor-chat-trace__header:hover, .pactor-chat-trace__entry-header:hover, 
   }
 .\[\&\>svg\]\:pointer-events-none > svg {
     pointer-events: none;
+  }
+.\[\&\>svg\]\:size-\(--pactor-control-box\) > svg {
+    width: var(--pactor-control-box);
+    height: var(--pactor-control-box);
   }
 .\[\&\>svg\]\:size-3 > svg {
     width: calc(var(--spacing) * 3);

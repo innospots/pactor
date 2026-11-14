@@ -121,7 +121,7 @@ createPactorApplication({
 | `Row` / `Col` | `gutter`、`span`、`offset`、`xs`…`xxl` | 24 栏响应式栅格；成对表单项常用 `xs: 24, md: 12` |
 | `Space` | `direction`、`size`、`align`、`wrap` | 一组相邻控件的一致间距；较复杂布局用 Flex |
 | `Card` | `title`、`extra`、`loading`、`bordered`、`hoverable`、`contentClassName` | `extra` 是 DslNode 数组；加载时优先用 `loading`，不要在外面再叠一个 Skeleton |
-| `Tabs` | `items`、`activeKey`、`variant`、`tabPosition`、`contentClassName` | `items[].children` 是同层内容；切 Tabs 不换路由 |
+| `Tabs` | `items`、`activeKey`、`variant`、`size`、`tabPosition`、`contentClassName` | `items[].children` 是同层内容；切 Tabs 不换路由；`size: sm` 压缩胶囊行高 |
 | `Resizable` | 面板配置见在线文档 | 文档中的 `Splitter` 对应 DSL `Resizable`，不得写 `type: Splitter` |
 | `ScrollArea` | 高度/滚动约束看在线文档 | 只约束内容滚动；页面整体不应横向滚动 |
 | `Layout` / `Header` / `Sider` / `Content` / `Footer` | 低层组合 props | 常规业务页运行在全局 layout 内，不重复外壳 |
@@ -191,6 +191,7 @@ createPactorApplication({
 | DSL type | 关键 props | `${event}` |
 | --- | --- | --- |
 | `Input` | `name`、`label`、`rules`、`value`、`type: text/password`、`placeholder`、`maxLength`、`allowClear`、`search`、`disabled` | string |
+| `SearchInput` | `name`、`label`、`rules`、`value`、`placeholder`、`maxLength`、`allowClear`、`buttonText`、`disabled` | string |
 | `Textarea` | `name`、`label`、`rules`、`rows`、`autoSize`、`maxLength` | string |
 | `NumberInput` | `name`、`label`、`rules`、`min`、`max`、`step`、`precision` | number / undefined |
 | `Select` | `name`、`label`、`rules`、`options`、`showSearch`、`allowClear` | 选项 value |
@@ -214,6 +215,7 @@ createPactorApplication({
 - 当前 `required` 仅把 `undefined` / `null` / `''` 判为空，布尔 `false` 会通过。协议确认、同意条款等布尔条件必须用 `onChange → state` 控制提交，并由服务端复验。
 - `Select` / `TreeSelect` / `Cascader` 的 value 在候选中必须唯一。
 - `Input` 的 `search` 只改变外观形态（前置搜索图标）；「回车才查」绑定 `events.onSearch`，「边输边筛」绑定 `events.onChange`，二者可同时声明。
+- `SearchInput` 直接渲染「左输入框 + 右搜索按钮」一体化组合框，无需再手写 `InputGroup`。缺省为仅图标按钮（无障碍名称取内置「搜索」，不显示 tooltip）；`buttonText` 为图标 + 该文案。在 Form 内按钮走表单提交（`onSubmit`），独立渲染时点击调用 `events.onSearch`；两种情况下点击都会先回调 `onSearch`，输入框回车也会触发 `onSearch`。固定宽度写在 `className`（Form 内即 `form-item` 容器）。
 - Upload 只是 UI 采集，真正上传由 `onChange` 后的服务/请求动作完成。
 - 日期范围值统一为 `{ start, end }`；时间格式必须与 API 约定一致。
 
@@ -255,6 +257,7 @@ createPactorApplication({
 - `rowSelection: true` 开启多选；`selectedRowKeys` 受控，事件为 `onSelectChange`。
 - 树表格由行数据 `children` 自动识别，可用 `childrenColumnName` 改字段名。
 - `rowDraggable` 的 `onRowDrop` 返回 `{ dragKey, dropKey, position }`，组件内部已更新显示树，动作负责持久化。
+- `size: small | middle | large` 控制行密度：middle（缺省）跟随全局密度档位，small / large 强制局部档、不受全局影响。
 - 表格可横向滚动，但页面不能整体横向滚动。
 
 ### 6.2 其他展示组件
@@ -281,7 +284,7 @@ createPactorApplication({
 | `Menu` | `items: [{ key, label, icon, badge, dot, group, disabled, trailing, actions, children }]` | `onSelect` 传 key；`onItemAction` 传 `{ key, action }` |
 | `Tabs` | `items: [{ key, label, children, extra }]` | `onChange` 传 key；同页视图切换 |
 | `DropdownMenu` | `items: [{ label, value, icon, danger, separator, children }]` | `onSelect` 传 value；必须提供触发 children |
-| `UserMenu` | `user`、`items`、`status`、`theme`、`language` 等 | `onSelect` / `onThemeChange` / `onStatusChange` / `onSignOut` |
+| `UserMenu` | `user`、`items`、`status`、`theme`、`language`、`size` 等 | `onSelect` / `onThemeChange` / `onSizeChange` / `onStatusChange` / `onSignOut`；`showSize: true` 开启界面密度切换（写 `<html data-pactor-size>`，持久化 `pactor.size`） |
 | `Pagination` | `total`、`page`、`pageSize`、`pageSizeOptions` | `onChange(page)` / `onPageSizeChange(size)`；切换 pageSize 后还会固定触发 `onChange(1)`，只在一侧执行 `reload` 以避免双请求 |
 | `Steps` | `items`、`current`、`direction` | 流程阶段，不是导航菜单 |
 

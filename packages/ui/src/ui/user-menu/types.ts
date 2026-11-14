@@ -1,5 +1,15 @@
 import type { CSSProperties, ReactNode, Ref } from 'react';
 
+import type { GlobalSize } from '../../lib/global-size.js';
+
+export type { GlobalSize };
+
+/** 密度选项：label 可随界面语言覆盖默认值 */
+export interface SizeOption {
+  value: GlobalSize;
+  label: string;
+}
+
 export type UserStatus = 'available' | 'busy' | 'away';
 export type ThemePreference = 'light' | 'dark' | 'system';
 /** 语言偏好（BCP 47 标签，如 zh-CN / en-US / ja-JP） */
@@ -44,6 +54,17 @@ export interface UserMenuProps {
   onThemeChange?: (theme: ThemePreference) => void;
   /** 显示内联浅色 / 深色 / 跟随系统切换（缺省 true） */
   showTheme?: boolean;
+  /** 受控全局密度 */
+  size?: GlobalSize;
+  /** 非受控初始密度；缺省读取 localStorage 的 pactor.size，未设置视为 'default' */
+  defaultSize?: GlobalSize;
+  /** 密度选择回调；选择同时应用到 documentElement（compact / comfortable 写
+   *  data-pactor-size，default 移除）；非受控时写入 localStorage 的 pactor.size */
+  onSizeChange?: (size: GlobalSize) => void;
+  /** 显示「界面密度」内联切换（缺省 false） */
+  showSize?: boolean;
+  /** 密度选项（缺省 紧凑 / 默认 / 宽松）；追加 { value, label } 即可覆盖显示名 */
+  sizes?: SizeOption[];
   /** 受控语言偏好 */
   language?: LanguagePreference;
   /** 非受控初始语言；缺省读取 localStorage 的 pactor.locale，

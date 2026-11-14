@@ -2,7 +2,7 @@
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Goal:** 为 `@pactor-app/ui` 表单控件族建立 compact / default / comfortable 三档全局密度，UserMenu 与自定义组件（示例：SkinSettings）均可切换整页尺寸。
+**Goal:** 为 `@pactor-app/ui` 建立 compact / default / comfortable 三档全局密度（一期：表单控件族 + 按钮族；二期：Table / 菜单族 / Tabs / NavigationMenu / Sidebar 菜单行 / Calendar / Avatar / Badge / Breadcrumb），并支持自定义数值覆盖；UserMenu 与自定义组件（示例：SkinSettings）均可切换整页尺寸。
 
 **Architecture:** CSS 尺寸令牌 + `data-pactor-size` 属性（与 `data-pactor-theme` 同构）。`:root` 定义 `--pactor-control-*` 令牌（default 档 = 现行尺寸），`[data-pactor-size='compact'|'comfortable']` 块覆盖令牌值；组件把硬编码 `h-9` / `text-sm` 换成令牌引用。最大杠杆是 DSL 层 `control-size.ts`（12 个表单控件共用的尺寸映射）一次令牌化。UserMenu 新增密度切换（与 theme/language 同构的受控/非受控 props + localStorage 持久化）。
 
@@ -18,6 +18,7 @@
 - 令牌命名前缀 `--pactor-control-`；属性 `data-pactor-size`；持久化 key `pactor.size`。
 - 不新增依赖；不改动 `control-size.ts` 的导出签名（`ControlSize` / `CONTROL_SIZE_*` 名字与 Record 形状不变）。
 - 自定义数值优先级：**documentElement 内联变量 > `[data-pactor-size]` 档位 > `:root` default**（内联样式天然胜出，无需额外 CSS）。
+- **防漂移约束**：`styles.css` `:root` 新增的任何令牌必须同步注册到 `tools/theme-studio/src/tokens.ts`（`tools/theme-studio/tests/tokens.test.ts` 与 `:root` 双向比对，缺失即红）；验证命令 `pnpm --filter theme-studio test`。
 - i18n key 必须同时加进 `packages/runtime/src/context/locales/zh-CN.ts` 与 `en-US.ts`。
 - 提交信息用中文 / 英文均可，遵循仓库现有 `feat(ui): ...` 风格。
 - 测试命令：`cd packages/ui && pnpm test`（单文件：`pnpm vitest run tests/<file>`）；样式构建断言：`pnpm vitest run tests/build-styles.test.mjs`（仓库根目录）。
@@ -32,6 +33,7 @@
 - Create: `packages/ui/src/lib/global-size.ts`
 - Modify: `packages/ui/src/ui/index.ts`（文件尾部 user-menu 导出块之后追加）
 - Modify: `packages/ui/src/components/index.ts`（control-size 导出块之后追加）
+- Modify: `tools/theme-studio/src/tokens.ts`（新增「控件尺寸」分组，皮肤工具可视化编辑）
 - Test: `packages/ui/tests/global-size.test.ts`（新建）
 - Test: `tests/build-styles.test.mjs`（追加一个 it）
 
@@ -333,15 +335,38 @@ export {
 export type { GlobalSize, GlobalSizeValues } from '../lib/global-size.js';
 ```
 
-- [ ] **Step 6: 跑测试确认通过**
+- [ ] **Step 6: theme-studio 注册令牌（皮肤 CSS 可视化编辑入口）**
 
-Run: `cd packages/ui && pnpm vitest run tests/global-size.test.ts`，然后回仓库根目录 `pnpm vitest run tests/build-styles.test.mjs`
+`tools/theme-studio/src/tokens.ts` 在 `key: 'size'` 分组之后插入新分组（防漂移测试要求 `:root` 令牌与清单一一对应；注册后 theme-studio 的 TokenEditor 出现「控件尺寸」分组，皮肤导出即携带这些数值）：
+
+```ts
+  {
+    key: 'control-size',
+    title: '控件尺寸（全局密度 default 档）',
+    tokens: [
+      { name: '--pactor-control-height-xs', type: 'length', description: '控件高度 xs 档（Button xs / icon-xs）', defaultValue: '1.5rem', slider: { min: 1, max: 2, step: 0.125 } },
+      { name: '--pactor-control-height-sm', type: 'length', description: '控件高度 sm 档（Button sm、Sidebar 菜单行、Avatar）', defaultValue: '2rem', slider: { min: 1.5, max: 2.5, step: 0.125 } },
+      { name: '--pactor-control-height-md', type: 'length', description: '控件高度 md 档（Input / Select / Button 默认、Tabs、Pagination）', defaultValue: '2.25rem', slider: { min: 1.75, max: 3, step: 0.125 } },
+      { name: '--pactor-control-height-lg', type: 'length', description: '控件高度 lg 档（Button lg）', defaultValue: '2.5rem', slider: { min: 2, max: 3.5, step: 0.125 } },
+      { name: '--pactor-control-text-sm', type: 'length', description: '控件小字号（Button xs/sm、Tabs sm、Badge）', defaultValue: '0.75rem', slider: { min: 0.625, max: 0.875, step: 0.0625 } },
+      { name: '--pactor-control-text-md', type: 'length', description: '控件正文字号（Button / Input / Select / 菜单项 / 表格）', defaultValue: '0.875rem', slider: { min: 0.75, max: 1, step: 0.0625 } },
+      { name: '--pactor-control-text-lg', type: 'length', description: '控件大字号（表单控件 large 档）', defaultValue: '1rem', slider: { min: 0.875, max: 1.25, step: 0.0625 } },
+      { name: '--pactor-control-box', type: 'length', description: 'Checkbox / Radio 控件盒尺寸', defaultValue: '1rem', slider: { min: 0.75, max: 1.25, step: 0.0625 } },
+    ],
+  },
+```
+
+说明：皮肤工具编辑的是 `:root`（default 档）数值；按档位（compact / comfortable）的皮肤级覆盖在皮肤 CSS 中手写 `[data-pactor-size='compact'] { --pactor-control-*: ... }` 块（与 `data-pactor-theme` 暗色块同一手法），设计文档已给出示例。
+
+- [ ] **Step 7: 跑测试确认通过**
+
+Run: `cd packages/ui && pnpm vitest run tests/global-size.test.ts`，然后回仓库根目录 `pnpm vitest run tests/build-styles.test.mjs && pnpm --filter theme-studio test`
 Expected: 全部 PASS（build-styles 会先执行样式构建，耗时正常；根级 vitest 只认根 tests/ 目录，不要在 packages/ui 里跑它）
 
-- [ ] **Step 7: Commit**
+- [ ] **Step 8: Commit**
 
 ```bash
-git add packages/ui/src/styles.css packages/ui/src/lib/global-size.ts packages/ui/src/ui/index.ts packages/ui/src/components/index.ts packages/ui/tests/global-size.test.ts tests/build-styles.test.mjs
+git add packages/ui/src/styles.css packages/ui/src/lib/global-size.ts packages/ui/src/ui/index.ts packages/ui/src/components/index.ts packages/ui/tests/global-size.test.ts tests/build-styles.test.mjs tools/theme-studio/src/tokens.ts
 git commit -m "feat(ui): 全局密度令牌与 global-size 工具（data-pactor-size 契约）"
 ```
 
@@ -388,7 +413,9 @@ describe('control-size 令牌映射', () => {
 
   it('cn 合并时令牌类覆盖 vendored 基类（h-9 / text-sm 被去重）', () => {
     // tailwind-merge 须把 h-(--x) 归 h 组、text-[length:...] 归 font-size 组，
-    // 否则基类与令牌类并存、胜负取决于样式表顺序
+    // 否则基类与令牌类并存、胜负取决于样式表顺序。
+    // 注：断言的是精确字符串；若 twMerge 版本导致输出顺序不同（语义等价），
+    // 以实际稳定输出为准调整本断言，关键是不再残留 h-9 / text-sm
     expect(cn('h-9 px-3 text-sm', CONTROL_SIZE_BOX.small)).toBe(
       'h-(--pactor-control-height-sm) px-2.5 text-[length:var(--pactor-control-text-sm)]',
     );
@@ -516,7 +543,7 @@ Expected: 全部 PASS
 - [ ] **Step 7: Commit**
 
 ```bash
-git add packages/ui/src/ui tests/build-styles.test.mjs
+git add packages/ui/src/ui/button.tsx packages/ui/src/ui/input.tsx packages/ui/src/ui/select.tsx packages/ui/src/ui/toggle.tsx packages/ui/src/ui/combobox.tsx packages/ui/src/ui/input-group.tsx packages/ui/src/ui/input-otp.tsx packages/ui/src/ui/checkbox.tsx packages/ui/src/ui/radio-group.tsx tests/build-styles.test.mjs
 git commit -m "feat(ui): 表单原语尺寸令牌化（button/input/select/toggle/combobox/input-group/input-otp/checkbox/radio）"
 ```
 
@@ -599,6 +626,12 @@ describe('UserMenu 密度切换', () => {
     window.localStorage.setItem(globalSizeStorageKey, 'compact');
     render(<UiUserMenu user={USER} showSize />);
     expect(document.documentElement.getAttribute('data-pactor-size')).toBe('compact');
+  });
+
+  it('无持久化偏好时挂载不动 documentElement（不重置宿主已设密度）', () => {
+    document.documentElement.setAttribute('data-pactor-size', 'comfortable');
+    render(<UiUserMenu user={USER} showSize />);
+    expect(document.documentElement.getAttribute('data-pactor-size')).toBe('comfortable');
   });
 });
 ```
@@ -715,10 +748,15 @@ import type { GlobalSize } from '../../lib/global-size.js';
 - 主题回显 effect（`if (!open || themeProp !== undefined ...) return;` 那个）之后加两个 effect：
 
 ```ts
-  // 非受控时挂载即应用持久化偏好（刷新后密度保持）；
+  // 非受控且存在持久化偏好（或显式 defaultSize）时，挂载即恢复（刷新后密度保持）；
+  // 无持久化偏好则不动 documentElement——页面当前密度可能由 SkinSettings
+  // 等宿主组件设置，UserMenu 挂载不得擅自重置；
   // 需要首屏防闪烁的宿主应在 HTML 头部内联脚本提前写 data-pactor-size
   useEffect(() => {
-    if (sizeProp === undefined) applyGlobalSize(size);
+    if (sizeProp !== undefined) return;
+    if (defaultSize !== undefined || readStoredGlobalSize() !== null) {
+      applyGlobalSize(size);
+    }
     // 仅挂载时执行一次；受控切换由 changeSize / 宿主负责应用
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -1018,21 +1056,23 @@ import {
 
 - 文件头注释「（主色预设 / 暗黑开关 / 圆角滑杆 / 恢复默认）」改为「（主色预设 / 暗黑开关 / 圆角滑杆 / 界面密度 / 控件高度自定义 / 恢复默认）」。
 
-- [ ] **Step 2: 构建并手动验证**
+- [ ] **Step 2: 构建验证（视觉验收统一在 Task 10）**
 
 ```bash
-pnpm --filter @pactor-app/ui build && pnpm --filter example-admin dev
+pnpm --filter @pactor-app/ui build && pnpm --filter example-admin build
 ```
 
-浏览器打开 admin 示例 → 头部「皮肤」→ 界面密度三档切换：Button/Input/Select 高度与字号即时变化；default 档与改动前视觉一致。
+Expected: 构建成功（example-admin 引用 workspace dist，确认新导出 `applyGlobalSize` / `applyGlobalSizeValues` 可被示例解析；浏览器视觉验收见 Task 10 Step 3）。
 
 - [ ] **Step 3: MEMORY.md 条目**
 
 `MEMORY.md` 最新条目之后追加一行：
 
 ```markdown
-- **全局密度档位**（2026-11-12 global-size-control）：`data-pactor-size="compact|comfortable"`（不设置=default）切换 `--pactor-control-*` 令牌（高度/字号/控件盒），default 档=现行尺寸零视觉变化；`control-size.ts` 四组映射已令牌化（12 个 DSL 表单控件自动跟随），vendored 原语 button/input/select/toggle/combobox/input-group/input-otp/checkbox/radio 同步。**坑：字号必须 `text-[length:var(--x)]`，`text-(--x)` 编译为 color 且 tailwind-merge 不去重**。UserMenu 新增 size/defaultSize/showSize/sizes/onSizeChange（与 theme 同构，持久化 `pactor.size`）；自定义数值走 applyGlobalSizeValues/readGlobalSizeValues（documentElement 内联变量，优先级高于档位预设，null 清除）；自定义组件入口 applyGlobalSize/readGlobalSize（example-admin SkinSettings 已演示三档切换 + 高度滑杆）。
+- **全局密度档位（一期）**（2026-11-12 global-size-control）：`data-pactor-size="compact|comfortable"`（不设置=default）切换 `--pactor-control-*` 令牌（高度/字号/控件盒），default 档=现行尺寸零视觉变化；`control-size.ts` 四组映射已令牌化（12 个 DSL 表单控件自动跟随），vendored 原语 button/input/select/toggle/combobox/input-group/input-otp/checkbox/radio 同步。**坑：字号必须 `text-[length:var(--x)]`，`text-(--x)` 编译为 color 且 tailwind-merge 不去重**。UserMenu 新增 size/defaultSize/showSize/sizes/onSizeChange（与 theme 同构，持久化 `pactor.size`；非受控挂载仅在存在持久化偏好时恢复，不清除宿主已设属性）；自定义数值走 applyGlobalSizeValues/readGlobalSizeValues（documentElement 内联变量，优先级高于档位预设，null 清除）；自定义组件入口 applyGlobalSize/readGlobalSize（example-admin SkinSettings 已演示三档切换 + 高度滑杆）。二期（Table/菜单族/Tabs/Calendar 等）见后续任务补充。
 ```
+
+（条目按一期范围撰写；Task 9 完成后再补二期一句，避免日志先行于代码。）
 
 - [ ] **Step 4: Commit**
 
@@ -1043,7 +1083,254 @@ git commit -m "feat(example-admin): SkinSettings 演示全局密度切换"
 
 ---
 
-### Task 7: 全量验证
+### Task 7: 菜单族 + Tabs + NavigationMenu + Sidebar 菜单行（二期）
+
+**Files:**
+- Modify: `packages/ui/src/styles.css`（menu 令牌，三块同改）
+- Modify: `packages/ui/src/ui/dropdown-menu.tsx`、`context-menu.tsx`、`menubar.tsx`、`tabs.tsx`、`navigation-menu.tsx`、`sidebar.tsx`
+- Modify: `packages/ui/src/components/components/Tabs/index.tsx`
+- Modify: `tools/theme-studio/src/tokens.ts`（control-size 分组追加 menu 令牌）
+- Test: `tests/build-styles.test.mjs`（追加断言）
+
+**Interfaces:**
+- Consumes: Task 1 令牌；新增令牌 `--pactor-menu-item-padding-y`。
+- Produces: DSL `Tabs` 新 prop `size?: 'default' | 'sm'`（缺省 default，仅压缩胶囊变体）。
+
+- [ ] **Step 1: styles.css 加菜单令牌（三块同改）**
+
+`:root` 令牌区追加 `--pactor-menu-item-padding-y: 0.375rem;`；`[data-pactor-size='compact']` 块追加 `--pactor-menu-item-padding-y: 0.25rem;`；`[data-pactor-size='comfortable']` 块追加 `--pactor-menu-item-padding-y: 0.5rem;`。
+
+`tools/theme-studio/src/tokens.ts` 的 `control-size` 分组追加：
+
+```ts
+      { name: '--pactor-menu-item-padding-y', type: 'length', description: '菜单项纵向内边距（DropdownMenu / ContextMenu / Menubar 项）', defaultValue: '0.375rem', slider: { min: 0.125, max: 0.75, step: 0.0625 } },
+```
+
+- [ ] **Step 2: 写失败测试（编译产物断言）**
+
+`tests/build-styles.test.mjs` 在 Task 3 的 it 后追加：
+
+```js
+  it('菜单项编译为密度令牌引用', () => {
+    expect(css).toContain('.py-\\(--pactor-menu-item-padding-y\\)');
+  });
+```
+
+Run: `pnpm vitest run tests/build-styles.test.mjs`
+Expected: FAIL（断言不成立）
+
+- [ ] **Step 3: 菜单族（dropdown-menu / context-menu / menubar）**
+
+- `dropdown-menu.tsx`：文件内所有 item 类串中的 `py-1.5 text-sm` → `py-(--pactor-menu-item-padding-y) text-[length:var(--pactor-control-text-md)]`（Item / CheckboxItem / RadioItem / SubTrigger / Label 等全部出现处，改完 `grep -c "py-1.5" ui/dropdown-menu.tsx` 应为 0）
+- `context-menu.tsx`：同样处理所有 `py-1.5` 与 item 的 `text-sm`
+- `menubar.tsx`：菜单**项**（约 90 行等）`py-1.5 text-sm` → 同上；顶栏**触发器**（约 41 行）`py-1` 保持，仅 `text-sm` → `text-[length:var(--pactor-control-text-md)]`
+
+- [ ] **Step 4: tabs.tsx + DSL Tabs 透传**
+
+`tabs.tsx`：
+- `default: 'h-9 rounded-lg bg-muted p-[3px]'` → `default: 'h-(--pactor-control-height-md) rounded-lg bg-muted p-[3px]'`
+- compoundVariants `{ variant: 'default', size: 'sm', class: 'h-8' }` → `class: 'h-(--pactor-control-height-sm)'`
+- 触发器基类（约 111 行）`px-2 py-1 text-sm font-medium` → `px-2 py-1 text-[length:var(--pactor-control-text-md)] font-medium`
+- `'group-data-[size=sm]/tabs-list:py-0.5 group-data-[size=sm]/tabs-list:text-xs'` → 末尾改为 `group-data-[size=sm]/tabs-list:text-[length:var(--pactor-control-text-sm)]`
+- TabsAddButton（约 175 行）`inline-flex size-9` → `inline-flex size-(--pactor-control-height-md)`
+
+`components/components/Tabs/index.tsx`：
+- `TabsProps` 的 `variant` 声明后加：`/** 尺寸（仅压缩 default 胶囊变体为 sm 档）：default（缺省）/ sm */ size?: 'default' | 'sm';`
+- 函数解构加 `size = 'default',`；`<TabsList variant={variant}` 改为 `<TabsList variant={variant} size={size}`
+
+- [ ] **Step 5: navigation-menu.tsx / sidebar.tsx**
+
+- `navigation-menu.tsx`（约 56 行触发器类串）：`inline-flex h-9 w-max` → `inline-flex h-(--pactor-control-height-md) w-max`；`py-2 text-sm font-medium` → `py-2 text-[length:var(--pactor-control-text-md)] font-medium`
+- `sidebar.tsx` menu-button variants：
+  - `default: 'h-8 text-sm'` → `default: 'h-(--pactor-control-height-sm) text-[length:var(--pactor-control-text-md)]'`
+  - `sm: 'h-7 text-xs'` → `sm: 'h-7 text-[length:var(--pactor-control-text-sm)]'`（h-7 为侧栏特有小档，保持）
+  - `lg: 'h-12 text-sm group-data-[collapsible=icon]:p-0!'` → `lg: 'h-12 text-[length:var(--pactor-control-text-md)] group-data-[collapsible=icon]:p-0!'`（h-12 保持）
+
+说明：Pagination 页码按钮复用 `buttonVariants`，Task 3 后已自动跟随全局密度，本任务无需改动；DSL `Menu` 不动（其 `py-2` 是侧栏导航语义，已由 Sidebar menu-button 覆盖）。
+
+- [ ] **Step 6: 跑测试 + 回归**
+
+Run: `pnpm vitest run tests/build-styles.test.mjs && pnpm --filter theme-studio test && cd packages/ui && pnpm vitest run tests/components/sidebar.test.tsx tests/components/extended-overlay.test.tsx tests/components/extended-composite.test.tsx tests/layout`
+Expected: 全部 PASS
+
+- [ ] **Step 7: Commit**
+
+```bash
+git add packages/ui/src/styles.css packages/ui/src/ui/dropdown-menu.tsx packages/ui/src/ui/context-menu.tsx packages/ui/src/ui/menubar.tsx packages/ui/src/ui/tabs.tsx packages/ui/src/ui/navigation-menu.tsx packages/ui/src/ui/sidebar.tsx packages/ui/src/components/components/Tabs tests/build-styles.test.mjs tools/theme-studio/src/tokens.ts
+git commit -m "feat(ui): 菜单族/Tabs/NavigationMenu/Sidebar 菜单行随全局密度缩放，DSL Tabs 透传 size"
+```
+
+---
+
+### Task 8: Table 密度（ui 令牌化 + DSL size prop）
+
+**Files:**
+- Modify: `packages/ui/src/styles.css`（table 令牌，三块同改）
+- Modify: `packages/ui/src/ui/table.tsx`
+- Modify: `packages/ui/src/components/components/Table/index.tsx`
+- Modify: `tools/theme-studio/src/tokens.ts`（control-size 分组追加 table 令牌）
+- Test: `packages/ui/tests/components/table-density.test.tsx`（新建）
+
+**Interfaces:**
+- Consumes: `ControlSize`（`components/control-size.ts`）；新增令牌 `--pactor-table-head-height` / `--pactor-table-cell-padding-y`。
+- Produces: DSL `Table` 新 prop `size?: ControlSize`（缺省 `'middle'` = 跟随全局密度；`small` / `large` 强制局部档，与全局密度独立、局部优先）。
+
+- [ ] **Step 1: styles.css 加表格令牌（三块同改）+ 失败断言**
+
+`:root` 追加 `--pactor-table-head-height: 2.5rem;` 与 `--pactor-table-cell-padding-y: 0.5rem;`；compact 块追加 `2rem` / `0.25rem`；comfortable 块追加 `3rem` / `0.75rem`。
+
+`tools/theme-studio/src/tokens.ts` 的 `control-size` 分组追加：
+
+```ts
+      { name: '--pactor-table-head-height', type: 'length', description: '表格表头行高', defaultValue: '2.5rem', slider: { min: 1.75, max: 3.5, step: 0.125 } },
+      { name: '--pactor-table-cell-padding-y', type: 'length', description: '表格单元格纵向内边距（行高由此派生）', defaultValue: '0.5rem', slider: { min: 0.125, max: 1, step: 0.0625 } },
+```
+
+`tests/build-styles.test.mjs` 追加：
+
+```js
+  it('表格编译为密度令牌引用', () => {
+    expect(css).toContain('.py-\\(--pactor-table-cell-padding-y\\)');
+    expect(css).toContain('.h-\\(--pactor-table-head-height\\)');
+  });
+```
+
+- [ ] **Step 2: 写失败测试**
+
+`packages/ui/tests/components/table-density.test.tsx`：
+
+```tsx
+// @vitest-environment jsdom
+import { screen } from '@testing-library/react';
+import { describe, expect, it } from 'vitest';
+
+import { renderDsl } from './helpers.js';
+
+const columns = [{ title: '姓名', dataIndex: 'name' }];
+const dataSource = [{ id: 1, name: 'Alice' }];
+
+describe('Table 密度', () => {
+  it('size=small 覆盖行高与单元格 padding（局部档优先）', () => {
+    renderDsl({ type: 'Table', props: { columns, dataSource, size: 'small' } });
+    const cell = screen.getByText('Alice').closest('td');
+    expect(cell?.className).toContain('py-1');
+    const head = screen.getByText('姓名').closest('th');
+    expect(head?.className).toContain('h-8');
+  });
+
+  it('size=large 覆盖行高与单元格 padding', () => {
+    renderDsl({ type: 'Table', props: { columns, dataSource, size: 'large' } });
+    expect(screen.getByText('Alice').closest('td')?.className).toContain('py-2.5');
+    expect(screen.getByText('姓名').closest('th')?.className).toContain('h-12');
+  });
+
+  it('size 缺省（middle）不加覆盖类，跟随全局密度令牌', () => {
+    renderDsl({ type: 'Table', props: { columns, dataSource } });
+    const cell = screen.getByText('Alice').closest('td');
+    expect(cell?.className).toContain('py-(--pactor-table-cell-padding-y)');
+    expect(cell?.className).not.toContain(' py-1');
+  });
+});
+```
+
+Run: `cd packages/ui && pnpm vitest run tests/components/table-density.test.tsx`
+Expected: FAIL（`size` prop 不存在；基类仍是硬编码 `p-2`）
+
+- [ ] **Step 3: table.tsx 令牌化**
+
+- Table 基类 `w-full caption-bottom text-sm` → `w-full caption-bottom text-[length:var(--pactor-control-text-md)]`
+- TableHead：`'h-10 px-2 text-left` → `'h-(--pactor-table-head-height) px-2 text-left`
+- TableCell：`'p-2 align-middle` → `'px-2 py-(--pactor-table-cell-padding-y) align-middle`
+
+- [ ] **Step 4: DSL Table 加 size prop**
+
+`components/components/Table/index.tsx`：
+
+- import 加 `import type { ControlSize } from '../../control-size.js';`
+- 文件顶部（TableProps 之前）加：
+
+```ts
+/** 行密度档位：middle = 跟随全局密度令牌（不加覆盖类）；small / large 强制局部档 */
+const TABLE_SIZE: Record<ControlSize, { head: string; cell: string }> = {
+  small: { head: 'h-8', cell: 'px-2 py-1' },
+  middle: { head: '', cell: '' },
+  large: { head: 'h-12 px-3', cell: 'px-3 py-2.5' },
+};
+```
+
+- `TableProps` 加（放在 `pagination` 之后）：`/** 行密度：middle（缺省，跟随全局密度档位）/ small / large（强制局部档，与全局密度独立） */ size?: ControlSize;`
+- 组件函数解构加 `size = 'middle',`
+- 全部 `<TableHead` 渲染点（drag 手柄、selection、columns.map 三处）的 `className={cn(...)}` 末尾追加 `TABLE_SIZE[size].head`；全部 `<TableCell` 渲染点（empty colSpan 行、body 各行，约 574 / 597 / 615 / 638 行）的 className 末尾追加 `TABLE_SIZE[size].cell`
+
+- [ ] **Step 5: 跑测试 + 回归**
+
+Run: `cd packages/ui && pnpm vitest run tests/components/table-density.test.tsx tests/components/table-tree-dnd.test.tsx tests/components/contract.test.tsx`，然后回仓库根目录 `pnpm vitest run tests/build-styles.test.mjs && pnpm --filter theme-studio test`
+Expected: 全部 PASS
+
+- [ ] **Step 6: Commit**
+
+```bash
+git add packages/ui/src/styles.css packages/ui/src/ui/table.tsx packages/ui/src/components/components/Table packages/ui/tests/components/table-density.test.tsx tools/theme-studio/src/tokens.ts
+git commit -m "feat(ui): Table 密度——行高/单元格令牌化 + DSL size prop（small/middle/large）"
+```
+
+---
+
+### Task 9: Calendar / Avatar / Badge / Breadcrumb（二期小件）
+
+**Files:**
+- Modify: `packages/ui/src/styles.css`（calendar 令牌，三块同改）
+- Modify: `packages/ui/src/ui/calendar.tsx`、`avatar.tsx`、`badge.tsx`、`breadcrumb.tsx`
+- Modify: `tools/theme-studio/src/tokens.ts`（control-size 分组追加 calendar 令牌）
+
+**Interfaces:**
+- Consumes: Task 1 令牌；新增令牌 `--pactor-calendar-day-size`。Produces: 无新导出。
+
+- [ ] **Step 1: styles.css 加日历令牌（三块同改）+ 失败断言**
+
+`:root` 追加 `--pactor-calendar-day-size: 2rem;`；compact 块追加 `1.75rem`；comfortable 块追加 `2.25rem`。
+
+`tools/theme-studio/src/tokens.ts` 的 `control-size` 分组追加：
+
+```ts
+      { name: '--pactor-calendar-day-size', type: 'length', description: '日历日期格尺寸（DatePicker 面板）', defaultValue: '2rem', slider: { min: 1.5, max: 2.75, step: 0.125 } },
+```
+
+`tests/build-styles.test.mjs` 追加：
+
+```js
+  it('日历日期格编译为密度令牌引用', () => {
+    expect(css).toContain('.size-\\(--pactor-calendar-day-size\\)');
+  });
+```
+
+- [ ] **Step 2: calendar.tsx / avatar.tsx / badge.tsx / breadcrumb.tsx**
+
+- `calendar.tsx`：weekday `'w-8 rounded-md` → `'w-(--pactor-calendar-day-size) rounded-md`；day `'h-8 w-8 p-0 text-center text-sm'` → `'h-(--pactor-calendar-day-size) w-(--pactor-calendar-day-size) p-0 text-center text-[length:var(--pactor-control-text-md)]'`；day 按钮 `'size-8 cursor-pointer` → `'size-(--pactor-calendar-day-size) cursor-pointer`（nav 前后按钮 `size-7` 保持）
+- `avatar.tsx`：`'relative flex size-8` → `'relative flex size-(--pactor-control-height-sm)`
+- `badge.tsx`：类串中 `text-xs` → `text-[length:var(--pactor-control-text-sm)]`
+- `breadcrumb.tsx`（约 106 行）：`'flex size-9 items-center` → `'flex size-(--pactor-control-height-md) items-center`
+- Kbd 保持现状（`h-5` 与控件高度阶梯不对齐，收益低）
+
+- [ ] **Step 3: 跑测试 + 回归**
+
+Run: `pnpm vitest run tests/build-styles.test.mjs && pnpm --filter theme-studio test && cd packages/ui && pnpm test`
+Expected: 全部 PASS
+
+- [ ] **Step 4: MEMORY.md 补二期 + Commit**
+
+`MEMORY.md` 一期条目末尾的「二期（Table/菜单族/Tabs/Calendar 等）见后续任务补充。」改为：
+
+`二期已落地：菜单项（--pactor-menu-item-padding-y）、Table（--pactor-table-head-height / --pactor-table-cell-padding-y + DSL size prop，middle 跟随全局、small/large 局部强制）、Tabs（含 DSL size 透传）、NavigationMenu、Sidebar 菜单行、Calendar（--pactor-calendar-day-size）、Avatar/Badge/Breadcrumb 同步令牌化；Pagination 复用 buttonVariants 自动跟随。`
+
+```bash
+git add packages/ui/src/styles.css packages/ui/src/ui/calendar.tsx packages/ui/src/ui/avatar.tsx packages/ui/src/ui/badge.tsx packages/ui/src/ui/breadcrumb.tsx tools/theme-studio/src/tokens.ts MEMORY.md
+git commit -m "feat(ui): Calendar/Avatar/Badge/Breadcrumb 尺寸随全局密度缩放"
+```
+
+---
+
+### Task 10: 全量验证
 
 - [ ] **Step 1: 全量测试与类型检查**
 
@@ -1068,4 +1355,5 @@ Expected: 计数 > 0（令牌定义 + 工具类引用均存在）。
 2. compact / comfortable 差异明显（控件高度 ±4px 以上）；
 3. 弹层（Select/Dropdown 等 portal 挂 body）同样跟随；
 4. 刷新后密度偏好保持（UserMenu 非受控路径）；
-5. SkinSettings 控件高度滑杆：拖动后 Button/Input 高度按自定义值渲染，且覆盖密度档位；「恢复档位」后回到预设。
+5. SkinSettings 控件高度滑杆：拖动后 Button/Input 高度按自定义值渲染，且覆盖密度档位；「恢复档位」后回到预设；
+6. 二期组件：Table 行高、DropdownMenu 菜单项、Tabs 胶囊、Sidebar 菜单行、Calendar 日期格在三档下差异明显；DSL Table `size: 'small'` 强制局部紧凑且不受全局档位影响。

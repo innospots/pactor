@@ -1,8 +1,10 @@
 import type { CSSProperties } from 'react';
 
+import type { GlobalSize } from '../../../lib/global-size.js';
 import {
   UserMenu as ShadcnUserMenu,
   type LanguageOption,
+  type SizeOption,
   type ThemePreference,
   type UserMenuUser,
   type UserStatus,
@@ -71,6 +73,16 @@ export interface UserMenuProps {
   onSelect?: (value: string) => void;
   /** 主题选择回调；选择同时应用到 documentElement（light / dark 写 data-pactor-theme，system 移除） */
   onThemeChange?: (theme: ThemePreference) => void;
+  /** 受控全局密度 */
+  size?: GlobalSize;
+  /** 非受控初始密度；缺省读取 localStorage 的 pactor.size */
+  defaultSize?: GlobalSize;
+  /** 显示「界面密度」内联切换（缺省 false），选择即应用到页面 */
+  showSize?: boolean;
+  /** 密度选项（缺省 紧凑 / 默认 / 宽松） */
+  sizes?: SizeOption[];
+  /** 密度选择回调；选择同时应用到 documentElement 的 data-pactor-size */
+  onSizeChange?: (size: GlobalSize) => void;
   /** 在线状态选择回调 */
   onStatusChange?: (status: UserStatus) => void;
   /** 退出登录；返回 Promise 时菜单保持展开并显示进度，结束后关闭 */
@@ -93,7 +105,8 @@ export interface UserMenuProps {
  *
  * 主题与状态选择保持菜单展开并分别经 onThemeChange / onStatusChange
  * 上报；主题选择同时写入 documentElement 的 data-pactor-theme（system
- * 移除属性）；showLanguage 时“切换语言”项以右侧子菜单展开 languages
+ * 移除属性）；密度切换与主题同款契约（data-pactor-size +
+ * pactor.size 持久化）；showLanguage 时“切换语言”项以右侧子菜单展开 languages
  * 列表（缺省 中文 / English，可扩展）单选，选择经 onLanguageChange 上报；
  * 账户入口经 onSelect 传出 value；
  * onSignOut 返回 Promise 时退出项显示进度，Promise 落定后关闭。
@@ -123,6 +136,11 @@ export function UserMenu({
   onOpenChange,
   onSelect,
   onThemeChange,
+  size,
+  defaultSize,
+  showSize,
+  sizes,
+  onSizeChange,
   onStatusChange,
   onSignOut,
   signOutKeys,
@@ -159,6 +177,11 @@ export function UserMenu({
       defaultOpen={defaultOpen}
       onOpenChange={onOpenChange}
       onThemeChange={onThemeChange}
+      size={size}
+      defaultSize={defaultSize}
+      showSize={showSize}
+      sizes={sizes}
+      onSizeChange={onSizeChange}
       onStatusChange={onStatusChange}
       onSignOut={onSignOut}
       signOutKeys={signOutKeys}

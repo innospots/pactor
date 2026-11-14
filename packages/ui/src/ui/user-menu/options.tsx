@@ -1,6 +1,7 @@
 import { Monitor, Moon, Sun } from 'lucide-react';
 import type { ReactNode } from 'react';
 
+import type { GlobalSize } from '../../lib/global-size.js';
 import type {
   LanguageOption,
   LanguagePreference,
@@ -43,6 +44,45 @@ export const themes: {
     label: '跟随系统',
     labelKey: 'pactor.userMenu.themeSystem',
     icon: <Monitor size={14} strokeWidth={1.75} aria-hidden="true" />,
+  },
+];
+
+/** 密度选项图标：同字形 A 按档递大（密度语义直观，无需引入新图标） */
+export const defaultSizes: {
+  value: GlobalSize;
+  label: string;
+  labelKey: string;
+  icon: ReactNode;
+}[] = [
+  {
+    value: 'compact',
+    label: '紧凑',
+    labelKey: 'pactor.userMenu.sizeCompact',
+    icon: (
+      <span aria-hidden="true" className="text-[9px] font-semibold leading-none">
+        A
+      </span>
+    ),
+  },
+  {
+    value: 'default',
+    label: '默认',
+    labelKey: 'pactor.userMenu.sizeDefault',
+    icon: (
+      <span aria-hidden="true" className="text-[11px] font-semibold leading-none">
+        A
+      </span>
+    ),
+  },
+  {
+    value: 'comfortable',
+    label: '宽松',
+    labelKey: 'pactor.userMenu.sizeComfortable',
+    icon: (
+      <span aria-hidden="true" className="text-[13px] font-semibold leading-none">
+        A
+      </span>
+    ),
   },
 ];
 

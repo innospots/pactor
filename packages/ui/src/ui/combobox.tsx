@@ -41,7 +41,7 @@ function ComboboxTrigger({
     <PopoverTrigger
       data-slot="combobox-trigger"
       className={cn(
-        'flex h-9 w-full min-w-0 cursor-pointer items-center justify-between gap-2 rounded-md border border-input bg-(--input-background) px-3 py-1 text-sm text-(--input-foreground) transition-colors outline-none hover:bg-accent focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:cursor-not-allowed disabled:opacity-50',
+        'flex h-(--pactor-control-height-md) w-full min-w-0 cursor-pointer items-center justify-between gap-2 rounded-md border border-input bg-(--input-background) px-3 py-1 text-[length:var(--pactor-control-text-md)] leading-5 text-(--input-foreground) transition-colors outline-none hover:bg-accent focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:cursor-not-allowed disabled:opacity-50',
         className,
       )}
       {...props}

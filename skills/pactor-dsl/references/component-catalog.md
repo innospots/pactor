@@ -114,6 +114,7 @@
 | `NumberInput` | 输入受约束的数值 | [在线文档](https://pactor.innospots.com/components/data-entry/number-input/) |
 | `RadioGroup` | 从互斥选项中选择一项 | [在线文档](https://pactor.innospots.com/components/data-entry/radio-group/) |
 | `Rate` | 输入评分 | [在线文档](https://pactor.innospots.com/components/data-entry/rate/) |
+| `SearchInput` | 左输入框 + 右搜索按钮的一体化搜索框 | [源码](https://github.com/innospots/pactor/blob/main/packages/ui/src/components/components/SearchInput/index.tsx) |
 | `Select` | 从候选项中选择一个或多个值 | [在线文档](https://pactor.innospots.com/components/data-entry/select/) |
 | `Slider` | 在连续或分段范围内选值 | [在线文档](https://pactor.innospots.com/components/data-entry/slider/) |
 | `Switch` | 即时切换二元状态 | [在线文档](https://pactor.innospots.com/components/data-entry/switch/) |

@@ -39,9 +39,9 @@ const typeClassMap: Record<TextType, string> = {
 };
 
 const sizeClassMap: Record<TextSize, string> = {
-  small: 'text-xs',
+  small: 'text-[length:var(--pactor-control-text-sm)] leading-4',
   middle: '',
-  large: 'text-lg',
+  large: 'text-[length:var(--pactor-control-text-lg)] leading-7',
 };
 
 /** Text 适配器（shadcn kit）：普通文本渲染，语义类型 + 字号 + 修饰（粗体/删除线/下划线/斜体） */

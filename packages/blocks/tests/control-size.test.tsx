@@ -34,15 +34,15 @@ describe('blocks 控件尺寸 size 属性', () => {
       },
     });
 
-    // 字段下拉（min-h-8）与操作符 Select（data-size=sm）同尺寸
+    // 字段下拉（min-height 令牌）与操作符 Select（data-size=sm）同尺寸
     const fieldTrigger = screen.getAllByRole('combobox')[0]!;
-    expect(fieldTrigger.className).toContain('min-h-8');
+    expect(fieldTrigger.className).toContain('min-h-(--pactor-control-height-sm)');
     const opTrigger = document.querySelector('[data-slot=select-trigger]')!;
     expect(opTrigger.getAttribute('data-size')).toBe('sm');
-    // 值输入框 h-8 text-xs
+    // 值输入框高度/字号令牌（small 档）
     const valueInput = document.querySelector('input[aria-label=condition-value]')!;
-    expect(valueInput.className).toContain('h-8');
-    expect(valueInput.className).toContain('text-xs');
+    expect(valueInput.className).toContain('h-(--pactor-control-height-sm)');
+    expect(valueInput.className).toContain('text-[length:var(--pactor-control-text-sm)]');
   });
 
   it('RuleConfig：权重 / 评分输入与操作符下拉统一按尺寸渲染', () => {
@@ -57,8 +57,12 @@ describe('blocks 控件尺寸 size 属性', () => {
       },
     });
 
-    expect(screen.getByDisplayValue('5').className).toContain('h-10');
-    expect(screen.getByDisplayValue('10').className).toContain('h-10');
+    expect(screen.getByDisplayValue('5').className).toContain(
+      'h-(--pactor-control-height-lg)',
+    );
+    expect(screen.getByDisplayValue('10').className).toContain(
+      'h-(--pactor-control-height-lg)',
+    );
     expect(
       document.querySelector('[data-slot=select-trigger]')!.getAttribute('data-size'),
     ).toBe('lg');
@@ -70,8 +74,8 @@ describe('blocks 控件尺寸 size 属性', () => {
       props: { size: 'small', options: [{ label: '年龄', value: 'age' }] },
     });
     const editor = document.querySelector('[role=textbox]')!;
-    expect(editor.className).toContain('min-h-8');
-    expect(editor.className).toContain('text-xs');
+    expect(editor.className).toContain('min-h-(--pactor-control-height-sm)');
+    expect(editor.className).toContain('text-[length:var(--pactor-control-text-sm)]');
   });
 
   it('ExpressionEditor：display 文本框按尺寸渲染', () => {
@@ -84,7 +88,7 @@ describe('blocks 控件尺寸 size 属性', () => {
       },
     });
     const textarea = document.querySelector('textarea')!;
-    expect(textarea.className).toContain('min-h-10');
-    expect(textarea.className).toContain('text-base');
+    expect(textarea.className).toContain('min-h-(--pactor-control-height-lg)');
+    expect(textarea.className).toContain('text-[length:var(--pactor-control-text-lg)]');
   });
 });

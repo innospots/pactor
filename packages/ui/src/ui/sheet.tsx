@@ -98,7 +98,7 @@ function SheetContent({
           render={
             <button
               type="button"
-              className="absolute top-4 right-4 cursor-pointer rounded-xs opacity-70 transition-opacity hover:opacity-100 focus-visible:ring-[3px] focus-visible:ring-ring/50 focus-visible:outline-none disabled:pointer-events-none [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4"
+              className="absolute top-4 right-4 cursor-pointer rounded-xs opacity-70 transition-opacity hover:opacity-100 focus-visible:ring-[3px] focus-visible:ring-ring/50 focus-visible:outline-none disabled:pointer-events-none [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-(--pactor-control-box)"
             />
           }
         >
@@ -114,7 +114,7 @@ function SheetHeader({ className, ...props }: React.ComponentProps<'div'>) {
   return (
     <div
       data-slot="sheet-header"
-      className={cn('flex flex-col gap-1.5 p-4', className)}
+      className={cn('flex flex-col gap-1.5 p-(--pactor-card-padding)', className)}
       {...props}
     />
   );
@@ -150,7 +150,10 @@ function SheetDescription({
   return (
     <DialogPrimitive.Description
       data-slot="sheet-description"
-      className={cn('text-sm text-muted-foreground', className)}
+      className={cn(
+        'text-[length:var(--pactor-control-text-md)] leading-5 text-muted-foreground',
+        className,
+      )}
       {...props}
     />
   );

@@ -10,7 +10,7 @@ body:
     - type: Typography
       props: { variant: h3, className: system-page-title, text: "$i18n{page.themes.title:主题设置}" }
     - type: Typography
-      props: { variant: muted, className: system-page-description, text: "$i18n{themePage.subtitle:从中国传统色中，选择适合你的工作空间色彩。}" }
+      props: { variant: muted, className: system-page-description, text: "$i18n{themePage.subtitle:从内置配色中选择适合你的工作空间色彩。}" }
     - type: Flex
       props: { className: theme-section-heading, justify: space-between, align: end }
       children:
@@ -18,9 +18,9 @@ body:
           props: { direction: vertical, gap: 4 }
           children:
             - type: Typography
-              props: { variant: h4, text: "$i18n{themePage.sectionTitle:十二色系}" }
+              props: { variant: h4, text: "$i18n{themePage.sectionTitle:十四色系}" }
             - type: Typography
               props: { variant: muted, text: "$i18n{themePage.sectionDescription:选用后立即应用，明暗模式可在账户菜单切换。}" }
         - type: Text
-          props: { text: "$i18n{themePage.count:12 套主题}" }
+          props: { text: "$i18n{themePage.count:14 套主题}" }
     - type: ThemeGallery

@@ -63,9 +63,10 @@ function navigateMenuItem(
   bridge.push(menu.path);
 }
 
-/** 菜单项基础样式（hover/active 高亮读 --menu-* 皮肤令牌，默认回退语义令牌） */
+/** 菜单项基础样式（hover/active 高亮读 --menu-* 皮肤令牌，默认回退语义令牌；
+ *  行高/字号随全局密度档位缩放——menu-nav-padding-y / control-text-md 令牌） */
 const menuItemClass =
-  'flex w-full cursor-pointer items-center gap-2 rounded-md px-3 py-2 text-left text-sm text-muted-foreground transition-colors hover:bg-(--menu-hover-background) hover:text-(--menu-hover-foreground) disabled:pointer-events-none disabled:opacity-50';
+  'flex w-full cursor-pointer items-center gap-2 rounded-md px-3 py-(--pactor-menu-nav-padding-y) text-left text-[length:var(--pactor-control-text-md)] leading-5 text-muted-foreground transition-colors hover:bg-(--menu-hover-background) hover:text-(--menu-hover-foreground) disabled:pointer-events-none disabled:opacity-50';
 
 interface MenuTreeProps {
   menus: readonly MenuItem[];
@@ -145,7 +146,7 @@ function CollapsedGroupFlyout({
           }
         }}
       >
-        <div className="px-3 pt-2 pb-1 text-xs font-semibold text-muted-foreground">
+        <div className="px-3 pt-2 pb-1 text-[length:var(--pactor-control-text-sm)] leading-4 font-semibold text-muted-foreground">
           {menu.title}
         </div>
         <MenuTree
@@ -231,7 +232,7 @@ function MenuTree({
             >
               <AccordionTrigger
                 data-slot="menu-group-trigger"
-                className={cn(menuItemClass, 'py-2 font-medium')}
+                className={cn(menuItemClass, 'font-medium')}
                 disabled={menu.disabled}
                 title={menu.title}
               >

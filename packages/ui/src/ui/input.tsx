@@ -23,7 +23,7 @@ function Input({
       type={type}
       data-slot="input"
       className={cn(
-        'flex h-9 w-full min-w-0 rounded-md border border-input bg-(--input-background) px-3 py-1 text-sm text-(--input-foreground) transition-colors outline-none placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:cursor-not-allowed disabled:opacity-50',
+        'flex h-(--pactor-control-height-md) w-full min-w-0 rounded-md border border-input bg-(--input-background) px-3 py-1 text-[length:var(--pactor-control-text-md)] leading-5 text-(--input-foreground) transition-colors outline-none placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:cursor-not-allowed disabled:opacity-50',
         // 加 !important：聚合样式（pactor-app/styles.css）多段拼接，后段重复的
         // px-3（padding-inline）会盖掉本段的 pl-9，图标位被文本侵占
         search && 'pl-9!',

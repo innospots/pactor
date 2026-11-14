@@ -221,6 +221,6 @@ describe('MultiSelect', () => {
     });
     const trigger = document.querySelector('[data-slot=select-trigger]')!;
     expect(trigger.getAttribute('data-size')).toBe('lg');
-    expect(trigger.className).toContain('text-base');
+    expect(trigger.className).toContain('text-[length:var(--pactor-control-text-lg)]');
   });
 });
