@@ -7,3 +7,5 @@ export { SkinSwitcher } from './SkinSwitcher.js';
 export type { SkinSwitcherProps } from './SkinSwitcher.js';
 export { PactorShellHost } from './PactorShellHost.js';
 export type { PactorShellHostProps } from './PactorShellHost.js';
+export { AppShell } from './AppShell.js';
+export type { AppShellProps, ShellMenuItem, SubAppContext } from './AppShell.js';
