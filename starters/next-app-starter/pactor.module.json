@@ -1,0 +1,19 @@
+{
+  "id": "next-app-starter",
+  "name": "next-app-starter",
+  "basePath": "/next-app-starter",
+  "yamlRoot": "src/backend/pages/yaml",
+  "sitemap": "sitemap.module.yaml",
+  "clientEntry": "module/client.ts",
+  "serverEntry": "module/server.ts",
+  "apiPrefixes": ["/api/d"],
+  "actions": [],
+  "publicDir": "public",
+  "target": "innospots-web-shell@3",
+  "access": { "default": "authenticated" },
+  "tailwind": {
+    "enabled": true,
+    "input": "src/app/globals.css"
+  },
+  "rewrite": { "absoluteApiToRelative": true }
+}

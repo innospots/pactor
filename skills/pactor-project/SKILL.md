@@ -24,6 +24,7 @@ version: 1.1.0
 | 写/改 `*.page.yaml`、组件 props、动作编排 | `pactor-dsl` skill + `pactor-dsl/references/dsl-authoring.md` |
 | 根据 PRD / 线框图生成整站页面与 mock API | `pactor-prd` skill（复制其 `template/`，不用本 skill 的 create 命令） |
 | 在已有 Vite 里只加几行 `createPactorApplication` | `pactor-dsl` skill「Quick start」+ 文档 manual-setup |
+| 模块打包、`pactor.module.json`、Shell 装配、双模式 pack | **`pactor-module` skill** |
 
 ## 选型（先问清楚再执行）
 
@@ -67,6 +68,7 @@ cd <dir-name>/pactor-apps/risk-analysis && pnpm install && pnpm pack:module
 cd ../risk-decision && pnpm install && pnpm pack:module
 cd ../../web-shell && pnpm install && pnpm assemble:modules
 pnpm dev
+# pack / assemble / pactor.module.json 全文约定 → 启用 pactor-module skill
 ```
 
 5. **验收**：
@@ -125,7 +127,8 @@ cd ../my-app && pnpm install && pnpm dev
 
 ## References
 
-- `references/templates.md` — next-app / spa 目录树、端口、演示账号、首要修改点
+- `references/templates.md` — next-app / spa / apps-shell 目录树、端口、演示账号、首要修改点
+- **`pactor-module` skill** — 模块 pack、Manifest、双模式 next-app、Shell 集成（`skills/pactor-module/`）
 - `references/minimal-vite.md` — `pactor create` 与手写 Vite 接入对比
 - 官方文档：`docs/src/content/docs/guides/getting-started.md`
 - 脚手架实现：`packages/create-app`（`create-pactor-app`）

@@ -264,6 +264,25 @@ page:
 生产环境接真实权限中心时，替换
 `src/app/api/page-access/verify/route.ts` 的代理目标和域 / 模块配置。
 
+## 双模式：独立应用与 Shell 模块
+
+同一工程支持两种交付方式，**业务 YAML 与 `src/frontend/components` 共用**：
+
+| 模式 | 命令 | 说明 |
+| --- | --- | --- |
+| **独立应用** | `pnpm dev` / `pnpm build` | 全量 `sitemap.yaml`，自带登录、NavigationShell、`/api/*` |
+| **Shell 模块** | `pnpm build:module` / `pnpm pack:module` | 读取 `pactor.module.json`，用 `sitemap.module.yaml`（无登录壳层），产出 `dist-module/` 与 `next-app-starter-<version>.tgz` |
+
+模块配置见工程根目录 `pactor.module.json`；`module/client.ts` 注册组件，`module/server.ts` 将 `/api/d/*` 原型接口打进 tgz（与独立模式 mock 同源）。
+
+```bash
+pnpm build:module      # pactor module build
+pnpm validate:module   # 校验产物契约
+pnpm pack:module       # 构建 + npm pack（--no-bump，版本固定）
+```
+
+装配到 `apps-shell` / innospots-web-shell：安装 tgz → `module-list.json` 启用 → Shell `sitemap.yaml` 挂载 `pageId: "next-app-starter:<pageId>"` → `pnpm assemble:modules`。
+
 ## 检查与构建
 
 ```bash

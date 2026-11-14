@@ -79,6 +79,8 @@ pactor-apps/
 
 生成后顺序（Shell 以 `file:` 引用模块 tgz）：两个模块各自 `pnpm install && pnpm pack:module`（`--no-bump`，tgz 文件名固定）→ `web-shell` `pnpm install && pnpm assemble:modules && pnpm dev`。改模块后重跑 `pack:module`，Shell 侧 `pnpm install --force && pnpm assemble:modules`。
 
+**模块契约、CLI、`pactor.module.json`、双模式 next-app**：见 **`pactor-module` skill**（`skills/pactor-module/references/module-pack-contract.md`、`apps-shell-integration.md`）。
+
 ## 生成后首要修改点
 
 ### 所有模板

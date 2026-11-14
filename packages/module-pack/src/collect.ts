@@ -34,7 +34,11 @@ export function collectModuleSource(yamlRoot: string): CollectedSource {
         walk(full);
         continue;
       }
-      if (!entry.name.endsWith('.yaml') || entry.name === 'sitemap.yaml') {
+      if (!entry.name.endsWith('.yaml')) {
+        continue;
+      }
+      // 站点地图变体（sitemap.yaml / sitemap.module.yaml 等）不是页面 DSL
+      if (entry.name === 'sitemap.yaml' || entry.name.startsWith('sitemap.')) {
         continue;
       }
       const rel = relative(yamlRoot, full);

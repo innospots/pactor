@@ -7,6 +7,7 @@
 | 目录 / skill id | 用途 |
 | --- | --- |
 | **`pactor-dsl`** | 框架、`*.page.yaml` DSL、页面授权与 sitemap/navigation 编写 |
+| **`pactor-module`** | Shell 模块打包（`pactor module *`）、`pactor.module.json`、apps-shell 装配、next-app 双模式 |
 | **`pactor-project`** | 新建工程、`pnpm create pactor-app`、模板选型 |
 | **`pactor-prd`** | PRD / 线框图 → 完整可运行后台（经 `create-pactor-app` 脚手架） |
 
@@ -17,6 +18,7 @@
 ```bash
 mkdir -p .cursor/skills
 ln -sf ../../skills/pactor-dsl .cursor/skills/pactor-dsl
+ln -sf ../../skills/pactor-module .cursor/skills/pactor-module
 ln -sf ../../skills/pactor-project .cursor/skills/pactor-project
 ln -sf ../../skills/pactor-prd .cursor/skills/pactor-prd
 ```
@@ -29,6 +31,7 @@ pnpm add -D @pactor-app/skills
 
 ```bash
 ln -s node_modules/@pactor-app/skills/pactor-dsl ~/.claude/skills/pactor-dsl
+ln -s node_modules/@pactor-app/skills/pactor-module ~/.claude/skills/pactor-module
 ln -s node_modules/@pactor-app/skills/pactor-project ~/.claude/skills/pactor-project
 ln -s node_modules/@pactor-app/skills/pactor-prd ~/.claude/skills/pactor-prd
 ```
@@ -40,10 +43,11 @@ ln -s node_modules/@pactor-app/skills/pactor-prd ~/.claude/skills/pactor-prd
 | Skill | 典型触发 | 产出 |
 | --- | --- | --- |
 | **`pactor-dsl`** | 写/改 YAML 页面、表达式、动作、组件、主题、Chat、access-mode/grantGroup、请求级 action 过滤、sitemap/navigation | 规范与示例（不生成新仓库） |
-| **`pactor-project`** | 初始化项目、`pnpm create pactor-app` | next-app / spa 或最小 Vite 壳工程 |
+| **`pactor-module`** | `pactor module pack`、`pactor.module.json`、apps-shell 装配、双模式 next-app、模块 server API | 模块契约、流程、验收清单 |
+| **`pactor-project`** | 初始化项目、`pnpm create pactor-app` | next-app / spa / apps-shell 或最小 Vite 壳工程 |
 | **`pactor-prd`** | PRD/线框图 → 页面（**新工程**经 `create-pactor-app` 创建并渲染，**已有工程**线框图增量） | 逐页 UI 计划 + YAML + 访问元数据 + sitemap/navigation + http 数据源/样式 + 三层验收 |
 
-关系：**`pactor-project`** 说明通用脚手架；**`pactor-prd`** 新建模式必须经 `create-pactor-app` + values 完成 render/check 与冒烟，经逐页 UI 计划门禁后按计划铺页；日常改页用 **`pactor-dsl`**。
+关系：**`pactor-project`** 选型与脚手架；**`pactor-prd`** 新建模式经 `create-pactor-app` + 逐页铺页；**`pactor-dsl`** 日常改页；需 **Shell npm 模块交付** 时启用 **`pactor-module`**（可与 project 串联：`-t apps-shell` 或 next-app 双模式）。
 
 ---
 
@@ -55,10 +59,20 @@ ln -s node_modules/@pactor-app/skills/pactor-prd ~/.claude/skills/pactor-prd
 
 ---
 
+## `pactor-module`
+
+- **入口**：`pactor-module/SKILL.md`
+- **references**：`module-pack-contract.md`（Manifest / CLI / 配置）、`dual-mode-next-app.md`、`apps-shell-integration.md`、`module-scaffold-checklist.md`
+- **能力**：`pactor module init|build|validate|pack`、双 sitemap、module client/server、Shell `assemble:modules` 与菜单 `globalPageId`
+- **样板**：`packages/module-pack/README.md`、`starters/next-app-starter`、`starters/apps-shell-starter`
+
+---
+
 ## `pactor-project`
 
 - **入口**：`pactor-project/SKILL.md`，`references/templates.md`、`references/minimal-vite.md`
-- **能力**：`pnpm create pactor-app -t next-app|spa`（npm 包名仍为 **`create-pactor-app`**）、`pactor create`、starters 复制、脚手架后检查清单
+- **能力**：`pnpm create pactor-app -t next-app|spa|apps-shell`（npm 包名仍为 **`create-pactor-app`**）、`pactor create`、starters 复制、脚手架后检查清单
+- **模块交付**：选型 apps-shell 或双模式 next-app 后，交接 **`pactor-module`** 完成 pack/装配
 
 ---
 
