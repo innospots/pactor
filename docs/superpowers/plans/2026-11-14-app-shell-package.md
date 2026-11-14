@@ -653,6 +653,10 @@ function fixtureDir(): string {
     'dsl: "1.0"\npage: { id: home, title: 首页 }\nbody: { type: Text, props: { content: hello } }\n',
   );
   writeFileSync(
+    join(dir, 'dsl/m1/log-detail.yaml'),
+    'dsl: "1.0"\npage: { id: log-detail, title: 日志 }\nbody: { type: Text, props: { content: logs } }\n',
+  );
+  writeFileSync(
     join(dir, 'assembly.json'),
     JSON.stringify({
       generatedAt: 'x',
@@ -1170,13 +1174,13 @@ function req(path: string, method = 'GET'): Request {
 
 describe('createModuleDispatcher', () => {
   it('命中 handler 并透传 query', async () => {
-    const res = await dispatcher(req('/api/modules/mod-a/items?q=x'), ctx('mod-a'));
+    const res = await dispatcher(req('/api/modules/mod-a/mod-a/items?q=x'), ctx('mod-a'));
     expect(res.status).toBe(200);
     await expect(res.json()).resolves.toEqual({ ok: true, q: 'x' });
   });
 
   it(':param 模式匹配并解码参数', async () => {
-    const res = await dispatcher(req('/api/modules/mod-a/items/42'), ctx('mod-a'));
+    const res = await dispatcher(req('/api/modules/mod-a/mod-a/items/42'), ctx('mod-a'));
     await expect(res.json()).resolves.toEqual({ id: '42' });
   });
 
@@ -1191,21 +1195,21 @@ describe('createModuleDispatcher', () => {
   });
 
   it('路径命中但方法不支持 → 405 + Allow', async () => {
-    const res = await dispatcher(req('/api/modules/mod-a/items', 'POST'), ctx('mod-a'));
+    const res = await dispatcher(req('/api/modules/mod-a/mod-a/items', 'POST'), ctx('mod-a'));
     expect(res.status).toBe(405);
     expect(res.headers.get('allow')).toBe('GET, HEAD, OPTIONS');
   });
 
   it('HEAD 无 handler 时回退 GET；OPTIONS 返回 204 + Allow', async () => {
-    const head = await dispatcher(req('/api/modules/mod-a/items', 'HEAD'), ctx('mod-a'));
+    const head = await dispatcher(req('/api/modules/mod-a/mod-a/items', 'HEAD'), ctx('mod-a'));
     expect(head.status).toBe(200);
-    const options = await dispatcher(req('/api/modules/mod-a/submit', 'OPTIONS'), ctx('mod-a'));
+    const options = await dispatcher(req('/api/modules/mod-a/mod-a/submit', 'OPTIONS'), ctx('mod-a'));
     expect(options.status).toBe(204);
     expect(options.headers.get('allow')).toBe('POST, OPTIONS');
   });
 
   it('handler 抛错 → 500', async () => {
-    const res = await dispatcher(req('/api/modules/mod-a/boom'), ctx('mod-a'));
+    const res = await dispatcher(req('/api/modules/mod-a/mod-a/boom'), ctx('mod-a'));
     expect(res.status).toBe(500);
     await expect(res.json()).resolves.toEqual({ error: 'internal_error' });
   });
@@ -1713,8 +1717,8 @@ import {
   mergeModuleComponents,
 } from '../src/client/register-extensions.js';
 
-const A: ComponentType = () => null;
-const B: ComponentType = () => null;
+const A: ComponentType<unknown> = () => null;
+const B: ComponentType<unknown> = () => null;
 
 describe('mergeModuleComponents', () => {
   it('注册原名与命名空间键', () => {
@@ -1738,7 +1742,7 @@ describe('mergeModuleComponents', () => {
 
 describe('mergeModuleActions', () => {
   it('合并动作并带命名空间键', () => {
-    const act = () => undefined;
+    const act = () => ({ ok: true });
     const merged = mergeModuleActions({ m1: { actions: { refresh: act } } });
     expect(merged.refresh).toBe(act);
     expect(merged['m1/refresh']).toBe(act);
@@ -2133,7 +2137,7 @@ export * from './skin.js';
 - [ ] **Step 4: 跑测试确认通过**
 
 Run: `cd packages/shell && pnpm vitest run tests/skin.test.ts`
-Expected: 8 个测试 PASS
+Expected: 9 个测试 PASS
 
 - [ ] **Step 5: typecheck + commit**
 
@@ -2755,7 +2759,7 @@ describe('PactorShellHost', () => {
       />,
     );
     const props = captured.props!;
-    expect(props.sources).toEqual(['/api/custom']);
+    expect(props.sources).toEqual(['/api/custom/sitemap']);
     expect((props.pageEndpoint as (id: string) => string)('m1:home')).toBe('/api/custom/m1:home');
     (props.navigate as (to: string) => void)('/m1');
     expect(pushMock).toHaveBeenCalledWith('/m1');

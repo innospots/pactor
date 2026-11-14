@@ -25,7 +25,7 @@ export interface SyncThemesOptions {
 
 export interface SyncThemesResult {
   synced: number;
-  /** checkOnly 时的过期/孤儿文件清单 */
+  /** checkOnly 时经错误信息暴露，正常返回恒为空数组 */
   stale: string[];
 }
 

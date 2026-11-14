@@ -28,6 +28,12 @@ describe('SkinHeadScript', () => {
     expect(scriptHtml({ defaultSkin: 'qing-ming' })).toContain('skin="qing-ming"');
   });
 
+  it('持久化 "system" 走系统偏好（仅显式 light 跳过 dark 判定）', () => {
+    const html = scriptHtml();
+    expect(html).toContain('mode!=="light"');
+    expect(html).not.toContain('mode?mode==="dark"');
+  });
+
   it('自定义 storageKey / modeStorageKey / themesPath / allowedSkins', () => {
     const html = scriptHtml({
       storageKey: 'mc-skin',

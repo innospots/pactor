@@ -1,5 +1,5 @@
 # Shell 自带站点：固定左侧菜单 + 默认布局。
-# 由 scripts/assemble-modules.mjs 在 npm 模块之前装配：
+# 由 pactor-shell assemble 在 npm 模块之前装配：
 #   - layout: shell 作为缺省布局，模块页面未声明 layout 时自动落入；
 #   - menus 直接指向已安装模块的全局页面 id（<moduleId>:<pageId>），
 #     左侧只保留两个固定一级菜单；

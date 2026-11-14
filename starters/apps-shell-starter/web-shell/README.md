@@ -1,6 +1,6 @@
 # InnoSpots Web Shell（`innospots-web-shell`）
 
-基于 **Next.js App Router + Pactor** 的统一 Web 入口：在**构建期**装配多个 UI npm 模块（YAML DSL、扩展组件、静态资源），在**运行期**通过统一 DSL API 与 `PactorHost` 渲染业务页面。
+基于 **Next.js App Router + Pactor** 的统一 Web 入口：在**构建期**装配多个 UI npm 模块（YAML DSL、扩展组件、静态资源），在**运行期**通过统一 DSL API 与 `PactorShellHost` 渲染业务页面。
 
 > 整体架构与术语见 InnoSpots 前端模块化设计（Build-time Composition + Runtime DSL Loading）。UI 模块侧打包使用 Pactor CLI：`pnpm build:module`（`pactor module build`）/ `pnpm pack:module`（`pactor module pack`）。
 
@@ -45,7 +45,7 @@
 1. **单一 Web 进程**：生产环境仅一个 Next.js Shell 对外；模块不单独起生产 Next。
 2. **显式模块清单**：只装配 `module-list.json` 中 `enabled: true` 的包，禁止运行时扫描整个 `node_modules`。
 3. **双轨路由模型**：HTTP URL 由 Shell 路由索引决定；页面逻辑标识使用 `globalPageId = moduleId:pageId`，二者通过装配表映射，不把 YAML 文件路径暴露为公共 URL。
-4. **适配层隔离**：Shell 通过 `PactorHost` / `pactor-adapter` 对接 Pactor 版本；业务模块不直接依赖 Shell 内部实现。
+4. **适配层隔离**：Shell 通过 `@pactor-app/shell/client` 的 `PactorShellHost` 对接 Pactor 版本；业务模块不直接依赖 Shell 内部实现。
 5. **Client 边界**：扩展组件与 Actions 经构建期生成的 `client-registry` **静态 import** 进入浏览器 Bundle；禁止把普通函数/组件经 Server Component props 序列化下发。
 
 ### 模块交付契约（npm 包）
@@ -68,7 +68,7 @@
 
 1. **统一 Runtime API**：`GET /api/runtime/bootstrap`、`/pages/{globalPageId}`、`/fragments/{id}`；lazy 页经 pages 接口拉取 DSL。
 2. **鉴权独立**：菜单过滤仅影响 UI；**DSL API 与业务 API 均须服务端校验**会话与页面权限；`pageId` 不是授权凭证。
-3. **会话占位可替换**：`src/server/auth/session.ts` 为扩展点，接入后与 console 类 BFF/cookie 策略对齐。
+3. **会话占位可替换**：会话契约由 `@pactor-app/shell/server` 提供（`ShellUser` / `defaultResolveSessionUser`），经 `@pactor-app/shell/server/routes` 的 `createRuntimeHandlers` 的 `resolveUser` 注入真实会话，接入后与 console 类 BFF/cookie 策略对齐。
 4. **供应链**：安装 UI npm 包等同于执行其 client JS，须纳入构建与依赖审计。
 
 ### 体验与可维护性
@@ -105,7 +105,7 @@
 
 ```text
 浏览器 → Next（工作区 catch-all 校验 URL）
-      → layout 内 PactorHost（SitemapApp）
+      → layout 内 PactorShellHost（SitemapApp）
       → GET /api/runtime/bootstrap（菜单 + 内联 DSL）
       → GET /api/runtime/pages/{globalPageId}（懒加载页）
 ```
@@ -130,9 +130,9 @@
 
 | 项 | 现状 | 影响 |
 | --- | --- | --- |
-| 会话与登录 | `src/server/auth/session.ts` 恒返回未登录 | 权限页、菜单裁剪、DSL API 鉴权未接真实 cookie/BFF |
+| 会话与登录 | `@pactor-app/shell/server` 的 `defaultResolveSessionUser` 恒返回未登录 | 权限页、菜单裁剪、DSL API 鉴权未接真实 cookie/BFF |
 | 业务 API 转发 | 模块服务端 API 随 tgz 分发，由 `app/api/modules/[moduleId]/[[...path]]` 统一分发（模块在 manifest 声明 `serverEntry` + `apiPrefixes`）；**无**通用 `app/api/d/[...parts]` BFF | 使用模块 API 的包需 `target: innospots-web-shell@3`；`/api/d/*`、`/api/auth/*` 仍需模块提供 server handler 或由 Shell 代理 |
-| HTTP 响应适配 | `PactorHost` 已接入 `createHttpHooks()`，默认拆 `{ code, data, message }` | 其他包裹协议 / 鉴权头需在 `createHttpHooks` 配置或自定义 `PactorHttpHooks` |
+| HTTP 响应适配 | `PactorShellHost` 已接入 `createHttpHooks()`，默认拆 `{ code, data, message }` | 其他包裹协议 / 鉴权头需经 `PactorShellHost` 的 HTTP 钩子覆盖或自定义 `PactorHttpHooks` |
 | 页面权限 | `canSeePage` 仅支持简单 `permission` 字符串 | 复杂 PermissionConfig、租户隔离未实现 |
 | 审计 / 限流 / CSRF | 未实现 | 生产安全基线未达标 |
 
@@ -197,16 +197,16 @@ export const moduleExtensions = {
 
 ### 3. 运行期：注入 SitemapApp
 
-`app/(workspace)/layout.tsx` 挂载 `PactorHost`（Client Component）：
+`app/(workspace)/layout.tsx` 挂载 `PactorShellHost`（Client Component，来自 `@pactor-app/shell/client`）：
 
 ```text
-PactorHost
+PactorShellHost
   → mergeModuleComponents(moduleExtensions)   // 合并各模块 components
   → mergeModuleActions(moduleExtensions)      // 合并各模块 actions
   → <SitemapApp components={...} actions={...} pageEndpoint={...} />
 ```
 
-合并规则（`src/runtime/register-extensions.ts`）：
+合并规则（`@pactor-app/shell/client` 的 `mergeModuleComponents` / `mergeModuleActions`）：
 
 - 每个组件/动作同时注册 **`原名`** 与 **`{moduleId}/{原名}`**（如 `console/PermissionGrantPanel`）。
 - 多模块同名时**先注册者占用短名**（`merged[key] ??= value`），后续模块只保留 `{moduleId}/{原名}` 命名空间键并输出警告；DSL 可用短名（与单模块 console 一致），跨模块歧义时改用命名空间键。
@@ -242,7 +242,7 @@ flowchart LR
     DM --> ASM --> CR --> NB
   end
   subgraph runtime [浏览器]
-    PH[PactorHost]
+    PH[PactorShellHost]
     SA[SitemapApp]
     DSL[Runtime DSL API]
     NB --> PH
@@ -458,7 +458,7 @@ pnpm add ../pactor-apps/risk-analysis/risk-analysis-0.1.0.tgz \
 | 模块页面 / 外壳 / 分页补丁 | tgz 的 `dist-module/client/index.css` | 子应用 `module/client.ts` import，装配后由 `module-styles.ts` 自动加载 |
 | Pactor 聚合组件样式 | 根 layout 引入 `pactor-app/styles.css` | 含 chart 组件样式（散点 / 柱状 / 组合图） |
 | 数据接口 | tgz 的 `dist-module/server/index.mjs` | 模块在 `module/server.ts` 导出 handlers；装配器生成 `server-registry.ts`，Shell 由 `/api/modules/<moduleId>/*` 统一分发，无需复制业务路由 |
-| HTTP 数据源 | `src/runtime/PactorHost.tsx` 的 `createHttpHooks()` | 拆 `{ code, data, message }` 包裹；模块 DSL 的 `dataSources` 依赖它 |
+| HTTP 数据源 | `@pactor-app/shell/client` 的 `PactorShellHost`（缺省 `createHttpHooks()`） | 拆 `{ code, data, message }` 包裹；模块 DSL 的 `dataSources` 依赖它 |
 | 主题背景 | `src/shell/layouts/shell.layout.yaml` 的 Content `background: var(--background)` | 让右侧内容区沿用模块皮肤背景 |
 
 风险分析的模块 API 公开地址：
@@ -578,7 +578,7 @@ pnpm dev
 
 ## 装配产物说明（模块如何进入发布目录）
 
-`assemble-modules.mjs` 对每个已启用包：
+`pactor-shell assemble`（`pnpm assemble:modules`）对每个已启用包：
 
 1. 通过 `<模块包>/manifest` 定位 `dist-module/manifest.json`。
 2. 解析 `dsl/sitemap.yaml`，生成带 `basePath` 的 **路由表** 与 **globalPageId**。
@@ -619,7 +619,7 @@ pnpm dev
 
 - 非 lazy：`GET /api/runtime/bootstrap` 内联 `pageDsl`
 - lazy（console 默认多为 lazy）：`GET /api/runtime/pages/console%3Arole-list`  
-  实现见 `src/server/runtime/pages.ts`，内部仍按 `pages.json` 的 `dslRef` 读 `.generated/pactor/...`。
+  实现见 `@pactor-app/shell/server` 的 `getRuntimePage`（route handler 经 `@pactor-app/shell/server/routes` 的 `createRuntimeHandlers` 挂载），内部仍按 `pages.json` 的 `dslRef` 读 `.generated/pactor/...`。
 
 ### 打包后 YAML 在哪里
 
@@ -656,8 +656,8 @@ import { extensions as riskAnalysisExtensions } from "risk-analysis/client";
 | 内容 | 实际位置 | 如何理解 |
 | --- | --- | --- |
 | 模块 client 源码（TSX） | **不在**生产目录单独保留 | 已在构建时由 esbuild 打进 `dist-module/client/index.js` |
-| 浏览器执行的 JS | `.next/static/chunks/*.js` 等 | 与 `PactorHost`、`SitemapApp` 等一起打包，**chunk 名为 hash，需通过构建分析或搜 `globalPageId`/组件名排查** |
-| 服务端引用的 registry | 编译进 `.next/server/**` | 入口逻辑来自 `client-registry.ts` + `PactorHost.tsx` |
+| 浏览器执行的 JS | `.next/static/chunks/*.js` 等 | 与 `PactorShellHost`、`SitemapApp` 等一起打包，**chunk 名为 hash，需通过构建分析或搜 `globalPageId`/组件名排查** |
+| 服务端引用的 registry | 编译进 `.next/server/**` | 入口逻辑来自 `client-registry.ts` + `@pactor-app/shell/client` 的 `PactorShellHost` |
 
 结论：**生产环境不要按文件路径去找「某一个页面的 js」**；页面行为由 **YAML DSL** + **已打包的 extensions（components/actions）** 决定。排查组件问题应回到模块仓库的 `src/pactor/components` 与 `module/client.ts`，重新 `build:module` → Shell `assemble` → `build`。
 
@@ -864,7 +864,7 @@ pnpm pack:module     # pactor module pack --no-bump：构建 + 校验 + 生成 r
 
 `/api/modules/*` 当前不做隐式鉴权，原样传递 `Request`；模块可自行读取
 cookie/header，后续可在分发器或 middleware 统一注入会话。菜单过滤仅为体验；
-**DSL API 与业务 API 须独立鉴权**（`src/server/auth/session.ts` 待接入真实会话）。
+**DSL API 与业务 API 须独立鉴权**（会话经 `@pactor-app/shell/server/routes` 的 `createRuntimeHandlers` `resolveUser` 注入，缺省 `defaultResolveSessionUser` 待接入真实会话）。
 
 ---
 
