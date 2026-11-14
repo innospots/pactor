@@ -182,11 +182,10 @@
   color: var(--muted-foreground, #6b7280);
 }
 
+/* 弹层经 createPortal 挂到 body，left/bottom/maxHeight 由组件按触发点视口坐标内联。 */
 .pactor-shell-skin-popover {
-  position: absolute;
+  position: fixed;
   z-index: 100;
-  bottom: calc(100% + 8px);
-  left: 0;
   width: min(560px, calc(100vw - 48px));
   max-height: calc(100dvh - 24px);
   overflow-y: auto;

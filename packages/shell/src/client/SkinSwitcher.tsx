@@ -4,6 +4,7 @@ import {
   useState,
   useSyncExternalStore,
 } from 'react';
+import { createPortal } from 'react-dom';
 
 import { THEMES, themeText, type ThemeName } from '@pactor-app/theme';
 
@@ -95,6 +96,24 @@ export function SkinSwitcher({
 }: SkinSwitcherProps) {
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
+  const triggerRef = useRef<HTMLButtonElement>(null);
+  const popoverRef = useRef<HTMLDivElement>(null);
+  const [anchor, setAnchor] = useState<{ left: number; bottom: number; maxHeight: number }>();
+
+  // 弹层经 portal 挂到 body：侧栏（fixed + z-index）是层叠上下文，
+  // 行内 absolute 弹层会被内容区 sticky header（z-index 更高）遮挡。
+  const toggle = () => {
+    if (!open && triggerRef.current) {
+      const rect = triggerRef.current.getBoundingClientRect();
+      const width = Math.min(560, window.innerWidth - 48);
+      setAnchor({
+        left: Math.max(8, Math.min(rect.left, window.innerWidth - width - 16)),
+        bottom: window.innerHeight - rect.top + 8,
+        maxHeight: Math.max(160, rect.top - 24),
+      });
+    }
+    setOpen(!open);
+  };
 
   const stored = useSyncExternalStore(
     subscribe,
@@ -128,7 +147,9 @@ export function SkinSwitcher({
   useEffect(() => {
     if (!open) return;
     const outside = (e: PointerEvent) => {
-      if (!ref.current?.contains(e.target as Node)) setOpen(false);
+      const target = e.target as Node;
+      if (ref.current?.contains(target) || popoverRef.current?.contains(target)) return;
+      setOpen(false);
     };
     const keyboard = (e: KeyboardEvent) => {
       if (e.key === 'Escape') setOpen(false);
@@ -160,17 +181,25 @@ export function SkinSwitcher({
     <div ref={ref} className="pactor-shell-skin">
       <button
         type="button"
+        ref={triggerRef}
         className="pactor-shell-skin-trigger"
         aria-haspopup="dialog"
         aria-expanded={open}
         aria-label={`皮肤设置：${currentLabel}`}
-        onClick={() => setOpen(!open)}
+        onClick={toggle}
       >
         <PaletteIcon />
         <span className="pactor-shell-skin-label">{currentLabel}</span>
       </button>
-      {open && (
-        <div className="pactor-shell-skin-popover" role="dialog" aria-label="皮肤设置">
+      {open &&
+        createPortal(
+          <div
+            ref={popoverRef}
+            className="pactor-shell-skin-popover"
+            role="dialog"
+            aria-label="皮肤设置"
+            style={anchor}
+          >
           <div className="pactor-shell-skin-section">
             <div className="pactor-shell-skin-heading">外观模式</div>
             <div className="pactor-shell-mode" role="group" aria-label="外观模式">
@@ -247,8 +276,9 @@ export function SkinSwitcher({
               })}
             </div>
           </div>
-        </div>
-      )}
+          </div>,
+          document.body,
+        )}
     </div>
   );
 }
