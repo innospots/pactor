@@ -18,9 +18,22 @@ import {
   type ReactNode,
 } from 'react';
 
-import { MenuRegistry, type MenuItem } from '@pactor-app/router';
 import { useRenderer } from '@pactor-app/runtime';
 import { isValidElement } from 'react';
+
+import { formatBadge } from './badge.js';
+import { deriveNavigationBreadcrumb } from './breadcrumb.js';
+import {
+  createNavigationRegistry,
+  findNavigationMenu,
+  isGroup,
+  menuTitle,
+  navId,
+  navPath,
+  visibleChildren,
+} from './navigation-menus.js';
+
+export { createNavigationRegistry, findNavigationMenu } from './navigation-menus.js';
 
 /** 判断 prop 值是否为 DSL 节点（{ type: string } 裸对象），否则按 ReactNode 处理 */
 function isDslNode(value: unknown): value is { type: string } {
@@ -55,6 +68,8 @@ export interface NavigationMenuItem {
   title?: string;
   icon?: string;
   hidden?: boolean;
+  /** 菜单徽标（sitemap 菜单清单静态值；0 / 空串 / 缺省不渲染，>99 显示 99+） */
+  badge?: string | number;
   activeMenu?: string;
   permission?: string | string[] | { code: string | string[] };
   children?: NavigationMenuItem[];
@@ -65,17 +80,27 @@ export interface NavigationShellLabels {
   navMain: string;
   /** 二级侧栏 aria-label，{name} 替换为分组标题 */
   navModule: string;
+  /** 面包屑 aria-label */
+  breadcrumb: string;
+  /** 品牌链接 aria-label */
+  brandHome: string;
 }
 
 const DEFAULT_LABELS: NavigationShellLabels = {
   navMain: '主导航',
   navModule: '{name}',
+  breadcrumb: '面包屑',
+  brandHome: '返回首页',
 };
 
 export interface NavigationShellProps {
   menus?: NavigationMenuItem[];
   /** 品牌 mark 字符（图标轨顶部方块），缺省 P */
   brandMark?: string;
+  /** 品牌方块链接地址，缺省 '/'；传 '' 退化为纯展示 */
+  brandHref?: string;
+  /** 面包屑（主内容区顶部，按菜单树自动推导），缺省 true */
+  breadcrumb?: boolean;
   /** 图标轨悬停展开（显示文案），缺省 false */
   expandRailOnHover?: boolean;
   /**
@@ -108,54 +133,6 @@ function iconFor(name: string | undefined): LucideIcon {
   return ICONS[(name ?? '').toLowerCase()] ?? MessageSquare;
 }
 
-function isGroup(item: NavigationMenuItem): boolean {
-  return item.type === 'group' || (item.children !== undefined && item.children.length > 0);
-}
-
-function visibleChildren(group: NavigationMenuItem): NavigationMenuItem[] {
-  return (group.children ?? []).filter((item) => !item.hidden && navPath(item));
-}
-
-function navId(item: NavigationMenuItem): string | undefined {
-  return item.id ?? item.key ?? item.path;
-}
-
-function navPath(item: NavigationMenuItem): string | undefined {
-  return item.path ?? (item.key?.startsWith('/') ? item.key : undefined);
-}
-
-function menuTitle(item: NavigationMenuItem): string {
-  return item.title ?? item.label ?? '';
-}
-
-/** Adapt the server's sitemap menu to Pactor's route registry. */
-export function createNavigationRegistry(menus: NavigationMenuItem[]): MenuRegistry {
-  function convert(items: NavigationMenuItem[]): MenuItem[] {
-    return items.flatMap((item) => {
-      const id = navId(item);
-      if (!id) return [];
-      const type = isGroup(item) ? 'group' : item.type === 'link' ? 'link' : 'page';
-      return [{
-        id, type, title: menuTitle(item), path: navPath(item), pageId: item.pageId,
-        hidden: item.hidden, activeMenu: item.activeMenu,
-        ...(item.children ? { children: convert(item.children) } : {}),
-      }];
-    });
-  }
-  return new MenuRegistry(convert(menus));
-}
-
-/** Session navigation excludes hidden pages; find their nearest visible parent route. */
-export function findNavigationMenu(registry: MenuRegistry, pathname: string): MenuItem | undefined {
-  const segments = pathname.split('/').filter(Boolean);
-  while (segments.length > 0) {
-    const hit = registry.findByPath(`/${segments.join('/')}`)?.menu;
-    if (hit) return hit;
-    segments.pop();
-  }
-  return registry.findByPath('/')?.menu;
-}
-
 function groupContains(group: NavigationMenuItem, currentId: string | undefined): boolean {
   if (!currentId) return false;
   return visibleChildren(group).some(
@@ -175,6 +152,8 @@ function groupContains(group: NavigationMenuItem, currentId: string | undefined)
 export function NavigationShell({
   menus = [],
   brandMark = 'P',
+  brandHref = '/',
+  breadcrumb: breadcrumbProp = true,
   expandRailOnHover = false,
   railFooter,
   labels: labelsProp,
@@ -205,6 +184,10 @@ export function NavigationShell({
   );
   const activeGroup =
     selectedTopLevel && isGroup(selectedTopLevel) ? selectedTopLevel : undefined;
+  const breadcrumbEntries = useMemo(
+    () => (breadcrumbProp ? deriveNavigationBreadcrumb(menus, pathname) : []),
+    [breadcrumbProp, menus, pathname],
+  );
 
   useEffect(() => {
     const content = mainRef.current?.querySelector<HTMLElement>('.shell-content');
@@ -225,18 +208,26 @@ export function NavigationShell({
         className={expandRailOnHover ? 'kn-rail kn-rail-expandable' : 'kn-rail'}
         aria-label={labels.navMain}
       >
-        <div className="kn-mark" aria-hidden="true">
-          {brandMark}
-        </div>
+        {brandHref === '' ? (
+          <div className="kn-mark" aria-hidden="true">
+            {brandMark}
+          </div>
+        ) : (
+          <Link href={brandHref} className="kn-mark" aria-label={labels.brandHome}>
+            {brandMark}
+          </Link>
+        )}
         {topLevelMenus.map((item) => {
           const Icon = iconFor(item.icon);
           const itemId = navId(item);
           const title = menuTitle(item);
+          const badge = formatBadge(item.badge);
           const active = selectedTopLevel !== undefined && navId(selectedTopLevel) === itemId;
           const content = (
             <>
               <Icon size={18} strokeWidth={1.8} />
               <span className="kn-rail-label">{title}</span>
+              {badge !== null && <span className="kn-rail-badge">{badge}</span>}
             </>
           );
 
@@ -281,6 +272,7 @@ export function NavigationShell({
           <nav className="kn-menu">
             {visibleChildren(activeGroup).map((item) => {
               const path = navPath(item)!;
+              const badge = formatBadge(item.badge);
               const active = navId(item) === currentMenuId || item.pageId === currentMenuId;
               return (
                 <Link
@@ -289,7 +281,8 @@ export function NavigationShell({
                   aria-current={active ? 'page' : undefined}
                   className={active ? 'kn-menu-item is-active' : 'kn-menu-item'}
                 >
-                  {menuTitle(item)}
+                  <span className="kn-menu-label">{menuTitle(item)}</span>
+                  {badge !== null && <span className="kn-menu-badge">{badge}</span>}
                 </Link>
               );
             })}
@@ -298,6 +291,34 @@ export function NavigationShell({
       ) : null}
 
       <div className="kn-main" ref={mainRef}>
+        {breadcrumbEntries.length > 0 && (
+          <nav className="kn-breadcrumb" aria-label={labels.breadcrumb}>
+            {breadcrumbEntries.map((entry, index) => {
+              const isLast = index === breadcrumbEntries.length - 1;
+              return (
+                <span key={entry.id} className="kn-breadcrumb-item">
+                  {index > 0 && (
+                    <span className="kn-breadcrumb-sep" aria-hidden="true">
+                      /
+                    </span>
+                  )}
+                  {isLast || !entry.path ? (
+                    <span
+                      className="kn-breadcrumb-text"
+                      aria-current={isLast ? 'page' : undefined}
+                    >
+                      {entry.title}
+                    </span>
+                  ) : (
+                    <Link href={entry.path} className="kn-breadcrumb-link">
+                      {entry.title}
+                    </Link>
+                  )}
+                </span>
+              );
+            })}
+          </nav>
+        )}
         {children}
       </div>
     </div>

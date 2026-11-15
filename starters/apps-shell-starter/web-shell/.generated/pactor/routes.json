@@ -91,6 +91,30 @@
       "paramNames": []
     },
     {
+      "publicPath": "/403",
+      "moduleId": "shell",
+      "pageId": "403",
+      "globalPageId": "shell:403",
+      "pattern": "/403",
+      "paramNames": []
+    },
+    {
+      "publicPath": "/404",
+      "moduleId": "shell",
+      "pageId": "404",
+      "globalPageId": "shell:404",
+      "pattern": "/404",
+      "paramNames": []
+    },
+    {
+      "publicPath": "/500",
+      "moduleId": "shell",
+      "pageId": "500",
+      "globalPageId": "shell:500",
+      "pattern": "/500",
+      "paramNames": []
+    },
+    {
       "publicPath": "/pactor-app-risk-analysis",
       "moduleId": "pactor-app-risk-analysis",
       "pageId": "risk-data-value",

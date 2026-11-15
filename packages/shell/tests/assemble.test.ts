@@ -12,12 +12,12 @@ describe('assembleModules', () => {
     const rootDir = createFixtureHost();
     const summary = assembleModules({ rootDir });
 
-    // 1 个模块路由 + 包默认站点 4 个开箱页面（login/workspace/themes/profile）
-    expect(summary).toMatchObject({ modules: 1, routes: 5, serverApis: 0 });
+    // 1 个模块路由 + 包默认站点 7 个开箱页面（login/workspace/themes/profile/403/404/500）
+    expect(summary).toMatchObject({ modules: 1, routes: 8, serverApis: 0 });
 
     const generated = join(rootDir, '.generated/pactor');
     const pages = JSON.parse(readFileSync(join(generated, 'pages.json'), 'utf8'));
-    expect(pages.pages).toHaveLength(5);
+    expect(pages.pages).toHaveLength(8);
     const fixturePage = pages.pages.find(
       (p: { globalPageId: string }) => p.globalPageId === 'fixture:home',
     );
@@ -69,7 +69,7 @@ describe('assembleModules', () => {
       sitemapPath,
       content.replace(
         'menus: []',
-        'menus:\n  - { id: home, type: page, pageId: home, title: 首页, icon: chart }',
+        'menus:\n  - { id: home, type: page, pageId: home, title: 首页, icon: chart, badge: 3 }',
       ),
     );
 
@@ -81,6 +81,8 @@ describe('assembleModules', () => {
     expect(home).toMatchObject({
       pageId: 'fixture:home',
       path: '/fixture',
+      // badge 字段随菜单清单原样透传到客户端
+      badge: 3,
     });
     expect('hidden' in home).toBe(false);
   });
@@ -104,8 +106,24 @@ describe('壳站点分层（宿主 src/shell 优先，包默认站点兜底）',
     const routes = JSON.parse(readFileSync(join(generated, 'routes.json'), 'utf8')).routes;
     const paths = routes.map((r: { publicPath: string }) => r.publicPath);
     expect(paths).toEqual(
-      expect.arrayContaining(['/login', '/workspace', '/settings/themes', '/profile']),
+      expect.arrayContaining([
+        '/login',
+        '/workspace',
+        '/settings/themes',
+        '/profile',
+        '/403',
+        '/404',
+        '/500',
+      ]),
     );
+
+    // 错误页三件套：hidden（不出现在导航）、blank 布局、DSL 已落盘
+    const menusJson = JSON.parse(readFileSync(join(generated, 'menus.json'), 'utf8')).menus;
+    for (const id of ['403', '404', '500']) {
+      const menu = menusJson.find((m: { id: string }) => m.id === id);
+      expect(menu).toMatchObject({ hidden: true, layout: 'blank', public: true });
+      expect(existsSync(join(generated, `dsl/shell/${id}.yaml`))).toBe(true);
+    }
 
     // 默认页面 DSL 已落盘
     expect(existsSync(join(generated, 'dsl/shell/login.yaml'))).toBe(true);

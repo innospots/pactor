@@ -11,6 +11,11 @@ export type {
   NavigationShellLabels,
   NavigationShellProps,
 } from './NavigationShell.js';
+export { formatBadge } from './badge.js';
+export { deriveNavigationBreadcrumb } from './breadcrumb.js';
+export type { BreadcrumbEntry } from './breadcrumb.js';
+export { ShellLoading } from './ShellLoading.js';
+export type { ShellLoadingProps } from './ShellLoading.js';
 export { SkinGallery, SkinCardGrid } from './SkinGallery.js';
 export type { SkinCardGridProps, SkinGalleryProps } from './SkinGallery.js';
 export { PactorShellHost } from './PactorShellHost.js';

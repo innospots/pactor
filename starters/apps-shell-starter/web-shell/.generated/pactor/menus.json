@@ -106,6 +106,36 @@
       "hidden": true
     },
     {
+      "id": "403",
+      "type": "page",
+      "pageId": "shell:403",
+      "path": "/403",
+      "title": "无权限",
+      "layout": "blank",
+      "public": true,
+      "hidden": true
+    },
+    {
+      "id": "404",
+      "type": "page",
+      "pageId": "shell:404",
+      "path": "/404",
+      "title": "页面不存在",
+      "layout": "blank",
+      "public": true,
+      "hidden": true
+    },
+    {
+      "id": "500",
+      "type": "page",
+      "pageId": "shell:500",
+      "path": "/500",
+      "title": "服务异常",
+      "layout": "blank",
+      "public": true,
+      "hidden": true
+    },
+    {
       "id": "risk-analysis",
       "type": "page",
       "pageId": "pactor-app-risk-analysis:risk-data-value",

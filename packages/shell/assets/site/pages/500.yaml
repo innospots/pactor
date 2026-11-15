@@ -1,0 +1,19 @@
+# 默认 500 页（服务异常）：blank 布局，hidden 路由；宿主可声明同名页面整体替换。
+dsl: "1.0"
+page:
+  id: '500'
+  title: 服务异常
+body:
+  type: Page
+  props: { className: pactor-shell-error-page }
+  children:
+    - type: Typography
+      props: { variant: h1, className: pactor-shell-error-code, text: '500' }
+    - type: Typography
+      props: { variant: muted, text: 服务出现异常，请稍后重试。 }
+    - type: Button
+      props: { text: 返回工作台, variant: primary }
+      events:
+        onClick:
+          - action: navigate
+            params: { to: /workspace }

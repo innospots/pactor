@@ -131,3 +131,116 @@ describe('AppShell sitemap 模式', () => {
     expect(document.querySelector('.pactor-shell-sidebar')).toBeNull();
   });
 });
+
+describe('AppShell 徽标 / 分组 / 面包屑 / 品牌点击 / 兜底', () => {
+  it('菜单徽标：正常渲染；0 与空串不渲染；>99 显示 99+', () => {
+    const { container } = render(
+      <AppShell
+        menu={{
+          mode: 'items',
+          items: [
+            { id: 'a', title: '待办', path: '/a', badge: 3 },
+            { id: 'b', title: '公告', path: '/b', badge: 'NEW' },
+            { id: 'c', title: '清空', path: '/c', badge: 0 },
+            { id: 'd', title: '海量', path: '/d', badge: 128 },
+          ],
+        }}
+        pages={{}}
+      />,
+    );
+    const badges = [...container.querySelectorAll('.pactor-shell-menu-badge')].map(
+      (el) => el.textContent,
+    );
+    expect(badges).toEqual(['3', 'NEW', '99+']);
+  });
+
+  it('分组标题：相邻同组只渲染一次，无组项前无标题', () => {
+    const { container } = render(
+      <AppShell
+        menu={{
+          mode: 'items',
+          items: [
+            { id: 'a', title: '文章', path: '/a', group: '内容' },
+            { id: 'b', title: '页面', path: '/b', group: '内容' },
+            { id: 'c', title: '其他', path: '/c' },
+          ],
+        }}
+        pages={{}}
+      />,
+    );
+    const groups = [...container.querySelectorAll('.pactor-shell-menu-group')].map(
+      (el) => el.textContent,
+    );
+    expect(groups).toEqual(['内容']);
+  });
+
+  it('面包屑：缺省显示当前命中菜单，breadcrumb=false 关闭', () => {
+    const { container, unmount } = render(
+      <AppShell
+        menu={{ mode: 'items', items: [{ id: 'dash', title: '看板', path: '/dashboard' }] }}
+        pages={{ '/dashboard': Page }}
+      />,
+    );
+    const crumb = container.querySelector('.pactor-shell-breadcrumb');
+    expect(crumb?.textContent).toContain('看板');
+    unmount();
+    const { container: off } = render(
+      <AppShell
+        breadcrumb={false}
+        menu={{ mode: 'items', items: [{ id: 'dash', title: '看板', path: '/dashboard' }] }}
+        pages={{ '/dashboard': Page }}
+      />,
+    );
+    expect(off.querySelector('.pactor-shell-breadcrumb')).toBeNull();
+  });
+
+  it('brand.onClick 优先于 href；均缺省时不可点', () => {
+    const onClick = vi.fn();
+    const { unmount } = render(
+      <AppShell
+        brand={{ title: 'InnoSpots', href: '/home', onClick }}
+        menu={{ mode: 'items', items: [] }}
+        pages={{}}
+      />,
+    );
+    fireEvent.click(screen.getByRole('button', { name: 'InnoSpots' }));
+    expect(onClick).toHaveBeenCalledTimes(1);
+    expect(nav.push).not.toHaveBeenCalledWith('/home');
+    unmount();
+    render(
+      <AppShell brand={{ title: '纯展示' }} menu={{ mode: 'items', items: [] }} pages={{}} />,
+    );
+    expect(screen.queryByRole('button', { name: '纯展示' })).toBeNull();
+  });
+
+  it('brand.href 点击走 navigate', () => {
+    render(
+      <AppShell
+        brand={{ title: 'InnoSpots', href: '/home' }}
+        menu={{ mode: 'items', items: [] }}
+        pages={{}}
+      />,
+    );
+    fireEvent.click(screen.getByRole('button', { name: 'InnoSpots' }));
+    expect(nav.push).toHaveBeenCalledWith('/home');
+  });
+
+  it('fallbacks.notFound 覆盖内置 404 兜底', () => {
+    render(
+      <AppShell
+        menu={{ mode: 'items', items: [] }}
+        pages={{}}
+        fallbacks={{ notFound: <div>自定义 404</div> }}
+      />,
+    );
+    expect(screen.getByText('自定义 404')).toBeTruthy();
+    expect(screen.queryByText(/未找到页面/)).toBeNull();
+  });
+
+  it('默认 404 兜底：状态码 + 返回首页', () => {
+    render(<AppShell menu={{ mode: 'items', items: [] }} pages={{}} />);
+    expect(screen.getByText('404')).toBeTruthy();
+    fireEvent.click(screen.getByRole('button', { name: '返回首页' }));
+    expect(nav.push).toHaveBeenCalledWith('/');
+  });
+});

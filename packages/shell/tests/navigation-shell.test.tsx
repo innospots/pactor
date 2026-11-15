@@ -120,3 +120,101 @@ describe('NavigationShell', () => {
     expect(screen.getByRole('navigation', { name: 'Main nav' })).toBeTruthy();
   });
 });
+
+describe('NavigationShell 徽标', () => {
+  const badgeMenus: NavigationMenuItem[] = [
+    { id: 'workspace', type: 'page', path: '/workspace', title: '工作台', badge: 3 },
+    {
+      id: 'system',
+      type: 'group',
+      title: '系统管理',
+      children: [
+        { id: 'users', type: 'page', path: '/settings/users', title: '用户管理', badge: 'NEW' },
+        { id: 'audit', type: 'page', path: '/settings/audit', title: '审计日志', badge: 0 },
+        { id: 'many', type: 'page', path: '/settings/many', title: '海量', badge: 128 },
+      ],
+    },
+  ];
+
+  it('一级轨渲染徽标；0 不渲染；>99 显示 99+', () => {
+    nav.pathname = '/workspace';
+    const { container } = render(
+      <NavigationShell menus={badgeMenus}><div /></NavigationShell>,
+    );
+    const railBadges = [...container.querySelectorAll('.kn-rail-badge')].map(
+      (el) => el.textContent,
+    );
+    expect(railBadges).toEqual(['3']);
+  });
+
+  it('二级侧栏渲染行内徽标（NEW），0 不渲染，128 显示 99+', () => {
+    nav.pathname = '/settings/users';
+    const { container } = render(
+      <NavigationShell menus={badgeMenus}><div /></NavigationShell>,
+    );
+    const menuBadges = [...container.querySelectorAll('.kn-menu-badge')].map(
+      (el) => el.textContent,
+    );
+    expect(menuBadges).toEqual(['NEW', '99+']);
+  });
+});
+
+describe('NavigationShell 面包屑', () => {
+  it('分组场景：分组标题 / 子项，末项纯文本', () => {
+    nav.pathname = '/settings/users';
+    const { container } = render(
+      <NavigationShell menus={groupedMenus}><div /></NavigationShell>,
+    );
+    const crumb = container.querySelector('.kn-breadcrumb');
+    expect(crumb?.textContent).toBe('系统管理/用户管理');
+    const last = crumb!.querySelector('[aria-current="page"]');
+    expect(last?.textContent).toBe('用户管理');
+    // 中间项无 path（分组不可导航）→ 纯文本而非链接
+    expect(crumb!.querySelectorAll('a')).toHaveLength(0);
+  });
+
+  it('hidden 详情页：命中项追加为末级纯文本', () => {
+    nav.pathname = '/settings/roles/42';
+    const { container } = render(
+      <NavigationShell menus={groupedMenus}><div /></NavigationShell>,
+    );
+    const crumb = container.querySelector('.kn-breadcrumb');
+    expect(crumb?.textContent).toBe('系统管理/角色详情');
+  });
+
+  it('breadcrumb=false 不渲染', () => {
+    nav.pathname = '/settings/users';
+    const { container } = render(
+      <NavigationShell menus={groupedMenus} breadcrumb={false}><div /></NavigationShell>,
+    );
+    expect(container.querySelector('.kn-breadcrumb')).toBeNull();
+  });
+
+  it('无命中不渲染', () => {
+    nav.pathname = '/totally/unknown';
+    const { container } = render(
+      <NavigationShell menus={groupedMenus}><div /></NavigationShell>,
+    );
+    expect(container.querySelector('.kn-breadcrumb')).toBeNull();
+  });
+});
+
+describe('NavigationShell 品牌链接', () => {
+  it('缺省 brandHref 为 /，品牌方块渲染为链接', () => {
+    nav.pathname = '/workspace';
+    const { container } = render(
+      <NavigationShell menus={flatMenus}><div /></NavigationShell>,
+    );
+    const mark = container.querySelector('a.kn-mark');
+    expect(mark?.getAttribute('href')).toBe('/');
+  });
+
+  it("brandHref='' 退化为纯展示", () => {
+    nav.pathname = '/workspace';
+    const { container } = render(
+      <NavigationShell menus={flatMenus} brandHref=""><div /></NavigationShell>,
+    );
+    expect(container.querySelector('a.kn-mark')).toBeNull();
+    expect(container.querySelector('div.kn-mark')).toBeTruthy();
+  });
+});

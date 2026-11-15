@@ -1,5 +1,5 @@
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
-import { Suspense, useContext, useMemo } from 'react';
+import { isValidElement, Suspense, useContext, useMemo, type ReactNode } from 'react';
 
 import { createHttpHooks, SitemapApp } from 'pactor-app';
 import type { PactorHttpHooks } from 'pactor-app';
@@ -17,6 +17,7 @@ import {
   ShellUserMenuConfigContext,
   type ShellUserMenuConfig,
 } from './ShellUserMenu.js';
+import { ShellLoading } from './ShellLoading.js';
 import { SkinGallery } from './SkinGallery.js';
 import { SkinSwitcher } from './SkinSwitcher.js';
 
@@ -38,6 +39,52 @@ export interface PactorShellHostProps {
   /** 外壳内 DSL UserMenu 的默认配置（在线状态 / 主题 / 密度 / 语言缺省全开）；
    *  DSL 节点显式 props 优先；外层 AppShell 的 userMenu 配置会被本 prop 覆盖合并 */
   userMenu?: ShellUserMenuConfig;
+  /**
+   * 兜底渲染定制：notFound（路由未命中）/ error（sitemap 加载失败）/ loading
+   * （加载中，缺省内置品牌加载态 ShellLoading）。值为 ReactNode 或 DSL 节点
+   * 对象；DSL 节点按静态渲染（type 经已注册组件表解析、props/children 递归，
+   * 不求值表达式与事件）。
+   */
+  fallbacks?: { notFound?: ReactNode; error?: ReactNode; loading?: ReactNode };
+}
+
+/** 判断值是否为 DSL 节点（{ type: string } 裸对象），否则按 ReactNode 处理 */
+function isDslNode(value: unknown): value is { type: string } {
+  return (
+    typeof value === 'object' &&
+    value !== null &&
+    !isValidElement(value) &&
+    typeof (value as { type?: unknown }).type === 'string'
+  );
+}
+
+interface DslNodeShape {
+  type: string;
+  props?: Record<string, unknown>;
+  children?: unknown[];
+}
+
+/** 兜底 DSL 节点的静态渲染（兜底内容通常是无表达式/事件的展示节点） */
+function FallbackNode({
+  node,
+  components,
+}: {
+  node: DslNodeShape;
+  components: Record<string, unknown>;
+}) {
+  const Component = components[node.type] as
+    | ((props: Record<string, unknown>) => ReactNode)
+    | undefined;
+  if (!Component) return null;
+  const children = (node.children ?? []).map((child, index) =>
+    isDslNode(child) ? (
+      // eslint-disable-next-line react/no-array-index-key
+      <FallbackNode key={index} node={child as DslNodeShape} components={components} />
+    ) : (
+      (child as ReactNode)
+    ),
+  );
+  return <Component {...(node.props ?? {})}>{children}</Component>;
 }
 
 /** 内建 DSL 组件：包默认站点的布局 / 页面依赖；宿主 components 同名覆盖优先。
@@ -48,6 +95,8 @@ const builtinComponents = { NavigationShell, SkinGallery, Login, UserMenu: Shell
 const defaultHttpAdapter = createHttpHooks();
 const defaultPageEndpoint = (pageId: string) =>
   `/api/runtime/pages/${encodeURIComponent(pageId)}`;
+/** bootstrap 等待期间的缺省加载态（fallbacks.loading 可覆盖） */
+const defaultLoading = <ShellLoading />;
 
 function PactorShellHostInner(props: PactorShellHostProps) {
   const pathname = usePathname();
@@ -75,6 +124,14 @@ function PactorShellHostInner(props: PactorShellHostProps) {
     [props.extensions, props.actions],
   );
 
+  const toFallbackNode = (value: ReactNode): ReactNode =>
+    isDslNode(value) ? (
+      <FallbackNode node={value as DslNodeShape} components={components} />
+    ) : (
+      value
+    );
+  const fallbacks = props.fallbacks;
+
   return (
     <ShellUserMenuConfigContext.Provider value={userMenuConfig}>
       <SitemapApp
@@ -89,6 +146,17 @@ function PactorShellHostInner(props: PactorShellHostProps) {
         actions={actions}
         httpAdapter={props.httpAdapter ?? defaultHttpAdapter}
         pageEndpoint={props.pageEndpoint ?? defaultPageEndpoint}
+        loading={
+          fallbacks?.loading !== undefined
+            ? toFallbackNode(fallbacks.loading)
+            : defaultLoading
+        }
+        {...(fallbacks?.error !== undefined
+          ? { renderError: () => toFallbackNode(fallbacks.error) }
+          : {})}
+        {...(fallbacks?.notFound !== undefined
+          ? { renderNotFound: () => toFallbackNode(fallbacks.notFound) }
+          : {})}
       />
     </ShellUserMenuConfigContext.Provider>
   );

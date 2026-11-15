@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-11-15T07:33:14.899Z",
+  "generatedAt": "2026-11-15T08:47:59.495Z",
   "modules": [
     {
       "id": "pactor-app-risk-analysis",
@@ -105,6 +105,30 @@
       "pageId": "profile",
       "globalPageId": "shell:profile",
       "pattern": "/profile",
+      "paramNames": []
+    },
+    {
+      "publicPath": "/403",
+      "moduleId": "shell",
+      "pageId": "403",
+      "globalPageId": "shell:403",
+      "pattern": "/403",
+      "paramNames": []
+    },
+    {
+      "publicPath": "/404",
+      "moduleId": "shell",
+      "pageId": "404",
+      "globalPageId": "shell:404",
+      "pattern": "/404",
+      "paramNames": []
+    },
+    {
+      "publicPath": "/500",
+      "moduleId": "shell",
+      "pageId": "500",
+      "globalPageId": "shell:500",
+      "pattern": "/500",
       "paramNames": []
     },
     {

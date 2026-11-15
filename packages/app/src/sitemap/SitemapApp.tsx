@@ -542,6 +542,9 @@ function Centered({ children }: { children: ReactNode }) {
   return (
     <div
       style={{
+        // 宿主常把 SitemapApp 放在 row flex 容器内（pactor-shell-root），
+        // 无宽度时 flex 项收缩到内容宽，居中会失效
+        width: '100%',
         minHeight: '60vh',
         display: 'flex',
         flexDirection: 'column',

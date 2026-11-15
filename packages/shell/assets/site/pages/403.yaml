@@ -1,0 +1,19 @@
+# 默认 403 页（无权限）：blank 布局，hidden 路由；宿主可声明同名页面整体替换。
+dsl: "1.0"
+page:
+  id: '403'
+  title: 无权限
+body:
+  type: Page
+  props: { className: pactor-shell-error-page }
+  children:
+    - type: Typography
+      props: { variant: h1, className: pactor-shell-error-code, text: '403' }
+    - type: Typography
+      props: { variant: muted, text: 没有访问该页面的权限，请联系管理员开通。 }
+    - type: Button
+      props: { text: 返回工作台, variant: primary }
+      events:
+        onClick:
+          - action: navigate
+            params: { to: /workspace }

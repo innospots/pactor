@@ -96,4 +96,46 @@ describe('PactorShellHost', () => {
     expect(components.NavigationShell).toBe(Panel);
     expect(components.SkinGallery).toBeTypeOf('function');
   });
+
+  it('fallbacks 映射到 SitemapApp 的 loading / renderError / renderNotFound', () => {
+    const VisiblePanel = ({ text }: { text?: string }) => <div>panel:{text}</div>;
+    render(
+      <PactorShellHost
+        extensions={{}}
+        components={{ Panel: VisiblePanel }}
+        fallbacks={{
+          loading: <div>加载中…</div>,
+          error: <div>加载失败</div>,
+          notFound: { type: 'Panel', props: { text: '没找到' } } as never,
+        }}
+      />,
+    );
+    const props = captured.props!;
+    expect(props.loading).toBeTruthy();
+    expect(props.renderError).toBeTypeOf('function');
+    expect(props.renderNotFound).toBeTypeOf('function');
+    // DSL 节点经静态渲染为已注册组件
+    const node = (props.renderNotFound as () => React.ReactNode)();
+    const { container } = render(<>{node}</>);
+    expect(container.textContent).toBe('panel:没找到');
+  });
+
+  it('未提供 fallbacks：loading 缺省内置品牌加载态，error/notFound 不传', () => {
+    render(<PactorShellHost extensions={{}} />);
+    const props = captured.props!;
+    const { container } = render(<>{props.loading as React.ReactNode}</>);
+    expect(container.querySelector('.pactor-shell-loading')).toBeTruthy();
+    expect(container.textContent).toContain('加载中');
+    expect(props.renderError).toBeUndefined();
+    expect(props.renderNotFound).toBeUndefined();
+  });
+
+  it('fallbacks.loading 覆盖内置加载态', () => {
+    render(
+      <PactorShellHost extensions={{}} fallbacks={{ loading: <div>自定义加载</div> }} />,
+    );
+    const { container } = render(<>{captured.props!.loading as React.ReactNode}</>);
+    expect(container.textContent).toBe('自定义加载');
+    expect(container.querySelector('.pactor-shell-loading')).toBeNull();
+  });
 });

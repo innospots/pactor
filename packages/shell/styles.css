@@ -42,6 +42,22 @@
   font-weight: 650;
 }
 
+button.pactor-shell-brand.is-clickable {
+  width: 100%;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+  font: inherit;
+  font-size: 15px;
+  font-weight: 650;
+  text-align: left;
+}
+
+button.pactor-shell-brand.is-clickable:hover {
+  background: var(--menu-hover-background, var(--accent, #f1f5f9));
+}
+
 .pactor-shell-menu {
   display: flex;
   flex: 1;
@@ -84,6 +100,131 @@
 .pactor-shell-skin-trigger:focus-visible {
   outline: 2px solid var(--ring, #94a3b8);
   outline-offset: 2px;
+}
+
+.pactor-shell-menu-group {
+  margin-top: 10px;
+  padding: 4px 12px 2px;
+  color: var(--muted-foreground, #6b7280);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+}
+
+.pactor-shell-menu-group:first-child {
+  margin-top: 0;
+}
+
+.pactor-shell-menu-badge {
+  margin-left: auto;
+  min-width: 18px;
+  padding: 1px 5px;
+  border-radius: 9px;
+  background: var(--destructive, #dc2626);
+  color: var(--destructive-foreground, #fff);
+  font-size: 11px;
+  font-weight: 600;
+  line-height: 16px;
+  text-align: center;
+}
+
+.pactor-shell-breadcrumb {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 20px;
+  border-bottom: 1px solid var(--border, #e5e7eb);
+  color: var(--muted-foreground, #6b7280);
+  font-size: 13px;
+}
+
+.pactor-shell-breadcrumb-text {
+  color: var(--foreground, #171717);
+}
+
+.pactor-shell-notfound-code {
+  color: var(--foreground, #171717);
+  font-size: 56px;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.pactor-shell-notfound-desc {
+  margin: 0;
+}
+
+.pactor-shell-notfound-action {
+  margin-top: 8px;
+  padding: 8px 16px;
+  border: 0;
+  border-radius: var(--radius, 10px);
+  background: var(--primary, #536b7f);
+  color: var(--primary-foreground, #fff);
+  cursor: pointer;
+  font: inherit;
+}
+
+/* 内置加载兜底（PactorShellHost 缺省 loading） */
+.pactor-shell-loading {
+  display: flex;
+  width: 100%;
+  min-height: 60vh;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  color: var(--muted-foreground, #6b7280);
+}
+
+.pactor-shell-loading-mark {
+  display: grid;
+  width: 40px;
+  height: 40px;
+  place-items: center;
+  border-radius: 12px;
+  background: var(--primary, #536b7f);
+  color: var(--primary-foreground, #fff);
+  font-size: 18px;
+  font-weight: 700;
+  animation: pactor-shell-loading-pulse 1.4s ease-in-out infinite;
+}
+
+.pactor-shell-loading-text {
+  font-size: 13px;
+}
+
+@keyframes pactor-shell-loading-pulse {
+  0%,
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.55;
+    transform: scale(0.92);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pactor-shell-loading-mark {
+    animation: none;
+  }
+}
+
+/* 默认站点错误页（403/404/500，blank 布局） */
+.pactor-shell-error-page {
+  display: flex;
+  min-height: 70vh;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+}
+
+.pactor-shell-error-code {
+  font-size: 72px;
+  font-weight: 700;
+  line-height: 1;
 }
 
 .pactor-shell-sidebar-footer {
@@ -430,9 +571,11 @@ body .shell-root {
   background: var(--primary, #536b7f);
   color: var(--primary-foreground, #fff);
   font-weight: 700;
+  text-decoration: none;
 }
 
 .kn-rail-button {
+  position: relative;
   display: flex;
   width: 38px;
   height: 38px;
@@ -450,6 +593,21 @@ body .shell-root {
   white-space: nowrap;
   cursor: pointer;
   transition: width 200ms ease, gap 200ms ease, background-color 150ms ease;
+}
+
+.kn-rail-badge {
+  position: absolute;
+  top: 2px;
+  right: 2px;
+  min-width: 16px;
+  padding: 0 4px;
+  border-radius: 8px;
+  background: var(--destructive, #dc2626);
+  color: var(--destructive-foreground, #fff);
+  font-size: 10px;
+  font-weight: 600;
+  line-height: 16px;
+  text-align: center;
 }
 
 .kn-rail-button:hover,
@@ -518,12 +676,28 @@ body .shell-root {
 }
 
 .kn-menu-item {
-  display: block;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
   padding: 10px 12px;
   border-radius: 8px;
   color: var(--foreground, #171717);
   font-size: 14px;
   text-decoration: none;
+}
+
+.kn-menu-badge {
+  flex: none;
+  min-width: 18px;
+  padding: 1px 5px;
+  border-radius: 9px;
+  background: var(--destructive, #dc2626);
+  color: var(--destructive-foreground, #fff);
+  font-size: 11px;
+  font-weight: 600;
+  line-height: 16px;
+  text-align: center;
 }
 
 .kn-menu-item:hover {
@@ -548,6 +722,42 @@ body .shell-root {
   min-height: 0;
   flex: 1;
   flex-direction: column;
+}
+
+.kn-breadcrumb {
+  display: flex;
+  flex: none;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 24px;
+  border-bottom: 1px solid var(--border, #e5e7eb);
+  background: var(--background, #f8f9fa);
+  color: var(--muted-foreground, #6b7280);
+  font-size: 13px;
+}
+
+.kn-breadcrumb-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.kn-breadcrumb-sep {
+  color: var(--muted-foreground, #9ca3af);
+}
+
+.kn-breadcrumb-link {
+  color: inherit;
+  text-decoration: none;
+}
+
+.kn-breadcrumb-link:hover {
+  color: var(--foreground, #171717);
+  text-decoration: underline;
+}
+
+.kn-breadcrumb-text {
+  color: var(--foreground, #171717);
 }
 
 .kn-main .shell-content {

@@ -17,11 +17,11 @@ function assembledHost(): string {
 describe('validateModules', () => {
   it('合法装配通过并返回计数', () => {
     const rootDir = assembledHost();
-    // 模块 1 路由/页面 + 包默认站点 4 页面/菜单 + 宿主 1 菜单
+    // 模块 1 路由/页面 + 包默认站点 7 页面/菜单 + 宿主 1 菜单
     expect(validateModules({ rootDir })).toEqual({
-      routes: 5,
-      pages: 5,
-      menus: 5,
+      routes: 8,
+      pages: 8,
+      menus: 8,
       serverApis: 0,
     });
   });
