@@ -1,24 +1,34 @@
 # 风险决策：总览（根路径）+ 对接日志（/integration-logs）。
 # 页面与布局 DSL 在 /api/sitemap 响应中内联下发。
-# 无侧栏：仅一个全宽内容区，顶栏由页面自绘。
+# 外壳：只有二级侧栏（总览 / 对接日志，样式与 next-app-starter 系统管理
+# 分组一致）+ 右侧内容区；不含一级图标轨——一级菜单由对接后的主应用提供。
 id: site
 resourceType: sitemap
-version: 1
+version: 3
 dslVersion: "1.0"
 app: { name: Pactor Console }
 
 layouts:
-  # 无菜单外壳：内容区铺满视口并独立滚动。
+  # 模块壳：二级侧栏 + 右侧内容区（PageOutlet）
   admin:
     dsl: "1.0"
     body:
       type: Layout
       props: { className: shell-root }
       children:
-        - type: Content
-          props: { className: shell-content }
+        - type: Flex
+          props: { className: kn-shell }
           children:
-            - type: PageOutlet
+            - type: ModuleSidebar
+              props:
+                title: 风险决策
+                items:
+                  - { path: /, title: 总览 }
+                  - { path: /integration-logs, title: 对接日志 }
+            - type: Content
+              props: { className: shell-content }
+              children:
+                - type: PageOutlet
 
 pages:
   - id: risk-decision
@@ -35,18 +45,21 @@ pages:
 
 menus:
   - id: risk-decision
-    type: page
-    pageId: risk-decision
-    path: /
+    type: group
     title: 风险决策
     icon: shield
-    layout: admin
-    public: true
-  - id: integration-logs
-    type: page
-    pageId: integration-logs
-    path: /integration-logs
-    title: 对接日志
-    icon: file-text
-    layout: admin
-    public: true
+    children:
+      - id: overview
+        type: page
+        pageId: risk-decision
+        path: /
+        title: 总览
+        layout: admin
+        public: true
+      - id: integration-logs
+        type: page
+        pageId: integration-logs
+        path: /integration-logs
+        title: 对接日志
+        layout: admin
+        public: true

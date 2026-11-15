@@ -1,0 +1,66 @@
+# Shell 模块模式站点地图：不含登录/注册与 NavigationShell 宿主壳。
+# 独立应用仍使用同目录下的 sitemap.yaml。
+id: site
+resourceType: sitemap
+version: 1
+dslVersion: "1.0"
+app: { name: "Example Admin" }
+layout: module
+
+pages:
+  - { id: workspace, path: /workspace, title: 工作台, version: 3, lazy: true }
+  - { id: dashboard, path: /dashboard, title: 数据概览, version: 2, lazy: true }
+  - { id: monitoring, path: /monitoring, title: 数据监控, version: 1, lazy: true }
+  - { id: monthly, path: /reports/monthly, title: 报表中心, version: 3, permission: report:view, lazy: true }
+  - { id: monthly-detail, path: /reports/monthly/:id, title: 月报详情, version: 2, permission: report:view, lazy: true }
+  - { id: data-list, path: /models/data-list, title: 数据列表, version: 1, lazy: true }
+  - { id: system-settings, path: /settings/general, title: 系统设置, version: 2, lazy: true }
+  - { id: dictionaries, path: /settings/dictionaries, title: 字典管理, version: 2, lazy: true }
+  - { id: audit-logs, path: /settings/audit-logs, title: 审计日志, version: 4, lazy: true }
+  - { id: roles, path: /settings/roles, title: 角色管理, version: 1, lazy: true }
+  - { id: role-detail, path: /settings/roles/:roleId, title: 角色详情, version: 1, lazy: true }
+  - { id: users, path: /settings/users, title: 用户管理, version: 1, permission: user:view, lazy: true }
+  - { id: themes, path: /settings/themes, title: 主题设置, version: 2, lazy: true }
+  - { id: profile, path: /profile, title: 个人中心, version: 2, lazy: true }
+
+menus:
+  - { id: workspace, type: page, pageId: workspace, path: /workspace, title: 工作台, icon: workspace, layout: module, hidden: true }
+
+  - id: analytics
+    type: group
+    title: 数据经营
+    icon: chart-no-axes-combined
+    hidden: true
+    children:
+      - { id: dashboard, type: page, pageId: dashboard, path: /dashboard, title: 数据概览, layout: module }
+      - { id: monitoring, type: page, pageId: monitoring, path: /monitoring, title: 数据监控, layout: module }
+      - { id: monthly, type: page, pageId: monthly, path: /reports/monthly, title: 报表中心, layout: module, permission: report:view }
+      - { id: data-list, type: page, pageId: data-list, path: /models/data-list, title: 数据列表, layout: module }
+
+  - id: system
+    type: group
+    title: 系统管理
+    icon: settings
+    hidden: true
+    children:
+      - { id: system-settings, type: page, pageId: system-settings, path: /settings/general, title: 系统设置, layout: module }
+      - { id: dictionaries, type: page, pageId: dictionaries, path: /settings/dictionaries, title: 字典管理, layout: module }
+      - { id: audit-logs, type: page, pageId: audit-logs, path: /settings/audit-logs, title: 审计日志, layout: module }
+      - { id: roles, type: page, pageId: roles, path: /settings/roles, title: 角色管理, layout: module }
+      - { id: users, type: page, pageId: users, path: /settings/users, title: 用户管理, layout: module, permission: user:view }
+      - { id: themes, type: page, pageId: themes, path: /settings/themes, title: 主题设置, layout: module }
+  - { id: role-detail, type: page, pageId: role-detail, path: /settings/roles/:roleId, title: 角色详情, layout: module, hidden: true, activeMenu: roles }
+  - { id: monthly-detail, type: page, pageId: monthly-detail, path: /reports/monthly/:id, title: 月报详情, layout: module, hidden: true, activeMenu: monthly, permission: report:view }
+  - { id: profile, type: page, pageId: profile, path: /profile, title: 个人中心, layout: module, hidden: true }
+
+layouts:
+  module:
+    dsl: "1.0"
+    body:
+      type: Layout
+      props: { className: shell-root }
+      children:
+        - type: Content
+          props: { className: shell-content }
+          children:
+            - type: PageOutlet

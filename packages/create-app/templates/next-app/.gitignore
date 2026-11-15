@@ -20,6 +20,8 @@ pnpm-lock.yaml
 
 # production
 /build
+/dist-module
+*.tgz
 
 # misc
 .DS_Store

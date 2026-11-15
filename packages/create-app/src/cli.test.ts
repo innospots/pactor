@@ -102,7 +102,8 @@ describe('create-pactor-app', () => {
     expect(code).toBe(0);
     for (const file of [
       'web-shell/package.json',
-      'web-shell/scripts/assemble-modules.mjs',
+      'web-shell/next.config.ts',
+      'web-shell/scripts/smoke-module-api.mjs',
       'web-shell/src/shell/sitemap.yaml',
       'pactor-apps/risk-analysis/package.json',
       'pactor-apps/risk-analysis/pactor.module.json',
@@ -124,6 +125,12 @@ describe('create-pactor-app', () => {
     expect(shellDeps['risk-decision']).toBe(
       'file:../pactor-apps/risk-decision/risk-decision-0.1.0.tgz',
     );
+    // 外壳能力由 @pactor-app/shell 提供：依赖版本可安装，装配/校验/主题同步委托其 CLI
+    expect(shellDeps['@pactor-app/shell']).toMatch(/^\^\d+\.\d+\.\d+$/);
+    const shellScripts = shell.scripts as Record<string, string>;
+    expect(shellScripts['assemble:modules']).toBe('pactor-shell assemble');
+    expect(shellScripts['validate:modules']).toBe('pactor-shell validate');
+    expect(shellScripts['theme:sync']).toBe('pactor-shell theme sync');
 
     const riskAnalysis = readPkg(join(target, 'pactor-apps/risk-analysis'));
     expect(riskAnalysis.name).toBe('risk-analysis');

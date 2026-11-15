@@ -5,6 +5,8 @@ import { PactorApp } from "@/pactor/App";
 
 import "./globals.css";
 import "./theme.css";
+// NavigationShell（一级图标轨 + 二级侧栏）样式
+import "@pactor-app/shell/styles.css";
 import "@/pactor/components/risk-shell.css";
 import "@/pactor/components/risk-decision.css";
 

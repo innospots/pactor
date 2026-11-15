@@ -1,0 +1,6 @@
+[
+  { "roleId": "demo-admin", "roleName": "系统管理员", "roleCode": "ADMIN", "ownerType": "平台", "memberCount": 2, "status": "ENABLED", "description": "管理平台配置、用户与角色权限。" },
+  { "roleId": "demo-operator", "roleName": "运营人员", "roleCode": "OPERATOR", "ownerType": "组织", "memberCount": 5, "status": "ENABLED", "description": "维护数据运营配置与日常报表。" },
+  { "roleId": "demo-viewer", "roleName": "只读访客", "roleCode": "VIEWER", "ownerType": "组织", "memberCount": 12, "status": "ENABLED", "description": "查看仪表盘、报表与业务数据。" },
+  { "roleId": "demo-auditor", "roleName": "审计员", "roleCode": "AUDITOR", "ownerType": "平台", "memberCount": 1, "status": "DISABLED", "description": "查看审计记录和系统运行情况。" }
+]

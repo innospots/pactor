@@ -39,7 +39,7 @@ afterAll(() => process.chdir(root));
 function pageFiles(dir: string): string[] {
   return readdirSync(dir, { withFileTypes: true }).flatMap((entry) => {
     const path = join(dir, entry.name);
-    return entry.isDirectory() ? pageFiles(path) : entry.name.endsWith('.yaml') && entry.name !== 'sitemap.yaml' ? [path] : [];
+    return entry.isDirectory() ? pageFiles(path) : entry.name.endsWith('.yaml') && !entry.name.startsWith('sitemap.') ? [path] : [];
   });
 }
 

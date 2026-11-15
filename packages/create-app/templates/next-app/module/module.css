@@ -1,0 +1,4 @@
+/**
+ * 模块打包样式入口：随 client bundle 抽取为 dist-module/client/index.css。
+ * 后台布局与页面样式见 src/app/globals.css（由 module/client.ts 引入）。
+ */

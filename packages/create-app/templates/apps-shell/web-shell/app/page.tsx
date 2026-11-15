@@ -1,6 +1,6 @@
 import Link from "next/link";
 
-import { getAssemblySummary } from "@/modules/registry";
+import { getAssemblySummary } from "@pactor-app/shell/server";
 
 export default function ShellHomePage() {
   const { modules, routeCount } = getAssemblySummary();

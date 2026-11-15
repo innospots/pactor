@@ -2,8 +2,10 @@
 
 基于 **Next.js + Pactor** 的多业务前端起始工程：一个统一宿主 `web-shell` + 多个可独立开发、以 npm 包交付的业务模块 `pactor-apps/*`。提炼自 `innospots-apps-template`，作为本仓库多应用架构的参考起点。
 
-- **构建期装配**：Shell 在构建前扫描已安装的模块包，生成路由、菜单、页面索引与注册表；
-- **运行期渲染**：页面由 Pactor 的 YAML DSL 描述，`PactorHost` 通过 `/api/runtime/*` 加载页面、片段与布局；
+外壳能力（一级菜单 / 皮肤设置 / 布局外壳、Runtime DSL API、模块装配 CLI）全部来自 **`@pactor-app/shell`** 包（本仓库 `packages/shell`），`web-shell` 为最薄宿主示范。
+
+- **构建期装配**：`pactor-shell assemble`（`@pactor-app/shell` 的 CLI）在构建前扫描已安装的模块包，生成路由、菜单、页面索引与注册表；
+- **运行期渲染**：页面由 Pactor 的 YAML DSL 描述，`PactorShellHost`（`@pactor-app/shell/client`）通过 `/api/runtime/*` 加载页面、片段与布局；
 - **模块交付物**：模块工程产出 `dist-module/`（Manifest V1 + DSL + client bundle + assets + 可选 server bundle），打包为 tgz 后由 Shell 以 `file:` 依赖安装。
 
 更完整的架构、模块契约与排查手册见 [`web-shell/README.md`](web-shell/README.md)。
@@ -12,20 +14,19 @@
 
 ```text
 apps-shell-starter/
-├── web-shell/                       # 统一 Web Shell（Next.js 宿主，端口 9020）
+├── web-shell/                       # 统一 Web Shell（Next.js 最薄宿主，端口 9020）
 │   ├── app/
-│   │   ├── (workspace)/[...slug]/   # 工作区页面入口（所有模块页面在此渲染）
+│   │   ├── (workspace)/[...slug]/   # 工作区页面入口（AppShell + PactorShellHost，所有模块页面在此渲染）
 │   │   └── api/
-│   │       ├── runtime/             # bootstrap / pages / fragments 运行时接口
-│   │       └── modules/[moduleId]/  # 模块服务端 API 统一分发（/api/modules/<id>/*）
+│   │       ├── runtime/             # 一行 re-export @pactor-app/shell/server/routes
+│   │       └── modules/[moduleId]/  # createModuleDispatcher(moduleServers)（/api/modules/<id>/*）
 │   ├── src/
-│   │   ├── shell/                   # Shell 自带站点（sitemap.yaml、shell.layout.yaml）
-│   │   ├── modules/                 # module-list.json、注册表、路由解析、模块类型
-│   │   ├── runtime/                 # PactorHost、扩展注册、Pactor 适配器
-│   │   └── server/                  # bootstrap / pages / fragments / 模块 API 分发
-│   ├── scripts/                     # assemble / validate / smoke 装配脚本
-│   ├── .generated/pactor/           # 装配产物（生成物，勿手改）
-│   └── public/modules/              # 模块静态资源 <moduleId>/<version>/
+│   │   ├── shell/                   # Shell 站点定制层（sitemap.yaml；布局/页面回退包默认站点）
+│   │   └── modules/                 # module-list.json（启停 / menuMode / access）与基础皮肤 theme.css
+│   ├── scripts/                     # smoke-module-api 冒烟脚本（assemble / validate 由 pactor-shell CLI 承接）
+│   ├── .generated/pactor/           # 装配产物（pactor-shell assemble 生成，勿手改）
+│   ├── public/modules/              # 模块静态资源 <moduleId>/<version>/
+│   └── public/themes/               # 预置皮肤 CSS（pactor-shell theme sync 生成）
 └── pactor-apps/
     ├── risk-analysis/               # 风险分析（端口 8021，含 server entry 示例）
     └── risk-decision/               # 风险决策（端口 8022，纯 DSL 模块示例）
@@ -79,7 +80,7 @@ pnpm dev                 # http://localhost:9020
 生产构建与启动：
 
 ```bash
-pnpm build   # assemble:modules → validate:modules → next build
+pnpm build   # pactor-shell assemble → validate → theme sync → next build
 pnpm start   # http://localhost:9020
 ```
 
@@ -132,7 +133,7 @@ pnpm assemble:modules && pnpm dev
 | `module/server.ts` + `pactor.module.json` 的 `serverEntry`/`apiPrefixes` | 业务 API（可选，参考 risk-analysis） |
 | web-shell `package.json` | `pnpm add` 新模块 tgz |
 | web-shell `src/modules/module-list.json` | 启用新模块（`enabled` / `menuMode` / `access`） |
-| web-shell `src/shell/sitemap.yaml` | 左侧固定菜单指向新模块页面（`<moduleId>:<pageId>`） |
+| web-shell `src/shell/sitemap.yaml` | 一级菜单指向新模块页面（`<moduleId>:<pageId>`） |
 
 也可以使用 `pactor create <name>` 生成基础工程，再执行 `pactor module init` 补齐模块接入面。
 

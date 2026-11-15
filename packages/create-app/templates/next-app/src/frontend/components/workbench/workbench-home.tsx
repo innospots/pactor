@@ -3,6 +3,7 @@
 import { ArrowRight, Bot, History, Languages, Layers, Palette, Plus, Send, Sparkles, Trash2, Wrench, BarChart3, BookOpen, FileText, ScrollText, Settings, Shield, Table2, Users, type LucideIcon } from "lucide-react";
 import Link from "next/link";
 import { type FormEvent, useEffect, useRef, useState } from "react";
+import { Card } from "@pactor-app/ui/components";
 import type { SessionUser } from "../../types/session";
 import { useHostI18n } from "../../i18n/messages";
 
@@ -229,7 +230,7 @@ export function WorkbenchAssistant({ user }: { user?: SessionUser }) {
         : "";
 
   return (
-          <aside className="assistant-card" id="workbench-assistant">
+          <Card className="assistant-card" id="workbench-assistant">
             <header className="assistant-head">
               <div className="assistant-title">
                 <span className="assistant-mark">
@@ -374,6 +375,6 @@ export function WorkbenchAssistant({ user }: { user?: SessionUser }) {
                 </button>
               </div>
             </form>
-          </aside>
+          </Card>
   );
 }
