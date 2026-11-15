@@ -20,13 +20,14 @@
   flex-direction: column;
 }
 
-/* MetricCard 尺寸与卡片视觉对齐 KPI 行（覆盖组件的 p-4 / shadow-sm） */
+/* MetricCard 尺寸与卡片视觉对齐 KPI 行（覆盖组件内边距 / shadow-sm；
+ * 内边距消费 --pactor-card-padding 令牌，随全局密度缩放） */
 .risk-metric[data-slot="metric-card"] {
   display: flex;
   min-height: 112px;
   flex: 1;
   flex-direction: column;
-  padding: 15px 17px 36px;
+  padding: calc(var(--pactor-card-padding) - 1px) calc(var(--pactor-card-padding) + 1px) calc(var(--pactor-card-padding) + 20px);
   border-radius: var(--radius);
   box-shadow: none;
 }
@@ -49,9 +50,9 @@
  * 正向 / 中性说明为绿色；含风险语义（告警、中断）为红色 */
 .risk-metric-footnote {
   position: absolute;
-  right: 17px;
-  bottom: 13px;
-  left: 17px;
+  right: calc(var(--pactor-card-padding) + 1px);
+  bottom: calc(var(--pactor-card-padding) - 3px);
+  left: calc(var(--pactor-card-padding) + 1px);
   font-size: 11px;
   line-height: 1.4;
   color: var(--muted-foreground);
@@ -71,23 +72,24 @@
   align-items: stretch;
 }
 
-/* Card 自带 py-6 / gap-6 / px-6，统一为紧凑内边距 */
+/* Card 内边距统一走 --pactor-card-padding 令牌（随全局密度缩放），
+ * 根节点 gap/padding 归零，header/content 自定紧凑间距 */
 .risk-decision-card {
   gap: 0;
   padding: 0;
 }
 
 .risk-decision-card [data-slot="card-header"] {
-  padding: 15px 18px 0;
+  padding: calc(var(--pactor-card-padding) - 1px) calc(var(--pactor-card-padding) + 2px) 0;
 }
 
 .risk-decision-card [data-slot="card-content"] {
-  padding: 8px 18px 16px;
+  padding: calc(var(--pactor-card-padding) - 8px) calc(var(--pactor-card-padding) + 2px) var(--pactor-card-padding);
 }
 
 /* 趋势图：图表本身由 @pactor-app/chart 渲染（Canvas + 皮肤主题） */
 .risk-decision-chart [data-slot="card-content"] {
-  padding: 2px 12px 12px;
+  padding: 2px calc(var(--pactor-card-padding) - 4px) calc(var(--pactor-card-padding) - 4px);
 }
 
 /* ─── 对接状态卡 ───────────────────────────────────────────────────────── */
@@ -179,18 +181,18 @@
 
 /* ─── 对接日志 ─────────────────────────────────────────────────────────── */
 
-/* Card 默认留白收紧，与总览页明细卡保持一致 */
+/* Card 默认留白收紧，与总览页明细卡保持一致（走 --pactor-card-padding 令牌） */
 .risk-log-card {
   gap: 0;
   padding: 0;
 }
 
 .risk-log-card [data-slot="card-header"] {
-  padding: 15px 18px 0;
+  padding: calc(var(--pactor-card-padding) - 1px) calc(var(--pactor-card-padding) + 2px) 0;
 }
 
 .risk-log-card [data-slot="card-content"] {
-  padding: 8px 18px 16px;
+  padding: calc(var(--pactor-card-padding) - 8px) calc(var(--pactor-card-padding) + 2px) var(--pactor-card-padding);
 }
 
 /* 时间列：等宽数字，弱化处理 */

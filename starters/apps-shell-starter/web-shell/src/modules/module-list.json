@@ -3,13 +3,13 @@
     {
       "package": "risk-analysis",
       "enabled": true,
-      "menuMode": "hidden",
+      "menuMode": "merge",
       "access": "public"
     },
     {
       "package": "risk-decision",
       "enabled": true,
-      "menuMode": "hidden",
+      "menuMode": "merge",
       "access": "public"
     }
   ]

@@ -1,0 +1,42 @@
+# 默认 admin 布局（对齐 starters/next-app-starter 的 NavigationShell 体系）：
+# 图标轨一级菜单 + 命中分组的二级侧栏；轨道底部贴底挂 UserMenu 账户组件
+# （个人中心入口 + 退出登录；在线状态 / 明暗模式 / 界面密度 / 切换语言由
+# PactorShellHost 内建注册的 ShellUserMenu 缺省全开，可用 AppShell 或
+# PactorShellHost 的 userMenu prop 配置，皮肤切换集中在「主题设置」页）。
+# NavigationShell / UserMenu 由 @pactor-app/shell 的 PactorShellHost 内建
+# 注册为 DSL 组件（UserMenu 在 UI kit 同名组件之上叠加外壳默认配置）。
+# 右侧 Content 内的 PageOutlet 是页面出口：安装的模块命中自己的路由后
+# 由同一布局在这里渲染。
+dsl: "1.0"
+body:
+  type: Layout
+  props: { className: shell-root }
+  children:
+    - type: NavigationShell
+      props:
+        menus: ${data.session.menus}
+        railFooter:
+          type: UserMenu
+          props:
+            user:
+              name: ${data.session.user.name || '访客'}
+              email: ${data.session.user.username || ''}
+            items:
+              - { label: 个人中心, value: /profile, icon: user-round }
+            showName: false
+            side: right
+            align: end
+          events:
+            onSelect:
+              - action: navigate
+                params: { to: "${event}" }
+            onSignOut:
+              - action: request
+                params: { method: POST, url: /api/auth/logout }
+              - action: app.reload
+                params: { to: /login }
+      children:
+        - type: Content
+          props: { className: shell-content }
+          children:
+            - type: PageOutlet

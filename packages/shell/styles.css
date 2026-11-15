@@ -362,3 +362,319 @@
     transition: none;
   }
 }
+
+/* ---- NavigationShell（rail 导航壳，移植自 next-app-starter kn-* / account-*，类名不变） ---- */
+
+body:has(.shell-root) {
+  height: 100dvh;
+  min-height: 0;
+  overflow: hidden;
+}
+
+body .shell-root {
+  display: flex;
+  height: 100%;
+  min-height: 0;
+  flex: 1 1 0%;
+  overflow: hidden;
+}
+
+.shell-root .shell-main,
+.kn-shell,
+.kn-main {
+  min-height: 0;
+}
+
+.shell-content {
+  min-width: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+.kn-shell {
+  display: flex;
+  width: 100%;
+  min-height: 0;
+  flex: 1;
+}
+
+.kn-rail {
+  display: flex;
+  width: 52px;
+  flex: 0 0 52px;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 10px;
+  padding: 16px 7px;
+  overflow: visible;
+  background: var(--rail-background, #172033);
+  color: var(--rail-foreground, #9daec4);
+  transition: width 200ms ease, flex-basis 200ms ease;
+}
+
+.kn-rail-expandable:hover,
+.kn-rail-expandable:has(.kn-rail-button:focus-visible) {
+  width: 150px;
+  flex-basis: 150px;
+}
+
+.kn-mark {
+  display: grid;
+  width: 32px;
+  height: 32px;
+  margin-bottom: 20px;
+  align-self: center;
+  flex: none;
+  place-items: center;
+  border-radius: 10px;
+  background: var(--primary, #536b7f);
+  color: var(--primary-foreground, #fff);
+  font-weight: 700;
+}
+
+.kn-rail-button {
+  display: flex;
+  width: 38px;
+  height: 38px;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  gap: 0;
+  padding: 0 10px;
+  overflow: hidden;
+  border: 0;
+  border-radius: 10px;
+  background: transparent;
+  color: inherit;
+  text-decoration: none;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: width 200ms ease, gap 200ms ease, background-color 150ms ease;
+}
+
+.kn-rail-button:hover,
+.kn-rail-button.is-active {
+  background: color-mix(in srgb, var(--rail-foreground, #9daec4) 19%, transparent);
+  color: var(--rail-foreground, #fff);
+}
+
+.kn-rail-expandable:hover .kn-rail-button,
+.kn-rail-expandable:has(.kn-rail-button:focus-visible) .kn-rail-button {
+  width: 100%;
+  justify-content: flex-start;
+  gap: 10px;
+}
+
+.kn-rail-button svg {
+  flex: none;
+}
+
+.kn-rail-label {
+  display: block;
+  max-width: 0;
+  overflow: hidden;
+  opacity: 0;
+  font-size: 14px;
+  text-overflow: ellipsis;
+  transition: max-width 200ms ease, opacity 150ms ease;
+}
+
+.kn-rail-expandable:hover .kn-rail-label,
+.kn-rail-expandable:has(.kn-rail-button:focus-visible) .kn-rail-label {
+  max-width: 110px;
+  opacity: 1;
+}
+
+/* SkinSwitcher 挂在 railFooter：宽度与 rail 对齐；窄轨内隐藏文案（aria-label 仍在） */
+.kn-rail .pactor-shell-skin-trigger {
+  padding: 8px 10px;
+}
+
+.kn-rail .pactor-shell-skin-label {
+  display: none;
+}
+
+.kn-sidebar {
+  width: 200px;
+  flex: 0 0 200px;
+  min-height: 0;
+  padding: 24px 12px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  border-right: 1px solid var(--border, #e5e7eb);
+  background: var(--background, #f8f9fa);
+}
+
+.kn-sidebar-title {
+  margin: 3px 12px 24px;
+  font-size: 16px;
+  font-weight: 650;
+}
+
+.kn-menu {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.kn-menu-item {
+  display: block;
+  padding: 10px 12px;
+  border-radius: 8px;
+  color: var(--foreground, #171717);
+  font-size: 14px;
+  text-decoration: none;
+}
+
+.kn-menu-item:hover {
+  background: var(--muted, #f1f5f9);
+}
+
+.kn-menu-item.is-active {
+  background: var(--accent, #e2e8f0);
+  color: var(--accent-foreground, inherit);
+  font-weight: 600;
+}
+
+.kn-rail-button:focus-visible,
+.kn-menu-item:focus-visible {
+  outline: 2px solid var(--ring, #94a3b8);
+  outline-offset: 2px;
+}
+
+.kn-main {
+  display: flex;
+  min-width: 0;
+  min-height: 0;
+  flex: 1;
+  flex-direction: column;
+}
+
+.kn-main .shell-content {
+  min-height: 0;
+  flex: 1;
+  overflow: auto;
+}
+
+@media (max-width: 640px) {
+  .kn-rail {
+    width: 48px;
+    flex-basis: 48px;
+    padding-inline: 5px;
+  }
+
+  .kn-rail-expandable:hover,
+  .kn-rail-expandable:has(.kn-rail-button:focus-visible) {
+    width: 150px;
+    flex-basis: 150px;
+  }
+
+  .kn-sidebar {
+    width: 130px;
+    flex-basis: 130px;
+    padding-inline: 6px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .kn-rail,
+  .kn-rail-button,
+  .kn-rail-label {
+    transition: none;
+  }
+}
+
+/* ---- 轨道底部插槽（默认 admin 布局挂内置 UserMenu） ---- */
+
+.kn-rail-footer {
+  margin-top: auto;
+}
+
+/* UserMenu 触发器（default 形态 40px 胶囊）收窄贴合 38px 轨宽并居中 */
+.kn-rail [data-slot='user-menu-trigger'] {
+  padding: 3px;
+  margin-inline: auto;
+}
+
+/* ---- SkinGallery 页面 / 默认工作台 ---- */
+
+.pactor-shell-gallery {
+  max-width: 1080px;
+  margin: 0 auto;
+  padding: 40px clamp(20px, 4vw, 56px);
+}
+
+.pactor-shell-gallery-heading h1 {
+  margin: 0;
+  font-size: 30px;
+  font-weight: 700;
+}
+
+.pactor-shell-gallery-heading p {
+  margin: 8px 0 0;
+  color: var(--muted-foreground, #6b7280);
+}
+
+.pactor-shell-gallery-section {
+  margin-top: 32px;
+}
+
+.pactor-shell-gallery-section-head {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+
+.pactor-shell-gallery-section-head h2 {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 650;
+}
+
+.pactor-shell-gallery-section-head p {
+  margin: 4px 0 0;
+  color: var(--muted-foreground, #6b7280);
+  font-size: 13px;
+}
+
+.pactor-shell-gallery-section-head > span {
+  color: var(--muted-foreground, #6b7280);
+  font-size: 13px;
+}
+
+.pactor-shell-gallery-mode {
+  max-width: 280px;
+  margin-bottom: 16px;
+}
+
+.pactor-shell-workspace {
+  max-width: 1080px;
+  margin: 0 auto;
+  padding: 40px clamp(20px, 4vw, 56px);
+}
+
+.pactor-shell-workspace-subtitle {
+  margin-top: 8px;
+}
+
+.pactor-shell-workspace-grid {
+  margin-top: 28px;
+}
+
+.pactor-shell-workspace-card {
+  width: min(320px, 100%);
+}
+
+.pactor-shell-workspace-card [data-slot='card-content'] {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.pactor-shell-profile {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 40px clamp(20px, 4vw, 56px);
+}

@@ -1,0 +1,74 @@
+[
+  {
+    "id": "status",
+    "code": "STATUS",
+    "name": "通用状态",
+    "status": "ENABLED",
+    "items": [
+      {
+        "itemValue": "ENABLED",
+        "itemName": "启用"
+      },
+      {
+        "itemValue": "DISABLED",
+        "itemName": "禁用"
+      }
+    ]
+  },
+  {
+    "id": "priority",
+    "code": "PRIORITY",
+    "name": "优先级",
+    "status": "ENABLED",
+    "items": [
+      {
+        "itemValue": "HIGH",
+        "itemName": "高"
+      },
+      {
+        "itemValue": "MEDIUM",
+        "itemName": "中"
+      },
+      {
+        "itemValue": "LOW",
+        "itemName": "低"
+      }
+    ]
+  },
+  {
+    "id": "category",
+    "code": "CATEGORY",
+    "name": "业务分类",
+    "status": "ENABLED",
+    "items": [
+      {
+        "itemValue": "OPERATION",
+        "itemName": "运营"
+      },
+      {
+        "itemValue": "TECH",
+        "itemName": "技术"
+      },
+      {
+        "itemValue": "MANAGEMENT",
+        "itemName": "管理"
+      }
+    ]
+  },
+  {
+    "id": "notice_type",
+    "code": "NOTICE_TYPE",
+    "name": "通知类型",
+    "status": "DISABLED",
+    "items": [
+      {
+        "itemValue": "SYSTEM",
+        "itemName": "系统通知"
+      },
+      {
+        "itemValue": "TASK",
+        "itemName": "任务提醒"
+      }
+    ]
+  }
+]

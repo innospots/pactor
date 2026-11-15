@@ -1,0 +1,23 @@
+# 默认个人中心占位页（移植自 starters/next-app-starter，文案直写中文）。
+dsl: "1.0"
+page:
+  id: profile
+  title: 个人中心
+body:
+  type: Page
+  props: { className: pactor-shell-profile }
+  children:
+    - type: Typography
+      props: { variant: h3, text: 个人中心 }
+    - type: Typography
+      props: { variant: muted, text: 查看当前登录账户的信息。 }
+    - type: Card
+      props: { title: 个人信息 }
+      children:
+        - type: Descriptions
+          props:
+            column: 1
+            items:
+              - { label: 姓名, value: "${data.session.user.name}" }
+              - { label: 账号, value: "${data.session.user.username}" }
+              - { label: 角色, value: "${data.session.user.roles}" }

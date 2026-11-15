@@ -1,0 +1,28 @@
+# @pactor-app/shell 内置默认站点：宿主未在 src/shell/ 提供同名文件时，
+# 由 pactor-shell assemble 回退使用本层；宿主 sitemap.yaml 与本文件按字段合并
+# （app/auth 宿主优先，layouts 按 key 合并，menus/pages 宿主一旦声明即整体替换）。
+id: shell
+resourceType: sitemap
+version: 1
+dslVersion: "1.0"
+app: { name: Pactor Shell }
+auth: { loginPath: /login }
+layout: admin
+
+pages:
+  - { id: login, path: /login, title: 登录, version: 1, public: true }
+  - { id: workspace, path: /workspace, title: 工作台, version: 1, public: true }
+  - { id: themes, path: /settings/themes, title: 主题设置, version: 1, public: true }
+  - { id: profile, path: /profile, title: 个人中心, version: 1, public: true }
+
+menus:
+  - { id: login, type: page, pageId: login, path: /login, title: 登录, layout: login, public: true, hidden: true }
+  - { id: workspace, type: page, pageId: workspace, path: /workspace, title: 工作台, icon: workspace, layout: admin, public: true }
+  - { id: themes, type: page, pageId: themes, path: /settings/themes, title: 主题设置, icon: settings, layout: admin, public: true }
+  - { id: profile, type: page, pageId: profile, path: /profile, title: 个人中心, layout: admin, public: true, hidden: true }
+
+layouts:
+  admin: layouts/admin.layout.yaml
+  login: layouts/login.layout.yaml
+  auth: layouts/auth.layout.yaml
+  blank: layouts/blank.layout.yaml

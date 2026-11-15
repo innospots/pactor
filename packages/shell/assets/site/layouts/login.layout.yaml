@@ -1,0 +1,4 @@
+# 登录布局：纯页面出口（与 next-app-starter 的 login 布局一致）。
+dsl: "1.0"
+body:
+  type: PageOutlet

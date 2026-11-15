@@ -125,7 +125,7 @@
   min-height: 112px;
   flex: 1;
   flex-direction: column;
-  padding: 15px 17px 36px;
+  padding: calc(var(--pactor-card-padding) - 1px) calc(var(--pactor-card-padding) + 1px) calc(var(--pactor-card-padding) + 20px);
   border-radius: var(--radius);
   box-shadow: none;
 }
@@ -143,9 +143,9 @@
 }
 .risk-metric-footnote {
   position: absolute;
-  right: 17px;
-  bottom: 13px;
-  left: 17px;
+  right: calc(var(--pactor-card-padding) + 1px);
+  bottom: calc(var(--pactor-card-padding) - 3px);
+  left: calc(var(--pactor-card-padding) + 1px);
   font-size: 11px;
   line-height: 1.4;
   color: var(--muted-foreground);
@@ -164,13 +164,13 @@
   padding: 0;
 }
 .risk-decision-card [data-slot=card-header] {
-  padding: 15px 18px 0;
+  padding: calc(var(--pactor-card-padding) - 1px) calc(var(--pactor-card-padding) + 2px) 0;
 }
 .risk-decision-card [data-slot=card-content] {
-  padding: 8px 18px 16px;
+  padding: calc(var(--pactor-card-padding) - 8px) calc(var(--pactor-card-padding) + 2px) var(--pactor-card-padding);
 }
 .risk-decision-chart [data-slot=card-content] {
-  padding: 2px 12px 12px;
+  padding: 2px calc(var(--pactor-card-padding) - 4px) calc(var(--pactor-card-padding) - 4px);
 }
 .risk-status-card {
   height: 100%;
@@ -242,10 +242,10 @@
   padding: 0;
 }
 .risk-log-card [data-slot=card-header] {
-  padding: 15px 18px 0;
+  padding: calc(var(--pactor-card-padding) - 1px) calc(var(--pactor-card-padding) + 2px) 0;
 }
 .risk-log-card [data-slot=card-content] {
-  padding: 8px 18px 16px;
+  padding: calc(var(--pactor-card-padding) - 8px) calc(var(--pactor-card-padding) + 2px) var(--pactor-card-padding);
 }
 .risk-log-time {
   font-variant-numeric: tabular-nums;

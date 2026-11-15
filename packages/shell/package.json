@@ -1,6 +1,6 @@
 {
   "name": "@pactor-app/shell",
-  "version": "1.69.0",
+  "version": "1.70.0",
   "description": "Pactor App Shell：Next.js (App Router) 专用容器组件包 —— 一级菜单 / 皮肤设置 / 布局外壳、Runtime DSL API handler 工厂与构建期模块装配 CLI",
   "keywords": ["pactor", "app-shell", "nextjs", "skin", "theme"],
   "license": "MIT",
@@ -38,7 +38,7 @@
   "bin": { "pactor-shell": "./dist/bin/cli.js" },
   "sideEffects": ["./styles.css"],
   "engines": { "node": ">=20" },
-  "files": ["dist", "styles.css"],
+  "files": ["dist", "styles.css", "assets"],
   "scripts": {
     "build": "tsup",
     "test": "vitest run",
@@ -46,9 +46,13 @@
   },
   "publishConfig": { "access": "public" },
   "dependencies": {
+    "@pactor-app/blocks": "workspace:*",
     "@pactor-app/core": "workspace:*",
+    "@pactor-app/router": "workspace:*",
     "@pactor-app/runtime": "workspace:*",
     "@pactor-app/theme": "workspace:*",
+    "@pactor-app/ui": "workspace:*",
+    "lucide-react": "^1.34.0",
     "yaml": "^2.9.1"
   },
   "peerDependencies": {

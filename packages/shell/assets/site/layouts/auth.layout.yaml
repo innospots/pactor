@@ -1,0 +1,20 @@
+# 认证布局：居中卡片容器（与 next-app-starter 的 auth 布局一致）。
+dsl: "1.0"
+body:
+  type: Flex
+  props:
+    direction: vertical
+    justify: center
+    align: center
+    style: { minHeight: 100vh, padding: 24 }
+  children:
+    - type: Flex
+      props:
+        direction: vertical
+        style:
+          width: 380
+          padding: 24
+          border: 1px solid var(--border)
+          borderRadius: 12
+      children:
+        - type: PageOutlet

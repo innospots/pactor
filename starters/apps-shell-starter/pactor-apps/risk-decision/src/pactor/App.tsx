@@ -5,6 +5,10 @@ import { Suspense, useCallback } from "react";
 import { SitemapApp, createHttpHooks } from "pactor-app";
 
 import { allowAllGuard, apiBaseUrl, sitemapSources } from "./config";
+import { ModuleSidebar } from "./components/ModuleSidebar";
+
+/** 布局 DSL 引用的组件（admin 布局的模块二级侧栏） */
+const pactorComponents: Record<string, unknown> = { ModuleSidebar };
 
 /** HTTP 钩子模块级常量：内联创建会让 SitemapApp 的页面/布局工厂随渲染重建 */
 const pactorHttpHooks = createHttpHooks();
@@ -34,6 +38,7 @@ function PactorAppInner() {
       navigate={navigate}
       guard={allowAllGuard}
       httpAdapter={pactorHttpHooks}
+      components={pactorComponents}
     />
   );
 }

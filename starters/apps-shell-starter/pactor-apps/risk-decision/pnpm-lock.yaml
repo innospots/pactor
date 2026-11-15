@@ -8,6 +8,9 @@ importers:
 
   .:
     dependencies:
+      '@pactor-app/shell':
+        specifier: link:../../../../packages/shell
+        version: link:../../../../packages/shell
       next:
         specifier: 16.3.5
         version: 16.3.5(@babel/core@7.29.7)(@types/node@20.19.43)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)

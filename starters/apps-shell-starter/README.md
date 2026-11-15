@@ -21,7 +21,7 @@ apps-shell-starter/
 │   │       ├── runtime/             # 一行 re-export @pactor-app/shell/server/routes
 │   │       └── modules/[moduleId]/  # createModuleDispatcher(moduleServers)（/api/modules/<id>/*）
 │   ├── src/
-│   │   ├── shell/                   # Shell 自带站点（sitemap.yaml、shell.layout.yaml、WorkspaceShell）
+│   │   ├── shell/                   # Shell 站点定制层（sitemap.yaml；布局/页面回退包默认站点）
 │   │   └── modules/                 # module-list.json（启停 / menuMode / access）与基础皮肤 theme.css
 │   ├── scripts/                     # smoke-module-api 冒烟脚本（assemble / validate 由 pactor-shell CLI 承接）
 │   ├── .generated/pactor/           # 装配产物（pactor-shell assemble 生成，勿手改）
@@ -133,7 +133,7 @@ pnpm assemble:modules && pnpm dev
 | `module/server.ts` + `pactor.module.json` 的 `serverEntry`/`apiPrefixes` | 业务 API（可选，参考 risk-analysis） |
 | web-shell `package.json` | `pnpm add` 新模块 tgz |
 | web-shell `src/modules/module-list.json` | 启用新模块（`enabled` / `menuMode` / `access`） |
-| web-shell `src/shell/sitemap.yaml` | 左侧固定菜单指向新模块页面（`<moduleId>:<pageId>`） |
+| web-shell `src/shell/sitemap.yaml` | 一级菜单指向新模块页面（`<moduleId>:<pageId>`） |
 
 也可以使用 `pactor create <name>` 生成基础工程，再执行 `pactor module init` 补齐模块接入面。
 

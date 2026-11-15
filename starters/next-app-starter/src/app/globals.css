@@ -1775,6 +1775,9 @@ body .shell-root {
   position: sticky;
   top: 24px;
   display: flex;
+  /* kit Card 自带 gap/padding 令牌：面板各段（head/history/thread/composer）自行管理间距 */
+  gap: 0;
+  padding: 0;
   height: min(710px, calc(100dvh - 48px));
   min-height: 560px;
   flex-direction: column;
@@ -1796,7 +1799,7 @@ body .shell-root {
   align-items: center;
   justify-content: space-between;
   gap: 14px;
-  padding: 19px 19px 15px;
+  padding: calc(var(--pactor-card-padding) + 3px) calc(var(--pactor-card-padding) + 3px) calc(var(--pactor-card-padding) - 1px);
 }
 
 .assistant-title {
@@ -1870,7 +1873,7 @@ body .shell-root {
   display: flex;
   align-items: center;
   gap: 8px;
-  margin: 0 19px;
+  margin: 0 calc(var(--pactor-card-padding) + 3px);
   padding: 7px 8px 7px 10px;
   border: 1px solid var(--border);
   border-radius: 10px;
@@ -1926,7 +1929,7 @@ body .shell-root {
 .assistant-thread {
   min-height: 0;
   flex: 1;
-  padding: 20px 19px 14px;
+  padding: calc(var(--pactor-card-padding) + 4px) calc(var(--pactor-card-padding) + 3px) calc(var(--pactor-card-padding) - 2px);
   overflow-y: auto;
   overscroll-behavior: contain;
 }
@@ -2055,7 +2058,7 @@ body .shell-root {
 }
 
 .assistant-composer {
-  margin: 0 14px 14px;
+  margin: 0 calc(var(--pactor-card-padding) - 2px) calc(var(--pactor-card-padding) - 2px);
   padding: 11px;
   border: 1px solid color-mix(in srgb, var(--primary) 19%, var(--border));
   border-radius: 13px;

@@ -1,0 +1,83 @@
+dsl: "1.0"
+page:
+  id: workspace
+  title: "$i18n{page.workspace.title:工作台}"
+i18n:
+  namespaces: [app]
+body:
+  type: Flex
+  props: { className: workbench-page }
+  children:
+    - type: Flex
+      props: { className: workbench-frame, direction: vertical }
+      children:
+        - type: WorkbenchHero
+          props: { user: "${data.session.user}" }
+        - type: Flex
+          props: { className: workbench-content-grid }
+          children:
+            - type: Flex
+              props: { className: workbench-main-column, direction: vertical }
+              children:
+                - type: Flex
+                  props: { className: workbench-panel, direction: vertical }
+                  children:
+                    - type: Flex
+                      props: { className: workbench-section-head }
+                      children:
+                        - type: Flex
+                          children:
+                            - type: Text
+                              props: { className: workbench-section-index, text: "01" }
+                            - type: Flex
+                              props: { direction: vertical }
+                              children:
+                                - type: Typography
+                                  props: { variant: h4, text: "$i18n{workbench.data.title:数据经营}" }
+                                - type: Typography
+                                  props: { variant: muted, text: "$i18n{workbench.data.description:数据经营}" }
+                    - type: Flex
+                      props: { className: "workbench-entry-grid" }
+                      children:
+                        - type: WorkbenchEntry
+                          props: { href: "/dashboard", icon: overview, tone: blue, title: "$i18n{workbench.data.overview:overview}", description: "$i18n{workbench.data.overviewDescription:overview}" }
+                        - type: WorkbenchEntry
+                          permission: report:view
+                          props: { href: "/reports/monthly", icon: reports, tone: green, title: "$i18n{workbench.data.reports:reports}", description: "$i18n{workbench.data.reportsDescription:reports}" }
+                        - type: WorkbenchEntry
+                          props: { href: "/models/data-list", icon: records, tone: amber, title: "$i18n{workbench.data.records:records}", description: "$i18n{workbench.data.recordsDescription:records}" }
+                - type: Flex
+                  props: { className: workbench-panel, direction: vertical }
+                  children:
+                    - type: Flex
+                      props: { className: workbench-section-head }
+                      children:
+                        - type: Flex
+                          children:
+                            - type: Text
+                              props: { className: workbench-section-index, text: "02" }
+                            - type: Flex
+                              props: { direction: vertical }
+                              children:
+                                - type: Typography
+                                  props: { variant: h4, text: "$i18n{workbench.system.title:系统管理}" }
+                                - type: Typography
+                                  props: { variant: muted, text: "$i18n{workbench.system.description:系统管理}" }
+                    - type: Flex
+                      props: { className: "workbench-entry-grid workbench-entry-grid-compact" }
+                      children:
+                        - type: WorkbenchEntry
+                          props: { href: "/settings/general", icon: settings, tone: blue, title: "$i18n{workbench.system.settings:settings}", description: "$i18n{workbench.system.settingsDescription:settings}" }
+                        - type: WorkbenchEntry
+                          props: { href: "/settings/dictionaries", icon: dictionaries, tone: green, title: "$i18n{workbench.system.dictionaries:dictionaries}", description: "$i18n{workbench.system.dictionariesDescription:dictionaries}" }
+                        - type: WorkbenchEntry
+                          props: { href: "/settings/audit-logs", icon: audit, tone: slate, title: "$i18n{workbench.system.audit:audit}", description: "$i18n{workbench.system.auditDescription:audit}" }
+                        - type: WorkbenchEntry
+                          props: { href: "/settings/roles", icon: roles, tone: violet, title: "$i18n{workbench.system.roles:roles}", description: "$i18n{workbench.system.rolesDescription:roles}" }
+                        - type: WorkbenchEntry
+                          permission: user:view
+                          props: { href: "/settings/users", icon: users, tone: rose, title: "$i18n{workbench.system.users:users}", description: "$i18n{workbench.system.usersDescription:users}" }
+                        - type: WorkbenchEntry
+                          props: { href: "/settings/themes", icon: themes, tone: amber, title: "$i18n{workbench.system.themes:themes}", description: "$i18n{workbench.system.themesDescription:themes}" }
+            - type: WorkbenchAssistant
+              props: { user: "${data.session.user}" }

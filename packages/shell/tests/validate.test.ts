@@ -1,12 +1,12 @@
-import { readFileSync, writeFileSync } from 'node:fs';
+import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 
 import { assembleModules } from '../src/assemble/assemble.js';
 import { validateModules } from '../src/assemble/validate.js';
 
-import { createFixtureHost } from './helpers.js';
+import { createBareHost, createFixtureHost } from './helpers.js';
 
 function assembledHost(): string {
   const rootDir = createFixtureHost();
@@ -17,10 +17,11 @@ function assembledHost(): string {
 describe('validateModules', () => {
   it('合法装配通过并返回计数', () => {
     const rootDir = assembledHost();
+    // 模块 1 路由/页面 + 包默认站点 4 页面/菜单 + 宿主 1 菜单
     expect(validateModules({ rootDir })).toEqual({
-      routes: 1,
-      pages: 1,
-      menus: 1,
+      routes: 5,
+      pages: 5,
+      menus: 5,
       serverApis: 0,
     });
   });
@@ -54,5 +55,35 @@ describe('validateModules', () => {
     writeFileSync(pagesPath, JSON.stringify(pages));
 
     expect(() => validateModules({ rootDir })).toThrow(/globalPageId 重复/);
+  });
+});
+
+describe('壳站点来源报告', () => {
+  it('宿主覆盖包默认同名文件时输出提示', () => {
+    const rootDir = createBareHost();
+    mkdirSync(join(rootDir, 'src/shell/layouts'), { recursive: true });
+    writeFileSync(
+      join(rootDir, 'src/shell/sitemap.yaml'),
+      ['id: shell', 'resourceType: sitemap', 'version: 1', 'menus: []', ''].join('\n'),
+    );
+    writeFileSync(
+      join(rootDir, 'src/shell/layouts/admin.layout.yaml'),
+      ['dsl: "1.0"', 'body:', '  type: PageOutlet', ''].join('\n'),
+    );
+    assembleModules({ rootDir });
+
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
+    try {
+      validateModules({ rootDir });
+      const messages = warn.mock.calls.map((call) => String(call[0]));
+      expect(messages.some((m) => m.includes('壳站点来源'))).toBe(true);
+      expect(
+        messages.some(
+          (m) => m.includes('覆盖了包默认站点同名文件') && m.includes('layouts/admin.layout.yaml'),
+        ),
+      ).toBe(true);
+    } finally {
+      warn.mockRestore();
+    }
   });
 });

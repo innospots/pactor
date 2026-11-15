@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-11-14T10:59:36.738Z",
+  "generatedAt": "2026-11-15T07:33:14.899Z",
   "modules": [
     {
       "id": "pactor-app-risk-analysis",
@@ -17,6 +17,96 @@
     }
   ],
   "routes": [
+    {
+      "publicPath": "/workspace",
+      "moduleId": "shell",
+      "pageId": "workspace",
+      "globalPageId": "shell:workspace",
+      "pattern": "/workspace",
+      "paramNames": []
+    },
+    {
+      "publicPath": "/dashboard",
+      "moduleId": "shell",
+      "pageId": "dashboard",
+      "globalPageId": "shell:dashboard",
+      "pattern": "/dashboard",
+      "paramNames": []
+    },
+    {
+      "publicPath": "/settings/general",
+      "moduleId": "shell",
+      "pageId": "system-settings",
+      "globalPageId": "shell:system-settings",
+      "pattern": "/settings/general",
+      "paramNames": []
+    },
+    {
+      "publicPath": "/settings/dictionaries",
+      "moduleId": "shell",
+      "pageId": "dictionaries",
+      "globalPageId": "shell:dictionaries",
+      "pattern": "/settings/dictionaries",
+      "paramNames": []
+    },
+    {
+      "publicPath": "/settings/audit-logs",
+      "moduleId": "shell",
+      "pageId": "audit-logs",
+      "globalPageId": "shell:audit-logs",
+      "pattern": "/settings/audit-logs",
+      "paramNames": []
+    },
+    {
+      "publicPath": "/settings/roles",
+      "moduleId": "shell",
+      "pageId": "roles",
+      "globalPageId": "shell:roles",
+      "pattern": "/settings/roles",
+      "paramNames": []
+    },
+    {
+      "publicPath": "/settings/roles/:roleId",
+      "moduleId": "shell",
+      "pageId": "role-detail",
+      "globalPageId": "shell:role-detail",
+      "pattern": "/settings/roles/:roleId",
+      "paramNames": [
+        "roleId"
+      ]
+    },
+    {
+      "publicPath": "/settings/users",
+      "moduleId": "shell",
+      "pageId": "users",
+      "globalPageId": "shell:users",
+      "pattern": "/settings/users",
+      "paramNames": []
+    },
+    {
+      "publicPath": "/login",
+      "moduleId": "shell",
+      "pageId": "login",
+      "globalPageId": "shell:login",
+      "pattern": "/login",
+      "paramNames": []
+    },
+    {
+      "publicPath": "/settings/themes",
+      "moduleId": "shell",
+      "pageId": "themes",
+      "globalPageId": "shell:themes",
+      "pattern": "/settings/themes",
+      "paramNames": []
+    },
+    {
+      "publicPath": "/profile",
+      "moduleId": "shell",
+      "pageId": "profile",
+      "globalPageId": "shell:profile",
+      "pattern": "/profile",
+      "paramNames": []
+    },
     {
       "publicPath": "/pactor-app-risk-analysis",
       "moduleId": "pactor-app-risk-analysis",

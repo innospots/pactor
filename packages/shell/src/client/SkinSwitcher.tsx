@@ -22,6 +22,7 @@ import {
   SHELL_SKIN_STORAGE_KEY,
   type ShellMode,
 } from './skin.js';
+import { SkinCardGrid } from './SkinGallery.js';
 
 export interface SkinSwitcherProps {
   /** 可选皮肤名单，缺省主题包全部预置 */
@@ -58,14 +59,6 @@ function subscribeSystemDark(onChange: () => void): () => void {
   const mq = window.matchMedia('(prefers-color-scheme: dark)');
   mq.addEventListener('change', onChange);
   return () => mq.removeEventListener('change', onChange);
-}
-
-function CheckIcon() {
-  return (
-    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-      <path d="M20 6 9 17l-5-5" />
-    </svg>
-  );
 }
 
 function PaletteIcon() {
@@ -132,7 +125,6 @@ export function SkinSwitcher({
   );
 
   const selected = resolveShellSkin(stored, defaultSkin);
-  const list = THEMES.filter((t) => skins === undefined || skins.includes(t.name));
 
   // 皮肤落地：运行时 <style> 替换首屏 <link>（宿主基础皮肤 selected=null 时不动）
   useEffect(() => {
@@ -217,64 +209,13 @@ export function SkinSwitcher({
           </div>
           <div className="pactor-shell-skin-section">
             <div className="pactor-shell-skin-heading">皮肤</div>
-            <div className="pactor-shell-theme-grid">
-              {allowDefault && (
-                <button
-                  type="button"
-                  className={`pactor-shell-theme-card${selected === null ? ' is-selected' : ''}`}
-                  aria-pressed={selected === null}
-                  aria-label="默认皮肤"
-                  onClick={() => pick(null)}
-                >
-                  <div className="pactor-shell-theme-preview">
-                    <div className="pactor-shell-theme-preview-window">
-                      <span />
-                      <div><i /><i /><i /></div>
-                    </div>
-                    {selected === null && (
-                      <span className="pactor-shell-theme-selected"><CheckIcon /> 已应用</span>
-                    )}
-                  </div>
-                  <div className="pactor-shell-theme-card-body">
-                    <div><strong>默认皮肤</strong><p>宿主基础皮肤</p></div>
-                  </div>
-                </button>
-              )}
-              {list.map((theme) => {
-                const text = themeText(theme, locale);
-                const active = selected === theme.name;
-                return (
-                  <button
-                    key={theme.name}
-                    type="button"
-                    className={`pactor-shell-theme-card${active ? ' is-selected' : ''}`}
-                    aria-pressed={active}
-                    aria-label={text.label}
-                    onClick={() => pick(theme.name)}
-                  >
-                    <div
-                      className="pactor-shell-theme-preview"
-                      style={{ backgroundColor: theme.color }}
-                    >
-                      <div className="pactor-shell-theme-preview-window">
-                        <span style={{ backgroundColor: theme.color }} />
-                        <div><i /><i /><i /></div>
-                      </div>
-                      {active && (
-                        <span className="pactor-shell-theme-selected"><CheckIcon /> 已应用</span>
-                      )}
-                    </div>
-                    <div className="pactor-shell-theme-card-body">
-                      <div>
-                        <strong>{text.label}</strong>
-                        <p>{text.family} · {text.source}</p>
-                      </div>
-                      <span className="pactor-shell-theme-hex">{theme.color}</span>
-                    </div>
-                  </button>
-                );
-              })}
-            </div>
+            <SkinCardGrid
+              skins={skins}
+              selected={selected}
+              allowDefault={allowDefault}
+              locale={locale}
+              onPick={pick}
+            />
           </div>
           </div>,
           document.body,

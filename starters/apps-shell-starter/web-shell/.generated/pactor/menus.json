@@ -1,51 +1,146 @@
 {
   "menus": [
     {
+      "id": "login",
+      "type": "page",
+      "pageId": "shell:login",
+      "path": "/login",
+      "title": "登录",
+      "layout": "login",
+      "public": true,
+      "hidden": true
+    },
+    {
+      "id": "workspace",
+      "type": "page",
+      "pageId": "shell:workspace",
+      "path": "/workspace",
+      "title": "工作台",
+      "icon": "workspace"
+    },
+    {
+      "id": "dashboard",
+      "type": "page",
+      "pageId": "shell:dashboard",
+      "path": "/dashboard",
+      "title": "数据概览",
+      "icon": "chart"
+    },
+    {
+      "id": "system",
+      "type": "group",
+      "title": "系统管理",
+      "icon": "settings",
+      "children": [
+        {
+          "id": "system-settings",
+          "type": "page",
+          "pageId": "shell:system-settings",
+          "path": "/settings/general",
+          "title": "系统设置"
+        },
+        {
+          "id": "dictionaries",
+          "type": "page",
+          "pageId": "shell:dictionaries",
+          "path": "/settings/dictionaries",
+          "title": "字典管理"
+        },
+        {
+          "id": "audit-logs",
+          "type": "page",
+          "pageId": "shell:audit-logs",
+          "path": "/settings/audit-logs",
+          "title": "审计日志"
+        },
+        {
+          "id": "roles",
+          "type": "page",
+          "pageId": "shell:roles",
+          "path": "/settings/roles",
+          "title": "角色管理"
+        },
+        {
+          "id": "users",
+          "type": "page",
+          "pageId": "shell:users",
+          "path": "/settings/users",
+          "title": "用户管理",
+          "permission": "user:view"
+        },
+        {
+          "id": "settings-themes",
+          "type": "page",
+          "pageId": "shell:themes",
+          "path": "/settings/themes",
+          "title": "主题设置"
+        }
+      ]
+    },
+    {
+      "id": "role-detail",
+      "type": "page",
+      "pageId": "shell:role-detail",
+      "path": "/settings/roles/:roleId",
+      "title": "角色详情",
+      "hidden": true,
+      "activeMenu": "roles"
+    },
+    {
+      "id": "themes",
+      "type": "page",
+      "pageId": "shell:themes",
+      "path": "/settings/themes",
+      "title": "主题设置",
+      "layout": "admin",
+      "hidden": true
+    },
+    {
+      "id": "profile",
+      "type": "page",
+      "pageId": "shell:profile",
+      "path": "/profile",
+      "title": "个人中心",
+      "layout": "admin",
+      "public": true,
+      "hidden": true
+    },
+    {
       "id": "risk-analysis",
       "type": "page",
       "pageId": "pactor-app-risk-analysis:risk-data-value",
-      "path": "/pactor-app-risk-analysis",
       "title": "风险分析",
       "icon": "chart",
-      "order": 1,
-      "public": true
+      "layout": "admin",
+      "public": true,
+      "path": "/pactor-app-risk-analysis"
     },
     {
       "id": "risk-decision",
-      "type": "page",
-      "pageId": "pactor-app-risk-decision:risk-decision",
-      "path": "/pactor-app-risk-decision",
+      "type": "group",
       "title": "风险决策",
       "icon": "shield",
-      "order": 2,
+      "children": [
+        {
+          "id": "overview",
+          "type": "page",
+          "pageId": "pactor-app-risk-decision:risk-decision",
+          "title": "总览",
+          "layout": "admin",
+          "public": true,
+          "path": "/pactor-app-risk-decision"
+        },
+        {
+          "id": "integration-logs",
+          "type": "page",
+          "pageId": "pactor-app-risk-decision:integration-logs",
+          "title": "对接日志",
+          "layout": "admin",
+          "public": true,
+          "path": "/pactor-app-risk-decision/integration-logs"
+        }
+      ],
       "public": true
-    },
-    {
-      "id": "risk-analysis",
-      "type": "page",
-      "pageId": "pactor-app-risk-analysis:risk-data-value",
-      "title": "风险分析",
-      "icon": "chart",
-      "public": true,
-      "hidden": true
-    },
-    {
-      "id": "risk-decision",
-      "type": "page",
-      "pageId": "pactor-app-risk-decision:risk-decision",
-      "title": "风险决策",
-      "icon": "shield",
-      "public": true,
-      "hidden": true
-    },
-    {
-      "id": "integration-logs",
-      "type": "page",
-      "pageId": "pactor-app-risk-decision:integration-logs",
-      "title": "对接日志",
-      "icon": "file-text",
-      "public": true,
-      "hidden": true
     }
   ]
 }

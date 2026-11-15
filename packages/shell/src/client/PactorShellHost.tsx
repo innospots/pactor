@@ -1,8 +1,9 @@
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
-import { Suspense, useMemo } from 'react';
+import { Suspense, useContext, useMemo } from 'react';
 
 import { createHttpHooks, SitemapApp } from 'pactor-app';
 import type { PactorHttpHooks } from 'pactor-app';
+import { Login } from '@pactor-app/blocks';
 import type { ActionHandler } from '@pactor-app/runtime';
 
 import {
@@ -10,6 +11,13 @@ import {
   mergeModuleComponents,
   type ModuleExtensionBundle,
 } from './register-extensions.js';
+import { NavigationShell } from './NavigationShell.js';
+import {
+  ShellUserMenu,
+  ShellUserMenuConfigContext,
+  type ShellUserMenuConfig,
+} from './ShellUserMenu.js';
+import { SkinGallery } from './SkinGallery.js';
 import { SkinSwitcher } from './SkinSwitcher.js';
 
 export interface PactorShellHostProps {
@@ -27,7 +35,14 @@ export interface PactorShellHostProps {
   actions?: Record<string, ActionHandler>;
   /** 是否向 DSL 注册 SkinSwitcher 组件（布局 YAML 可以 type: SkinSwitcher 引用），缺省 true */
   skinSwitcher?: boolean;
+  /** 外壳内 DSL UserMenu 的默认配置（在线状态 / 主题 / 密度 / 语言缺省全开）；
+   *  DSL 节点显式 props 优先；外层 AppShell 的 userMenu 配置会被本 prop 覆盖合并 */
+  userMenu?: ShellUserMenuConfig;
 }
+
+/** 内建 DSL 组件：包默认站点的布局 / 页面依赖；宿主 components 同名覆盖优先。
+ *  UserMenu 覆盖 UI kit 同名注册：叠加外壳默认配置与外观模式同步 */
+const builtinComponents = { NavigationShell, SkinGallery, Login, UserMenu: ShellUserMenu };
 
 /** 模块级缺省实例：引用稳定，避免 SitemapApp 页面工厂随渲染重建 */
 const defaultHttpAdapter = createHttpHooks();
@@ -39,8 +54,16 @@ function PactorShellHostInner(props: PactorShellHostProps) {
   const searchParams = useSearchParams();
   const router = useRouter();
 
+  // 与外层（AppShell）配置合并：本 prop 字段优先
+  const inheritedUserMenu = useContext(ShellUserMenuConfigContext);
+  const userMenuConfig = useMemo(
+    () => (props.userMenu ? { ...inheritedUserMenu, ...props.userMenu } : inheritedUserMenu),
+    [inheritedUserMenu, props.userMenu],
+  );
+
   const components = useMemo(
     () => ({
+      ...builtinComponents,
       ...(props.skinSwitcher === false ? {} : { SkinSwitcher }),
       ...mergeModuleComponents(props.extensions),
       ...props.components,
@@ -53,19 +76,21 @@ function PactorShellHostInner(props: PactorShellHostProps) {
   );
 
   return (
-    <SitemapApp
-      sources={[props.sitemapSource ?? '/api/runtime/bootstrap']}
-      baseUrl=""
-      pathname={pathname}
-      query={Object.fromEntries(searchParams.entries())}
-      navigate={(to: string) => {
-        router.push(to);
-      }}
-      components={components}
-      actions={actions}
-      httpAdapter={props.httpAdapter ?? defaultHttpAdapter}
-      pageEndpoint={props.pageEndpoint ?? defaultPageEndpoint}
-    />
+    <ShellUserMenuConfigContext.Provider value={userMenuConfig}>
+      <SitemapApp
+        sources={[props.sitemapSource ?? '/api/runtime/bootstrap']}
+        baseUrl=""
+        pathname={pathname}
+        query={Object.fromEntries(searchParams.entries())}
+        navigate={(to: string) => {
+          router.push(to);
+        }}
+        components={components}
+        actions={actions}
+        httpAdapter={props.httpAdapter ?? defaultHttpAdapter}
+        pageEndpoint={props.pageEndpoint ?? defaultPageEndpoint}
+      />
+    </ShellUserMenuConfigContext.Provider>
   );
 }
 

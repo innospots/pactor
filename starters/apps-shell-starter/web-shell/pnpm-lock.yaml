@@ -11,6 +11,9 @@ importers:
       '@pactor-app/core':
         specifier: link:../../../packages/core
         version: link:../../../packages/core
+      '@pactor-app/i18n':
+        specifier: link:../../../packages/i18n
+        version: link:../../../packages/i18n
       '@pactor-app/runtime':
         specifier: link:../../../packages/runtime
         version: link:../../../packages/runtime
@@ -20,6 +23,9 @@ importers:
       '@pactor-app/ui':
         specifier: link:../../../packages/ui
         version: link:../../../packages/ui
+      lucide-react:
+        specifier: ^1.34.0
+        version: 1.73.0(@types/react@19.3.0)(react@19.2.8)
       next:
         specifier: 16.3.5
         version: 16.3.5(@babel/core@7.29.7)(@types/node@20.19.43)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
@@ -1534,6 +1540,15 @@ packages:
   lru-cache@5.1.1:
     resolution: {integrity: sha512-KpNARQA3Iwv+jTA0utUVVbrh+Jlrr1Fv0e56GGzAFOXN7dk/FviaDW8LHmK52DlcH4WP2n6gI8vN1aesBFgo9w==}
 
+  lucide-react@1.73.0:
+    resolution: {integrity: sha512-fVOzGviL9mTfHenG1PbCfIceavyGlnpYNSYr+aGZHLRymAJ7DTP6KHuqt0uBkCKAoenr1UVkwSbDIYt2xIesEQ==}
+    peerDependencies:
+      '@types/react': '*'
+      react: ^16.5.1 || ^17.0.0 || ^18.0.0 || ^19.0.0
+    peerDependenciesMeta:
+      '@types/react':
+        optional: true
+
   magic-string@0.30.21:
     resolution: {integrity: sha512-vd2F4YUyEXKGcLHoq+TEyCjxueSeHnFxyyjNp80yg0XV4vUhnDer/lvvlqM/arB5bXQN5K2/3oinyCRyx8T2CQ==}
 
@@ -1741,7 +1756,7 @@ packages:
     engines: {iojs: '>=1.0.0', node: '>=0.10.0'}
 
   risk-analysis@file:../pactor-apps/risk-analysis/risk-analysis-0.1.0.tgz:
-    resolution: {integrity: sha512-H5z+bng4RUuUtLp0M7kx1a4F1qK0tJdFkGKfrQlHpYialn1wli5TM4MUXET3bN6NSbmFHVT8teJpIiMYjNpc1A==, tarball: file:../pactor-apps/risk-analysis/risk-analysis-0.1.0.tgz}
+    resolution: {integrity: sha512-2dnc3lwTctlZwQig6v0vQ04kKJP4g12C+69CVHy3F4+G4xH+nfj2csrI1cEgN/OLMCOl2ObedYxHCgFCcFinQA==, tarball: file:../pactor-apps/risk-analysis/risk-analysis-0.1.0.tgz}
     version: 0.1.0
     peerDependencies:
       next: 16.3.5
@@ -1750,7 +1765,7 @@ packages:
       react-dom: 19.2.8
 
   risk-decision@file:../pactor-apps/risk-decision/risk-decision-0.1.0.tgz:
-    resolution: {integrity: sha512-ddw4VrIDj80u+lcho1wgRhbZIXpp/zL/zR/YiFtGPCvDNg1GJBoV2DeXK5qAvvf6EWGvbNKWcruSUEaGMGZVIw==, tarball: file:../pactor-apps/risk-decision/risk-decision-0.1.0.tgz}
+    resolution: {integrity: sha512-H7RL1dlPIIt9sIN8FsiXrAvZGsxhCa12HlojqSDwYLuOUrcNuei4SkiE3971+H79SvCe1l4ApxgjWl0pQEvvuA==, tarball: file:../pactor-apps/risk-decision/risk-decision-0.1.0.tgz}
     version: 0.1.0
     peerDependencies:
       next: 16.3.5
@@ -3600,6 +3615,12 @@ snapshots:
     dependencies:
       yallist: 3.1.1
 
+  lucide-react@1.73.0(@types/react@19.3.0)(react@19.2.8):
+    dependencies:
+      react: 19.2.8
+    optionalDependencies:
+      '@types/react': 19.3.0
+
   magic-string@0.30.21:
     dependencies:
       '@jridgewell/sourcemap-codec': 1.6.0
@@ -3827,6 +3848,7 @@ snapshots:
 
   risk-decision@file:../pactor-apps/risk-decision/risk-decision-0.1.0.tgz(next@16.3.5(@babel/core@7.29.7)(@types/node@20.19.43)(react-dom@19.2.8(react@19.2.8))(react@19.2.8))(pactor-app@..+..+packages+pactor)(react-dom@19.2.8(react@19.2.8))(react@19.2.8):
     dependencies:
+      '@pactor-app/shell': link:../../../../packages/shell
       next: 16.3.5(@babel/core@7.29.7)(@types/node@20.19.43)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
       pactor-app: link:../../../packages/pactor
       react: 19.2.8

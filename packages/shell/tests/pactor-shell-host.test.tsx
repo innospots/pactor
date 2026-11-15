@@ -21,6 +21,17 @@ vi.mock('next/navigation', () => ({
   useRouter: () => ({ push: pushMock }),
 }));
 
+vi.mock('next/link', () => ({
+  default: ({ href, children }: { href: string; children: React.ReactNode }) => (
+    <a href={href}>{children}</a>
+  ),
+}));
+
+// blocks 的 Login 实现与本包注册逻辑无关，桩掉避免拉起整条组件依赖链
+vi.mock('@pactor-app/blocks', () => ({
+  Login: () => null,
+}));
+
 import { PactorShellHost } from '../src/client/PactorShellHost.js';
 
 (globalThis as Record<string, unknown>).IS_REACT_ACT_ENVIRONMENT = true;
@@ -65,5 +76,24 @@ describe('PactorShellHost', () => {
     expect((props.pageEndpoint as (id: string) => string)('m1:home')).toBe('/api/custom/m1:home');
     (props.navigate as (to: string) => void)('/m1');
     expect(pushMock).toHaveBeenCalledWith('/m1');
+  });
+
+  it('内建注册 NavigationShell / SkinGallery / Login（默认站点布局与页面依赖）', () => {
+    render(<PactorShellHost extensions={{}} />);
+    const components = captured.props!.components as Record<string, unknown>;
+    expect(components.NavigationShell).toBeTypeOf('function');
+    expect(components.SkinGallery).toBeTypeOf('function');
+    expect(components.Login).toBeTypeOf('function');
+    // UserMenu 覆盖 UI kit 同名注册：叠加外壳默认配置与外观模式同步
+    expect(components.UserMenu).toBeTypeOf('function');
+  });
+
+  it('宿主 components 同名覆盖内建注册', () => {
+    render(
+      <PactorShellHost extensions={{}} components={{ NavigationShell: Panel }} />,
+    );
+    const components = captured.props!.components as Record<string, unknown>;
+    expect(components.NavigationShell).toBe(Panel);
+    expect(components.SkinGallery).toBeTypeOf('function');
   });
 });

@@ -1,5 +1,5 @@
 {
-  "layout": "shell",
+  "layout": "admin",
   "dslVersion": "1.0",
   "app": {
     "name": "InnoSpots"
@@ -17,48 +17,26 @@
         },
         "children": [
           {
-            "type": "Content",
+            "type": "NavigationShell",
             "props": {
-              "className": "shell-content"
-            },
-            "children": [
-              {
-                "type": "PageOutlet"
-              }
-            ]
-          }
-        ]
-      }
-    },
-    "shell": {
-      "dsl": "1.0",
-      "body": {
-        "type": "Layout",
-        "props": {
-          "className": "h-dvh overflow-hidden bg-zinc-50"
-        },
-        "children": [
-          {
-            "type": "Sidebar",
-            "props": {
-              "className": "flex-1",
-              "style": {
-                "minHeight": 0
-              },
-              "brand": {
-                "title": "InnoSpots"
-              },
-              "collapsible": false,
-              "sidebarFooter": {
-                "type": "SkinSwitcher",
+              "menus": "${data.session.menus}",
+              "railFooter": {
+                "type": "UserMenu",
                 "props": {
-                  "allowDefault": true
-                }
-              },
-              "content": {
-                "type": "SitemapMenu",
-                "props": {
-                  "items": "${data.session.menus}"
+                  "user": {
+                    "name": "${data.session.user.name || '访客'}",
+                    "email": "${data.session.user.username || ''}"
+                  },
+                  "items": [
+                    {
+                      "label": "个人中心",
+                      "value": "/profile",
+                      "icon": "user-round"
+                    }
+                  ],
+                  "showName": false,
+                  "side": "right",
+                  "align": "end"
                 },
                 "events": {
                   "onSelect": [
@@ -66,6 +44,21 @@
                       "action": "navigate",
                       "params": {
                         "to": "${event}"
+                      }
+                    }
+                  ],
+                  "onSignOut": [
+                    {
+                      "action": "request",
+                      "params": {
+                        "method": "POST",
+                        "url": "/api/auth/logout"
+                      }
+                    },
+                    {
+                      "action": "app.reload",
+                      "params": {
+                        "to": "/login"
                       }
                     }
                   ]
@@ -76,10 +69,7 @@
               {
                 "type": "Content",
                 "props": {
-                  "className": "overflow-y-auto",
-                  "style": {
-                    "background": "var(--background)"
-                  }
+                  "className": "shell-content"
                 },
                 "children": [
                   {
@@ -90,6 +80,52 @@
             ]
           }
         ]
+      }
+    },
+    "login": {
+      "dsl": "1.0",
+      "body": {
+        "type": "PageOutlet"
+      }
+    },
+    "auth": {
+      "dsl": "1.0",
+      "body": {
+        "type": "Flex",
+        "props": {
+          "direction": "vertical",
+          "justify": "center",
+          "align": "center",
+          "style": {
+            "minHeight": "100vh",
+            "padding": 24
+          }
+        },
+        "children": [
+          {
+            "type": "Flex",
+            "props": {
+              "direction": "vertical",
+              "style": {
+                "width": 380,
+                "padding": 24,
+                "border": "1px solid var(--border)",
+                "borderRadius": 12
+              }
+            },
+            "children": [
+              {
+                "type": "PageOutlet"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    "blank": {
+      "dsl": "1.0",
+      "body": {
+        "type": "PageOutlet"
       }
     }
   }

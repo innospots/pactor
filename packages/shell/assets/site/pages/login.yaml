@@ -1,0 +1,57 @@
+# 默认登录页（移植自 starters/next-app-starter，去掉 $i18n 接线，文案直写中文）。
+# type: Login 来自 @pactor-app/blocks，由 PactorShellHost 内建注册；
+# 提交闭环由 DSL 编排：内置 request（POST /api/auth/login）+ 失败置态 +
+# 成功 message + app.reload 整页重载（sitemap 按已登录会话重新下发）。
+# 宿主后端登录端点不同时，在 src/shell/pages/login.yaml 提供同名页面覆盖。
+dsl: "1.0"
+page:
+  id: login
+  title: 登录
+  name: login
+  description: 登录页
+
+state:
+  # 内联错误提示开关：失败分支置 true，重新提交 / 成功复位
+  loginFailed: false
+
+body:
+  type: Login
+  props:
+    layout: split
+    authVariant: card
+    brand:
+      name: Pactor Shell
+      title: 管理后台登录
+      description: A modular admin application powered by Pactor.
+    title: 登录
+    subtitle: 演示账号
+    submitText: 登 录
+    errorMessage: 用户名或密码错误
+    errorVisible: ${state.loginFailed}
+  events:
+    onSubmit:
+      - action: setState
+        params:
+          loginFailed: false
+      - id: loginResult
+        action: request
+        params:
+          method: POST
+          url: /api/auth/login
+          body:
+            username: ${event.username}
+            password: ${event.password}
+      - action: setState
+        condition: ${actions.loginResult == null || actions.loginResult.token == null}
+        params:
+          loginFailed: true
+      - action: if
+        params:
+          condition: ${actions.loginResult != null && actions.loginResult.token != null}
+          then:
+            - action: message
+              params:
+                messageType: success
+                text: 登录成功，正在跳转…
+            - action: app.reload
+              params: { to: /workspace }

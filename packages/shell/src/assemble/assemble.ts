@@ -17,6 +17,7 @@ import { dirname, join, normalize, relative, resolve } from 'node:path';
 
 import { parseDocument } from 'yaml';
 
+import { resolveDefaultSiteDir } from './default-site.js';
 import type {
   AssemblyModule,
   AssemblyRoute,
@@ -264,16 +265,31 @@ function assertInsideRoot(root: string, target: string): void {
 function namespaceMenus(
   menus: SiteMenuItem[] | undefined,
   moduleId: string,
+  pathByPageId: Map<string, string>,
+  basePath: string,
 ): SiteMenuItem[] {
   return (menus ?? []).map((item) => {
     const next = { ...item };
+    // 模块菜单契约不携带对外 path（pactor module build 会剥离）：按 pageId
+    // 从页面清单推导（basePath + 页面相对路径）；显式 path 视为模块内相对
+    // 路径，同样拼 basePath。页面清单查不到时保留原 path。
+    if (next.pageId) {
+      const rawId = next.pageId.includes(':')
+        ? next.pageId.slice(next.pageId.indexOf(':') + 1)
+        : next.pageId;
+      const derived = pathByPageId.get(rawId);
+      if (derived) next.path = derived;
+      else if (next.path) next.path = joinPublicPath(basePath, next.path);
+    } else if (next.path) {
+      next.path = joinPublicPath(basePath, next.path);
+    }
     // Shell 自带站点可以直接引用已限定命名空间的页面（moduleId:pageId），
     // 只给模块内的相对 pageId 加前缀，避免拼成 moduleId:moduleId:pageId。
     if (next.pageId && !next.pageId.includes(':')) {
       next.pageId = `${moduleId}:${next.pageId}`;
     }
     if (next.type === 'group' && next.children) {
-      next.children = namespaceMenus(next.children, moduleId);
+      next.children = namespaceMenus(next.children, moduleId, pathByPageId, basePath);
     }
     return next;
   });
@@ -304,8 +320,13 @@ function transformModuleMenus(
   menus: SiteMenuItem[] | undefined,
   moduleId: string,
   entry: ModuleListEntry,
+  sitePages: SiteSitemap['pages'],
+  basePath: string,
 ): SiteMenuItem[] {
-  const namespaced = namespaceMenus(menus, moduleId);
+  const pathByPageId = new Map(
+    (sitePages ?? []).map((page) => [page.id, joinPublicPath(basePath, page.path)]),
+  );
+  const namespaced = namespaceMenus(menus, moduleId, pathByPageId, basePath);
 
   if (entry.menuMode !== 'hidden') {
     return applyPublicAccess(namespaced, entry);
@@ -348,7 +369,7 @@ function buildSitemapMeta(
  */
 function resolveSiteLayouts(
   site: SiteSitemap,
-  manifestDir: string,
+  source: SiteSource,
 ): Record<string, unknown> {
   const resolved: Record<string, unknown> = {};
   for (const [name, value] of Object.entries(site.layouts ?? {})) {
@@ -356,12 +377,11 @@ function resolveSiteLayouts(
       resolved[name] = value;
       continue;
     }
-    const layoutPath = resolve(manifestDir, value);
-    assertInsideRoot(manifestDir, layoutPath);
-    if (!existsSync(layoutPath)) {
-      throw new Error(`布局 ${name} 的 DSL 文件不存在：${layoutPath}`);
+    const hit = source.resolveFile(value);
+    if (!hit) {
+      throw new Error(`布局 ${name} 的 DSL 文件不存在：${value}`);
     }
-    resolved[name] = loadYamlFile(layoutPath);
+    resolved[name] = loadYamlFile(hit.path);
   }
   return resolved;
 }
@@ -382,10 +402,125 @@ function findPageDslFile(dslRoot: string, pageId: string): string | null {
   return null;
 }
 
+interface SiteFileHit {
+  path: string;
+  root: string;
+}
+
+/** 站点文件解析入口：模块是单目录，Shell 自带站点是「宿主 → 包默认」分层。 */
+interface SiteSource {
+  resolveFile(rel: string): SiteFileHit | null;
+  findPageFile(dslRootRel: string, pageId: string): SiteFileHit | null;
+}
+
+function singleDirSource(dir: string): SiteSource {
+  return {
+    resolveFile(rel) {
+      const target = resolve(dir, rel);
+      assertInsideRoot(dir, target);
+      return existsSync(target) ? { path: target, root: dir } : null;
+    },
+    findPageFile(dslRootRel, pageId) {
+      const dslRoot = resolve(dir, dslRootRel);
+      assertInsideRoot(dir, dslRoot);
+      if (!existsSync(dslRoot)) return null;
+      const found = findPageDslFile(dslRoot, pageId);
+      return found ? { path: found, root: dir } : null;
+    },
+  };
+}
+
+/** 壳站点文件来源报告：落盘 shell-site.json，供 validate 输出来源摘要与覆盖提示。 */
+export interface ShellSiteReport {
+  /** 命中的相对路径 → 来源层 */
+  sources: Record<string, 'host' | 'default'>;
+  /** 宿主与默认层同时存在、宿主胜出的相对路径（sitemap.yaml 走字段合并，不计入） */
+  overridden: string[];
+}
+
+function layeredSiteSource(
+  hostDir: string,
+  defaultDir: string,
+  report: ShellSiteReport,
+): SiteSource {
+  const layers = [
+    { dir: hostDir, origin: 'host' as const },
+    { dir: defaultDir, origin: 'default' as const },
+  ];
+  const record = (hit: SiteFileHit, layerIndex: number): void => {
+    const rel = relative(hit.root, hit.path);
+    report.sources[rel] = layers[layerIndex].origin;
+    if (
+      layerIndex === 0 &&
+      rel !== 'sitemap.yaml' &&
+      existsSync(join(defaultDir, rel)) &&
+      !report.overridden.includes(rel)
+    ) {
+      report.overridden.push(rel);
+    }
+  };
+  return {
+    resolveFile(rel) {
+      for (let i = 0; i < layers.length; i += 1) {
+        const target = resolve(layers[i].dir, rel);
+        assertInsideRoot(layers[i].dir, target);
+        if (existsSync(target)) {
+          const hit = { path: target, root: layers[i].dir };
+          record(hit, i);
+          return hit;
+        }
+      }
+      return null;
+    },
+    findPageFile(dslRootRel, pageId) {
+      for (let i = 0; i < layers.length; i += 1) {
+        const dslRoot = resolve(layers[i].dir, dslRootRel);
+        assertInsideRoot(layers[i].dir, dslRoot);
+        if (!existsSync(dslRoot)) continue;
+        const found = findPageDslFile(dslRoot, pageId);
+        if (found) {
+          const hit = { path: found, root: layers[i].dir };
+          record(hit, i);
+          return hit;
+        }
+      }
+      return null;
+    },
+  };
+}
+
+/**
+ * sitemap 字段级合并（宿主存在时）：app/auth/layout/dslVersion 宿主优先；
+ * layouts 按 key 合并、同名宿主优先；menus/pages 按 id 合并——宿主同 id 条目
+ * 覆盖默认，其余默认条目保留（排在宿主条目之后）。
+ * menus 不能整体替换：SitemapApp 的路由与匿名访问守卫由 menus 驱动，
+ * 替换会让默认页面（含 hidden 的 login/profile）的路由消失、开箱页面 404。
+ */
+function mergeById<T extends Record<string, any>>(base: T[] | undefined, override: T[] | undefined): T[] | undefined {
+  if (!override) return base;
+  if (!base) return override;
+  const overriddenIds = new Set(override.map((item) => item.id).filter(Boolean));
+  return [...override, ...base.filter((item) => !item.id || !overriddenIds.has(item.id))];
+}
+
+function mergeSiteSitemaps(base: SiteSitemap, override: SiteSitemap): SiteSitemap {
+  return {
+    ...base,
+    ...override,
+    app: override.app ?? base.app,
+    auth: override.auth ?? base.auth,
+    layouts: { ...base.layouts, ...override.layouts },
+    menus: mergeById(base.menus, override.menus),
+    pages: mergeById(base.pages, override.pages),
+  };
+}
+
 function assembleModule(
   entry: ModuleListEntry,
   manifest: ModuleManifestV1,
   manifestDir: string,
+  source: SiteSource = singleDirSource(manifestDir),
+  siteOverride?: SiteSitemap,
 ): AssembledModule {
   const basePath = normalizeBasePath(entry.basePath ?? manifest.basePath);
   const moduleId = manifest.id;
@@ -395,10 +530,14 @@ function assembleModule(
     manifestDir,
     moduleId,
   );
-  const sitemapPath = resolve(manifestDir, manifest.sitemap);
-  assertInsideRoot(manifestDir, sitemapPath);
-  const site = loadYamlFile(sitemapPath) as SiteSitemap;
-  const layouts = resolveSiteLayouts(site, manifestDir);
+  const site = siteOverride ?? (() => {
+    const hit = source.resolveFile(manifest.sitemap);
+    if (!hit) {
+      throw new Error(`站点 sitemap 不存在：${resolve(manifestDir, manifest.sitemap)}`);
+    }
+    return loadYamlFile(hit.path) as SiteSitemap;
+  })();
+  const layouts = resolveSiteLayouts(site, source);
 
   const routes: AssemblyRoute[] = [];
   const pages: PageIndexEntry[] = [];
@@ -419,14 +558,13 @@ function assembleModule(
       paramNames,
     });
 
-    const dslRoot = resolve(manifestDir, manifest.dslRoot);
-    const dslSource = findPageDslFile(dslRoot, page.id);
-    if (!dslSource) {
+    const dslHit = source.findPageFile(manifest.dslRoot, page.id);
+    if (!dslHit) {
       throw new Error(
         `${moduleId} 页面 ${page.id} 缺少 DSL 文件（在 ${manifest.dslRoot} 下未找到 ${page.id}.yaml）`,
       );
     }
-    assertInsideRoot(manifestDir, dslSource);
+    const dslSource = dslHit.path;
     const dslTargetRel = `dsl/${moduleId}/${page.id}.yaml`;
     dslCopies.push({
       from: dslSource,
@@ -474,7 +612,7 @@ function assembleModule(
     },
     routes,
     pages,
-    menus: transformModuleMenus(site.menus, moduleId, entry),
+    menus: transformModuleMenus(site.menus, moduleId, entry, site.pages, basePath),
     sitemapMeta: buildSitemapMeta(site, basePath, layouts),
     layouts,
     dslCopies,
@@ -485,27 +623,54 @@ function assembleModule(
 }
 
 /**
- * Shell 自带站点（默认布局 + 两个业务域入口页）：不走 npm 模块契约，
- * 但复用同一套 sitemap → routes/pages/menus/layouts 装配流程。它永远
- * 排在模块之前，作为缺省布局；模块页面未声明 layout 时即落入该布局。
+ * Shell 自带站点：宿主 src/shell/ 与包内默认站点（assets/site）分层叠加——
+ * 文件级「宿主优先、默认兜底」，sitemap.yaml 字段级合并（见 mergeSiteSitemaps）。
+ * 不走 npm 模块契约，但复用同一套 sitemap → routes/pages/menus/layouts 装配流程。
+ * 它永远排在模块之前，作为缺省布局；模块页面未声明 layout 时即落入该布局。
+ * 两层都没有 sitemap.yaml 时才返回 null（无壳站点）。
  */
-function assembleBaseSite(): AssembledModule | null {
-  if (!existsSync(join(cfg.shellSiteDir, 'sitemap.yaml'))) return null;
+function assembleBaseSite(): { assembled: AssembledModule; report: ShellSiteReport } | null {
+  const hostDir = cfg.shellSiteDir;
+  const defaultDir = resolveDefaultSiteDir(cfg.rootDir);
+  const hasDefault =
+    defaultDir !== null &&
+    defaultDir !== hostDir &&
+    existsSync(join(defaultDir, 'sitemap.yaml'));
+  const hasHost = existsSync(join(hostDir, 'sitemap.yaml'));
+  if (!hasHost && !hasDefault) return null;
+
+  const report: ShellSiteReport = { sources: {}, overridden: [] };
+  report.sources['sitemap.yaml'] = hasHost ? 'host' : 'default';
+  const hostSite = hasHost
+    ? (loadYamlFile(join(hostDir, 'sitemap.yaml')) as SiteSitemap)
+    : null;
+  const defaultSite = hasDefault
+    ? (loadYamlFile(join(defaultDir!, 'sitemap.yaml')) as SiteSitemap)
+    : null;
+  const site =
+    hostSite && defaultSite
+      ? mergeSiteSitemaps(defaultSite, hostSite)
+      : ((hostSite ?? defaultSite) as SiteSitemap);
+
+  const source = layeredSiteSource(hostDir, hasDefault ? defaultDir! : hostDir, report);
   const manifest = {
     schemaVersion: '1',
     id: 'shell',
-    name: 'InnoSpots Shell',
+    name: 'Pactor Shell Site',
     version: '0.1.0',
     pactorVersionRange: '^1.55.0',
     basePath: '/',
     sitemap: 'sitemap.yaml',
     dslRoot: 'pages',
   } as ModuleManifestV1;
-  return assembleModule(
-    { package: '@innospots/shell-site', enabled: true, basePath: '/' },
+  const assembled = assembleModule(
+    { package: '@pactor-app/shell-site', enabled: true, basePath: '/' },
     manifest,
-    cfg.shellSiteDir,
+    hostDir,
+    source,
+    site,
   );
+  return { assembled, report };
 }
 
 function generateClientRegistry(registryModules: RegistryModule[]): void {
@@ -604,15 +769,17 @@ export function assembleModules(options: AssembleOptions = {}): AssembleSummary 
 
   const baseSite = assembleBaseSite();
   if (baseSite) {
-    allRoutes.push(...baseSite.routes);
-    allPages.push(...baseSite.pages);
-    allMenus.push(...baseSite.menus);
-    sitemapMeta = baseSite.sitemapMeta;
-    baseLayouts = baseSite.layouts;
-    for (const copy of baseSite.dslCopies) {
+    const { assembled } = baseSite;
+    allRoutes.push(...assembled.routes);
+    allPages.push(...assembled.pages);
+    allMenus.push(...assembled.menus);
+    sitemapMeta = assembled.sitemapMeta;
+    baseLayouts = assembled.layouts;
+    for (const copy of assembled.dslCopies) {
       mkdirSync(dirname(copy.to), { recursive: true });
       cpSync(copy.from, copy.to);
     }
+    writeJson(join(cfg.generatedDir, 'shell-site.json'), baseSite.report);
   }
 
   for (const entry of enabled) {

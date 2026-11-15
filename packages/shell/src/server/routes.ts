@@ -13,6 +13,11 @@ import {
 export interface ShellRuntimeConfig extends ShellGeneratedOptions {
   /** 会话解析扩展点；缺省恒匿名（defaultResolveSessionUser） */
   resolveUser?: (store: ShellCookieStore) => ShellUser | null;
+  /** Cookie 读取工厂（缺省 next/headers 的 cookies()）。
+   *  宿主与包分属不同 next 实例时（monorepo link），包内 cookies() 会因
+   *  AsyncLocalStorage 不共享而报 outside request scope——宿主注入自身的
+   *  cookies 即可。 */
+  cookies?: () => Promise<ShellCookieStore>;
 }
 
 type PageRouteContext = { params: Promise<{ pageId: string }> };
@@ -38,10 +43,11 @@ export function createRuntimeHandlers(
   config: ShellRuntimeConfig = {},
 ): RuntimeRouteHandlers {
   const resolveUser = config.resolveUser ?? defaultResolveSessionUser;
+  const getCookieStore = config.cookies ?? cookies;
 
   return {
     async bootstrap() {
-      const store = await cookies();
+      const store = await getCookieStore();
       const body = buildRuntimeBootstrap(resolveUser(store), config);
       return Response.json(body, {
         headers: { 'cache-control': 'no-store' },
@@ -50,7 +56,7 @@ export function createRuntimeHandlers(
 
     async page(_request, context) {
       const { pageId } = await context.params;
-      const store = await cookies();
+      const store = await getCookieStore();
       const result = getRuntimePage(pageId, resolveUser(store), config);
       if (result.kind !== 'ok') {
         return Response.json(
@@ -65,7 +71,7 @@ export function createRuntimeHandlers(
 
     async fragment(_request, context) {
       const { fragmentId } = await context.params;
-      const store = await cookies();
+      const store = await getCookieStore();
       const fragment = getRuntimeFragmentDsl(fragmentId, resolveUser(store), config);
       if (!fragment) {
         return Response.json({ error: 'not_found' }, { status: 404 });

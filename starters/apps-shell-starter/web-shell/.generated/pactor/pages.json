@@ -1,6 +1,117 @@
 {
   "pages": [
     {
+      "globalPageId": "shell:workspace",
+      "moduleId": "shell",
+      "pageId": "workspace",
+      "path": "/workspace",
+      "title": "工作台",
+      "version": 3,
+      "lazy": true,
+      "dslRef": "dsl/shell/workspace.yaml"
+    },
+    {
+      "globalPageId": "shell:dashboard",
+      "moduleId": "shell",
+      "pageId": "dashboard",
+      "path": "/dashboard",
+      "title": "数据概览",
+      "version": 2,
+      "lazy": true,
+      "dslRef": "dsl/shell/dashboard.yaml"
+    },
+    {
+      "globalPageId": "shell:system-settings",
+      "moduleId": "shell",
+      "pageId": "system-settings",
+      "path": "/settings/general",
+      "title": "系统设置",
+      "version": 2,
+      "lazy": true,
+      "dslRef": "dsl/shell/system-settings.yaml"
+    },
+    {
+      "globalPageId": "shell:dictionaries",
+      "moduleId": "shell",
+      "pageId": "dictionaries",
+      "path": "/settings/dictionaries",
+      "title": "字典管理",
+      "version": 2,
+      "lazy": true,
+      "dslRef": "dsl/shell/dictionaries.yaml"
+    },
+    {
+      "globalPageId": "shell:audit-logs",
+      "moduleId": "shell",
+      "pageId": "audit-logs",
+      "path": "/settings/audit-logs",
+      "title": "审计日志",
+      "version": 4,
+      "lazy": true,
+      "dslRef": "dsl/shell/audit-logs.yaml"
+    },
+    {
+      "globalPageId": "shell:roles",
+      "moduleId": "shell",
+      "pageId": "roles",
+      "path": "/settings/roles",
+      "title": "角色管理",
+      "version": 1,
+      "lazy": true,
+      "dslRef": "dsl/shell/roles.yaml"
+    },
+    {
+      "globalPageId": "shell:role-detail",
+      "moduleId": "shell",
+      "pageId": "role-detail",
+      "path": "/settings/roles/:roleId",
+      "title": "角色详情",
+      "version": 1,
+      "lazy": true,
+      "dslRef": "dsl/shell/role-detail.yaml"
+    },
+    {
+      "globalPageId": "shell:users",
+      "moduleId": "shell",
+      "pageId": "users",
+      "path": "/settings/users",
+      "title": "用户管理",
+      "version": 1,
+      "permission": "user:view",
+      "lazy": true,
+      "dslRef": "dsl/shell/users.yaml"
+    },
+    {
+      "globalPageId": "shell:login",
+      "moduleId": "shell",
+      "pageId": "login",
+      "path": "/login",
+      "title": "登录",
+      "version": 1,
+      "public": true,
+      "dslRef": "dsl/shell/login.yaml"
+    },
+    {
+      "globalPageId": "shell:themes",
+      "moduleId": "shell",
+      "pageId": "themes",
+      "path": "/settings/themes",
+      "title": "主题设置",
+      "version": 1,
+      "public": true,
+      "dslRef": "dsl/shell/themes.yaml"
+    },
+    {
+      "globalPageId": "shell:profile",
+      "moduleId": "shell",
+      "pageId": "profile",
+      "path": "/profile",
+      "title": "个人中心",
+      "version": 1,
+      "public": true,
+      "dslRef": "dsl/shell/profile.yaml"
+    },
+    {
       "globalPageId": "pactor-app-risk-analysis:risk-data-value",
       "moduleId": "pactor-app-risk-analysis",
       "pageId": "risk-data-value",

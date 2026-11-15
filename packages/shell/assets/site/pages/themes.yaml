@@ -1,0 +1,9 @@
+# 默认主题设置页：SkinGallery 由 PactorShellHost 内建注册
+# （皮肤画廊 + 外观模式，样式随 @pactor-app/shell/styles.css 分发）。
+dsl: "1.0"
+page:
+  id: themes
+  title: 主题设置
+body:
+  type: SkinGallery
+  props: { allowDefault: true }

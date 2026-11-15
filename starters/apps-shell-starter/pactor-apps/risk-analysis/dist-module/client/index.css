@@ -121,7 +121,7 @@
   min-height: 112px;
   flex-direction: column;
   gap: 6px;
-  padding: 15px 17px;
+  padding: calc(var(--pactor-card-padding) - 1px) calc(var(--pactor-card-padding) + 1px);
   border: 1px solid var(--border);
   border-radius: var(--radius);
   background: var(--card);
@@ -187,7 +187,7 @@
   margin-top: 12px;
 }
 .risk-dist-panel {
-  padding: 16px;
+  padding: var(--pactor-card-padding);
 }
 .risk-dist-grid {
   display: grid;
@@ -199,7 +199,7 @@
   min-height: 86px;
   flex-direction: column;
   gap: 3px;
-  padding: 11px 13px;
+  padding: calc(var(--pactor-card-padding) - 5px) calc(var(--pactor-card-padding) - 3px);
   border: 1px solid color-mix(in srgb, var(--border) 72%, transparent);
   border-radius: 10px;
 }
@@ -258,10 +258,10 @@
   padding: 0;
 }
 .risk-chart-card [data-slot=card-header] {
-  padding: 15px 18px 0;
+  padding: calc(var(--pactor-card-padding) - 1px) calc(var(--pactor-card-padding) + 2px) 0;
 }
 .risk-chart-card [data-slot=card-content] {
-  padding: 10px 18px 16px;
+  padding: calc(var(--pactor-card-padding) - 6px) calc(var(--pactor-card-padding) + 2px) var(--pactor-card-padding);
 }
 .risk-chart-desc {
   margin: 2px 0 10px;

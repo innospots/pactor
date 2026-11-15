@@ -1,0 +1,42 @@
+# 默认工作台：纯 DSL 欢迎页（内置组件，无宿主业务组件依赖）。
+# 安装业务模块后，宿主可在 src/shell/pages/workspace.yaml 覆盖为本模块入口聚合页。
+dsl: "1.0"
+page:
+  id: workspace
+  title: 工作台
+body:
+  type: Page
+  props: { className: pactor-shell-workspace }
+  children:
+    - type: Typography
+      props: { variant: h3, text: 工作台 }
+    - type: Typography
+      props:
+        variant: muted
+        className: pactor-shell-workspace-subtitle
+        text: 欢迎使用 Pactor Shell。从左侧菜单进入已安装的应用模块，或在主题设置中挑选喜欢的皮肤。
+    - type: Flex
+      props: { className: pactor-shell-workspace-grid, gap: 16, wrap: true }
+      children:
+        - type: Card
+          props: { title: 主题设置, className: pactor-shell-workspace-card }
+          children:
+            - type: Typography
+              props: { variant: muted, text: 十四套内置皮肤与浅色 / 深色 / 跟随系统外观模式。 }
+            - type: Button
+              props: { text: 前往主题设置, variant: primary }
+              events:
+                onClick:
+                  - action: navigate
+                    params: { to: /settings/themes }
+        - type: Card
+          props: { title: 个人中心, className: pactor-shell-workspace-card }
+          children:
+            - type: Typography
+              props: { variant: muted, text: 查看当前登录账户的姓名、账号与角色信息。 }
+            - type: Button
+              props: { text: 查看个人中心 }
+              events:
+                onClick:
+                  - action: navigate
+                    params: { to: /profile }

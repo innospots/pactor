@@ -924,15 +924,27 @@ importers:
 
   packages/shell:
     dependencies:
+      '@pactor-app/blocks':
+        specifier: workspace:*
+        version: link:../blocks
       '@pactor-app/core':
         specifier: workspace:*
         version: link:../core
+      '@pactor-app/router':
+        specifier: workspace:*
+        version: link:../router
       '@pactor-app/runtime':
         specifier: workspace:*
         version: link:../runtime
       '@pactor-app/theme':
         specifier: workspace:*
         version: link:../theme
+      '@pactor-app/ui':
+        specifier: workspace:*
+        version: link:../ui
+      lucide-react:
+        specifier: ^1.34.0
+        version: 1.34.0(react@19.2.8)
       yaml:
         specifier: ^2.9.1
         version: 2.9.1

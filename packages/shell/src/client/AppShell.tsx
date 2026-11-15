@@ -1,5 +1,7 @@
 import { usePathname, useRouter } from 'next/navigation';
 import {
+  useContext,
+  useMemo,
   useState,
   type CSSProperties,
   type ComponentType,
@@ -8,6 +10,10 @@ import {
 
 import type { ThemeName } from '@pactor-app/theme';
 
+import {
+  ShellUserMenuConfigContext,
+  type ShellUserMenuConfig,
+} from './ShellUserMenu.js';
 import { SkinSwitcher } from './SkinSwitcher.js';
 
 export interface ShellMenuItem {
@@ -63,6 +69,9 @@ export interface AppShellProps {
   pages?: Record<string, ComponentType<SubAppContext>>;
   /** 子应用接入：自定义渲染（如 <PactorShellHost />） */
   renderSubApp?: (ctx: SubAppContext) => ReactNode;
+  /** sitemap 模式：外壳内 DSL UserMenu 的默认配置（在线状态 / 主题 /
+   *  密度 / 语言缺省全开）；PactorShellHost 的 userMenu prop 可再覆盖合并 */
+  userMenu?: ShellUserMenuConfig;
   /** 插槽 */
   headerExtra?: ReactNode;
   sidebarFooter?: ReactNode;
@@ -106,13 +115,20 @@ export function AppShell(props: AppShellProps) {
   }
 
   const [collapsed, setCollapsed] = useState(false);
+  const inheritedUserMenu = useContext(ShellUserMenuConfigContext);
+  const userMenuConfig = useMemo(
+    () => (props.userMenu ? { ...inheritedUserMenu, ...props.userMenu } : inheritedUserMenu),
+    [inheritedUserMenu, props.userMenu],
+  );
 
   // sitemap 模式：菜单/布局由 Pactor DSL 布局链承担，外壳只提供子应用出口
   if (props.menu?.mode === 'sitemap') {
     return (
-      <div className="pactor-shell-root">
-        {props.renderSubApp?.({ pathname }) ?? <ShellNotFound pathname={pathname} />}
-      </div>
+      <ShellUserMenuConfigContext.Provider value={userMenuConfig}>
+        <div className="pactor-shell-root">
+          {props.renderSubApp?.({ pathname }) ?? <ShellNotFound pathname={pathname} />}
+        </div>
+      </ShellUserMenuConfigContext.Provider>
     );
   }
 

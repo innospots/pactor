@@ -1,39 +1,47 @@
-# Shell 自带站点：固定左侧菜单 + 默认布局。
-# 由 pactor-shell assemble 在 npm 模块之前装配：
-#   - layout: shell 作为缺省布局，模块页面未声明 layout 时自动落入；
-#   - menus 直接指向已安装模块的全局页面 id（<moduleId>:<pageId>），
-#     左侧只保留两个固定一级菜单；
-#   - 模块自身的菜单在 module-list.json 中以 menuMode: "hidden" 接入，
-#     仅保留隐藏路由（如风险决策的对接日志），不重复出现在导航中。
+# Shell 站点定制：品牌 + 一级/二级菜单 + 页面清单。布局（admin rail 导航壳）
+# 与开箱页面（登录 / 主题设置 / 个人中心）回退 @pactor-app/shell 包内默认站点；
+# 默认页面集合对齐 starters/next-app-starter：工作台 / 数据概览 / 系统管理
+# （系统设置 / 字典管理 / 审计日志 / 角色管理 / 用户管理 / 主题设置），
+# 页面 DSL 移植自 next-app-starter（src/shell/pages/*.yaml），数据由
+# src/backend mock 经 /api/d/* 提供，登录态见 /api/auth/login（admin / admin123）。
+# 两个已安装模块（风险分析 / 风险决策）的菜单以 menuMode: "merge" 直接并入
+# 导航（模块声明的 layout: admin 与 Shell 同名布局合并，Shell 优先）。
+# 装配：本文件与默认 sitemap 按 id 字段级合并（宿主条目在前，默认条目保留）。
 id: shell
 resourceType: sitemap
-version: 1
+version: 2
 dslVersion: "1.0"
 app: { name: InnoSpots }
-auth: { loginPath: /login }
-layout: shell
+
+pages:
+  - { id: workspace, path: /workspace, title: 工作台, version: 3, lazy: true }
+  - { id: dashboard, path: /dashboard, title: 数据概览, version: 2, lazy: true }
+  - { id: system-settings, path: /settings/general, title: 系统设置, version: 2, lazy: true }
+  - { id: dictionaries, path: /settings/dictionaries, title: 字典管理, version: 2, lazy: true }
+  - { id: audit-logs, path: /settings/audit-logs, title: 审计日志, version: 4, lazy: true }
+  - { id: roles, path: /settings/roles, title: 角色管理, version: 1, lazy: true }
+  - { id: role-detail, path: /settings/roles/:roleId, title: 角色详情, version: 1, lazy: true }
+  - { id: users, path: /settings/users, title: 用户管理, version: 1, permission: "user:view", lazy: true }
 
 menus:
-  - {
-      id: risk-analysis,
-      type: page,
-      pageId: "pactor-app-risk-analysis:risk-data-value",
-      path: /pactor-app-risk-analysis,
-      title: 风险分析,
-      icon: chart,
-      order: 1,
-      public: true,
-    }
-  - {
-      id: risk-decision,
-      type: page,
-      pageId: "pactor-app-risk-decision:risk-decision",
-      path: /pactor-app-risk-decision,
-      title: 风险决策,
-      icon: shield,
-      order: 2,
-      public: true,
-    }
+  - { id: login, type: page, pageId: login, path: /login, title: 登录, layout: login, public: true, hidden: true }
 
-layouts:
-  shell: layouts/shell.layout.yaml
+  - { id: workspace, type: page, pageId: workspace, path: /workspace, title: 工作台, icon: workspace }
+  - { id: dashboard, type: page, pageId: dashboard, path: /dashboard, title: 数据概览, icon: chart }
+
+  - id: system
+    type: group
+    title: 系统管理
+    icon: settings
+    children:
+      - { id: system-settings, type: page, pageId: system-settings, path: /settings/general, title: 系统设置 }
+      - { id: dictionaries, type: page, pageId: dictionaries, path: /settings/dictionaries, title: 字典管理 }
+      - { id: audit-logs, type: page, pageId: audit-logs, path: /settings/audit-logs, title: 审计日志 }
+      - { id: roles, type: page, pageId: roles, path: /settings/roles, title: 角色管理 }
+      - { id: users, type: page, pageId: users, path: /settings/users, title: 用户管理, permission: "user:view" }
+      # 主题设置页由包默认站点提供（pageId themes）；子菜单换 id 避免与默认顶层 themes 菜单撞 id
+      - { id: settings-themes, type: page, pageId: themes, path: /settings/themes, title: 主题设置 }
+
+  - { id: role-detail, type: page, pageId: role-detail, path: /settings/roles/:roleId, title: 角色详情, hidden: true, activeMenu: roles }
+  # 覆盖默认顶层「主题设置」菜单为隐藏（导航入口已挪入系统管理分组），路由保留
+  - { id: themes, type: page, pageId: themes, path: /settings/themes, title: 主题设置, layout: admin, hidden: true }

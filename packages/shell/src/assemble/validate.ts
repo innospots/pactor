@@ -196,6 +196,28 @@ export function validateModules(options: ValidateOptions = {}): ValidateSummary 
   };
   checkMenus(menus);
 
+  // 壳站点来源摘要：宿主 src/shell/ 与包默认站点（assets/site）的分层命中情况；
+  // 宿主覆盖默认同名文件时给出提示，便于发现意外遮蔽。
+  const siteReportPath = join(cfg.generatedDir, 'shell-site.json');
+  if (existsSync(siteReportPath)) {
+    const report = readJson(siteReportPath) as {
+      sources?: Record<string, 'host' | 'default'>;
+      overridden?: string[];
+    };
+    let hostCount = 0;
+    let defaultCount = 0;
+    for (const origin of Object.values(report.sources ?? {})) {
+      if (origin === 'host') hostCount += 1;
+      else defaultCount += 1;
+    }
+    console.warn(
+      `[validate] 壳站点来源：${hostCount} 个宿主文件 / ${defaultCount} 个包默认文件`,
+    );
+    for (const rel of report.overridden ?? []) {
+      console.warn(`[validate] 提示：宿主 src/shell/${rel} 覆盖了包默认站点同名文件`);
+    }
+  }
+
   const serverCount = validateModuleServers();
 
   return {

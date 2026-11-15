@@ -17,7 +17,8 @@
   min-height: 112px;
   flex-direction: column;
   gap: 6px;
-  padding: 15px 17px;
+  /* 内边距消费 --pactor-card-padding 令牌，随全局密度缩放 */
+  padding: calc(var(--pactor-card-padding) - 1px) calc(var(--pactor-card-padding) + 1px);
   border: 1px solid var(--border);
   border-radius: var(--radius);
   background: var(--card);
@@ -101,7 +102,7 @@
 /* ─── 使用特征分布 ──────────────────────────────────────────────────────── */
 
 .risk-dist-panel {
-  padding: 16px;
+  padding: var(--pactor-card-padding);
 }
 
 .risk-dist-grid {
@@ -115,7 +116,7 @@
   min-height: 86px;
   flex-direction: column;
   gap: 3px;
-  padding: 11px 13px;
+  padding: calc(var(--pactor-card-padding) - 5px) calc(var(--pactor-card-padding) - 3px);
   border: 1px solid color-mix(in srgb, var(--border) 72%, transparent);
   border-radius: 10px;
 }
@@ -175,18 +176,19 @@
   margin-top: 24px;
 }
 
-/* Card 自带 py-6 / gap-6 / px-6，标题卡需统一为紧凑内边距 */
+/* Card 内边距统一走 --pactor-card-padding 令牌（随全局密度缩放），
+ * 根节点 gap/padding 归零，header/content 自定紧凑间距 */
 .risk-chart-card {
   gap: 0;
   padding: 0;
 }
 
 .risk-chart-card [data-slot="card-header"] {
-  padding: 15px 18px 0;
+  padding: calc(var(--pactor-card-padding) - 1px) calc(var(--pactor-card-padding) + 2px) 0;
 }
 
 .risk-chart-card [data-slot="card-content"] {
-  padding: 10px 18px 16px;
+  padding: calc(var(--pactor-card-padding) - 6px) calc(var(--pactor-card-padding) + 2px) var(--pactor-card-padding);
 }
 
 .risk-chart-desc {
