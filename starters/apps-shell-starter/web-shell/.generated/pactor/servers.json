@@ -1,10 +1,10 @@
 {
   "modules": [
     {
-      "moduleId": "pactor-app-risk-analysis",
-      "package": "risk-analysis",
+      "moduleId": "pactor-app-general-app",
+      "package": "general-app",
       "prefixes": [
-        "/api/risk-analysis"
+        "/api/general-app"
       ]
     }
   ]

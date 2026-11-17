@@ -41,7 +41,7 @@ version: 1.0.0
 
 ### A. 新建 Shell 模块工程（典型 apps-shell 子包）
 
-1. 复制样板：`starters/apps-shell-starter/pactor-apps/risk-analysis`（含 server）或 `risk-decision`（纯 DSL）。
+1. 复制样板：`starters/apps-shell-starter/pactor-apps/data-analysis`（含 server）或 `product-center`（纯 DSL）。
 2. 一次性接入（幂等）：
 
 ```bash

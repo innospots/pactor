@@ -57,7 +57,7 @@ alias 自动取 tsconfig paths）→ 可选 Tailwind 预编译 → 可选 server
 ```jsonc
 {
   "serverEntry": "module/server.ts",     // 与 apiPrefixes 必须成对出现
-  "apiPrefixes": ["/api/risk-analysis"]  // 命中前缀的 DSL URL 自动 namespacing
+  "apiPrefixes": ["/api/data-analysis"]  // 命中前缀的 DSL URL 自动 namespacing
 }
 ```
 
@@ -65,7 +65,7 @@ alias 自动取 tsconfig paths）→ 可选 Tailwind 预编译 → 可选 server
 
 ```ts
 export const handlers = {
-  "/api/risk-analysis/data-value": {
+  "/api/data-analysis/data-value": {
     GET: (request, context) =>
       Response.json({ code: 0, data: { ok: true }, message: "ok" }),
   },
@@ -94,7 +94,7 @@ export const handlers = {
   "sitemap": "sitemap.module.yaml",   // 可选；默认 sitemap.yaml（双模式工程可分流）
   "clientEntry": "module/client.ts",  // 默认值；不存在时按纯 DSL 模块跳过 bundle
   "serverEntry": "module/server.ts",  // 可选；与 apiPrefixes 成对配置
-  "apiPrefixes": ["/api/risk-analysis"], // 可选；模块 API 逻辑前缀
+  "apiPrefixes": ["/api/data-analysis"], // 可选；模块 API 逻辑前缀
   "actions": [],                      // init 自动发现 src/pactor/*-actions.ts
   "publicDir": "public",              // 默认值
   "target": "innospots-web-shell@3",  // 默认值；server entry 需要 @3

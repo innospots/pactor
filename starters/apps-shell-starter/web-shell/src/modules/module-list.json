@@ -1,16 +1,21 @@
 {
   "modules": [
     {
-      "package": "risk-analysis",
+      "package": "data-analysis",
       "enabled": true,
-      "menuMode": "merge",
+      "menuMode": "hidden",
       "access": "public"
     },
     {
-      "package": "risk-decision",
+      "package": "product-center",
       "enabled": true,
-      "menuMode": "merge",
+      "menuMode": "hidden",
       "access": "public"
+    },
+    {
+      "package": "general-app",
+      "enabled": true,
+      "menuMode": "hidden"
     }
   ]
 }

@@ -4,9 +4,15 @@
 
 > 整体架构与术语见 InnoSpots 前端模块化设计（Build-time Composition + Runtime DSL Loading）。UI 模块侧打包使用 Pactor CLI：`pnpm build:module`（`pactor module build`）/ `pnpm pack:module`（`pactor module pack`）。
 
-**当前接入**：`pactor-apps` 下两个 tgz 模块 `risk-analysis` / `risk-decision`（版本随 pack 递增，以 `package.json` 的 `file:` 引用为准）。风险分析的业务 API 已随 tgz 的 `server/index.mjs` 分发，由 Shell 的 `/api/modules/<moduleId>/*` 统一承接。左侧固定菜单定义在 `src/shell/sitemap.yaml`，模块启停与菜单接入模式在 `src/modules/module-list.json`。外壳能力（菜单 / 皮肤 / 布局、Runtime API、装配 CLI）来自 `@pactor-app/shell` 包（`packages/shell`），本工程为最薄宿主示范。
+**当前接入**：`pactor-apps` 下三个 tgz 模块 `general-app` / `data-analysis` / `product-center`（版本随 pack 递增，以 `package.json` 的 `file:` 引用为准）。业务 API 随 tgz 的 `server/index.mjs` 分发，由 Shell 的 `/api/modules/<moduleId>/*` 统一承接。导航统一定义在 `src/shell/sitemap.yaml`，模块启停与菜单接入模式（当前全部 `hidden`）在 `src/modules/module-list.json`。外壳能力（菜单 / 皮肤 / 布局、Runtime API、装配 CLI）来自 `@pactor-app/shell` 包（`packages/shell`），本工程为最薄宿主示范。
 
-**默认页面**：对齐 `starters/next-app-starter`——工作台 / 数据概览 / 系统管理（系统设置 / 字典管理 / 审计日志 / 角色管理 / 用户管理 / 主题设置）+ 隐藏的角色详情，页面 DSL 在 `src/shell/pages/`，数据由 `src/backend/` mock 经 `/api/d/*` 提供；演示登录 `admin / admin123`（`/api/auth/login` + cookie 会话，见下文「会话与登录」）。
+**默认业务应用**：`pactor-apps/general-app` 提供工作台 / 数据概览 / 系统管理（系统设置 / 字典管理 / 审计日志 / 角色管理 / 用户管理）+ 隐藏的角色详情；页面 DSL、组件、mock 数据与 i18n 语言包全部随模块交付，`web-shell` 只保留宿主骨架。演示登录 `admin / admin123`（`/api/auth/login` + cookie 会话，见下文「会话与登录」）。
+
+## 宿主与模块边界
+
+- **Shell（本工程）**：Next 路由骨架、AppShell / PactorShellHost、Runtime DSL API（bootstrap / pages / fragments / modules 分发）、会话占位、模块装配配置、基础皮肤与预置皮肤。
+- **模块（`pactor-apps/*`）**：页面 DSL、自定义组件 / Actions、业务 API（server entry）、演示数据、i18n 语言包与可翻译字段；以 tgz 交付，`pactor.module.json` 声明 `id` / `basePath` / `apiPrefixes`。
+- 装配器把模块页面按 `basePath` 拼成公开路径、把模块 API 挂到 `/api/modules/<moduleId>/*`；Shell 不复制任何业务页面或数据实现。
 
 ---
 
@@ -77,7 +83,7 @@
 
 1. **开发可溯源**：URL → `routes.json` / `pages.json` → `dslRef` → YAML；模块源侧 → `sitemap.yaml` → `src/server/yaml/**/{pageId}.yaml`。
 2. **文档与配置同源**：`module-list.json`、manifest、README 中的路径约定保持一致。
-3. **CSS 风险可控**：推荐 CSS Modules / 局部类名；全局 reset 与主题由 Shell 统一；模块在 `client.ts` import 自有 CSS，装配器按 manifest `styles` 自动引入。
+3. **CSS 作用域可控**：推荐 CSS Modules / 局部类名；全局 reset 与主题由 Shell 统一；模块在 `client.ts` import 自有 CSS，装配器按 manifest `styles` 自动引入。
 
 ### 验收口径（摘要）
 
@@ -132,8 +138,8 @@
 
 | 项 | 现状 | 影响 |
 | --- | --- | --- |
-| 会话与登录 | 演示账号 mock（`src/backend/mock/accounts.ts`，cookie `pactor_demo_session`）：`/api/auth/login` 写会话，`/api/runtime/bootstrap` 经 `createRuntimeHandlers({ cookies, resolveUser })` 注入会话并裁剪菜单/页面（`cookies` 由宿主注入——包与宿主分属不同 next 实例时 AsyncLocalStorage 不共享） | 真实用户体系 / 签名 token 未接 |
-| 业务 API 转发 | 模块服务端 API 随 tgz 分发，由 `app/api/modules/[moduleId]/[[...path]]` 统一分发；默认页面（工作台 / 数据概览 / 系统管理）的业务数据经通用 `app/api/d/[...parts]` BFF 由 `src/backend/mock` 提供（移植自 next-app-starter） | 模块使用 `/api/d/*` 会命中 mock，生产需按域拆分或代理真实后端 |
+| 会话与登录 | 演示会话占位（`src/backend/session.ts`，cookie `pactor_demo_session`）：`/api/auth/login` 写会话，`/api/runtime/bootstrap` 经 `createRuntimeHandlers({ cookies, resolveUser })` 注入会话并裁剪菜单/页面（`cookies` 由宿主注入——包与宿主分属不同 next 实例时 AsyncLocalStorage 不共享） | 真实用户体系 / 签名 token 未接；业务用户与角色数据在 general-app 模块内 |
+| 业务 API | 业务数据随模块 server entry 交付，由 `app/api/modules/[moduleId]/[[...path]]` 统一分发；Shell 不再提供 `/api/d` BFF | 模块 API 逻辑路径由 `pactor.module.json.apiPrefixes` 声明，生产可替换为真实后端 |
 | HTTP 响应适配 | `PactorShellHost` 已接入 `createHttpHooks()`，默认拆 `{ code, data, message }` | 其他包裹协议 / 鉴权头需经 `PactorShellHost` 的 HTTP 钩子覆盖或自定义 `PactorHttpHooks` |
 | 页面权限 | `canSeePage` 仅支持简单 `permission` 字符串 | 复杂 PermissionConfig、租户隔离未实现 |
 | 审计 / 限流 / CSRF | 未实现 | 生产安全基线未达标 |
@@ -142,7 +148,7 @@
 
 | 项 | 现状 | 影响 |
 | --- | --- | --- |
-| 模块样式 | 两个 tgz 都在 `module/client.ts` 中 import 页面 CSS，构建后 manifest 声明 `styles`；装配器生成 `.generated/pactor/module-styles.ts`，layout 固定引入该文件 | 新模块需在 `module/client.ts` import 自己的 CSS，并在 `package.json` 声明 `exports["./styles.css"]`；Shell 不再手工补齐模块页面样式 |
+| 模块样式 | 三个 tgz 都在 `module/client.ts` 中 import 页面 CSS，构建后 manifest 声明 `styles`；装配器生成 `.generated/pactor/module-styles.ts`，layout 固定引入该文件 | 新模块需在 `module/client.ts` import 自己的 CSS，并在 `package.json` 声明 `exports["./styles.css"]`；Shell 不再手工补齐模块页面样式 |
 | 皮肤 / 主题 | 基础皮肤 `src/modules/styles/theme.css`（晨雾奶芙）；预置皮肤切换、light/dark 模式与持久化由 `@pactor-app/shell` 提供（SkinHeadScript 首屏恢复 + 侧栏底部 SkinSwitcher，DSL 组件名 `SkinSwitcher`） | 默认皮肤即宿主基础皮肤；`public/themes` 由 `pactor-shell theme sync` 生成 |
 | Pactor 版本 | Shell `package.json` 与模块 `peerDependencies` 需人工对齐 | 版本漂移可能导致运行时异常 |
 | 组件/动作重名 | 多模块同名时先注册者占用短名，后续模块只保留命名空间键并 `console.warn` | 缺少构建期硬失败与白名单策略 |
@@ -153,9 +159,9 @@
 | --- | --- | --- |
 | `output: standalone` | 未默认开启 | 容器镜像需自行确认 `.generated` 与 `public/modules` 是否进镜像 |
 | 集成 / E2E 测试 | 无 | 多模块路由、懒加载、权限回归靠人工 |
-| 模块样板 | 已接入 `risk-analysis`、`risk-decision` 两个 tgz 模块 | 菜单 `pageId` 冲突、隐藏路由与多模块样式隔离仍需更多样本验证 |
+| 模块样板 | 已接入 `data-analysis`、`product-center`、`general-app` 三个 tgz 模块 | 菜单 `pageId` 冲突、隐藏路由与多模块样式隔离仍需更多样本验证 |
 
-> **规划优先级建议**：P0 会话 + `/api/d` 与 auth 路由；P1 多模块样式隔离、DSL 资源 URL 重写；P2 fragment、深度校验与 CI E2E。
+> **规划优先级建议**：P0 真实会话与签名 token；P1 多模块样式隔离、模块 i18n 声明进 manifest；P2 fragment、深度校验与 CI E2E。
 
 ---
 
@@ -187,10 +193,10 @@ module/client.ts                     # export const extensions = { components, a
 示例：
 
 ```ts
-import { extensions as riskDecisionExtensions } from "risk-decision/client";
+import { extensions as productCenterExtensions } from "product-center/client";
 
 export const moduleExtensions = {
-  "pactor-app-risk-decision": riskDecisionExtensions,
+  "pactor-app-product-center": productCenterExtensions,
 };
 ```
 
@@ -261,7 +267,7 @@ flowchart LR
 | DSL `type` 与注册表键名 | 大小写完全一致 |
 | 模块是否 `build:module` + Shell `assemble:modules` | `client-registry.ts` 是否 import 该包 |
 | `module-list` 是否 `enabled: true` | 未启用则不会 import |
-| `next.config` `transpilePackages` | 是否包含该 `模块包（如 `risk-analysis`）` |
+| `next.config` `transpilePackages` | 是否包含该 `模块包（如 `data-analysis`）` |
 | 自定义 action | DSL 中 action 名是否在 `pactorActions` 中注册 |
 | 浏览器 Network | 先确认 DSL 已返回，再查控制台是否有 Pactor 组件解析错误 |
 
@@ -273,44 +279,35 @@ flowchart LR
 web-shell/
 ├── app/
 │   ├── layout.tsx                 # 根 Layout、全局样式、SkinHeadScript 首屏防闪烁
-│   ├── page.tsx                   # Shell 首页（装配状态概览）
 │   ├── globals.css
 │   ├── (workspace)/
 │   │   ├── layout.tsx             # 挂载 WorkspaceShell（AppShell + PactorShellHost）
 │   │   └── [...slug]/page.tsx     # 必选 catch-all；按路由表校验，非法路径 404
 │   ├── api/runtime/
 │   │   ├── bootstrap/route.ts     # createRuntimeHandlers({ cookies, resolveUser })
-│   │   ├── pages/[pageId]/route.ts # 页面端点 + 服务端本地化（localizePageDsl）
+│   │   ├── pages/[pageId]/route.ts # 页面端点 + 按模块语言包本地化
 │   │   └── fragments/[fragmentId]/route.ts
-│   ├── api/d/[...parts]/route.ts  # 默认页面业务数据 BFF（src/backend/mock）
 │   ├── api/auth/{login,logout}/route.ts
-│   │                             # 演示登录（admin / admin123，cookie 会话）
+│   │                             # 演示会话（admin / admin123，cookie）
 │   └── api/modules/[moduleId]/[[...path]]/route.ts
 │                                   # createModuleDispatcher(moduleServers) 分发
 ├── src/
-│   ├── shell/                     # Shell 站点定制层（叠加在包默认站点之上）
-│   │   ├── sitemap.yaml           # 品牌 + 一级/二级菜单 + 页面清单
-│   │   └── pages/                 # 默认页面 DSL（移植自 next-app-starter）
-│   ├── backend/                   # 演示后端：accounts/各域 mock + fixtures + i18n 语言包
-│   ├── components/
-│   │   ├── WorkspaceShell.tsx     # AppShell + PactorShellHost 装配（client）
-│   │   ├── settings/              # CatalogTree / DictionaryEditor / PermissionGrantPanel
-│   │   ├── shared/                # FilterSelect / i18n-text
-│   │   └── workbench/             # WorkbenchHero / WorkbenchEntry / WorkbenchAssistant
-│   ├── i18n/messages.ts           # 宿主组件文案（useHostI18n）
-│   ├── locale.tsx                 # locale Cookie / URL 解析
-│   ├── styles/starter-pages.css   # 默认页面样式（移植自 next-app-starter globals.css）
+│   ├── shell/sitemap.yaml         # 品牌 + 全量导航（模块菜单统一 hidden，导航在此定义）
+│   ├── backend/
+│   │   ├── session.ts             # 演示会话占位（真实项目替换为统一登录）
+│   │   └── cors.ts                # 演示 CORS
+│   ├── components/WorkspaceShell.tsx # AppShell + PactorShellHost 装配（client）
 │   ├── modules/
 │   │   ├── module-list.json       # 启用哪些 UI 包、菜单接入模式、访问级别
 │   │   └── styles/theme.css       # Shell 基础皮肤（晨雾奶芙，皮肤系统的默认基底）
 │   └── types/pactor-modules.d.ts  # 模块 client/server 入口的通配类型声明
-├── .generated/pactor/             # pactor-shell assemble 生成（勿手改，可提交占位或 CI 生成）
+├── .generated/pactor/             # pactor-shell assemble 生成（勿手改，已 gitignore）
 ├── public/
-│   ├── modules/                   # 模块静态资源：<moduleId>/<version>/
+│   ├── modules/                   # 模块静态资源：<moduleId>/<version>/（含 i18n/）
 │   └── themes/                    # pactor-shell theme sync 生成的预置皮肤 CSS
 ├── scripts/
 │   └── smoke-module-api.mjs       # /api/modules/* 运行时冒烟
-├── next.config.ts                 # withShell(...)
+├── next.config.ts                 # withShell(...) + 根路径重定向到 general-app
 └── package.json
 ```
 
@@ -323,40 +320,38 @@ Shell 自身按 Pactor 的 sitemap / layout / page YAML 描述一个**自带站�
 1. **包默认层**：`@pactor-app/shell` 内置 `assets/site/`——`admin` / `login` / `auth` / `blank` 四套布局与登录、工作台、主题设置、个人中心四个开箱页面。`admin` 布局是 rail 风格导航壳（一级菜单图标轨 + 命中分组的二级侧栏），轨道底部挂 `UserMenu` 账户组件：个人中心 / 退出登录之外，在线状态、明暗主题、界面密度、切换语言缺省全开（`PactorShellHost` 内建注册的 `ShellUserMenu` 覆盖 UI kit 同名组件，主题选择与外壳外观模式 `pactor.mode` 同步持久化；皮肤切换集中在「主题设置」页）。可在调用处配置缺省项：`<AppShell userMenu={{ showLanguage: false }} />` 或 `<PactorShellHost userMenu={{ showSize: false }} />`（后者字段优先，DSL 节点显式 props 再优先）。`NavigationShell` / `SkinGallery` / `Login` / `UserMenu` 组件由 `PactorShellHost` 内建注册，样式随 `@pactor-app/shell/styles.css` 分发（`app/(workspace)/layout.tsx` 已引入）。
 2. **宿主定制层**：本工程 `src/shell/`。逐文件优先于默认层；`sitemap.yaml` 字段级合并——`app` / `auth` / `layout` 宿主优先，`layouts` 按 key 合并，`menus` / `pages` 按 id 合并（宿主同 id 条目覆盖默认，其余默认条目保留）。
 
-本工程 `src/shell/` 提供 `sitemap.yaml`（品牌 `InnoSpots` + 菜单/页面清单）与 `pages/`（默认页面 DSL，移植自 next-app-starter：工作台 / 数据概览 / 系统管理五个页面 + 角色详情；工作台按 id 覆盖包默认页面）。主题设置、登录、个人中心仍用包默认页面。覆盖示例：自定义默认布局放 `src/shell/layouts/admin.layout.yaml`，自定义登录页放 `src/shell/pages/login.yaml`，重新装配即生效；`pnpm validate:modules` 会输出每个站点文件的来源（宿主 / 包默认）与覆盖提示。
+本工程 `src/shell/` 提供 `sitemap.yaml`（品牌 + 全量导航）。业务页面由各模块提供，但导航统一在本文件定义：三个模块在 `module-list.json` 中均为 `menuMode: "hidden"`，模块自带菜单只保留为隐藏路由。包默认站点仍提供登录、主题设置、个人中心与错误页；需要覆盖默认布局/页面时，在 `src/shell/layouts/`、`src/shell/pages/` 放同名文件即可，`pnpm validate:modules` 会输出来源与覆盖提示。
 
 ### sitemap.yaml 要点
 
 - 未声明 `layout`：回退包默认 `admin`（rail 导航壳），模块页面未声明 `menu.layout` / `sitemap.layout` 时自动落入。
-- `menus`：`type: page` 且带 `pageId`，`pageId` 使用**全局页面 id**（`<moduleId>:<pageId>`）。装配器对已含 `:` 的 id 不再重复加 `shell:` 前缀。当前一级菜单为：
+- `menus`：导航完全由本文件定义（各模块在 `module-list.json` 中统一 `menuMode: "hidden"`，模块 sitemap 的菜单只保留为隐藏路由）。`type: page` 的叶子项用**全局页面 id**（`<moduleId>:<pageId>`），并显式写 `path`：
 
 | id | 标题 | 目标页面 | 路径 | 图标 |
 | --- | --- | --- | --- | --- |
-| `workspace` | 工作台 | `shell:workspace`（宿主 pages/workspace.yaml） | `/workspace` | `workspace` |
-| `dashboard` | 数据概览 | `shell:dashboard` | `/dashboard` | `chart` |
-| `system`（分组） | 系统管理 | 系统设置 / 字典管理 / 审计日志 / 角色管理 / 用户管理 / 主题设置 | `/settings/*` | `settings` |
-| `risk-analysis`（模块声明） | 风险分析 | `pactor-app-risk-analysis:risk-data-value` | `/pactor-app-risk-analysis` | `chart` |
-| `risk-decision`（模块声明） | 风险决策 | `pactor-app-risk-decision:risk-decision` | `/pactor-app-risk-decision` | `shield` |
-| `integration-logs`（模块声明） | 对接日志 | `pactor-app-risk-decision:integration-logs` | `/pactor-app-risk-decision/integration-logs` | `file-text` |
+| `workspace` | 工作台 | `pactor-app-general-app:workspace` | `/general-app/workspace` | `workspace` |
+| `dashboard` | 数据概览 | `pactor-app-general-app:dashboard` | `/general-app/dashboard` | `chart` |
+| `system`（分组） | 系统管理 | 系统设置 / 字典管理 / 审计日志 / 角色管理 / 用户管理 | `/general-app/settings/*` | `settings` |
+| `data-analysis`（分组） | 数据分析 | 数据看板 / 数据报表 / 用户分析 / 数据详情 | `/data-analysis/*` | `chart` |
+| `product-center`（分组） | 产品中心 | 产品管理 / 产品配置设置 / 产品状态任务看板 | `/product-center/*` | `file-text` |
+| `themes` | 主题设置 | `shell:themes`（包默认） | `/settings/themes` | `palette` |
 
-隐藏菜单：`login` / `role-detail`（`activeMenu: roles`）/ `themes`（覆盖默认顶层主题设置，入口已挪入系统管理分组）/ `profile`（默认层保留）。除 `login` 与模块入口（`public: true`）外均需登录（匿名访问被重定向到 `/login`），`users` 页另需 `user:view` 权限。
-- 移植页面使用 `$i18n{key:默认值}` 简写，由 `app/api/runtime/pages/[pageId]/route.ts` 在服务端经 `localizePageDsl` 转换下发（语言包 `src/backend/locales/<locale>/app.yaml`，?locale= / locale Cookie 选择，缺省 zh-CN）；因此这些页面在 sitemap `pages` 中须标记 `lazy: true`（非 lazy 页面内联进 bootstrap，不经过本地化端点）。
+隐藏菜单：`role-detail`（`activeMenu: roles`）、`login` / `profile` / 403 / 404 / 500（包默认），以及全部模块自带菜单（`menuMode: "hidden"`）。general-app 页面默认需要登录（模块 `access.default=authenticated`），`users` 页另需 `user:view` 权限；`/` 与 `/workspace` 由 `next.config.ts` 重定向到 `/general-app/workspace`。
+- 模块页面使用 `$i18n{key:默认值}` 简写，语言包随模块 public 资源分发到 `public/modules/<moduleId>/<version>/i18n/<locale>/app.yaml`，自定义组件的可翻译字段由同目录 `fields.json` 声明；`app/api/runtime/pages/[pageId]/route.ts` 按页面所属模块（`globalPageId` 的 `moduleId:` 前缀）加载语言包，经 `localizePageDsl` 转换下发（`?locale=` / `locale` Cookie 选择，缺省 zh-CN）。因此这些页面在模块 sitemap 中须标记 `lazy: true`（非 lazy 页面内联进 bootstrap，不经过本地化端点）。Shell 自带页面为直写中文，不经过本地化。
 
-- 默认层菜单（工作台 / 主题设置可见，登录 / 个人中心隐藏）按 id 合并保留，因此开箱页面始终可达；要去掉某个默认入口，用同 id 条目覆盖（如 `{ id: workspace, hidden: true }`）。
-- 默认页面的路由与匿名访问由菜单条目驱动（`public: true`），这也是 menus 按 id 合并而非整体替换的原因。
+- 默认层菜单按 id 合并：本文件用 `workspace` / `themes` 覆盖包默认条目，其余默认隐藏项（login / profile / 错误页）保持隐藏。
+- 页面路由与匿名访问仍由菜单目标页面的 `public` / `permission` 驱动（`filterVisibleMenus`）。
 
-### 模块菜单如何并入
+### 菜单接入方式（当前：Shell 统一定义）
 
-两个 tgz 的 sitemap 自带菜单（风险分析 / 风险决策 / 对接日志）。`module-list.json` 以 `menuMode: "merge"` 将它们直接并入 Shell 导航：
+`module-list.json` 的 `menuMode` 决定模块自带菜单是否进入导航：
 
-```json
-{ "package": "risk-decision", "enabled": true, "menuMode": "merge", "access": "public" }
-```
-
-- `menuMode: "merge"`（默认）：模块菜单原样并入导航。模块菜单契约不携带对外 `path`（`pactor module build` 会剥离），装配器按 `pageId` 从模块页面清单推导（`basePath` + 页面相对路径）；菜单级 `layout: admin` 与 Shell 同名布局合并时 **Shell 优先**，模块页面仍落在 rail 导航壳中。
-- `menuMode: "hidden"`：模块菜单递归标记 `hidden: true` 并删除菜单级 `layout`——路由保留（如 `/pactor-app-risk-decision/integration-logs`）但不出现在导航；适合 Shell 已手写一级菜单、模块只补充二级页面的场景（需在 `src/shell/sitemap.yaml` 自行声明入口，避免重复）。
-- `access: "public"`：为模块页面与菜单补 `public: true`，匿名可达。
+- `merge`（默认）：模块菜单原样并入导航。装配器按模块页面清单推导 path（`basePath` + 页面相对路径）；菜单级 `layout` 与 Shell 同名布局合并时 Shell 优先。
+- `hidden`（当前三个模块全部使用）：模块菜单递归标记 `hidden: true` 并删除菜单级 `layout`——路由保留（如 `/data-analysis/detail` 直达可用）但不出现在导航；导航完全由 `src/shell/sitemap.yaml` 定义。
+- `access: "public"`：为模块页面与菜单补 `public: true`，匿名可达（数据分析和产品中心使用）。
 - 若模块自带与壳站点同名布局，装配时 Shell 的布局优先（`{ ...moduleLayouts, ...baseLayouts }`），避免默认外壳被模块覆盖。
+
+接入新模块到现有统一导航：设 `menuMode: "hidden"`，在 `src/shell/sitemap.yaml` 增加菜单条目（显式 `pageId` 与 `path`），再 `pnpm assemble:modules`。
 
 ### 新增一级菜单
 
@@ -375,7 +370,7 @@ pnpm build
 pnpm start   # 默认 http://localhost:9020
 ```
 
-访问 `/pactor-app-risk-analysis`、`/pactor-app-risk-decision`、`/pactor-app-risk-decision/integration-logs`：左侧为 rail 图标轨（风险分析 / 风险决策 + 默认的工作台 / 主题设置），右侧渲染对应模块页面；`/workspace`、`/settings/themes`、`/login`、`/profile` 为包默认开箱页面；`/api/runtime/bootstrap` 返回 `layout: "admin"`、合并后的菜单与内联页面 DSL。
+访问 `/general-app/workspace`、`/pactor-app-data-analysis`、`/pactor-app-product-center`：左侧 rail 由 `src/shell/sitemap.yaml` 定义（工作台 / 数据概览 / 系统管理分组 / 数据分析 / 产品中心 / 主题设置），右侧渲染对应模块页面；`/general-app/settings/*` 由 general-app 提供，`/settings/themes`、`/login`、`/profile` 为包默认页面；`/api/runtime/bootstrap` 返回 `layout: "admin"`、过滤后的菜单与内联页面 DSL。
 
 ---
 
@@ -385,23 +380,14 @@ pnpm start   # 默认 http://localhost:9020
 
 只处理 **`enabled: true`** 的项，不会扫描整个 `node_modules`。
 
-当前启用 `pactor-apps` 下两个 tgz 模块：
+当前启用 `pactor-apps` 下三个 tgz 模块（全部 `menuMode: "hidden"`，导航由 `src/shell/sitemap.yaml` 统一定义）：
 
 ```json
 {
   "modules": [
-    {
-      "package": "risk-analysis",
-      "enabled": true,
-      "menuMode": "hidden",
-      "access": "public"
-    },
-    {
-      "package": "risk-decision",
-      "enabled": true,
-      "menuMode": "hidden",
-      "access": "public"
-    }
+    { "package": "data-analysis", "enabled": true, "menuMode": "hidden", "access": "public" },
+    { "package": "product-center", "enabled": true, "menuMode": "hidden", "access": "public" },
+    { "package": "general-app", "enabled": true, "menuMode": "hidden" }
   ]
 }
 ```
@@ -411,7 +397,7 @@ pnpm start   # 默认 http://localhost:9020
 | `package` | npm 包名，须提供 `exports["./manifest"]`、`./client` 等 |
 | `enabled` | 是否参与本次装配 |
 | `basePath` | 可选；Shell 侧 URL 前缀，覆盖模块 manifest 中的默认 `basePath` |
-| `menuMode` | 可选；`merge`（默认，原样并入导航）或 `hidden`（只注册隐藏路由并移除菜单级 layout） |
+| `menuMode` | 可选；`merge`（默认，原样并入导航）或 `hidden`（只注册隐藏路由并移除菜单级 layout）；当前三个模块均为 `hidden` |
 | `access` | 可选；设为 `public` 时，模块内未声明 `public` 的页面默认公开 |
 
 模块内 sitemap 的 `path` 会与 `basePath` 拼接为最终 URL；菜单里的相对 `pageId` 在装配时会加上 `moduleId:` 命名空间，已含 `:` 的全局 id 保持不变。
@@ -421,15 +407,16 @@ pnpm start   # 默认 http://localhost:9020
 本仓库使用 **pnpm** 管理依赖，模块以 `pactor module pack` 生成的 `.tgz` 经 `file:` 接入，当前接入命令为：
 
 ```bash
-pnpm add ../pactor-apps/risk-analysis/risk-analysis-0.1.0.tgz \
-         ../pactor-apps/risk-decision/risk-decision-0.1.0.tgz
+pnpm add ../pactor-apps/general-app/general-app-0.1.0.tgz \
+         ../pactor-apps/data-analysis/data-analysis-0.1.0.tgz \
+         ../pactor-apps/product-center/product-center-0.1.0.tgz
 ```
 
 **注意**：`file:` / tgz 安装的是包的 `files` 字段内容（一般为 `dist-module/`），安装前请在模块仓库执行 `npm run build:module`。tgz 中的 `dist-module/` 包含 manifest、DSL、客户端扩展、`client/index.css`、静态资源；模块声明 `serverEntry` 时还包含 `server/index.mjs`。模块页面样式应通过 `module/client.ts` 的 CSS import 打进 tgz；业务 API 应通过 `module/server.ts` 打进 tgz，无需在 Shell 复制 Next 路由（见下一节）。
 
 ### 3. Next：`next.config.ts`
 
-- `transpilePackages`：列出需要参与编译的 `模块包（如 `risk-analysis`）` 包。
+- `transpilePackages`：列出需要参与编译的 `模块包（如 `data-analysis`）` 包。
 - 容器部署可开启 `output: "standalone"`，并确认镜像包含 `.generated/pactor`（被服务端/构建引用）与 `public/modules`。
 
 ### 4. 路径别名：`tsconfig.json`
@@ -437,9 +424,9 @@ pnpm add ../pactor-apps/risk-analysis/risk-analysis-0.1.0.tgz \
 - `@/*` → `src/*`
 - `@generated/*` → `.generated/*`
 
-### 5. tgz 模块的样式与业务 API（当前风险应用）
+### 5. tgz 模块的样式与业务 API（general-app / 数据分析 / 产品中心）
 
-模块样式已经随 tgz 分发：两个子应用都在 `module/client.ts` import `risk-shell.css`、各自的页面 CSS 与 `module/module.css`。`pactor module build` 会把它们抽成 `dist-module/client/index.css`，manifest 自动写入 `styles: ["client/index.css"]`，Shell 装配器再生成 `.generated/pactor/module-styles.ts` 自动引入。Shell 侧只保留两个模块共用的皮肤与 Pactor 聚合样式。
+模块样式已经随 tgz 分发：各模块在 `module/client.ts` import 自己的页面 CSS（如 general-app 的 `starter-pages.css`、两个示例模块的 `app-shell.css` 与页面样式）。`pactor module build` 会把它们抽成 `dist-module/client/index.css`，manifest 自动写入 `styles: ["client/index.css"]`，Shell 装配器再生成 `.generated/pactor/module-styles.ts` 自动引入。Shell 侧只保留基础皮肤与 Pactor 聚合样式。
 
 | 依赖 | 位置 | 说明 |
 | --- | --- | --- |
@@ -450,16 +437,16 @@ pnpm add ../pactor-apps/risk-analysis/risk-analysis-0.1.0.tgz \
 | HTTP 数据源 | `@pactor-app/shell/client` 的 `PactorShellHost`（缺省 `createHttpHooks()`） | 拆 `{ code, data, message }` 包裹；模块 DSL 的 `dataSources` 依赖它 |
 | 主题背景 | 包默认 admin 布局的内容区（`kn-main` / `shell-content`）使用皮肤变量背景 | 让右侧内容区沿用模块皮肤背景 |
 
-风险分析的模块 API 公开地址：
+数据分析的模块 API 公开地址：
 
 ```text
-/api/modules/pactor-app-risk-analysis/risk-analysis/data-value
-/api/modules/pactor-app-risk-analysis/risk-analysis/feature-source-summary
+/api/modules/pactor-app-data-analysis/data-analysis/data-value
+/api/modules/pactor-app-data-analysis/data-analysis/feature-source-summary
 ```
 
-对应模块逻辑路径 `/api/risk-analysis/*` 由打包器自动改写；模块需声明
+对应模块逻辑路径 `/api/data-analysis/*` 由打包器自动改写；模块需声明
 `serverEntry`、`apiPrefixes` 并使用 `target: "innospots-web-shell@3"`。未声明
-server entry 的模块（如 `risk-decision`）不产生 server 产物，也不占用模块 API 路由。
+server entry 的模块（如 `product-center`）不产生 server 产物，也不占用模块 API 路由。
 
 接入其他 tgz 模块时，按同样方式确认：`module/client.ts` 是否 import 了自有 CSS、
 manifest 是否有 `styles`、页面 DSL 是否声明 `dataSources`、是否需要 server entry
@@ -503,7 +490,7 @@ handler 异常 → 500。当前分发器不做隐式鉴权，原样传递 `Reque
 
 - Node.js 20+
 - pnpm（仓库使用 pnpm 管理 `node_modules`）
-- 已构建好的 UI 模块 tgz（当前为 `risk-analysis-0.1.0.tgz`、`risk-decision-0.1.0.tgz`）
+- 已构建好的 UI 模块 tgz（当前为 `general-app-0.1.0.tgz`、`data-analysis-0.1.0.tgz`、`product-center-0.1.0.tgz`）
 
 ### 安装
 
@@ -522,9 +509,8 @@ pnpm dev    # http://localhost:9020
 ```
 
 - `/`：Shell 首页，展示已装配模块与路由数量。
-- `/pactor-app-risk-analysis`：风险分析（数据价值分析工作台）。
-- `/pactor-app-risk-decision`：风险决策总览。
-- `/pactor-app-risk-decision/integration-logs`：对接日志（隐藏路由，经总览页按钮进入）。
+- `/data-analysis/dashboard`、`/data-analysis/reports`、`/data-analysis/users`、`/data-analysis/detail`：数据分析四个页面。
+- `/product-center/products`、`/product-center/settings`、`/product-center/board`：产品中心三个页面。
 
 ### 生产构建与启动
 
@@ -544,16 +530,17 @@ pnpm start    # 默认端口 9020
 
 ### 与 UI 模块联调（推荐流程）
 
-当前两个子应用以**已打包 tgz** 接入，不需要在 Shell 中重新构建模块：
+当前三个子应用以**已打包 tgz** 接入，不需要在 Shell 中重新构建模块：
 
 ```bash
 # 1. 安装 tgz（package.json 记录 file: 协议）
 cd web-shell
-pnpm add ../pactor-apps/risk-analysis/risk-analysis-0.1.0.tgz \
-         ../pactor-apps/risk-decision/risk-decision-0.1.0.tgz
+pnpm add ../pactor-apps/general-app/general-app-0.1.0.tgz \
+         ../pactor-apps/data-analysis/data-analysis-0.1.0.tgz \
+         ../pactor-apps/product-center/product-center-0.1.0.tgz
 
 # 2. 在 src/modules/module-list.json 启用模块并配置菜单接入模式
-#    当前：menuMode=hidden、access=public
+#    当前：三个模块均为 menuMode=hidden，导航由 src/shell/sitemap.yaml 统一定义
 
 # 3. 装配 + 校验 + 启动
 pnpm assemble:modules
@@ -616,7 +603,7 @@ pnpm dev
 | --- | --- | --- |
 | Shell `assemble` 之后 | `.generated/pactor/dsl/<moduleId>/<pageId>.yaml` | 从 npm 包 `dist-module/dsl` 复制而来，**服务端 DSL 数据源** |
 | `next build` 之后 | 仍在仓库 `.generated/pactor/dsl/...` | 构建时被打进服务端逻辑；**不要指望在 `.next` 里按原文件名找 yaml** |
-| 已安装的 npm 包内 | `node_modules/risk-analysis/dist-module/dsl/...` | 仅当需要对照模块版本；Shell 运行以 `.generated` 为准 |
+| 已安装的 npm 包内 | `node_modules/data-analysis/dist-module/dsl/...` | 仅当需要对照模块版本；Shell 运行以 `.generated` 为准 |
 
 模块内 sitemap 入口（复制后仍在 dsl 根下）：
 
@@ -631,13 +618,13 @@ pnpm dev
 模块的 **客户端入口**在 npm 包：
 
 ```text
-node_modules/risk-analysis/dist-module/client/index.js
+node_modules/data-analysis/dist-module/client/index.js
 ```
 
 Shell 装配时生成 **`.generated/pactor/client-registry.ts`**，内容为对各包的稳定 import，例如：
 
 ```ts
-import { extensions as riskAnalysisExtensions } from "risk-analysis/client";
+import { extensions as dataAnalysisExtensions } from "data-analysis/client";
 ```
 
 **`npm run build`（`next build`）之后**：
@@ -661,10 +648,10 @@ public/modules/<moduleId>/<version>/...
 浏览器 URL：
 
 ```text
-/modules/pactor-app-risk-analysis/0.1.0/next.svg
+/modules/pactor-app-data-analysis/0.1.0/next.svg
 ```
 
-清单可选对照：`node_modules/risk-analysis/dist-module/module-assets.json`。
+清单可选对照：`node_modules/data-analysis/dist-module/module-assets.json`。
 
 ### 打包产物目录一览（Shell）
 
@@ -716,14 +703,14 @@ Console 类工程仍用 **独立 Next**，源文件位置与模块化打包的**
 
 ---
 
-## UI 模块工程结构（以 `risk-analysis` 为例）
+## UI 模块工程结构（以 `data-analysis` 为例）
 
 模块仓库同时支持 **独立 Next 应用** 与 **npm 模块交付** 两条流水线；**`app/`、`.next/` 不会进入 npm 包**。
 
 ### 源码工程结构
 
 ```text
-risk-analysis/
+data-analysis/
 ├── app/                          # 独立 Next：dev / demo（不打进 npm 模块）
 ├── src/
 │   ├── pactor/
@@ -733,7 +720,7 @@ risk-analysis/
 │   │   └── ...
 │   └── server/yaml/              # 业务 DSL 源目录
 │       ├── sitemap.yaml          # 模块内路由/菜单（path 为模块内相对路径）
-│       └── risk-analysis/        # 页面 DSL（{pageId}.page.yaml）
+│       └── data-analysis/        # 页面 DSL（{pageId}.page.yaml）
 ├── public/                       # 静态资源源 → 打进 dist-module/assets
 ├── module/                       # npm 模块打包入口（由 pactor module init 生成）
 │   ├── client.ts                 # 导出 extensions { components, actions }
@@ -763,7 +750,7 @@ risk-analysis/
 | `styles` | 建议 | 模块内相对路径数组，如 `["client/index.css"]`；Shell 通过包 `exports["./styles.css"]` 引入 |
 | `clientEntry` | 建议 | 如 `./client/index.js`（build 后路径） |
 | `serverEntry` | 可选 | 如 `server/index.mjs`；与 `apiPrefixes` 必须成对出现 |
-| `apiPrefixes` | 可选 | 模块 API 逻辑前缀，如 `["/api/risk-analysis"]`；DSL URL 由打包器改写为 `/api/modules/<id>/...` |
+| `apiPrefixes` | 可选 | 模块 API 逻辑前缀，如 `["/api/data-analysis"]`；DSL URL 由打包器改写为 `/api/modules/<id>/...` |
 
 #### 2. `package.json`（npm 契约）
 
@@ -771,7 +758,7 @@ risk-analysis/
 
 ```json
 {
-  "name": "risk-analysis",
+  "name": "data-analysis",
   "files": ["dist-module"],
   "exports": {
     "./manifest": "./dist-module/manifest.json",
@@ -837,7 +824,7 @@ dist-module/
 
 ```bash
 pnpm build:module    # pactor module build：生成 dist-module/
-pnpm pack:module     # pactor module pack --no-bump：构建 + 校验 + 生成 risk-analysis-0.1.0.tgz
+pnpm pack:module     # pactor module pack --no-bump：构建 + 校验 + 生成 data-analysis-0.1.0.tgz
 ```
 
 ---
@@ -875,6 +862,6 @@ cookie/header，后续可在分发器或 middleware 统一注入会话。菜单�
 
 ## 相关资源
 
-- UI 模块示例：本仓库 `pactor-apps/risk-analysis`（含 server entry）与 `pactor-apps/risk-decision`（纯 DSL），打包命令 `pnpm build:module` / `pnpm pack:module`
+- UI 模块示例：本仓库 `pactor-apps/data-analysis`（含 server entry）与 `pactor-apps/product-center`（纯 DSL），打包命令 `pnpm build:module` / `pnpm pack:module`
 - Starter 总览与快速开始：[`../README.md`](../README.md)
 - Pactor 文档：<https://pactor-docs.xp-java.workers.dev/guides/getting-started/>

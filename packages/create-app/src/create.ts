@@ -152,8 +152,9 @@ const NEXT_STEPS: Record<TemplateId, (name: string) => string[]> = {
   ],
   // 多工程模板：Shell 以 file: 引用模块 tgz，必须先 pack 模块再安装 Shell
   'apps-shell': (name) => [
-    `  cd ${name}/pactor-apps/risk-analysis && pnpm install && pnpm pack:module`,
-    '  cd ../risk-decision && pnpm install && pnpm pack:module',
+    `  cd ${name}/pactor-apps/general-app && pnpm install && pnpm pack:module`,
+    '  cd ../data-analysis && pnpm install && pnpm pack:module',
+    '  cd ../product-center && pnpm install && pnpm pack:module',
     '  cd ../../web-shell && pnpm install && pnpm assemble:modules',
     '  pnpm dev        # http://localhost:9020',
   ],

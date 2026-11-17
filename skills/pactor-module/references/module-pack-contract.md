@@ -19,7 +19,7 @@ pactor module pack --no-bump    # 固定版本（apps-shell file: 依赖常用�
 | --- | --- |
 | `id` | 模块 id → `globalPageId` 前缀、`/modules/<id>/` 资源路径 |
 | `name` | 展示名 |
-| `basePath` | 路由前缀，如 `/pactor-app-risk-analysis`；**禁止 `/`** |
+| `basePath` | 路由前缀，如 `/pactor-app-data-analysis`；**禁止 `/`** |
 | `yamlRoot` | 页面 DSL 根；默认 `src/server/yaml`；next-app-starter 为 `src/backend/pages/yaml` |
 | `sitemap` | yamlRoot 内站点地图文件名；默认 `sitemap.yaml`；双模式用 `sitemap.module.yaml` |
 | `clientEntry` | 默认 `module/client.ts`；须 `export const extensions = { components, actions }` |

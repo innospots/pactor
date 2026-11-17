@@ -1,2 +1,3 @@
-import "risk-analysis/styles.css";
-import "risk-decision/styles.css";
+import "data-analysis/styles.css";
+import "product-center/styles.css";
+import "general-app/styles.css";

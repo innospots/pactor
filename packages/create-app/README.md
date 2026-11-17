@@ -25,11 +25,12 @@ pnpm dev
 
 - `next-app`：Next.js 全栈动态页面工程，含 mock API（dev 端口 9011）
 - `spa`：Vite + React 纯前端工程（dev 端口 9012）
-- `apps-shell`：多业务前端合一部署——统一宿主 `web-shell`（9020）+ 两个示例模块工程（`pactor-apps/risk-analysis` 含 server entry、`pactor-apps/risk-decision` 纯 DSL）。Shell 以 `file:` 引用模块 tgz，生成后须先打包模块再安装 Shell：
+- `apps-shell`：多业务前端合一部署——统一宿主 `web-shell`（9020）+ 三个示例模块工程（`pactor-apps/general-app` 含 server entry 与 i18n、`data-analysis` 与 `product-center` 为纯 DSL 页面示例）。Shell 以 `file:` 引用模块 tgz，生成后须先打包模块再安装 Shell：
 
   ```bash
-  cd my-apps/pactor-apps/risk-analysis && pnpm install && pnpm pack:module
-  cd ../risk-decision && pnpm install && pnpm pack:module
+  cd my-apps/pactor-apps/general-app && pnpm install && pnpm pack:module
+  cd ../data-analysis && pnpm install && pnpm pack:module
+  cd ../product-center && pnpm install && pnpm pack:module
   cd ../../web-shell && pnpm install && pnpm assemble:modules
   pnpm dev   # http://localhost:9020
   ```

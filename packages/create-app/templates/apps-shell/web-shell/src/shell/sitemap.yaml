@@ -1,47 +1,57 @@
-# Shell 站点定制：品牌 + 一级/二级菜单 + 页面清单。布局（admin rail 导航壳）
-# 与开箱页面（登录 / 主题设置 / 个人中心）回退 @pactor-app/shell 包内默认站点；
-# 默认页面集合对齐 starters/next-app-starter：工作台 / 数据概览 / 系统管理
-# （系统设置 / 字典管理 / 审计日志 / 角色管理 / 用户管理 / 主题设置），
-# 页面 DSL 移植自 next-app-starter（src/shell/pages/*.yaml），数据由
-# src/backend mock 经 /api/d/* 提供，登录态见 /api/auth/login（admin / admin123）。
-# 两个已安装模块（风险分析 / 风险决策）的菜单以 menuMode: "merge" 直接并入
-# 导航（模块声明的 layout: admin 与 Shell 同名布局合并，Shell 优先）。
-# 装配：本文件与默认 sitemap 按 id 字段级合并（宿主条目在前，默认条目保留）。
+# Shell 站点定制层：品牌 + 全量导航。
+#
+# 菜单策略：所有模块在 module-list.json 中设为 menuMode: "hidden"，
+# 模块自带的 menus 不再进入导航（仅保留为隐藏路由），导航完全由本文件定义。
+# 因此这里的每条菜单都需要：
+#   - pageId：装配后的全局页面 id（<moduleId>:<pageId>）；
+#   - path：装配后的公开路径（<basePath><pages[].path>），Shell 站点不会
+#     自动为跨模块页面推导 path，必须显式写。
+#
+# 覆盖说明：menus 与包默认站点按 id 合并，同 id 的宿主条目覆盖默认条目。
+# 这里用 id: workspace 覆盖默认欢迎页入口，id: themes 保留主题设置。
 id: shell
 resourceType: sitemap
 version: 2
 dslVersion: "1.0"
 app: { name: InnoSpots }
 
-pages:
-  - { id: workspace, path: /workspace, title: 工作台, version: 3, lazy: true }
-  - { id: dashboard, path: /dashboard, title: 数据概览, version: 2, lazy: true }
-  - { id: system-settings, path: /settings/general, title: 系统设置, version: 2, lazy: true }
-  - { id: dictionaries, path: /settings/dictionaries, title: 字典管理, version: 2, lazy: true }
-  - { id: audit-logs, path: /settings/audit-logs, title: 审计日志, version: 4, lazy: true }
-  - { id: roles, path: /settings/roles, title: 角色管理, version: 1, lazy: true }
-  - { id: role-detail, path: /settings/roles/:roleId, title: 角色详情, version: 1, lazy: true }
-  - { id: users, path: /settings/users, title: 用户管理, version: 1, permission: "user:view", lazy: true }
-
 menus:
-  - { id: login, type: page, pageId: login, path: /login, title: 登录, layout: login, public: true, hidden: true }
-
-  - { id: workspace, type: page, pageId: workspace, path: /workspace, title: 工作台, icon: workspace }
-  - { id: dashboard, type: page, pageId: dashboard, path: /dashboard, title: 数据概览, icon: chart }
+  # ── general-app：工作台 / 数据概览 / 系统管理 ────────────────────────
+  - { id: workspace, type: page, pageId: "pactor-app-general-app:workspace", path: /general-app/workspace, title: 工作台, icon: workspace }
+  - { id: dashboard, type: page, pageId: "pactor-app-general-app:dashboard", path: /general-app/dashboard, title: 数据概览, icon: chart }
 
   - id: system
     type: group
     title: 系统管理
     icon: settings
     children:
-      - { id: system-settings, type: page, pageId: system-settings, path: /settings/general, title: 系统设置 }
-      - { id: dictionaries, type: page, pageId: dictionaries, path: /settings/dictionaries, title: 字典管理 }
-      - { id: audit-logs, type: page, pageId: audit-logs, path: /settings/audit-logs, title: 审计日志 }
-      - { id: roles, type: page, pageId: roles, path: /settings/roles, title: 角色管理 }
-      - { id: users, type: page, pageId: users, path: /settings/users, title: 用户管理, permission: "user:view" }
-      # 主题设置页由包默认站点提供（pageId themes）；子菜单换 id 避免与默认顶层 themes 菜单撞 id
-      - { id: settings-themes, type: page, pageId: themes, path: /settings/themes, title: 主题设置 }
+      - { id: system-settings, type: page, pageId: "pactor-app-general-app:system-settings", path: /general-app/settings/general, title: 系统设置 }
+      - { id: dictionaries, type: page, pageId: "pactor-app-general-app:dictionaries", path: /general-app/settings/dictionaries, title: 字典管理 }
+      - { id: audit-logs, type: page, pageId: "pactor-app-general-app:audit-logs", path: /general-app/settings/audit-logs, title: 审计日志 }
+      - { id: roles, type: page, pageId: "pactor-app-general-app:roles", path: /general-app/settings/roles, title: 角色管理 }
+      - { id: users, type: page, pageId: "pactor-app-general-app:users", path: /general-app/settings/users, title: 用户管理, permission: "user:view" }
 
-  - { id: role-detail, type: page, pageId: role-detail, path: /settings/roles/:roleId, title: 角色详情, hidden: true, activeMenu: roles }
-  # 覆盖默认顶层「主题设置」菜单为隐藏（导航入口已挪入系统管理分组），路由保留
-  - { id: themes, type: page, pageId: themes, path: /settings/themes, title: 主题设置, layout: admin, hidden: true }
+  # ── 数据分析 ────────────────────────────────────────────────────────
+  - id: data-analysis
+    type: group
+    title: 数据分析
+    icon: chart
+    children:
+      - { id: da-dashboard, type: page, pageId: "pactor-app-data-analysis:dashboard", path: /data-analysis/dashboard, title: 数据看板, public: true }
+      - { id: da-reports, type: page, pageId: "pactor-app-data-analysis:reports", path: /data-analysis/reports, title: 数据报表, public: true }
+      - { id: da-users, type: page, pageId: "pactor-app-data-analysis:users", path: /data-analysis/users, title: 用户分析, public: true }
+      - { id: da-detail, type: page, pageId: "pactor-app-data-analysis:detail", path: /data-analysis/detail, title: 数据详情, public: true }
+
+  # ── 产品中心 ────────────────────────────────────────────────────────
+  - id: product-center
+    type: group
+    title: 产品中心
+    icon: file-text
+    children:
+      - { id: pc-products, type: page, pageId: "pactor-app-product-center:products", path: /product-center/products, title: 产品管理, public: true }
+      - { id: pc-settings, type: page, pageId: "pactor-app-product-center:settings", path: /product-center/settings, title: 产品配置设置, public: true }
+      - { id: pc-board, type: page, pageId: "pactor-app-product-center:board", path: /product-center/board, title: 产品状态任务看板, public: true }
+
+  # ── 框架默认菜单 ────────────────────────────────────────────────────
+  # 主题设置由包默认站点提供；同 id 覆盖默认条目（保留其路由）
+  - { id: themes, type: page, pageId: "shell:themes", path: /settings/themes, title: 主题设置, icon: palette }

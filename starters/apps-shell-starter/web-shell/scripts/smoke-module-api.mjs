@@ -4,9 +4,8 @@
  * 用法：SHELL_BASE_URL=http://127.0.0.1:9020 node scripts/smoke-module-api.mjs
  */
 const BASE = process.env.SHELL_BASE_URL ?? "http://127.0.0.1:9020";
-const MODULE = "pactor-app-risk-analysis";
-const DATA_VALUE = `${BASE}/api/modules/${MODULE}/risk-analysis/data-value?start=2026-08-12&end=2026-08-12`;
-const SUMMARY = `${BASE}/api/modules/${MODULE}/risk-analysis/feature-source-summary?page=2&pageSize=10&start=2026-08-12&end=2026-08-12`;
+const MODULE = "pactor-app-general-app";
+const API = `${BASE}/api/modules/${MODULE}/general-app/dashboard`;
 
 const failures = [];
 
@@ -22,51 +21,39 @@ function check(name, condition, detail = "") {
 async function main() {
   console.log(`[smoke] ${BASE}`);
 
-  const dataValue = await fetch(DATA_VALUE);
-  const dataValueBody = await dataValue.json();
-  check("GET data-value → 200", dataValue.status === 200, `status=${dataValue.status}`);
-  check("data-value code=0", dataValueBody.code === 0);
+  const dashboard = await fetch(API);
+  const dashboardBody = await dashboard.json();
+  check("GET dashboard → 200", dashboard.status === 200, `status=${dashboard.status}`);
+  check("dashboard 返回指标数据", dashboardBody?.stats?.requests > 0);
   check(
-    "data-value 回显 range",
-    dataValueBody.data?.range?.start === "2026-08-12" &&
-      dataValueBody.data?.range?.end === "2026-08-12",
-  );
-  check(
-    "data-value cache-control=no-store",
-    dataValue.headers.get("cache-control") === "no-store",
-    dataValue.headers.get("cache-control") ?? "missing",
+    "dashboard cache-control=no-store",
+    dashboard.headers.get("cache-control") === "no-store",
+    dashboard.headers.get("cache-control") ?? "missing",
   );
 
-  const summary = await fetch(SUMMARY);
-  const summaryBody = await summary.json();
-  check("GET feature-source-summary → 200", summary.status === 200);
-  check("分页参数生效", summaryBody.data?.page === 2 && summaryBody.data?.pageSize === 10);
-
-  const head = await fetch(DATA_VALUE, { method: "HEAD" });
+  const head = await fetch(API, { method: "HEAD" });
   const headText = await head.text();
   check("HEAD → 200 且无响应体", head.status === 200 && headText === "", `status=${head.status}, len=${headText.length}`);
 
-  const options = await fetch(DATA_VALUE, { method: "OPTIONS" });
+  const options = await fetch(API, { method: "OPTIONS" });
   const allow = options.headers.get("allow") ?? "";
   check("OPTIONS → 204", options.status === 204, `status=${options.status}`);
   check(
-    "OPTIONS Allow 含 GET/HEAD/OPTIONS 且不含 POST",
-    allow.includes("GET") && allow.includes("HEAD") && allow.includes("OPTIONS") && !allow.includes("POST"),
+    "OPTIONS Allow 含 GET/HEAD/OPTIONS",
+    allow.includes("GET") && allow.includes("HEAD") && allow.includes("OPTIONS"),
     allow,
   );
 
-  const post = await fetch(DATA_VALUE, { method: "POST" });
-  const postAllow = post.headers.get("allow") ?? "";
-  check("POST → 405", post.status === 405, `status=${post.status}`);
-  check("POST Allow 与 OPTIONS 一致", postAllow === allow, postAllow);
+  const post = await fetch(API, { method: "POST" });
+  check("POST（dashboard 仅支持 GET）→ 405", post.status === 405, `status=${post.status}`);
 
   const cases = [
-    ["未知模块", `${BASE}/api/modules/nope/risk-analysis/data-value`, 404],
-    ["未知路径", `${BASE}/api/modules/${MODULE}/risk-analysis/nope`, 404],
+    ["未知模块", `${BASE}/api/modules/nope/general-app/dashboard`, 404],
+    ["未知路径", `${BASE}/api/modules/${MODULE}/general-app/nope`, 404],
     ["模块根路径", `${BASE}/api/modules/${MODULE}`, 404],
     ["前缀外路径", `${BASE}/api/modules/${MODULE}/api/runtime/bootstrap`, 404],
-    ["旧业务路径", `${BASE}/api/risk-analysis/data-value`, 404],
-    ["无 server 的 risk-decision", `${BASE}/api/modules/pactor-app-risk-decision/risk-decision/data`, 404],
+    ["旧业务路径", `${BASE}/api/general-app/dashboard`, 404],
+    ["无 server 的 product-center", `${BASE}/api/modules/pactor-app-product-center/product-center/products`, 404],
   ];
   for (const [name, url, expected] of cases) {
     const response = await fetch(url);
@@ -76,8 +63,8 @@ async function main() {
   const bootstrap = await fetch(`${BASE}/api/runtime/bootstrap`);
   check("/api/runtime/bootstrap 仍可用", bootstrap.status === 200);
 
-  const page = await fetch(`${BASE}/pactor-app-risk-analysis`);
-  check("风险分析页面可访问", page.status === 200);
+  const page = await fetch(`${BASE}/data-analysis/dashboard`);
+  check("数据分析页面可访问", page.status === 200);
 
   if (failures.length > 0) {
     console.error(`\n[smoke] 失败 ${failures.length} 项：\n- ${failures.join("\n- ")}`);

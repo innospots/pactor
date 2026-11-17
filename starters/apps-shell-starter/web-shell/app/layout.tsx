@@ -3,7 +3,7 @@ import type { Metadata } from "next";
 import { SkinHeadScript } from "@pactor-app/shell/client";
 
 import "./globals.css";
-// 聚合样式入口（ui → blocks → chart → chat）：风险分析 / 风险决策页面
+// 聚合样式入口（ui → blocks → chart → chat）：数据分析 / 产品中心页面
 // 使用 chart 组件，必须引入聚合样式而不是仅 ui 分表。
 import "pactor-app/styles.css";
 

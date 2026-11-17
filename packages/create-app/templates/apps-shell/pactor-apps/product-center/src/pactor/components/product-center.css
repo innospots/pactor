@@ -1,0 +1,211 @@
+/* ─── 产品中心：产品管理 / 产品配置设置 / 产品状态任务看板 ──────────────
+ * 容器、顶栏与分节样式见 app-shell.css；颜色全部走皮肤语义令牌。
+ * ────────────────────────────────────────────────────────────────────── */
+
+/* ─── 指标卡 ───────────────────────────────────────────────────────────── */
+
+.pc-metrics {
+  align-items: stretch;
+}
+
+.pc-metric-cell {
+  position: relative;
+  display: flex;
+  height: 100%;
+  flex-direction: column;
+}
+
+.pc-metric[data-slot="metric-card"] {
+  display: flex;
+  min-height: 112px;
+  flex: 1;
+  flex-direction: column;
+  padding: calc(var(--pactor-card-padding) - 1px) calc(var(--pactor-card-padding) + 1px) calc(var(--pactor-card-padding) + 20px);
+  border-radius: var(--radius);
+  box-shadow: none;
+}
+
+.pc-metric [data-slot="metric-card-title"] {
+  font-size: 12px;
+  line-height: 1.4;
+  color: var(--muted-foreground);
+}
+
+.pc-metric [data-slot="metric-card-value"] {
+  margin-top: 6px;
+  font-size: 30px;
+  font-weight: 600;
+  line-height: 1.05;
+  letter-spacing: -0.025em;
+}
+
+.pc-metric-footnote {
+  position: absolute;
+  right: calc(var(--pactor-card-padding) + 1px);
+  bottom: calc(var(--pactor-card-padding) - 3px);
+  left: calc(var(--pactor-card-padding) + 1px);
+  font-size: 11px;
+  line-height: 1.4;
+  color: var(--muted-foreground);
+}
+
+.pc-metric-footnote--positive {
+  color: var(--success);
+}
+
+.pc-metric-footnote--danger {
+  color: var(--destructive);
+}
+
+/* ─── 卡片 / 表格 / 筛选 ───────────────────────────────────────────────── */
+
+.pc-card {
+  gap: 0;
+  padding: 0;
+}
+
+.pc-card [data-slot="card-header"] {
+  padding: calc(var(--pactor-card-padding) - 1px) calc(var(--pactor-card-padding) + 2px) 0;
+}
+
+.pc-card [data-slot="card-content"] {
+  padding: calc(var(--pactor-card-padding) - 8px) calc(var(--pactor-card-padding) + 2px) var(--pactor-card-padding);
+}
+
+.pc-table-card {
+  overflow: hidden;
+}
+
+.pc-table-card [data-slot="card-content"] {
+  padding: 0;
+}
+
+.pc-table-card table {
+  width: 100%;
+  font-size: 13px;
+}
+
+.pc-table-card thead th {
+  background: color-mix(in srgb, var(--muted) 45%, var(--card));
+  color: var(--muted-foreground);
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.pc-filter-card {
+  padding: calc(var(--pactor-card-padding) - 4px) var(--pactor-card-padding);
+}
+
+.pc-filter-row {
+  display: flex;
+  flex-wrap: wrap;
+}
+
+.pc-filter-input {
+  width: 240px;
+}
+
+.pc-filter-select {
+  width: 150px;
+}
+
+/* ─── 配置表单 ─────────────────────────────────────────────────────────── */
+
+.pc-form-card {
+  margin-bottom: 16px;
+}
+
+.pc-form-card [data-slot="card-content"] {
+  padding-top: var(--pactor-card-padding);
+}
+
+.pc-form-actions {
+  padding-top: 4px;
+}
+
+/* ─── 任务看板 ─────────────────────────────────────────────────────────── */
+
+.pc-board {
+  align-items: start;
+}
+
+.pc-column {
+  min-height: 420px;
+  padding: 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: color-mix(in srgb, var(--muted) 28%, var(--card));
+}
+
+.pc-column-head {
+  padding-bottom: 4px;
+}
+
+.pc-column-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--foreground);
+}
+
+.pc-column-count {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 22px;
+  height: 20px;
+  padding: 0 6px;
+  border-radius: 999px;
+  background: var(--card);
+  box-shadow: inset 0 0 0 1px var(--border);
+  font-size: 11px;
+  color: var(--muted-foreground);
+}
+
+.pc-task {
+  padding: 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--card);
+  box-shadow: 0 1px 2px color-mix(in srgb, var(--foreground) 6%, transparent);
+}
+
+.pc-task--done {
+  opacity: 0.78;
+}
+
+.pc-task-title {
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.5;
+  color: var(--foreground);
+}
+
+.pc-task-meta {
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--muted-foreground);
+}
+
+.pc-task-due {
+  font-size: 11px;
+  color: var(--muted-foreground);
+}
+
+/* ─── 响应式 ───────────────────────────────────────────────────────────── */
+
+@media (max-width: 1100px) {
+  .pc-board {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 720px) {
+  .pc-filter-input,
+  .pc-filter-select {
+    width: 100%;
+  }
+
+  .pc-board {
+    grid-template-columns: 1fr;
+  }
+}

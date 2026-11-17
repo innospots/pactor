@@ -1,0 +1,57 @@
+# general-app 站点：工作台 / 数据概览 / 系统管理（系统设置 / 字典 / 审计 / 角色 / 用户）。
+#
+# 接入 Shell 时：
+#   - Shell 以 basePath 前缀拼接全部路径（本文件 path 均为模块内相对路径）；
+#   - 菜单 path 在打包时剥离，由 Shell 按 pages[].path 推导；
+#   - 页面默认需要登录（pactor.module.json 的 access.default=authenticated），
+#     登录态与权限由 Shell 会话注入，页面/菜单按 permission 裁剪；
+#   - 布局由 Shell 的同名 admin 布局接管；此处的 admin 仅用于模块独立运行。
+#
+# 独立运行（pnpm dev）时由 app/api/sitemap 直接下发本文件与页面 DSL。
+id: general-app
+resourceType: sitemap
+version: 1
+dslVersion: "1.0"
+app: { name: General App }
+layout: admin
+
+layouts:
+  # 独立运行用的空壳布局：内容区铺满视口（Shell 集成时由 Shell admin 布局覆盖）。
+  admin:
+    dsl: "1.0"
+    body:
+      type: Layout
+      props: { className: shell-root }
+      children:
+        - type: Content
+          props: { className: shell-content }
+          children:
+            - type: PageOutlet
+
+pages:
+  - { id: workspace, path: /workspace, title: 工作台, version: 1, lazy: true }
+  - { id: dashboard, path: /dashboard, title: 数据概览, version: 1, lazy: true }
+  - { id: system-settings, path: /settings/general, title: 系统设置, version: 1, lazy: true }
+  - { id: dictionaries, path: /settings/dictionaries, title: 字典管理, version: 1, lazy: true }
+  - { id: audit-logs, path: /settings/audit-logs, title: 审计日志, version: 1, lazy: true }
+  - { id: roles, path: /settings/roles, title: 角色管理, version: 1, lazy: true }
+  - { id: role-detail, path: /settings/roles/:roleId, title: 角色详情, version: 1, lazy: true }
+  - { id: users, path: /settings/users, title: 用户管理, version: 1, permission: "user:view", lazy: true }
+
+menus:
+  - { id: workspace, type: page, pageId: workspace, path: /workspace, title: 工作台, icon: workspace, layout: admin }
+  - { id: dashboard, type: page, pageId: dashboard, path: /dashboard, title: 数据概览, icon: chart, layout: admin }
+
+  - id: system
+    type: group
+    title: 系统管理
+    icon: settings
+    layout: admin
+    children:
+      - { id: system-settings, type: page, pageId: system-settings, path: /settings/general, title: 系统设置 }
+      - { id: dictionaries, type: page, pageId: dictionaries, path: /settings/dictionaries, title: 字典管理 }
+      - { id: audit-logs, type: page, pageId: audit-logs, path: /settings/audit-logs, title: 审计日志 }
+      - { id: roles, type: page, pageId: roles, path: /settings/roles, title: 角色管理 }
+      - { id: users, type: page, pageId: users, path: /settings/users, title: 用户管理, permission: "user:view" }
+
+  - { id: role-detail, type: page, pageId: role-detail, path: /settings/roles/:roleId, title: 角色详情, hidden: true, activeMenu: roles }

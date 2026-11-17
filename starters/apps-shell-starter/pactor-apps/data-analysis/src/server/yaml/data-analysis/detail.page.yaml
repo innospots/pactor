@@ -1,0 +1,117 @@
+# 数据详情：报表元信息 + 指标趋势 + 渠道构成 + 明细表。
+# 从数据报表页「查看」进入；返回按钮回到 /reports。
+dsl: "1.0"
+page:
+  id: detail
+  title: 数据详情
+state:
+  meta:
+    - { label: 报表名称, value: 经营日报 }
+    - { label: 数据源, value: 交易 / 用户 / 渠道 }
+    - { label: 统计周期, value: 2026-11-17 }
+    - { label: 更新时间, value: 2026-11-17 08:30 }
+    - { label: 负责人, value: 张伟 }
+    - { label: 状态, value: 已生成 }
+  trend:
+    - { date: "11-11", gmv: 82.4, orders: 1860 }
+    - { date: "11-12", gmv: 86.1, orders: 1920 }
+    - { date: "11-13", gmv: 84.7, orders: 1880 }
+    - { date: "11-14", gmv: 91.3, orders: 2040 }
+    - { date: "11-15", gmv: 96.8, orders: 2180 }
+    - { date: "11-16", gmv: 93.2, orders: 2090 }
+    - { date: "11-17", gmv: 101.6, orders: 2260 }
+  channels:
+    - { name: 自有渠道, value: 42 }
+    - { name: 合作渠道, value: 28 }
+    - { name: 线上投放, value: 20 }
+    - { name: 线下活动, value: 10 }
+  rows:
+    - { date: 2026-11-11, gmv: "¥ 82.4 万", orders: "1,860", users: "1,420", conversion: "4.62%" }
+    - { date: 2026-11-12, gmv: "¥ 86.1 万", orders: "1,920", users: "1,468", conversion: "4.71%" }
+    - { date: 2026-11-13, gmv: "¥ 84.7 万", orders: "1,880", users: "1,442", conversion: "4.66%" }
+    - { date: 2026-11-14, gmv: "¥ 91.3 万", orders: "2,040", users: "1,536", conversion: "4.80%" }
+    - { date: 2026-11-15, gmv: "¥ 96.8 万", orders: "2,180", users: "1,612", conversion: "4.92%" }
+    - { date: 2026-11-16, gmv: "¥ 93.2 万", orders: "2,090", users: "1,578", conversion: "4.86%" }
+    - { date: 2026-11-17, gmv: "¥ 101.6 万", orders: "2,260", users: "1,668", conversion: "5.04%" }
+body:
+  type: Page
+  props: { className: p-0 app-page }
+  children:
+    - type: Header
+      props: { className: app-topbar }
+      children:
+        - type: Flex
+          props: { direction: vertical, gap: 2, className: app-topbar-heading }
+          children:
+            - type: Text
+              props: { text: 数据分析 / 数据报表 / 数据详情, className: app-topbar-breadcrumb }
+            - type: Typography
+              props: { variant: h2, text: 数据详情, className: app-topbar-title }
+        - type: Flex
+          props: { className: app-topbar-actions, align: center, gap: 8 }
+          children:
+            - type: Button
+              props: { text: 返回报表, icon: arrow-left, size: small, variant: default }
+              events:
+                onClick:
+                  - action: navigate
+                    params: { to: /reports }
+            - type: Button
+              props: { text: 导出明细, icon: download, size: small, variant: primary }
+              events:
+                onClick:
+                  - action: message
+                    params: { messageType: info, text: 明细导出任务已创建（演示） }
+
+    - type: Text
+      props:
+        text: 查看单张报表的指标趋势、渠道构成与逐日明细
+        className: app-page-subtitle
+
+    - type: Card
+      props: { title: 报表信息, className: da-card }
+      children:
+        - type: Descriptions
+          props:
+            items: "${state.meta}"
+            column: 3
+            bordered: true
+
+    - type: Grid
+      props: { className: da-panels, columns: 2, gap: 16 }
+      children:
+        - type: Card
+          props: { title: 核心指标趋势, className: da-card da-chart-card }
+          children:
+            - type: LineChart
+              props:
+                data: ${state.trend}
+                xKey: date
+                yKeys: [gmv, orders]
+                smooth: true
+                showArea: true
+                height: 260
+        - type: Card
+          props: { title: 渠道构成, className: da-card da-chart-card }
+          children:
+            - type: PieChart
+              props:
+                data: ${state.channels}
+                nameKey: name
+                valueKey: value
+                height: 260
+
+    - type: Card
+      props: { title: 逐日明细, className: da-card da-table-card }
+      children:
+        - type: Table
+          props:
+            dataSource: ${state.rows}
+            rowKey: date
+            pagination: false
+            columns:
+              - { title: 日期, dataIndex: date }
+              - { title: GMV, dataIndex: gmv, align: right }
+              - { title: 订单数, dataIndex: orders, align: right }
+              - { title: 下单用户, dataIndex: users, align: right }
+              - { title: 转化率, dataIndex: conversion, align: right }

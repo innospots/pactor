@@ -12,8 +12,8 @@ apps-shell-starter/
     src/modules/module-list.json
     .generated/pactor/         # 装配产出（勿手改）
   pactor-apps/
-    risk-analysis/           # 模块独立 dev :8021，含 server entry
-    risk-decision/           # 纯 DSL :8022
+    data-analysis/           # 模块独立 dev :8021，含 server entry
+    product-center/           # 纯 DSL :8022
 ```
 
 ## 标准工作流
@@ -50,7 +50,7 @@ cd web-shell && pnpm install && pnpm assemble:modules && pnpm dev
 
 ## 新建业务模块（复制样板）
 
-1. 复制 `pactor-apps/risk-analysis` 或 `risk-decision`。
+1. 复制 `pactor-apps/data-analysis` 或 `product-center`。
 2. 改 `package.json` `name`、dev 端口、`pactor.module.json`（`id`、`basePath`、`yamlRoot`）。
 3. 替换 `src/server/yaml`（或工程约定路径）内 DSL。
 4. `pnpm pack:module` → web-shell `package.json` 用 `file:../pactor-apps/<name>/<name>-0.1.0.tgz` 或 `pnpm add`。

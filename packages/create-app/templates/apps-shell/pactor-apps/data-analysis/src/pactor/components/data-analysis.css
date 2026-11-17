@@ -1,0 +1,220 @@
+/* ─── 数据分析：看板 / 报表 / 用户分析 / 数据详情 ──────────────────────
+ * 只保留页面级视觉细节；容器、顶栏与分节样式见 app-shell.css。
+ * 颜色全部走皮肤语义令牌（app/theme.css），切换皮肤自动适配。
+ * ────────────────────────────────────────────────────────────────────── */
+
+/* ─── 指标卡（MetricCard + 脚注） ───────────────────────────────────────── */
+
+.da-metrics {
+  align-items: stretch;
+}
+
+.da-metric-cell {
+  position: relative;
+  display: flex;
+  height: 100%;
+  flex-direction: column;
+}
+
+.da-metric[data-slot="metric-card"] {
+  display: flex;
+  min-height: 112px;
+  flex: 1;
+  flex-direction: column;
+  padding: calc(var(--pactor-card-padding) - 1px) calc(var(--pactor-card-padding) + 1px) calc(var(--pactor-card-padding) + 20px);
+  border-radius: var(--radius);
+  box-shadow: none;
+}
+
+.da-metric [data-slot="metric-card-title"] {
+  font-size: 12px;
+  line-height: 1.4;
+  color: var(--muted-foreground);
+}
+
+.da-metric [data-slot="metric-card-value"] {
+  margin-top: 6px;
+  font-size: 30px;
+  font-weight: 600;
+  line-height: 1.05;
+  letter-spacing: -0.025em;
+}
+
+.da-metric-footnote {
+  position: absolute;
+  right: calc(var(--pactor-card-padding) + 1px);
+  bottom: calc(var(--pactor-card-padding) - 3px);
+  left: calc(var(--pactor-card-padding) + 1px);
+  font-size: 11px;
+  line-height: 1.4;
+  color: var(--muted-foreground);
+}
+
+.da-metric-footnote--positive {
+  color: var(--success);
+}
+
+.da-metric-footnote--danger {
+  color: var(--destructive);
+}
+
+/* ─── 双栏面板与卡片内边距 ─────────────────────────────────────────────── */
+
+.da-panels {
+  align-items: stretch;
+}
+
+.da-card {
+  gap: 0;
+  padding: 0;
+}
+
+.da-card [data-slot="card-header"] {
+  padding: calc(var(--pactor-card-padding) - 1px) calc(var(--pactor-card-padding) + 2px) 0;
+}
+
+.da-card [data-slot="card-content"] {
+  padding: calc(var(--pactor-card-padding) - 8px) calc(var(--pactor-card-padding) + 2px) var(--pactor-card-padding);
+}
+
+.da-chart-card [data-slot="card-content"] {
+  padding: 2px calc(var(--pactor-card-padding) - 4px) calc(var(--pactor-card-padding) - 4px);
+}
+
+/* ─── 数据健康状态 ─────────────────────────────────────────────────────── */
+
+.da-health-card {
+  height: 100%;
+}
+
+.da-health-card [data-slot="card-content"] {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+}
+
+.da-health-list {
+  display: flex;
+  flex-direction: column;
+}
+
+.da-health-row {
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--foreground);
+}
+
+.da-health-row::before {
+  content: "";
+  flex: 0 0 auto;
+  width: 8px;
+  height: 8px;
+  border-radius: 999px;
+  background: var(--muted-foreground);
+}
+
+.da-health-row--ok::before {
+  background: var(--success);
+}
+
+.da-health-row--attention::before {
+  background: var(--warning);
+}
+
+.da-health-row--danger::before {
+  background: var(--destructive);
+}
+
+.da-health-footnote {
+  margin-top: auto;
+  padding-top: 14px;
+  font-size: 11px;
+  line-height: 1.5;
+  color: var(--muted-foreground);
+}
+
+/* ─── 表格 ─────────────────────────────────────────────────────────────── */
+
+.da-table-card {
+  padding: 0;
+  overflow: hidden;
+}
+
+.da-table-card [data-slot="card-content"] {
+  padding: 0;
+}
+
+.da-table-card table {
+  width: 100%;
+  font-size: 13px;
+}
+
+.da-table-card thead th {
+  background: color-mix(in srgb, var(--muted) 45%, var(--card));
+  color: var(--muted-foreground);
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.da-trend {
+  font-variant-numeric: tabular-nums;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.da-trend--up {
+  color: var(--success);
+}
+
+.da-trend--down {
+  color: var(--destructive);
+}
+
+/* ─── 报表筛选 ─────────────────────────────────────────────────────────── */
+
+.da-filter-card {
+  padding: calc(var(--pactor-card-padding) - 4px) var(--pactor-card-padding);
+}
+
+.da-filter-row {
+  display: flex;
+  flex-wrap: wrap;
+}
+
+.da-filter-input {
+  width: 220px;
+}
+
+.da-filter-select {
+  width: 140px;
+}
+
+/* ─── 用户分析：关键洞察 ───────────────────────────────────────────────── */
+
+.da-insight {
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: color-mix(in srgb, var(--muted) 24%, var(--card));
+}
+
+.da-insight-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--foreground);
+}
+
+.da-insight-text {
+  font-size: 12px;
+  line-height: 1.6;
+  color: var(--muted-foreground);
+}
+
+/* ─── 响应式 ───────────────────────────────────────────────────────────── */
+
+@media (max-width: 720px) {
+  .da-filter-input,
+  .da-filter-select {
+    width: 100%;
+  }
+}

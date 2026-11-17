@@ -1,0 +1,46 @@
+# 产品中心：产品管理 / 产品配置设置 / 产品状态任务看板。
+# 独立运行时由 ModuleSidebar 提供二级导航；接入 Shell 后布局与一级导航由 Host
+# 接管（module-list 中该模块 menuMode=hidden，菜单由 Shell sitemap 定义）。
+id: product-center
+resourceType: sitemap
+version: 1
+dslVersion: "1.0"
+app: { name: Product Center }
+
+layouts:
+  admin:
+    dsl: "1.0"
+    body:
+      type: Layout
+      props: { className: shell-root }
+      children:
+        - type: Flex
+          props: { className: kn-shell }
+          children:
+            - type: ModuleSidebar
+              props:
+                title: 产品中心
+                items:
+                  - { path: /products, title: 产品管理 }
+                  - { path: /settings, title: 产品配置设置 }
+                  - { path: /board, title: 产品状态任务看板 }
+            - type: Content
+              props: { className: shell-content }
+              children:
+                - type: PageOutlet
+
+pages:
+  - { id: products, path: /products, title: 产品管理, version: 1, file: product-center/products.page.yaml }
+  - { id: settings, path: /settings, title: 产品配置设置, version: 1, file: product-center/settings.page.yaml }
+  - { id: board, path: /board, title: 产品状态任务看板, version: 1, file: product-center/board.page.yaml }
+
+menus:
+  - id: product-center
+    type: group
+    title: 产品中心
+    icon: settings
+    layout: admin
+    children:
+      - { id: products, type: page, pageId: products, path: /products, title: 产品管理 }
+      - { id: settings, type: page, pageId: settings, path: /settings, title: 产品配置设置 }
+      - { id: board, type: page, pageId: board, path: /board, title: 产品状态任务看板 }

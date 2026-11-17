@@ -1,77 +1,19 @@
 {
   "routes": [
     {
-      "publicPath": "/workspace",
-      "moduleId": "shell",
-      "pageId": "workspace",
-      "globalPageId": "shell:workspace",
-      "pattern": "/workspace",
-      "paramNames": []
-    },
-    {
-      "publicPath": "/dashboard",
-      "moduleId": "shell",
-      "pageId": "dashboard",
-      "globalPageId": "shell:dashboard",
-      "pattern": "/dashboard",
-      "paramNames": []
-    },
-    {
-      "publicPath": "/settings/general",
-      "moduleId": "shell",
-      "pageId": "system-settings",
-      "globalPageId": "shell:system-settings",
-      "pattern": "/settings/general",
-      "paramNames": []
-    },
-    {
-      "publicPath": "/settings/dictionaries",
-      "moduleId": "shell",
-      "pageId": "dictionaries",
-      "globalPageId": "shell:dictionaries",
-      "pattern": "/settings/dictionaries",
-      "paramNames": []
-    },
-    {
-      "publicPath": "/settings/audit-logs",
-      "moduleId": "shell",
-      "pageId": "audit-logs",
-      "globalPageId": "shell:audit-logs",
-      "pattern": "/settings/audit-logs",
-      "paramNames": []
-    },
-    {
-      "publicPath": "/settings/roles",
-      "moduleId": "shell",
-      "pageId": "roles",
-      "globalPageId": "shell:roles",
-      "pattern": "/settings/roles",
-      "paramNames": []
-    },
-    {
-      "publicPath": "/settings/roles/:roleId",
-      "moduleId": "shell",
-      "pageId": "role-detail",
-      "globalPageId": "shell:role-detail",
-      "pattern": "/settings/roles/:roleId",
-      "paramNames": [
-        "roleId"
-      ]
-    },
-    {
-      "publicPath": "/settings/users",
-      "moduleId": "shell",
-      "pageId": "users",
-      "globalPageId": "shell:users",
-      "pattern": "/settings/users",
-      "paramNames": []
-    },
-    {
       "publicPath": "/login",
       "moduleId": "shell",
       "pageId": "login",
       "globalPageId": "shell:login",
       "pattern": "/login",
+      "paramNames": []
+    },
+    {
+      "publicPath": "/workspace",
+      "moduleId": "shell",
+      "pageId": "workspace",
+      "globalPageId": "shell:workspace",
+      "pattern": "/workspace",
       "paramNames": []
     },
     {
@@ -115,27 +57,125 @@
       "paramNames": []
     },
     {
-      "publicPath": "/pactor-app-risk-analysis",
-      "moduleId": "pactor-app-risk-analysis",
-      "pageId": "risk-data-value",
-      "globalPageId": "pactor-app-risk-analysis:risk-data-value",
-      "pattern": "/pactor-app-risk-analysis",
+      "publicPath": "/data-analysis/dashboard",
+      "moduleId": "pactor-app-data-analysis",
+      "pageId": "dashboard",
+      "globalPageId": "pactor-app-data-analysis:dashboard",
+      "pattern": "/data-analysis/dashboard",
       "paramNames": []
     },
     {
-      "publicPath": "/pactor-app-risk-decision",
-      "moduleId": "pactor-app-risk-decision",
-      "pageId": "risk-decision",
-      "globalPageId": "pactor-app-risk-decision:risk-decision",
-      "pattern": "/pactor-app-risk-decision",
+      "publicPath": "/data-analysis/reports",
+      "moduleId": "pactor-app-data-analysis",
+      "pageId": "reports",
+      "globalPageId": "pactor-app-data-analysis:reports",
+      "pattern": "/data-analysis/reports",
       "paramNames": []
     },
     {
-      "publicPath": "/pactor-app-risk-decision/integration-logs",
-      "moduleId": "pactor-app-risk-decision",
-      "pageId": "integration-logs",
-      "globalPageId": "pactor-app-risk-decision:integration-logs",
-      "pattern": "/pactor-app-risk-decision/integration-logs",
+      "publicPath": "/data-analysis/users",
+      "moduleId": "pactor-app-data-analysis",
+      "pageId": "users",
+      "globalPageId": "pactor-app-data-analysis:users",
+      "pattern": "/data-analysis/users",
+      "paramNames": []
+    },
+    {
+      "publicPath": "/data-analysis/detail",
+      "moduleId": "pactor-app-data-analysis",
+      "pageId": "detail",
+      "globalPageId": "pactor-app-data-analysis:detail",
+      "pattern": "/data-analysis/detail",
+      "paramNames": []
+    },
+    {
+      "publicPath": "/product-center/products",
+      "moduleId": "pactor-app-product-center",
+      "pageId": "products",
+      "globalPageId": "pactor-app-product-center:products",
+      "pattern": "/product-center/products",
+      "paramNames": []
+    },
+    {
+      "publicPath": "/product-center/settings",
+      "moduleId": "pactor-app-product-center",
+      "pageId": "settings",
+      "globalPageId": "pactor-app-product-center:settings",
+      "pattern": "/product-center/settings",
+      "paramNames": []
+    },
+    {
+      "publicPath": "/product-center/board",
+      "moduleId": "pactor-app-product-center",
+      "pageId": "board",
+      "globalPageId": "pactor-app-product-center:board",
+      "pattern": "/product-center/board",
+      "paramNames": []
+    },
+    {
+      "publicPath": "/general-app/workspace",
+      "moduleId": "pactor-app-general-app",
+      "pageId": "workspace",
+      "globalPageId": "pactor-app-general-app:workspace",
+      "pattern": "/general-app/workspace",
+      "paramNames": []
+    },
+    {
+      "publicPath": "/general-app/dashboard",
+      "moduleId": "pactor-app-general-app",
+      "pageId": "dashboard",
+      "globalPageId": "pactor-app-general-app:dashboard",
+      "pattern": "/general-app/dashboard",
+      "paramNames": []
+    },
+    {
+      "publicPath": "/general-app/settings/general",
+      "moduleId": "pactor-app-general-app",
+      "pageId": "system-settings",
+      "globalPageId": "pactor-app-general-app:system-settings",
+      "pattern": "/general-app/settings/general",
+      "paramNames": []
+    },
+    {
+      "publicPath": "/general-app/settings/dictionaries",
+      "moduleId": "pactor-app-general-app",
+      "pageId": "dictionaries",
+      "globalPageId": "pactor-app-general-app:dictionaries",
+      "pattern": "/general-app/settings/dictionaries",
+      "paramNames": []
+    },
+    {
+      "publicPath": "/general-app/settings/audit-logs",
+      "moduleId": "pactor-app-general-app",
+      "pageId": "audit-logs",
+      "globalPageId": "pactor-app-general-app:audit-logs",
+      "pattern": "/general-app/settings/audit-logs",
+      "paramNames": []
+    },
+    {
+      "publicPath": "/general-app/settings/roles",
+      "moduleId": "pactor-app-general-app",
+      "pageId": "roles",
+      "globalPageId": "pactor-app-general-app:roles",
+      "pattern": "/general-app/settings/roles",
+      "paramNames": []
+    },
+    {
+      "publicPath": "/general-app/settings/roles/:roleId",
+      "moduleId": "pactor-app-general-app",
+      "pageId": "role-detail",
+      "globalPageId": "pactor-app-general-app:role-detail",
+      "pattern": "/general-app/settings/roles/:roleId",
+      "paramNames": [
+        "roleId"
+      ]
+    },
+    {
+      "publicPath": "/general-app/settings/users",
+      "moduleId": "pactor-app-general-app",
+      "pageId": "users",
+      "globalPageId": "pactor-app-general-app:users",
+      "pattern": "/general-app/settings/users",
       "paramNames": []
     }
   ]

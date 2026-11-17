@@ -64,8 +64,8 @@ pnpm install
 pnpm dev
 
 # apps-shell（Shell 以 file: 引用模块 tgz，必须先 pack 模块）：
-cd <dir-name>/pactor-apps/risk-analysis && pnpm install && pnpm pack:module
-cd ../risk-decision && pnpm install && pnpm pack:module
+cd <dir-name>/pactor-apps/data-analysis && pnpm install && pnpm pack:module
+cd ../product-center && pnpm install && pnpm pack:module
 cd ../../web-shell && pnpm install && pnpm assemble:modules
 pnpm dev
 # pack / assemble / pactor.module.json 全文约定 → 启用 pactor-module skill
@@ -74,7 +74,7 @@ pnpm dev
 5. **验收**：
    - **next-app**：打开 http://localhost:9011 ，用 `admin` / `pactor123` 登录
    - **spa**：先在同一机器启动 next-app 或兼容的 sitemap 服务（:9011），再开 http://localhost:9012
-   - **apps-shell**：打开 http://localhost:9020/pactor-app-risk-analysis 与 /pactor-app-risk-decision 均能渲染；模块可独立 dev（:8021/:8022）
+   - **apps-shell**：打开 http://localhost:9020/pactor-app-data-analysis 与 /pactor-app-product-center 均能渲染；模块可独立 dev（:8021/:8022）
 6. **告诉用户改哪里**：见 `references/templates.md` 中的「生成后首要修改点」。
 
 ## 备选入口

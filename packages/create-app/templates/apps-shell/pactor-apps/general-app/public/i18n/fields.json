@@ -1,0 +1,31 @@
+{
+  "components": {
+    "Login": ["props.brand.description", "props.subtitle"],
+    "Input": "props.placeholder",
+    "MetricCard": ["props.title", "props.trendLabel"],
+    "WorkbenchEntry": ["props.title", "props.description"],
+    "Field": ["props.label", "props.description"],
+    "Tabs": "props.items[*].label",
+    "Descriptions": ["props.items[*].label", "props.items[*].value"],
+    "Dialog": "props.title",
+    "Textarea": [
+      "props.label",
+      "props.placeholder",
+      "props.description",
+      "props.ariaLabel",
+      "props.rules[*].message"
+    ],
+    "FilterSelect": [
+      "props.label",
+      "props.placeholder",
+      "props.description",
+      "props.ariaLabel",
+      "props.options[*].label",
+      "props.rules[*].message"
+    ],
+    "Select": "props.rules[*].message"
+  },
+  "actions": {
+    "overlay.open": "params.overlay.title"
+  }
+}

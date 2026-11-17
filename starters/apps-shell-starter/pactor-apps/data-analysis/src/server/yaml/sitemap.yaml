@@ -1,0 +1,49 @@
+# 数据分析：数据看板 / 数据报表 / 用户分析 / 数据详情。
+# 独立运行时由 ModuleSidebar 提供二级导航；接入 Shell 后布局与一级导航由 Host
+# 接管（module-list 中该模块 menuMode=hidden，菜单由 Shell sitemap 定义）。
+id: data-analysis
+resourceType: sitemap
+version: 1
+dslVersion: "1.0"
+app: { name: Data Analysis }
+
+layouts:
+  admin:
+    dsl: "1.0"
+    body:
+      type: Layout
+      props: { className: shell-root }
+      children:
+        - type: Flex
+          props: { className: kn-shell }
+          children:
+            - type: ModuleSidebar
+              props:
+                title: 数据分析
+                items:
+                  - { path: /dashboard, title: 数据看板 }
+                  - { path: /reports, title: 数据报表 }
+                  - { path: /users, title: 用户分析 }
+                  - { path: /detail, title: 数据详情 }
+            - type: Content
+              props: { className: shell-content }
+              children:
+                - type: PageOutlet
+
+pages:
+  - { id: dashboard, path: /dashboard, title: 数据看板, version: 1, file: data-analysis/dashboard.page.yaml }
+  - { id: reports, path: /reports, title: 数据报表, version: 1, file: data-analysis/reports.page.yaml }
+  - { id: users, path: /users, title: 用户分析, version: 1, file: data-analysis/users.page.yaml }
+  - { id: detail, path: /detail, title: 数据详情, version: 1, file: data-analysis/detail.page.yaml }
+
+menus:
+  - id: data-analysis
+    type: group
+    title: 数据分析
+    icon: chart
+    layout: admin
+    children:
+      - { id: board, type: page, pageId: dashboard, path: /dashboard, title: 数据看板 }
+      - { id: reports, type: page, pageId: reports, path: /reports, title: 数据报表 }
+      - { id: users, type: page, pageId: users, path: /users, title: 用户分析 }
+      - { id: detail, type: page, pageId: detail, path: /detail, title: 数据详情 }

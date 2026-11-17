@@ -2,7 +2,7 @@ import { cookies } from "next/headers";
 
 import { createRuntimeHandlers } from "@pactor-app/shell/server/routes";
 
-import { findUserBySession, SESSION_COOKIE } from "@/backend/mock/accounts";
+import { findUserBySession, SESSION_COOKIE } from "@/backend/session";
 
 /**
  * Runtime bootstrap：注入演示账号的会话解析（cookie = username），

@@ -1,0 +1,194 @@
+# 数据看板：核心指标 + 访问趋势 + 渠道构成 + 新增用户 + 数据健康 + 热门页面。
+# 纯前端示例数据；接入真实后端时把 state 换成 dataSources 即可。
+dsl: "1.0"
+page:
+  id: dashboard
+  title: 数据看板
+state:
+  rangeStart: "2026-11-01"
+  rangeEnd: "2026-11-17"
+  kpis:
+    - { key: visits, label: 累计访问, value: "86,420", suffix: "", footnote: "较上周期 +12.6%", tone: positive }
+    - { key: users, label: 活跃用户, value: "12,860", suffix: "", footnote: "较上周期 +6.4%", tone: positive }
+    - { key: conversion, label: 转化率, value: "4.82", suffix: "%", footnote: "较上周期 -0.3%", tone: danger }
+    - { key: duration, label: 人均停留, value: "06:32", suffix: "", footnote: "较上周期 +00:18", tone: positive }
+  trend:
+    - { date: "11-11", visits: 11200, users: 1680 }
+    - { date: "11-12", visits: 11980, users: 1740 }
+    - { date: "11-13", visits: 11760, users: 1690 }
+    - { date: "11-14", visits: 12480, users: 1820 }
+    - { date: "11-15", visits: 13120, users: 1940 }
+    - { date: "11-16", visits: 12360, users: 1810 }
+    - { date: "11-17", visits: 13520, users: 2020 }
+  channels:
+    - { name: 自然搜索, value: 38 }
+    - { name: 直接访问, value: 26 }
+    - { name: 内容推荐, value: 18 }
+    - { name: 活动投放, value: 12 }
+    - { name: 其他, value: 6 }
+  newUsers:
+    - { date: "11-11", count: 248 }
+    - { date: "11-12", count: 276 }
+    - { date: "11-13", count: 261 }
+    - { date: "11-14", count: 302 }
+    - { date: "11-15", count: 338 }
+    - { date: "11-16", count: 294 }
+    - { date: "11-17", count: 356 }
+  health:
+    - { key: collect, tone: ok, text: "数据采集延迟 12s，链路正常" }
+    - { key: quality, tone: ok, text: "核心表空值率 0.4%，质量达标" }
+    - { key: task, tone: attention, text: "3 个离线任务预计 10 分钟后完成" }
+    - { key: alert, tone: danger, text: "渠道归因数据缺失 1 个分区" }
+  topPages:
+    - { name: 首页, views: "18,420", users: "9,860", duration: "02:18", trend: "+8.2%", tone: up }
+    - { name: 数据报表, views: "12,880", users: "6,420", duration: "05:42", trend: "+14.6%", tone: up }
+    - { name: 用户分析, views: "9,640", users: "4,980", duration: "04:26", trend: "+3.1%", tone: up }
+    - { name: 产品列表, views: "8,210", users: "4,120", duration: "03:58", trend: "-1.8%", tone: down }
+    - { name: 帮助中心, views: "6,480", users: "3,760", duration: "06:12", trend: "+0.6%", tone: up }
+body:
+  type: Page
+  props: { className: p-0 app-page }
+  children:
+    - type: Header
+      props: { className: app-topbar }
+      children:
+        - type: Flex
+          props: { direction: vertical, gap: 2, className: app-topbar-heading }
+          children:
+            - type: Text
+              props: { text: 数据分析 / 数据看板, className: app-topbar-breadcrumb }
+            - type: Typography
+              props: { variant: h2, text: 数据看板, className: app-topbar-title }
+        - type: Flex
+          props: { className: app-topbar-actions, align: center, gap: 8 }
+          children:
+            - type: DatePicker
+              props:
+                mode: range
+                size: small
+                className: da-date-range
+                value:
+                  start: ${state.rangeStart}
+                  end: ${state.rangeEnd}
+                presets:
+                  - { label: 近 7 天, days: 7 }
+                  - { label: 近 30 天, days: 30 }
+              events:
+                onChange:
+                  - action: setState
+                    params:
+                      rangeStart: "${event.start}"
+                      rangeEnd: "${event.end}"
+            - type: Button
+              props: { text: 刷新, icon: refresh-cw, size: small, variant: default }
+              events:
+                onClick:
+                  - action: message
+                    params: { messageType: success, text: 看板数据已刷新（演示） }
+
+    - type: Text
+      props:
+        text: 汇总访问、用户、渠道与数据质量，快速定位当日经营变化
+        className: app-page-subtitle
+
+    - type: For
+      props:
+        className: da-metrics
+        columns: 4
+        gap: 12
+        keyField: key
+        items: "${state.kpis}"
+      children:
+        - type: Flex
+          props: { className: da-metric-cell, direction: vertical }
+          children:
+            - type: MetricCard
+              props:
+                title: "${row.label}"
+                value: "${row.value}"
+                suffix: "${row.suffix}"
+                className: da-metric
+            - type: Text
+              props:
+                text: "${row.footnote}"
+                className: "da-metric-footnote da-metric-footnote--${row.tone}"
+
+    - type: Grid
+      props: { className: da-panels, columns: 2, gap: 16 }
+      children:
+        - type: Card
+          props: { title: 访问趋势, className: da-card da-chart-card }
+          children:
+            - type: LineChart
+              props:
+                data: ${state.trend}
+                xKey: date
+                yKeys: [visits, users]
+                smooth: true
+                showArea: true
+                height: 260
+        - type: Card
+          props: { title: 流量渠道构成, className: da-card da-chart-card }
+          children:
+            - type: PieChart
+              props:
+                data: ${state.channels}
+                nameKey: name
+                valueKey: value
+                height: 260
+
+    - type: Grid
+      props: { className: da-panels, columns: 2, gap: 16 }
+      children:
+        - type: Card
+          props: { title: 每日新增用户, className: da-card da-chart-card }
+          children:
+            - type: ColumnChart
+              props:
+                data: ${state.newUsers}
+                xKey: date
+                yKeys: [count]
+                height: 240
+        - type: Card
+          props: { title: 数据健康状态, className: da-card da-health-card }
+          children:
+            - type: Flex
+              props: { className: da-health-list, direction: vertical, gap: 12 }
+              children:
+                - type: For
+                  props: { keyField: key, items: "${state.health}" }
+                  children:
+                    - type: Flex
+                      props:
+                        className: "da-health-row da-health-row--${row.tone}"
+                        align: center
+                        gap: 9
+                      children:
+                        - type: Text
+                          props: { text: "${row.text}" }
+            - type: Text
+              props:
+                text: 数据质量按小时巡检，异常会同步到任务中心
+                className: da-health-footnote
+
+    - type: Card
+      props: { title: 热门页面 Top 5, className: da-card da-table-card }
+      children:
+        - type: Table
+          props:
+            dataSource: ${state.topPages}
+            rowKey: name
+            pagination: false
+            columns:
+              - { title: 页面, dataIndex: name }
+              - { title: 浏览量, dataIndex: views, align: right }
+              - { title: 访客数, dataIndex: users, align: right }
+              - { title: 平均停留, dataIndex: duration, align: right }
+              - title: 趋势
+                dataIndex: trend
+                align: right
+                cell:
+                  type: Text
+                  props:
+                    text: ${row.trend}
+                    className: "da-trend da-trend--${row.tone}"

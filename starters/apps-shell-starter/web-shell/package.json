@@ -24,8 +24,9 @@
     "pactor-app": "link:../../../packages/pactor",
     "react": "19.2.8",
     "react-dom": "19.2.8",
-    "risk-analysis": "file:../pactor-apps/risk-analysis/risk-analysis-0.1.0.tgz",
-    "risk-decision": "file:../pactor-apps/risk-decision/risk-decision-0.1.0.tgz",
+    "data-analysis": "file:../pactor-apps/data-analysis/data-analysis-0.1.0.tgz",
+    "general-app": "file:../pactor-apps/general-app/general-app-0.1.0.tgz",
+    "product-center": "file:../pactor-apps/product-center/product-center-0.1.0.tgz",
     "yaml": "^2.9.1"
   },
   "devDependencies": {

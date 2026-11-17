@@ -73,8 +73,8 @@ web-shell/                     # 统一宿主（9020）：装配脚本、/api/ru
   src/modules/module-list.json # 模块启停与菜单接入模式（menuMode/access）
   scripts/assemble-modules.mjs # 构建期装配 → .generated/pactor + public/modules
 pactor-apps/
-  risk-analysis/               # 含 server entry 示例（8021）：module/server.ts + apiPrefixes
-  risk-decision/               # 纯 DSL 示例（8022）：仅 module/client.ts
+  data-analysis/               # 含 server entry 示例（8021）：module/server.ts + apiPrefixes
+  product-center/               # 纯 DSL 示例（8022）：仅 module/client.ts
 ```
 
 生成后顺序（Shell 以 `file:` 引用模块 tgz）：两个模块各自 `pnpm install && pnpm pack:module`（`--no-bump`，tgz 文件名固定）→ `web-shell` `pnpm install && pnpm assemble:modules && pnpm dev`。改模块后重跑 `pack:module`，Shell 侧 `pnpm install --force && pnpm assemble:modules`。

@@ -105,11 +105,14 @@ describe('create-pactor-app', () => {
       'web-shell/next.config.ts',
       'web-shell/scripts/smoke-module-api.mjs',
       'web-shell/src/shell/sitemap.yaml',
-      'pactor-apps/risk-analysis/package.json',
-      'pactor-apps/risk-analysis/pactor.module.json',
-      'pactor-apps/risk-analysis/module/server.ts',
-      'pactor-apps/risk-decision/package.json',
-      'pactor-apps/risk-decision/module/client.ts',
+      'pactor-apps/general-app/package.json',
+      'pactor-apps/general-app/pactor.module.json',
+      'pactor-apps/general-app/module/server.ts',
+      'pactor-apps/data-analysis/package.json',
+      'pactor-apps/data-analysis/pactor.module.json',
+      'pactor-apps/data-analysis/src/server/yaml/data-analysis/dashboard.page.yaml',
+      'pactor-apps/product-center/package.json',
+      'pactor-apps/product-center/module/client.ts',
     ]) {
       expect(existsSync(join(target, file)), file).toBe(true);
     }
@@ -119,11 +122,14 @@ describe('create-pactor-app', () => {
     expect(shell.name).toBe('innospots-web-shell');
     expectNoLinkDeps(shell);
     const shellDeps = shell.dependencies as Record<string, string>;
-    expect(shellDeps['risk-analysis']).toBe(
-      'file:../pactor-apps/risk-analysis/risk-analysis-0.1.0.tgz',
+    expect(shellDeps['general-app']).toBe(
+      'file:../pactor-apps/general-app/general-app-0.1.0.tgz',
     );
-    expect(shellDeps['risk-decision']).toBe(
-      'file:../pactor-apps/risk-decision/risk-decision-0.1.0.tgz',
+    expect(shellDeps['data-analysis']).toBe(
+      'file:../pactor-apps/data-analysis/data-analysis-0.1.0.tgz',
+    );
+    expect(shellDeps['product-center']).toBe(
+      'file:../pactor-apps/product-center/product-center-0.1.0.tgz',
     );
     // 外壳能力由 @pactor-app/shell 提供：依赖版本可安装，装配/校验/主题同步委托其 CLI
     expect(shellDeps['@pactor-app/shell']).toMatch(/^\^\d+\.\d+\.\d+$/);
@@ -132,12 +138,15 @@ describe('create-pactor-app', () => {
     expect(shellScripts['validate:modules']).toBe('pactor-shell validate');
     expect(shellScripts['theme:sync']).toBe('pactor-shell theme sync');
 
-    const riskAnalysis = readPkg(join(target, 'pactor-apps/risk-analysis'));
-    expect(riskAnalysis.name).toBe('risk-analysis');
-    expectNoLinkDeps(riskAnalysis);
-    const riskDecision = readPkg(join(target, 'pactor-apps/risk-decision'));
-    expect(riskDecision.name).toBe('risk-decision');
-    expectNoLinkDeps(riskDecision);
+    const generalApp = readPkg(join(target, 'pactor-apps/general-app'));
+    expect(generalApp.name).toBe('general-app');
+    expectNoLinkDeps(generalApp);
+    const dataAnalysis = readPkg(join(target, 'pactor-apps/data-analysis'));
+    expect(dataAnalysis.name).toBe('data-analysis');
+    expectNoLinkDeps(dataAnalysis);
+    const productCenter = readPkg(join(target, 'pactor-apps/product-center'));
+    expect(productCenter.name).toBe('product-center');
+    expectNoLinkDeps(productCenter);
 
     // 根 README 首行替换为应用名；子工程 README 标题保留
     const rootReadme = readFileSync(join(target, 'README.md'), 'utf8');
@@ -148,8 +157,10 @@ describe('create-pactor-app', () => {
     // 产物不进入模板
     for (const absent of [
       'web-shell/.generated',
-      'pactor-apps/risk-analysis/dist-module',
-      'pactor-apps/risk-analysis/risk-analysis-0.1.0.tgz',
+      'pactor-apps/general-app/dist-module',
+      'pactor-apps/data-analysis/dist-module',
+      'pactor-apps/data-analysis/data-analysis-0.1.0.tgz',
+      'pactor-apps/product-center/product-center-0.1.0.tgz',
       'web-shell/pnpm-lock.yaml',
     ]) {
       expect(existsSync(join(target, absent)), absent).toBe(false);

@@ -1,4 +1,4 @@
-import { handlers as pactor_app_risk_analysisHandlers } from "risk-analysis/server";
+import { handlers as pactor_app_general_appHandlers } from "general-app/server";
 
 import type {
   ModuleApiHandlers,
@@ -6,10 +6,10 @@ import type {
 } from "@pactor-app/shell/server";
 
 export const moduleServers: ModuleServerRegistry = {
-  "pactor-app-risk-analysis": {
-    moduleId: "pactor-app-risk-analysis",
-    package: "risk-analysis",
-    prefixes: ["/api/risk-analysis"],
-    handlers: pactor_app_risk_analysisHandlers as ModuleApiHandlers,
+  "pactor-app-general-app": {
+    moduleId: "pactor-app-general-app",
+    package: "general-app",
+    prefixes: ["/api/general-app"],
+    handlers: pactor_app_general_appHandlers as ModuleApiHandlers,
   },
 };

@@ -1,0 +1,10 @@
+{
+  "id": "pactor-app-data-analysis",
+  "name": "data-analysis",
+  "basePath": "/data-analysis",
+  "yamlRoot": "src/server/yaml",
+  "clientEntry": "module/client.ts",
+  "actions": [],
+  "publicDir": "public",
+  "target": "innospots-web-shell@2"
+}

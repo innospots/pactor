@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 
-import { SESSION_COOKIE } from "@/backend/mock/accounts";
+import { SESSION_COOKIE } from "@/backend/session";
 import { corsHeaders, corsPreflight } from "@/backend/cors";
 
 /** 演示登出：清会话 cookie */

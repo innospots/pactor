@@ -1,0 +1,14 @@
+{
+  "id": "pactor-app-general-app",
+  "name": "general-app",
+  "basePath": "/general-app",
+  "yamlRoot": "src/server/yaml",
+  "clientEntry": "module/client.ts",
+  "serverEntry": "module/server.ts",
+  "apiPrefixes": ["/api/general-app"],
+  "actions": [],
+  "publicDir": "public",
+  "target": "innospots-web-shell@3",
+  "access": { "default": "authenticated" },
+  "tailwind": { "enabled": false }
+}

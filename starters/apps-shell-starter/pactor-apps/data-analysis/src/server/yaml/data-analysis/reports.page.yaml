@@ -1,0 +1,185 @@
+# 数据报表：筛选 + 报表列表 + 查看/下载。
+# 列表为演示数据；查看详情跳转 /detail，下载为演示反馈。
+dsl: "1.0"
+page:
+  id: reports
+  title: 数据报表
+state:
+  rangeStart: "2026-11-01"
+  rangeEnd: "2026-11-17"
+  keyword: ""
+  type: all
+  status: all
+  kpis:
+    - { key: total, label: 报表总数, value: "24", suffix: " 张", footnote: "本周新增 3 张", tone: positive }
+    - { key: scheduled, label: 定时报表, value: "16", suffix: " 张", footnote: "全部运行正常", tone: positive }
+    - { key: exported, label: 本月导出, value: "128", suffix: " 次", footnote: "较上月 +18%", tone: positive }
+  reports:
+    - { id: r1, name: 经营日报, type: 日报, period: "2026-11-17", owner: 张伟, updatedAt: "11-17 08:30", status: 已生成, tone: success }
+    - { id: r2, name: 渠道效果周报, type: 周报, period: "11-11 ~ 11-17", owner: 李娜, updatedAt: "11-17 09:10", status: 已生成, tone: success }
+    - { id: r3, name: 用户增长月报, type: 月报, period: "2026-10", owner: 王芳, updatedAt: "11-03 10:20", status: 已归档, tone: default }
+    - { id: r4, name: 内容转化分析, type: 专题, period: "11-01 ~ 11-17", owner: 刘洋, updatedAt: "11-16 18:42", status: 生成中, tone: warning }
+    - { id: r5, name: 活动复盘报告, type: 专题, period: "11-05 ~ 11-12", owner: 陈静, updatedAt: "11-13 15:08", status: 已生成, tone: success }
+    - { id: r6, name: 产品使用概览, type: 周报, period: "11-04 ~ 11-10", owner: 赵磊, updatedAt: "11-11 09:00", status: 已生成, tone: success }
+    - { id: r7, name: 留存分层分析, type: 专题, period: "2026-10", owner: 孙娜, updatedAt: "11-02 14:26", status: 失败, tone: error }
+    - { id: r8, name: 数据质量巡检, type: 日报, period: "2026-11-17", owner: 系统, updatedAt: "11-17 07:00", status: 已生成, tone: success }
+body:
+  type: Page
+  props: { className: p-0 app-page }
+  children:
+    - type: Header
+      props: { className: app-topbar }
+      children:
+        - type: Flex
+          props: { direction: vertical, gap: 2, className: app-topbar-heading }
+          children:
+            - type: Text
+              props: { text: 数据分析 / 数据报表, className: app-topbar-breadcrumb }
+            - type: Typography
+              props: { variant: h2, text: 数据报表, className: app-topbar-title }
+        - type: Flex
+          props: { className: app-topbar-actions, align: center, gap: 8 }
+          children:
+            - type: DatePicker
+              props:
+                mode: range
+                size: small
+                value:
+                  start: ${state.rangeStart}
+                  end: ${state.rangeEnd}
+              events:
+                onChange:
+                  - action: setState
+                    params:
+                      rangeStart: "${event.start}"
+                      rangeEnd: "${event.end}"
+            - type: Button
+              props: { text: 导出报表, icon: download, size: small, variant: default }
+              events:
+                onClick:
+                  - action: message
+                    params: { messageType: info, text: 报表导出任务已创建（演示） }
+
+    - type: Text
+      props:
+        text: 按周期查看经营、渠道、用户与内容报表，支持下载与详情追踪
+        className: app-page-subtitle
+
+    - type: For
+      props:
+        className: da-metrics
+        columns: 3
+        gap: 12
+        keyField: key
+        items: "${state.kpis}"
+      children:
+        - type: Flex
+          props: { className: da-metric-cell, direction: vertical }
+          children:
+            - type: MetricCard
+              props:
+                title: "${row.label}"
+                value: "${row.value}"
+                suffix: "${row.suffix}"
+                className: da-metric
+            - type: Text
+              props:
+                text: "${row.footnote}"
+                className: "da-metric-footnote da-metric-footnote--${row.tone}"
+
+    - type: Card
+      props: { className: da-filter-card }
+      children:
+        - type: Flex
+          props: { className: da-filter-row, align: center, gap: 10, wrap: true }
+          children:
+            - type: Input
+              props:
+                name: keyword
+                placeholder: 搜索报表名称
+                value: ${state.keyword}
+                className: da-filter-input
+              events:
+                onChange:
+                  - action: setState
+                    params: { keyword: "${event}" }
+            - type: Select
+              props:
+                name: type
+                value: ${state.type}
+                className: da-filter-select
+                options:
+                  - { label: 全部类型, value: all }
+                  - { label: 日报, value: daily }
+                  - { label: 周报, value: weekly }
+                  - { label: 月报, value: monthly }
+                  - { label: 专题, value: topic }
+              events:
+                onChange:
+                  - action: setState
+                    params: { type: "${event}" }
+            - type: Select
+              props:
+                name: status
+                value: ${state.status}
+                className: da-filter-select
+                options:
+                  - { label: 全部状态, value: all }
+                  - { label: 已生成, value: success }
+                  - { label: 生成中, value: warning }
+                  - { label: 失败, value: error }
+              events:
+                onChange:
+                  - action: setState
+                    params: { status: "${event}" }
+            - type: Button
+              props: { text: 查询, variant: primary, size: small }
+              events:
+                onClick:
+                  - action: message
+                    params: { messageType: info, text: 已按条件筛选（演示） }
+            - type: Button
+              props: { text: 重置, size: small }
+              events:
+                onClick:
+                  - action: setState
+                    params: { keyword: "", type: all, status: all }
+
+    - type: Card
+      props: { className: da-card da-table-card }
+      children:
+        - type: Table
+          props:
+            dataSource: ${state.reports}
+            rowKey: id
+            pagination: { pageSize: 6 }
+            columns:
+              - { title: 报表名称, dataIndex: name }
+              - { title: 类型, dataIndex: type }
+              - { title: 统计周期, dataIndex: period }
+              - { title: 负责人, dataIndex: owner }
+              - { title: 更新时间, dataIndex: updatedAt }
+              - title: 状态
+                dataIndex: status
+                cell:
+                  type: Tag
+                  props:
+                    text: "${row.status}"
+                    color: "${row.tone}"
+              - title: 操作
+                cell:
+                  type: Flex
+                  props: { gap: 10, align: center }
+                  children:
+                    - type: Button
+                      props: { text: 查看, variant: link, size: small }
+                      events:
+                        onClick:
+                          - action: navigate
+                            params: { to: /detail }
+                    - type: Button
+                      props: { text: 下载, variant: link, size: small }
+                      events:
+                        onClick:
+                          - action: message
+                            params: { messageType: success, text: "报表「${row.name}」下载已开始（演示）" }

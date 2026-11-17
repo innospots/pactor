@@ -1,0 +1,226 @@
+# 产品管理：指标概览 + 筛选 + 产品列表 + 新建产品弹窗。
+# 纯前端示例数据；接入真实后端时把 state 换成 dataSources / request。
+dsl: "1.0"
+page:
+  id: products
+  title: 产品管理
+state:
+  keyword: ""
+  category: all
+  status: all
+  dialogOpen: false
+  kpis:
+    - { key: total, label: 产品总数, value: "42", suffix: " 个", footnote: "覆盖 6 条产品线", tone: positive }
+    - { key: selling, label: 在售产品, value: "18", suffix: " 个", footnote: "本月上架 4 个", tone: positive }
+    - { key: new, label: 本月新增, value: "5", suffix: " 个", footnote: "较上月 +1", tone: positive }
+    - { key: review, label: 待审核, value: "3", suffix: " 个", footnote: "最长等待 2 天", tone: danger }
+  products:
+    - { id: p1, name: 智能数据助手, code: DA-1001, category: 数据产品, owner: 张伟, status: 在售, tone: success, updatedAt: "11-17 09:20" }
+    - { id: p2, name: 经营分析套件, code: DA-1002, category: 数据产品, owner: 李娜, status: 在售, tone: success, updatedAt: "11-16 18:40" }
+    - { id: p3, name: 用户增长引擎, code: GR-2001, category: 增长产品, owner: 王芳, status: 审核中, tone: warning, updatedAt: "11-16 14:05" }
+    - { id: p4, name: 内容推荐服务, code: GR-2002, category: 增长产品, owner: 刘洋, status: 在售, tone: success, updatedAt: "11-15 11:32" }
+    - { id: p5, name: 渠道归因平台, code: MK-3001, category: 营销产品, owner: 陈静, status: 已下线, tone: default, updatedAt: "11-12 16:18" }
+    - { id: p6, name: 活动编排中心, code: MK-3002, category: 营销产品, owner: 赵磊, status: 审核中, tone: warning, updatedAt: "11-12 10:06" }
+    - { id: p7, name: 客户洞察画像, code: DA-1003, category: 数据产品, owner: 孙娜, status: 草稿, tone: default, updatedAt: "11-10 09:44" }
+    - { id: p8, name: 智能触达组件, code: GR-2003, category: 增长产品, owner: 周敏, status: 在售, tone: success, updatedAt: "11-08 15:12" }
+body:
+  type: Page
+  props: { className: p-0 app-page }
+  children:
+    - type: Header
+      props: { className: app-topbar }
+      children:
+        - type: Flex
+          props: { direction: vertical, gap: 2, className: app-topbar-heading }
+          children:
+            - type: Text
+              props: { text: 产品中心 / 产品管理, className: app-topbar-breadcrumb }
+            - type: Typography
+              props: { variant: h2, text: 产品管理, className: app-topbar-title }
+        - type: Flex
+          props: { className: app-topbar-actions, align: center, gap: 8 }
+          children:
+            - type: Button
+              props: { text: 新建产品, icon: plus, size: small, variant: primary }
+              events:
+                onClick:
+                  - action: setState
+                    params: { dialogOpen: true }
+
+    - type: Text
+      props:
+        text: 维护产品目录、责任人与上下架状态，按产品线查看整体经营情况
+        className: app-page-subtitle
+
+    - type: For
+      props:
+        className: pc-metrics
+        columns: 4
+        gap: 12
+        keyField: key
+        items: "${state.kpis}"
+      children:
+        - type: Flex
+          props: { className: pc-metric-cell, direction: vertical }
+          children:
+            - type: MetricCard
+              props:
+                title: "${row.label}"
+                value: "${row.value}"
+                suffix: "${row.suffix}"
+                className: pc-metric
+            - type: Text
+              props:
+                text: "${row.footnote}"
+                className: "pc-metric-footnote pc-metric-footnote--${row.tone}"
+
+    - type: Card
+      props: { className: pc-filter-card }
+      children:
+        - type: Flex
+          props: { className: pc-filter-row, align: center, gap: 10, wrap: true }
+          children:
+            - type: Input
+              props:
+                name: keyword
+                placeholder: 搜索产品名称或编码
+                value: ${state.keyword}
+                className: pc-filter-input
+              events:
+                onChange:
+                  - action: setState
+                    params: { keyword: "${event}" }
+            - type: Select
+              props:
+                name: category
+                value: ${state.category}
+                className: pc-filter-select
+                options:
+                  - { label: 全部分类, value: all }
+                  - { label: 数据产品, value: data }
+                  - { label: 增长产品, value: growth }
+                  - { label: 营销产品, value: marketing }
+              events:
+                onChange:
+                  - action: setState
+                    params: { category: "${event}" }
+            - type: Select
+              props:
+                name: status
+                value: ${state.status}
+                className: pc-filter-select
+                options:
+                  - { label: 全部状态, value: all }
+                  - { label: 在售, value: success }
+                  - { label: 审核中, value: warning }
+                  - { label: 草稿, value: draft }
+                  - { label: 已下线, value: offline }
+              events:
+                onChange:
+                  - action: setState
+                    params: { status: "${event}" }
+            - type: Button
+              props: { text: 查询, variant: primary, size: small }
+              events:
+                onClick:
+                  - action: message
+                    params: { messageType: info, text: 已按条件筛选（演示） }
+            - type: Button
+              props: { text: 重置, size: small }
+              events:
+                onClick:
+                  - action: setState
+                    params: { keyword: "", category: all, status: all }
+
+    - type: Card
+      props: { className: pc-card pc-table-card }
+      children:
+        - type: Table
+          props:
+            dataSource: ${state.products}
+            rowKey: id
+            pagination: { pageSize: 8 }
+            columns:
+              - { title: 产品名称, dataIndex: name }
+              - { title: 编码, dataIndex: code }
+              - { title: 分类, dataIndex: category }
+              - { title: 负责人, dataIndex: owner }
+              - title: 状态
+                dataIndex: status
+                cell:
+                  type: Tag
+                  props:
+                    text: "${row.status}"
+                    color: "${row.tone}"
+              - { title: 更新时间, dataIndex: updatedAt }
+              - title: 操作
+                cell:
+                  type: Flex
+                  props: { gap: 10, align: center }
+                  children:
+                    - type: Button
+                      props: { text: 任务看板, variant: link, size: small }
+                      events:
+                        onClick:
+                          - action: navigate
+                            params: { to: /board }
+                    - type: Button
+                      props: { text: 编辑, variant: link, size: small }
+                      events:
+                        onClick:
+                          - action: message
+                            params: { messageType: info, text: "编辑「${row.name}」（演示）" }
+
+    - type: Dialog
+      props:
+        title: 新建产品
+        open: ${state.dialogOpen}
+        style: { width: 560, maxWidth: 92vw }
+      events:
+        onClose:
+          - action: setState
+            params: { dialogOpen: false }
+      children:
+        - type: Form
+          props: { name: createProduct, layout: vertical }
+          events:
+            onSubmit:
+              - action: setState
+                params: { dialogOpen: false }
+              - action: message
+                params: { messageType: success, text: "产品「${event.name}」已创建（演示）" }
+          children:
+            - type: Input
+              props: { name: name, label: 产品名称, placeholder: 请输入产品名称, rules: [{ required: true, message: 请输入产品名称 }] }
+            - type: Input
+              props: { name: code, label: 产品编码, placeholder: 如 DA-1004, rules: [{ required: true, message: 请输入产品编码 }] }
+            - type: Select
+              props:
+                name: category
+                label: 产品分类
+                rules: [{ required: true, message: 请选择产品分类 }]
+                options:
+                  - { label: 数据产品, value: data }
+                  - { label: 增长产品, value: growth }
+                  - { label: 营销产品, value: marketing }
+            - type: Select
+              props:
+                name: owner
+                label: 负责人
+                options:
+                  - { label: 张伟, value: zhangwei }
+                  - { label: 李娜, value: lina }
+                  - { label: 王芳, value: wangfang }
+            - type: Textarea
+              props: { name: description, label: 产品说明, placeholder: 简要描述产品定位与目标用户, rows: 3 }
+            - type: Flex
+              props: { justify: end, gap: 8 }
+              children:
+                - type: Button
+                  props: { text: 取消 }
+                  events:
+                    onClick:
+                      - action: setState
+                        params: { dialogOpen: false }
+                - type: Button
+                  props: { text: 创建, variant: primary, submit: true }

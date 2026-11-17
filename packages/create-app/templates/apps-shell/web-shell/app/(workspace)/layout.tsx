@@ -8,9 +8,6 @@ import "@/modules/styles/theme.css";
 // AppShell 外壳与 SkinSwitcher 样式。
 import "@pactor-app/shell/styles.css";
 
-// 默认页面（工作台 / 数据概览 / 系统管理）样式：移植自 next-app-starter。
-import "@/styles/starter-pages.css";
-
 import { WorkspaceShell } from "@/components/WorkspaceShell";
 
 /**

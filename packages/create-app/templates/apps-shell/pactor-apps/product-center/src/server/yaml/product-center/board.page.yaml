@@ -1,0 +1,322 @@
+# 产品状态任务看板：待规划 / 进行中 / 评审中 / 已上线 四列任务卡片。
+# 示例为静态任务数据；卡片支持查看详情、推进状态（演示反馈）。
+dsl: "1.0"
+page:
+  id: board
+  title: 产品状态任务看板
+state:
+  createOpen: false
+  detailOpen: false
+  detailTitle: ""
+  detailProduct: ""
+  detailOwner: ""
+  detailDue: ""
+  todo:
+    - { id: t1, title: 设计产品数据模型, product: 智能数据助手, priority: 高, tone: error, owner: 张伟, due: 11-20 }
+    - { id: t2, title: 梳理渠道归因口径, product: 渠道归因平台, priority: 中, tone: warning, owner: 陈静, due: 11-22 }
+    - { id: t3, title: 补充产品定价方案, product: 经营分析套件, priority: 低, tone: info, owner: 李娜, due: 11-25 }
+  doing:
+    - { id: t4, title: 实现指标看板接口, product: 智能数据助手, priority: 高, tone: error, owner: 张伟, due: 11-19 }
+    - { id: t5, title: 优化推荐召回策略, product: 内容推荐服务, priority: 中, tone: warning, owner: 刘洋, due: 11-21 }
+    - { id: t6, title: 接入企业 IM 通知, product: 智能触达组件, priority: 低, tone: info, owner: 周敏, due: 11-24 }
+  review:
+    - { id: t7, title: 增长引擎灰度评审, product: 用户增长引擎, priority: 高, tone: error, owner: 王芳, due: 11-18 }
+    - { id: t8, title: 活动编排流程验收, product: 活动编排中心, priority: 中, tone: warning, owner: 赵磊, due: 11-19 }
+  done:
+    - { id: t9, title: 用户分层模型上线, product: 客户洞察画像, priority: 中, tone: warning, owner: 孙娜, due: 11-15 }
+    - { id: t10, title: 报表导出能力发布, product: 经营分析套件, priority: 低, tone: info, owner: 李娜, due: 11-14 }
+body:
+  type: Page
+  props: { className: p-0 app-page }
+  children:
+    - type: Header
+      props: { className: app-topbar }
+      children:
+        - type: Flex
+          props: { direction: vertical, gap: 2, className: app-topbar-heading }
+          children:
+            - type: Text
+              props: { text: 产品中心 / 产品状态任务看板, className: app-topbar-breadcrumb }
+            - type: Typography
+              props: { variant: h2, text: 产品状态任务看板, className: app-topbar-title }
+        - type: Flex
+          props: { className: app-topbar-actions, align: center, gap: 8 }
+          children:
+            - type: Button
+              props: { text: 新建任务, icon: plus, size: small, variant: primary }
+              events:
+                onClick:
+                  - action: setState
+                    params: { createOpen: true }
+
+    - type: Text
+      props:
+        text: 按状态查看产品任务进度，卡片展示优先级、负责人与截止时间
+        className: app-page-subtitle
+
+    - type: Grid
+      props: { className: pc-board, columns: 4, gap: 14 }
+      children:
+        # 待规划
+        - type: Flex
+          props: { className: pc-column, direction: vertical, gap: 10 }
+          children:
+            - type: Flex
+              props: { className: pc-column-head, justify: space-between, align: center }
+              children:
+                - type: Text
+                  props: { text: 待规划, className: pc-column-title }
+                - type: Text
+                  props: { text: "3", className: pc-column-count }
+            - type: Flex
+              props: { direction: vertical, gap: 10 }
+              children:
+                - type: For
+                  props: { items: "${state.todo}", keyField: id }
+                  children:
+                    - type: Flex
+                      props: { className: pc-task, direction: vertical, gap: 8 }
+                      children:
+                        - type: Flex
+                          props: { justify: space-between, align: center }
+                          children:
+                            - type: Tag
+                              props: { text: "优先级 ${row.priority}", color: "${row.tone}" }
+                            - type: Text
+                              props: { text: "截止 ${row.due}", className: pc-task-due }
+                        - type: Text
+                          props: { text: "${row.title}", className: pc-task-title }
+                        - type: Text
+                          props: { text: "${row.product} · ${row.owner}", className: pc-task-meta }
+                        - type: Flex
+                          props: { justify: end, gap: 8 }
+                          children:
+                            - type: Button
+                              props: { text: 详情, variant: link, size: small }
+                              events:
+                                onClick:
+                                  - action: setState
+                                    params:
+                                      detailOpen: true
+                                      detailTitle: "${row.title}"
+                                      detailProduct: "${row.product}"
+                                      detailOwner: "${row.owner}"
+                                      detailDue: "${row.due}"
+                                  - action: message
+                                    params: { messageType: success, text: "任务「${row.title}」已推进（演示）" }
+
+        # 进行中
+        - type: Flex
+          props: { className: pc-column, direction: vertical, gap: 10 }
+          children:
+            - type: Flex
+              props: { className: pc-column-head, justify: space-between, align: center }
+              children:
+                - type: Text
+                  props: { text: 进行中, className: pc-column-title }
+                - type: Text
+                  props: { text: "3", className: pc-column-count }
+            - type: Flex
+              props: { direction: vertical, gap: 10 }
+              children:
+                - type: For
+                  props: { items: "${state.doing}", keyField: id }
+                  children:
+                    - type: Flex
+                      props: { className: pc-task, direction: vertical, gap: 8 }
+                      children:
+                        - type: Flex
+                          props: { justify: space-between, align: center }
+                          children:
+                            - type: Tag
+                              props: { text: "优先级 ${row.priority}", color: "${row.tone}" }
+                            - type: Text
+                              props: { text: "截止 ${row.due}", className: pc-task-due }
+                        - type: Text
+                          props: { text: "${row.title}", className: pc-task-title }
+                        - type: Text
+                          props: { text: "${row.product} · ${row.owner}", className: pc-task-meta }
+                        - type: Flex
+                          props: { justify: end, gap: 8 }
+                          children:
+                            - type: Button
+                              props: { text: 详情, variant: link, size: small }
+                              events:
+                                onClick:
+                                  - action: setState
+                                    params:
+                                      detailOpen: true
+                                      detailTitle: "${row.title}"
+                                      detailProduct: "${row.product}"
+                                      detailOwner: "${row.owner}"
+                                      detailDue: "${row.due}"
+                                  - action: message
+                                    params: { messageType: success, text: "任务「${row.title}」已推进（演示）" }
+
+        # 评审中
+        - type: Flex
+          props: { className: pc-column, direction: vertical, gap: 10 }
+          children:
+            - type: Flex
+              props: { className: pc-column-head, justify: space-between, align: center }
+              children:
+                - type: Text
+                  props: { text: 评审中, className: pc-column-title }
+                - type: Text
+                  props: { text: "2", className: pc-column-count }
+            - type: Flex
+              props: { direction: vertical, gap: 10 }
+              children:
+                - type: For
+                  props: { items: "${state.review}", keyField: id }
+                  children:
+                    - type: Flex
+                      props: { className: pc-task, direction: vertical, gap: 8 }
+                      children:
+                        - type: Flex
+                          props: { justify: space-between, align: center }
+                          children:
+                            - type: Tag
+                              props: { text: "优先级 ${row.priority}", color: "${row.tone}" }
+                            - type: Text
+                              props: { text: "截止 ${row.due}", className: pc-task-due }
+                        - type: Text
+                          props: { text: "${row.title}", className: pc-task-title }
+                        - type: Text
+                          props: { text: "${row.product} · ${row.owner}", className: pc-task-meta }
+                        - type: Flex
+                          props: { justify: end, gap: 8 }
+                          children:
+                            - type: Button
+                              props: { text: 详情, variant: link, size: small }
+                              events:
+                                onClick:
+                                  - action: setState
+                                    params:
+                                      detailOpen: true
+                                      detailTitle: "${row.title}"
+                                      detailProduct: "${row.product}"
+                                      detailOwner: "${row.owner}"
+                                      detailDue: "${row.due}"
+                                  - action: message
+                                    params: { messageType: success, text: "任务「${row.title}」已推进（演示）" }
+
+        # 已上线
+        - type: Flex
+          props: { className: pc-column, direction: vertical, gap: 10 }
+          children:
+            - type: Flex
+              props: { className: pc-column-head, justify: space-between, align: center }
+              children:
+                - type: Text
+                  props: { text: 已上线, className: pc-column-title }
+                - type: Text
+                  props: { text: "2", className: pc-column-count }
+            - type: Flex
+              props: { direction: vertical, gap: 10 }
+              children:
+                - type: For
+                  props: { items: "${state.done}", keyField: id }
+                  children:
+                    - type: Flex
+                      props: { className: "pc-task pc-task--done", direction: vertical, gap: 8 }
+                      children:
+                        - type: Flex
+                          props: { justify: space-between, align: center }
+                          children:
+                            - type: Tag
+                              props: { text: 已上线, color: success }
+                            - type: Text
+                              props: { text: "完成 ${row.due}", className: pc-task-due }
+                        - type: Text
+                          props: { text: "${row.title}", className: pc-task-title }
+                        - type: Text
+                          props: { text: "${row.product} · ${row.owner}", className: pc-task-meta }
+                        - type: Flex
+                          props: { justify: end, gap: 8 }
+                          children:
+                            - type: Button
+                              props: { text: 详情, variant: link, size: small }
+                              events:
+                                onClick:
+                                  - action: setState
+                                    params:
+                                      detailOpen: true
+                                      detailTitle: "${row.title}"
+                                      detailProduct: "${row.product}"
+                                      detailOwner: "${row.owner}"
+                                      detailDue: "${row.due}"
+
+    - type: Dialog
+      props:
+        title: 任务详情
+        open: ${state.detailOpen}
+        style: { width: 420, maxWidth: 92vw }
+      events:
+        onClose:
+          - action: setState
+            params: { detailOpen: false }
+      children:
+        - type: Flex
+          props: { direction: vertical, gap: 8 }
+          children:
+            - type: Typography
+              props: { variant: h4, text: "${state.detailTitle}" }
+            - type: Text
+              props: { text: "产品：${state.detailProduct}" }
+            - type: Text
+              props: { text: "负责人：${state.detailOwner}" }
+            - type: Text
+              props: { text: "截止时间：${state.detailDue}" }
+
+    - type: Dialog
+      props:
+        title: 新建任务
+        open: ${state.createOpen}
+        style: { width: 520, maxWidth: 92vw }
+      events:
+        onClose:
+          - action: setState
+            params: { createOpen: false }
+      children:
+        - type: Form
+          props: { name: createTask, layout: vertical }
+          events:
+            onSubmit:
+              - action: setState
+                params: { createOpen: false }
+              - action: message
+                params: { messageType: success, text: "任务「${event.title}」已创建（演示）" }
+          children:
+            - type: Input
+              props: { name: title, label: 任务标题, placeholder: 请输入任务标题, rules: [{ required: true, message: 请输入任务标题 }] }
+            - type: Select
+              props:
+                name: product
+                label: 关联产品
+                options:
+                  - { label: 智能数据助手, value: da }
+                  - { label: 经营分析套件, value: suite }
+                  - { label: 用户增长引擎, value: growth }
+                  - { label: 内容推荐服务, value: recommend }
+            - type: Select
+              props:
+                name: priority
+                label: 优先级
+                options:
+                  - { label: 高, value: high }
+                  - { label: 中, value: medium }
+                  - { label: 低, value: low }
+            - type: Input
+              props: { name: owner, label: 负责人, placeholder: 请输入负责人 }
+            - type: Flex
+              props: { justify: end, gap: 8 }
+              children:
+                - type: Button
+                  props: { text: 取消 }
+                  events:
+                    onClick:
+                      - action: setState
+                        params: { createOpen: false }
+                - type: Button
+                  props: { text: 创建, variant: primary, submit: true }

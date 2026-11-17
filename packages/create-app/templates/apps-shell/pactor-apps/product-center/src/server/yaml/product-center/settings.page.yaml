@@ -1,0 +1,135 @@
+# 产品配置设置：基础配置 / 流程配置 / 通知配置 + 保存。
+# 表单为演示提交（message 反馈），接入后端时把 onSubmit 换成 request。
+dsl: "1.0"
+page:
+  id: settings
+  title: 产品配置设置
+body:
+  type: Page
+  props: { className: p-0 app-page }
+  children:
+    - type: Header
+      props: { className: app-topbar }
+      children:
+        - type: Flex
+          props: { direction: vertical, gap: 2, className: app-topbar-heading }
+          children:
+            - type: Text
+              props: { text: 产品中心 / 产品配置设置, className: app-topbar-breadcrumb }
+            - type: Typography
+              props: { variant: h2, text: 产品配置设置, className: app-topbar-title }
+        - type: Flex
+          props: { className: app-topbar-actions, align: center, gap: 8 }
+          children:
+            - type: Button
+              props: { text: 恢复默认, icon: rotate-ccw, size: small, variant: default }
+              events:
+                onClick:
+                  - action: message
+                    params: { messageType: info, text: 已恢复默认配置（演示） }
+
+    - type: Text
+      props:
+        text: 统一产品编码、审核流程、上架周期与通知策略
+        className: app-page-subtitle
+
+    - type: Alert
+      props:
+        variant: info
+        message: 配置对全部产品线生效
+        description: 修改后点击页面底部「保存配置」；示例环境仅保存在当前页面。
+        style: { marginBottom: 4 }
+
+    - type: Form
+      props:
+        name: productSettings
+        layout: vertical
+        initialValues:
+          productLine: 数据产品线
+          codePrefix: DA
+          defaultCategory: data
+          defaultOwner: zhangwei
+          reviewRequired: true
+          notifyOnPublish: true
+          cycle: "7"
+          transitionNote: 草稿 → 审核中 → 在售 → 已下线；下线后 30 天内可重新上架。
+          emailNotify: true
+          imNotify: false
+          notifyReceiver: product-team@example.com
+      events:
+        onSubmit:
+          - action: message
+            params: { messageType: success, text: 产品配置已保存（演示） }
+      children:
+        - type: Card
+          props: { title: 基础配置, className: pc-card pc-form-card }
+          children:
+            - type: Grid
+              props: { columns: 2, gap: 16 }
+              children:
+                - type: Input
+                  props: { name: productLine, label: 默认产品线, placeholder: 请输入默认产品线 }
+                - type: Input
+                  props: { name: codePrefix, label: 产品编码前缀, placeholder: 如 DA, maxLength: 8 }
+                - type: Select
+                  props:
+                    name: defaultCategory
+                    label: 默认分类
+                    options:
+                      - { label: 数据产品, value: data }
+                      - { label: 增长产品, value: growth }
+                      - { label: 营销产品, value: marketing }
+                - type: Select
+                  props:
+                    name: defaultOwner
+                    label: 默认负责人
+                    options:
+                      - { label: 张伟, value: zhangwei }
+                      - { label: 李娜, value: lina }
+                      - { label: 王芳, value: wangfang }
+
+        - type: Card
+          props: { title: 流程配置, className: pc-card pc-form-card }
+          children:
+            - type: Grid
+              props: { columns: 2, gap: 16 }
+              children:
+                - type: Switch
+                  props: { name: reviewRequired, label: 上架前审核 }
+                - type: Switch
+                  props: { name: notifyOnPublish, label: 上架后自动通知 }
+                - type: Select
+                  props:
+                    name: cycle
+                    label: 默认上架周期
+                    options:
+                      - { label: 7 天, value: "7" }
+                      - { label: 14 天, value: "14" }
+                      - { label: 30 天, value: "30" }
+            - type: Textarea
+              props: { name: transitionNote, label: 状态流转补充说明, rows: 3, placeholder: 补充审核、下线与重新上架的说明 }
+
+        - type: Card
+          props: { title: 通知配置, className: pc-card pc-form-card }
+          children:
+            - type: Grid
+              props: { columns: 2, gap: 16 }
+              children:
+                - type: Switch
+                  props: { name: emailNotify, label: 邮件通知 }
+                - type: Switch
+                  props: { name: imNotify, label: 企业 IM 通知 }
+                - type: Input
+                  props: { name: notifyReceiver, label: 默认接收人, placeholder: product-team@example.com }
+
+        - type: Flex
+          props: { justify: end, gap: 8, className: pc-form-actions }
+          children:
+            - type: Button
+              props: { text: 取消 }
+              events:
+                onClick:
+                  - action: navigate
+                    params: { to: /products }
+            - type: Button
+              props: { text: 保存配置, variant: primary, submit: true }

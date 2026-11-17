@@ -1,0 +1,10 @@
+{
+  "id": "pactor-app-product-center",
+  "name": "product-center",
+  "basePath": "/product-center",
+  "yamlRoot": "src/server/yaml",
+  "clientEntry": "module/client.ts",
+  "actions": [],
+  "publicDir": "public",
+  "target": "innospots-web-shell@2"
+}

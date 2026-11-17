@@ -18,33 +18,38 @@ apps-shell-starter/
 │   ├── app/
 │   │   ├── (workspace)/[...slug]/   # 工作区页面入口（AppShell + PactorShellHost，所有模块页面在此渲染）
 │   │   └── api/
-│   │       ├── runtime/             # 一行 re-export @pactor-app/shell/server/routes
+│   │       ├── runtime/             # bootstrap / pages（按模块语言包本地化）/ fragments
+│   │       ├── auth/                # 演示会话（真实项目替换）
 │   │       └── modules/[moduleId]/  # createModuleDispatcher(moduleServers)（/api/modules/<id>/*）
 │   ├── src/
 │   │   ├── shell/                   # Shell 站点定制层（sitemap.yaml；布局/页面回退包默认站点）
+│   │   ├── backend/                 # 演示会话占位与 CORS（无业务数据）
 │   │   └── modules/                 # module-list.json（启停 / menuMode / access）与基础皮肤 theme.css
 │   ├── scripts/                     # smoke-module-api 冒烟脚本（assemble / validate 由 pactor-shell CLI 承接）
-│   ├── .generated/pactor/           # 装配产物（pactor-shell assemble 生成，勿手改）
-│   ├── public/modules/              # 模块静态资源 <moduleId>/<version>/
+│   ├── .generated/pactor/           # 装配产物（pactor-shell assemble 生成，已 gitignore）
+│   ├── public/modules/              # 模块静态资源 <moduleId>/<version>/（含 i18n/）
 │   └── public/themes/               # 预置皮肤 CSS（pactor-shell theme sync 生成）
 └── pactor-apps/
-    ├── risk-analysis/               # 风险分析（端口 8021，含 server entry 示例）
-    └── risk-decision/               # 风险决策（端口 8022，纯 DSL 模块示例）
+    ├── general-app/                 # 通用业务应用（端口 8030：工作台/看板/系统管理，含 server entry 与 i18n）
+    ├── data-analysis/               # 数据分析（端口 8021，纯 DSL：看板/报表/用户分析/详情）
+    └── product-center/               # 产品中心（端口 8022，纯 DSL：产品管理/配置/任务看板）
 ```
 
-每个业务模块工程结构一致：
+每个业务模块工程结构一致（`general-app` 是完整示例）：
 
 ```text
 pactor-apps/<app>/
-├── app/                           # 独立运行入口（PactorApp、sitemap API、可选业务 API）
-├── module/                        # 模块接入面（由 pactor module init 生成）
-│   ├── client.ts                  # 扩展注册表入口（components / actions）
-│   ├── module.css                 # 模块自带样式（可选，由 client.ts import）
-│   └── server.ts                  # 模块服务端 API（可选，--server 生成）
+├── app/                           # 独立运行入口（PactorApp、sitemap API、业务 API 薄路由）
+├── module/                        # 模块接入面
+│   ├── client.ts                  # 扩展注册表入口（components / actions）+ 样式 import
+│   └── server.ts                  # 模块服务端 API（可选）
 ├── src/
 │   ├── server/yaml/               # sitemap 与页面 DSL
-│   ├── pactor/                    # PactorApp 配置、自定义组件与样式
-│   └── server/api/                # 业务数据实现（独立运行与 server entry 共用）
+│   ├── server/api/                # 业务数据实现（独立运行与 server entry 共用）
+│   ├── server/fixtures/           # 演示数据（可选）
+│   ├── pactor/                    # PactorApp 配置、自定义组件、组件文案与样式
+│   └── shared/                    # 前后端共享类型 / 纯函数（可选）
+├── public/i18n/                   # 页面语言包 + 可翻译字段（随模块资源分发，可选）
 ├── pactor.module.json             # 模块打包配置
 └── dist-module/                   # pactor module build 产物（不进 git）
 ```
@@ -59,11 +64,12 @@ pactor-apps/<app>/
 
 **顺序很重要：模块先 pack，Shell 再 install**（Shell 以 `file:` 引用模块 tgz）。
 
-### 1. 打包两个示例模块
+### 1. 打包三个示例模块
 
 ```bash
-cd pactor-apps/risk-analysis && pnpm install && pnpm pack:module
-cd ../risk-decision && pnpm install && pnpm pack:module
+cd pactor-apps/general-app && pnpm install && pnpm pack:module
+cd ../data-analysis && pnpm install && pnpm pack:module
+cd ../product-center && pnpm install && pnpm pack:module
 ```
 
 `pack:module` = `pactor module pack --no-bump`（含 build），产出 `dist-module/` 与 `<name>-<version>.tgz`。示例模块的 pack 脚本默认 `--no-bump`：版本固定，tgz 文件名稳定，Shell 侧的 `file:` 引用无需跟随变化。
@@ -87,19 +93,20 @@ pnpm start   # http://localhost:9020
 ### 3. 独立运行某个业务模块
 
 ```bash
-cd pactor-apps/risk-analysis
+cd pactor-apps/general-app
 pnpm install
-pnpm dev      # http://localhost:8021
+pnpm dev      # http://localhost:8030
 ```
 
-`risk-decision` 同理，端口 8022。独立运行时页面与 API 都在本工程内；打包进 Shell 后由 Shell 统一承接。
+`data-analysis` 端口 8021、`product-center` 端口 8022，同理。独立运行时页面与 API 都在本工程内；打包进 Shell 后由 Shell 统一承接。
 
 当前默认页面：
 
 | 模块 | 公开路径 | 说明 |
 | --- | --- | --- |
-| risk-analysis | `/pactor-app-risk-analysis` | 风险数据取值页，含 `/api/risk-analysis/*` 服务端 API |
-| risk-decision | `/pactor-app-risk-decision` | 风险决策页；`/pactor-app-risk-decision/integration-logs` 为隐藏路由 |
+| general-app | `/general-app/*` | 工作台 / 数据概览 / 系统管理（系统设置 / 字典 / 审计 / 角色 / 用户），含 `/api/general-app/*` 服务端 API 与中英文语言包 |
+| data-analysis | `/data-analysis/*` | 数据看板 / 数据报表 / 用户分析 / 数据详情 |
+| product-center | `/product-center/*` | 产品管理 / 产品配置设置 / 产品状态任务看板 |
 
 ## 模块改动后的再发布流程
 
@@ -107,7 +114,7 @@ pnpm dev      # http://localhost:8021
 
 ```bash
 # 1. 模块侧：重新打包（覆盖同名 tgz）
-cd pactor-apps/risk-analysis && pnpm pack:module
+cd pactor-apps/data-analysis && pnpm pack:module
 
 # 2. Shell 侧：重新安装该模块并装配
 cd ../../web-shell
@@ -122,18 +129,19 @@ pnpm assemble:modules && pnpm dev
 
 ## 替换为自己的业务模块
 
-以 `risk-decision`（纯 DSL）或 `risk-analysis`（含 server entry）为模板复制一份，然后修改：
+以 `general-app`（完整：页面 + 组件 + server entry + i18n）或 `data-analysis` / `product-center`（纯 DSL 页面示例）为模板复制一份，然后修改：
 
 | 位置 | 修改内容 |
 | --- | --- |
 | `package.json` | `name`、`version`、dev 端口 |
-| `pactor.module.json` | `id`、`name`、`basePath`、`yamlRoot` |
+| `pactor.module.json` | `id`、`name`、`basePath`、`yamlRoot`、`apiPrefixes` |
 | `src/server/yaml/` | sitemap 与页面 DSL（目录名与 `id` 对应） |
-| `src/pactor/`、`module/client.ts` | 自定义组件 / Actions（可选） |
-| `module/server.ts` + `pactor.module.json` 的 `serverEntry`/`apiPrefixes` | 业务 API（可选，参考 risk-analysis） |
+| `src/pactor/`、`module/client.ts` | 自定义组件 / Actions 与组件文案 |
+| `module/server.ts` + `pactor.module.json` 的 `serverEntry`/`apiPrefixes` | 业务 API（可选，参考 general-app） |
+| `public/i18n/` | 页面语言包与可翻译字段（可选，参考 general-app） |
 | web-shell `package.json` | `pnpm add` 新模块 tgz |
-| web-shell `src/modules/module-list.json` | 启用新模块（`enabled` / `menuMode` / `access`） |
-| web-shell `src/shell/sitemap.yaml` | 一级菜单指向新模块页面（`<moduleId>:<pageId>`） |
+| web-shell `src/modules/module-list.json` | 启用新模块（`enabled` / `menuMode` / `access`）；接入统一导航时设 `menuMode: "hidden"` |
+| web-shell `src/shell/sitemap.yaml` | 在 Shell 统一定义菜单条目（全局 `pageId` + 显式 `path`） |
 
 也可以使用 `pactor create <name>` 生成基础工程，再执行 `pactor module init` 补齐模块接入面。
 
@@ -142,8 +150,9 @@ pnpm assemble:modules && pnpm dev
 | 工程 | 端口 |
 | --- | --- |
 | web-shell | 9020 |
-| risk-analysis | 8021 |
-| risk-decision | 8022 |
+| general-app | 8030 |
+| data-analysis | 8021 |
+| product-center | 8022 |
 
 ## 验证
 
