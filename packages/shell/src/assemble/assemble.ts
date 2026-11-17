@@ -274,12 +274,17 @@ function namespaceMenus(
     // 从页面清单推导（basePath + 页面相对路径）；显式 path 视为模块内相对
     // 路径，同样拼 basePath。页面清单查不到时保留原 path。
     if (next.pageId) {
-      const rawId = next.pageId.includes(':')
-        ? next.pageId.slice(next.pageId.indexOf(':') + 1)
-        : next.pageId;
-      const derived = pathByPageId.get(rawId);
-      if (derived) next.path = derived;
-      else if (next.path) next.path = joinPublicPath(basePath, next.path);
+      const namespaced = next.pageId.includes(':');
+      // 已带命名空间的引用（Shell 站点引用模块页面）：本站点页面清单里没有
+      // 该页面，不能按裸 pageId 推导，否则与默认站点同名页面（如 workspace）
+      // 冲突时会把显式 path 覆盖成默认页路径。
+      if (namespaced) {
+        if (next.path) next.path = joinPublicPath(basePath, next.path);
+      } else {
+        const derived = pathByPageId.get(next.pageId);
+        if (derived) next.path = derived;
+        else if (next.path) next.path = joinPublicPath(basePath, next.path);
+      }
     } else if (next.path) {
       next.path = joinPublicPath(basePath, next.path);
     }

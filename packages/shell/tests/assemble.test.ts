@@ -177,6 +177,47 @@ describe('壳站点分层（宿主 src/shell 优先，包默认站点兜底）',
     expect(report.sources['layouts/admin.layout.yaml']).toBe('default');
   });
 
+  it('宿主菜单引用模块页面时保留显式 path（与默认页同名 id 不被覆盖）', () => {
+    const rootDir = createBareHost();
+    const moduleDir = join(rootDir, 'node_modules/fixture-mod/dist-module');
+    const sitemapPath = join(moduleDir, 'dsl/sitemap.yaml');
+    writeFileSync(
+      sitemapPath,
+      readFileSync(sitemapPath, 'utf8').replace(
+        'pages:\n  - { id: home, path: /, title: 首页, public: true }',
+        'pages:\n  - { id: home, path: /, title: 首页, public: true }\n  - { id: workspace, path: /workspace, title: 模块工作台, public: true }',
+      ),
+    );
+    writeFileSync(
+      join(moduleDir, 'dsl/workspace.yaml'),
+      'dsl: "1.0"\npage: { id: workspace, title: 模块工作台 }\nbody: { type: Text, props: { content: hi } }\n',
+    );
+
+    mkdirSync(join(rootDir, 'src/shell'), { recursive: true });
+    writeFileSync(
+      join(rootDir, 'src/shell/sitemap.yaml'),
+      [
+        'id: shell',
+        'resourceType: sitemap',
+        'version: 1',
+        'menus:',
+        '  - { id: workspace, type: page, pageId: "fixture:workspace", path: /fixture/workspace, title: 工作台 }',
+        '',
+      ].join('\n'),
+    );
+
+    assembleModules({ rootDir });
+    const menus = JSON.parse(
+      readFileSync(join(rootDir, '.generated/pactor/menus.json'), 'utf8'),
+    ).menus;
+    const menu = menus.find((m: { id: string }) => m.id === 'workspace');
+    // 默认站点同 id 页面 /workspace 不得覆盖宿主为模块页面写的显式 path
+    expect(menu).toMatchObject({
+      pageId: 'fixture:workspace',
+      path: '/fixture/workspace',
+    });
+  });
+
   it('宿主覆盖同名布局：admin 用宿主文件，其余布局仍回退默认', () => {
     const rootDir = createBareHost();
     mkdirSync(join(rootDir, 'src/shell/layouts'), { recursive: true });
