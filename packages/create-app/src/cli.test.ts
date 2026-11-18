@@ -110,7 +110,7 @@ describe('create-pactor-app', () => {
       'pactor-apps/general-app/module/server.ts',
       'pactor-apps/data-analysis/package.json',
       'pactor-apps/data-analysis/pactor.module.json',
-      'pactor-apps/data-analysis/src/server/yaml/data-analysis/dashboard.page.yaml',
+      'pactor-apps/data-analysis/src/backend/pages/yaml/data-analysis/dashboard.page.yaml',
       'pactor-apps/product-center/package.json',
       'pactor-apps/product-center/module/client.ts',
     ]) {

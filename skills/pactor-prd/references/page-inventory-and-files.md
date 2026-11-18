@@ -14,7 +14,7 @@
 **一律采用模块分目录（模式 B）**：
 
 ```text
-src/backend/resources/yaml/
+src/backend/pages/yaml/
   sitemap.yaml
   common/           # 可选：login、dashboard
   <模块>/           # PRD 模块，kebab-case
@@ -33,7 +33,7 @@ src/backend/resources/yaml/
 
 ## 批量创建流程
 
-1. **按模块建目录**：对清单中每个 distinct `<模块>` 执行 `mkdir -p src/backend/resources/yaml/<模块>`（生成时保持树形与 PRD 模块树一致）。
+1. **按模块建目录**：对清单中每个 distinct `<模块>` 执行 `mkdir -p src/backend/pages/yaml/<模块>`（生成时保持树形与 PRD 模块树一致）。
 2. **按行建文件**：清单每一行 → 一个 `yaml/<模块>/<id>.page.yaml`；内容类型从线框图判定（列表 / 详情 / 表单），套 `references/page-templates.md`。
 3. **一次更新 sitemap**：
    - `pages`：清单中每一页一条（含 hidden 的详情/编辑）；Nexus 页面必须 `lazy: true`

@@ -6,7 +6,7 @@
 popstate 前进后退）接管全部路由：
 
 ```tsx
-// src/pactor/App.tsx —— 全部装配
+// src/frontend/App.tsx —— 全部装配
 <SitemapApp
   sources={sitemapSources}    // sitemap 接口（相对路径）
   baseUrl={apiBaseUrl}        // 外部接口基准地址（相对路径补全）
@@ -35,9 +35,10 @@ cd ../spa-starter && pnpm install && pnpm dev        # http://localhost:9012
 ```
 src/
   main.tsx               # React 入口（导入 @pactor-app/ui/styles.css，必需）
-  pactor/
+  frontend/
     App.tsx              # SitemapApp 装配（纯前端模式：零路由配置；HTTP 钩子用框架 createHttpHooks）
     config.ts            # sitemapSources / apiBaseUrl
+    i18n/                # locale.tsx / messages.ts / demo.ts
 vite.config.ts           # react 插件（无代理：接口服务端已开通 CORS，直连）
 ```
 
@@ -54,11 +55,11 @@ vite.config.ts           # react 插件（无代理：接口服务端已开通 C
 登录 / 登出后 sitemap 需按新会话重新下发，模板用框架内置 `app.reload`
 动作整页重载（`window.location.assign`），两种模式一致。登录 / 登出
 本身是普通 HTTP 调用，由服务端下发的 DSL 用内置 `request` 动作直接
-表达（见 next-app-starter 的 `src/server/sitemap.ts`），客户端零服务代码。
+表达（见 next-app-starter 的 `src/backend/pages/sitemap.ts`），客户端零服务代码。
 
 ## 跨域与 HTTP 钩子
 
-外部接口以 `apiBaseUrl`（`src/pactor/config.ts`，缺省
+外部接口以 `apiBaseUrl`（`src/frontend/config.ts`，缺省
 `http://localhost:9011`，即 next-app-starter 的 dev server）为基准：
 `sitemapSources` 只写相对路径，由 `baseUrl` 补全为
 外部绝对地址。**假定服务端已开通 CORS，浏览器直连，无需项目内代理**——
@@ -66,7 +67,7 @@ vite.config.ts           # react 插件（无代理：接口服务端已开通 C
 （Allow-Origin 回显 + Allow-Credentials + 预检响应），cookie 会话跨源
 可达（框架 fetch 均带 `credentials: 'include'`）。
 
-**HTTP 钩子**（框架默认实现 `createHttpHooks`，`src/pactor/App.tsx`）：
+**HTTP 钩子**（框架默认实现 `createHttpHooks`，`src/frontend/App.tsx`）：
 - `request`：缺省不改写地址（CORS 直连）；服务端不开 CORS 时传
   `proxyPrefix` 把跨域地址改写到项目内代理前缀（需自行配置
   Vite `server.proxy` / nginx 转发）；可注入公共头（Authorization 等）
@@ -75,7 +76,7 @@ vite.config.ts           # react 插件（无代理：接口服务端已开通 C
 
 ## 接入真实后端
 
-1. `src/pactor/config.ts`：`sitemapSources` 改为你的接口 URL（可多个），
+1. `src/frontend/config.ts`：`sitemapSources` 改为你的接口 URL（可多个），
    `apiBaseUrl` 改为接口基准地址。
 2. 服务端按 `SitemapResource`（自 `pactor-app` 导入类型）返回 JSON：
    - `layouts`：DSL 布局（`PageOutlet` 为页面出口，`SitemapMenu` 渲染导航，
@@ -97,6 +98,6 @@ vite.config.ts           # react 插件（无代理：接口服务端已开通 C
 
 ## 前端国际化
 
-右下角选择器将语言保存在浏览器的 `localStorage`，并同步 URL `locale` 与文档 `lang`。`src/i18n/messages.ts` 是前端词条，`SitemapApp` 接收 `locale`、`defaultLocale` 和 `messages`；`src/i18n/demo.ts` 注册的 `/client-i18n` 页使用 `${t('demo.title')}` 与动态参数插值，可直接切换中英文。
+右下角选择器将语言保存在浏览器的 `localStorage`，并同步 URL `locale` 与文档 `lang`。`src/frontend/i18n/messages.ts` 是前端词条，`SitemapApp` 接收 `locale`、`defaultLocale` 和 `messages`；`src/frontend/i18n/demo.ts` 注册的 `/client-i18n` 页使用 `${t('demo.title')}` 与动态参数插值，可直接切换中英文。
 
 本示例仍连接 next-app-starter 的后端：远端菜单和页面由该服务按请求 `locale` 本地化，`/client-i18n` 展示浏览器自主翻译的模式。语言变化会重挂载 `SitemapApp`，重取同一语言的远端 sitemap；如果业务接口返回的数据也需要翻译，应由对应服务或前端产品代码自行处理。扩展前端词条时同时维护两种语言；缺失 key 按默认语言回退。

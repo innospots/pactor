@@ -5,7 +5,7 @@ import { Languages, LogOut, Monitor, Moon, Palette, Sun, UserRound } from "lucid
 import { useRouter } from "next/navigation";
 import { applySkinStylesheet, DEFAULT_SKIN, PREFERENCES_CHANGE_EVENT, resolveSkin, selectSkin, SKINS, SKIN_STORAGE_KEY, themeText, type SkinValue } from "../../skin";
 import { useHostI18n } from "../../i18n/messages";
-import type { SessionUser } from "../../types/session";
+import type { SessionUser } from "../../../shared/types/session";
 
 type Mode = "light" | "dark" | "system";
 const MODE_KEY = "mc-mode";

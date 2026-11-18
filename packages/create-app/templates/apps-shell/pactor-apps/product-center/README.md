@@ -41,8 +41,8 @@ Shell 侧以 `file:` 安装 tgz，并在 `web-shell/src/modules/module-list.json
 
 | 路径 | 说明 |
 | --- | --- |
-| `app/` | 独立运行入口（PactorApp 常驻 layout、sitemap API） |
+| `src/app/` | 独立运行入口（PactorApp 常驻 layout、sitemap API） |
 | `module/client.ts` | 模块 client entry：样式入口 + `ModuleSidebar` 注册 |
-| `src/server/yaml/` | sitemap 与三个页面 DSL |
-| `src/pactor/` | PactorApp 配置、`ModuleSidebar`、页面样式 |
-| `app/theme.css` | 独立运行时的基础皮肤令牌（接入 Shell 后由 Shell 提供） |
+| `src/backend/pages/yaml/` | sitemap 与三个页面 DSL |
+| `src/frontend/` | PactorApp 配置、`ModuleSidebar`、页面样式 |
+| `src/app/theme.css` | 独立运行时的基础皮肤令牌（接入 Shell 后由 Shell 提供） |

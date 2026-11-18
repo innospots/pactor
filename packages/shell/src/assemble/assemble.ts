@@ -757,7 +757,12 @@ export function assembleModules(options: AssembleOptions = {}): AssembleSummary 
   cfg = resolveConfig(options);
   rmSync(cfg.generatedDir, { recursive: true, force: true });
   mkdirSync(cfg.generatedDir, { recursive: true });
+  // public/modules 是装配产物：清掉已移除模块的残留，只保留 .gitkeep。
   mkdirSync(cfg.publicModulesDir, { recursive: true });
+  for (const entry of readdirSync(cfg.publicModulesDir)) {
+    if (entry === '.gitkeep') continue;
+    rmSync(join(cfg.publicModulesDir, entry), { recursive: true, force: true });
+  }
 
   const list = readJson(cfg.moduleListPath) as ModuleListFile;
   const enabled = (list.modules ?? []).filter((m) => m.enabled);

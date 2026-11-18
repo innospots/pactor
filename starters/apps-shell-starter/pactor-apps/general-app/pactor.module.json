@@ -2,7 +2,7 @@
   "id": "pactor-app-general-app",
   "name": "general-app",
   "basePath": "/general-app",
-  "yamlRoot": "src/server/yaml",
+  "yamlRoot": "src/backend/pages/yaml",
   "clientEntry": "module/client.ts",
   "serverEntry": "module/server.ts",
   "apiPrefixes": ["/api/general-app"],

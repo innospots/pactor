@@ -112,14 +112,15 @@ next-app-starter/
 │   │       ├── page-access.ts  pageKey / grantGroup 校验
 │   │       ├── sitemap.ts      sitemap 构建、权限裁剪、语言解析
 │   │       └── yaml/           sitemap.yaml 与页面 DSL
-│   └── frontend/
-│       ├── App.tsx             SitemapApp 宿主与页面访问门禁接线
-│       ├── components/         auth、workbench、layout、settings、shared
-│       ├── i18n/               宿主自身文案
-│       ├── config.ts           sitemap / pageAccess / apiBaseUrl 配置
-│       ├── locale.tsx          中英文语言状态
-│       ├── page-access.tsx     页面访问门禁 UI
-│       └── skin.ts             主题包适配、换肤与持久化
+│   ├── frontend/
+│   │   ├── App.tsx             SitemapApp 宿主与页面访问门禁接线
+│   │   ├── components/         auth、workbench、layout、settings、shared
+│   │   ├── i18n/               宿主自身文案
+│   │   ├── config.ts           sitemap / pageAccess / apiBaseUrl 配置
+│   │   ├── locale.tsx          中英文语言状态
+│   │   ├── page-access.tsx     页面访问门禁 UI
+│   │   └── skin.ts             主题包适配、换肤与持久化
+│   └── shared/types/session.ts 前后端共享的会话类型
 ├── next.config.js              环境地址、根路径重定向
 └── package.json
 ```

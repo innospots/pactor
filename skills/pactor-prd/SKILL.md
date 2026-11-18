@@ -28,13 +28,13 @@ metadata:
 ## 红线（必须遵守）
 
 1. **dataSources 一律 `type: http`，不写 `type: service`**；**PRD 含接口文档/说明时，url 取文档中的接口地址**（方法、路径、返回形状对齐，见「1. 输入解析」）；无接口文档时指向 `/api/d/...`（prototype 使用本地 mock，其他环境原样转发，见 `references/data-api.md`）
-2. **布局与间距以样板页为准**：新建工程时以脚手架生成工程内 `src/backend/resources/yaml/analytics/data-list.page.yaml`、`settings/users.page.yaml` 等同类页为准；**增量时以目标工程内同模块/同类型页**为准。线框图只提取结构与功能，不逐像素还原 ASCII
+2. **布局与间距以样板页为准**：新建工程时以脚手架生成工程内 `src/backend/pages/yaml/analytics/data-list.page.yaml`、`settings/users.page.yaml` 等同类页为准；**增量时以目标工程内同模块/同类型页**为准。线框图只提取结构与功能，不逐像素还原 ASCII
 3. **样式与视觉依据一致**：原产品存在时，主题令牌（含深浅色）、自定义 CSS、换肤入口全部移植对齐；原产品不存在时以 PRD + UI 计划 + 同类标准骨架 / 模板目检，不虚报原产品对比，见 `references/theme-and-style.md` 与 `references/acceptance-checklist.md`
 4. **功能与 PRD / 原产品一致**：线框图描述的筛选/搜索/跳转/弹窗/提交等交互必须经 events/actions 闭环可用，禁止只画静态骨架；错误分支（校验失败提示等）也要实现
 5. **表单一律用 `Form` 组件**：凡是一组「字段 + 校验 + 提交」的表单——独立表单页、页面内嵌的配置面板（如树/列表右侧的编辑表单）、弹窗/抽屉表单、**搜索栏（关键词 + 查询/重置 的筛选区，用 `Form layout: inline`）**——都必须用 `Form` 包裹，字段经 `props.name` 绑定，校验用字段级 `rules`（required + message），提交用 `submit: true` 的 Button 触发 `onSubmit`；**禁止**散放 `Input`/`Select` + `setState` 攒草稿 + `if` 动作手写校验。上下结构字段及 data-list 搜索结构一律用 `Field` 包裹：label、必填星号（`required: true`）、行右提示（`labelHint`）由 `Field` 渲染，控件上只留 `name`/`rules` 等；直接使用控件自身 label 时不得在外层 `Field` 重复声明 label，禁止手写 `Text("*") + Label` 拼标签。回填联动（如点击列表/树节点填充表单）用 `form.setValues` 动作，不要绑 `${state.x}` 到字段 value；即点即生效的 ChipFilter 快筛行没有提交语义，不属于表单
-6. **列表页操作列规范**：操作列按钮样式统一 `Button variant: link`；「编辑」与「新建」指向同一个表单（同一路由页或同一弹窗），唯一区别是编辑以行数据预填（路由页按接口约定整体预填，通常为 `initialValues: ${data.detail}`，route 等预整形接口为 `${data.detail.form}`；弹窗/内嵌面板用 `form.setValues`）；**数据列表页（搜索 + 表格 + 新建/编辑）以生成工程内 `src/backend/resources/yaml/analytics/data-list.page.yaml` 为标准骨架生成**（结构与要点见 `references/page-templates.md`「数据列表标准模型」）
+6. **列表页操作列规范**：操作列按钮样式统一 `Button variant: link`；「编辑」与「新建」指向同一个表单（同一路由页或同一弹窗），唯一区别是编辑以行数据预填（路由页按接口约定整体预填，通常为 `initialValues: ${data.detail}`，route 等预整形接口为 `${data.detail.form}`；弹窗/内嵌面板用 `form.setValues`）；**数据列表页（搜索 + 表格 + 新建/编辑）以生成工程内 `src/backend/pages/yaml/analytics/data-list.page.yaml` 为标准骨架生成**（结构与要点见 `references/page-templates.md`「数据列表标准模型」）
 7. **文案以线框图为准**：标题、按钮、空态文案逐字取自线框图/PRD
-8. **登录页用 `Login` 业务组件**：PRD 含登录页时，以生成工程内 `src/backend/resources/yaml/auth/login.page.yaml`（`type: Login`）为样板生成，禁止手写 Card+Form+自定义 CSS；**原型未明确布局方式时必须向用户提问**选择 `layout`（`split` 左右分栏 / `centered` 居中 / `brand-card` 品牌卡片 / `overlap` 卡片叠加 / `backdrop` 整页渐变背景，附效果简述，必要时含 `brandSide`/`brandRatio`/`authVariant` 修饰项），原型可判定布局则直接用、不提问；用户不答默认 `split` + `authVariant: card`；品牌区文案/logo/插画取自 PRD，提交闭环沿用 `onSubmit` → `request` + `message` + `app.reload` 模式
+8. **登录页用 `Login` 业务组件**：PRD 含登录页时，以生成工程内 `src/backend/pages/yaml/auth/login.page.yaml`（`type: Login`）为样板生成，禁止手写 Card+Form+自定义 CSS；**原型未明确布局方式时必须向用户提问**选择 `layout`（`split` 左右分栏 / `centered` 居中 / `brand-card` 品牌卡片 / `overlap` 卡片叠加 / `backdrop` 整页渐变背景，附效果简述，必要时含 `brandSide`/`brandRatio`/`authVariant` 修饰项），原型可判定布局则直接用、不提问；用户不答默认 `split` + `authVariant: card`；品牌区文案/logo/插画取自 PRD，提交闭环沿用 `onSubmit` → `request` + `message` + `app.reload` 模式
 9. DSL 语法细节（组件 props、表达式、动作）以 `pactor-dsl` skill 与 packages 当前导出（ui 内置注册表 / `@pactor-app/blocks` / `@pactor-app/chart`）为准，本 skill 只约定流程与产出物
 10. **先识别授权宿主再写页面/sitemap**：Nexus/Console 页面必须声明 `access-mode`；`grant` 页面必须有与 catalog 对齐的 `domain`、`module`、`pageKey`，非 `view` 浏览组显式写 `grantGroup`。该宿主的本地 `sitemap.yaml` 只维护 `pages` + `layouts`，导航来自后端并通过 `/api/sitemap` 合并，禁止再维护重复 `menus`；所有页面 `lazy: true`。纯 Pactor starter 继续遵循其 `sitemap`/`menus` 或 bootstrap 菜单模式。完整契约见 `../pactor-dsl/references/authorization-and-sitemap.md`
 
@@ -68,7 +68,7 @@ PRD 要求多语言时，先读 [国际化参考](references/internationalizatio
 
 严格按 **create-pactor-app 脚手架（带 values）→ rendered check → install/dev 冒烟** 的顺序执行；冒烟后先通过 UI 计划门禁，再进入页面生成：
 
-1. 工程名由 README 产品名派生为 kebab-case 英文名，创建前确认一次；**工程必须经 create-pactor-app 脚手架创建**（模板唯一事实来源是 `starters/next-app-starter`，脚手架产物自带 PRD 起点内容：`/api/d` 数据层、`src/backend/resources/yaml/` 页面骨架、主题与国际化接线），禁止从任何位置复制模板工程副本替代脚手架。
+1. 工程名由 README 产品名派生为 kebab-case 英文名，创建前确认一次；**工程必须经 create-pactor-app 脚手架创建**（模板唯一事实来源是 `starters/next-app-starter`，脚手架产物自带 PRD 起点内容：`/api/d` 数据层、`src/backend/pages/yaml/` 页面骨架、主题与国际化接线），禁止从任何位置复制模板工程副本替代脚手架。
 2. 按 **`template-placeholders.json`** 准备 flat values JSON：键必须恰好是清单登记的全部键，每个值都是字符串；键含义与示例直接读清单，不自行增删键。
 3. 用 `--values` 一次性完成脚手架与占位符渲染，然后做渲染后检查（`<values.json>` 为上一步的文件）：
 

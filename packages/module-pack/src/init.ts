@@ -46,7 +46,7 @@ export interface InitModuleResult {
 }
 
 interface ActionSource {
-  /** 工程相对导入路径（无扩展名，如 ../src/pactor/risk-actions） */
+  /** 工程相对导入路径（无扩展名，如 ../src/frontend/risk-actions） */
   specifier: string;
   /** 具名导出（如 riskActions） */
   exports: string[];
@@ -190,9 +190,9 @@ export function deriveApiPrefix(moduleId: string): string {
   return `/api/${slug.length > 0 ? slug : 'module'}`;
 }
 
-/** 扫描 src/pactor/*-actions.ts 的具名导出（export const xxx） */
+/** 扫描 src/frontend/*-actions.ts 的具名导出（export const xxx） */
 export function discoverActions(projectDir: string): ActionSource[] {
-  const dir = join(projectDir, 'src/pactor');
+  const dir = join(projectDir, 'src/frontend');
   if (!existsSync(dir)) return [];
   const sources: ActionSource[] = [];
   for (const entry of readdirSync(dir, { withFileTypes: true }).sort((a, b) =>
@@ -206,16 +206,16 @@ export function discoverActions(projectDir: string): ActionSource[] {
     );
     if (exports.length === 0) continue;
     sources.push({
-      specifier: `../src/pactor/${entry.name.replace(/\.ts$/, '')}`,
+      specifier: `../src/frontend/${entry.name.replace(/\.ts$/, '')}`,
       exports,
     });
   }
   return sources;
 }
 
-/** 检测 src/pactor/components/index.ts 是否导出 pactorComponents */
+/** 检测 src/frontend/components/index.ts 是否导出 pactorComponents */
 export function discoverComponents(projectDir: string): boolean {
-  const file = join(projectDir, 'src/pactor/components/index.ts');
+  const file = join(projectDir, 'src/frontend/components/index.ts');
   if (!existsSync(file)) return false;
   return /export\s+(const|\{[^}]*)\s*pactorComponents/.test(readFileSync(file, 'utf8'));
 }
@@ -225,7 +225,7 @@ export function renderClientEntry(hasComponents: boolean, actions: ActionSource[
   const imports: string[] = [];
   const spreads: string[] = [];
   if (hasComponents) {
-    imports.push("import { pactorComponents } from '../src/pactor/components';");
+    imports.push("import { pactorComponents } from '../src/frontend/components';");
   }
   for (const action of actions) {
     imports.push(

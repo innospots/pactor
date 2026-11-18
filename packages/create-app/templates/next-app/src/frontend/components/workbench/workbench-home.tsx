@@ -4,7 +4,7 @@ import { ArrowRight, Bot, History, Languages, Layers, Palette, Plus, Send, Spark
 import Link from "next/link";
 import { type FormEvent, useEffect, useRef, useState } from "react";
 import { Card } from "@pactor-app/ui/components";
-import type { SessionUser } from "../../types/session";
+import type { SessionUser } from "../../../shared/types/session";
 import { useHostI18n } from "../../i18n/messages";
 
 type Message = { id: string; role: "user" | "assistant"; text: string };

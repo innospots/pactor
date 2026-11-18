@@ -628,10 +628,10 @@ body:
 
 ```bash
 # 单文件
-npx pactor validate src/server/yaml/pages/home.page.yaml
+npx pactor validate src/backend/pages/yaml/analytics/home.page.yaml
 
 # 递归校验 DSL 目录（包含表达式静态检查）
-npx pactor lint src/server/yaml
+npx pactor lint src/backend/pages/yaml
 ```
 
 The command must run in the consumer project with `@pactor-app/cli` installed. It checks schema shape (top-level keys, node structure, action configs) but does NOT validate component props. Correctness of props comes from the bundled component catalog/contracts and the online docs. Host extensions such as Nexus node-level `access` may not be understood by every generic schema version; also start the host and verify its loader, page-access, and full page request against the installed host implementation.

@@ -6,15 +6,15 @@
 
 工程至少具备：
 
-- `src/backend/resources/yaml/sitemap.yaml`（或等价 sitemap 源）
-- 页面 yaml 目录（**模式 B** `yaml/<模块>/<id>.page.yaml` 或 **模式 A** `yaml/pages/*.page.yaml` — 见 `pactor-dsl/references/page-catalog-and-layout.md`）
+- `src/backend/pages/yaml/sitemap.yaml`（或等价 sitemap 源）
+- 页面 yaml 目录（**模式 B** `yaml/<模块>/<id>.page.yaml` 或 **模式 A** `yaml/<area>/*.page.yaml` — 见 `pactor-dsl/references/page-catalog-and-layout.md`）
 - 数据接口层：`src/app/api/d/[...parts]/route.ts`（prototype 使用 mock，其他环境原样转发；见 `data-api.md`）。若工程仍用 `type: service`，增量页 **仍须 http**，并迁移或仅对新页遵守红线
 
 不满足时：先 **`pactor-project`** 或 **新建工程 `pactor-prd` 模式** 搭壳，再回来做增量。
 
 ## 0. 摸底（只读）
 
-1. 扫描目标工程实际的 YAML 根（通用 starter 常见 `src/backend/resources/yaml/**`，Nexus 常见 `src/backend/pages/yaml/**`；排除 `sitemap.yaml`），建立 **现状清单**：`page id`、文件路径、`sitemap.pages` 的 path、导航引用、访问元数据。
+1. 扫描目标工程实际的 YAML 根（通用 starter 常见 `src/backend/pages/yaml/**`；Nexus 以目标工程实际 loader 为准；排除 `sitemap.yaml`），建立 **现状清单**：`page id`、文件路径、`sitemap.pages` 的 path、导航引用、访问元数据。
 2. 判定授权/sitemap profile：通用 Pactor 用本地 `menus`/bootstrap 与 `permission`；Nexus/Console 用页面 `access-mode` + 后端导航，并禁止本地 sitemap 重复 `menus`。
 3. 确认实际懒加载 API：通用 starter 常见 `/api/pages/{id}`；Nexus 当前为 `/api/public/pages/{id}`，服务端在该路由内执行 page-access。不要按 `pageEndpoint` 缺省值猜测。
 4. 读工程内 **同类页** 一份（同模块列表页或表单页）作为排版样板（增量时红线「以模板为准」= **以本工程同类页为准**）。

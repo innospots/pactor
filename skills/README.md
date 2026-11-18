@@ -83,7 +83,7 @@ ln -s node_modules/@pactor-app/skills/pactor-prd ~/.claude/skills/pactor-prd
 ### 能力摘要
 
 - 输入：产品总览 README + 分页 Markdown 线框图（可选原产品仓抽样式）
-- 产出：Next + Pactor 工程 — `docs/prd/ui-plan.md`、sitemap/navigation、分模块 YAML、页面访问元数据、http 数据源 + `app/api/d/[...parts]` 转发层、懒加载页面 API、neutral 默认皮肤与验收证据
+- 产出：Next + Pactor 工程 — `docs/prd/ui-plan.md`、sitemap/navigation、分模块 YAML、页面访问元数据、http 数据源 + `src/app/api/d/[...parts]` 转发层、懒加载页面 API、neutral 默认皮肤与验收证据
 - **新建工程**：解析与页面清单 → `create-pactor-app` + PRD values render → rendered check → install/dev 冒烟 → 完成全量 P0/P1 UI 计划 → 按计划建 `yaml/<模块>/<id>.yaml` → 访问元数据/数据接口/样式 → 静态检查 + 浏览器功能 + 截图目检（`page-inventory-and-files.md`、`ui-quality.md`）
 - **增量**：现状清单 / delta 与摸底 → 只更新 **add/update** 页的 UI 计划 → 按计划只改相关 YAML、sitemap、数据接口；**deprecate** 经确认处理 → 变更页三层验收 + 回归（`incremental-wireframe-delta.md`）
 - 红线：dataSources 仅 `http`；表单一律 `Form`；列表操作列规范；功能闭环；文案跟线框图；新建工程的 rendered check / 冒烟未通过，或任一模式的完整 UI 计划门禁未通过时，不得生成页面；不得擅自偏离计划，三层验收任一失败均修复并重验

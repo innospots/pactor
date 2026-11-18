@@ -7,6 +7,7 @@ Agent 在 **新建模块** 或 **改造为可 pack** 时，按序勾选。
 - [ ] 工程根存在 `package.json`（Next 或独立模块包）
 - [ ] `pnpm add -D @pactor-app/cli`（或 monorepo `link:../../packages/cli`）
 - [ ] `pactor module init`（需要 API 则 `--server`）
+- [ ] 源码按 `src/{app,frontend,backend,shared}` 组织；`yamlRoot` 默认 `src/backend/pages/yaml`
 - [ ] `pactor.module.json`：`id`（URL 安全）、`basePath`（非 `/`）、`yamlRoot` 指向真实 YAML 根
 - [ ] 双模式时配置 **`sitemap`** 指向模块专用站点地图文件
 - [ ] `module/client.ts` 导出 `extensions`；样式策略正确（无 globals tailwind 直 import）
@@ -18,6 +19,7 @@ Agent 在 **新建模块** 或 **改造为可 pack** 时，按序勾选。
 - [ ] 布局适合 Shell（content-only，无重复 NavigationShell / 登录流）
 - [ ] DSL 内 `/api/...` 命中已声明 `apiPrefixes`，或走 Shell 宿主 BFF
 - [ ] `module/server.ts` 的 `handlers` 覆盖 mock/真实逻辑路径（含多段路径策略）
+- [ ] 页面 i18n（如需要）：`public/i18n/<locale>/app.yaml` + `fields.json`；组件文案在 `src/frontend/i18n`
 
 ## 构建与打包
 

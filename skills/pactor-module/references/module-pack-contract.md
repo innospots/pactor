@@ -13,14 +13,36 @@ pactor module pack --no-bump    # 固定版本（apps-shell file: 依赖常用�
 
 可编程：`import { buildModule, validateModule, initModule } from '@pactor-app/module-pack'`。
 
+## 工程结构（与 starter 一致）
+
+```text
+src/
+  app/                  # Next 路由（模块独立运行）
+  frontend/             # App、components、i18n、styles（构建进 client）
+  backend/
+    api/                # 业务 API 实现（可选）
+    fixtures/           # 演示数据（可选）
+    pages/
+      sitemap.ts        # 独立运行 sitemap 加载器
+      yaml/             # sitemap.yaml + <module>/*.yaml
+  shared/               # 同构类型 / 纯函数（可选）
+module/
+  client.ts             # extensions（components / actions）+ 样式 import
+  server.ts             # 可选，handlers + apiPrefixes
+public/
+  i18n/<locale>/app.yaml + fields.json   # 模块页面语言包（可选）
+```
+
+`yamlRoot` 默认 `src/backend/pages/yaml`；`pactor module init` 在 `src/frontend` 下探测 actions / components。
+
 ## `pactor.module.json` 核心字段
 
 | 字段 | 说明 |
 | --- | --- |
 | `id` | 模块 id → `globalPageId` 前缀、`/modules/<id>/` 资源路径 |
 | `name` | 展示名 |
-| `basePath` | 路由前缀，如 `/pactor-app-data-analysis`；**禁止 `/`** |
-| `yamlRoot` | 页面 DSL 根；默认 `src/server/yaml`；next-app-starter 为 `src/backend/pages/yaml` |
+| `basePath` | 路由前缀，如 `/data-analysis`；**禁止 `/`** |
+| `yamlRoot` | 页面 DSL 根；默认 `src/backend/pages/yaml`；next-app-starter 为 `src/backend/pages/yaml` |
 | `sitemap` | yamlRoot 内站点地图文件名；默认 `sitemap.yaml`；双模式用 `sitemap.module.yaml` |
 | `clientEntry` | 默认 `module/client.ts`；须 `export const extensions = { components, actions }` |
 | `serverEntry` | 如 `module/server.ts`；与 `apiPrefixes` **成对** |

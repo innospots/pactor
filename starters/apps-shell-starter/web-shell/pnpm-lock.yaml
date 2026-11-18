@@ -937,7 +937,7 @@ packages:
     resolution: {integrity: sha512-sdQSFB7+llfUcQHUQO3+B8ERRj0Oa4w9POWMI/puGtuf7gFywGmkaLCElnudfTiKZV+NvHqL0ifzdrI8Ro7ESA==}
 
   data-analysis@file:../pactor-apps/data-analysis/data-analysis-0.1.0.tgz:
-    resolution: {integrity: sha512-MIceytbKOSCcoVqCK2S6HU4WcJRI+gFCADSfbyaBwLJXdacw/EjFZ3qjbsHat2BH2YaKS3ysa/ny9DEr09LE9A==, tarball: file:../pactor-apps/data-analysis/data-analysis-0.1.0.tgz}
+    resolution: {integrity: sha512-Na4rRWeQwu2dQGSNaYS4t3FeDvmDxmwJ8kqRe0h+A/V8+phatn/gJXzln2p0UQQazSYFZssK+gElgREjI2tUVw==, tarball: file:../pactor-apps/data-analysis/data-analysis-0.1.0.tgz}
     version: 0.1.0
     peerDependencies:
       next: 16.3.5
@@ -1231,7 +1231,7 @@ packages:
     resolution: {integrity: sha512-xckBUXyTIqT97tq2x2AMb+g163b5JFysYk0x4qxNFwbfQkmNZoiRHb6sPzI9/QV33WeuvVYBUIiD4NzNIyqaRQ==}
 
   general-app@file:../pactor-apps/general-app/general-app-0.1.0.tgz:
-    resolution: {integrity: sha512-1UUOp14YW9uFrhnYcv+Rt6ySSITEHgmyVdicD5+/MG/K/JW3ekdxtzDg79P2uY1wyXs6oAjZfvorw7WL16Ah2Q==, tarball: file:../pactor-apps/general-app/general-app-0.1.0.tgz}
+    resolution: {integrity: sha512-h0SiW7G7MP8PobVjkaWnqSkJkP2OyWygcSjmmiIW8M4mZ5nsQ6rUr2R7zHq4N5fS2EbYinof+fQ6id0E22bumA==, tarball: file:../pactor-apps/general-app/general-app-0.1.0.tgz}
     version: 0.1.0
     peerDependencies:
       '@pactor-app/runtime': '>=1.55.0'
@@ -1771,7 +1771,7 @@ packages:
     engines: {node: '>= 0.8.0'}
 
   product-center@file:../pactor-apps/product-center/product-center-0.1.0.tgz:
-    resolution: {integrity: sha512-lUkbD3nKXmk9sjh87j0t05NJ9xFdLdHoQajIYLy2N3JyychtsTTN1s57dYGP82z+8lO/s7yNu5cxArPTZgx8/Q==, tarball: file:../pactor-apps/product-center/product-center-0.1.0.tgz}
+    resolution: {integrity: sha512-RinDJHZI605F2lbBRvUkLzzyb6E6RMRtGVcov82jhc4I7mEW44FBsazP1HjP8q3sWkEiSCSqo5fp/Dr3auB9Pg==, tarball: file:../pactor-apps/product-center/product-center-0.1.0.tgz}
     version: 0.1.0
     peerDependencies:
       next: 16.3.5

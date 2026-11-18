@@ -81,7 +81,7 @@
 
 ### 体验与可维护性
 
-1. **开发可溯源**：URL → `routes.json` / `pages.json` → `dslRef` → YAML；模块源侧 → `sitemap.yaml` → `src/server/yaml/**/{pageId}.yaml`。
+1. **开发可溯源**：URL → `routes.json` / `pages.json` → `dslRef` → YAML；模块源侧 → `sitemap.yaml` → `src/backend/pages/yaml/**/{pageId}.yaml`。
 2. **文档与配置同源**：`module-list.json`、manifest、README 中的路径约定保持一致。
 3. **CSS 作用域可控**：推荐 CSS Modules / 局部类名；全局 reset 与主题由 Shell 统一；模块在 `client.ts` import 自有 CSS，装配器按 manifest `styles` 自动引入。
 
@@ -139,7 +139,7 @@
 | 项 | 现状 | 影响 |
 | --- | --- | --- |
 | 会话与登录 | 演示会话占位（`src/backend/session.ts`，cookie `pactor_demo_session`）：`/api/auth/login` 写会话，`/api/runtime/bootstrap` 经 `createRuntimeHandlers({ cookies, resolveUser })` 注入会话并裁剪菜单/页面（`cookies` 由宿主注入——包与宿主分属不同 next 实例时 AsyncLocalStorage 不共享） | 真实用户体系 / 签名 token 未接；业务用户与角色数据在 general-app 模块内 |
-| 业务 API | 业务数据随模块 server entry 交付，由 `app/api/modules/[moduleId]/[[...path]]` 统一分发；Shell 不再提供 `/api/d` BFF | 模块 API 逻辑路径由 `pactor.module.json.apiPrefixes` 声明，生产可替换为真实后端 |
+| 业务 API | 业务数据随模块 server entry 交付，由 `src/app/api/modules/[moduleId]/[[...path]]` 统一分发；Shell 不再提供 `/api/d` BFF | 模块 API 逻辑路径由 `pactor.module.json.apiPrefixes` 声明，生产可替换为真实后端 |
 | HTTP 响应适配 | `PactorShellHost` 已接入 `createHttpHooks()`，默认拆 `{ code, data, message }` | 其他包裹协议 / 鉴权头需经 `PactorShellHost` 的 HTTP 钩子覆盖或自定义 `PactorHttpHooks` |
 | 页面权限 | `canSeePage` 仅支持简单 `permission` 字符串 | 复杂 PermissionConfig、租户隔离未实现 |
 | 审计 / 限流 / CSRF | 未实现 | 生产安全基线未达标 |
@@ -172,9 +172,9 @@
 ### 1. 模块侧：定义与导出
 
 ```text
-src/pactor/components/*.tsx          # 组件实现
-src/pactor/components/index.ts       # pactorComponents 注册表（DSL type 名 → 组件）
-src/pactor/actions.ts                # pactorActions（可选）
+src/frontend/components/*.tsx          # 组件实现
+src/frontend/components/index.ts       # pactorComponents 注册表（DSL type 名 → 组件）
+src/frontend/actions.ts                # pactorActions（可选）
 module/client.ts                     # export const extensions = { components, actions }
 ```
 
@@ -193,9 +193,13 @@ module/client.ts                     # export const extensions = { components, a
 示例：
 
 ```ts
+import { extensions as generalAppExtensions } from "general-app/client";
+import { extensions as dataAnalysisExtensions } from "data-analysis/client";
 import { extensions as productCenterExtensions } from "product-center/client";
 
 export const moduleExtensions = {
+  "pactor-app-general-app": generalAppExtensions,
+  "pactor-app-data-analysis": dataAnalysisExtensions,
   "pactor-app-product-center": productCenterExtensions,
 };
 ```
@@ -205,7 +209,7 @@ export const moduleExtensions = {
 
 ### 3. 运行期：注入 SitemapApp
 
-`app/(workspace)/layout.tsx` 挂载 `PactorShellHost`（Client Component，来自 `@pactor-app/shell/client`）：
+`src/app/(workspace)/layout.tsx` 挂载 `PactorShellHost`（Client Component，来自 `@pactor-app/shell/client`）：
 
 ```text
 PactorShellHost
@@ -236,7 +240,7 @@ GET /api/runtime/bootstrap 或 /api/runtime/pages/{globalPageId}
 ```mermaid
 flowchart LR
   subgraph module_repo [模块仓库]
-    TSX[src/pactor/components]
+    TSX[src/frontend/components]
     REG[index.ts 注册表]
     CE[module/client.ts]
     BM[build:module esbuild]
@@ -277,30 +281,24 @@ flowchart LR
 
 ```text
 web-shell/
-├── app/
-│   ├── layout.tsx                 # 根 Layout、全局样式、SkinHeadScript 首屏防闪烁
-│   ├── globals.css
-│   ├── (workspace)/
-│   │   ├── layout.tsx             # 挂载 WorkspaceShell（AppShell + PactorShellHost）
-│   │   └── [...slug]/page.tsx     # 必选 catch-all；按路由表校验，非法路径 404
-│   ├── api/runtime/
-│   │   ├── bootstrap/route.ts     # createRuntimeHandlers({ cookies, resolveUser })
-│   │   ├── pages/[pageId]/route.ts # 页面端点 + 按模块语言包本地化
-│   │   └── fragments/[fragmentId]/route.ts
-│   ├── api/auth/{login,logout}/route.ts
-│   │                             # 演示会话（admin / admin123，cookie）
-│   └── api/modules/[moduleId]/[[...path]]/route.ts
-│                                   # createModuleDispatcher(moduleServers) 分发
 ├── src/
+│   ├── app/
+│   │   ├── layout.tsx             # 根 Layout、全局样式、SkinHeadScript 首屏防闪烁
+│   │   ├── globals.css
+│   │   ├── (workspace)/
+│   │   │   ├── layout.tsx         # 挂载 WorkspaceShell（AppShell + PactorShellHost）
+│   │   │   └── [...slug]/page.tsx # 必选 catch-all；按路由表校验，非法路径 404
+│   │   └── api/
+│   │       ├── runtime/           # bootstrap / pages（按模块语言包本地化）/ fragments
+│   │       ├── auth/              # 演示会话（admin / admin123，cookie）
+│   │       └── modules/[moduleId]/ # createModuleDispatcher(moduleServers) 分发
+│   ├── frontend/WorkspaceShell.tsx # AppShell + PactorShellHost 装配（client）
+│   ├── backend/                   # session.ts / cors.ts（演示会话与 CORS）
+│   ├── shared/types/pactor-modules.d.ts # 模块 client/server 入口的通配类型声明
 │   ├── shell/sitemap.yaml         # 品牌 + 全量导航（模块菜单统一 hidden，导航在此定义）
-│   ├── backend/
-│   │   ├── session.ts             # 演示会话占位（真实项目替换为统一登录）
-│   │   └── cors.ts                # 演示 CORS
-│   ├── components/WorkspaceShell.tsx # AppShell + PactorShellHost 装配（client）
-│   ├── modules/
-│   │   ├── module-list.json       # 启用哪些 UI 包、菜单接入模式、访问级别
-│   │   └── styles/theme.css       # Shell 基础皮肤（晨雾奶芙，皮肤系统的默认基底）
-│   └── types/pactor-modules.d.ts  # 模块 client/server 入口的通配类型声明
+│   └── modules/
+│       ├── module-list.json       # 启用哪些 UI 包、菜单接入模式、访问级别
+│       └── styles/theme.css       # Shell 基础皮肤（晨雾奶芙，皮肤系统的默认基底）
 ├── .generated/pactor/             # pactor-shell assemble 生成（勿手改，已 gitignore）
 ├── public/
 │   ├── modules/                   # 模块静态资源：<moduleId>/<version>/（含 i18n/）
@@ -317,7 +315,7 @@ web-shell/
 
 Shell 自身按 Pactor 的 sitemap / layout / page YAML 描述一个**自带站点**，装配器在 npm 模块**之前**处理它（模块 id 固定为 `shell`）。站点由两层叠加：
 
-1. **包默认层**：`@pactor-app/shell` 内置 `assets/site/`——`admin` / `login` / `auth` / `blank` 四套布局与登录、工作台、主题设置、个人中心四个开箱页面。`admin` 布局是 rail 风格导航壳（一级菜单图标轨 + 命中分组的二级侧栏），轨道底部挂 `UserMenu` 账户组件：个人中心 / 退出登录之外，在线状态、明暗主题、界面密度、切换语言缺省全开（`PactorShellHost` 内建注册的 `ShellUserMenu` 覆盖 UI kit 同名组件，主题选择与外壳外观模式 `pactor.mode` 同步持久化；皮肤切换集中在「主题设置」页）。可在调用处配置缺省项：`<AppShell userMenu={{ showLanguage: false }} />` 或 `<PactorShellHost userMenu={{ showSize: false }} />`（后者字段优先，DSL 节点显式 props 再优先）。`NavigationShell` / `SkinGallery` / `Login` / `UserMenu` 组件由 `PactorShellHost` 内建注册，样式随 `@pactor-app/shell/styles.css` 分发（`app/(workspace)/layout.tsx` 已引入）。
+1. **包默认层**：`@pactor-app/shell` 内置 `assets/site/`——`admin` / `login` / `auth` / `blank` 四套布局与登录、工作台、主题设置、个人中心四个开箱页面。`admin` 布局是 rail 风格导航壳（一级菜单图标轨 + 命中分组的二级侧栏），轨道底部挂 `UserMenu` 账户组件：个人中心 / 退出登录之外，在线状态、明暗主题、界面密度、切换语言缺省全开（`PactorShellHost` 内建注册的 `ShellUserMenu` 覆盖 UI kit 同名组件，主题选择与外壳外观模式 `pactor.mode` 同步持久化；皮肤切换集中在「主题设置」页）。可在调用处配置缺省项：`<AppShell userMenu={{ showLanguage: false }} />` 或 `<PactorShellHost userMenu={{ showSize: false }} />`（后者字段优先，DSL 节点显式 props 再优先）。`NavigationShell` / `SkinGallery` / `Login` / `UserMenu` 组件由 `PactorShellHost` 内建注册，样式随 `@pactor-app/shell/styles.css` 分发（`src/app/(workspace)/layout.tsx` 已引入）。
 2. **宿主定制层**：本工程 `src/shell/`。逐文件优先于默认层；`sitemap.yaml` 字段级合并——`app` / `auth` / `layout` 宿主优先，`layouts` 按 key 合并，`menus` / `pages` 按 id 合并（宿主同 id 条目覆盖默认，其余默认条目保留）。
 
 本工程 `src/shell/` 提供 `sitemap.yaml`（品牌 + 全量导航）。业务页面由各模块提供，但导航统一在本文件定义：三个模块在 `module-list.json` 中均为 `menuMode: "hidden"`，模块自带菜单只保留为隐藏路由。包默认站点仍提供登录、主题设置、个人中心与错误页；需要覆盖默认布局/页面时，在 `src/shell/layouts/`、`src/shell/pages/` 放同名文件即可，`pnpm validate:modules` 会输出来源与覆盖提示。
@@ -337,7 +335,7 @@ Shell 自身按 Pactor 的 sitemap / layout / page YAML 描述一个**自带站�
 | `themes` | 主题设置 | `shell:themes`（包默认） | `/settings/themes` | `palette` |
 
 隐藏菜单：`role-detail`（`activeMenu: roles`）、`login` / `profile` / 403 / 404 / 500（包默认），以及全部模块自带菜单（`menuMode: "hidden"`）。general-app 页面默认需要登录（模块 `access.default=authenticated`），`users` 页另需 `user:view` 权限；`/` 与 `/workspace` 由 `next.config.ts` 重定向到 `/general-app/workspace`。
-- 模块页面使用 `$i18n{key:默认值}` 简写，语言包随模块 public 资源分发到 `public/modules/<moduleId>/<version>/i18n/<locale>/app.yaml`，自定义组件的可翻译字段由同目录 `fields.json` 声明；`app/api/runtime/pages/[pageId]/route.ts` 按页面所属模块（`globalPageId` 的 `moduleId:` 前缀）加载语言包，经 `localizePageDsl` 转换下发（`?locale=` / `locale` Cookie 选择，缺省 zh-CN）。因此这些页面在模块 sitemap 中须标记 `lazy: true`（非 lazy 页面内联进 bootstrap，不经过本地化端点）。Shell 自带页面为直写中文，不经过本地化。
+- 模块页面使用 `$i18n{key:默认值}` 简写，语言包随模块 public 资源分发到 `public/modules/<moduleId>/<version>/i18n/<locale>/app.yaml`，自定义组件的可翻译字段由同目录 `fields.json` 声明；`src/app/api/runtime/pages/[pageId]/route.ts` 按页面所属模块（`globalPageId` 的 `moduleId:` 前缀）加载语言包，经 `localizePageDsl` 转换下发（`?locale=` / `locale` Cookie 选择，缺省 zh-CN）。因此这些页面在模块 sitemap 中须标记 `lazy: true`（非 lazy 页面内联进 bootstrap，不经过本地化端点）。Shell 自带页面为直写中文，不经过本地化。
 
 - 默认层菜单按 id 合并：本文件用 `workspace` / `themes` 覆盖包默认条目，其余默认隐藏项（login / profile / 错误页）保持隐藏。
 - 页面路由与匿名访问仍由菜单目标页面的 `public` / `permission` 驱动（`filterVisibleMenus`）。
@@ -370,7 +368,7 @@ pnpm build
 pnpm start   # 默认 http://localhost:9020
 ```
 
-访问 `/general-app/workspace`、`/pactor-app-data-analysis`、`/pactor-app-product-center`：左侧 rail 由 `src/shell/sitemap.yaml` 定义（工作台 / 数据概览 / 系统管理分组 / 数据分析 / 产品中心 / 主题设置），右侧渲染对应模块页面；`/general-app/settings/*` 由 general-app 提供，`/settings/themes`、`/login`、`/profile` 为包默认页面；`/api/runtime/bootstrap` 返回 `layout: "admin"`、过滤后的菜单与内联页面 DSL。
+访问 `/general-app/workspace`、`/data-analysis/dashboard`、`/product-center/products`：左侧 rail 由 `src/shell/sitemap.yaml` 定义（工作台 / 数据概览 / 系统管理分组 / 数据分析 / 产品中心 / 主题设置），右侧渲染对应模块页面；`/general-app/settings/*` 由 general-app 提供，`/settings/themes`、`/login`、`/profile` 为包默认页面；`/api/runtime/bootstrap` 返回 `layout: "admin"`、过滤后的菜单与内联页面 DSL。
 
 ---
 
@@ -437,16 +435,17 @@ pnpm add ../pactor-apps/general-app/general-app-0.1.0.tgz \
 | HTTP 数据源 | `@pactor-app/shell/client` 的 `PactorShellHost`（缺省 `createHttpHooks()`） | 拆 `{ code, data, message }` 包裹；模块 DSL 的 `dataSources` 依赖它 |
 | 主题背景 | 包默认 admin 布局的内容区（`kn-main` / `shell-content`）使用皮肤变量背景 | 让右侧内容区沿用模块皮肤背景 |
 
-数据分析的模块 API 公开地址：
+`general-app` 的模块 API 公开地址示例：
 
 ```text
-/api/modules/pactor-app-data-analysis/data-analysis/data-value
-/api/modules/pactor-app-data-analysis/data-analysis/feature-source-summary
+/api/modules/pactor-app-general-app/general-app/dashboard
+/api/modules/pactor-app-general-app/general-app/users
 ```
 
-对应模块逻辑路径 `/api/data-analysis/*` 由打包器自动改写；模块需声明
-`serverEntry`、`apiPrefixes` 并使用 `target: "innospots-web-shell@3"`。未声明
-server entry 的模块（如 `product-center`）不产生 server 产物，也不占用模块 API 路由。
+对应逻辑路径 `/api/general-app/*` 由打包器自动改写；模块需声明
+`serverEntry`、`apiPrefixes` 并使用 `target: "innospots-web-shell@3"`。
+`data-analysis` / `product-center` 是纯 DSL 模块，未声明 server entry，
+不产生 server 产物，也不占用模块 API 路由。
 
 接入其他 tgz 模块时，按同样方式确认：`module/client.ts` 是否 import 了自有 CSS、
 manifest 是否有 `styles`、页面 DSL 是否声明 `dataSources`、是否需要 server entry
@@ -472,7 +471,7 @@ Shell 侧：
 
 - 装配器读取 `manifest.serverEntry` / `manifest.apiPrefixes`，生成
   `.generated/pactor/server-registry.ts` 与 `servers.json`；
-- `app/api/modules/[moduleId]/[[...path]]/route.ts` 用原始 pathname 还原逻辑路径后
+- `src/app/api/modules/[moduleId]/[[...path]]/route.ts` 用原始 pathname 还原逻辑路径后
   分发，避免 Next 解码 `%2F` 导致的路径歧义；
 - `validate:modules` 校验模块内前缀不重复/不包含，并扫描 DSL 是否残留未改写的
   原始 API URL；
@@ -611,7 +610,7 @@ pnpm dev
 .generated/pactor/dsl/console/sitemap.yaml   # 来自模块 dist-module/dsl/sitemap.yaml（装配不单独改名）
 ```
 
-> 注意：装配按 **文件名** `{pageId}.yaml` 在模块 `dslRoot` 下递归查找，源文件可在子目录（如 `src/server/yaml/role/role-list.yaml` → 打包为 `dist-module/dsl/role/role-list.yaml`）。
+> 注意：装配按 **文件名** `{pageId}.yaml` 在模块 `dslRoot` 下递归查找，源文件可在子目录（如 `src/backend/pages/yaml/role/role-list.yaml` → 打包为 `dist-module/dsl/role/role-list.yaml`）。
 
 ### 打包后模块 JS（扩展组件 / Actions）在哪里
 
@@ -635,7 +634,7 @@ import { extensions as dataAnalysisExtensions } from "data-analysis/client";
 | 浏览器执行的 JS | `.next/static/chunks/*.js` 等 | 与 `PactorShellHost`、`SitemapApp` 等一起打包，**chunk 名为 hash，需通过构建分析或搜 `globalPageId`/组件名排查** |
 | 服务端引用的 registry | 编译进 `.next/server/**` | 入口逻辑来自 `client-registry.ts` + `@pactor-app/shell/client` 的 `PactorShellHost` |
 
-结论：**生产环境不要按文件路径去找「某一个页面的 js」**；页面行为由 **YAML DSL** + **已打包的 extensions（components/actions）** 决定。排查组件问题应回到模块仓库的 `src/pactor/components` 与 `module/client.ts`，重新 `build:module` → Shell `assemble` → `build`。
+结论：**生产环境不要按文件路径去找「某一个页面的 js」**；页面行为由 **YAML DSL** + **已打包的 extensions（components/actions）** 决定。排查组件问题应回到模块仓库的 `src/frontend/components` 与 `module/client.ts`，重新 `build:module` → Shell `assemble` → `build`。
 
 ### 打包后静态资源（图片、皮肤 CSS 等）
 
@@ -682,14 +681,14 @@ Console 类工程仍用 **独立 Next**，源文件位置与模块化打包的**
 
 | 要找什么 | 开发时路径（console 示例） |
 | --- | --- |
-| 路由 / 菜单 / 页面 id 列表 | `src/server/yaml/sitemap.yaml` 的 `pages` / `menus` |
-| 某一页的 YAML | `src/server/yaml/<域>/<pageId>.yaml`（如 `role/role-list.yaml`） |
-| 自定义组件（DSL 里 `type: Xxx`） | `src/pactor/components/` + 注册表 `src/pactor/components/index.ts` |
-| 自定义 Actions | `src/pactor/actions.ts` |
-| 本地 dev 拉 sitemap | `app/api/sitemap/route.ts` → `src/server/sitemap.ts` 读上述 yaml 目录 |
+| 路由 / 菜单 / 页面 id 列表 | `src/backend/pages/yaml/sitemap.yaml` 的 `pages` / `menus` |
+| 某一页的 YAML | `src/backend/pages/yaml/<域>/<pageId>.yaml`（如 `role/role-list.yaml`） |
+| 自定义组件（DSL 里 `type: Xxx`） | `src/frontend/components/` + 注册表 `src/frontend/components/index.ts` |
+| 自定义 Actions | `src/frontend/actions.ts` |
+| 本地 dev 拉 sitemap | `src/app/api/sitemap/route.ts` → `src/backend/pages/sitemap.ts` 读上述 yaml 目录 |
 
 **从 URL 反查（仅独立 Next，无 basePath 前缀）**：  
-`http://localhost:9011/system/roles` → 在 `sitemap.yaml` 中查 `path: /system/roles` → `id: role-list` → 文件 `src/server/yaml/**/role-list.yaml`。
+`http://localhost:9011/system/roles` → 在 `sitemap.yaml` 中查 `path: /system/roles` → `id: role-list` → 文件 `src/backend/pages/yaml/**/role-list.yaml`。
 
 **在 Shell 中带 basePath**：  
 同一页在 Shell 为 `/console/system/roles`，`pageId` 仍为 `role-list`，`globalPageId` 为 `console:role-list`。
@@ -698,7 +697,7 @@ Console 类工程仍用 **独立 Next**，源文件位置与模块化打包的**
 
 | 环境 | URL 示例 | pageId | globalPageId | YAML（模块源） | YAML（Shell 装配后） |
 | --- | --- | --- | --- | --- | --- |
-| 模块独立 dev | `/system/roles` | `role-list` | （无命名空间） | `src/server/yaml/role/role-list.yaml` | — |
+| 模块独立 dev | `/system/roles` | `role-list` | （无命名空间） | `src/backend/pages/yaml/role/role-list.yaml` | — |
 | Web Shell | `/console/system/roles` | `role-list` | `console:role-list` | 同上（改后需 build:module） | `.generated/pactor/dsl/console/role-list.yaml` |
 
 ---
@@ -711,16 +710,19 @@ Console 类工程仍用 **独立 Next**，源文件位置与模块化打包的**
 
 ```text
 data-analysis/
-├── app/                          # 独立 Next：dev / demo（不打进 npm 模块）
 ├── src/
-│   ├── pactor/
+│   ├── app/                      # 独立 Next：dev / demo（不打进 npm 模块）
+│   ├── frontend/
 │   │   ├── App.tsx               # 独立应用入口（SitemapApp）
 │   │   ├── components/           # 页面 DSL 引用的自定义组件 → 打进 client 包
-│   │   ├── actions.ts            # 自定义 Actions → 打进 client 包
-│   │   └── ...
-│   └── server/yaml/              # 业务 DSL 源目录
-│       ├── sitemap.yaml          # 模块内路由/菜单（path 为模块内相对路径）
-│       └── data-analysis/        # 页面 DSL（{pageId}.page.yaml）
+│   │   ├── actions/               # 自定义 Actions → 打进 client 包
+│   │   ├── i18n/                 # 组件文案与 locale
+│   │   └── styles/               # 页面样式
+│   └── backend/pages/            # 业务 DSL 源目录 + 加载器
+│       ├── sitemap.ts
+│       └── yaml/
+│           ├── sitemap.yaml      # 模块内路由/菜单（path 为模块内相对路径）
+│           └── data-analysis/    # 页面 DSL（{pageId}.yaml）
 ├── public/                       # 静态资源源 → 打进 dist-module/assets
 ├── module/                       # npm 模块打包入口（由 pactor module init 生成）
 │   ├── client.ts                 # 导出 extensions { components, actions }
@@ -801,7 +803,7 @@ export const extensions = {
 ```text
 dist-module/
 ├── manifest.json           # 写入真实 version
-├── dsl/                    # 自 src/server/yaml 整树复制
+├── dsl/                    # 自 src/backend/pages/yaml 整树复制
 │   ├── sitemap.yaml
 │   ├── role/
 │   │   └── role-list.yaml
@@ -862,6 +864,6 @@ cookie/header，后续可在分发器或 middleware 统一注入会话。菜单�
 
 ## 相关资源
 
-- UI 模块示例：本仓库 `pactor-apps/data-analysis`（含 server entry）与 `pactor-apps/product-center`（纯 DSL），打包命令 `pnpm build:module` / `pnpm pack:module`
+- UI 模块示例：`pactor-apps/general-app`（含 server entry 与 i18n）、`pactor-apps/data-analysis` / `product-center`（纯 DSL），打包命令 `pnpm build:module` / `pnpm pack:module`
 - Starter 总览与快速开始：[`../README.md`](../README.md)
 - Pactor 文档：<https://pactor-docs.xp-java.workers.dev/guides/getting-started/>

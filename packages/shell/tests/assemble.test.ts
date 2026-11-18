@@ -50,6 +50,21 @@ describe('assembleModules', () => {
     expect(JSON.parse(readFileSync(join(generated, 'servers.json'), 'utf8')).modules).toEqual([]);
   });
 
+  it('装配前清理 public/modules 中已移除模块的残留', () => {
+    const rootDir = createBareHost();
+    const staleDir = join(rootDir, 'public/modules/stale/0.1.0');
+    mkdirSync(staleDir, { recursive: true });
+    writeFileSync(join(staleDir, 'stale.css'), 'stale');
+    mkdirSync(join(rootDir, 'public/modules'), { recursive: true });
+    writeFileSync(join(rootDir, 'public/modules/.gitkeep'), '');
+
+    assembleModules({ rootDir });
+
+    expect(existsSync(join(rootDir, 'public/modules/stale'))).toBe(false);
+    expect(existsSync(join(rootDir, 'public/modules/.gitkeep'))).toBe(true);
+    expect(existsSync(join(rootDir, 'public/modules/fixture/0.1.0/logo.txt'))).toBe(true);
+  });
+
   it('页面 DSL 缺失时抛错（失败即阻断）', () => {
     const rootDir = createFixtureHost();
     // 追加一个无 DSL 文件的页面

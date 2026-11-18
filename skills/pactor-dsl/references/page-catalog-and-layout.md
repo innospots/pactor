@@ -83,12 +83,13 @@ layouts:
 
 | 模式 | 适用 | 路径规则 | 页面 id |
 | --- | --- | --- | --- |
-| **A. 演示平铺** | 官方 `pnpm create pactor-app -t next-app` / `starters/next-app-starter`；页面 ≤5、模块单一 | `src/server/yaml/pages/<id>.page.yaml` | `page.id` = 文件名去掉 `.page.yaml`（如 `home.page.yaml` → `home`） |
-| **B. 模块分目录** | `pactor-prd` 模板及多模块后台（模块 ≥2 或页面 >5） | `src/server/yaml/<模块>/<id>.yaml` | `page.id` = 文件名去掉 `.yaml`（**无** `.page` 后缀） |
+| **A. 宿主分目录** | 官方 `pnpm create pactor-app -t next-app` / `starters/next-app-starter`；页面按业务域分目录 | `src/backend/pages/yaml/<area>/<id>.page.yaml` | `page.id` = 文件名去掉 `.page.yaml`（如 `home.page.yaml` → `home`） |
+| **B. 模块分目录（宿主）** | `pactor-prd` 模板及多模块后台（模块 ≥2 或页面 >5） | `src/backend/pages/yaml/<模块>/<id>.page.yaml` | `page.id` = 文件名去掉 `.page.yaml` |
+| **C. 模块包（apps-shell）** | 以 tgz 交付的 UI 模块（general-app / data-analysis / product-center） | `src/backend/pages/yaml/<module>/<id>.yaml` | `page.id` = 文件名去掉 `.yaml`（**无** `.page` 后缀） |
 
-`src/server/sitemap.ts`（或等价加载器）递归扫描 `yaml/` 子目录建立 **id → 文件路径** 索引；**id 全局唯一**，且与 `sitemap.yaml` 里 `pages[].id`、`menus[].pageId` 一致。
+`src/backend/pages/sitemap.ts`（或等价加载器）递归扫描 `yaml/` 子目录建立 **id → 文件路径** 索引；**id 全局唯一**，且与 `sitemap.yaml` 里 `pages[].id`、`menus[].pageId` 一致。
 
-从模式 A 扩到模式 B：新建模块子目录，把新页放进 `<模块>/`；旧页可逐步迁移，同一时刻不要两个文件共用一个 id。
+从模式 A 扩到模式 B：新建模块子目录，把新页放进 `<模块>/`；旧页可逐步迁移，同一时刻不要两个文件共用一个 id。apps-shell 模块包用模式 C（`<id>.yaml`），与 `pactor module build` 的页面 id 推导一致。
 
 ## 页面清单（Agent 先输出，再写文件）
 

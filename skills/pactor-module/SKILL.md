@@ -41,7 +41,7 @@ version: 1.0.0
 
 ### A. 新建 Shell 模块工程（典型 apps-shell 子包）
 
-1. 复制样板：`starters/apps-shell-starter/pactor-apps/data-analysis`（含 server）或 `product-center`（纯 DSL）。
+1. 复制样板：`starters/apps-shell-starter/pactor-apps/general-app`（含 server entry 与 i18n），或 `data-analysis` / `product-center`（纯 DSL）。
 2. 一次性接入（幂等）：
 
 ```bash
@@ -75,7 +75,7 @@ pnpm pack:module     # 默认含 build；apps-shell 示例常用 --no-bump
 ### C. 既有全站 next-app 改造为可 pack
 
 1. 执行 `pactor module init`（按需 `--server`），不破坏现有 `dev`/`build`。
-2. 新增 `sitemap.module.yaml` 与 `module/client.ts`（从 `src/frontend/components` 或 `src/pactor/components` re-export）。
+2. 新增 `sitemap.module.yaml` 与 `module/client.ts`（从 `src/frontend/components` re-export）。
 3. 配置 `yamlRoot` 指向工程实际 YAML 根（next-app-starter 为 `src/backend/pages/yaml`）。
 4. 业务 API：统一前缀 `apiPrefixes`（如 `/api/d`）；`module/server.ts` 导出 `handlers` 逻辑路径表。
 5. `pnpm pack:module` + `pactor module validate`；在 Shell PoC 跑 `assemble:modules` 验收。

@@ -32,7 +32,7 @@ function createModuleProject(dir: string): void {
     JSON.stringify({ id: 'demo', name: 'Demo', basePath: '/demo' }),
   );
   write(
-    join(dir, 'src/server/yaml/sitemap.yaml'),
+    join(dir, 'src/backend/pages/yaml/sitemap.yaml'),
     `id: site
 auth: { loginPath: /login }
 pages:
@@ -41,7 +41,7 @@ menus: []
 `,
   );
   write(
-    join(dir, 'src/server/yaml/login.yaml'),
+    join(dir, 'src/backend/pages/yaml/login.yaml'),
     `dsl: '1.0'\npage: { id: login, title: 登录 }\nbody:\n  type: LoginForm\n`,
   );
 }
@@ -147,7 +147,7 @@ describe('pactor module', () => {
   it('build：页面 DSL 缺失退出码 1 且不留产物', () => {
     createModuleProject(temp.dir);
     write(
-      join(temp.dir, 'src/server/yaml/sitemap.yaml'),
+      join(temp.dir, 'src/backend/pages/yaml/sitemap.yaml'),
       `id: site\npages:\n  - { id: ghost, path: /ghost, title: 缺失 }\nmenus: []\n`,
     );
     const { io, err } = createTestIo();
@@ -162,7 +162,7 @@ describe('pactor module', () => {
       JSON.stringify({ name: '@demo/risk-app', version: '0.1.0' }, null, 2),
     );
     write(
-      join(temp.dir, 'src/pactor/risk-actions.ts'),
+      join(temp.dir, 'src/frontend/risk-actions.ts'),
       `export const riskActions = { 'risk.enterPage': () => {} };\n`,
     );
 

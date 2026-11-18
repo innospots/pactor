@@ -247,10 +247,10 @@ dataSources:
 
 ```bash
 # 单文件
-npx pactor validate src/server/yaml/pages/home.page.yaml
+npx pactor validate src/backend/pages/yaml/analytics/home.page.yaml
 
 # 多文件 / 整个 DSL 目录
-npx pactor lint src/server/yaml
+npx pactor lint src/backend/pages/yaml
 ```
 
 该命令在消费项目中执行，要求已安装 `@pactor-app/cli`。Schema 校验只证明根结构与动作形状合法，不证明组件 props、路由、服务、响应式或交互闭环完整；后者按 R1–R13 在真实工程和浏览器中验收。

@@ -87,15 +87,15 @@ export const handlers = {
 
 ```jsonc
 {
-  "id": "risk",                       // 必填，模块 id（globalPageId 前缀）
-  "name": "AI Risk Mesh",
-  "basePath": "/risk",                // 默认 /<id>；禁止 "/"
-  "yamlRoot": "src/server/yaml",      // 默认值
+  "id": "demo",                       // 必填，模块 id（globalPageId 前缀）
+  "name": "Demo Module",
+  "basePath": "/demo",                // 默认 /<id>；禁止 "/"
+  "yamlRoot": "src/backend/pages/yaml",      // 默认值
   "sitemap": "sitemap.module.yaml",   // 可选；默认 sitemap.yaml（双模式工程可分流）
   "clientEntry": "module/client.ts",  // 默认值；不存在时按纯 DSL 模块跳过 bundle
   "serverEntry": "module/server.ts",  // 可选；与 apiPrefixes 成对配置
-  "apiPrefixes": ["/api/data-analysis"], // 可选；模块 API 逻辑前缀
-  "actions": [],                      // init 自动发现 src/pactor/*-actions.ts
+  "apiPrefixes": ["/api/demo"],       // 可选；模块 API 逻辑前缀
+  "actions": [],                      // init 自动发现 src/frontend/*-actions.ts
   "publicDir": "public",              // 默认值
   "target": "innospots-web-shell@3",  // 默认值；server entry 需要 @3
   "access": { "default": "public" },  // 访问默认值：public 时给未声明 public/permission 的页面/菜单补 public

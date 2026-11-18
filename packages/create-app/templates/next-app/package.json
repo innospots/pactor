@@ -7,6 +7,7 @@
     "build": "node scripts/build.mjs production",
     "start": "next start -p 9011",
     "lint": "eslint",
+    "typecheck": "tsc --noEmit",
     "build:dev": "node scripts/build.mjs development",
     "build:test": "node scripts/build.mjs test",
     "build:prototype": "node scripts/build.mjs prototype",

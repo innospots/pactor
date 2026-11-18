@@ -11,8 +11,7 @@
 <project>/
 ├── public/
 │   ├── logo.svg                     品牌 logo（sitemap 品牌区引用）
-│   ├── themes/                      12 套主题 CSS
-│   └── skins/neutral.css            基础语义令牌
+│   └── themes/                      14 套主题 CSS（由主题包同步）
 ├── scripts/
 │   └── build.mjs                    按 APP_ENV 构建
 ├── src/
@@ -34,7 +33,7 @@
 │   │   ├── fixtures/                用户、角色、设置示例数据
 │   │   ├── mock/                    prototype 数据接口
 │   │   ├── config.ts                serverBaseUrl / prototype 判断
-│   │   └── resources/
+│   │   └── pages/
 │   │       ├── i18n/                语言包与服务端本地化
 │   │       ├── page-access.ts       pageKey / grantGroup 映射
 │   │       ├── sitemap.ts           YAML 收集、权限裁剪与 lazy 页面索引
@@ -71,7 +70,7 @@
 
 ```yaml
 # 页面 DSL 按模块分目录存放：yaml/<模块>/<id>.page.yaml；
-# 页面 id = 文件名去掉 .page；src/backend/resources/sitemap.ts 递归收集并建 id→路径索引；
+# 页面 id = 文件名去掉 .page；src/backend/pages/sitemap.ts 递归收集并建 id→路径索引；
 # lazy: true 不随 sitemap 内联下发，客户端经 /api/pages/{id} 懒加载
 id: site
 resourceType: sitemap
@@ -109,7 +108,7 @@ layouts:
 
 ## 约定
 
-- 页面按 PRD 模块树分目录：`src/backend/resources/yaml/<模块>/<id>.page.yaml`（如 `src/backend/resources/yaml/project/project-list.page.yaml`）；模块目录名用 kebab-case 英文域。批量建文件与清单对齐见 **`page-inventory-and-files.md`**。
+- 页面按 PRD 模块树分目录：`src/backend/pages/yaml/<模块>/<id>.page.yaml`（如 `src/backend/pages/yaml/project/project-list.page.yaml`）；模块目录名用 kebab-case 英文域。批量建文件与清单对齐见 **`page-inventory-and-files.md`**。
 - 页面 id kebab-case，= 文件名去掉 `.page.yaml`；`pages:` 注册、`menus:` 引用、文件名三者一致。
 - 列表/详情/编辑成组路径：`/projects`、`/projects/:code`、`/projects/:code/edit`、`/projects/new`。
 - 通用 Pactor 中详情/编辑页不进菜单时可在本地菜单使用 `hidden: true` + `activeMenu`；Nexus 的导航项在后端，本地只登记页面路由。

@@ -11,7 +11,8 @@
     "smoke:module-api": "node scripts/smoke-module-api.mjs",
     "build": "npm run assemble:modules && npm run validate:modules && npm run theme:sync && next build",
     "start": "next start -p 9020",
-    "lint": "eslint"
+    "lint": "eslint",
+    "typecheck": "tsc --noEmit"
   },
   "dependencies": {
     "@pactor-app/core": "^1.70.0",

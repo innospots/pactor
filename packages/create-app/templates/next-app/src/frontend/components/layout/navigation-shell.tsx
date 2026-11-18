@@ -14,7 +14,7 @@ import type { ReactNode } from "react";
 import { useEffect, useMemo, useRef } from "react";
 
 import { AccountMenu } from "./account-menu";
-import type { SessionUser } from "../../types/session";
+import type { SessionUser } from "../../../shared/types/session";
 import { useHostI18n } from "../../i18n/messages";
 import { navigationConfig } from "../../config";
 

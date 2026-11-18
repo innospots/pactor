@@ -15,15 +15,12 @@
 ```text
 apps-shell-starter/
 ├── web-shell/                       # 统一 Web Shell（Next.js 最薄宿主，端口 9020）
-│   ├── app/
-│   │   ├── (workspace)/[...slug]/   # 工作区页面入口（AppShell + PactorShellHost）
-│   │   └── api/
-│   │       ├── runtime/             # bootstrap / pages（按模块语言包本地化）/ fragments
-│   │       ├── auth/                # 演示会话（真实项目替换）
-│   │       └── modules/[moduleId]/  # createModuleDispatcher(moduleServers)（/api/modules/<id>/*）
 │   ├── src/
-│   │   ├── shell/sitemap.yaml       # 品牌 + 全量导航（模块菜单统一 hidden）
+│   │   ├── app/                     # Next 路由：工作区入口 + runtime/auth/modules API
+│   │   ├── frontend/                # WorkspaceShell（AppShell + PactorShellHost）
 │   │   ├── backend/                 # 演示会话占位与 CORS（无业务数据）
+│   │   ├── shared/types/            # 模块入口的通配类型声明
+│   │   ├── shell/sitemap.yaml       # 品牌 + 全量导航（模块菜单统一 hidden）
 │   │   └── modules/                 # module-list.json（启停 / menuMode / access）与基础皮肤 theme.css
 │   ├── scripts/                     # smoke-module-api 冒烟脚本
 │   ├── .generated/pactor/           # 装配产物（pactor-shell assemble 生成，已 gitignore）
@@ -39,16 +36,17 @@ apps-shell-starter/
 
 ```text
 pactor-apps/<app>/
-├── app/                           # 独立运行入口（PactorApp、sitemap API、业务 API 薄路由）
+├── src/
+│   ├── app/                       # Next 路由与 API 薄入口
+│   ├── frontend/                  # PactorApp、自定义组件、组件文案与样式
+│   ├── backend/
+│   │   ├── api/                   # 业务数据实现（可选）
+│   │   ├── fixtures/              # 演示数据（可选）
+│   │   └── pages/                 # sitemap.ts + yaml/{sitemap.yaml,<模块>/*.yaml}
+│   └── shared/                    # 同构类型 / 纯函数（可选）
 ├── module/
 │   ├── client.ts                  # 扩展注册表入口（components / actions）+ 样式 import
 │   └── server.ts                  # 模块服务端 API（可选）
-├── src/
-│   ├── server/yaml/               # sitemap 与页面 DSL
-│   ├── server/api/                # 业务数据实现（独立运行与 server entry 共用，可选）
-│   ├── server/fixtures/           # 演示数据（可选）
-│   ├── pactor/                    # PactorApp 配置、自定义组件、组件文案与样式
-│   └── shared/                    # 前后端共享类型 / 纯函数（可选）
 ├── public/i18n/                   # 页面语言包 + 可翻译字段（随模块资源分发，可选）
 ├── pactor.module.json             # 模块打包配置
 └── dist-module/                   # pactor module build 产物（不进 git）
@@ -63,7 +61,7 @@ pactor-apps/<app>/
 | 包导出 | `pactor-apps/<app>/package.json` | `exports`：`./manifest`、`./client`、`./styles.css`、可选 `./server` |
 | 导航 | `web-shell/src/shell/sitemap.yaml` | 品牌 + 全量菜单（全局 `pageId` + 显式 `path`） |
 | 国际化（页面） | 模块 `public/i18n/<locale>/app.yaml` + `fields.json` | DSL 文案与自定义组件可翻译字段 |
-| 国际化（组件） | 模块 `src/pactor/i18n/messages.ts` + `locale.tsx` | React 组件内的文案与语言切换 |
+| 国际化（组件） | 模块 `src/frontend/i18n/messages.ts` + `locale.tsx` | React 组件内的文案与语言切换 |
 | 基础皮肤 | `web-shell/src/modules/styles/theme.css` | 皮肤系统默认基底；预置皮肤由 theme sync 生成 |
 | 会话 | `web-shell/src/backend/session.ts` | 演示会话占位，接真实登录时替换 |
 | 路由重定向 | `web-shell/next.config.ts` | `/`、`/workspace` 指向 general-app 工作台 |
@@ -156,7 +154,7 @@ pnpm dev      # http://localhost:8030
   "id": "pactor-app-general-app",
   "name": "general-app",
   "basePath": "/general-app",
-  "yamlRoot": "src/server/yaml",
+  "yamlRoot": "src/backend/pages/yaml",
   "clientEntry": "module/client.ts",
   "serverEntry": "module/server.ts",
   "apiPrefixes": ["/api/general-app"],
@@ -281,7 +279,7 @@ Shell sitemap.menus ─┼─▶ pactor-shell assemble ─▶ .generated/pactor/
 模块页面用 `$i18n{key:默认值}` 声明，语言包放在模块 `public/i18n/` 下：
 
 ```yaml
-# src/server/yaml/general-app/workspace.yaml（general-app 实际使用）
+# src/backend/pages/yaml/general-app/workspace.yaml（general-app 实际使用）
 page:
   id: workspace
   title: "$i18n{page.workspace.title:工作台}"
@@ -317,7 +315,7 @@ workbench.data.title: Analytics
 
 - 构建期：`public/i18n/` 随模块 assets 进入 `dist-module/assets/i18n/`；装配后位于
   `public/modules/<moduleId>/<version>/i18n/`。
-- 运行期：`web-shell/app/api/runtime/pages/[pageId]/route.ts` 根据 `globalPageId` 的
+- 运行期：`web-shell/src/app/api/runtime/pages/[pageId]/route.ts` 根据 `globalPageId` 的
   `moduleId:` 前缀找到模块语言包，经 `localizePageDsl` 转换后下发；`fields.json`
   与默认字段注册表合并。
 - 语言选择：`?locale=` → `locale` Cookie → `Accept-Language`；缺省 `zh-CN`。
@@ -330,7 +328,7 @@ workbench.data.title: Analytics
 模块自己的 React 视图使用模块内文案表（`general-app` 为完整示例）：
 
 ```text
-src/pactor/i18n/
+src/frontend/i18n/
 ├── locale.tsx     # useLocale：Cookie / URL / 浏览器语言 → locale + changeLocale
 └── messages.ts    # useHostI18n：translate + 当前 locale
 ```
@@ -368,8 +366,8 @@ src/pactor/i18n/
 | --- | --- |
 | `package.json` | `name`、`version`、dev 端口、`exports` |
 | `pactor.module.json` | `id`、`name`、`basePath`、`yamlRoot`、`clientEntry`、可选 `serverEntry`/`apiPrefixes` |
-| `src/server/yaml/` | sitemap 与页面 DSL（目录名与页面 id 对应） |
-| `src/pactor/`、`module/client.ts` | 自定义组件 / Actions 与组件文案 |
+| `src/backend/pages/yaml/` | sitemap 与页面 DSL（目录名与页面 id 对应） |
+| `src/frontend/`、`module/client.ts` | 自定义组件 / Actions 与组件文案 |
 | `module/server.ts` | 业务 API（可选，参考 general-app） |
 | `public/i18n/` | 页面语言包与可翻译字段（可选，参考 general-app） |
 | web-shell `package.json` | 安装新模块 tgz |

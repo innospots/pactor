@@ -36,7 +36,7 @@ export interface ModulePackConfig {
    * 会改写为 /api/modules/<id>/...，由 Shell 的通用分发入口承接。
    */
   apiPrefixes?: string[];
-  /** init 时自动发现的 src/pactor/*-actions.ts（仅记录，client entry 自行 import） */
+  /** init 时自动发现的 src/frontend/*-actions.ts（仅记录，client entry 自行 import） */
   actions: string[];
   publicDir: string;
   /** target profile id（如 innospots-web-shell@2） */
@@ -61,7 +61,7 @@ export interface ModulePackConfig {
 }
 
 export const CONFIG_DEFAULTS = {
-  yamlRoot: 'src/server/yaml',
+  yamlRoot: 'src/backend/pages/yaml',
   clientEntry: 'module/client.ts',
   publicDir: 'public',
   target: DEFAULT_TARGET,

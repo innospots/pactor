@@ -27,7 +27,7 @@ Activate when the user works with **Pactor DSL or runtime APIs** in a project th
 ## What you can do with this skill
 
 - Explain Pactor architecture, package boundaries, and dependency rules
-- **Batch-create pages** from a page inventory: file paths (`yaml/<module>/<id>.yaml` vs `yaml/pages/*.page.yaml`), generic `sitemap.yaml` `pages`/`menus`, a host-owned navigation source, or `StaticDslLoader.pages` — see `references/page-catalog-and-layout.md`
+- **Batch-create pages** from a page inventory: file paths (`yaml/<module>/<id>.yaml` vs `yaml/<area>/*.page.yaml`), generic `sitemap.yaml` `pages`/`menus`, a host-owned navigation source, or `StaticDslLoader.pages` — see `references/page-catalog-and-layout.md`
 - **Build complete page structures** for list, detail, form, dashboard, card-list, tree master-detail, login, register, chat, navigation, and overlay workflows — see `references/page-blueprints.md`
 - **Choose components without omissions** from the source-audited catalog of 175 DSL types, with per-component online documentation links — see `references/component-catalog.md`
 - **Copy complete, schema-valid page baselines** for search/list, detail, edit, login, register, chat, dialog, drawer, navigation, dashboard, card list, and tree master-detail — see `references/examples/index.md`
@@ -426,8 +426,8 @@ Pure-React hosts can use `<ChatServicesProvider>` + `<Chat>` directly; `createCh
 pnpm add pactor-app
 
 # validate explicit page files, or lint a DSL directory recursively
-npx pactor validate src/server/yaml/pages/home.page.yaml
-npx pactor lint src/server/yaml
+npx pactor validate src/backend/pages/yaml/analytics/home.page.yaml
+npx pactor lint src/backend/pages/yaml
 npx pactor inspect src/pages/home.page.yaml
 
 # scaffold only when creating a new repository

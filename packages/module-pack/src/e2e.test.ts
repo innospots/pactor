@@ -45,7 +45,7 @@ function createFixtureProject(dir: string, configOverrides = ''): void {
     JSON.stringify({ compilerOptions: { baseUrl: '.', paths: { '@/*': ['src/*'] } } }),
   );
   writeText(
-    join(dir, 'src/server/yaml/sitemap.yaml'),
+    join(dir, 'src/backend/pages/yaml/sitemap.yaml'),
     `id: site
 resourceType: sitemap
 version: 1
@@ -62,7 +62,7 @@ menus:
 `,
   );
   writeText(
-    join(dir, 'src/server/yaml/admin.layout.yaml'),
+    join(dir, 'src/backend/pages/yaml/admin.layout.yaml'),
     `dsl: '1.0'
 layout: { id: admin }
 body:
@@ -71,7 +71,7 @@ body:
 `,
   );
   writeText(
-    join(dir, 'src/server/yaml/common/login.yaml'),
+    join(dir, 'src/backend/pages/yaml/common/login.yaml'),
     `dsl: '1.0'
 page: { id: login, title: 登录 }
 body:
@@ -88,7 +88,7 @@ body:
 `,
   );
   writeText(
-    join(dir, 'src/server/yaml/main/dashboard.page.yaml'),
+    join(dir, 'src/backend/pages/yaml/main/dashboard.page.yaml'),
     `dsl: '1.0'
 page: { id: dashboard, title: 工作台 }
 body:
@@ -98,7 +98,7 @@ body:
 `,
   );
   writeText(
-    join(dir, 'src/server/yaml/shared/card.fragment.yaml'),
+    join(dir, 'src/backend/pages/yaml/shared/card.fragment.yaml'),
     `dsl: '1.0'
 fragment: { id: card }
 body:
@@ -112,7 +112,7 @@ body:
 `,
   );
   writeText(
-    join(dir, 'src/pactor/demo-actions.ts'),
+    join(dir, 'src/frontend/demo-actions.ts'),
     `export const demoActions = {
   'demo.hello': () => ({ ok: true }),
 };
@@ -120,7 +120,7 @@ body:
   );
   writeText(
     join(dir, 'module/client.ts'),
-    `import { demoActions } from '../src/pactor/demo-actions';
+    `import { demoActions } from '../src/frontend/demo-actions';
 import './style.css';
 
 export const extensions = {
@@ -162,7 +162,7 @@ function createServerFixtureProject(dir: string): void {
 `,
   );
   writeText(
-    join(dir, 'src/server/yaml/common/login.yaml'),
+    join(dir, 'src/backend/pages/yaml/common/login.yaml'),
     `dsl: '1.0'
 page: { id: login, title: 登录 }
 body:
@@ -307,7 +307,7 @@ describe('buildModule e2e（微型工程全链路）', () => {
     createFixtureProject(temp.dir);
     // sitemap 增加一个不存在 DSL 文件的页面
     writeText(
-      join(temp.dir, 'src/server/yaml/sitemap.yaml'),
+      join(temp.dir, 'src/backend/pages/yaml/sitemap.yaml'),
       `id: site
 auth: { loginPath: /login }
 layouts:

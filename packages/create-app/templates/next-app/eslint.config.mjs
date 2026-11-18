@@ -12,6 +12,8 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // 模块打包产物（pactor module build）
+    "dist-module/**",
   ]),
 ]);
 

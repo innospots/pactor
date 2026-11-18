@@ -12,7 +12,7 @@ function makeConfig(overrides: Partial<ModulePackConfig> = {}): ModulePackConfig
     id: 'demo',
     name: 'Demo Module',
     basePath: '/demo',
-    yamlRoot: 'src/server/yaml',
+    yamlRoot: 'src/backend/pages/yaml',
     clientEntry: 'module/client.ts',
     actions: [],
     publicDir: 'public',
@@ -22,7 +22,7 @@ function makeConfig(overrides: Partial<ModulePackConfig> = {}): ModulePackConfig
     rewrite: { absoluteApiToRelative: true },
     outDir: 'dist-module',
     ...overrides,
-  };
+  } as ModulePackConfig;
 }
 
 describe('emit-manifest', () => {
