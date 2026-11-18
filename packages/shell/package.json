@@ -1,6 +1,6 @@
 {
   "name": "@pactor-app/shell",
-  "version": "1.70.0",
+  "version": "1.71.0",
   "description": "Pactor App Shell：Next.js (App Router) 专用容器组件包 —— 一级菜单 / 皮肤设置 / 布局外壳、Runtime DSL API handler 工厂与构建期模块装配 CLI",
   "keywords": [
     "pactor",
