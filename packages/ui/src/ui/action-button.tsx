@@ -42,7 +42,9 @@ function ActionButton({
     !props['aria-label']
   ) {
     // eslint-disable-next-line no-console
-    console.warn('[ActionButton] icon-only 用法须传 aria-label 以保证可访问性。');
+    console.warn(
+      '[ActionButton] icon-only 用法须传 aria-label 以保证可访问性；新代码可改用 IconButton（label 必填）。',
+    );
   }
 
   const button = (

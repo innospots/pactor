@@ -79,6 +79,22 @@ export {
   type ChatPermissionChecker,
 } from './capability-action.js';
 
+// 高风险审批队列（POC，opt-in；不改变 ChatConfirm 签名）
+export {
+  ApprovalQueue,
+  ApprovalQueueController,
+  createApprovalConfirm,
+  createApprovalQueue,
+  type ApprovalConfirmOptions,
+  type ApprovalDecision,
+  type ApprovalDecisionEvent,
+  type ApprovalQueueOptions,
+  type ApprovalQueueProps,
+  type ApprovalRequest,
+  type ApprovalRisk,
+  type ApprovalScope,
+} from './approval.js';
+
 // Chat 作用域与 RuntimeContext 组装（零 React）
 export {
   buildChatScope,

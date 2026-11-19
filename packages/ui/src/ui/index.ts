@@ -9,6 +9,8 @@
 export { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from './accordion.js';
 export { ActionButton } from './action-button.js';
 export type { ActionButtonProps } from './action-button.js';
+export { IconButton } from './icon-button.js';
+export type { IconButtonProps } from './icon-button.js';
 export { Alert, AlertDescription, AlertTitle } from './alert.js';
 export {
   Attachment,

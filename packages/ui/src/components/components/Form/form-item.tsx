@@ -18,6 +18,10 @@ export interface FieldShellProps {
   label?: string;
   /** 标签关联的控件 id（label htmlFor）；控件不可标注时省略 */
   htmlFor?: string;
+  /** 标签元素 id；分组控件用 aria-labelledby 引用，同时作为错误文案 id 前缀 */
+  labelId?: string;
+  /** aria 下发目标：首个可聚焦控件（默认）或 [role=radiogroup] 分组 */
+  ariaTarget?: 'control' | 'group';
   /** 校验规则（含 required 时 label 前自动渲染必填星号，对齐 Field 的 required 语义） */
   rules?: FieldRule[];
   /** 校验错误文案 */
@@ -38,6 +42,8 @@ export function FieldShell({
   layout,
   label,
   htmlFor,
+  labelId,
+  ariaTarget = 'control',
   rules,
   error,
   className,
@@ -49,15 +55,18 @@ export function FieldShell({
   // mb-2 / min-h-9 叠加）
   const inField = useContext(FieldNestContext);
   const rootRef = useRef<HTMLDivElement | null>(null);
-  const errorId = htmlFor ? `${htmlFor}-error` : undefined;
+  const anchorId = htmlFor ?? labelId;
+  const errorId = anchorId ? `${anchorId}-error` : undefined;
 
   // 校验/必填语义集中下发到外壳内首个可聚焦控件（18 个表单适配器免逐个接线）：
   // aria-invalid / aria-describedby 随 error 增减，aria-required 随 rules 增减；
   // 控件重渲染不会清理由外部设置的 aria 属性（React 只管理自己声明过的属性）
   useEffect(() => {
-    const control = rootRef.current?.querySelector<HTMLElement>(
-      "input, textarea, select, button, [tabindex]:not([tabindex='-1'])",
-    );
+    const selector =
+      ariaTarget === 'group'
+        ? '[role="radiogroup"]'
+        : "input, textarea, select, button, [tabindex]:not([tabindex='-1'])";
+    const control = rootRef.current?.querySelector<HTMLElement>(selector);
     if (!control) return;
     if (error) {
       control.setAttribute("aria-invalid", "true");
@@ -99,6 +108,7 @@ export function FieldShell({
             </span>
           ) : null}
           <label
+            id={labelId}
             htmlFor={htmlFor}
             className="shrink-0 text-sm leading-normal font-medium whitespace-nowrap"
           >

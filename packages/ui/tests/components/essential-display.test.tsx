@@ -759,6 +759,131 @@ describe('Segmented', () => {
     expectCommonProps(container.querySelector('[data-slot=segmented]'));
   });
 
+  it('键盘：方向键循环切换、跳过 disabled 选项并同步移动焦点', () => {
+    const { container } = renderDsl({
+      type: 'Segmented',
+      props: { options },
+    });
+    const group = container.querySelector('[data-slot=segmented]')!;
+    const item = (value: string) =>
+      container.querySelector(`[data-slot=segmented-item][data-value=${value}]`)!;
+
+    fireEvent.keyDown(group, { key: 'ArrowRight' });
+    expect(item('week').getAttribute('aria-checked')).toBe('true');
+    expect(document.activeElement).toBe(item('week'));
+
+    // month 已禁用：继续右移应跳过并回绕到 day
+    fireEvent.keyDown(group, { key: 'ArrowRight' });
+    expect(item('day').getAttribute('aria-checked')).toBe('true');
+    expect(document.activeElement).toBe(item('day'));
+
+    // 左移反向回绕到 week（仍跳过 month）
+    fireEvent.keyDown(group, { key: 'ArrowLeft' });
+    expect(item('week').getAttribute('aria-checked')).toBe('true');
+
+    fireEvent.keyDown(group, { key: 'Home' });
+    expect(item('day').getAttribute('aria-checked')).toBe('true');
+    fireEvent.keyDown(group, { key: 'End' });
+    expect(item('week').getAttribute('aria-checked')).toBe('true');
+  });
+
+  it('roving tabindex：整组只保留一个 Tab 停靠点，随选中项移动', () => {
+    const { container } = renderDsl({
+      type: 'Segmented',
+      props: { options },
+    });
+    const tabIndexes = () =>
+      Array.from(container.querySelectorAll('[data-slot=segmented-item]')).map((el) =>
+        el.getAttribute('tabindex'),
+      );
+
+    // 无选中项时停靠在首个可用选项
+    expect(tabIndexes()).toEqual(['0', '-1', '-1']);
+
+    fireEvent.click(container.querySelector('[data-slot=segmented-item][data-value=week]')!);
+    expect(tabIndexes()).toEqual(['-1', '0', '-1']);
+  });
+
+  it('分组无障碍名：独立渲染回退 label，Form 内用 label 的 aria-labelledby', () => {
+    const standalone = renderDsl({
+      type: 'Segmented',
+      props: { options, label: '周期' },
+    });
+    expect(
+      standalone.container
+        .querySelector('[data-slot=segmented]')!
+        .getAttribute('aria-label'),
+    ).toBe('周期');
+    standalone.unmount();
+
+    // 无 label 时不下发空名
+    const unnamed = renderDsl({ type: 'Segmented', props: { options } });
+    expect(
+      unnamed.container
+        .querySelector('[data-slot=segmented]')!
+        .getAttribute('aria-label'),
+    ).toBeNull();
+    unnamed.unmount();
+
+    const inForm = renderDsl({
+      type: 'Form',
+      children: [
+        { type: 'Segmented', props: { name: 'period', label: '周期', options } },
+      ],
+    });
+    const group = inForm.container.querySelector('[data-slot=segmented]')!;
+    const labelEl = inForm.container.querySelector('label')!;
+    expect(labelEl.id).toBeTruthy();
+    expect(group.getAttribute('aria-labelledby')).toBe(labelEl.id);
+    expect(group.getAttribute('aria-label')).toBeNull();
+  });
+
+  it('显式 aria-label 优先于回退的 label', () => {
+    const { container } = renderDsl({
+      type: 'Segmented',
+      props: { options, label: '周期', 'aria-label': '时间粒度' },
+    });
+    expect(
+      container.querySelector('[data-slot=segmented]')!.getAttribute('aria-label'),
+    ).toBe('时间粒度');
+  });
+
+  it('Form 内把必填 / 校验语义下发到 radiogroup', async () => {
+    const { container } = renderDsl({
+      type: 'Form',
+      children: [
+        {
+          type: 'Segmented',
+          props: {
+            name: 'period',
+            label: '周期',
+            options,
+            rules: [{ required: true, message: '请选择周期' }],
+          },
+        },
+        { type: 'Button', props: { text: '提交', submit: true } },
+      ],
+    });
+    const group = container.querySelector('[data-slot=segmented]')!;
+
+    expect(group.getAttribute('aria-required')).toBe('true');
+    expect(group.getAttribute('aria-invalid')).toBeNull();
+
+    fireEvent.click(screen.getByRole('button', { name: '提交' }));
+    expect(await screen.findByText('请选择周期')).toBeTruthy();
+    const errorEl = container.querySelector('[data-slot=form-error]')!;
+    expect(group.getAttribute('aria-invalid')).toBe('true');
+    expect(group.getAttribute('aria-describedby')).toBe(errorEl.id);
+
+    // 选中后错误清除，aria 同步移除
+    fireEvent.click(container.querySelector('[data-slot=segmented-item][data-value=week]')!);
+    await vi.waitFor(() => {
+      expect(screen.queryByText('请选择周期')).toBeNull();
+    });
+    expect(group.getAttribute('aria-invalid')).toBeNull();
+    expect(group.getAttribute('aria-describedby')).toBeNull();
+  });
+
   it('滑动指示块：有选中项时渲染、无选中项时不渲染', () => {
     const { container } = renderDsl({
       type: 'Segmented',

@@ -121,6 +121,29 @@ import {
 
 契约类型（props / layout / interaction）与交互核心均为本包自有定义。
 
+## 图标按钮与动效令牌
+
+- **icon-only 按钮**：新代码用 `IconButton`（`@pactor-app/ui/ui`），`label` 必填并落到 `aria-label`，可选 `tooltip`；未传 `label` 在类型层直接报错。存量 `ActionButton` 签名不变，icon-only 用法仅在开发环境提示补 `aria-label`，不做破坏性迁移。
+- **动效令牌**：`styles.css` 提供 `--ease-ui-out` / `--ease-ui-in-out` 与 `--duration-ui-fast|base|slow`；组件过渡按主题变量写法使用，如 `motion-safe:duration-(--duration-ui-base) motion-safe:ease-ui-out`。新增自绘过渡请复用令牌，不要写裸时长 / 曲线。
+- **减弱动效**：`styles.css` 已内置 `prefers-reduced-motion: reduce` 基线，只作用于 `[data-slot]` 子树（`styles.css` 是宿主应用基线，不做全局 `*` 覆盖）；需保留关键反馈的子树加 `data-motion="essential"` 豁免。
+
+## 新增组件交付清单
+
+新增一个 DSL 组件时按以下顺序交付（标「人工」的步骤没有构建期兜底，最容易漏）：
+
+- [ ] 1. **组件适配器**：`src/components/components/<Name>/index.tsx`，props 对齐 DSL 语义；有表单语义时复用 `FieldShell`，并给分组控件传 `labelId` / `ariaTarget="group"`。
+- [ ] 2. **导出**：在 `src/components/index.ts` 导出组件与 props 类型。
+- [ ] 3. **注册**：在 `src/components/register.ts` 导入并加入 `builtinComponents`。
+- [ ] 4. **测试**：`tests/components/<name>.test.tsx`，至少覆盖 props 映射、受控 / 非受控、Form 集成（如适用）、无障碍名与键盘操作。
+- [ ] 5. **i18n**：组件内置文案（空态、加载、关闭等）补入 i18n 词典，不在适配器里写死中文。
+- [ ] 6. **文档站（人工，独立仓库 pactor-docs）**：
+  - 组件目录数据与详情数据（`src/assets-data/components`、`src/assets-data/details`）；
+  - 预览注册表（`src/components/previews/basic-*.tsx` 等）与 `previewable.ts` 清单必须同时增删；
+  - 运行态预览按 `PreviewProps` 契约实现（`variant` / `replayKey` 可选，零参数预览仍兼容）；
+  - 执行 `pnpm validate`：预览 key 与 `previewable.ts` 集合不一致、key 重复、详情 key 指向不存在的组件都会在构建期失败。
+
+样式产物由 `pnpm build:styles` 从 `src/styles.css` 生成，不要手改根目录 `styles.css`。
+
 ## 文档
 
 完整文档见 <https://github.com/innospots/pactor/tree/main/docs>（`pnpm docs:dev` 本地启动文档站）。

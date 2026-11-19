@@ -5,6 +5,7 @@ import {
   useRef,
   useState,
   type CSSProperties,
+  type KeyboardEvent as ReactKeyboardEvent,
 } from "react";
 
 import { cn } from "../../../lib/utils.js";
@@ -43,6 +44,8 @@ export interface SegmentedProps {
   /** 控件根节点 id；缺省自动生成。分组控件无法被 label 的 htmlFor 关联，
    * 供外部 aria-labelledby 引用（独立渲染时也可作为锚点） */
   id?: string;
+  /** 分组无障碍名；缺省独立渲染回退 label，Form 内用 label 的 aria-labelledby */
+  "aria-label"?: string;
 }
 
 /**
@@ -61,15 +64,19 @@ export function Segmented({
   className,
   style,
   id,
+  "aria-label": ariaLabel,
 }: SegmentedProps) {
   const form = useFormContext();
   const generatedId = useId();
   const controlId = id ?? generatedId;
+  const labelId = `${controlId}-label`;
   const inForm =
     form?.inForm === true && typeof name === "string" && name !== "";
   const [innerValue, setInnerValue] = useState<string | number | undefined>(
     value,
   );
+  // 键盘切换时指示块瞬时到位；指针切换保留过渡
+  const [keyboardMode, setKeyboardMode] = useState(false);
 
   useEffect(() => {
     if (inForm && form && name) {
@@ -82,8 +89,9 @@ export function Segmented({
   const current =
     inForm && form && name ? form.values[name] : (value ?? innerValue);
 
-  const handleChange = (option: SegmentedOption) => {
+  const handleChange = (option: SegmentedOption, viaKeyboard = false) => {
     if (disabled || option.disabled) return;
+    setKeyboardMode(viaKeyboard);
     if (inForm && form && name) {
       form.setValue(name, option.value);
     } else if (value === undefined) {
@@ -99,6 +107,54 @@ export function Segmented({
     width: number;
   } | null>(null);
   const activeIndex = options.findIndex((option) => option.value === current);
+  const enabledIndexes = options
+    .map((option, index) => (option.disabled ? -1 : index))
+    .filter((index) => index >= 0);
+  // roving tabindex：整组只保留一个 Tab 停靠点
+  const tabStopIndex = disabled
+    ? -1
+    : activeIndex >= 0 && !options[activeIndex]?.disabled
+      ? activeIndex
+      : (enabledIndexes[0] ?? -1);
+
+  const handleKeyDown = (event: ReactKeyboardEvent<HTMLDivElement>) => {
+    if (disabled || enabledIndexes.length === 0) return;
+    const { key } = event;
+    if (
+      key !== "ArrowRight" &&
+      key !== "ArrowDown" &&
+      key !== "ArrowLeft" &&
+      key !== "ArrowUp" &&
+      key !== "Home" &&
+      key !== "End"
+    ) {
+      return;
+    }
+    event.preventDefault();
+
+    const first = enabledIndexes[0]!;
+    const last = enabledIndexes[enabledIndexes.length - 1]!;
+    if (key === "Home" || key === "End") {
+      const target = key === "Home" ? first : last;
+      handleChange(options[target]!, true);
+      itemRefs.current[target]?.focus();
+      return;
+    }
+
+    const currentIndex = enabledIndexes.includes(activeIndex)
+      ? activeIndex
+      : tabStopIndex >= 0
+        ? tabStopIndex
+        : first;
+    const position = enabledIndexes.indexOf(currentIndex);
+    const delta = key === "ArrowRight" || key === "ArrowDown" ? 1 : -1;
+    const nextIndex =
+      enabledIndexes[
+        (position + delta + enabledIndexes.length) % enabledIndexes.length
+      ]!;
+    handleChange(options[nextIndex]!, true);
+    itemRefs.current[nextIndex]?.focus();
+  };
 
   useLayoutEffect(() => {
     const measure = () => {
@@ -115,6 +171,12 @@ export function Segmented({
       id={controlId}
       data-slot="segmented"
       role="radiogroup"
+      aria-label={ariaLabel ?? (!inForm ? label : undefined)}
+      aria-labelledby={
+        !ariaLabel && inForm && label ? labelId : undefined
+      }
+      aria-disabled={disabled || undefined}
+      onKeyDown={handleKeyDown}
       className={cn(
         "relative inline-flex items-center gap-1 rounded-full bg-muted p-1",
         disabled && "cursor-not-allowed opacity-50",
@@ -126,7 +188,12 @@ export function Segmented({
         <span
           data-slot="segmented-indicator"
           aria-hidden
-          className="pointer-events-none absolute top-1 bottom-1 rounded-full bg-background shadow-sm motion-safe:transition-[left,width] motion-safe:duration-200 motion-safe:ease-out"
+          className={cn(
+            "pointer-events-none absolute top-1 bottom-1 rounded-full bg-background shadow-sm",
+            keyboardMode
+              ? "transition-none"
+              : "motion-safe:transition-[left,width] motion-safe:duration-(--duration-ui-base) motion-safe:ease-ui-out",
+          )}
           style={{ left: indicator.left, width: indicator.width }}
         />
       ) : null}
@@ -143,6 +210,7 @@ export function Segmented({
             aria-checked={active}
             data-slot="segmented-item"
             data-value={option.value}
+            tabIndex={index === tabStopIndex ? 0 : -1}
             disabled={disabled === true || option.disabled === true}
             onClick={() => handleChange(option)}
             className={cn(
@@ -166,6 +234,8 @@ export function Segmented({
       <FieldShell
         layout={form.layout}
         label={label}
+        labelId={labelId}
+        ariaTarget="group"
         rules={rules}
         error={form.errors[name]}
         className={className}

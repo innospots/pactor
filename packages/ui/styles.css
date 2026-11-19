@@ -57,6 +57,11 @@
     --default-font-family: var(--font-sans);
     --default-mono-font-family: var(--font-mono);
     --color-primary: var(--primary);
+    --ease-ui-out: cubic-bezier(0.23, 1, 0.32, 1);
+    --ease-ui-in-out: cubic-bezier(0.77, 0, 0.175, 1);
+    --duration-ui-fast: 150ms;
+    --duration-ui-base: 200ms;
+    --duration-ui-slow: 320ms;
   }
 }
 @layer base {
@@ -2561,6 +2566,9 @@
     transition-timing-function: var(--tw-ease, var(--default-transition-timing-function));
     transition-duration: var(--tw-duration, var(--default-transition-duration));
   }
+  .transition-none {
+    transition-property: none;
+  }
   .duration-150 {
     --tw-duration: 150ms;
     transition-duration: 150ms;
@@ -3749,13 +3757,13 @@
       transition-timing-function: var(--tw-ease, var(--default-transition-timing-function));
       transition-duration: var(--tw-duration, var(--default-transition-duration));
     }
-    .motion-safe\:duration-200 {
-      --tw-duration: 200ms;
-      transition-duration: 200ms;
+    .motion-safe\:duration-\(--duration-ui-base\) {
+      --tw-duration: var(--duration-ui-base);
+      transition-duration: var(--duration-ui-base);
     }
-    .motion-safe\:ease-out {
-      --tw-ease: var(--ease-out);
-      transition-timing-function: var(--ease-out);
+    .motion-safe\:ease-ui-out {
+      --tw-ease: cubic-bezier(0.23, 1, 0.32, 1);
+      transition-timing-function: cubic-bezier(0.23, 1, 0.32, 1);
     }
   }
   @media (prefers-reduced-motion: reduce) {
@@ -5066,6 +5074,14 @@ div.pactor-markdown-editor-root.mdxeditor, div.pactor-markdown-editor-root.mdxed
   }
   .group:hover .pactor-clearable-ghost {
     visibility: hidden;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  [data-slot]:not([data-motion='essential'], [data-motion='essential'] *), [data-slot] :not([data-motion='essential'], [data-motion='essential'] *) {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
   }
 }
 @layer base {

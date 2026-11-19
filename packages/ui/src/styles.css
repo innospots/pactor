@@ -657,6 +657,28 @@
   }
 }
 
+/* 动效令牌：统一缓动与时长。`--ease-*` 会生成 Tailwind 的 ease-* 工具类；
+ * 时长可用 duration-[var(--duration-ui-base)] 或 duration-(--duration-ui-base)。 */
+@theme inline {
+  --ease-ui-out: cubic-bezier(0.23, 1, 0.32, 1);
+  --ease-ui-in-out: cubic-bezier(0.77, 0, 0.175, 1);
+  --duration-ui-fast: 150ms;
+  --duration-ui-base: 200ms;
+  --duration-ui-slow: 320ms;
+}
+
+/* 减弱动效：只作用于 pactor 组件（data-slot 根及其子树），不改变宿主的
+ * 全局动效策略；必须保留的动效元素可加 data-motion="essential" 豁免。 */
+@media (prefers-reduced-motion: reduce) {
+  [data-slot]:not([data-motion='essential'], [data-motion='essential'] *),
+  [data-slot] :not([data-motion='essential'], [data-motion='essential'] *) {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
 /* 官方 base layer：默认边框色/焦点环色 + 页面底色与文字色 */
 @layer base {
   * {

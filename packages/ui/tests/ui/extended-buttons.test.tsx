@@ -19,6 +19,7 @@ import {
   CopyButton,
   ExpandingButtonGroup,
   FloatingButtonGroup,
+  IconButton,
   IconMorph,
   SplitButton,
 } from '../../src/ui/index.js';
@@ -36,9 +37,10 @@ const FLOATING_OPTIONS = [
 ];
 
 describe('组件族与导出', () => {
-  it('ui 子路径可导入全部 7 个扩展按钮组件', () => {
+  it('ui 子路径可导入全部 8 个扩展按钮组件', () => {
     for (const name of [
       'ActionButton',
+      'IconButton',
       'SplitButton',
       'FloatingButtonGroup',
       'ExpandingButtonGroup',
@@ -63,6 +65,7 @@ describe('组件族与导出', () => {
     //（见 src/components/index.ts「扩展按钮族」导出注释）
     for (const name of [
       'ActionButton',
+      'IconButton',
       'SplitButton',
       'FloatingButtonGroup',
       'CopyButton',
@@ -148,6 +151,36 @@ describe('ActionButton 紧凑工具栏按钮', () => {
       '[data-slot="tooltip-content"]',
     );
     expect(content).not.toBeNull();
+  });
+});
+
+describe('IconButton 必填无障碍名的图标按钮', () => {
+  it('渲染图标、aria-label，不渲染文字节点', () => {
+    render(<IconButton icon={<XIcon />} label="关闭" />);
+    const button = screen.getByRole('button', { name: '关闭' });
+    expect(button.textContent).toBe('');
+    expect(button.querySelector('svg')).not.toBeNull();
+    expect(button.getAttribute('data-slot')).toBe('icon-button');
+    expect(button.getAttribute('aria-label')).toBe('关闭');
+    // icon-only 缺省回退 icon-sm 方形尺寸
+    expect(button.className).toContain('size-(--pactor-control-height-sm)');
+  });
+
+  it('tooltip：悬浮显示提示浮层，可访问名仍是 label', async () => {
+    const user = userEvent.setup();
+    render(<IconButton icon={<SaveIcon />} label="保存" tooltip="保存更改" />);
+    expect(screen.getByRole('button', { name: '保存' })).not.toBeNull();
+    await user.hover(screen.getByRole('button', { name: '保存' }));
+    const content = (await screen.findByText('保存更改')).closest(
+      '[data-slot="tooltip-content"]',
+    );
+    expect(content).not.toBeNull();
+  });
+
+  it('类型层：缺 label 无法通过编译', () => {
+    // @ts-expect-error IconButton 的 label 必填
+    const invalid = <IconButton icon={<XIcon />} />;
+    expect(invalid).toBeTruthy();
   });
 });
 

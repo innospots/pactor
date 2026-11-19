@@ -1,0 +1,17 @@
+{
+  "detector": {
+    "ignoreRules": [],
+    "ignoreFiles": [],
+    "ignoreValues": [
+      {
+        "rule": "side-tab",
+        "value": "*",
+        "files": [
+          "packages/chat/src/styles.css"
+        ],
+        "createdAt": "2026-11-19T04:14:59.491Z",
+        "reason": "Agent: markdown blockquote quote-bar convention (L1413-1418), neutral --pactor-chat-border token, not a card accent"
+      }
+    ]
+  }
+}
