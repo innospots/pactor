@@ -5,12 +5,29 @@ import type { DslNode } from '@pactor-app/core';
  * 移植面板所需子集）：零 React，可纯 Node 测试。
  */
 
+/** 历史版本快照：内容与产物同形；展示文案 / 语言等可覆盖当前值 */
+export interface ArtifactVersion {
+  /** 稳定 id（切换 / 恢复回调透传） */
+  id: string;
+  content: string | DslNode;
+  /** 版本标题（缺省沿用产物 title） */
+  title?: string;
+  language?: string;
+  fileType?: string;
+  /** 版本标记（如「初稿」「v2」）；缺省按序号展示 */
+  label?: string;
+  /** 创建时间戳（毫秒，宿主自行格式化展示） */
+  createdAt?: number;
+}
+
 /** 产物：dsl kind 的 content 为 DslNode 普通对象，其余 kind 为字符串 */
 export interface ChatPageArtifact {
   id: string;
   kind: 'markdown' | 'code' | 'text' | 'dsl';
   title: string;
   content: string | DslNode;
+  /** 历史版本（旧 → 新，不含当前内容）；提供后面板展示版本切换与恢复 */
+  versions?: ArtifactVersion[];
   /** code kind 的语言标记（角标 / CodeBlock 高亮） */
   language?: string;
   /**

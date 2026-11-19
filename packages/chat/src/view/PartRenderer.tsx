@@ -2,10 +2,11 @@ import { Icon } from '@pactor-app/ui/components';
 import { MarkdownRenderer } from '@pactor-app/markdown';
 import { DslRenderer, useI18n, useRenderer } from '@pactor-app/runtime';
 
+import { AgentQuestion } from '../components/AgentQuestion/index.js';
 import { guardChatDsl } from '../dsl-guard.js';
 import { useSmoothStreamText } from '../hooks/use-smooth-stream-text.js';
 import { useThrottledValue } from '../hooks/use-throttled-value.js';
-import type { ChatPart } from '../model.js';
+import type { ChatPart, ChatQuestionAnswer } from '../model.js';
 import { buildChatScope, type ChatRuntime, type ChatScope } from '../scope.js';
 import {
   ARTIFACT_CARD_INTERNAL_COMPONENTS,
@@ -27,6 +28,7 @@ import { buildErrorFragment, buildStatusFragment } from './chrome/feedback.js';
  * - error → 自绘警示条；status → 弱提示文本
  * - artifact → 产出物卡片（ChatArtifactCard 内部组件：着色图标盒 +
  *   标题 + 元信息 + 右上箭头，整卡点击打开面板，spec: chat-artifact-panel）
+ * - question → AgentQuestion 提问卡（单选 / 多选 / 自由输入 / delegate / Undo）
  *
  * 视图零 antd 依赖，颜色经 `@pactor-app/chat/styles.css` 的
  * `--pactor-chat-*` 变量表达。
@@ -39,6 +41,12 @@ export interface PartRendererProps {
   scope?: ChatScope;
   /** 所属消息是否流式中（text/markdown 启用平滑揭示） */
   streaming?: boolean;
+  /** question part 提交回答 */
+  onQuestionAnswer?: (answer: ChatQuestionAnswer, part: ChatPart) => void;
+  /** question part 选择「让 agent 决定」 */
+  onQuestionDelegate?: (part: ChatPart) => void;
+  /** question part 撤销回答 */
+  onQuestionUndo?: (part: ChatPart) => void;
 }
 
 /** 白名单外组件的受控占位（注册名 ChatDenied，见 dsl-guard） */
@@ -82,7 +90,15 @@ function SmoothMarkdown({ content, streaming }: { content: string; streaming: bo
   return <MarkdownRenderer content={throttled} />;
 }
 
-export function PartRenderer({ part, runtime, scope, streaming = false }: PartRendererProps) {
+export function PartRenderer({
+  part,
+  runtime,
+  scope,
+  streaming = false,
+  onQuestionAnswer,
+  onQuestionDelegate,
+  onQuestionUndo,
+}: PartRendererProps) {
   const { t } = useI18n();
   switch (part.type) {
     case 'text':
@@ -142,6 +158,25 @@ export function PartRenderer({ part, runtime, scope, streaming = false }: PartRe
           fallback={<div className="pactor-chat-status">{part.text}</div>}
         />
       );
+
+    case 'question': {
+      const data = part.question;
+      return (
+        <AgentQuestion
+          question={data.question}
+          description={data.description}
+          options={data.options}
+          multiple={data.multiple}
+          allowOther={data.allowOther}
+          suggested={data.suggested}
+          status={data.status}
+          answer={data.answer}
+          onSubmit={(answer) => onQuestionAnswer?.(answer, part)}
+          onDelegate={() => onQuestionDelegate?.(part)}
+          onUndo={() => onQuestionUndo?.(part)}
+        />
+      );
+    }
 
     case 'artifact':
       // 产出物卡片（spec: chat-artifact-panel）：整卡可点击——着色图标盒 +

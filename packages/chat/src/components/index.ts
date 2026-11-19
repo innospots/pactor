@@ -1,5 +1,6 @@
 import type { Registry } from '@pactor-app/core';
 
+import { AgentQuestion } from './AgentQuestion/index.js';
 import { AgentStatus } from './AgentStatus/index.js';
 import { ArtifactPanel } from './ArtifactPanel/index.js';
 import { Attachment } from './Attachment/index.js';
@@ -8,10 +9,13 @@ import { ChatMessage } from './ChatMessage/index.js';
 import { ChatPage } from './ChatPage/index.js';
 import { Citation } from './Citation/index.js';
 import { Composer } from './Composer/index.js';
+import { ContextWindowMeter } from './ContextWindowMeter/index.js';
 import { ConversationList } from './ConversationList/index.js';
+import { MessageBranches } from './MessageBranches/index.js';
 import { MessageList } from './MessageList/index.js';
 import { Prompt } from './Prompt/index.js';
 import { Sender } from './Sender/index.js';
+import { SourceList } from './SourceList/index.js';
 import { StepsPanel } from './StepsPanel/index.js';
 import { StreamingText } from './StreamingText/index.js';
 import { Suggestion } from './Suggestion/index.js';
@@ -21,13 +25,25 @@ import { Welcome } from './Welcome/index.js';
 import { WorkspaceSwitcher } from './WorkspaceSwitcher/index.js';
 
 /**
- * Chat 展示组件族（19 个，spec: chat-ui-components）：自 @pactor-app/ui
+ * Chat 展示组件族（23 个，spec: chat-ui-components）：自 @pactor-app/ui
  * 迁入（props 契约与视觉一致），经 `@pactor-app/chat/components` 子路径
  * 导出；DSL 类型注册经 registerChatComponents（同名不覆盖，与
  * registerChatComponent 的 Chat / ChatShell 类型并存互不影响）。
  */
+export { AgentQuestion } from './AgentQuestion/index.js';
+export type {
+  AgentQuestionAnswer,
+  AgentQuestionOption,
+  AgentQuestionProps,
+  AgentQuestionStatus,
+  AgentQuestionSuggestion,
+} from './AgentQuestion/index.js';
 export { AgentStatus } from './AgentStatus/index.js';
-export type { AgentStatusProps, AgentStatusType } from './AgentStatus/index.js';
+export type {
+  AgentStatusProps,
+  AgentStatusStep,
+  AgentStatusType,
+} from './AgentStatus/index.js';
 export { ArtifactPanel } from './ArtifactPanel/index.js';
 export type {
   ArtifactPanelProps,
@@ -37,6 +53,7 @@ export type {
 export { buildArtifactTree } from './ArtifactPanel/artifact.js';
 export type {
   ArtifactTreeNode,
+  ArtifactVersion,
   ChatPageArtifact,
 } from './ArtifactPanel/artifact.js';
 export {
@@ -66,13 +83,34 @@ export type {
 } from './ChatPage/index.js';
 export { Citation } from './Citation/index.js';
 export type { CitationItem, CitationProps } from './Citation/index.js';
-export { Composer } from './Composer/index.js';
+export { Composer, checkFiles } from './Composer/index.js';
 export type {
+  ComposerCommand,
   ComposerContextItem,
   ComposerContextSource,
+  ComposerFileCheckResult,
+  ComposerFileRules,
+  ComposerMode,
+  ComposerModelCapability,
   ComposerModelOption,
   ComposerProps,
+  ComposerQueueItem,
+  ComposerRejectedFile,
+  ComposerRejectReason,
 } from './Composer/index.js';
+export { ContextWindowMeter } from './ContextWindowMeter/index.js';
+export type {
+  ContextWindowMeterProps,
+  ContextWindowSegment,
+} from './ContextWindowMeter/index.js';
+export {
+  MessageBranches,
+} from './MessageBranches/index.js';
+export type {
+  MessageBranchKind,
+  MessageBranchesProps,
+  MessageBranchVersion,
+} from './MessageBranches/index.js';
 export { ConversationList } from './ConversationList/index.js';
 export type {
   ConversationItemData,
@@ -82,8 +120,23 @@ export { MessageList } from './MessageList/index.js';
 export type { MessageListItem, MessageListProps } from './MessageList/index.js';
 export { Prompt } from './Prompt/index.js';
 export type { PromptProps } from './Prompt/index.js';
+export { ResponseFeedback } from './ResponseFeedback/index.js';
+export type {
+  FeedbackRating,
+  FeedbackReasonOption,
+  FeedbackValue,
+  ResponseFeedbackProps,
+  ResponseFeedbackVariant,
+} from './ResponseFeedback/index.js';
 export { Sender } from './Sender/index.js';
 export type { SenderProps } from './Sender/index.js';
+export { SourceList, parseSourceText } from './SourceList/index.js';
+export type {
+  SourceClaim,
+  SourceItem,
+  SourceListProps,
+  SourceTextSegment,
+} from './SourceList/index.js';
 export { StepsPanel } from './StepsPanel/index.js';
 export type { StepsPanelItemData, StepsPanelProps } from './StepsPanel/index.js';
 export { StreamingText } from './StreamingText/index.js';
@@ -103,11 +156,13 @@ export type {
 } from './WorkspaceSwitcher/index.js';
 
 /**
- * 注册 chat 展示组件族的 19 个 DSL 类型名（与迁移前 ui
- * builtinComponents 的注册集合一致）；已存在同名类型时不覆盖。
+ * 注册 chat 展示组件族的 23 个 DSL 类型名（与迁移前 ui
+ * builtinComponents 的注册集合一致，另含 AgentQuestion / SourceList /
+ * MessageBranches / ContextWindowMeter）；已存在同名类型时不覆盖。
  */
 export function registerChatComponents(registry: Registry<unknown>): void {
   const components = {
+    AgentQuestion,
     AgentStatus,
     ArtifactPanel,
     Attachment,
@@ -116,10 +171,13 @@ export function registerChatComponents(registry: Registry<unknown>): void {
     ChatPage,
     Citation,
     Composer,
+    ContextWindowMeter,
     ConversationList,
+    MessageBranches,
     MessageList,
     Prompt,
     Sender,
+    SourceList,
     StepsPanel,
     StreamingText,
     Suggestion,

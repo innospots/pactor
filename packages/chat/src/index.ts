@@ -8,8 +8,12 @@ export {
   type ChatContextSource,
   type ChatMessage,
   type ChatMessageAction,
+  type ChatModelCapability,
   type ChatModelOption,
   type ChatPart,
+  type ChatQuestion,
+  type ChatQuestionAnswer,
+  type ChatQuestionOption,
   type ChatRole,
   type MessagePatch,
   type MessageStatus,
@@ -91,8 +95,10 @@ export {
   type ApprovalQueueOptions,
   type ApprovalQueueProps,
   type ApprovalRequest,
+  type ApprovalResolution,
   type ApprovalRisk,
   type ApprovalScope,
+  type ApprovalUndoEvent,
 } from './approval.js';
 
 // Chat 作用域与 RuntimeContext 组装（零 React）
@@ -166,7 +172,43 @@ export {
   useSidebarDrawer,
   type AppShellProps,
 } from './view/AppShell.js';
-export { ChatView, type ChatViewProps } from './view/ChatView.js';
+export {
+  ChatView,
+  type ChatQuestionAnswerEvent,
+  type ChatQuestionEvent,
+  type ChatViewProps,
+} from './view/ChatView.js';
+// Agent 提问卡（DSL 组件 + root React 组件）
+export {
+  AgentQuestion,
+  type AgentQuestionAnswer,
+  type AgentQuestionOption,
+  type AgentQuestionProps,
+  type AgentQuestionStatus,
+  type AgentQuestionSuggestion,
+} from './components/AgentQuestion/index.js';
+// 消息版本切换（root React 组件；版本数据由宿主自管）
+export {
+  MessageBranches,
+  type MessageBranchKind,
+  type MessageBranchesProps,
+  type MessageBranchVersion,
+} from './components/MessageBranches/index.js';
+// 上下文窗口用量表（root React 组件；纯展示，无 tokenizer）
+export {
+  ContextWindowMeter,
+  type ContextWindowMeterProps,
+  type ContextWindowSegment,
+} from './components/ContextWindowMeter/index.js';
+// 回答反馈卡（root React 组件；不改变 MessageActions 默认动作）
+export {
+  ResponseFeedback,
+  type FeedbackRating,
+  type FeedbackReasonOption,
+  type FeedbackValue,
+  type ResponseFeedbackProps,
+  type ResponseFeedbackVariant,
+} from './components/ResponseFeedback/index.js';
 export {
   DEFAULT_CHAT_GREETING,
   EmptyState,

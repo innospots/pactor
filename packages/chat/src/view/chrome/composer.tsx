@@ -7,6 +7,10 @@ import type {
   ChatContextItem,
   ChatModelOption,
 } from '../../model.js';
+import type {
+  ComposerMode,
+  ComposerQueueItem,
+} from '../../components/Composer/index.js';
 import { ModelSelect } from '../ModelChip.js';
 import type { ChromeFragment } from './ChromeSlot.js';
 
@@ -35,6 +39,13 @@ export interface ComposerBridge {
   showPlus: boolean;
   showAttach: boolean;
   modelChipEnabled: boolean;
+  /** 生成中排队（opt-in）：队列与移除入口 */
+  queue?: ComposerQueueItem[];
+  removeQueued?: (id: string) => void;
+  /** Ask / Plan / Act（opt-in） */
+  showModes?: boolean;
+  mode?: ComposerMode;
+  modeChange?: (mode: ComposerMode) => void;
   // 行为
   send: () => void;
   stop?: () => void;
@@ -145,6 +156,11 @@ export function ComposerContextChips({
   if (chips.length === 0) {
     return null;
   }
+  const tokenChips = chips.filter((chip) => typeof chip.tokens === 'number');
+  const totalTokens = tokenChips.reduce(
+    (total, chip) => total + (chip.tokens ?? 0),
+    0,
+  );
   const removeContextLabel = (label: string): string =>
     t('pactor.chat.composer.removeContext', { label });
   return (
@@ -156,6 +172,16 @@ export function ComposerContextChips({
           data-context-id={chip.id}
         >
           <span className="pactor-chat-context-chip__label">{chip.label}</span>
+          {typeof chip.tokens === 'number' ? (
+            <span
+              data-slot="composer-context-token"
+              className="pactor-chat-context-chip__tokens"
+            >
+              {t('pactor.chat.composer.contextTokens', {
+                tokens: chip.tokens,
+              })}
+            </span>
+          ) : null}
           <button
             type="button"
             className="pactor-chat-icon-button pactor-chat-context-chip__remove"
@@ -166,6 +192,97 @@ export function ComposerContextChips({
             <Icon name="x" size={12} />
           </button>
         </span>
+      ))}
+      {tokenChips.length > 0 ? (
+        <span
+          data-slot="composer-context-total"
+          className="pactor-chat-context-chip__total"
+        >
+          {t('pactor.chat.composer.totalTokens', { tokens: totalTokens })}
+        </span>
+      ) : null}
+    </div>
+  );
+}
+
+/** 生成中排队行（DSL header 与 fallback 共用） */
+export function ComposerQueue({
+  queue,
+  onRemove,
+}: {
+  queue: ComposerQueueItem[];
+  onRemove: (id: string) => void;
+}): ReactNode {
+  const { t } = useI18n();
+  if (queue.length === 0) {
+    return null;
+  }
+  return (
+    <div
+      data-slot="composer-queue"
+      className="pactor-chat-composer__queue"
+    >
+      <div className="pactor-chat-composer__queue-title">
+        <Icon name="list" size={12} />
+        {t('pactor.chat.composer.queue')}
+        <span>{queue.length}</span>
+      </div>
+      <ul className="pactor-chat-composer__queue-items">
+        {queue.map((item) => (
+          <li
+            key={item.id}
+            data-slot="composer-queue-item"
+            className="pactor-chat-composer__queue-item"
+          >
+            <span className="pactor-chat-composer__queue-text">{item.text}</span>
+            <button
+              type="button"
+              data-slot="composer-queue-remove"
+              className="pactor-chat-icon-button"
+              aria-label={t('pactor.chat.composer.queueRemove', {
+                text: item.text,
+              })}
+              onClick={() => onRemove(item.id)}
+            >
+              <Icon name="x" size={12} />
+            </button>
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+}
+
+/** Ask / Plan / Act 切换（DSL toolbarStart 与 fallback 共用） */
+export function ComposerModeSelector({
+  mode,
+  onChange,
+}: {
+  mode: ComposerMode;
+  onChange: (mode: ComposerMode) => void;
+}): ReactNode {
+  const { t } = useI18n();
+  const modes: ComposerMode[] = ['ask', 'plan', 'act'];
+  return (
+    <div
+      data-slot="composer-modes"
+      role="radiogroup"
+      aria-label={t('pactor.chat.composer.mode')}
+      className="pactor-chat-composer__modes"
+    >
+      {modes.map((item) => (
+        <button
+          key={item}
+          type="button"
+          role="radio"
+          data-slot="composer-mode"
+          data-mode={item}
+          aria-checked={mode === item}
+          tabIndex={mode === item ? 0 : -1}
+          onClick={() => onChange(item)}
+        >
+          {t(`pactor.chat.composer.mode.${item}`)}
+        </button>
       ))}
     </div>
   );
@@ -189,6 +306,9 @@ function ChatComposerHeader(): ReactNode {
           onRemove={bridge.removeChip}
         />
       )}
+      {bridge.queue !== undefined && bridge.removeQueued ? (
+        <ComposerQueue queue={bridge.queue} onRemove={bridge.removeQueued} />
+      ) : null}
     </>
   );
 }
@@ -200,6 +320,12 @@ function ChatComposerToolbarStart(): ReactNode {
   return (
     <>
       {bridge.toolbarStart}
+      {bridge.showModes && bridge.mode && bridge.modeChange ? (
+        <ComposerModeSelector
+          mode={bridge.mode}
+          onChange={bridge.modeChange}
+        />
+      ) : null}
       {bridge.showPlus && (
         <button
           type="button"

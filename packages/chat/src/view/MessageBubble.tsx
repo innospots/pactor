@@ -11,6 +11,7 @@ import type {
   ChatMessage,
   ChatMessageAction,
   ChatPart,
+  ChatQuestionAnswer,
 } from '../model.js';
 import type { ChatRuntime, ChatScope } from '../scope.js';
 import { ActivityTrace } from './ActivityTrace.js';
@@ -91,6 +92,12 @@ export interface MessageBubbleProps {
   callService?: CallChatService;
   /** 全部动作（含内建）点击的并行通知 */
   onMessageAction?: (actionId: string, message: ChatMessage) => void;
+  /** question part 提交回答 */
+  onQuestionAnswer?: (answer: ChatQuestionAnswer, part: ChatPart) => void;
+  /** question part 选择「让 agent 决定」 */
+  onQuestionDelegate?: (part: ChatPart) => void;
+  /** question part 撤销回答 */
+  onQuestionUndo?: (part: ChatPart) => void;
 }
 
 /**
@@ -209,6 +216,9 @@ export function MessageBubble({
   messageActions,
   callService,
   onMessageAction,
+  onQuestionAnswer,
+  onQuestionDelegate,
+  onQuestionUndo,
 }: MessageBubbleProps) {
   const { t } = useI18n();
   const [editing, setEditing] = useState(false);
@@ -269,6 +279,9 @@ export function MessageBubble({
               runtime={runtime}
               scope={bubbleScope}
               streaming={streaming}
+              onQuestionAnswer={onQuestionAnswer}
+              onQuestionDelegate={onQuestionDelegate}
+              onQuestionUndo={onQuestionUndo}
             />
           ),
         )

@@ -6,6 +6,7 @@ import { useEffect, useMemo, useRef, useState, useSyncExternalStore, type ReactN
 import type { ChatArtifact } from '../artifact.js';
 import type { ChatConfirm, ChatPermissionChecker } from '../capability-action.js';
 import type { ChatCapabilityRegistry } from '../capability-action.js';
+import type { ComposerQueueItem } from '../components/Composer/index.js';
 import { CHAT_DENIED_TYPE } from '../dsl-guard.js';
 import { useChatAutoScroll } from '../hooks/use-chat-auto-scroll.js';
 import { useChatModel } from '../hooks/use-chat-model.js';
@@ -17,6 +18,7 @@ import type {
   ChatMessage,
   ChatMessageAction,
   ChatModelOption,
+  ChatQuestionAnswer,
 } from '../model.js';
 import {
   createChatRuntime,
@@ -53,6 +55,19 @@ import { ChatDenied } from './PartRenderer.js';
  * Composer 扩展 props（attachments / onAttachFiles / toolbar 槽 /
  * 提及与 "+" 触发等，见 ComposerProps）原样透传给内建 Composer。
  */
+/** Agent 提问回答事件（question part） */
+export interface ChatQuestionAnswerEvent {
+  messageId: string;
+  partId?: string;
+  answer: ChatQuestionAnswer;
+}
+
+/** Agent 提问 delegate / undo 事件 */
+export interface ChatQuestionEvent {
+  messageId: string;
+  partId?: string;
+}
+
 export interface ChatViewProps
   extends Pick<
     ComposerProps,
@@ -66,6 +81,16 @@ export interface ChatViewProps
     | 'hideToolbar'
     | 'onMentionTrigger'
     | 'onPlusMenu'
+    | 'queue'
+    | 'onQueueChange'
+    | 'showModes'
+    | 'mode'
+    | 'onModeChange'
+    | 'commands'
+    | 'accept'
+    | 'maxSize'
+    | 'maxFiles'
+    | 'onReject'
   > {
   store: ConversationStore;
   /** 注入后发送即驱动 turn；缺省时仅触发 onSend */
@@ -135,6 +160,12 @@ export interface ChatViewProps
   messageActions?: Array<BuiltinMessageAction | ChatMessageAction>;
   /** 全部消息动作（含内建）点击的并行通知（event 语义，不影响内建默认行为） */
   onMessageAction?: (actionId: string, message: ChatMessage) => void;
+  /** question part 提交回答（宿主据此更新消息 part / 继续对话） */
+  onQuestionAnswer?: (event: ChatQuestionAnswerEvent) => void;
+  /** question part 选择「让 agent 决定」 */
+  onQuestionDelegate?: (event: ChatQuestionEvent) => void;
+  /** question part 撤销回答 */
+  onQuestionUndo?: (event: ChatQuestionEvent) => void;
   /**
    * Composer 下方自定义内容槽（未提供不渲染）：渲染在 Composer 之外、
    * 页面底部留白区内（空态 / 钉底两态一致），典型用途为免责声明、
@@ -185,6 +216,16 @@ export function ChatView({
   hideToolbar,
   onMentionTrigger,
   onPlusMenu,
+  queue,
+  onQueueChange,
+  showModes,
+  mode,
+  onModeChange,
+  commands,
+  accept,
+  maxSize,
+  maxFiles,
+  onReject,
   models,
   model,
   onModelChange,
@@ -194,6 +235,9 @@ export function ChatView({
   callService,
   messageActions,
   onMessageAction,
+  onQuestionAnswer,
+  onQuestionDelegate,
+  onQuestionUndo,
   composerBottom,
 }: ChatViewProps) {
   const { t } = useI18n();
@@ -261,7 +305,8 @@ export function ChatView({
   // 当前 turn 的取消控制器
   const abortRef = useRef<AbortController | null>(null);
 
-  const { containerRef, isFollowing, scrollToBottom } = useChatAutoScroll({
+  const { containerRef, isFollowing, newMessageCount, scrollToBottom } =
+    useChatAutoScroll({
     messageCount: messages.length,
     lastContentLength: lastContentLength(messages),
     isStreaming,
@@ -314,6 +359,36 @@ export function ChatView({
     abortRef.current?.abort();
     abortRef.current = null;
   };
+
+  // 生成中排队（opt-in）：内部自持队列；streaming 结束（true → false）
+  // 时取出队首发送一条，其余等下一轮结束后继续
+  const [innerQueue, setInnerQueue] = useState<ComposerQueueItem[]>([]);
+  const queueItems = queue ?? innerQueue;
+  const queueEnabled = queue !== undefined || onQueueChange !== undefined;
+  const handleQueueChange = (next: ComposerQueueItem[]): void => {
+    if (queue === undefined) {
+      setInnerQueue(next);
+    }
+    onQueueChange?.(next);
+  };
+  const queueRef = useRef(queueItems);
+  queueRef.current = queueItems;
+  const wasStreamingRef = useRef(false);
+  useEffect(() => {
+    const wasStreaming = wasStreamingRef.current;
+    wasStreamingRef.current = isStreaming;
+    if (!queueEnabled || !wasStreaming || isStreaming) {
+      return;
+    }
+    const [nextItem, ...rest] = queueRef.current;
+    if (!nextItem) {
+      return;
+    }
+    handleQueueChange(rest);
+    handleSend(nextItem.text);
+    // 仅在 streaming 状态翻转时排空一条
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isStreaming, queueEnabled]);
 
   // chrome DSL 渲染层（spec: chat-chrome-dsl）：包级行为注入——
   // 空态建议点击 / artifact 卡片打开经 chat.* 内建动作桥接回这里
@@ -381,6 +456,16 @@ export function ChatView({
       hideToolbar={hideToolbar}
       onMentionTrigger={onMentionTrigger}
       onPlusMenu={onPlusMenu}
+      queue={queueEnabled ? queueItems : undefined}
+      onQueueChange={queueEnabled ? handleQueueChange : undefined}
+      showModes={showModes}
+      mode={mode}
+      onModeChange={onModeChange}
+      commands={commands}
+      accept={accept}
+      maxSize={maxSize}
+      maxFiles={maxFiles}
+      onReject={onReject}
       models={modelPlacement === 'header' ? undefined : models}
       model={currentModel}
       onModelChange={handleModelChange}
@@ -434,6 +519,34 @@ export function ChatView({
               messageActions={messageActions}
               callService={callService}
               onMessageAction={onMessageAction}
+              onQuestionAnswer={
+                onQuestionAnswer
+                  ? (answer, part) =>
+                      onQuestionAnswer({
+                        messageId: message.id,
+                        partId: part.id,
+                        answer,
+                      })
+                  : undefined
+              }
+              onQuestionDelegate={
+                onQuestionDelegate
+                  ? (part) =>
+                      onQuestionDelegate({
+                        messageId: message.id,
+                        partId: part.id,
+                      })
+                  : undefined
+              }
+              onQuestionUndo={
+                onQuestionUndo
+                  ? (part) =>
+                      onQuestionUndo({
+                        messageId: message.id,
+                        partId: part.id,
+                      })
+                  : undefined
+              }
             />
           ))
         )}
@@ -441,10 +554,16 @@ export function ChatView({
           <button
             type="button"
             className="pactor-chat-scroll-bottom"
+            data-slot="chat-scroll-bottom"
+            data-new-messages={newMessageCount || undefined}
             onClick={scrollToBottom}
           >
             <Icon name="arrow-down" size={13} />
-            {t('pactor.chat.view.backToBottom')}
+            {newMessageCount > 0
+              ? t('pactor.chat.view.backToBottomWithCount', {
+                  count: newMessageCount,
+                })
+              : t('pactor.chat.view.backToBottom')}
           </button>
         )}
       </div>

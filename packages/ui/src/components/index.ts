@@ -60,8 +60,13 @@ export type { TabItem, TabsProps } from './components/Tabs/index.js';
 // 展示类扩展组件
 export { Badge } from './components/Badge/index.js';
 export type { BadgeProps, BadgeVariant } from './components/Badge/index.js';
-export { Avatar } from './components/Avatar/index.js';
-export type { AvatarProps } from './components/Avatar/index.js';
+export { Avatar, AvatarGroup } from './components/Avatar/index.js';
+export type {
+  AvatarGroupProps,
+  AvatarKind,
+  AvatarProps,
+  AvatarStatus,
+} from './components/Avatar/index.js';
 export { Skeleton } from './components/Skeleton/index.js';
 export type { SkeletonProps, SkeletonShape } from './components/Skeleton/index.js';
 export { Separator } from './components/Separator/index.js';

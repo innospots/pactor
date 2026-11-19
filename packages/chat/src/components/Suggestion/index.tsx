@@ -1,3 +1,4 @@
+import { useI18n } from '@pactor-app/runtime';
 import type { CSSProperties } from 'react';
 
 import { cn } from '../../lib/utils.js';
@@ -13,6 +14,10 @@ export interface SuggestionProps {
   justify?: 'start' | 'center';
   /** 选择事件，传出选中项 value（Renderer 绑定 events.onSelect） */
   onSelect?: (value: string) => void;
+  /** 刷新建议（提供时 chips 末尾展示刷新按钮；加载逻辑由宿主实现） */
+  onRefresh?: () => void;
+  /** 刷新中：按钮旋转并禁用，防止重复触发 */
+  refreshing?: boolean;
   /** 通用：根节点 class（与内置样式合并） */
   className?: string;
   /** 通用：根节点内联样式 */
@@ -28,7 +33,16 @@ function normalize(item: SuggestionItem): { label: string; value: string; icon?:
  * Suggestion 适配器（shadcn kit）：追问 / 下一步建议 chips——
  * 圆角描边小按钮横向排列（可换行），点击经 onSelect 传出 value。
  */
-export function Suggestion({ items = [], justify = 'start', onSelect, className, style }: SuggestionProps) {
+export function Suggestion({
+  items = [],
+  justify = 'start',
+  onSelect,
+  onRefresh,
+  refreshing = false,
+  className,
+  style,
+}: SuggestionProps) {
+  const { t } = useI18n();
   return (
     <div
       data-slot="suggestion"
@@ -51,6 +65,29 @@ export function Suggestion({ items = [], justify = 'start', onSelect, className,
           </button>
         );
       })}
+      {onRefresh ? (
+        <button
+          type="button"
+          data-slot="suggestion-refresh"
+          aria-label={
+            refreshing
+              ? t('pactor.chat.suggestion.refreshing')
+              : t('pactor.chat.suggestion.refresh')
+          }
+          aria-busy={refreshing}
+          disabled={refreshing}
+          className="flex items-center gap-1.5 rounded-full border border-border px-3 py-1 text-sm text-muted-foreground transition-colors hover:bg-accent hover:text-foreground disabled:opacity-60"
+          onClick={onRefresh}
+        >
+          <span
+            className={cn(
+              refreshing && 'animate-spin motion-reduce:animate-none',
+            )}
+          >
+            <Icon name="refresh-cw" size="sm" />
+          </span>
+        </button>
+      ) : null}
     </div>
   );
 }

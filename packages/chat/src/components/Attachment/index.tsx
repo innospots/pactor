@@ -14,6 +14,8 @@ export interface AttachmentItemData {
   fileSize?: number;
   /** MIME 或扩展名（类别图标推断） */
   fileType?: string;
+  /** 图片缩略图地址（image 类别且提供时展示缩略图；点击仍经 onClick 交宿主预览） */
+  src?: string;
   /** 状态，默认 done */
   status?: 'uploading' | 'done' | 'error';
   /** 上传进度（0-100，status=uploading 时展示） */
@@ -62,6 +64,7 @@ export function Attachment({ items = [], onRemove, onRetry, onClick, className, 
             key={key}
             data-slot="attachment-item"
             data-status={status}
+            data-kind={kind}
             className={cn(
               'flex w-56 flex-col rounded-md border border-border px-2 py-1.5',
               onClick && 'cursor-pointer',
@@ -69,9 +72,19 @@ export function Attachment({ items = [], onRemove, onRetry, onClick, className, 
             onClick={onClick ? () => onClick(item) : undefined}
           >
             <div className="flex items-center gap-1.5">
-              <span className="shrink-0 text-muted-foreground">
-                <Icon name={kindIcon[kind]} size="sm" />
-              </span>
+              {kind === 'image' && item.src ? (
+                <img
+                  data-slot="attachment-thumbnail"
+                  src={item.src}
+                  alt={item.name}
+                  loading="lazy"
+                  className="size-6 shrink-0 rounded object-cover"
+                />
+              ) : (
+                <span className="shrink-0 text-muted-foreground">
+                  <Icon name={kindIcon[kind]} size="sm" />
+                </span>
+              )}
               <span className="min-w-0 flex-1 truncate text-sm">{item.name}</span>
               {status === 'uploading' ? (
                 <span className="shrink-0 animate-spin text-muted-foreground motion-reduce:animate-none">

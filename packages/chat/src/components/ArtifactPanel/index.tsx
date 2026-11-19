@@ -21,6 +21,7 @@ import {
   resolveArtifactFileType,
   resolveArtifactIconName,
   type ArtifactTreeNode,
+  type ArtifactVersion,
   type ChatPageArtifact,
 } from "./artifact.js";
 import { downloadArtifact } from "./download.js";
@@ -79,6 +80,11 @@ export interface ArtifactPanelProps {
   onClose?: () => void;
   /** 下载事件；缺省内部走浏览器下载（downloadArtifact） */
   onDownload?: (artifact: ChatPageArtifact) => void;
+  /**
+   * 恢复历史版本事件（面板只预览历史内容；宿主据此更新产物内容 /
+   * versions 并持久化）
+   */
+  onRestoreVersion?: (version: ArtifactVersion, index: number) => void;
   /** dsl 产物活预览的 Safe Registry；缺省时 dsl 内容渲染降级块 */
   safeRegistry?: Registry<unknown>;
   /** 注入 dsl 预览作用域 user */
@@ -278,6 +284,7 @@ export function ArtifactPanel({
   resizable = false,
   onClose,
   onDownload,
+  onRestoreVersion,
   safeRegistry,
   user,
   artifactViewers,
@@ -302,8 +309,14 @@ export function ArtifactPanel({
     onViewChange?.(next);
   };
   const activeId = activeArtifactId ?? artifact?.id;
+  // 历史版本预览（null = 当前内容）；激活产物变化时复位
+  const [versionIndex, setVersionIndex] = useState<number | null>(null);
+  const versions = artifact?.versions ?? [];
+  const selectedVersion =
+    versionIndex !== null ? versions[versionIndex] : undefined;
   useEffect(() => {
     switchView("content");
+    setVersionIndex(null);
     // switchView 随渲染恒新，不入依赖
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeId]);
@@ -430,6 +443,51 @@ export function ArtifactPanel({
               {artifact.kind}
             </span>
           ) : null}
+          {view !== "list" && artifact && versions.length > 0 ? (
+            <DropdownMenu
+              items={[
+                {
+                  label: t("pactor.chat.artifact.currentVersion"),
+                  value: "__current__",
+                  selected: versionIndex === null,
+                  icon: "check",
+                },
+                ...versions.map((version, index) => ({
+                  label:
+                    version.label ??
+                    t("pactor.chat.artifact.version", { version: index + 1 }),
+                  value: version.id,
+                  selected: versionIndex === index,
+                  icon: "history",
+                })),
+              ]}
+              onSelect={(value) =>
+                setVersionIndex(
+                  value === "__current__"
+                    ? null
+                    : versions.findIndex((version) => version.id === value),
+                )
+              }
+            >
+              <button
+                type="button"
+                data-slot="artifact-panel-versions-trigger"
+                aria-label={t("pactor.chat.artifact.versions")}
+                className="flex shrink-0 cursor-pointer items-center gap-1 rounded-md border border-border px-1.5 py-0.5 text-xs text-muted-foreground hover:bg-accent hover:text-foreground"
+              >
+                <Icon name="history" size={12} />
+                <span className="max-w-24 truncate">
+                  {selectedVersion
+                    ? (selectedVersion.label ??
+                      t("pactor.chat.artifact.version", {
+                        version: (versionIndex ?? 0) + 1,
+                      }))
+                    : t("pactor.chat.artifact.currentVersion")}
+                </span>
+                <Icon name="chevron-down" size={11} />
+              </button>
+            </DropdownMenu>
+          ) : null}
           <span className="flex-1" />
           {artifact ? (
             <Button
@@ -463,11 +521,55 @@ export function ArtifactPanel({
         ) : inspector !== undefined && inspector !== null ? (
           inspector
         ) : artifact ? (
-          <ArtifactContent
-            artifact={artifact}
-            runtime={runtime}
-            viewers={artifactViewers}
-          />
+          <>
+            {selectedVersion ? (
+              <div
+                data-slot="artifact-panel-version-banner"
+                role="status"
+                className="mb-3 flex items-center gap-2 rounded-md border border-border bg-muted px-2.5 py-1.5 text-xs"
+              >
+                <Icon name="history" size={13} />
+                <span className="min-w-0 flex-1 truncate">
+                  {selectedVersion.label ??
+                    t("pactor.chat.artifact.version", {
+                      version: (versionIndex ?? 0) + 1,
+                    })}
+                </span>
+                {onRestoreVersion ? (
+                  <button
+                    type="button"
+                    data-slot="artifact-panel-restore"
+                    className="shrink-0 rounded border border-border px-1.5 py-0.5 font-medium hover:bg-accent"
+                    onClick={() =>
+                      onRestoreVersion(selectedVersion, versionIndex ?? 0)
+                    }
+                  >
+                    {t("pactor.chat.artifact.restore")}
+                  </button>
+                ) : (
+                  <span className="shrink-0 text-muted-foreground">
+                    {t("pactor.chat.artifact.restoreUnavailable")}
+                  </span>
+                )}
+              </div>
+            ) : null}
+            <ArtifactContent
+              artifact={
+                selectedVersion
+                  ? {
+                      ...artifact,
+                      content: selectedVersion.content,
+                      title: selectedVersion.title ?? artifact.title,
+                      language:
+                        selectedVersion.language ?? artifact.language,
+                      fileType: selectedVersion.fileType ?? artifact.fileType,
+                    }
+                  : artifact
+              }
+              runtime={runtime}
+              viewers={artifactViewers}
+            />
+          </>
         ) : (
           <p className="text-sm text-muted-foreground">{resolvedEmptyText}</p>
         )}

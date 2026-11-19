@@ -25,6 +25,38 @@ export type PartStatus = 'pending' | 'streaming' | 'ready' | 'error';
 /** tool-call part 的执行状态 */
 export type ToolCallStatus = 'waiting' | 'running' | 'success' | 'failed';
 
+/** Agent 提问选项（question part） */
+export interface ChatQuestionOption {
+  id: string;
+  label: string;
+  description?: string;
+  /** 图标名（ui Icon 白名单） */
+  icon?: string;
+}
+
+/** Agent 提问数据（question part） */
+export interface ChatQuestion {
+  question: string;
+  description?: string;
+  options?: ChatQuestionOption[];
+  /** 多选（缺省单选，单选点击即提交） */
+  multiple?: boolean;
+  /** 允许自由输入 */
+  allowOther?: boolean;
+  /** 推荐项 */
+  suggested?: { optionId: string; reason?: string };
+  /** 提问状态（宿主写回时用于定格回答结果） */
+  status?: 'pending' | 'answered' | 'delegated';
+  /** 回答结果（status 非 pending 时展示） */
+  answer?: ChatQuestionAnswer;
+}
+
+/** Agent 提问的回答 */
+export interface ChatQuestionAnswer {
+  optionIds: string[];
+  other?: string;
+}
+
 /**
  * Part 联合类型：一条消息由有序 Part 数组组成，
  * thinking 与正文分离（设计文档第 72 节）。
@@ -64,6 +96,13 @@ export type ChatPart =
   | { id?: string; type: 'status'; text: string }
   | {
       id?: string;
+      /** Agent 提问 part（spec: chat-agent-question）：渲染为可交互提问卡 */
+      type: 'question';
+      question: ChatQuestion;
+      status?: PartStatus;
+    }
+  | {
+      id?: string;
       /** 产出物 part（spec: chat-artifact-panel，设计决策 D4）：内联渲染为产出物卡片 */
       type: 'artifact';
       artifact: ChatArtifact;
@@ -90,6 +129,8 @@ export interface ChatContextItem {
   label: string;
   trigger?: '@' | '+';
   data?: unknown;
+  /** 该上下文占用的 token 数（提供后 chips 行展示合计） */
+  tokens?: number;
 }
 
 /**
@@ -111,10 +152,27 @@ export interface ChatContextSource {
   params?: Record<string, unknown>;
 }
 
-/** 模型选项（spec: chat-model-selector）：value 进 ChatInput.model，label 用于 chip 展示 */
+/** 模型能力徽章（模型选择子集；宿主按模型能力声明） */
+export type ChatModelCapability = 'vision' | 'tools' | 'reasoning';
+
+/**
+ * 模型选项（spec: chat-model-selector）：value 进 ChatInput.model，
+ * label 用于 chip 展示；扩展字段可选，缺省行为不变（仅基础字段时
+ * 模型弹层保持原样，不出现搜索 / 分组 / 徽章）。
+ */
 export interface ChatModelOption {
   value: string;
   label: string;
+  /** 次要说明（如「均衡 / 快速」） */
+  description?: string;
+  /** 服务商（同一服务商的模型在弹层内分组展示） */
+  provider?: string;
+  /** 上下文窗口（tokens，弹层内作次要信息展示） */
+  contextWindow?: number;
+  /** 能力徽章（vision / tools / reasoning） */
+  capabilities?: ChatModelCapability[];
+  /** 推荐项（弹层内展示推荐标记） */
+  recommended?: boolean;
 }
 
 /**
@@ -195,6 +253,7 @@ export type PartPatch = Partial<{
   message: string;
   text: string;
   artifact: ChatArtifact;
+  question: ChatQuestion;
 }>;
 
 let idCounter = 0;

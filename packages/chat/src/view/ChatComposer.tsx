@@ -1,5 +1,10 @@
 import {
   Composer as UiComposer,
+  checkFiles,
+  type ComposerCommand,
+  type ComposerMode,
+  type ComposerQueueItem,
+  type ComposerRejectedFile,
 } from '../components/Composer/index.js';
 import { type AttachmentItemData } from '../components/Attachment/index.js';
 import { useI18n } from '@pactor-app/runtime';
@@ -19,6 +24,7 @@ import {
   COMPOSER_INTERNAL_COMPONENTS,
   ComposerBridgeContext,
   ComposerContextChips,
+  ComposerQueue,
   type ComposerBridge,
 } from './chrome/composer.js';
 import {
@@ -102,6 +108,25 @@ export interface ComposerProps {
   contextChips?: ChatContextItem[];
   /** chips 变更回调（选中追加 / 单独移除） */
   onContextChipsChange?: (chips: ChatContextItem[]) => void;
+  /**
+   * 生成中排队（opt-in）：提供 onQueueChange 时，streaming 中的 Enter /
+   * 发送入队而非发送；运行结束后由宿主（ChatView 或调用方）发下一条
+   */
+  queue?: ComposerQueueItem[];
+  /** 队列变更（入队 / 移除） */
+  onQueueChange?: (queue: ComposerQueueItem[]) => void;
+  /** Ask / Plan / Act 模式切换（showModes 时渲染） */
+  showModes?: boolean;
+  mode?: ComposerMode;
+  onModeChange?: (mode: ComposerMode) => void;
+  /** 斜杠命令候选（fallback 路径；输入 `/` 过滤，选中只插入） */
+  commands?: ComposerCommand[];
+  /** 文件规则：类型白名单 / 单文件大小上限 / 数量上限（含现有附件） */
+  accept?: string[];
+  maxSize?: number;
+  maxFiles?: number;
+  /** 被规则拒绝的文件 */
+  onReject?: (rejected: ComposerRejectedFile[]) => void;
   /** service 引用解析出口（ChatServices.callService 透传） */
   callService?: CallChatService;
 }
@@ -115,6 +140,13 @@ function detectMention(text: string, caret: number): string | null {
 
 function collectDropFiles(event: { dataTransfer: DataTransfer | null }): File[] {
   return event.dataTransfer ? Array.from(event.dataTransfer.files) : [];
+}
+
+let chatQueueSeq = 0;
+
+function createQueueItem(text: string): ComposerQueueItem {
+  chatQueueSeq += 1;
+  return { id: `chat-queue-${Date.now()}-${chatQueueSeq}`, text };
 }
 
 /** ChatAttachment → ui AttachmentItemData（id 回查原对象用） */
@@ -147,6 +179,16 @@ export function Composer({
   contextSources,
   contextChips,
   onContextChipsChange,
+  queue,
+  onQueueChange,
+  showModes = false,
+  mode,
+  onModeChange,
+  commands,
+  accept,
+  maxSize,
+  maxFiles,
+  onReject,
   callService,
   composerFooter,
   hideToolbar = false,
@@ -157,6 +199,46 @@ export function Composer({
   const [text, setText] = useState('');
   const [dragOver, setDragOver] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // 模式：受控 / 非受控（缺省 act），fallback 与 DSL 路径共用
+  const [innerMode, setInnerMode] = useState<ComposerMode>('act');
+  const currentMode = mode ?? innerMode;
+  const changeMode = (nextMode: ComposerMode): void => {
+    if (mode === undefined) {
+      setInnerMode(nextMode);
+    }
+    onModeChange?.(nextMode);
+  };
+
+  // 队列：提供 onQueueChange 即启用；queue 受控时以 props 为准
+  const queueEnabled = onQueueChange !== undefined;
+  const [innerQueue, setInnerQueue] = useState<ComposerQueueItem[]>([]);
+  const queueItems = queue ?? innerQueue;
+  const updateQueue = (next: ComposerQueueItem[]): void => {
+    if (queue === undefined) {
+      setInnerQueue(next);
+    }
+    onQueueChange?.(next);
+  };
+  const removeQueued = (id: string): void => {
+    updateQueue(queueItems.filter((item) => item.id !== id));
+  };
+
+  const hasFileRules =
+    accept !== undefined || maxSize !== undefined || maxFiles !== undefined;
+  /** 文件规则过滤（DSL 路径入口共用；fallback 由 ui Composer 内建规则处理） */
+  const processFiles = (files: File[]): File[] => {
+    if (!hasFileRules) return files;
+    const { accepted, rejected } = checkFiles(
+      files,
+      { accept, maxSize, maxFiles },
+      attachments?.length ?? 0,
+    );
+    if (rejected.length > 0) {
+      onReject?.(rejected);
+    }
+    return accepted;
+  };
 
   // 内建模型 chip（spec: chat-model-selector）：models 非空才渲染
   const modelChipEnabled = models !== undefined && models.length > 0;
@@ -211,6 +293,12 @@ export function Composer({
     if (!value || disabled) {
       return;
     }
+    // streaming 且启用排队：Enter 入队而非发送（宿主发下一条）
+    if (streaming && queueEnabled) {
+      updateQueue([...queueItems, createQueueItem(value)]);
+      setText('');
+      return;
+    }
     onSend?.(value);
     setText('');
   };
@@ -258,7 +346,10 @@ export function Composer({
   const handlePasteFiles = (clipboardData: DataTransfer): boolean => {
     const files = Array.from(clipboardData.files);
     if (files.length > 0 && onAttachFiles) {
-      onAttachFiles(files);
+      const accepted = processFiles(files);
+      if (accepted.length > 0) {
+        onAttachFiles(accepted);
+      }
       return true;
     }
     return false;
@@ -275,7 +366,10 @@ export function Composer({
       setDragOver(false);
       const files = collectDropFiles(event);
       if (files.length > 0 && onAttachFiles) {
-        onAttachFiles(files);
+        const accepted = processFiles(files);
+        if (accepted.length > 0) {
+          onAttachFiles(accepted);
+        }
       }
     },
   };
@@ -306,8 +400,11 @@ export function Composer({
       hidden
       onChange={(event) => {
         const files = event.target.files ? Array.from(event.target.files) : [];
-        if (files.length > 0) {
-          onAttachFiles(files);
+        if (files.length > 0 && onAttachFiles) {
+          const accepted = processFiles(files);
+          if (accepted.length > 0) {
+            onAttachFiles(accepted);
+          }
         }
         // 允许重复选择同一文件
         event.target.value = '';
@@ -359,6 +456,9 @@ export function Composer({
       className="pactor-chat-composer pactor-chat-composer--dsl"
       onChange={handleBubbleChange}
     >
+      {queueEnabled ? (
+        <ComposerQueue queue={queueItems} onRemove={removeQueued} />
+      ) : null}
       {contextChips !== undefined && (
         <ComposerContextChips chips={contextChips} onRemove={removeChip} />
       )}
@@ -368,6 +468,14 @@ export function Composer({
         disabled={disabled}
         streaming={streaming}
         onStop={onStop}
+        showModes={showModes}
+        mode={currentMode}
+        onModeChange={changeMode}
+        commands={commands}
+        accept={accept}
+        maxSize={maxSize}
+        maxFiles={maxFiles}
+        onReject={onReject}
         attachments={attachments?.map(toAttachmentItem)}
         onRemoveAttachment={
           attachments !== undefined
@@ -418,6 +526,11 @@ export function Composer({
     showPlus,
     showAttach: onAttachFiles !== undefined,
     modelChipEnabled,
+    queue: queueEnabled ? queueItems : undefined,
+    removeQueued,
+    showModes,
+    mode: showModes ? currentMode : undefined,
+    modeChange: changeMode,
     send,
     stop: onStop,
     openFilePicker: () => fileInputRef.current?.click(),
