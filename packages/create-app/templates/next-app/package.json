@@ -17,17 +17,17 @@
     "pack:module": "pactor module pack --no-bump"
   },
   "dependencies": {
-    "@pactor-app/blocks": "^1.71.0",
-    "@pactor-app/chat": "^1.71.0",
-    "@pactor-app/core": "^1.71.0",
-    "@pactor-app/i18n": "^1.71.0",
-    "@pactor-app/router": "^1.71.0",
-    "@pactor-app/runtime": "^1.71.0",
-    "@pactor-app/theme": "^1.71.0",
-    "@pactor-app/ui": "^1.71.0",
+    "@pactor-app/blocks": "^1.72.0",
+    "@pactor-app/chat": "^1.72.0",
+    "@pactor-app/core": "^1.72.0",
+    "@pactor-app/i18n": "^1.72.0",
+    "@pactor-app/router": "^1.72.0",
+    "@pactor-app/runtime": "^1.72.0",
+    "@pactor-app/theme": "^1.72.0",
+    "@pactor-app/ui": "^1.72.0",
     "lucide-react": "1.64.0",
     "next": "16.4.3",
-    "pactor-app": "^1.71.0",
+    "pactor-app": "^1.72.0",
     "react": "19.3.1",
     "react-dom": "19.3.1",
     "yaml": "^2.9.1"
@@ -48,7 +48,7 @@
     "pactor-app": ">=1.55.0"
   },
   "devDependencies": {
-    "@pactor-app/cli": "^1.71.0",
+    "@pactor-app/cli": "^1.72.0",
     "@tailwindcss/postcss": "^4.3.3",
     "@types/node": "^26.6.6",
     "@types/react": "^19.3.0",
