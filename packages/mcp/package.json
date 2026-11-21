@@ -1,0 +1,64 @@
+{
+  "name": "@pactor-app/mcp",
+  "version": "1.72.0",
+  "description": "Pactor MCP server: DSL component catalog, validation, reference and action catalog for AI agents (stdio + library entry)",
+  "keywords": [
+    "pactor",
+    "dsl",
+    "mcp",
+    "model-context-protocol",
+    "ai-native"
+  ],
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/innospots/pactor.git",
+    "directory": "packages/mcp"
+  },
+  "homepage": "https://github.com/innospots/pactor/tree/main/packages/mcp",
+  "bugs": {
+    "url": "https://github.com/innospots/pactor/issues"
+  },
+  "type": "module",
+  "bin": {
+    "pactor-mcp": "./dist/cli.js"
+  },
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "sideEffects": false,
+  "engines": {
+    "node": ">=18"
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "node scripts/sync.mjs && tsup",
+    "test": "node scripts/sync.mjs && tsup && vitest run",
+    "typecheck": "tsc --noEmit",
+    "prepublishOnly": "pnpm build"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "1.32.2",
+    "@pactor-app/core": "workspace:*",
+    "@pactor-app/expression": "workspace:*",
+    "@pactor-app/schema": "workspace:*",
+    "yaml": "^2.9.0",
+    "zod": "^3.25.76"
+  },
+  "devDependencies": {
+    "tsup": "^8.3.5",
+    "typescript": "^5.6.3",
+    "vitest": "^2.1.9",
+    "@types/node": "^22.10.0"
+  }
+}

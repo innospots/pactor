@@ -159,6 +159,24 @@ export function validatePageDsl(document: unknown): DslValidationResult {
   };
 }
 
+/**
+ * 把已编译的 Page DSL 校验器包装成 DslValidationResult 形式。
+ * 供禁代码生成的运行时（Cloudflare Workers / workerd）注入构建期预编译的
+ * Ajv standalone 校验器（见 scripts/build-standalone.mjs 与 dist/standalone）。
+ */
+export function createPageDslValidator(
+  validate: ValidateFunction,
+): (document: unknown) => DslValidationResult {
+  return (document) => {
+    const valid = validate(document) as boolean;
+    return {
+      valid,
+      errors: valid ? [] : toStructuredErrors(validate.errors ?? []),
+      warnings: collectWarnings(document),
+    };
+  };
+}
+
 /** 递归遍历未知文档；visit 返回 false 时不再深入该值 */
 function walkDocument(
   value: unknown,

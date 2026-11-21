@@ -6,13 +6,13 @@
 
 | 来源 | 数量 | 注册方式 |
 | --- | ---: | --- |
-| `@pactor-app/ui` 内置组件 | 124 | 默认 `createComponentRegistry()` 已注册 |
+| `@pactor-app/ui` 内置组件 | 127 | 默认 `createComponentRegistry()` 已注册 |
 | `@pactor-app/chart` | 17 | `registerChartComponents(registry)` |
 | `@pactor-app/blocks` | 11 | `registerBlockComponents(registry)` |
 | `@pactor-app/chat` 展示组件 | 19 | `registerChatComponents(registry)` 或 `createChatComponentRegistry()` |
 | `Chat` / `ChatShell` | 2 | `registerChatComponent(registry)` |
 | Sitemap 布局保留类型 | 2 | `SitemapApp` 内置注入，仅用于布局 DSL |
-| **当前运行时类型合计** | **175** | 下方逐项列出 |
+| **当前运行时类型合计** | **178** | 下方逐项列出 |
 
 在线组件文档共 141 条，对应 140 个 DSL 类型：文档中的 `Splitter` 是 `Resizable` 的用法页，不存在 `type: Splitter`。文档总览：<https://pactor.innospots.com/components/overview/>。
 
@@ -24,9 +24,9 @@
 4. 文档未单列但源码已注册的类型也在这里列出，不能因为文档缺页而漏用或猜名。
 5. 在线文档不可访问时，本文和 [`component-contracts.md`](component-contracts.md) 是首要离线依据；需要版本复核时使用每行的 GitHub 源码链接。
 
-## `@pactor-app/ui` 内置组件（124）
+## `@pactor-app/ui` 内置组件（127）
 
-### 页面、布局与循环（17）
+### 页面、布局与循环（18）
 
 | DSL type | 用途 | 文档 / 源码 |
 | --- | --- | --- |
@@ -41,6 +41,7 @@
 | `Header` | 布局头部区域 | [源码](https://github.com/innospots/pactor/blob/main/packages/ui/src/components/components/Header/index.tsx) |
 | `Layout` | 组织页面级头部、侧栏和内容区 | [在线文档](https://pactor.innospots.com/components/layout/layout/) |
 | `Page` | 页面内容容器；页面标题、内边距和纵向内容节奏 | [源码](https://github.com/innospots/pactor/blob/main/packages/ui/src/components/components/Page/index.tsx) |
+| `Panel` | header（左 title + 右 extra，底部分隔线）+ 内容区的区块容器 | [源码](https://github.com/innospots/pactor/blob/main/packages/ui/src/components/components/Panel/index.tsx) |
 | `Resizable` | 调整单个区域或对象尺寸 | [在线文档](https://pactor.innospots.com/components/layout/resizable/) |
 | `Row` | 栅格行容器（gutter / 对齐 / 换行） | [在线文档](https://pactor.innospots.com/components/layout/row/) |
 | `ScrollArea` | 建立受控滚动区域 | [在线文档](https://pactor.innospots.com/components/layout/scroll-area/) |
@@ -92,7 +93,7 @@
 | `Tooltip` | 补充短说明或不可见标签 | [在线文档](https://pactor.innospots.com/components/general/tooltip/) |
 | `Typography` | 组织标题、正文和辅助文本 | [在线文档](https://pactor.innospots.com/components/general/typography/) |
 
-### 数据录入与表单（28）
+### 数据录入与表单（30）
 
 | DSL type | 用途 | 文档 / 源码 |
 | --- | --- | --- |
@@ -101,6 +102,7 @@
 | `Checkbox` | 独立确认或多项选择 | [在线文档](https://pactor.innospots.com/components/data-entry/checkbox/) |
 | `ChipFilter` | 单选/多选 chip 快筛控件 | [源码](https://github.com/innospots/pactor/blob/main/packages/ui/src/components/components/ChipFilter/index.tsx) |
 | `ChipNode` | 可组合 chip 节点 | [源码](https://github.com/innospots/pactor/blob/main/packages/ui/src/components/components/ChipNode/index.tsx) |
+| `ChipSelect` | 维度筛选：点选后以可关闭 Chip 展示，x 删除 | [源码](https://github.com/innospots/pactor/blob/main/packages/ui/src/components/components/ChipSelect/index.tsx) |
 | `ColorPicker` | 选择或输入颜色 | [在线文档](https://pactor.innospots.com/components/data-entry/color-picker/) |
 | `Combobox` | 输入并匹配建议值 | [在线文档](https://pactor.innospots.com/components/data-entry/combobox/) |
 | `DatePicker` | 选择日期、区间或周期 | [在线文档](https://pactor.innospots.com/components/data-entry/date-picker/) |
@@ -111,6 +113,7 @@
 | `InputOTP` | 一次性验证码输入 | [源码](https://github.com/innospots/pactor/blob/main/packages/ui/src/components/components/InputOTP/index.tsx) |
 | `Label` | 独立标签节点 | [源码](https://github.com/innospots/pactor/blob/main/packages/ui/src/components/components/Label/index.tsx) |
 | `Mentions` | 输入并引用用户或对象 | [在线文档](https://pactor.innospots.com/components/data-entry/mentions/) |
+| `MultiSelect` | 多选下拉：触发器内以标签展示已选项，可限制最多可选数量 | [源码](https://github.com/innospots/pactor/blob/main/packages/ui/src/components/components/MultiSelect/index.tsx) |
 | `NumberInput` | 输入受约束的数值 | [在线文档](https://pactor.innospots.com/components/data-entry/number-input/) |
 | `RadioGroup` | 从互斥选项中选择一项 | [在线文档](https://pactor.innospots.com/components/data-entry/radio-group/) |
 | `Rate` | 输入评分 | [在线文档](https://pactor.innospots.com/components/data-entry/rate/) |

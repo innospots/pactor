@@ -67,6 +67,7 @@ The skill is self-contained. Use this table for package responsibility; use the 
 | `@pactor-app/vite-plugin` | Vite YAML modules, build-time validation, HMR | [GitHub](https://github.com/innospots/pactor/tree/main/packages/vite-plugin) |
 | `@pactor-app/cli` | DSL validation, inspection, scaffolding | [GitHub](https://github.com/innospots/pactor/tree/main/packages/cli) |
 | `@pactor-app/app` | One-stop composition through `createPactorApplication` | [GitHub](https://github.com/innospots/pactor/tree/main/packages/app) |
+| `@pactor-app/mcp` | MCP server: component catalog, DSL validation, reference sections, action catalog for AI agents — local `npx @pactor-app/mcp` (stdio) or remote `https://pactor.innospots.com/api/mcp` (Streamable HTTP) | [GitHub](https://github.com/innospots/pactor/tree/main/packages/mcp) |
 | `pactor-app` | Meta package that depends on all modules and re-exports the app entry | [GitHub](https://github.com/innospots/pactor/tree/main/packages/pactor) |
 
 ## Dependency rules

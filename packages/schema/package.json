@@ -32,6 +32,10 @@
         "types": "./dist/index.d.cts",
         "default": "./dist/index.cjs"
       }
+    },
+    "./standalone": {
+      "types": "./dist/standalone.d.ts",
+      "default": "./dist/standalone.js"
     }
   },
   "sideEffects": false,
@@ -42,8 +46,8 @@
     "dist"
   ],
   "scripts": {
-    "build": "tsup",
-    "test": "vitest run",
+    "build": "tsup && node scripts/build-standalone.mjs",
+    "test": "pnpm build && vitest run",
     "typecheck": "tsc --noEmit",
     "prepublishOnly": "pnpm build"
   },

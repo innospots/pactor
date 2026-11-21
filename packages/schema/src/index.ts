@@ -24,5 +24,5 @@ export {
   dslFragmentPayloadSchema,
 } from './schemas/dsl-fragment.js';
 
-export { validateAuthorPageDsl, validateDslFragmentPayload, validateDslNode, validateDslNodes, validateDslSourceRef, validateLocalizedPageDsl, validatePageDsl } from './validate.js';
+export { createPageDslValidator, validateAuthorPageDsl, validateDslFragmentPayload, validateDslNode, validateDslNodes, validateDslSourceRef, validateLocalizedPageDsl, validatePageDsl } from './validate.js';
 export type { DslValidationError, DslValidationResult } from './validate.js';
