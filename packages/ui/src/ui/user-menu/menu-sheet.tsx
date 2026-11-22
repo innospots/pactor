@@ -176,7 +176,7 @@ export function UserMenuSheet({
           role="menu"
           aria-label={t('pactor.userMenu.trigger', { name: user.name })}
           data-slot="user-menu-panel"
-          className="min-h-0 overflow-y-auto text-left text-[13px] text-foreground"
+          className="min-h-0 overflow-y-auto text-left text-sm text-foreground"
         >
           <MenuHeader
             user={user}

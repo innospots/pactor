@@ -61,6 +61,12 @@
   --success: oklch(0.696 0.17 162.48);
   --warning: oklch(0.769 0.188 70.08);
   --info: oklch(0.623 0.214 259.815);
+  /* Alert 文字色：语义色向黑色混合压暗，白底上满足 WCAG AA（4.5:1）；
+     皮肤覆盖语义色时文字色经 color-mix 自动跟随；暗色主题下重绑为语义色原值 */
+  --alert-destructive-fg: color-mix(in oklab, var(--destructive) 85%, black);
+  --alert-success-fg: color-mix(in oklab, var(--success) 72%, black);
+  --alert-warning-fg: color-mix(in oklab, var(--warning) 62%, black);
+  --alert-info-fg: color-mix(in oklab, var(--info) 80%, black);
   --border: oklch(0.922 0 0);
   --input: oklch(0.85 0 0);
   --ring: oklch(0.556 0 0);
@@ -235,6 +241,11 @@
   --success: oklch(0.696 0.17 162.48);
   --warning: oklch(0.769 0.188 70.08);
   --info: oklch(0.623 0.214 259.815);
+  /* 暗色背景上语义色原值即满足对比度，Alert 文字色重绑为原值 */
+  --alert-destructive-fg: var(--destructive);
+  --alert-success-fg: var(--success);
+  --alert-warning-fg: var(--warning);
+  --alert-info-fg: var(--info);
   --border: oklch(1 0 0 / 10%);
   --input: oklch(1 0 0 / 25%);
   --ring: oklch(0.708 0 0);
@@ -284,6 +295,11 @@
     --success: oklch(0.696 0.17 162.48);
     --warning: oklch(0.769 0.188 70.08);
     --info: oklch(0.623 0.214 259.815);
+    /* 与上方 [data-pactor-theme='dark'] 块一致：暗色下 Alert 文字色为语义色原值 */
+    --alert-destructive-fg: var(--destructive);
+    --alert-success-fg: var(--success);
+    --alert-warning-fg: var(--warning);
+    --alert-info-fg: var(--info);
     --border: oklch(1 0 0 / 10%);
     --input: oklch(1 0 0 / 25%);
     --ring: oklch(0.708 0 0);

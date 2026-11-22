@@ -5,7 +5,8 @@ import { cn } from '../lib/utils.js';
 
 /**
  * shadcn/ui Alert（vendored 源码，按 DSL 契约扩展 success/warning/info 变体；
- * 语义色读取 --success/--warning/--info 令牌，见 src/styles.css）
+ * 文字色读 --alert-*-fg 令牌（亮色主题下为语义色压暗值，满足白底 AA；
+ * 暗色主题重绑为语义色原值），见 src/styles.css）
  */
 const alertVariants = cva(
   'relative grid w-full grid-cols-[0_1fr] items-start gap-y-0.5 rounded-lg border border-border px-(--pactor-card-padding) py-(--pactor-alert-padding-y) text-[length:var(--pactor-control-text-md)] leading-5 has-[>svg]:grid-cols-[var(--pactor-control-box)_1fr] has-[>svg]:gap-x-3 [&>svg]:size-(--pactor-control-box) [&>svg]:translate-y-0.5 [&>svg]:text-current',
@@ -14,10 +15,10 @@ const alertVariants = cva(
       variant: {
         default: 'bg-card text-card-foreground',
         destructive:
-          'border-destructive/50 text-destructive bg-card [&>svg]:text-current',
-        success: 'border-success/50 text-success bg-card [&>svg]:text-current',
-        warning: 'border-warning/50 text-warning bg-card [&>svg]:text-current',
-        info: 'border-info/50 text-info bg-card [&>svg]:text-current',
+          'border-destructive/50 text-(--alert-destructive-fg) bg-card [&>svg]:text-current',
+        success: 'border-success/50 text-(--alert-success-fg) bg-card [&>svg]:text-current',
+        warning: 'border-warning/50 text-(--alert-warning-fg) bg-card [&>svg]:text-current',
+        info: 'border-info/50 text-(--alert-info-fg) bg-card [&>svg]:text-current',
       },
     },
     defaultVariants: {

@@ -34,12 +34,12 @@ export function toast(message: unknown, options: ToastOptions = {}): string {
   });
 }
 
-/** variant → 语义色条 class（读 --success/--destructive/--info/--warning 令牌） */
+/** variant → 语义色 class（读 --success/--destructive/--info/--warning 令牌；与 Alert 同款 hairline 描边 + 标题语义色，不用左侧色条） */
 const toastVariantClass: Record<ToastVariant, string> = {
-  success: 'border-l-4 border-l-success',
-  error: 'border-l-4 border-l-destructive',
-  info: 'border-l-4 border-l-info',
-  warning: 'border-l-4 border-l-warning',
+  success: 'border-success/50 [&_[data-slot=toast-title]]:text-success',
+  error: 'border-destructive/50 [&_[data-slot=toast-title]]:text-destructive',
+  info: 'border-info/50 [&_[data-slot=toast-title]]:text-info',
+  warning: 'border-warning/50 [&_[data-slot=toast-title]]:text-warning',
 };
 
 function ToasterViewport({ className }: { className?: string }) {

@@ -43,7 +43,7 @@
 [data-slot='page-content']
   > [data-slot='alert']:first-child:has(+ [data-slot='grid'])
   [data-slot='alert-title'] {
-  font-size: 1rem;
+  font-size: 1.125rem;
   font-weight: 600;
 }
 
@@ -53,12 +53,37 @@
   color: color-mix(in oklab, var(--primary-foreground) 85%, transparent);
 }
 
+/* 暗色下横幅收敛为深色面：--primary 在暗色反转为近白，
+   直接渐变会得到一块突兀的亮色面板；改为 card 底 + 主色微染，文字回到 foreground */
+[data-pactor-theme='dark']
+  [data-slot='page-content']
+  > [data-slot='alert']:first-child:has(+ [data-slot='grid']) {
+  background: linear-gradient(
+    135deg,
+    color-mix(in oklab, var(--primary) 22%, var(--card)),
+    var(--card)
+  );
+  color: var(--foreground);
+}
+
+[data-pactor-theme='dark']
+  [data-slot='page-content']
+  > [data-slot='alert']:first-child:has(+ [data-slot='grid'])
+  [data-slot='alert-description'] {
+  color: var(--muted-foreground);
+}
+
 /* ============================================================
- * 3. 指标卡主色强调条（契约方式三：结构性美化）
- *    含 Statistic 的卡加左侧强调条；--primary 为 token，dark 下自动适配。
+ * 3. 指标卡交互反馈（契约方式三：结构性美化）
+ *    含 Statistic 的卡静止态保持扁平（Flat-By-Default）；
+ *    hover 时边框染主色，表达可交互感；--primary 为 token，dark 下自动适配。
  * ============================================================ */
 [data-slot='card']:has([data-slot='statistic']) {
-  border-left: 3px solid var(--primary);
+  transition: border-color 0.2s ease;
+}
+
+[data-slot='card']:has([data-slot='statistic']):hover {
+  border-color: color-mix(in oklab, var(--primary) 40%, var(--border));
 }
 
 /* ============================================================

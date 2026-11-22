@@ -35,7 +35,7 @@ import type {
 } from './types.js';
 
 const itemRowClass =
-  'group relative flex h-8 items-center gap-2.5 rounded-md px-2 text-[13px] text-foreground outline-hidden select-none focus:bg-foreground/[0.06] data-highlighted:bg-foreground/[0.06]';
+  'group relative flex h-8 items-center gap-2.5 rounded-md px-2 text-sm text-foreground outline-hidden select-none focus:bg-foreground/[0.06] data-highlighted:bg-foreground/[0.06]';
 
 /** 语言子菜单：点击触发项向右展开语言单选（键盘 → 亦可展开） */
 function LanguageSubmenu({
@@ -70,7 +70,7 @@ function LanguageSubmenu({
       </DropdownMenuSubTrigger>
       <DropdownMenuSubContent
         data-slot="user-menu-language"
-        className="max-h-(--available-height) min-w-[9.5rem] max-w-[calc(100vw-24px)] overflow-x-hidden overflow-y-auto rounded-[10px] border-[0.5px] p-1 text-left text-[13px] shadow-lg [--presence-surface:var(--popover)]"
+        className="max-h-(--available-height) min-w-[9.5rem] max-w-[calc(100vw-24px)] overflow-x-hidden overflow-y-auto rounded-[10px] border-[0.5px] p-1 text-left text-sm shadow-lg [--presence-surface:var(--popover)]"
       >
         <DropdownMenuRadioGroup
           value={language}
@@ -170,7 +170,7 @@ export function UserMenuDropdown({
         collisionPadding={12}
         data-slot="user-menu-panel"
         data-align={align}
-        className="w-[15.5rem] max-w-[calc(100vw-24px)] rounded-[10px] border-[0.5px] p-1 text-left text-[13px] shadow-lg [--presence-surface:var(--popover)]"
+        className="w-[15.5rem] max-w-[calc(100vw-24px)] rounded-[10px] border-[0.5px] p-1 text-left text-sm shadow-lg [--presence-surface:var(--popover)]"
       >
         <MenuHeader
           user={user}

@@ -1625,10 +1625,6 @@
     border-left-style: var(--tw-border-style);
     border-left-width: 2px;
   }
-  .border-l-4 {
-    border-left-style: var(--tw-border-style);
-    border-left-width: 4px;
-  }
   .border-dashed {
     --tw-border-style: dashed;
     border-style: dashed;
@@ -1703,20 +1699,8 @@
   .border-t-transparent {
     border-top-color: transparent;
   }
-  .border-l-destructive {
-    border-left-color: var(--destructive);
-  }
-  .border-l-info {
-    border-left-color: var(--info);
-  }
-  .border-l-success {
-    border-left-color: var(--success);
-  }
   .border-l-transparent {
     border-left-color: transparent;
-  }
-  .border-l-warning {
-    border-left-color: var(--warning);
   }
   .bg-\(--input-background\) {
     background-color: var(--input-background);
@@ -2165,9 +2149,6 @@
     font-size: var(--text-xs);
     line-height: var(--tw-leading, var(--text-xs--line-height));
   }
-  .text-\[0\.8rem\] {
-    font-size: 0.8rem;
-  }
   .text-\[9px\] {
     font-size: 9px;
   }
@@ -2263,6 +2244,18 @@
   }
   .whitespace-pre-wrap {
     white-space: pre-wrap;
+  }
+  .text-\(--alert-destructive-fg\) {
+    color: var(--alert-destructive-fg);
+  }
+  .text-\(--alert-info-fg\) {
+    color: var(--alert-info-fg);
+  }
+  .text-\(--alert-success-fg\) {
+    color: var(--alert-success-fg);
+  }
+  .text-\(--alert-warning-fg\) {
+    color: var(--alert-warning-fg);
   }
   .text-\(--input-foreground\) {
     color: var(--input-foreground);
@@ -4041,6 +4034,18 @@
   .\[\&_\[data-slot\=text\]\]\:hidden [data-slot=text] {
     display: none;
   }
+  .\[\&_\[data-slot\=toast-title\]\]\:text-destructive [data-slot=toast-title] {
+    color: var(--destructive);
+  }
+  .\[\&_\[data-slot\=toast-title\]\]\:text-info [data-slot=toast-title] {
+    color: var(--info);
+  }
+  .\[\&_\[data-slot\=toast-title\]\]\:text-success [data-slot=toast-title] {
+    color: var(--success);
+  }
+  .\[\&_\[data-slot\=toast-title\]\]\:text-warning [data-slot=toast-title] {
+    color: var(--warning);
+  }
   .\[\&_p\]\:leading-relaxed p {
     --tw-leading: var(--leading-relaxed);
     line-height: var(--leading-relaxed);
@@ -4726,6 +4731,22 @@ div.pactor-markdown-editor-root.mdxeditor, div.pactor-markdown-editor-root.mdxed
   --success: oklch(0.696 0.17 162.48);
   --warning: oklch(0.769 0.188 70.08);
   --info: oklch(0.623 0.214 259.815);
+  --alert-destructive-fg: var(--destructive);
+  @supports (color: color-mix(in lab, red, red)) {
+    --alert-destructive-fg: color-mix(in oklab, var(--destructive) 85%, black);
+  }
+  --alert-success-fg: var(--success);
+  @supports (color: color-mix(in lab, red, red)) {
+    --alert-success-fg: color-mix(in oklab, var(--success) 72%, black);
+  }
+  --alert-warning-fg: var(--warning);
+  @supports (color: color-mix(in lab, red, red)) {
+    --alert-warning-fg: color-mix(in oklab, var(--warning) 62%, black);
+  }
+  --alert-info-fg: var(--info);
+  @supports (color: color-mix(in lab, red, red)) {
+    --alert-info-fg: color-mix(in oklab, var(--info) 80%, black);
+  }
   --border: oklch(0.922 0 0);
   --input: oklch(0.85 0 0);
   --ring: oklch(0.556 0 0);
@@ -4874,6 +4895,10 @@ div.pactor-markdown-editor-root.mdxeditor, div.pactor-markdown-editor-root.mdxed
   --success: oklch(0.696 0.17 162.48);
   --warning: oklch(0.769 0.188 70.08);
   --info: oklch(0.623 0.214 259.815);
+  --alert-destructive-fg: var(--destructive);
+  --alert-success-fg: var(--success);
+  --alert-warning-fg: var(--warning);
+  --alert-info-fg: var(--info);
   --border: oklch(1 0 0 / 10%);
   --input: oklch(1 0 0 / 25%);
   --ring: oklch(0.708 0 0);
@@ -4913,6 +4938,10 @@ div.pactor-markdown-editor-root.mdxeditor, div.pactor-markdown-editor-root.mdxed
     --success: oklch(0.696 0.17 162.48);
     --warning: oklch(0.769 0.188 70.08);
     --info: oklch(0.623 0.214 259.815);
+    --alert-destructive-fg: var(--destructive);
+    --alert-success-fg: var(--success);
+    --alert-warning-fg: var(--warning);
+    --alert-info-fg: var(--info);
     --border: oklch(1 0 0 / 10%);
     --input: oklch(1 0 0 / 25%);
     --ring: oklch(0.708 0 0);

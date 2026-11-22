@@ -44,12 +44,12 @@ interface ConfirmState {
 /** toast 自动消失时长（毫秒） */
 const TOAST_DURATION = 3000;
 
-/** toast 类型 → 语义色边框/文本 class（读 --success/--warning/--info/--destructive 令牌） */
+/** toast 类型 → 语义色 class（读 --success/--warning/--info/--destructive 令牌；与 Alert 同款 hairline 描边 + 语义色文本，不用左侧色条） */
 const toastTypeClass: Record<ToastType, string> = {
-  success: 'border-l-4 border-l-success',
-  error: 'border-l-4 border-l-destructive',
-  info: 'border-l-4 border-l-info',
-  warning: 'border-l-4 border-l-warning',
+  success: 'border-success/50 text-success',
+  error: 'border-destructive/50 text-destructive',
+  info: 'border-info/50 text-info',
+  warning: 'border-warning/50 text-warning',
 };
 
 /**

@@ -1,0 +1,175 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-11-21T02:40:00.000Z",
+  "title": "Design System: Pactor",
+  "extensions": {
+    "colorMeta": {
+      "primary": {
+        "role": "primary",
+        "displayName": "Ink",
+        "canonical": "oklch(0.205 0 0)",
+        "tonalRamp": ["oklch(0.15 0 0)", "oklch(0.205 0 0)", "oklch(0.32 0 0)", "oklch(0.45 0 0)", "oklch(0.556 0 0)", "oklch(0.7 0 0)", "oklch(0.85 0 0)", "oklch(0.95 0 0)"]
+      },
+      "muted": {
+        "role": "neutral",
+        "displayName": "Whisper",
+        "canonical": "oklch(0.97 0 0)",
+        "tonalRamp": ["oklch(0.45 0 0)", "oklch(0.556 0 0)", "oklch(0.7 0 0)", "oklch(0.85 0 0)", "oklch(0.922 0 0)", "oklch(0.95 0 0)", "oklch(0.97 0 0)", "oklch(0.985 0 0)"]
+      },
+      "muted-foreground": {
+        "role": "neutral",
+        "displayName": "Ash",
+        "canonical": "oklch(0.556 0 0)",
+        "tonalRamp": ["oklch(0.2 0 0)", "oklch(0.3 0 0)", "oklch(0.4 0 0)", "oklch(0.5 0 0)", "oklch(0.556 0 0)", "oklch(0.65 0 0)", "oklch(0.75 0 0)", "oklch(0.88 0 0)"]
+      },
+      "border": {
+        "role": "neutral",
+        "displayName": "Hairline",
+        "canonical": "oklch(0.922 0 0)",
+        "tonalRamp": ["oklch(0.3 0 0)", "oklch(0.45 0 0)", "oklch(0.6 0 0)", "oklch(0.72 0 0)", "oklch(0.82 0 0)", "oklch(0.88 0 0)", "oklch(0.922 0 0)", "oklch(0.96 0 0)"]
+      },
+      "destructive": {
+        "role": "primary",
+        "displayName": "Signal Red",
+        "canonical": "oklch(0.577 0.245 27.325)",
+        "tonalRamp": ["oklch(0.28 0.09 27)", "oklch(0.38 0.14 27)", "oklch(0.48 0.19 27)", "oklch(0.577 0.245 27.325)", "oklch(0.66 0.2 27)", "oklch(0.75 0.14 27)", "oklch(0.85 0.08 27)", "oklch(0.93 0.03 27)"]
+      },
+      "info": {
+        "role": "primary",
+        "displayName": "Cerulean",
+        "canonical": "oklch(0.623 0.214 259.815)",
+        "tonalRamp": ["oklch(0.28 0.08 260)", "oklch(0.4 0.12 260)", "oklch(0.5 0.17 260)", "oklch(0.623 0.214 259.815)", "oklch(0.7 0.16 260)", "oklch(0.78 0.11 260)", "oklch(0.87 0.06 260)", "oklch(0.94 0.02 260)"]
+      },
+      "chat-bg": {
+        "role": "neutral",
+        "displayName": "Warm Paper",
+        "canonical": "#f7f6f4",
+        "tonalRamp": ["oklch(0.3 0.01 70)", "oklch(0.45 0.012 70)", "oklch(0.6 0.012 70)", "oklch(0.75 0.01 70)", "oklch(0.85 0.008 70)", "oklch(0.92 0.006 70)", "oklch(0.955 0.004 70)", "oklch(0.967 0.003 80)"]
+      }
+    },
+    "typographyMeta": {
+      "display": { "displayName": "Display (Serif)", "purpose": "仅 chat 空态问候与对话标题；Operate 表面出现衬线即为 bug。" },
+      "body": { "displayName": "Body", "purpose": "组件默认字号（0.875rem），跟随 data-pactor-size 密度档位。" },
+      "label": { "displayName": "Label", "purpose": "按钮、表单标签、菜单项。" }
+    },
+    "shadows": [
+      { "name": "whisper-shadow", "value": "0 1px 2px rgb(0 0 0 / 4%)", "purpose": "chat 卡片微分层（--pactor-chat-shadow-sm），几乎不可见。" },
+      { "name": "composer-lift", "value": "0 1px 2px rgb(0 0 0 / 3%), 0 10px 28px -10px rgb(0 0 0 / 8%)", "purpose": "chat 输入框浮起感（--pactor-chat-shadow-composer），全系统唯一常驻阴影。" }
+    ],
+    "motion": [
+      { "name": "accordion-down", "value": "accordion-down 200ms ease-out", "purpose": "手风琴展开（--animate-accordion-down，面板高度变量 --accordion-panel-height）。" },
+      { "name": "accordion-up", "value": "accordion-up 200ms ease-out", "purpose": "手风琴收起。" },
+      { "name": "toast-in", "value": "toast-in 200ms ease-out", "purpose": "Sonner 通知进入。" },
+      { "name": "toast-out", "value": "toast-out 150ms ease-in", "purpose": "Sonner 通知退出，比进入更快。" }
+    ],
+    "breakpoints": [
+      { "name": "xs", "value": "480px" },
+      { "name": "sm", "value": "576px" },
+      { "name": "md", "value": "768px" },
+      { "name": "lg", "value": "992px" },
+      { "name": "xl", "value": "1200px" },
+      { "name": "xxl", "value": "1600px" }
+    ]
+  },
+  "components": [
+    {
+      "name": "Primary Button",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "主操作按钮：Ink 底近黑，loading 旋转图标并禁用。",
+      "html": "<button class=\"ds-btn-primary\">保存更改</button>",
+      "css": ".ds-btn-primary { background: var(--primary, oklch(0.205 0 0)); color: var(--primary-foreground, oklch(0.985 0 0)); padding: 8px 16px; border: none; border-radius: calc(var(--radius, 0.625rem) * 0.8); font-size: 0.875rem; font-weight: 500; line-height: 1.25rem; cursor: pointer; transition: opacity 0.15s, background 0.15s; } .ds-btn-primary:hover { opacity: 0.9; } .ds-btn-primary:focus-visible { outline: 2px solid var(--ring, oklch(0.556 0 0)); outline-offset: 2px; } .ds-btn-primary:active { opacity: 0.85; }"
+    },
+    {
+      "name": "Default Button",
+      "kind": "button",
+      "refersTo": "button-default",
+      "description": "次操作按钮：透明底 + hairline 边框（antd default ≈ shadcn outline）。",
+      "html": "<button class=\"ds-btn-default\">取消</button>",
+      "css": ".ds-btn-default { background: var(--background, oklch(1 0 0)); color: var(--foreground, oklch(0.145 0 0)); padding: 8px 16px; border: 1px solid var(--border, oklch(0.922 0 0)); border-radius: calc(var(--radius, 0.625rem) * 0.8); font-size: 0.875rem; font-weight: 500; line-height: 1.25rem; cursor: pointer; transition: background 0.15s; } .ds-btn-default:hover { background: var(--accent, oklch(0.97 0 0)); } .ds-btn-default:focus-visible { outline: 2px solid var(--ring, oklch(0.556 0 0)); outline-offset: 2px; }"
+    },
+    {
+      "name": "Input",
+      "kind": "input",
+      "refersTo": "input",
+      "description": "盒式输入框：hairline 描边 + Panel 底，高度跟随密度令牌。",
+      "html": "<input class=\"ds-input\" placeholder=\"搜索订单…\" />",
+      "css": ".ds-input { background: var(--card, oklch(1 0 0)); color: var(--foreground, oklch(0.145 0 0)); border: 1px solid var(--input, oklch(0.85 0 0)); border-radius: calc(var(--radius, 0.625rem) * 0.8); height: var(--pactor-control-height-md, 2.25rem); padding: 0 12px; font-size: var(--pactor-control-text-md, 0.875rem); line-height: 1.25rem; transition: border-color 0.15s, box-shadow 0.15s; } .ds-input::placeholder { color: var(--muted-foreground, oklch(0.556 0 0)); } .ds-input:focus-visible { outline: none; border-color: var(--ring, oklch(0.556 0 0)); box-shadow: 0 0 0 2px color-mix(in oklab, var(--ring, oklch(0.556 0 0)) 25%, transparent); }"
+    },
+    {
+      "name": "Card",
+      "kind": "card",
+      "refersTo": "card",
+      "description": "内容容器：Panel 底 + hairline 边框 + 大圆角，静止态无阴影。",
+      "html": "<div class=\"ds-card\"><div class=\"ds-card-title\">本月概览</div><div class=\"ds-card-body\">卡片内容区域，内边距令牌化。</div></div>",
+      "css": ".ds-card { background: var(--card, oklch(1 0 0)); color: var(--foreground, oklch(0.145 0 0)); border: 1px solid var(--border, oklch(0.922 0 0)); border-radius: var(--radius, 0.625rem); padding: 16px 24px; } .ds-card-title { font-size: 1.125rem; font-weight: 500; line-height: 1.75rem; margin-bottom: 16px; } .ds-card-body { font-size: 0.875rem; line-height: 1.5; color: var(--muted-foreground, oklch(0.556 0 0)); }"
+    },
+    {
+      "name": "Badge",
+      "kind": "chip",
+      "refersTo": "badge",
+      "description": "状态徽标：弱填充底 + 语义色文字，彩度只属于状态。",
+      "html": "<span class=\"ds-badge\">运行中</span>",
+      "css": ".ds-badge { display: inline-flex; align-items: center; padding: 2px 8px; border-radius: calc(var(--radius, 0.625rem) * 0.6); background: color-mix(in oklab, var(--success, oklch(0.696 0.17 162.48)) 12%, transparent); color: var(--success, oklch(0.696 0.17 162.48)); font-size: 0.75rem; font-weight: 500; line-height: 1rem; }"
+    },
+    {
+      "name": "Sidebar Nav Item",
+      "kind": "nav",
+      "refersTo": "sidebar-nav-item",
+      "description": "侧栏导航行：hover 弱灰，选中 Ink 底；间距走 --pactor-menu-* 令牌。",
+      "html": "<nav class=\"ds-nav\"><a class=\"ds-nav-item\" href=\"#\"><svg width=\"16\" height=\"16\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z\"/></svg>工作台</a><a class=\"ds-nav-item ds-nav-item--active\" href=\"#\"><svg width=\"16\" height=\"16\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><rect width=\"7\" height=\"9\" x=\"3\" y=\"3\" rx=\"1\"/><rect width=\"7\" height=\"5\" x=\"14\" y=\"3\" rx=\"1\"/><rect width=\"7\" height=\"9\" x=\"14\" y=\"12\" rx=\"1\"/><rect width=\"7\" height=\"5\" x=\"3\" y=\"16\" rx=\"1\"/></svg>应用管理</a></nav>",
+      "css": ".ds-nav { display: flex; flex-direction: column; gap: 2px; padding: var(--pactor-menu-nav-padding-y, 0.5rem) 8px; background: var(--sidebar, var(--card, oklch(1 0 0))); width: 220px; } .ds-nav-item { display: flex; align-items: center; gap: 8px; padding: var(--pactor-menu-item-padding-y, 0.375rem) 10px; border-radius: calc(var(--radius, 0.625rem) * 0.6); color: var(--sidebar-foreground, var(--foreground, oklch(0.145 0 0))); font-size: 0.875rem; text-decoration: none; transition: background 0.15s; } .ds-nav-item:hover { background: var(--sidebar-accent, oklch(0.97 0 0)); } .ds-nav-item--active, .ds-nav-item--active:hover { background: var(--sidebar-primary, var(--primary, oklch(0.205 0 0))); color: var(--sidebar-primary-foreground, oklch(0.985 0 0)); }"
+    },
+    {
+      "name": "Chat Composer",
+      "kind": "custom",
+      "refersTo": "chat-composer",
+      "description": "chat 输入框：白卡 + Composer Lift 阴影 + 12px 圆角，全系统唯一常驻阴影。",
+      "html": "<div class=\"ds-composer\"><textarea class=\"ds-composer-input\" rows=\"1\" placeholder=\"输入消息，Enter 发送…\"></textarea><button class=\"ds-composer-send\" aria-label=\"发送\"><svg width=\"16\" height=\"16\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M5 12h14\"/><path d=\"m12 5 7 7-7 7\"/></svg></button></div>",
+      "css": ".ds-composer { display: flex; align-items: flex-end; gap: 8px; background: var(--card, oklch(1 0 0)); border: 1px solid var(--pactor-chat-border, var(--border, oklch(0.922 0 0))); border-radius: var(--pactor-chat-radius, 12px); padding: 12px 16px; box-shadow: var(--pactor-chat-shadow-composer, 0 1px 2px rgb(0 0 0 / 3%), 0 10px 28px -10px rgb(0 0 0 / 8%)); } .ds-composer-input { flex: 1; border: none; outline: none; resize: none; background: transparent; color: var(--pactor-chat-fg, var(--foreground, oklch(0.145 0 0))); font-size: 0.875rem; line-height: 1.5; font-family: inherit; } .ds-composer-send { display: inline-flex; align-items: center; justify-content: center; width: 32px; height: 32px; border: none; border-radius: 8px; background: var(--pactor-chat-primary, var(--primary, oklch(0.205 0 0))); color: var(--pactor-chat-primary-fg, oklch(0.985 0 0)); cursor: pointer; transition: opacity 0.15s; } .ds-composer-send:hover { opacity: 0.9; }"
+    },
+    {
+      "name": "Artifact Card",
+      "kind": "custom",
+      "refersTo": "artifact-card",
+      "description": "chat 产物卡片：色调图标盒 + 标题 + meta 行，整卡可点击。",
+      "html": "<div class=\"ds-artifact\"><div class=\"ds-artifact-icon\"><svg width=\"18\" height=\"18\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><polyline points=\"16 18 22 12 16 6\"/><polyline points=\"8 6 2 12 8 18\"/></svg></div><div class=\"ds-artifact-meta\"><div class=\"ds-artifact-title\">query-result.sql</div><div class=\"ds-artifact-sub\">2.4 KB · CODE</div></div><svg class=\"ds-artifact-arrow\" width=\"16\" height=\"16\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"m9 18 6-6-6-6\"/></svg></div>",
+      "css": ".ds-artifact { display: flex; align-items: center; gap: 12px; background: var(--pactor-chat-card, var(--card, oklch(1 0 0))); border: 1px solid var(--pactor-chat-border, var(--border, oklch(0.922 0 0))); border-radius: var(--pactor-chat-radius-md, 8px); padding: 10px 12px; cursor: pointer; transition: border-color 0.15s, background 0.15s; } .ds-artifact:hover { border-color: var(--pactor-chat-primary, var(--primary, oklch(0.205 0 0))); } .ds-artifact-icon { display: inline-flex; align-items: center; justify-content: center; width: 36px; height: 36px; border-radius: 8px; background: var(--pactor-chat-artifact-tone-blue-bg, oklch(0.93 0.04 260)); color: var(--pactor-chat-artifact-tone-blue-fg, oklch(0.55 0.15 260)); flex-shrink: 0; } .ds-artifact-meta { flex: 1; min-width: 0; } .ds-artifact-title { font-size: 0.875rem; font-weight: 500; color: var(--pactor-chat-fg, oklch(0.145 0 0)); } .ds-artifact-sub { font-size: 0.75rem; color: var(--pactor-chat-muted-fg, oklch(0.556 0 0)); } .ds-artifact-arrow { color: var(--pactor-chat-muted-fg, oklch(0.556 0 0)); flex-shrink: 0; }"
+    }
+  ],
+  "narrative": {
+    "northStar": "The Skin-Ready Instrument",
+    "overview": "Pactor 的设计系统是一台刻意中性的仪器：界面的结构色只有 OKLCH 无彩灰阶，所有视觉决定都解析为 CSS 自定义属性，把「性格」让渡给皮肤、密度档位与对话表面。它不是用来展示的视觉系统，而是承载别人产品的基座：业务方下发什么 DSL，它就忠实地渲染什么性格。系统的分层非常清晰：@pactor-app/ui 持有 shadcn 语义令牌与全部基础组件；@pactor-app/chat 在灰阶基座上叠加暖白灰与衬线展示字体，形成「工作区克制、对话区温暖」的双表面结构；blocks/chart/shell 一律不引入自己的颜色。",
+    "keyCharacteristics": [
+      "中性灰阶 OKLCH 基座，light/dark/跟随系统三态，皮肤后置加载即拥有最终裁量权",
+      "扁平优先：静止态零阴影，深度靠 hairline 边框与色调分层；唯一的例外是 chat composer 的浮起感",
+      "双表面：Operate 表面（admin/表格/表单）绝对克制，Chat 表面允许暖底 + 衬线标题的人性化",
+      "密度即令牌：--pactor-control-* 体系让控件高度/字号/面板间距随 data-pactor-size 三档整体缩放",
+      "一切圆角乘法派生自 --radius（0.625rem）基准"
+    ],
+    "rules": [
+      { "name": "The Skin Authority Rule", "body": "任何组件颜色必须来自语义令牌或组件级令牌（var()），禁止硬编码色值进组件；皮肤在样式表之后加载即拥有最终裁量权。覆盖入口必须在 :root。", "section": "colors" },
+      { "name": "The One Accent Rule", "body": "界面结构色只有灰阶；彩度只属于语义状态、图表与 chat 产物图标色调。组件不发明自己的彩色。", "section": "colors" },
+      { "name": "The Two Surfaces Rule", "body": "暖色只允许出现在 chat 表面（--pactor-chat-* 令牌族）；admin/表格/表单等 Operate 表面保持无彩灰阶。", "section": "colors" },
+      { "name": "The System Stack Rule", "body": "组件不绑定任何 Web 字体；字体是皮肤的权利，组件只声明字重与字号阶梯。", "section": "typography" },
+      { "name": "The Serif Boundary Rule", "body": "衬线字体只存在于 chat 展示位（问候、标题）；Operate 表面出现衬线即为 bug。", "section": "typography" },
+      { "name": "The Density Dial Rule", "body": "改密度只准调 --pactor-control-* 令牌或 data-pactor-size 档位；禁止给单个控件写死高度补丁。", "section": "layout" },
+      { "name": "The Flat-By-Default Rule", "body": "组件静止态不带阴影；浮层阴影由皮肤经 --card-shadow / --shadow-color 授予，组件不私自声明。", "section": "elevation" },
+      { "name": "The Multiplicative Radius Rule", "body": "组件只引用 radius 档位，不写死 px 圆角；圆角是全局变量，不是局部决定。", "section": "shapes" }
+    ],
+    "dos": [
+      "Do 用语义令牌表达一切颜色；需要组件级差异时新增 --<component>-<part>-<state> 令牌并回退到语义令牌（Skin Authority Rule）。",
+      "Do 用 radius 档位表达圆角；需要新档位时按比例从 --radius 派生。",
+      "Do 用 text-[length:var(--x)] 配显式 leading-* 表达令牌化字号（text-(--x) 会编译为颜色且不携带行高）。",
+      "Do 把皮肤覆盖放在 :root 与 documentElement 链上（portaled 浮层挂在 body，暗色选择器须命中 documentElement）。",
+      "Do 多维度自定义尺寸时合并为一次 applyGlobalSizeValues 调用（分次调用会互相清除）。"
+    ],
+    "donts": [
+      "Don't 在组件里写硬编码颜色字面值——包括「临时」的业务绿、品牌蓝。",
+      "Don't 给静止态组件加阴影；浮层阴影由皮肤授予（Flat-By-Default Rule）。",
+      "Don't 在 Operate 表面引入彩色装饰或衬线字体；彩度只属于语义状态、图表与 chat 产物图标。",
+      "Don't 绑定 Web 字体；字体是皮肤的权利。",
+      "Don't 给 AdminLayout 导航行写 py-2 这类硬编码补丁盖掉 --pactor-menu-* 令牌。"
+    ]
+  }
+}

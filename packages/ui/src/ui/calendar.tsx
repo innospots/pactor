@@ -47,7 +47,7 @@ function Calendar({
         month_grid: cn('w-full border-collapse', defaultClassNames.month_grid),
         weekdays: cn('flex', defaultClassNames.weekdays),
         weekday: cn(
-          'w-(--pactor-calendar-day-size) rounded-md text-[0.8rem] font-normal text-muted-foreground',
+          'w-(--pactor-calendar-day-size) rounded-md text-xs font-normal text-muted-foreground',
           defaultClassNames.weekday,
         ),
         week: cn('mt-2 flex w-full', defaultClassNames.week),

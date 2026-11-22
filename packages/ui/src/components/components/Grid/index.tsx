@@ -1,5 +1,6 @@
 import { Children, isValidElement, type CSSProperties, type ReactNode } from 'react';
 
+import { useMediaQuery } from '../../../layout/admin/use-media-query.js';
 import { cn } from '../../../lib/utils.js';
 
 export interface GridProps {
@@ -7,6 +8,11 @@ export interface GridProps {
   columns?: number;
   /** 栏间距（px）；未指定时应用默认间距令牌 `--grid-gap`，`gap: 0` 显式关闭 */
   gap?: number;
+  /**
+   * 窄视口收列（默认 true）：视口 < 576px 时 2 列收为 1 列、≥3 列收为 2 列；
+   * 需要更细的响应式档位（xs~xxl）时改用 Row/Col 24 分栏。
+   */
+  responsive?: boolean;
   /** 通用：根节点 class（与内置样式合并） */
   className?: string;
   /** 通用：根节点内联样式（布局逃逸口；与 columns / gap 生成的样式合并，同键后者优先） */
@@ -17,19 +23,29 @@ export interface GridProps {
 /**
  * Grid 均分栏布局（shadcn kit）：CSS grid。
  * 列数为运行时动态值，无法用 Tailwind 静态类表达，经 inline style 设置。
+ * 窄视口（<576px）默认收列（responsive），保证移动端内容不被挤压。
  * 子项跨列 / 跨行：子节点 props.style 上声明 `gridColumn` / `gridRow`
  * （如 `style: { gridColumn: '1 / -1' }` 跨整行），Grid 渲染时将其
  * 提升到子项包裹容器（真正的 grid item）上生效。
  */
-export function Grid({ columns = 1, gap, className, style, children }: GridProps) {
+export function Grid({
+  columns = 1,
+  gap,
+  responsive = true,
+  className,
+  style,
+  children,
+}: GridProps) {
   const cols = Math.max(1, columns);
+  const narrow = useMediaQuery('(max-width: 575px)');
+  const effectiveCols = responsive && narrow ? (cols <= 2 ? 1 : 2) : cols;
   return (
     <div
       data-slot="grid"
-      data-columns={cols}
+      data-columns={effectiveCols}
       className={cn('grid', gap === undefined && 'gap-(--grid-gap)', className)}
       style={{
-        gridTemplateColumns: `repeat(${cols}, minmax(0, 1fr))`,
+        gridTemplateColumns: `repeat(${effectiveCols}, minmax(0, 1fr))`,
         ...(gap !== undefined ? { gap } : {}),
         ...style,
       }}

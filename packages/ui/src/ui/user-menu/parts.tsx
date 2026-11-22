@@ -123,13 +123,13 @@ export function MenuHeader({
       <Face user={user} status={status} size="md" />
       <div className="grid min-w-0 flex-1 gap-0.5">
         <div className="flex min-w-0 items-center gap-1.5">
-          <span className="min-w-0 shrink truncate text-[13px] font-medium leading-tight">
+          <span className="min-w-0 shrink truncate text-sm font-medium leading-tight">
             {user.name}
           </span>
           {user.plan ? (
             <Badge
               variant="outline"
-              className="max-w-[55%] min-w-0 shrink truncate px-1 py-0 text-[11px] leading-4 font-medium"
+              className="max-w-[55%] min-w-0 shrink truncate px-1 py-0 text-xs leading-4 font-medium"
             >
               {user.plan}
             </Badge>
@@ -167,7 +167,7 @@ function Segmented<T extends string>({
     options.findIndex((option) => option.value === value),
   );
   const rowClass = cn(
-    'relative flex items-center gap-2.5 rounded-md px-2 text-[13px]',
+    'relative flex items-center gap-2.5 rounded-md px-2 text-sm',
     sheet
       ? 'h-[52px] text-base'
       : 'h-9 outline-hidden select-none [&:has([data-highlighted])]:bg-foreground/[0.06]',

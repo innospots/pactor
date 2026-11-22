@@ -11,6 +11,195 @@
         ],
         "createdAt": "2026-11-19T04:14:59.491Z",
         "reason": "Agent: markdown blockquote quote-bar convention (L1413-1418), neutral --pactor-chat-border token, not a card accent"
+      },
+      {
+        "rule": "design-system-font-size",
+        "value": "9px",
+        "files": [
+          "packages/ui/src/ui/user-menu/options.tsx"
+        ],
+        "createdAt": "2026-11-21T10:27:25.009Z",
+        "reason": "density preview glyphs: intentionally three distinct A-glyph sizes to demonstrate compact/default/comfortable"
+      },
+      {
+        "rule": "design-system-font-size",
+        "value": "11px",
+        "files": [
+          "packages/ui/src/ui/user-menu/options.tsx"
+        ],
+        "createdAt": "2026-11-21T10:27:25.026Z",
+        "reason": "density preview glyphs: intentionally three distinct A-glyph sizes to demonstrate compact/default/comfortable"
+      },
+      {
+        "rule": "design-system-font-size",
+        "value": "13px",
+        "files": [
+          "packages/ui/src/ui/user-menu/options.tsx"
+        ],
+        "createdAt": "2026-11-21T10:27:25.039Z",
+        "reason": "density preview glyphs: intentionally three distinct A-glyph sizes to demonstrate compact/default/comfortable"
+      },
+      {
+        "rule": "design-system-font-size",
+        "value": "10px",
+        "files": [
+          "packages/chat/**"
+        ],
+        "createdAt": "2026-11-21T10:29:57.453Z",
+        "reason": "chat surface documented dense type scale (DESIGN.md Typography > Chat 阶梯)"
+      },
+      {
+        "rule": "design-system-font-size",
+        "value": "11px",
+        "files": [
+          "packages/chat/**"
+        ],
+        "createdAt": "2026-11-21T10:29:57.470Z",
+        "reason": "chat surface documented dense type scale (DESIGN.md Typography > Chat 阶梯)"
+      },
+      {
+        "rule": "design-system-font-size",
+        "value": "11.5px",
+        "files": [
+          "packages/chat/**"
+        ],
+        "createdAt": "2026-11-21T10:29:57.487Z",
+        "reason": "chat surface documented dense type scale (DESIGN.md Typography > Chat 阶梯)"
+      },
+      {
+        "rule": "design-system-font-size",
+        "value": "12px",
+        "files": [
+          "packages/chat/**"
+        ],
+        "createdAt": "2026-11-21T10:29:57.502Z",
+        "reason": "chat surface documented dense type scale (DESIGN.md Typography > Chat 阶梯)"
+      },
+      {
+        "rule": "design-system-font-size",
+        "value": "12.5px",
+        "files": [
+          "packages/chat/**"
+        ],
+        "createdAt": "2026-11-21T10:29:57.516Z",
+        "reason": "chat surface documented dense type scale (DESIGN.md Typography > Chat 阶梯)"
+      },
+      {
+        "rule": "design-system-font-size",
+        "value": "13px",
+        "files": [
+          "packages/chat/**"
+        ],
+        "createdAt": "2026-11-21T10:29:57.530Z",
+        "reason": "chat surface documented dense type scale (DESIGN.md Typography > Chat 阶梯)"
+      },
+      {
+        "rule": "design-system-font-size",
+        "value": "15px",
+        "files": [
+          "packages/chat/**"
+        ],
+        "createdAt": "2026-11-21T10:29:57.543Z",
+        "reason": "chat surface documented dense type scale (DESIGN.md Typography > Chat 阶梯)"
+      },
+      {
+        "rule": "design-system-font-size",
+        "value": "26px",
+        "files": [
+          "packages/chat/**"
+        ],
+        "createdAt": "2026-11-21T10:29:57.557Z",
+        "reason": "chat surface documented dense type scale (DESIGN.md Typography > Chat 阶梯)"
+      },
+      {
+        "rule": "design-system-font-size",
+        "value": "1.3rem",
+        "files": [
+          "packages/chat/**"
+        ],
+        "createdAt": "2026-11-21T10:29:57.570Z",
+        "reason": "chat surface documented dense type scale (DESIGN.md Typography > Chat 阶梯)"
+      },
+      {
+        "rule": "design-system-radius",
+        "value": "3px",
+        "files": [
+          "packages/chat/src/styles.css"
+        ],
+        "createdAt": "2026-11-21T10:29:57.582Z",
+        "reason": "chat micro-geometry (code blocks, thumbs, progress) below documented radius scale"
+      },
+      {
+        "rule": "design-system-radius",
+        "value": "4px",
+        "files": [
+          "packages/chat/src/styles.css"
+        ],
+        "createdAt": "2026-11-21T10:29:57.596Z",
+        "reason": "chat micro-geometry (code blocks, thumbs, progress) below documented radius scale"
+      },
+      {
+        "rule": "design-system-radius",
+        "value": "5px",
+        "files": [
+          "packages/chat/src/styles.css"
+        ],
+        "createdAt": "2026-11-21T10:29:57.608Z",
+        "reason": "chat micro-geometry (code blocks, thumbs, progress) below documented radius scale"
+      },
+      {
+        "rule": "design-system-radius",
+        "value": "7px",
+        "files": [
+          "packages/chat/src/styles.css"
+        ],
+        "createdAt": "2026-11-21T10:29:57.619Z",
+        "reason": "chat micro-geometry (code blocks, thumbs, progress) below documented radius scale"
+      },
+      {
+        "rule": "design-system-color",
+        "value": "#1677ff",
+        "files": [
+          "examples/admin/src/skin.ts"
+        ],
+        "createdAt": "2026-11-22T00:28:46.253Z",
+        "reason": "user-selectable accent preset swatches in skin settings demo (product feature, not drift)"
+      },
+      {
+        "rule": "design-system-color",
+        "value": "#0e7a3d",
+        "files": [
+          "examples/admin/src/skin.ts"
+        ],
+        "createdAt": "2026-11-22T00:28:46.267Z",
+        "reason": "user-selectable accent preset swatches in skin settings demo (product feature, not drift)"
+      },
+      {
+        "rule": "design-system-color",
+        "value": "#722ed1",
+        "files": [
+          "examples/admin/src/skin.ts"
+        ],
+        "createdAt": "2026-11-22T00:28:46.279Z",
+        "reason": "user-selectable accent preset swatches in skin settings demo (product feature, not drift)"
+      },
+      {
+        "rule": "design-system-color",
+        "value": "#eb2f96",
+        "files": [
+          "examples/admin/src/skin.ts"
+        ],
+        "createdAt": "2026-11-22T00:28:46.291Z",
+        "reason": "user-selectable accent preset swatches in skin settings demo (product feature, not drift)"
+      },
+      {
+        "rule": "design-system-color",
+        "value": "#d4380d",
+        "files": [
+          "examples/admin/src/skin.ts"
+        ],
+        "createdAt": "2026-11-22T00:28:46.302Z",
+        "reason": "user-selectable accent preset swatches in skin settings demo (product feature, not drift)"
       }
     ]
   }
