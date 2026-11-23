@@ -6,8 +6,8 @@ import { createI18nContext } from '@pactor-app/core';
 import { evaluateExpression } from '@pactor-app/expression';
 import { validateAuthorPageDsl, validateLocalizedPageDsl } from '@pactor-app/schema';
 
-import { withClientDemo } from '../starters/spa-starter/src/i18n/demo';
-import { messages } from '../starters/spa-starter/src/i18n/messages';
+import { withClientDemo } from '../starters/spa-starter/src/frontend/i18n/demo';
+import { messages } from '../starters/spa-starter/src/frontend/i18n/messages';
 
 const root = process.cwd();
 let next: typeof import('../starters/next-app-starter/src/backend/pages/i18n');
