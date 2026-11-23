@@ -1,9 +1,20 @@
 // @vitest-environment jsdom
-import { screen } from '@testing-library/react';
+import { within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, expect, it, vi } from 'vitest';
 
 import { renderDsl } from './helpers.js';
+
+/** 与当前 trigger 绑定的 listbox（避免并行用例里其它 Select portal 污染全局 role 查询） */
+async function listboxForTrigger(trigger: Element): Promise<HTMLElement> {
+  return vi.waitFor(() => {
+    const id = trigger.getAttribute('aria-controls');
+    if (!id) throw new Error('missing aria-controls');
+    const node = document.getElementById(id);
+    if (!node) throw new Error('missing listbox');
+    return node;
+  });
+}
 
 const groupedOptions = [
   { label: '全部对象', value: 'all' },
@@ -45,22 +56,23 @@ describe('Select 分组选项', () => {
     expect(trigger.textContent).toContain('供应商');
 
     await user.click(trigger);
+    const listbox = await listboxForTrigger(trigger);
 
-    const groups = document.querySelectorAll('[data-slot=select-group]');
+    const groups = listbox.querySelectorAll('[data-slot=select-group]');
     expect(groups).toHaveLength(2);
     const labels = Array.from(
-      document.querySelectorAll('[data-slot=select-label]'),
+      listbox.querySelectorAll('[data-slot=select-label]'),
     ).map((label) => label.textContent);
     expect(labels).toEqual(['按类别', '具体对象']);
-    expect(screen.getAllByRole('option')).toHaveLength(5);
+    expect(within(listbox).getAllByRole('option')).toHaveLength(5);
 
     // 分组内选项缩进，平铺选项保持原有左内边距
-    const groupedItem = screen.getByRole('option', { name: '所有实体' });
+    const groupedItem = within(listbox).getByRole('option', { name: '所有实体' });
     expect(groupedItem.className).toContain('pl-8');
-    const flatItem = screen.getByRole('option', { name: '全部对象' });
+    const flatItem = within(listbox).getByRole('option', { name: '全部对象' });
     expect(flatItem.className).not.toContain('pl-8');
 
-    await user.click(screen.getByRole('option', { name: '客户' }));
+    await user.click(within(listbox).getByRole('option', { name: '客户' }));
     await vi.waitFor(() => {
       expect(trigger.textContent).toContain('客户');
     });
@@ -92,23 +104,21 @@ describe('Select 分组选项', () => {
     )!;
     trigger.focus();
     await user.keyboard('{Enter}');
-    expect(document.querySelector('[data-slot=select-search]')).not.toBeNull();
+    const listbox = await listboxForTrigger(trigger);
+    expect(listbox.querySelector('[data-slot=select-search]')).not.toBeNull();
 
-    await user.type(
-      document.querySelector('[data-slot=select-search] input')!,
-      '供应',
-    );
+    await user.type(listbox.querySelector('[data-slot=select-search] input')!, '供应');
 
     await vi.waitFor(() => {
       const labels = Array.from(
-        document.querySelectorAll('[data-slot=select-label]'),
+        listbox.querySelectorAll('[data-slot=select-label]'),
       ).map((label) => label.textContent);
       expect(labels).toEqual(['具体对象']);
     });
-    expect(screen.getByRole('option', { name: '供应商' })).toBeTruthy();
-    expect(screen.queryByRole('option', { name: '客户' })).toBeNull();
-    expect(screen.queryByText('按类别')).toBeNull();
-    expect(screen.queryByText('全部对象')).toBeNull();
+    expect(within(listbox).getByRole('option', { name: '供应商' })).toBeTruthy();
+    expect(within(listbox).queryByRole('option', { name: '客户' })).toBeNull();
+    expect(within(listbox).queryByText('按类别')).toBeNull();
+    expect(within(listbox).queryByText('全部对象')).toBeNull();
 
     // 关闭弹层并等退出动画结束，避免打开状态下卸载影响下一个用例
     await user.keyboard('{Escape}');
@@ -132,10 +142,11 @@ describe('Select 分组选项', () => {
     )!;
     trigger.focus();
     await user.keyboard('{Enter}');
+    const listbox = await listboxForTrigger(trigger);
 
-    expect(document.querySelector('[data-slot=select-group]')).toBeNull();
-    expect(document.querySelector('[data-slot=select-label]')).toBeNull();
-    expect(document.querySelector('[data-slot=select-search]')).toBeNull();
-    expect(await screen.findAllByRole('option')).toHaveLength(2);
+    expect(listbox.querySelector('[data-slot=select-group]')).toBeNull();
+    expect(listbox.querySelector('[data-slot=select-label]')).toBeNull();
+    expect(listbox.querySelector('[data-slot=select-search]')).toBeNull();
+    expect(await within(listbox).findAllByRole('option')).toHaveLength(2);
   });
 });
